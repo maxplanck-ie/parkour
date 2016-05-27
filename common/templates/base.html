@@ -8,35 +8,36 @@
     <meta name="description" content="">
     <meta name="keywords" content="">
 
-    <title>{% block title %}Django App{% endblock title %}</title>
+    <title>{% block title %}Django App{% endblock %}</title>
 
     <!-- css -->
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-    <link rel="stylesheet" href="{% static 'js/extjs/build/classic/theme-triton/resources/theme-triton-all.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    {% block css %}{% endblock css %}
+    {% block css %}{% endblock %}
 
     <script type="text/javascript" src="{% static 'js/jquery-2.2.4.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/extjs/build/ext-all-debug.js' %}"></script>
-    {% block extjs_app %}{% endblock extjs_app %}
 
-    <script>
-        Ext.onReady( function() {
-            Ext.create("Ext.panel.Panel", {
-                title: "Panel",
-                html: "<h1>Hello World!</h1>",
-                renderTo: Ext.getBody()
-            });
-        });
-    </script>
+
+    <script type="text/javascript" src="{% static 'js/extjs/build/ext-all-debug.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/extjs/build/classic/theme-triton/theme-triton-debug.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'js/extjs/build/classic/theme-triton/resources/theme-triton-all.css' %}">
+    {% block extjs_app %}{% endblock %}
+
+{#    <script>#}
+{#        Ext.onReady( function() {#}
+{#            Ext.create("Ext.panel.Panel", {#}
+{#                title: "Panel",#}
+{#                html: "<h1>Hello World!</h1>",#}
+{#                renderTo: Ext.getBody()#}
+{#            });#}
+{#        });#}
+{#    </script>#}
 </head>
 
 <body>
 
-{% block content %}{% endblock content %}
+{% block content %}{% endblock %}
 
-<!-- js -->
-<script src="{% static 'js/bootstrap.min.js' %}"></script>
-{% block js %}{% endblock js %}
+{% block js %}{% endblock %}
 </body>
 </html>
