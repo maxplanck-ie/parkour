@@ -6,6 +6,7 @@
 Ext.Loader.setConfig({
     enabled: true,
     paths: {
+        'MainHub': '/static/js/extjs/apps/main-hub',
         'MainHub.view.main.Main': '/static/js/extjs/apps/main-hub/app/view/main/Main.js',
         'MainHub.view.main.MainModel': '/static/js/extjs/apps/main-hub/app/view/main/MainModel.js',
         'MainHub.view.main.MainController': '/static/js/extjs/apps/main-hub/app/view/main/MainController.js',
@@ -13,6 +14,7 @@ Ext.Loader.setConfig({
         'MainHub.store.Personnel': '/static/js/extjs/apps/main-hub/app/store/Personnel.js'
     }
 });
+
 Ext.application({
     name: 'MainHub',
 
