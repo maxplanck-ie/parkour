@@ -65,4 +65,4 @@ target/
 .DS_Store
 
 # Ext JS
-!common/static/js/extjs/build
+!common/static/js/extjs/build/
