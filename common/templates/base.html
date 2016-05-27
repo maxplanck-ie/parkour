@@ -18,19 +18,25 @@
 
     <script type="text/javascript" src="{% static 'js/jquery-2.2.4.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/extjs/build/ext-all-debug.js' %}"></script>
+    {% block extjs_app %}{% endblock extjs_app %}
+
+    <script>
+        Ext.onReady( function() {
+            Ext.create("Ext.panel.Panel", {
+                title: "Panel",
+                html: "<h1>Hello World!</h1>",
+                renderTo: Ext.getBody()
+            });
+        });
+    </script>
 </head>
 
 <body>
 
-{% block header %}{% endblock header %}
-
 {% block content %}{% endblock content %}
-
-{% block footer %}{% endblock footer %}
 
 <!-- js -->
 <script src="{% static 'js/bootstrap.min.js' %}"></script>
 {% block js %}{% endblock js %}
-
 </body>
 </html>
