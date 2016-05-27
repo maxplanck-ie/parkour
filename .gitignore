@@ -58,8 +58,11 @@ docs/_build/
 # PyBuilder
 target/
 
-#Ipython Notebook
+# Ipython Notebook
 .ipynb_checkpoints
 
 .idea/
 .DS_Store
+
+# Ext JS
+!common/static/js/extjs/build
