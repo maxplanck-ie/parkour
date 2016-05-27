@@ -1,7 +1,7 @@
+{% load staticfiles %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    {% load staticfiles %}
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
@@ -12,10 +12,12 @@
 
     <!-- css -->
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'js/extjs/build/classic/theme-triton/resources/theme-triton-all.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     {% block css %}{% endblock css %}
 
-    <script src="{% static 'js/jquery-2.2.4.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery-2.2.4.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/extjs/build/ext-all-debug.js' %}"></script>
 </head>
 
 <body>
