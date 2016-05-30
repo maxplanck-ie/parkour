@@ -1,9 +1,13 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 
-{% block title %}Home page{% endblock title %}
+{% block title %}Home page{% endblock %}
+
+{% block css %}
+     <link rel="stylesheet" href="{% static 'js/extjs/build/production/MainHub/resources/MainHub-all.css' %}">
+{% endblock %}
 
 {% block extjs_app %}
     <script type="text/javascript" src="{% static 'js/extjs/apps/main-hub/app.js' %}"></script>
 {#    <script id="microloader" type="text/javascript" src="{% static 'js/extjs/apps/main-hub/bootstrap.js' %}"></script>#}
-{% endblock extjs_app %}
+{% endblock %}

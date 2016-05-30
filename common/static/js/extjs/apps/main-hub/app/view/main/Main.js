@@ -1,7 +1,7 @@
 Ext.define('MainHub.view.main.Main', {
     extend: 'Ext.container.Viewport',
 
-    requires: ['Ext.list.Tree'],
+    requires: ['Ext.list.Tree', 'Ext.tab.Panel'],
 
     controller: 'main',
     viewModel: 'main',
@@ -28,45 +28,44 @@ Ext.define('MainHub.view.main.Main', {
                 {
                     xtype: 'component',
                     reference: 'logo',
-                    cls: 'sencha-logo',
-                    html: '<div class="main-logo"><img src="static/js/extjs/apps/main-hub/resources/images/logo.png">Django App</div>',
+                    cls: 'main-logo',
+                    html: '<div class="logo"><img src="static/js/extjs/apps/main-hub/resources/images/logo.png">Django App</div>',
                     width: 250
                 },
                 {
                     margin: '0 0 0 8',
-                    ui: 'header',
+                    // ui: 'header',
                     iconCls:'x-fa fa-navicon',
                     id: 'main-navigation-btn',
                     handler: 'onToggleNavigationSize'
                 },
                 '->',
-                {
-                    iconCls:'x-fa fa-question',
-                    ui: 'header',
-                    href: '#faq',
-                    hrefTarget: '_self',
-                    tooltip: 'Help / FAQ\'s'
-                },
-                {
-                    iconCls:'x-fa fa-th-large',
-                    ui: 'header',
-                    href: '#profile',
-                    hrefTarget: '_self',
-                    tooltip: 'See your profile'
-                },
+                // {
+                //     iconCls:'x-fa fa-question',
+                //     ui: 'header',
+                //     href: '#faq',
+                //     hrefTarget: '_self',
+                //     tooltip: 'Help / FAQ\'s'
+                // },
                 {
                     xtype: 'tbtext',
                     text: 'Firstname Lastname',
                     cls: 'top-user-name'
                 },
-                // {
-                //     xtype: 'image',
-                //     cls: 'header-right-profile-image',
-                //     height: 35,
-                //     width: 35,
-                //     alt:'current user image',
-                //     src: 'resources/images/user-profile/2.png'
-                // }
+                {
+                    xtype: 'button',
+                    text: 'Menu',
+                    // iconCls:'x-fa fa-th-large',
+                    // ui: 'header',
+                    menu: {
+                        xtype: 'menu',
+                        items: [{
+                            text: 'Logout',
+                            // iconCls: ''
+                            href: 'logout'
+                        }]
+                    }
+                }
             ]
         },
         {

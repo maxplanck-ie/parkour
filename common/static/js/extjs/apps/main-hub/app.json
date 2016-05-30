@@ -126,7 +126,8 @@
          *      +-----------------+
          */
         "etc": [
-            "sass/etc/all.scss"
+            "sass/etc/all.scss",
+            "{toolkit.name}/sass/etc/all.scss"
         ],
 
         /**
@@ -151,7 +152,9 @@
          */
         "var": [
             "sass/var/all.scss",
-            "sass/var"
+            "sass/var",
+            "${toolkit.name}/sass/var",
+            "${toolkit.name}/sass/var/all.scss"
         ],
 
         /**
@@ -171,7 +174,8 @@
          *      +-----------------+
          */
         "src": [
-            "sass/src"
+            "sass/src",
+            "${toolkit.name}/sass/src"
         ]
     },
 

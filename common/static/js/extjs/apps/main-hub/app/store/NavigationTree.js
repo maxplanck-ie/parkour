@@ -13,7 +13,6 @@ Ext.define('MainHub.store.NavigationTree', {
             {
                 text: 'Dashboard',
                 iconCls: 'x-fa fa-desktop',
-                rowCls: 'nav-tree-badge nav-tree-badge-new',
                 viewType: 'dashboard',
                 // routeId: 'dashboard', // routeId defaults to viewType
                 leaf: true
