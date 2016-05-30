@@ -49,8 +49,10 @@ Ext.define('MainHub.view.main.Main', {
                 // },
                 {
                     xtype: 'tbtext',
-                    text: 'Firstname Lastname',
-                    cls: 'top-user-name'
+                    cls: 'top-user-name',
+                    listeners: {
+                        beforerender: 'onUsernameBeforerender'
+                    }
                 },
                 {
                     xtype: 'button',
