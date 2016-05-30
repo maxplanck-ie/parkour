@@ -9,7 +9,7 @@ Ext.define('MainHub.Application', {
     name: 'MainHub',
 
     stores: [
-        // TODO: add global / shared stores here
+        'NavigationTree'
     ],
 
     controllers: [],
