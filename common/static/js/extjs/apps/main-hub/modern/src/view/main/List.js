@@ -2,7 +2,7 @@
  * This view is an example list of people.
  */
 Ext.define('MainHub.view.main.List', {
-    extend: 'Ext.grid.Panel',
+    extend: 'Ext.grid.Grid',
     xtype: 'mainlist',
 
     requires: [
@@ -16,9 +16,9 @@ Ext.define('MainHub.view.main.List', {
     },
 
     columns: [
-        { text: 'Name',  dataIndex: 'name' },
-        { text: 'Email', dataIndex: 'email', flex: 1 },
-        { text: 'Phone', dataIndex: 'phone', flex: 1 }
+        { text: 'Name',  dataIndex: 'name', width: 100 },
+        { text: 'Email', dataIndex: 'email', width: 230 },
+        { text: 'Phone', dataIndex: 'phone', width: 150 }
     ],
 
     listeners: {
