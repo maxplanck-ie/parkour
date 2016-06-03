@@ -11,6 +11,12 @@ Ext.define('MainHub.store.NavigationTree', {
         expanded: true,
         children: [
             {
+                text: 'Start Page',
+                iconCls: 'x-fa fa-th-large',
+                viewType: 'startpage',
+                leaf: true
+            },
+            {
                 text: 'Dashboard',
                 iconCls: 'x-fa fa-desktop',
                 viewType: 'dashboard',

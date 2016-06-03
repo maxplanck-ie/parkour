@@ -7,6 +7,7 @@ Ext.define('MainHub.view.main.Main', {
         'MainHub.view.main.MainController',
         'MainHub.view.main.MainContainerWrap',
         'MainHub.view.reports.BlankReport',
+        'MainHub.view.startpage.StartPage',
         'MainHub.store.NavigationTree'
     ],
 
