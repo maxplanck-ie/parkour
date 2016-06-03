@@ -13,8 +13,6 @@ def load_fixture(apps, schema_editor):
 
 
 def unload_fixture(apps, schema_editor):
-    """Brutally delete all entries for this model"""
-
     Researcher = apps.get_model("researcher", "Researcher")
     Researcher.objects.all().delete()
 
