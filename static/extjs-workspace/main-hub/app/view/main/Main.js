@@ -69,7 +69,7 @@ Ext.define('MainHub.view.main.Main', {
                         xtype: 'menu',
                         items: [{
                             text: 'Logout',
-                            // iconCls: ''
+                            iconCls: 'x-fa fa-sign-out',
                             href: 'logout'
                         }]
                     }
