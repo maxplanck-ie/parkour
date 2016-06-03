@@ -24,7 +24,7 @@ Ext.define('MainHub.view.main.MainController', {
 
     onUsernameBeforerender: function(username) {
         Ext.Ajax.request({
-            url: 'get_username',
+            url: 'get_username/',
 
             success: function (response) {
                 var obj = Ext.JSON.decode(response.responseText);

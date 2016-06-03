@@ -24,22 +24,36 @@ Ext.define('MainHub.store.NavigationTree', {
                 leaf: true
             },
             {
-                text: 'Reports',
-                iconCls: 'x-fa fa-leanpub',
-                expanded: false,
+                text: 'Tables',
+                iconCls: 'x-fa fa-table',
+                expanded: true,
                 selectable: false,
-                //routeId: 'pages-parent',
-                //id: 'pages-parent',
-
                 children: [
                     {
-                        text: 'Blank Report',
-                        iconCls: 'x-fa fa-file-o',
-                        viewType: 'reportblank',
+                        text: 'Researchers',
+                        iconCls: 'x-fa fa-user',
+                        viewType: 'researchers',
                         leaf: true
                     }
                 ]
-            }
+            },
+            // {
+            //     text: 'Reports',
+            //     iconCls: 'x-fa fa-leanpub',
+            //     expanded: false,
+            //     selectable: false,
+            //     //routeId: 'pages-parent',
+            //     //id: 'pages-parent',
+            //
+            //     children: [
+            //         {
+            //             text: 'Blank Report',
+            //             iconCls: 'x-fa fa-file-o',
+            //             viewType: 'reportblank',
+            //             leaf: true
+            //         }
+            //     ]
+            // }
         ]
     }
 });

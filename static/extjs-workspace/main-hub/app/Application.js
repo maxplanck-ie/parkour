@@ -11,7 +11,8 @@ Ext.define('MainHub.Application', {
     appFolder: '/static/extjs-workspace/main-hub/app',
 
     stores: [
-        'NavigationTree'
+        'NavigationTree',
+        'Researchers'
     ],
 
     controllers: [],
