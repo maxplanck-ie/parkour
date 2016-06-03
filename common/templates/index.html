@@ -1,9 +1,14 @@
-{% extends 'base.html' %}
 
-{% block title %}Home page{% endblock title %}
+{% extends 'base_ext.html' %}
+{% load staticfiles %}
 
-{% block content %}
+{% block title %}Home page{% endblock %}
 
-    <h1>Home page</h1>
+{% block css %}
+     <link rel="stylesheet" href="{% static 'extjs-workspace/ext/build/production/MainHub/resources/MainHub-all.css' %}">
+{% endblock %}
 
-{% endblock content %}
+{% block extjs_app %}
+    <script type="text/javascript" src="{% static 'extjs-workspace/ext/build/ext-all-debug.js' %}"></script>
+    <script type="text/javascript" src="{% static 'extjs-workspace/main-hub/app.js' %}"></script>
+{% endblock %}
