@@ -10,6 +10,7 @@ Ext.define('MainHub.view.tables.Researchers', {
 
     controller: 'researchers',
 
+    anchor : '100% -1',
     layout: 'fit',
 
     items: [
