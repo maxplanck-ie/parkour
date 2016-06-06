@@ -47,7 +47,7 @@ def edit_researcher(request):
         researcher.cost_unit = cost_unit
         researcher.save()
     except Exception as e:
-        print('[ERROR]: edit_researcher(): ', e)
+        print('[ERROR]: edit_researcher():', e)
         error = str(e)
 
     return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')

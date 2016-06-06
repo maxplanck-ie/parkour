@@ -69,6 +69,7 @@ Ext.define('MainHub.view.tables.ResearchersController', {
                 } else {
                     console.log('[ERROR]: edit_researcher()');
                     console.log(obj.error);
+                    console.log(response);
                 }
                 grid.setLoading(false);
             },
