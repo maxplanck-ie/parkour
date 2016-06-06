@@ -16,8 +16,13 @@
 
     <link rel="stylesheet" href="{% static 'extjs-workspace/ext/build/classic/theme-triton/resources/theme-triton-all.css' %}">
 
+    {# Global variables #}
+    {% include 'globals.html' %}
+
     {% block css %}{% endblock %}
     {% block extjs_app %}{% endblock %}
+
+    <script type="text/javascript" src="{% static 'extjs-workspace/global/overrides/csrf.js' %}"></script>
 
 {#    <script type="text/javascript" src="{% static 'extjs-workspace/ext/build/classic/theme-triton/theme-triton-debug.js' %}"></script>#}
 </head>
