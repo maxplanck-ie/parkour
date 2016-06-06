@@ -1,4 +1,4 @@
-Ext.define('MainHub.view.tables.Researchers', {
+Ext.define('MainHub.view.tables.researchers.Researchers', {
     extend: 'Ext.container.Container',
     xtype: 'researchers',
 
@@ -6,8 +6,8 @@ Ext.define('MainHub.view.tables.Researchers', {
         'Ext.container.Container',
         'Ext.toolbar.Paging',
         'Ext.grid.plugin.RowEditing',
-        'MainHub.view.tables.ResearchersController',
-        'MainHub.view.tables.AddResearcherWindow'
+        'MainHub.view.tables.researchers.ResearchersController',
+        'MainHub.view.tables.researchers.AddResearcherWindow'
     ],
 
     controller: 'researchers',
@@ -59,12 +59,7 @@ Ext.define('MainHub.view.tables.Researchers', {
                     ptype: 'rowediting',
                     pluginId: 'editResearcher',
                     clicksToMoveEditor: 1,
-                    autoCancel: false,
-                    // listeners: {
-                    //     edit: function() {
-                    //         debugger;
-                    //     }
-                    // }
+                    autoCancel: false
                 }
             ]
         }

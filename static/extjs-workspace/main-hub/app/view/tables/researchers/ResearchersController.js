@@ -1,4 +1,4 @@
-Ext.define('MainHub.view.tables.ResearchersController', {
+Ext.define('MainHub.view.tables.researchers.ResearchersController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.researchers',
 

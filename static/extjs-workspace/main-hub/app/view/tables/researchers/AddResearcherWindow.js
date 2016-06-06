@@ -1,9 +1,9 @@
-Ext.define('MainHub.view.tables.AddResearcherWindow', {
+Ext.define('MainHub.view.tables.researchers.AddResearcherWindow', {
     extend: 'Ext.window.Window',
     alias: 'addresearcher',
     xtype: 'addresearcher',
 
-    requires: ['MainHub.view.tables.AddResearcherWindowController'],
+    requires: ['MainHub.view.tables.researchers.AddResearcherWindowController'],
 
     controller: 'addresearcher',
 
