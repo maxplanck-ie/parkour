@@ -3,6 +3,10 @@ Ext.define('MainHub.model.tables.Researcher', {
 
     fields: [
         {
+            type: 'int',
+            name: 'researcherId'
+        },
+        {
             type: 'string',
             name: 'firstName'
         },

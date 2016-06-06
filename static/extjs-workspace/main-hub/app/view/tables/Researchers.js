@@ -16,6 +16,7 @@ Ext.define('MainHub.view.tables.Researchers', {
     items: [
         {
             xtype: 'grid',
+            id: 'researchersTable',
             itemId: 'researchersTable',
             padding: 15,
 

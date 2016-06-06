@@ -9,6 +9,7 @@ def get_researchers(request):
     researchers = Researcher.objects.all()
 
     data = [{
+                'researcherId': researcher.id,
                 'firstName': researcher.first_name,
                 'lastName': researcher.last_name,
                 'telephone': researcher.telephone,
