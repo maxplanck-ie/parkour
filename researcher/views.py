@@ -6,6 +6,7 @@ import json
 
 
 def get_researchers(request):
+    """ Get the list of all researchers and send it to frontend """
     researchers = Researcher.objects.all()
 
     data = [{
@@ -25,6 +26,7 @@ def get_researchers(request):
 
 
 def edit_researcher(request):
+    """ Edit existing researcher """
     error = str()
 
     researcher_id = int(request.POST.get('researcher_id', ''))
@@ -48,6 +50,29 @@ def edit_researcher(request):
         researcher.save()
     except Exception as e:
         print('[ERROR]: edit_researcher():', e)
+        error = str(e)
+
+    return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')
+
+
+def add_researcher(request):
+    """ Add new researcher """
+    error = str()
+
+    first_name = request.POST.get('first_name', '')
+    last_name = request.POST.get('last_name', '')
+    telephone = request.POST.get('telephone', '')
+    email = request.POST.get('email', '')
+    pi = request.POST.get('pi', '')
+    organization = request.POST.get('organization', '')
+    cost_unit = request.POST.get('cost_unit', '')
+
+    try:
+        researcher = Researcher(first_name=first_name, last_name=last_name, telephone=telephone,
+                                email=email, pi=pi, organization=organization, costunit=cost_unit)
+        researcher.save()
+    except Exception as e:
+        print('[ERROR]: add_researcher():', e)
         error = str(e)
 
     return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')

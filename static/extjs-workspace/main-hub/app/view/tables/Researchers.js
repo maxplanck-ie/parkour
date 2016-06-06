@@ -6,7 +6,8 @@ Ext.define('MainHub.view.tables.Researchers', {
         'Ext.container.Container',
         'Ext.toolbar.Paging',
         'Ext.grid.plugin.RowEditing',
-        'MainHub.view.tables.ResearchersController'
+        'MainHub.view.tables.ResearchersController',
+        'MainHub.view.tables.AddResearcherWindow'
     ],
 
     controller: 'researchers',
@@ -24,7 +25,7 @@ Ext.define('MainHub.view.tables.Researchers', {
             header: {
                 title: 'Researchers',
                 items: [
-                    { xtype: 'button', text: 'Add' }
+                    { xtype: 'button', itemId: 'addResearcherBtn', text: 'Add' }
                 ]
             },
 

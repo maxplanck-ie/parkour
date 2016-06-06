@@ -6,17 +6,19 @@ Ext.define('MainHub.view.tables.ResearchersController', {
         control: {
             '#researchersTable': {
                 boxready: 'onResearchersTableBoxready',
-                beforerender : 'onResearchersTableBeforerender',
-                edit: 'onResearcherEdit'
+                edit: 'onResearcherEdit',
+                refresh: 'onResearchersTableRefresh'
+            },
+            '#addResearcherBtn': {
+                click: 'onAddResearcherBtnClick'
             }
         }
     },
 
-    onResearchersTableBoxready: function(grid) {
-        grid.setLoading(true);
-    },
+    onResearchersTableRefresh: function(grid) {
+        grid.getStore().removeAll();    // Clear the table before refreshing
 
-    onResearchersTableBeforerender: function(grid) {
+        grid.setLoading(true);
         Ext.Ajax.request({
             url: 'get_researchers/',
             timeout: 1000000,
@@ -39,6 +41,10 @@ Ext.define('MainHub.view.tables.ResearchersController', {
                 console.log(response);
             }
         });
+    },
+
+    onResearchersTableBoxready: function(grid) {
+        grid.fireEvent('refresh', grid);
     },
 
     onResearcherEdit: function(editor, e) {
@@ -67,8 +73,7 @@ Ext.define('MainHub.view.tables.ResearchersController', {
                 if (obj.success) {
                     e.record.commit();
                 } else {
-                    console.log('[ERROR]: edit_researcher()');
-                    console.log(obj.error);
+                    console.log('[ERROR]: edit_researcher(): ' + obj.error);
                     console.log(response);
                 }
                 grid.setLoading(false);
@@ -80,5 +85,9 @@ Ext.define('MainHub.view.tables.ResearchersController', {
                 console.log(response);
             }
         });
+    },
+
+    onAddResearcherBtnClick: function(btn) {
+        Ext.create('addresearcher').show();
     }
 });
