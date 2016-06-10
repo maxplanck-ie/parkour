@@ -20,16 +20,29 @@ Ext.define('MainHub.view.tables.researchers.Researchers', {
             xtype: 'grid',
             id: 'researchersTable',
             itemId: 'researchersTable',
+            height: Ext.Element.getViewportHeight() - 64,
+            region: 'center',
             padding: 15,
 
             header: {
                 title: 'Researchers',
                 items: [
-                    { xtype: 'button', itemId: 'addResearcherBtn', text: 'Add' }
+                    {
+                        xtype: 'textfield',
+                        itemId: 'searchField',
+                        emptyText: 'Search',
+                        width: 200,
+                        margin: '0 15px 0 0'
+                    },
+                    {
+                        xtype: 'button',
+                        itemId: 'addResearcherBtn',
+                        text: 'Add'
+                    }
                 ]
             },
 
-            store: [],
+            store: 'researchersStore',
 
             columns: {
                 items: [
@@ -46,20 +59,17 @@ Ext.define('MainHub.view.tables.researchers.Researchers', {
                 }
             },
 
-            dockedItems: [
-                {
-                    xtype: 'pagingtoolbar',
-                    dock: 'bottom',
-                    displayInfo: true
-                }
-            ],
-
             plugins: [
                 {
                     ptype: 'rowediting',
                     pluginId: 'editResearcher',
                     clicksToMoveEditor: 1,
                     autoCancel: false
+                },
+                {
+                    ptype: 'bufferedrenderer',
+                    trailingBufferZone: 100,
+                    leadingBufferZone: 100
                 }
             ]
         }

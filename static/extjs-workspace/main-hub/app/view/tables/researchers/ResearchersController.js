@@ -5,57 +5,21 @@ Ext.define('MainHub.view.tables.researchers.ResearchersController', {
     config: {
         control: {
             '#researchersTable': {
-                boxready: 'onResearchersTableBoxready',
                 edit: 'onResearcherEdit',
                 refresh: 'onResearchersTableRefresh'
             },
             '#addResearcherBtn': {
                 click: 'onAddResearcherBtnClick'
+            },
+            "#searchField": {
+                change: 'onSearchFieldChange'
             }
         }
     },
 
     onResearchersTableRefresh: function(grid) {
-        grid.getStore().removeAll();    // Clear the table before refreshing
-
-        grid.setLoading(true);
-        Ext.Ajax.request({
-            url: 'get_researchers/',
-            method: 'POST',
-            timeout: 1000000,
-            scope: this,
-
-            success: function (response) {
-                var obj = Ext.JSON.decode(response.responseText);
-
-                if (obj.success) {
-                    var store = Ext.create('MainHub.store.Researchers', {
-                        data: obj.data
-                    });
-    
-                    grid.setStore(store);
-                    grid.down('pagingtoolbar').bindStore(store);
-                    store.loadPage(1);
-                    grid.setLoading(false);
-                } else {
-                    grid.setLoading(false);
-                    Ext.ux.ToastMessage(obj.error, 'error');
-                    console.log('[ERROR]: get_researchers()');
-                    console.log(response);
-                }
-            },
-
-            failure: function(response) {
-                grid.setLoading(false);
-                Ext.ux.ToastMessage(response.statusText, 'error');
-                console.log('[ERROR]: get_researchers()');
-                console.log(response);
-            }
-        });
-    },
-
-    onResearchersTableBoxready: function(grid) {
-        grid.fireEvent('refresh', grid);
+        grid.getStore().removeAll();
+        grid.getStore().reload();
     },
 
     onResearcherEdit: function(editor, e) {
@@ -104,5 +68,24 @@ Ext.define('MainHub.view.tables.researchers.ResearchersController', {
 
     onAddResearcherBtnClick: function(btn) {
         Ext.create('addresearcher').show();
+    },
+    
+    onSearchFieldChange: function(fld, newValue) {
+        var grid = Ext.getCmp('researchersTable'),
+            store = grid.getStore(),
+            columns = Ext.pluck(grid.getColumns(), 'dataIndex');
+
+        store.clearFilter();
+        store.filterBy(function(record) {
+            var res = false;
+            Ext.each(columns, function(column) {
+                if (record.data[column].toLowerCase().indexOf(newValue.toLowerCase()) > -1) {
+                    res = res || true;
+                }
+            });
+            return res;
+        });
+
+        grid.setHeight(Ext.Element.getViewportHeight() - 64);
     }
 });

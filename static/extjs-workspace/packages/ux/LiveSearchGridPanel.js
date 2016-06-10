@@ -3,6 +3,7 @@
  */
 Ext.define('Ext.ux.LiveSearchGridPanel', {
     extend: 'Ext.grid.Panel',
+    xtype: 'livesearchgrid',
     requires: [
         'Ext.toolbar.TextItem',
         'Ext.form.field.Checkbox',
