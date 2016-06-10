@@ -21,22 +21,33 @@ Ext.define('MainHub.view.tables.researchers.ResearchersController', {
         grid.setLoading(true);
         Ext.Ajax.request({
             url: 'get_researchers/',
+            method: 'POST',
             timeout: 1000000,
+            scope: this,
 
             success: function (response) {
-                var data = Ext.JSON.decode(response.responseText);
-                var store = Ext.create('MainHub.store.Researchers', {
-                    data: data
-                });
+                var obj = Ext.JSON.decode(response.responseText);
 
-                grid.setStore(store);
-                grid.down('pagingtoolbar').bindStore(store);
-                store.loadPage(1);
-                grid.setLoading(false);
+                if (obj.success) {
+                    var store = Ext.create('MainHub.store.Researchers', {
+                        data: obj.data
+                    });
+    
+                    grid.setStore(store);
+                    grid.down('pagingtoolbar').bindStore(store);
+                    store.loadPage(1);
+                    grid.setLoading(false);
+                } else {
+                    grid.setLoading(false);
+                    Ext.ux.ToastMessage(obj.error, 'error');
+                    console.log('[ERROR]: get_researchers()');
+                    console.log(response);
+                }
             },
 
             failure: function(response) {
                 grid.setLoading(false);
+                Ext.ux.ToastMessage(response.statusText, 'error');
                 console.log('[ERROR]: get_researchers()');
                 console.log(response);
             }
@@ -72,15 +83,19 @@ Ext.define('MainHub.view.tables.researchers.ResearchersController', {
 
                 if (obj.success) {
                     e.record.commit();
+                    Ext.ux.ToastMessage('Record has been updated!');
+                    grid.setLoading(false);
                 } else {
+                    grid.setLoading(false);
+                    Ext.ux.ToastMessage(obj.error, 'error');
                     console.log('[ERROR]: edit_researcher(): ' + obj.error);
                     console.log(response);
                 }
-                grid.setLoading(false);
             },
 
             failure: function(response) {
                 grid.setLoading(false);
+                Ext.ux.ToastMessage(response.statusText, 'error');
                 console.log('[ERROR]: edit_researcher()');
                 console.log(response);
             }

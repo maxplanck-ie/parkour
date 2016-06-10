@@ -42,7 +42,9 @@ Ext.define('MainHub.view.tables.researchers.AddResearcherWindowController', {
                     if (obj.success) {
                         var grid = Ext.getCmp('researchersTable');
                         grid.fireEvent('refresh', grid);
+                        Ext.ux.ToastMessage('Record has been added!');
                     } else {
+                        Ext.ux.ToastMessage(obj.error, 'error');
                         console.log('[ERROR]: add_researcher(): ' + obj.error);
                         console.log(response);
                     }
@@ -50,11 +52,14 @@ Ext.define('MainHub.view.tables.researchers.AddResearcherWindowController', {
                 },
 
                 failure: function(response) {
+                    Ext.ux.ToastMessage(response.statusText, 'error');
                     console.log('[ERROR]: add_researcher()');
                     console.log(response);
                     wnd.close();
                 }
             });
+        } else {
+            Ext.ux.ToastMessage('Check the form', 'warning');
         }
     },
 
