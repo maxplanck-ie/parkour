@@ -51,7 +51,7 @@ Ext.define('MainHub.view.tables.requests.Requests', {
                     { text: 'Researcher', dataIndex: 'researcher', flex: 1 },
                     { text: 'Date Created', dataIndex: 'dateCreated', flex: 1 },
                     { text: 'Description', dataIndex: 'description', flex: 1 },
-                    { ext: 'Terms of Use (accept)', dataIndex: 'termsOfUseAccept', flex: 1,
+                    { text: 'Terms of Use (accept)', dataIndex: 'termsOfUseAccept', flex: 1,
                         renderer: function(value) {
                             var checked = value ? 'checked' : '';
                             return '<input type="checkbox" ' + checked + ' onclick="return false;" onkeydown="return false;" />';
