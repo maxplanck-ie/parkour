@@ -3,6 +3,15 @@
  * calls Ext.application(). This is the ideal place to handle application launch and
  * initialization details.
  */
+
+Ext.Loader.setConfig({
+    enabled : true,
+    disableCaching : true, // For debug only
+    paths : {
+        'Ext.ux': '/static/extjs-workspace/packages/ux'
+    }
+});
+
 Ext.define('MainHub.Application', {
     extend: 'Ext.app.Application',
     
@@ -13,6 +22,10 @@ Ext.define('MainHub.Application', {
     stores: [
         'NavigationTree',
         'Researchers'
+    ],
+
+    requires: [
+        'Ext.ux.ToastMessage'
     ],
 
     controllers: [],
