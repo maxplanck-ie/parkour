@@ -21,7 +21,8 @@ Ext.define('MainHub.Application', {
 
     stores: [
         'NavigationTree',
-        'Researchers'
+        'Researchers',
+        'Requests'
     ],
 
     requires: [

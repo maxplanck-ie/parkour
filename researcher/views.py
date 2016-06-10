@@ -21,8 +21,7 @@ def get_researchers(request):
                     'pi': researcher.pi,
                     'organization': researcher.organization,
                     'costUnit': researcher.costunit,
-                }
-                for researcher in researchers]
+                } for researcher in researchers]
     except Exception as e:
         print('[ERROR]: get_researchers():', e)
         error = str(e)
