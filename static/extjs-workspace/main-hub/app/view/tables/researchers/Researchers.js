@@ -7,7 +7,7 @@ Ext.define('MainHub.view.tables.researchers.Researchers', {
         'Ext.toolbar.Paging',
         'Ext.grid.plugin.RowEditing',
         'MainHub.view.tables.researchers.ResearchersController',
-        'MainHub.view.tables.researchers.AddResearcherWindow'
+        'MainHub.view.tables.researchers.ResearcherWindow'
     ],
 
     controller: 'researchers',

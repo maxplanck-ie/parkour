@@ -1,11 +1,11 @@
-Ext.define('MainHub.view.tables.researchers.AddResearcherWindow', {
+Ext.define('MainHub.view.tables.researchers.ResearcherWindow', {
     extend: 'Ext.window.Window',
-    alias: 'addresearcher',
-    xtype: 'addresearcher',
+    alias: 'researcher_wnd',
+    xtype: 'researcher_wnd',
 
-    requires: ['MainHub.view.tables.researchers.AddResearcherWindowController'],
+    requires: ['MainHub.view.tables.researchers.ResearcherWindowController'],
 
-    controller: 'addresearcher',
+    controller: 'researcher_wnd',
 
     title: 'Add Researcher',
     height: 410,
@@ -17,8 +17,8 @@ Ext.define('MainHub.view.tables.researchers.AddResearcherWindow', {
     items: [
         {
             xtype: 'form',
-            id: 'addResearcherForm',
-            itemId: 'addResearcherForm',
+            id: 'ResearcherForm',
+            itemId: 'ResearcherForm',
             layout: 'anchor',
             border: 0,
             padding: 15,

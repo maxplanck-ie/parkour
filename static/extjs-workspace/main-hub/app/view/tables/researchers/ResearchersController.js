@@ -68,7 +68,7 @@ Ext.define('MainHub.view.tables.researchers.ResearchersController', {
     },
 
     onAddResearcherBtnClick: function(btn) {
-        Ext.create('addresearcher').show();
+        Ext.create('researcher_wnd').show();
     },
     
     onSearchFieldChange: function(fld, newValue) {

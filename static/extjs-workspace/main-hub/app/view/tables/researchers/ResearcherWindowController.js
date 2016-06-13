@@ -1,6 +1,6 @@
-Ext.define('MainHub.view.tables.researchers.AddResearcherWindowController', {
+Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.addresearcher',
+    alias: 'controller.researcher_wnd',
 
     config: {
         control: {
@@ -14,8 +14,8 @@ Ext.define('MainHub.view.tables.researchers.AddResearcherWindowController', {
     },
 
     onAddBtnClick: function(btn) {
-        var form = Ext.getCmp('addResearcherForm'),
-            wnd = btn.up('addresearcher');
+        var form = Ext.getCmp('ResearcherForm'),
+            wnd = btn.up('researcher_wnd');
 
         if (form.isValid()) {
             var data = form.getValues();
@@ -64,6 +64,6 @@ Ext.define('MainHub.view.tables.researchers.AddResearcherWindowController', {
     },
 
     onCancelBtnClick: function(btn) {
-        btn.up('addresearcher').close();
+        btn.up('researcher_wnd').close();
     }
 });
