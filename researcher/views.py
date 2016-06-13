@@ -35,7 +35,7 @@ def edit_researcher(request):
     """ Edit existing researcher """
     error = str()
 
-    researcher_id = int(request.POST.get('researcher_id', ''))
+    researcher_id = int(request.POST.get('researcher_id', 1))
     first_name = request.POST.get('first_name', '')
     last_name = request.POST.get('last_name', '')
     telephone = request.POST.get('telephone', '')

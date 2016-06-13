@@ -13,6 +13,9 @@ Ext.define('MainHub.view.tables.requests.RequestWindowController', {
             '#addRequestWndBtn': {
                 // click: 'onAddRequestWndBtnClick'
             },
+            '#editRequestWndBtn': {
+                click: 'onEditRequestWndBtnClick'
+            },
             '#cancelBtn': {
                 click: 'onCancelBtnClick'
             }
@@ -108,7 +111,7 @@ Ext.define('MainHub.view.tables.requests.RequestWindowController', {
 
     onAddBtnClick: function(btn) {
         var form = Ext.getCmp('requestForm'),
-            wnd = btn.up('add_request');
+            wnd = btn.up('request_wnd');
 
         if (form.isValid()) {
             var data = form.getValues();
@@ -147,6 +150,57 @@ Ext.define('MainHub.view.tables.requests.RequestWindowController', {
                 failure: function(response) {
                     Ext.ux.ToastMessage(response.statusText, 'error');
                     console.log('[ERROR]: add_request()');
+                    console.log(response);
+                    wnd.close();
+                }
+            });
+        } else {
+            Ext.ux.ToastMessage('Check the form', 'warning');
+        }
+    },
+
+    onEditRequestWndBtnClick: function(btn) {
+        var wnd = btn.up('request_wnd'),
+            form = Ext.getCmp('requestForm'),
+            grid = Ext.getCmp('researchersInAddRequestTable');
+
+        if (form.isValid()) {
+            var data = form.getValues();
+
+            wnd.setLoading('Updating...');
+            Ext.Ajax.request({
+                url: 'edit_request/',
+                method: 'POST',
+                scope: this,
+
+                params: {
+                    'status': data.status,
+                    'name': data.name,
+                    'project_type': data.projectType,
+                    'description': data.description,
+                    'terms_of_use_accept': data.termsOfUseAccept == 'on',
+                    'researcher_id': grid.getSelection()[0].data.researcherId,
+                    'request_id': wnd.record.data.requestId
+                },
+
+                success: function (response) {
+                    var obj = Ext.JSON.decode(response.responseText);
+
+                    if (obj.success) {
+                        var grid = Ext.getCmp('requestsTable');
+                        grid.fireEvent('refresh', grid);
+                        Ext.ux.ToastMessage('Record has been updated!');
+                    } else {
+                        Ext.ux.ToastMessage(obj.error, 'error');
+                        console.log('[ERROR]: edit_request(): ' + obj.error);
+                        console.log(response);
+                    }
+                    wnd.close();
+                },
+
+                failure: function(response) {
+                    Ext.ux.ToastMessage(response.statusText, 'error');
+                    console.log('[ERROR]: edit_request()');
                     console.log(response);
                     wnd.close();
                 }
