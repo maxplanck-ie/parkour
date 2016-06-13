@@ -57,8 +57,9 @@ Ext.define('MainHub.view.tables.requests.RequestWindowController', {
                             rowIndex = grid.getStore().indexOf(rec);
 
                          // Select researcher on request edit
-                        grid.getSelectionModel().select(rowIndex);
+                        grid.ensureVisible(rec);
                         grid.getView().getNode(rowIndex).scrollIntoView();
+                        grid.getSelectionModel().select(rowIndex);
                     }
                 } else {
                     wnd.setLoading(false);
