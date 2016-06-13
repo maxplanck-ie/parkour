@@ -82,3 +82,18 @@ def edit_researcher(request):
         error = str(e)
 
     return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')
+
+
+def delete_researcher(request):
+    error = str()
+
+    researcher_id = int(request.POST.get('researcher_id', 0))
+
+    try:
+        researcher = Researcher.objects.get(id=researcher_id)
+        researcher.delete()
+    except Exception as e:
+        print('[ERROR]: delete_researcher():', e)
+        error = str(e)
+
+    return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')

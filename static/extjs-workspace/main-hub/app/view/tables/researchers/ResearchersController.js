@@ -128,6 +128,36 @@ Ext.define('MainHub.view.tables.researchers.ResearchersController', {
     },
 
     deleteResearcher: function(record) {
-        // debugger;
+        Ext.Ajax.request({
+            url: 'delete_researcher/',
+            method: 'POST',
+            timeout: 1000000,
+            scope: this,
+
+            params: {
+                'researcher_id': record.data.researcherId
+            },
+
+            success: function (response) {
+                var obj = Ext.JSON.decode(response.responseText);
+
+                if (obj.success) {
+                    var grid = Ext.getCmp('researchersTable');
+                    grid.fireEvent('refresh', grid);
+                    Ext.ux.ToastMessage('Record has been deleted!');
+
+                } else {
+                    Ext.ux.ToastMessage(obj.error, 'error');
+                    console.log('[ERROR]: delete_researcher()');
+                    console.log(response);
+                }
+            },
+
+            failure: function(response) {
+                Ext.ux.ToastMessage(response.statusText, 'error');
+                console.log('[ERROR]: delete_researcher()');
+                console.log(response);
+            }
+        });
     }
 });
