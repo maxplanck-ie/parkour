@@ -7,8 +7,8 @@ Ext.define('MainHub.view.tables.requests.RequestWindow', {
 
     controller: 'request_wnd',
 
-    height: 370,
-    width: 600,
+    height: 380,
+    width: 650,
 
     modal: true,
     resizable: false,
@@ -25,7 +25,7 @@ Ext.define('MainHub.view.tables.requests.RequestWindow', {
                     layout: 'anchor',
                     border: 0,
                     padding: 15,
-                    width: 350,
+                    width: 400,
 
                     defaultType: 'textfield',
                     defaults: {
@@ -37,8 +37,10 @@ Ext.define('MainHub.view.tables.requests.RequestWindow', {
                         {
                             name: 'status',
                             xtype: 'numberfield',
+                            fieldLabel: 'Status',
                             emptyText: 'Status',
                             minValue: 0,
+                            maxValue: 10,
                             allowBlank: false,
                             hideTrigger: true,
                             keyNavEnabled: false,
@@ -46,17 +48,20 @@ Ext.define('MainHub.view.tables.requests.RequestWindow', {
                         },
                         {
                             name: 'name',
+                            fieldLabel: 'Name',
                             emptyText: 'Name',
                             allowBlank: false
                         },
                         {
                             name: 'projectType',
+                            fieldLabel: 'Project Type',
                             emptyText: 'Project Type',
                             allowBlank: false
                         },
                         {
                             name: 'description',
                             xtype: 'textarea',
+                            fieldLabel: 'Description',
                             emptyText: 'Description',
                             allowBlank: false
                         },
@@ -69,11 +74,11 @@ Ext.define('MainHub.view.tables.requests.RequestWindow', {
                 },
                 {
                     xtype: 'container',
-                    padding: '15px 15px 0 0',
+                    padding: '25px 15px 0 0',
                     items: [
                         {
                             xtype: 'label',
-                            text: 'Researcher',
+                            text: 'Researcher:',
                             style: {
                                 // color: '#cecece',
                                 fontWeight: 400
