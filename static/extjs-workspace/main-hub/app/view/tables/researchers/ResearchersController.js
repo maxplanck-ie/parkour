@@ -7,7 +7,8 @@ Ext.define('MainHub.view.tables.researchers.ResearchersController', {
             '#researchersTable': {
                 edit: 'onResearcherEdit',
                 boxready: 'onResearchersTableRefresh',
-                refresh: 'onResearchersTableRefresh'
+                refresh: 'onResearchersTableRefresh',
+                itemcontextmenu: 'onResearchersTableItemContextMenu'
             },
             '#addResearcherBtn': {
                 click: 'onAddResearcherBtnClick'
@@ -68,7 +69,7 @@ Ext.define('MainHub.view.tables.researchers.ResearchersController', {
     },
 
     onAddResearcherBtnClick: function(btn) {
-        Ext.create('researcher_wnd').show();
+        Ext.create('researcher_wnd', {title: 'Add Researcher', mode: 'add'}).show();
     },
     
     onSearchFieldChange: function(fld, newValue) {
@@ -88,5 +89,45 @@ Ext.define('MainHub.view.tables.researchers.ResearchersController', {
         });
 
         grid.setHeight(Ext.Element.getViewportHeight() - 64);
+    },
+
+    onResearchersTableItemContextMenu: function(grid, record, item, index, e) {
+        var me = this;
+
+        e.stopEvent();
+        Ext.create('Ext.menu.Menu', {
+            items: [
+                {
+                    text: 'Edit',
+                    iconCls: 'x-fa fa-pencil',
+                    handler: function() {
+                        me.editResearcher(record)
+                    }
+                },
+                {
+                    text: 'Delete',
+                    iconCls: 'x-fa fa-trash',
+                    handler: function() {
+                        Ext.Msg.show({
+                            title: 'Delete researcher',
+                            message: 'Are you sure you want to delete the researcher?',
+                            buttons: Ext.Msg.YESNO,
+                            icon: Ext.Msg.QUESTION,
+                            fn: function(btn) {
+                                if (btn == 'yes') me.deleteResearcher(record);
+                            }
+                        });
+                    }
+                }
+            ]
+        }).showAt(e.getXY());
+    },
+
+    editResearcher: function(record) {
+        Ext.create('researcher_wnd', {title: 'Edit Researcher', mode: 'edit', record: record}).show();
+    },
+
+    deleteResearcher: function(record) {
+        // debugger;
     }
 });

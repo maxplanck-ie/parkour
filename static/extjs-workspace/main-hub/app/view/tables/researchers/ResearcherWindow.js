@@ -7,7 +7,6 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindow', {
 
     controller: 'researcher_wnd',
 
-    title: 'Add Researcher',
     height: 410,
     width: 400,
 
@@ -17,8 +16,8 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindow', {
     items: [
         {
             xtype: 'form',
-            id: 'ResearcherForm',
-            itemId: 'ResearcherForm',
+            id: 'researcherForm',
+            itemId: 'researcherForm',
             layout: 'anchor',
             border: 0,
             padding: 15,
@@ -78,8 +77,17 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindow', {
         },
         {
             xtype: 'button',
-            itemId: 'addBtn',
-            text: 'Add'
+            itemId: 'addResearcherWndBtn',
+            id: 'addResearcherWndBtn',
+            text: 'Add',
+            hidden: true
+        },
+        {
+            xtype: 'button',
+            itemId: 'editResearcherWndBtn',
+            id: 'editResearcherWndBtn',
+            text: 'Update',
+            hidden: true
         }
     ]
 });

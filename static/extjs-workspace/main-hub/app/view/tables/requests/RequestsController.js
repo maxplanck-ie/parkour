@@ -98,7 +98,7 @@ Ext.define('MainHub.view.tables.requests.RequestsController', {
                     iconCls: 'x-fa fa-trash',
                     handler: function() {
                         Ext.Msg.show({
-                            title: 'Delete request?',
+                            title: 'Delete request',
                             message: 'Are you sure you want to delete the request?',
                             buttons: Ext.Msg.YESNO,
                             icon: Ext.Msg.QUESTION,
