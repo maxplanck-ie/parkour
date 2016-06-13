@@ -49,7 +49,12 @@ Ext.define('MainHub.view.tables.requests.Requests', {
                     { text: 'Project Type', dataIndex: 'projectType', flex: 1 },
                     { text: 'Researcher', dataIndex: 'researcher', flex: 1 },
                     { text: 'Date Created', dataIndex: 'dateCreated', flex: 1 },
-                    { text: 'Description', dataIndex: 'description', flex: 1 },
+                    { text: 'Description', dataIndex: 'description', flex: 1,
+                        renderer: function(value, metaData) {
+                            metaData.tdAttr = 'data-qtip="' + value + '" data-qwidth=300';
+                            return value;
+                        }
+                    },
                     { text: 'Terms of Use (accept)', dataIndex: 'termsOfUseAccept', flex: 1,
                         renderer: function(value) {
                             var checked = value ? 'checked' : '';
