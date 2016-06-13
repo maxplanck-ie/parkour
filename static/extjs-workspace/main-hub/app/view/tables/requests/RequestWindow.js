@@ -1,13 +1,12 @@
-Ext.define('MainHub.view.tables.requests.AddRequestWindow', {
+Ext.define('MainHub.view.tables.requests.RequestWindow', {
     extend: 'Ext.window.Window',
-    alias: 'add_request',
-    xtype: 'add_request',
+    alias: 'request_wnd',
+    xtype: 'request_wnd',
 
-    requires: ['MainHub.view.tables.requests.AddRequestWindowController'],
+    requires: ['MainHub.view.tables.requests.RequestWindowController'],
 
-    controller: 'add_request',
+    controller: 'request_wnd',
 
-    title: 'Add Request',
     height: 370,
     width: 600,
 
@@ -21,8 +20,8 @@ Ext.define('MainHub.view.tables.requests.AddRequestWindow', {
             items: [
                 {
                     xtype: 'form',
-                    id: 'addRequestForm',
-                    itemId: 'addRequestForm',
+                    id: 'requestForm',
+                    itemId: 'requestForm',
                     layout: 'anchor',
                     border: 0,
                     padding: 15,
@@ -113,8 +112,17 @@ Ext.define('MainHub.view.tables.requests.AddRequestWindow', {
         },
         {
             xtype: 'button',
-            itemId: 'addBtn',
-            text: 'Add'
+            itemId: 'addRequestWndBtn',
+            id: 'addRequestWndBtn',
+            text: 'Add',
+            hidden: true
+        },
+        {
+            xtype: 'button',
+            itemId: 'editRequestWndBtn',
+            id: 'editRequestWndBtn',
+            text: 'Update',
+            hidden: true
         }
     ]
 });

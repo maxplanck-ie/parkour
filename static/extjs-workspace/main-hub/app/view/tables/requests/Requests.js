@@ -4,9 +4,8 @@ Ext.define('MainHub.view.tables.requests.Requests', {
 
     requires: [
         'Ext.container.Container',
-        'Ext.toolbar.Paging',
         'MainHub.view.tables.requests.RequestsController',
-        'MainHub.view.tables.requests.AddRequestWindow'
+        'MainHub.view.tables.requests.RequestWindow'
     ],
 
     controller: 'requests',

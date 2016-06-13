@@ -6,7 +6,8 @@ Ext.define('MainHub.view.tables.requests.RequestsController', {
         control: {
             '#requestsTable': {
                 boxready: 'onRequestsTableRefresh',
-                refresh: 'onRequestsTableRefresh'
+                refresh: 'onRequestsTableRefresh',
+                itemcontextmenu: 'onRequestsTableItemContextMenu'
             },
             '#addRequestBtn': {
                 click: 'onAddRequestBtnClick'
@@ -55,7 +56,7 @@ Ext.define('MainHub.view.tables.requests.RequestsController', {
     },
 
     onAddRequestBtnClick: function(btn) {
-        Ext.create('add_request').show();
+        Ext.create('request_wnd', {title: 'Add Request', mode: 'add'}).show();
     },
     
     onSearchFieldChange: function(fld, newValue) {
@@ -63,11 +64,13 @@ Ext.define('MainHub.view.tables.requests.RequestsController', {
             store = grid.getStore(),
             columns = Ext.pluck(grid.getColumns(), 'dataIndex');
 
+        columns.pop();  // do not consider 'Terms of Use' column
+
         store.clearFilter();
         store.filterBy(function(record) {
             var res = false;
             Ext.each(columns, function(column) {
-                if (record.data[column].toLowerCase().indexOf(newValue.toLowerCase()) > -1) {
+                if (record.data[column].toString().toLowerCase().indexOf(newValue.toLowerCase()) > -1) {
                     res = res || true;
                 }
             });
@@ -75,5 +78,45 @@ Ext.define('MainHub.view.tables.requests.RequestsController', {
         });
 
         grid.setHeight(Ext.Element.getViewportHeight() - 64);
+    },
+
+    onRequestsTableItemContextMenu: function(grid, record, item, index, e) {
+        var me = this;
+
+        e.stopEvent();
+        Ext.create('Ext.menu.Menu', {
+            items: [
+                {
+                    text: 'Edit',
+                    iconCls: 'x-fa fa-pencil',
+                    handler: function() {
+                        me.editRequest(record)
+                    }
+                },
+                {
+                    text: 'Delete',
+                    iconCls: 'x-fa fa-trash',
+                    handler: function() {
+                        Ext.Msg.show({
+                            title: 'Delete request?',
+                            message: 'Are you sure you want to delete the request?',
+                            buttons: Ext.Msg.YESNO,
+                            icon: Ext.Msg.QUESTION,
+                            fn: function(btn) {
+                                if (btn == 'yes') me.deleteRequest(record);
+                            }
+                        });
+                    }
+                }
+            ]
+        }).showAt(e.getXY());
+    },
+
+    editRequest: function(record) {
+        Ext.create('request_wnd', {title: 'Edit Request', mode: 'edit', record: record}).show();
+    },
+
+    deleteRequest: function(record) {
+        // debugger;
     }
 });

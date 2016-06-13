@@ -1,17 +1,17 @@
-Ext.define('MainHub.view.tables.requests.AddRequestWindowController', {
+Ext.define('MainHub.view.tables.requests.RequestWindowController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.add_request',
+    alias: 'controller.request_wnd',
 
     config: {
         control: {
             '#': {
-                boxready: 'onAddRequestWindowBoxready'
+                boxready: 'onRequestWindowBoxready'
             },
             '#searchField': {
                 change: 'onSearchFieldChange'
             },
-            '#addBtn': {
-                // click: 'onAddBtnClick'
+            '#addRequestWndBtn': {
+                // click: 'onAddRequestWndBtnClick'
             },
             '#cancelBtn': {
                 click: 'onCancelBtnClick'
@@ -19,9 +19,17 @@ Ext.define('MainHub.view.tables.requests.AddRequestWindowController', {
         }
     },
 
-    onAddRequestWindowBoxready: function(wnd) {
+    onRequestWindowBoxready: function(wnd) {
         var grid = Ext.getCmp('researchersInAddRequestTable');
 
+        if (wnd.mode == 'add') {
+            Ext.getCmp('addRequestWndBtn').show();
+        } else {
+            var record = wnd.record.data;
+            Ext.getCmp('editRequestWndBtn').show();
+        }
+
+        // Get researchers table
         wnd.setLoading();
         Ext.Ajax.request({
             url: 'get_researchers/',
@@ -37,9 +45,18 @@ Ext.define('MainHub.view.tables.requests.AddRequestWindowController', {
                         fields: ['firstName', 'lastName'],
                         data: obj.data
                     });
-
                     grid.setStore(store);
-                    wnd.setLoading(false);
+
+                    if (wnd.mode == 'add') {
+                        wnd.setLoading(false);
+                    } else {
+                        var rec = grid.getStore().findRecord('researcherId', record.researcherId),
+                            rowIndex = grid.getStore().indexOf(rec);
+
+                         // Select researcher on request edit
+                        grid.getSelectionModel().select(rowIndex);
+                        grid.getView().getNode(rowIndex).scrollIntoView();
+                    }
                 } else {
                     wnd.setLoading(false);
                     Ext.ux.ToastMessage(obj.error, 'error');
@@ -55,6 +72,21 @@ Ext.define('MainHub.view.tables.requests.AddRequestWindowController', {
                 console.log(response);
             }
         });
+
+        // Set form fields with request data
+        if (wnd.mode == 'edit') {
+            var form = Ext.getCmp('requestForm').getForm();
+
+            form.setValues({
+                status: record.status,
+                name: record.name,
+                projectType: record.projectType,
+                description: record.description,
+                termsOfUseAccept: record.termsOfUseAccept
+            });
+
+            wnd.setLoading(false);
+        }
     },
 
     onSearchFieldChange: function(fld, newValue) {
@@ -75,7 +107,7 @@ Ext.define('MainHub.view.tables.requests.AddRequestWindowController', {
     },
 
     onAddBtnClick: function(btn) {
-        var form = Ext.getCmp('addRequestForm'),
+        var form = Ext.getCmp('requestForm'),
             wnd = btn.up('add_request');
 
         if (form.isValid()) {
@@ -125,6 +157,6 @@ Ext.define('MainHub.view.tables.requests.AddRequestWindowController', {
     },
 
     onCancelBtnClick: function(btn) {
-        btn.up('add_request').close();
+        btn.up('request_wnd').close();
     }
 });
