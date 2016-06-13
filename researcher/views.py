@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from researcher.models import Researcher
+from researcher.models import Researcher, PrincipalInvestigator, Organization, CostUnit
 
 import json
 
@@ -12,15 +12,22 @@ def get_researchers(request):
 
     try:
         researchers = Researcher.objects.all()
+        principal_investigators = PrincipalInvestigator.objects.all()
+        organizations = Organization.objects.all()
+        cost_units = CostUnit.objects.all()
+
         data = [{
                     'researcherId': researcher.id,
                     'firstName': researcher.first_name,
                     'lastName': researcher.last_name,
                     'telephone': researcher.telephone,
                     'email': researcher.email,
-                    'pi': researcher.pi,
-                    'organization': researcher.organization,
-                    'costUnit': researcher.costunit,
+                    'pi': researcher.pi.name,
+                    'piId': researcher.pi_id,
+                    'organization': researcher.organization.name,
+                    'organizationId': researcher.organization_id,
+                    'costUnit': researcher.costunit.name,
+                    'costUnitId': researcher.costunit_id,
                 } for researcher in researchers]
     except Exception as e:
         print('[ERROR]: get_researchers():', e)
