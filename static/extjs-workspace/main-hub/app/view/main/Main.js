@@ -9,6 +9,7 @@ Ext.define('MainHub.view.main.Main', {
         'MainHub.view.reports.BlankReport',
         'MainHub.view.startpage.StartPage',
         'MainHub.view.tables.researchers.Researchers',
+        'MainHub.view.tables.requests.Requests',
         'MainHub.store.NavigationTree'
     ],
 
@@ -48,13 +49,6 @@ Ext.define('MainHub.view.main.Main', {
                     handler: 'onToggleNavigationSize'
                 },
                 '->',
-                // {
-                //     iconCls:'x-fa fa-question',
-                //     ui: 'header',
-                //     href: '#faq',
-                //     hrefTarget: '_self',
-                //     tooltip: 'Help / FAQ\'s'
-                // },
                 {
                     xtype: 'tbtext',
                     cls: 'top-user-name',

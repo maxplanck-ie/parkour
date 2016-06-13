@@ -22,4 +22,5 @@ urlpatterns = [
 
     url(r'', include('common.urls')),
     url(r'', include('researcher.urls')),
+    url(r'', include('request.urls')),
 ]

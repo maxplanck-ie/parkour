@@ -21,8 +21,7 @@ def get_researchers(request):
                     'pi': researcher.pi,
                     'organization': researcher.organization,
                     'costUnit': researcher.costunit,
-                }
-                for researcher in researchers]
+                } for researcher in researchers]
     except Exception as e:
         print('[ERROR]: get_researchers():', e)
         error = str(e)
@@ -36,7 +35,7 @@ def edit_researcher(request):
     """ Edit existing researcher """
     error = str()
 
-    researcher_id = int(request.POST.get('researcher_id', ''))
+    researcher_id = int(request.POST.get('researcher_id', 1))
     first_name = request.POST.get('first_name', '')
     last_name = request.POST.get('last_name', '')
     telephone = request.POST.get('telephone', '')

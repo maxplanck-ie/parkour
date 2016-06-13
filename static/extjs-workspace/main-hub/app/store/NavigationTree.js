@@ -34,26 +34,15 @@ Ext.define('MainHub.store.NavigationTree', {
                         iconCls: 'x-fa fa-user',
                         viewType: 'researchers',
                         leaf: true
+                    },
+                    {
+                        text: 'Requests',
+                        iconCls: 'x-fa fa-external-link-square',
+                        viewType: 'requests',
+                        leaf: true
                     }
                 ]
-            },
-            // {
-            //     text: 'Reports',
-            //     iconCls: 'x-fa fa-leanpub',
-            //     expanded: false,
-            //     selectable: false,
-            //     //routeId: 'pages-parent',
-            //     //id: 'pages-parent',
-            //
-            //     children: [
-            //         {
-            //             text: 'Blank Report',
-            //             iconCls: 'x-fa fa-file-o',
-            //             viewType: 'reportblank',
-            //             leaf: true
-            //         }
-            //     ]
-            // }
+            }
         ]
     }
 });
