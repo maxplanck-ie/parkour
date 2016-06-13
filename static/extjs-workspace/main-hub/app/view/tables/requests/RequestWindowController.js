@@ -11,7 +11,7 @@ Ext.define('MainHub.view.tables.requests.RequestWindowController', {
                 change: 'onSearchFieldChange'
             },
             '#addRequestWndBtn': {
-                // click: 'onAddRequestWndBtnClick'
+                click: 'onAddRequestWndBtnClick'
             },
             '#editRequestWndBtn': {
                 click: 'onEditRequestWndBtnClick'
@@ -23,7 +23,7 @@ Ext.define('MainHub.view.tables.requests.RequestWindowController', {
     },
 
     onRequestWindowBoxready: function(wnd) {
-        var grid = Ext.getCmp('researchersInAddRequestTable');
+        var grid = Ext.getCmp('researchersInRequestWindow');
 
         if (wnd.mode == 'add') {
             Ext.getCmp('addRequestWndBtn').show();
@@ -93,7 +93,7 @@ Ext.define('MainHub.view.tables.requests.RequestWindowController', {
     },
 
     onSearchFieldChange: function(fld, newValue) {
-        var grid = Ext.getCmp('researchersInAddRequestTable'),
+        var grid = Ext.getCmp('researchersInRequestWindow'),
             store = grid.getStore(),
             columns = Ext.pluck(grid.getColumns(), 'dataIndex');
 
@@ -109,12 +109,14 @@ Ext.define('MainHub.view.tables.requests.RequestWindowController', {
         });
     },
 
-    onAddBtnClick: function(btn) {
+    onAddRequestWndBtnClick: function(btn) {
         var form = Ext.getCmp('requestForm'),
-            wnd = btn.up('request_wnd');
+            wnd = btn.up('request_wnd'),
+            grid = Ext.getCmp('researchersInRequestWindow'),
+            selection = grid.getSelection()[0];
 
-        if (form.isValid()) {
-            var data = form.getValues();
+        if (form.isValid() && typeof selection != 'undefined') {
+            var data = form.getForm().getFieldValues();
 
             wnd.setLoading('Adding...');
             Ext.Ajax.request({
@@ -123,13 +125,12 @@ Ext.define('MainHub.view.tables.requests.RequestWindowController', {
                 scope: this,
 
                 params: {
-                    'first_name': data.firstName,
-                    'last_name': data.lastName,
-                    'telephone': data.telephone,
-                    'email': data.email,
-                    'pi': data.pi,
-                    'organization': data.organization,
-                    'cost_unit': data.costUnit
+                    'status': data.status,
+                    'name': data.name,
+                    'project_type': data.projectType,
+                    'description': data.description,
+                    'terms_of_use_accept': data.termsOfUseAccept,
+                    'researcher_id': selection.data.researcherId,
                 },
 
                 success: function (response) {
@@ -154,6 +155,8 @@ Ext.define('MainHub.view.tables.requests.RequestWindowController', {
                     wnd.close();
                 }
             });
+        } else if (typeof selection == 'undefined') {
+            Ext.ux.ToastMessage('Select a researcher', 'warning');
         } else {
             Ext.ux.ToastMessage('Check the form', 'warning');
         }
@@ -162,10 +165,10 @@ Ext.define('MainHub.view.tables.requests.RequestWindowController', {
     onEditRequestWndBtnClick: function(btn) {
         var wnd = btn.up('request_wnd'),
             form = Ext.getCmp('requestForm'),
-            grid = Ext.getCmp('researchersInAddRequestTable');
+            grid = Ext.getCmp('researchersInRequestWindow');
 
         if (form.isValid()) {
-            var data = form.getValues();
+            var data = form.getForm().getFieldValues();
 
             wnd.setLoading('Updating...');
             Ext.Ajax.request({
@@ -178,7 +181,7 @@ Ext.define('MainHub.view.tables.requests.RequestWindowController', {
                     'name': data.name,
                     'project_type': data.projectType,
                     'description': data.description,
-                    'terms_of_use_accept': data.termsOfUseAccept == 'on',
+                    'terms_of_use_accept': data.termsOfUseAccept,
                     'researcher_id': grid.getSelection()[0].data.researcherId,
                     'request_id': wnd.record.data.requestId
                 },

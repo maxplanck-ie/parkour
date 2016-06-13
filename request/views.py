@@ -3,6 +3,7 @@ from request.models import Request
 from researcher.models import Researcher
 
 import json
+from datetime import datetime
 
 
 def get_requests(request):
@@ -32,6 +33,30 @@ def get_requests(request):
                         content_type='application/json')
 
 
+def add_request(request):
+    """ Add new request """
+    error = str()
+
+    status = request.POST.get('status', '')
+    name = request.POST.get('name', '')
+    project_type = request.POST.get('project_type', '')
+    date_created = datetime.now()
+    description = request.POST.get('description', '')
+    terms_of_use_accept = bool(request.POST.get('terms_of_use_accept', ''))
+    researcher_id = int(request.POST.get('researcher_id', 1))
+
+    try:
+        req = Request(status=status, name=name, project_type=project_type, date_created=date_created,
+                      description=description, terms_of_use_accept=terms_of_use_accept,
+                      researcher_id=Researcher.objects.get(id=researcher_id))
+        req.save()
+    except Exception as e:
+        print('[ERROR]: add_request():', e)
+        error = str(e)
+
+    return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')
+
+
 def edit_request(request):
     """ Edit existing request """
     error = str()
@@ -39,6 +64,7 @@ def edit_request(request):
     request_id = int(request.POST.get('request_id', 1))
     status = request.POST.get('status', '')
     name = request.POST.get('name', '')
+    project_type = request.POST.get('project_type', '')
     description = request.POST.get('description', '')
     terms_of_use_accept = bool(request.POST.get('terms_of_use_accept', ''))
     researcher_id = int(request.POST.get('researcher_id', 1))
@@ -47,6 +73,7 @@ def edit_request(request):
         req = Request.objects.get(id=request_id)
         req.status = status
         req.name = name
+        req.project_type = project_type
         req.description = description
         req.terms_of_use_accept = terms_of_use_accept
         req.researcher_id = Researcher.objects.get(id=researcher_id)

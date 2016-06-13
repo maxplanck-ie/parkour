@@ -36,8 +36,13 @@ Ext.define('MainHub.view.tables.requests.RequestWindow', {
                     items: [
                         {
                             name: 'status',
+                            xtype: 'numberfield',
                             emptyText: 'Status',
-                            allowBlank: false
+                            minValue: 0,
+                            allowBlank: false,
+                            hideTrigger: true,
+                            keyNavEnabled: false,
+                            mouseWheelEnabled: false
                         },
                         {
                             name: 'name',
@@ -76,7 +81,7 @@ Ext.define('MainHub.view.tables.requests.RequestWindow', {
                         },
                         {
                             xtype: 'grid',
-                            id: 'researchersInAddRequestTable',
+                            id: 'researchersInRequestWindow',
                             width: 245,
                             height: 242,
                             padding: '15px 15px 15px 0',
