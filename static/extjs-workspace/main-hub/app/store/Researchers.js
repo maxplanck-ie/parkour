@@ -21,7 +21,5 @@ Ext.define('MainHub.store.Researchers', {
             rootProperty: 'data',
             successProperty: 'success'
         }
-    },
-    
-    autoLoad: true
+    }
 });

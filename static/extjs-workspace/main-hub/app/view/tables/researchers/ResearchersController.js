@@ -6,6 +6,7 @@ Ext.define('MainHub.view.tables.researchers.ResearchersController', {
         control: {
             '#researchersTable': {
                 edit: 'onResearcherEdit',
+                boxready: 'onResearchersTableRefresh',
                 refresh: 'onResearchersTableRefresh'
             },
             '#addResearcherBtn': {
