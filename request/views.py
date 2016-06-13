@@ -43,7 +43,7 @@ def add_request(request):
     date_created = datetime.now()
     description = request.POST.get('description', '')
     terms_of_use_accept = bool(request.POST.get('terms_of_use_accept', ''))
-    researcher_id = int(request.POST.get('researcher_id', 1))
+    researcher_id = int(request.POST.get('researcher_id', 0))
 
     try:
         req = Request(status=status, name=name, project_type=project_type, date_created=date_created,
@@ -61,13 +61,13 @@ def edit_request(request):
     """ Edit existing request """
     error = str()
 
-    request_id = int(request.POST.get('request_id', 1))
+    request_id = int(request.POST.get('request_id', 0))
     status = request.POST.get('status', '')
     name = request.POST.get('name', '')
     project_type = request.POST.get('project_type', '')
     description = request.POST.get('description', '')
     terms_of_use_accept = bool(request.POST.get('terms_of_use_accept', ''))
-    researcher_id = int(request.POST.get('researcher_id', 1))
+    researcher_id = int(request.POST.get('researcher_id', 0))
 
     try:
         req = Request.objects.get(id=request_id)
@@ -80,6 +80,21 @@ def edit_request(request):
         req.save()
     except Exception as e:
         print('[ERROR]: edit_request():', e)
+        error = str(e)
+
+    return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')
+
+
+def delete_request(request):
+    error = str()
+
+    request_id = int(request.POST.get('request_id', 0))
+
+    try:
+        req = Request.objects.get(id=request_id)
+        req.delete()
+    except Exception as e:
+        print('[ERROR]: delete_request():', e)
         error = str(e)
 
     return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')

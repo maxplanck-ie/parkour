@@ -117,6 +117,36 @@ Ext.define('MainHub.view.tables.requests.RequestsController', {
     },
 
     deleteRequest: function(record) {
-        // debugger;
+        Ext.Ajax.request({
+            url: 'delete_request/',
+            method: 'POST',
+            timeout: 1000000,
+            scope: this,
+
+            params: {
+                'request_id': record.data.requestId
+            },
+
+            success: function (response) {
+                var obj = Ext.JSON.decode(response.responseText);
+
+                if (obj.success) {
+                    var grid = Ext.getCmp('requestsTable');
+                    grid.fireEvent('refresh', grid);
+                    Ext.ux.ToastMessage('Record has been deleted!');
+
+                } else {
+                    Ext.ux.ToastMessage(obj.error, 'error');
+                    console.log('[ERROR]: delete_request()');
+                    console.log(response);
+                }
+            },
+
+            failure: function(response) {
+                Ext.ux.ToastMessage(response.statusText, 'error');
+                console.log('[ERROR]: delete_request()');
+                console.log(response);
+            }
+        });
     }
 });
