@@ -11,10 +11,9 @@ def get_researchers(request):
     data = []
 
     try:
-        researchers = Researcher.objects.all()
-        principal_investigators = PrincipalInvestigator.objects.all()
-        organizations = Organization.objects.all()
-        cost_units = CostUnit.objects.all()
+        researchers = Researcher.objects.all().prefetch_related(
+            'pi', 'organization', 'costunit'
+        )
 
         data = [{
                     'researcherId': researcher.id,
