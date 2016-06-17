@@ -29,7 +29,7 @@ class Researcher(models.Model):
     email = models.CharField('Email', max_length=100)
     pi = models.ForeignKey(PrincipalInvestigator)
     organization = models.ForeignKey(Organization)
-    costunit = models.ForeignKey(CostUnit)
+    costunit = models.ManyToManyField(CostUnit)
 
     def __str__(self):
         return '%s %s (%s)' % (self.first_name, self.last_name, self.organization)
