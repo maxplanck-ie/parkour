@@ -36,8 +36,8 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
                 lastName: record.lastName,
                 telephone: record.telephone,
                 email: record.email,
-                pi: record.pi,
-                organization: record.organization,
+                pi: record.piId,
+                organization: record.organizationId,
                 costUnit: record.costUnit
             });
         }
@@ -48,7 +48,7 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
             wnd = btn.up('researcher_wnd');
 
         if (form.isValid()) {
-            var data = form.getValues();
+            var data = form.getForm().getFieldValues();
 
             wnd.setLoading('Adding...');
             Ext.Ajax.request({

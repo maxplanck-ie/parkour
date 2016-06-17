@@ -1,4 +1,4 @@
-Ext.define('MainHub.model.tables.Researcher', {
+Ext.define('MainHub.model.tables.researchers.Researcher', {
     extend: 'MainHub.model.Base',
 
     fields: [

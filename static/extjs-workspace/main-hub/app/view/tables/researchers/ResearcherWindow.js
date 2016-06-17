@@ -54,15 +54,25 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindow', {
                     allowBlank: false
                 },
                 {
+                    xtype: 'combobox',
                     name: 'pi',
+                    queryMode: 'local',
+                    displayField: 'name',
+                    valueField: 'piId',
                     fieldLabel: 'Principal Investigator',
                     emptyText: 'Principal Investigator',
+                    store: 'principalInvestigatorsStore',
                     allowBlank: false
                 },
                 {
+                    xtype: 'combobox',
                     name: 'organization',
+                    queryMode: 'local',
+                    displayField: 'name',
+                    valueField: 'organizationId',
                     fieldLabel: 'Organization',
                     emptyText: 'Organization',
+                    store: 'organizationsStore',
                     allowBlank: false
                 },
                 {

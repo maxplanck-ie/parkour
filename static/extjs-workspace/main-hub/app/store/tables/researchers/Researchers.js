@@ -1,12 +1,12 @@
-Ext.define('MainHub.store.Researchers', {
+Ext.define('MainHub.store.tables.researchers.Researchers', {
     extend: 'Ext.data.Store',
     storeId: 'researchersStore',
 
     requires: [
-        'MainHub.model.tables.Researcher'
+        'MainHub.model.tables.researchers.Researcher'
     ],
 
-    model: 'MainHub.model.tables.Researcher',
+    model: 'MainHub.model.tables.researchers.Researcher',
 
     proxy: {
         type: 'ajax',

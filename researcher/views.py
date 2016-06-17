@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from researcher.models import Researcher
+from researcher.models import Researcher, PrincipalInvestigator, Organization
 from common.utils import *
 
 import json
@@ -111,3 +111,32 @@ def delete_researcher(request):
         error = str(e)
 
     return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')
+
+
+def get_pis(request):
+    error = str()
+    data = []
+
+    try:
+        data = [{'name': pi.name, 'piId': pi.id} for pi in PrincipalInvestigator.objects.all()]
+    except Exception as e:
+        print('[ERROR]: get_pis():', e)
+        error = str(e)
+
+    return HttpResponse(json.dumps({'success': not error, 'error': error, 'data': data}),
+                        content_type='application/json')
+
+
+def get_organizations(request):
+    error = str()
+    data = []
+
+    try:
+        data = [{'name': organization.name, 'organizationId': organization.id}
+                for organization in Organization.objects.all()]
+    except Exception as e:
+        print('[ERROR]: get_organizations():', e)
+        error = str(e)
+
+    return HttpResponse(json.dumps({'success': not error, 'error': error, 'data': data}),
+                        content_type='application/json')
