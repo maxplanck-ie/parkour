@@ -5,7 +5,7 @@ Ext.define('MainHub.view.tables.researchers.ResearchersController', {
     config: {
         control: {
             '#researchersTable': {
-                edit: 'onResearcherEdit',
+                // edit: 'onResearcherEdit',
                 boxready: 'onResearchersTableRefresh',
                 refresh: 'onResearchersTableRefresh',
                 itemcontextmenu: 'onResearchersTableItemContextMenu'

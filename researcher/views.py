@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from researcher.models import Researcher, PrincipalInvestigator, Organization, CostUnit
+from researcher.models import Researcher
+from common.utils import *
 
 import json
 
@@ -15,19 +16,26 @@ def get_researchers(request):
             'pi', 'organization', 'costunit'
         )
 
-        data = [{
-                    'researcherId': researcher.id,
-                    'firstName': researcher.first_name,
-                    'lastName': researcher.last_name,
-                    'telephone': researcher.telephone,
-                    'email': researcher.email,
-                    'pi': researcher.pi.name,
-                    'piId': researcher.pi_id,
-                    'organization': researcher.organization.name,
-                    'organizationId': researcher.organization_id,
-                    'costUnit': researcher.costunit.name,
-                    'costUnitId': researcher.costunit_id,
-                } for researcher in researchers]
+        for researcher in researchers:
+            cost_unit = []
+            cost_unit_id = []
+            for cu in researcher.costunit.all():
+                cost_unit.append(cu.name)
+                cost_unit_id.append(cu.id)
+
+            data.append({
+                'researcherId': researcher.id,
+                'firstName': researcher.first_name,
+                'lastName': researcher.last_name,
+                'telephone': researcher.telephone,
+                'email': researcher.email,
+                'pi': researcher.pi.name,
+                'piId': researcher.pi_id,
+                'organization': researcher.organization.name,
+                'organizationId': researcher.organization_id,
+                'costUnit': ', '.join(sorted(cost_unit)),
+                'costUnitId': cost_unit_id,
+            })
     except Exception as e:
         print('[ERROR]: get_researchers():', e)
         error = str(e)

@@ -21,5 +21,16 @@ Ext.define('MainHub.store.Researchers', {
             rootProperty: 'data',
             successProperty: 'success'
         }
+    },
+
+    listeners: {
+        load: function(store, records, success, operation) {
+            if (!success) {
+                var response = operation._response,
+                    obj = Ext.JSON.decode(response.responseText);
+                console.log('[ERROR]: get_researchers(): ' + obj.error);
+                console.log(response);
+            }
+        }
     }
 });

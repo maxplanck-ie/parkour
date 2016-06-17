@@ -5,7 +5,6 @@ Ext.define('MainHub.view.tables.researchers.Researchers', {
     requires: [
         'Ext.container.Container',
         'Ext.toolbar.Paging',
-        'Ext.grid.plugin.RowEditing',
         'MainHub.view.tables.researchers.ResearchersController',
         'MainHub.view.tables.researchers.ResearcherWindow'
     ],
@@ -60,12 +59,6 @@ Ext.define('MainHub.view.tables.researchers.Researchers', {
             },
 
             plugins: [
-                {
-                    ptype: 'rowediting',
-                    pluginId: 'editResearcher',
-                    clicksToMoveEditor: 1,
-                    autoCancel: false
-                },
                 {
                     ptype: 'bufferedrenderer',
                     trailingBufferZone: 100,

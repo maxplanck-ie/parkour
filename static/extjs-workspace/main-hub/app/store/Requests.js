@@ -21,5 +21,16 @@ Ext.define('MainHub.store.Requests', {
             rootProperty: 'data',
             successProperty: 'success'
         }
+    },
+    
+    listeners: {
+        load: function(store, records, success, operation) {
+            if (!success) {
+                var response = operation._response,
+                    obj = Ext.JSON.decode(response.responseText);
+                console.log('[ERROR]: get_requests(): ' + obj.error);
+                console.log(response);
+            }
+        }
     }
 });
