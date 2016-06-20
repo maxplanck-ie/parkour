@@ -13,15 +13,15 @@ def get_researchers(request):
 
     try:
         researchers = Researcher.objects.all().prefetch_related(
-            'pi', 'organization', 'costunit'
+            'pi', 'organization', 'cost_unit'
         )
 
         for researcher in researchers:
-            cost_unit = []
-            cost_unit_id = []
-            for cu in researcher.costunit.all():
-                cost_unit.append(cu.name)
-                cost_unit_id.append(cu.id)
+            cost_units = []
+            cost_units_id = []
+            for cost_unit in researcher.cost_unit.all():
+                cost_units.append(cost_unit.name)
+                cost_units_id.append(cost_unit.id)
 
             data.append({
                 'researcherId': researcher.id,
@@ -33,15 +33,15 @@ def get_researchers(request):
                 'piId': researcher.pi_id,
                 'organization': researcher.organization.name,
                 'organizationId': researcher.organization_id,
-                'costUnit': ', '.join(sorted(cost_unit)),
-                'costUnitId': cost_unit_id,
+                'costUnit': ', '.join(sorted(cost_units)),
+                'costUnitId': cost_units_id,
             })
     except Exception as e:
         print('[ERROR]: get_researchers():', e)
         error = str(e)
 
     return HttpResponse(json.dumps({'success': not error, 'error': error,
-                                    'data': sorted(data, key=lambda x: x['lastName'])}),
+                                    'data': sorted(data, key=lambda x: x['lastName'].lower())}),
                         content_type='application/json')
 
 
@@ -53,14 +53,17 @@ def add_researcher(request):
     last_name = request.POST.get('last_name', '')
     telephone = request.POST.get('telephone', '')
     email = request.POST.get('email', '')
-    pi = request.POST.get('pi', '')
-    organization = request.POST.get('organization', '')
-    cost_unit = request.POST.get('cost_unit', '')
+    pi_id = int(request.POST.get('pi', 0))
+    organization_id = int(request.POST.get('organization', 0))
+    cost_unit = json.loads(request.POST.get('cost_unit', '[]'))
 
     try:
+        pi = PrincipalInvestigator.objects.get(id=pi_id)
+        organization = Organization.objects.get(id=organization_id)
         researcher = Researcher(first_name=first_name, last_name=last_name, telephone=telephone,
-                                email=email, pi=pi, organization=organization, costunit=cost_unit)
+                                email=email, pi=pi, organization=organization)
         researcher.save()
+        researcher.cost_unit.add(*cost_unit)
     except Exception as e:
         print('[ERROR]: add_researcher():', e)
         error = str(e)
@@ -77,9 +80,9 @@ def edit_researcher(request):
     last_name = request.POST.get('last_name', '')
     telephone = request.POST.get('telephone', '')
     email = request.POST.get('email', '')
-    pi = request.POST.get('pi', '')
-    organization = request.POST.get('organization', '')
-    cost_unit = request.POST.get('cost_unit', '')
+    pi_id = int(request.POST.get('pi', 0))
+    organization_id = int(request.POST.get('organization', 0))
+    cost_unit = json.loads(request.POST.get('cost_unit', '[]'))
 
     try:
         researcher = Researcher.objects.get(id=researcher_id)
@@ -87,8 +90,8 @@ def edit_researcher(request):
         researcher.last_name = last_name
         researcher.telephone = telephone
         researcher.email = email
-        researcher.pi = pi
-        researcher.organization = organization
+        researcher.pi = PrincipalInvestigator.objects.get(id=pi_id)
+        researcher.organization = Organization.objects.get(id=organization_id)
         researcher.cost_unit = cost_unit
         researcher.save()
     except Exception as e:
@@ -144,16 +147,16 @@ def get_organizations(request):
                         content_type='application/json')
 
 
-def get_costunits(request):
+def get_cost_units(request):
     """ Get the list of all cost units """
     error = str()
     data = []
 
     try:
-        data = [{'name': costunit.name, 'costUnitId': costunit.id}
-                for costunit in CostUnit.objects.all()]
+        data = [{'name': cost_unit.name, 'costUnitId': cost_unit.id}
+                for cost_unit in CostUnit.objects.all()]
     except Exception as e:
-        print('[ERROR]: get_costunits():', e)
+        print('[ERROR]: get_cost_units():', e)
         error = str(e)
 
     return HttpResponse(json.dumps({'success': not error, 'error': error, 'data': data}),

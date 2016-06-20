@@ -10,7 +10,7 @@ Ext.define('MainHub.store.tables.researchers.CostUnits', {
 
     proxy: {
         type: 'ajax',
-        url: 'get_costunits/',
+        url: 'get_cost_units/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"
@@ -28,7 +28,7 @@ Ext.define('MainHub.store.tables.researchers.CostUnits', {
             if (!success) {
                 var response = operation._response,
                     obj = Ext.JSON.decode(response.responseText);
-                console.log('[ERROR]: get_costunits(): ' + obj.error);
+                console.log('[ERROR]: get_cost_units(): ' + obj.error);
                 console.log(response);
             }
         }

@@ -54,6 +54,7 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
             Ext.Ajax.request({
                 url: 'add_researcher/',
                 method: 'POST',
+                timeout: 1000000,
                 scope: this,
 
                 params: {
@@ -63,7 +64,7 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
                     'email': data.email,
                     'pi': data.pi,
                     'organization': data.organization,
-                    'cost_unit': data.costUnit
+                    'cost_unit': Ext.JSON.encode(data.costUnit)
                 },
 
                 success: function (response) {
@@ -104,6 +105,7 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
             Ext.Ajax.request({
                 url: 'edit_researcher/',
                 method: 'POST',
+                timeout: 1000000,
                 scope: this,
             
                 params: {
@@ -113,7 +115,7 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
                     'email': data.email,
                     'pi': data.pi,
                     'organization': data.organization,
-                    'cost_unit': data.costUnit,
+                    'cost_unit': Ext.JSON.encode(data.costUnit),
                     'researcher_id': wnd.record.data.researcherId
                 },
             

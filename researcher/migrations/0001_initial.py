@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
                 ('last_name', models.CharField(max_length=150, verbose_name='Last name')),
                 ('telephone', models.CharField(max_length=100, verbose_name='Telephone')),
                 ('email', models.CharField(max_length=100, verbose_name='Email')),
-                ('costunit', models.ManyToManyField(to='researcher.CostUnit')),
+                ('cost_unit', models.ManyToManyField(to='researcher.CostUnit')),
                 ('organization', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='researcher.Organization')),
                 ('pi', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='researcher.PrincipalInvestigator')),
             ],

@@ -62,6 +62,7 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindow', {
                     fieldLabel: 'Principal Investigator',
                     emptyText: 'Principal Investigator',
                     store: 'principalInvestigatorsStore',
+                    forceSelection: true,
                     allowBlank: false
                 },
                 {
@@ -73,6 +74,7 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindow', {
                     fieldLabel: 'Organization',
                     emptyText: 'Organization',
                     store: 'organizationsStore',
+                    forceSelection: true,
                     allowBlank: false
                 },
                 {
