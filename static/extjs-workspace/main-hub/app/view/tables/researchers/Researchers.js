@@ -49,8 +49,8 @@ Ext.define('MainHub.view.tables.researchers.Researchers', {
                     { text: 'Last name', dataIndex: 'lastName', editor: { xtype: 'textfield', allowBlank: false } },
                     { text: 'Telephone', dataIndex: 'telephone', editor: { xtype: 'textfield', allowBlank: false } },
                     { text: 'Email', dataIndex: 'email', editor: { xtype: 'textfield', allowBlank: false } },
-                    { text: 'Principal Investigator', dataIndex: 'pi', editor: { xtype: 'textfield', allowBlank: false } },
                     { text: 'Organization', dataIndex: 'organization', editor: { xtype: 'textfield', allowBlank: false } },
+                    { text: 'Principal Investigator', dataIndex: 'pi', editor: { xtype: 'textfield', allowBlank: false } },
                     { text: 'Cost Unit', dataIndex: 'costUnit', editor: { xtype: 'textfield', allowBlank: false } }
                 ],
                 defaults: {

@@ -116,21 +116,6 @@ def delete_researcher(request):
     return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')
 
 
-def get_pis(request):
-    """ Get the list of all principal investigators """
-    error = str()
-    data = []
-
-    try:
-        data = [{'name': pi.name, 'piId': pi.id} for pi in PrincipalInvestigator.objects.all()]
-    except Exception as e:
-        print('[ERROR]: get_pis():', e)
-        error = str(e)
-
-    return HttpResponse(json.dumps({'success': not error, 'error': error, 'data': data}),
-                        content_type='application/json')
-
-
 def get_organizations(request):
     """ Get the list of all organizations """
     error = str()
@@ -147,14 +132,32 @@ def get_organizations(request):
                         content_type='application/json')
 
 
+def get_pis(request):
+    """ Get the list of all principal investigators by a given organization id """
+    error = str()
+    data = []
+
+    try:
+        organization_id = int(request.GET.get('organization_id', 0))
+        data = [{'name': pi.name, 'piId': pi.id}
+                for pi in PrincipalInvestigator.objects.filter(organization=organization_id)]
+    except Exception as e:
+        print('[ERROR]: get_pis():', e)
+        error = str(e)
+
+    return HttpResponse(json.dumps({'success': not error, 'error': error, 'data': data}),
+                        content_type='application/json')
+
+
 def get_cost_units(request):
     """ Get the list of all cost units """
     error = str()
     data = []
 
     try:
+        organization_id = int(request.GET.get('organization_id', 0))
         data = [{'name': cost_unit.name, 'costUnitId': cost_unit.id}
-                for cost_unit in CostUnit.objects.all()]
+                for cost_unit in CostUnit.objects.filter(organization=organization_id)]
     except Exception as e:
         print('[ERROR]: get_cost_units():', e)
         error = str(e)

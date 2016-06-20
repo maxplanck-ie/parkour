@@ -25,6 +25,7 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindow', {
             defaultType: 'textfield',
             defaults: {
                 submitEmptyText: false,
+                allowBlank: false,
                 anchor: '100%'
             },
 
@@ -32,30 +33,40 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindow', {
                 {
                     name: 'firstName',
                     fieldLabel: 'First name',
-                    emptyText: 'First name',
-                    allowBlank: false
+                    emptyText: 'First name'
                 },
                 {
                     name: 'lastName',
                     fieldLabel: 'Last name',
-                    emptyText: 'Last name',
-                    allowBlank: false
+                    emptyText: 'Last name'
                 },
                 {
                     name: 'telephone',
                     fieldLabel: 'Telephone',
-                    emptyText: 'Telephone',
-                    allowBlank: false
+                    emptyText: 'Telephone'
                 },
                 {
                     name: 'email',
                     fieldLabel: 'Email',
-                    emptyText: 'Email',
-                    allowBlank: false
+                    emptyText: 'Email'
+                },
+                {
+                    xtype: 'combobox',
+                    name: 'organization',
+                    id: 'organizationField',
+                    itemId: 'organizationField',
+                    queryMode: 'local',
+                    displayField: 'name',
+                    valueField: 'organizationId',
+                    fieldLabel: 'Organization',
+                    emptyText: 'Organization',
+                    store: 'organizationsStore',
+                    forceSelection: true
                 },
                 {
                     xtype: 'combobox',
                     name: 'pi',
+                    id: 'piField',
                     queryMode: 'local',
                     displayField: 'name',
                     valueField: 'piId',
@@ -63,29 +74,18 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindow', {
                     emptyText: 'Principal Investigator',
                     store: 'principalInvestigatorsStore',
                     forceSelection: true,
-                    allowBlank: false
-                },
-                {
-                    xtype: 'combobox',
-                    name: 'organization',
-                    queryMode: 'local',
-                    displayField: 'name',
-                    valueField: 'organizationId',
-                    fieldLabel: 'Organization',
-                    emptyText: 'Organization',
-                    store: 'organizationsStore',
-                    forceSelection: true,
-                    allowBlank: false
+                    disabled: true
                 },
                 {
                     xtype: 'tagfield',
                     name: 'costUnit',
+                    id: 'costUnitField',
                     queryMode: 'local',
                     displayField: 'name',
                     valueField: 'costUnitId',
                     fieldLabel: 'Cost Unit',
                     store: 'costUnitsStore',
-                    allowBlank: false
+                    disabled: true
                 }
             ]
         }

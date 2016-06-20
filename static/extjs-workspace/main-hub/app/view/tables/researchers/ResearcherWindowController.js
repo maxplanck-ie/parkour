@@ -7,6 +7,9 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
             '#': {
                 boxready: 'onResearcherWindowBoxready'
             },
+            '#organizationField': {
+                select: 'onOrganizationFieldSelect'
+            },
             '#addResearcherWndBtn': {
                 click: 'onAddResearcherWndBtnClick'
             },
@@ -23,24 +26,67 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
         if (wnd.mode == 'add') {
             Ext.getCmp('addResearcherWndBtn').show();
         } else {
-            var record = wnd.record.data;
+            var record = wnd.record.data,
+                organizationField = Ext.getCmp('organizationField'),
+                piField = Ext.getCmp('piField'),
+                costUnitField = Ext.getCmp('costUnitField');
             Ext.getCmp('editResearcherWndBtn').show();
         }
 
         // Set form fields with researcher data
         if (wnd.mode == 'edit') {
             var form = Ext.getCmp('researcherForm').getForm();
-
             form.setValues({
                 firstName: record.firstName,
                 lastName: record.lastName,
                 telephone: record.telephone,
                 email: record.email,
-                pi: record.piId,
-                organization: record.organizationId,
-                costUnit: record.costUnitId
             });
         }
+
+        // Load organizations
+        wnd.setLoading();
+        Ext.getStore('organizationsStore').load(function(records, operation, success) {
+            if (!success || records.length == 0) {
+                Ext.ux.ToastMessage('Cannot load Organizations', 'error');
+            } else if (wnd.mode == 'edit') {
+                organizationField.select(record.organizationId);
+                organizationField.fireEvent('select', organizationField, organizationField.findRecordByValue(record.organizationId));
+                piField.select(record.piId);
+                costUnitField.select(record.costUnitId);
+            }
+            wnd.setLoading(false);
+        });
+    },
+
+    onOrganizationFieldSelect: function(fld, record) {
+        var wnd = fld.up('researcher_wnd'),
+            piStore = Ext.getStore('principalInvestigatorsStore'),
+            costUnitStore = Ext.getStore('costUnitsStore'),
+            piField = Ext.getCmp('piField'),
+            costUnitField = Ext.getCmp('costUnitField');
+
+        // Load principal investigators and cost units
+        wnd.setLoading();
+        piStore.load({
+            params: {
+                'organization_id': record.data.organizationId
+            },
+            callback: function(records, operation, success) {
+                piField.setDisabled(false);
+                if (!success || records.length == 0) Ext.ux.ToastMessage('Cannot load Principal Investigators', 'error');
+            }
+        });
+        costUnitStore.load({
+            params: {
+                'organization_id': record.data.organizationId
+            },
+            callback: function(records, operation, success) {
+                costUnitField.setDisabled(false);
+                if (!success || records.length == 0) Ext.ux.ToastMessage('Cannot load Cost Units', 'error');
+            }
+        });
+        wnd.setLoading(false);
     },
 
     onAddResearcherWndBtnClick: function(btn) {

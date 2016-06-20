@@ -1,0 +1,1 @@
+[{"model": "researcher.organization", "fields": {"name": "DEEP"}, "pk": 1}, {"model": "researcher.organization", "fields": {"name": "MPI-IE"}, "pk": 2}, {"model": "researcher.organization", "fields": {"name": "University Freiburg"}, "pk": 3}]

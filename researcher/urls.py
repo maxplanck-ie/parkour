@@ -8,7 +8,7 @@ urlpatterns = [
     url(r'^edit_researcher/$', views.edit_researcher, name='edit_researcher'),
     url(r'^delete_researcher/$', views.delete_researcher, name='delete_researcher'),
 
-    url(r'^get_pis/$', views.get_pis, name='get_pis'),
     url(r'^get_organizations/$', views.get_organizations, name='get_organizations'),
+    url(r'^get_pis/$', views.get_pis, name='get_pis'),
     url(r'^get_cost_units/$', views.get_cost_units, name='get_cost_units'),
 ]
