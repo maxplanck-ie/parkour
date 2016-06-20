@@ -7,7 +7,7 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindow', {
 
     controller: 'researcher_wnd',
 
-    height: 445,
+    height: 470,
     width: 400,
 
     modal: true,
