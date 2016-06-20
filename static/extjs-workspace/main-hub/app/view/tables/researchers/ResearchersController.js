@@ -6,7 +6,7 @@ Ext.define('MainHub.view.tables.researchers.ResearchersController', {
         control: {
             '#researchersTable': {
                 // edit: 'onResearcherEdit',
-                boxready: 'onResearchersTableRefresh',
+                boxready: 'onResearchersTableBoxready',
                 refresh: 'onResearchersTableRefresh',
                 itemcontextmenu: 'onResearchersTableItemContextMenu'
             },
@@ -19,53 +19,18 @@ Ext.define('MainHub.view.tables.researchers.ResearchersController', {
         }
     },
 
-    onResearchersTableRefresh: function(grid) {
-        grid.getStore().removeAll();
-        grid.getStore().reload();
+    onResearchersTableBoxready: function(grid) {
+        // Triggers when the table is shown for the first time
+        Ext.getStore('principalInvestigatorsStore').load();
+        Ext.getStore('organizationsStore').load();
+        Ext.getStore('costUnitsStore').load();
+        grid.fireEvent('refresh', grid);
     },
 
-    onResearcherEdit: function(editor, e) {
-        var grid = Ext.getCmp('researchersTable');
-
-        grid.setLoading('Updating...');
-        Ext.Ajax.request({
-            url: 'edit_researcher/',
-            method: 'POST',
-            scope: this,
-
-            params: {
-                'researcher_id': e.record.data.researcherId,
-                'first_name': e.record.data.firstName,
-                'last_name': e.record.data.lastName,
-                'telephone': e.record.data.telephone,
-                'email': e.record.data.email,
-                'pi': e.record.data.pi,
-                'organization': e.record.data.organization,
-                'cost_unit': e.record.data.costUnit
-            },
-
-            success: function (response) {
-                var obj = Ext.JSON.decode(response.responseText);
-
-                if (obj.success) {
-                    e.record.commit();
-                    Ext.ux.ToastMessage('Record has been updated!');
-                    grid.setLoading(false);
-                } else {
-                    grid.setLoading(false);
-                    Ext.ux.ToastMessage(obj.error, 'error');
-                    console.log('[ERROR]: edit_researcher(): ' + obj.error);
-                    console.log(response);
-                }
-            },
-
-            failure: function(response) {
-                grid.setLoading(false);
-                Ext.ux.ToastMessage(response.statusText, 'error');
-                console.log('[ERROR]: edit_researcher()');
-                console.log(response);
-            }
-        });
+    onResearchersTableRefresh: function(grid) {
+        // Reload the table
+        grid.getStore().removeAll();
+        grid.getStore().reload();
     },
 
     onAddResearcherBtnClick: function(btn) {

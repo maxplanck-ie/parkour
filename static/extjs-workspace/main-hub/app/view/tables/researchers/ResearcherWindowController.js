@@ -38,7 +38,7 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
                 email: record.email,
                 pi: record.piId,
                 organization: record.organizationId,
-                costUnit: record.costUnit
+                costUnit: record.costUnitId
             });
         }
     },

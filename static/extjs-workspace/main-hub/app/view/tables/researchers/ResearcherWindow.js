@@ -7,7 +7,7 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindow', {
 
     controller: 'researcher_wnd',
 
-    height: 420,
+    height: 445,
     width: 400,
 
     modal: true,
@@ -76,9 +76,13 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindow', {
                     allowBlank: false
                 },
                 {
+                    xtype: 'tagfield',
                     name: 'costUnit',
+                    queryMode: 'local',
+                    displayField: 'name',
+                    valueField: 'costUnitId',
                     fieldLabel: 'Cost Unit',
-                    emptyText: 'Cost Unit',
+                    store: 'costUnitsStore',
                     allowBlank: false
                 }
             ]

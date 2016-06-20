@@ -32,7 +32,5 @@ Ext.define('MainHub.store.tables.researchers.Organizations', {
                 console.log(response);
             }
         }
-    },
-
-    autoLoad: true
+    }
 });

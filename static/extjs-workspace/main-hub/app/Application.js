@@ -24,6 +24,7 @@ Ext.define('MainHub.Application', {
         'tables.researchers.Researchers',
         'tables.researchers.PrincipalInvestigators',
         'tables.researchers.Organizations',
+        'tables.researchers.CostUnits',
         'Requests'
     ],
 

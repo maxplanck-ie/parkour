@@ -1,16 +1,16 @@
-Ext.define('MainHub.store.tables.researchers.PrincipalInvestigators', {
+Ext.define('MainHub.store.tables.researchers.CostUnits', {
     extend: 'Ext.data.Store',
-    storeId: 'principalInvestigatorsStore',
+    storeId: 'costUnitsStore',
 
     requires: [
-        'MainHub.model.tables.researchers.PrincipalInvestigator'
+        'MainHub.model.tables.researchers.CostUnit'
     ],
 
-    model: 'MainHub.model.tables.researchers.PrincipalInvestigator',
+    model: 'MainHub.model.tables.researchers.CostUnit',
 
     proxy: {
         type: 'ajax',
-        url: 'get_pis/',
+        url: 'get_costunits/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"
@@ -28,7 +28,7 @@ Ext.define('MainHub.store.tables.researchers.PrincipalInvestigators', {
             if (!success) {
                 var response = operation._response,
                     obj = Ext.JSON.decode(response.responseText);
-                console.log('[ERROR]: get_pis(): ' + obj.error);
+                console.log('[ERROR]: get_costunits(): ' + obj.error);
                 console.log(response);
             }
         }

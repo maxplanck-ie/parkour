@@ -1,13 +1,13 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from researcher.models import Researcher, PrincipalInvestigator, Organization
+from researcher.models import Researcher, PrincipalInvestigator, Organization, CostUnit
 from common.utils import *
 
 import json
 
 
 def get_researchers(request):
-    """ Get the list of all researchers and send it to frontend """
+    """ Get the list of all researchers """
     error = str()
     data = []
 
@@ -114,6 +114,7 @@ def delete_researcher(request):
 
 
 def get_pis(request):
+    """ Get the list of all principal investigators """
     error = str()
     data = []
 
@@ -128,6 +129,7 @@ def get_pis(request):
 
 
 def get_organizations(request):
+    """ Get the list of all organizations """
     error = str()
     data = []
 
@@ -136,6 +138,22 @@ def get_organizations(request):
                 for organization in Organization.objects.all()]
     except Exception as e:
         print('[ERROR]: get_organizations():', e)
+        error = str(e)
+
+    return HttpResponse(json.dumps({'success': not error, 'error': error, 'data': data}),
+                        content_type='application/json')
+
+
+def get_costunits(request):
+    """ Get the list of all cost units """
+    error = str()
+    data = []
+
+    try:
+        data = [{'name': costunit.name, 'costUnitId': costunit.id}
+                for costunit in CostUnit.objects.all()]
+    except Exception as e:
+        print('[ERROR]: get_costunits():', e)
         error = str(e)
 
     return HttpResponse(json.dumps({'success': not error, 'error': error, 'data': data}),

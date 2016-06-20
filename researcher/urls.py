@@ -10,4 +10,5 @@ urlpatterns = [
 
     url(r'^get_pis/$', views.get_pis, name='get_pis'),
     url(r'^get_organizations/$', views.get_organizations, name='get_organizations'),
+    url(r'^get_costunits/$', views.get_costunits, name='get_costunits'),
 ]
