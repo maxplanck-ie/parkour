@@ -124,6 +124,7 @@ def get_organizations(request):
     try:
         data = [{'name': organization.name, 'organizationId': organization.id}
                 for organization in Organization.objects.all()]
+        data = sorted(data, key=lambda x: x['name'])
     except Exception as e:
         print('[ERROR]: get_organizations():', e)
         error = str(e)
@@ -141,6 +142,7 @@ def get_pis(request):
         organization_id = int(request.GET.get('organization_id', 0))
         data = [{'name': pi.name, 'piId': pi.id}
                 for pi in PrincipalInvestigator.objects.filter(organization=organization_id)]
+        data = sorted(data, key=lambda x: x['name'])
     except Exception as e:
         print('[ERROR]: get_pis():', e)
         error = str(e)
@@ -155,9 +157,10 @@ def get_cost_units(request):
     data = []
 
     try:
-        organization_id = int(request.GET.get('organization_id', 0))
+        pi_id = int(request.GET.get('pi_id', 0))
         data = [{'name': cost_unit.name, 'costUnitId': cost_unit.id}
-                for cost_unit in CostUnit.objects.filter(organization=organization_id)]
+                for cost_unit in CostUnit.objects.filter(pi=pi_id)]
+        data = sorted(data, key=lambda x: x['name'])
     except Exception as e:
         print('[ERROR]: get_cost_units():', e)
         error = str(e)

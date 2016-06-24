@@ -10,6 +10,9 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
             '#organizationField': {
                 select: 'onOrganizationFieldSelect'
             },
+            '#piField': {
+                select: 'onPiFieldSelect'
+            },
             '#addResearcherWndBtn': {
                 click: 'onAddResearcherWndBtnClick'
             },
@@ -62,11 +65,15 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
     onOrganizationFieldSelect: function(fld, record) {
         var wnd = fld.up('researcher_wnd'),
             piStore = Ext.getStore('principalInvestigatorsStore'),
-            costUnitStore = Ext.getStore('costUnitsStore'),
             piField = Ext.getCmp('piField'),
             costUnitField = Ext.getCmp('costUnitField');
 
-        // Load principal investigators and cost units
+        // Clear Cost Unit field
+        costUnitField.clearValue();
+        costUnitField.getStore().removeAll();
+        costUnitField.setDisabled(true);
+
+        // Load Principal Investigators
         wnd.setLoading();
         piStore.load({
             params: {
@@ -77,9 +84,22 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
                 if (!success || records.length == 0) Ext.ux.ToastMessage('Cannot load Principal Investigators', 'error');
             }
         });
+        wnd.setLoading(false);
+    },
+
+    onPiFieldSelect: function(fld, record) {
+        var wnd = fld.up('researcher_wnd'),
+            costUnitStore = Ext.getStore('costUnitsStore'),
+            costUnitField = Ext.getCmp('costUnitField');
+
+        // Clear Cost Unit field
+        costUnitField.clearValue();
+
+        // Load Cost Units
+        wnd.setLoading();
         costUnitStore.load({
             params: {
-                'organization_id': record.data.organizationId
+                'pi_id': record.data.piId
             },
             callback: function(records, operation, success) {
                 costUnitField.setDisabled(false);

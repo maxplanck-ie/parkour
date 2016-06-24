@@ -13,15 +13,15 @@ class PrincipalInvestigator(models.Model):
     organization = models.ForeignKey(Organization)
 
     def __str__(self):
-        return self.name
+        return '%s (%s)' % (self.name, self.organization.name)
 
 
 class CostUnit(models.Model):
     name = models.CharField('Cost Unit', max_length=150)
-    organization = models.ForeignKey(Organization)
+    pi = models.ForeignKey(PrincipalInvestigator, verbose_name='Principal Investigator')
 
     def __str__(self):
-        return self.name
+        return '%s (%s: %s)' % (self.name, self.pi.organization.name, self.pi.name)
 
 
 class Researcher(models.Model):
