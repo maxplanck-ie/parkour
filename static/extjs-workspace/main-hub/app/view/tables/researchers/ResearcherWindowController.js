@@ -43,7 +43,7 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
                 firstName: record.firstName,
                 lastName: record.lastName,
                 telephone: record.telephone,
-                email: record.email,
+                email: record.email
             });
         }
 
@@ -56,7 +56,10 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
                 organizationField.select(record.organizationId);
                 organizationField.fireEvent('select', organizationField, organizationField.findRecordByValue(record.organizationId));
                 piField.select(record.piId);
-                costUnitField.select(record.costUnitId);
+
+                // TODO: fix fields loading when Edit option is selected
+                // piField.fireEvent('select', piField, piField.findRecordByValue(record.piId));
+                // costUnitField.select(record.costUnitId);
             }
             wnd.setLoading(false);
         });
