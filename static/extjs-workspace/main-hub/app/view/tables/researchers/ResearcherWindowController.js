@@ -69,12 +69,15 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
         var wnd = fld.up('researcher_wnd'),
             piStore = Ext.getStore('principalInvestigatorsStore'),
             piField = Ext.getCmp('piField'),
-            costUnitField = Ext.getCmp('costUnitField');
+            costUnitField = Ext.getCmp('costUnitField'),
+            addPiBtn = Ext.getCmp('addPiBtn'),
+            addCostUnitBtn = Ext.getCmp('addCostUnitBtn');
 
         // Clear Cost Unit field
         costUnitField.clearValue();
         costUnitField.getStore().removeAll();
         costUnitField.setDisabled(true);
+        addCostUnitBtn.setDisabled(true);
 
         // Load Principal Investigators
         wnd.setLoading();
@@ -84,6 +87,7 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
             },
             callback: function(records, operation, success) {
                 piField.setDisabled(false);
+                addPiBtn.setDisabled(false);
                 if (!success || records.length == 0) Ext.ux.ToastMessage('Cannot load Principal Investigators', 'error');
             }
         });
@@ -93,7 +97,8 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
     onPiFieldSelect: function(fld, record) {
         var wnd = fld.up('researcher_wnd'),
             costUnitStore = Ext.getStore('costUnitsStore'),
-            costUnitField = Ext.getCmp('costUnitField');
+            costUnitField = Ext.getCmp('costUnitField'),
+            addCostUnitBtn = Ext.getCmp('addCostUnitBtn');
 
         // Clear Cost Unit field
         costUnitField.clearValue();
@@ -106,6 +111,7 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
             },
             callback: function(records, operation, success) {
                 costUnitField.setDisabled(false);
+                addCostUnitBtn.setDisabled(false);
                 if (!success || records.length == 0) Ext.ux.ToastMessage('Cannot load Cost Units', 'error');
             }
         });
