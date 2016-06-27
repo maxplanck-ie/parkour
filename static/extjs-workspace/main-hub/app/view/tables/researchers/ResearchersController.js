@@ -21,9 +21,6 @@ Ext.define('MainHub.view.tables.researchers.ResearchersController', {
 
     onResearchersTableBoxready: function(grid) {
         // Triggers when the table is shown for the first time
-        Ext.getStore('principalInvestigatorsStore').load();
-        Ext.getStore('organizationsStore').load();
-        Ext.getStore('costUnitsStore').load();
         grid.fireEvent('refresh', grid);
     },
 

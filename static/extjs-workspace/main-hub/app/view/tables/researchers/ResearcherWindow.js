@@ -3,7 +3,10 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindow', {
     alias: 'researcher_wnd',
     xtype: 'researcher_wnd',
 
-    requires: ['MainHub.view.tables.researchers.ResearcherWindowController'],
+    requires: [
+        'MainHub.view.tables.researchers.ResearcherWindowController',
+        'MainHub.view.tables.researchers.ResearcherFieldWindow'
+    ],
 
     controller: 'researcher_wnd',
 
@@ -25,6 +28,7 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindow', {
             defaultType: 'textfield',
             defaults: {
                 submitEmptyText: false,
+                allowBlank: false,
                 anchor: '100%'
             },
 
@@ -32,60 +36,101 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindow', {
                 {
                     name: 'firstName',
                     fieldLabel: 'First name',
-                    emptyText: 'First name',
-                    allowBlank: false
+                    emptyText: 'First name'
                 },
                 {
                     name: 'lastName',
                     fieldLabel: 'Last name',
-                    emptyText: 'Last name',
-                    allowBlank: false
+                    emptyText: 'Last name'
                 },
                 {
                     name: 'telephone',
                     fieldLabel: 'Telephone',
-                    emptyText: 'Telephone',
-                    allowBlank: false
+                    emptyText: 'Telephone'
                 },
                 {
                     name: 'email',
                     fieldLabel: 'Email',
-                    emptyText: 'Email',
-                    allowBlank: false
+                    emptyText: 'Email'
                 },
                 {
-                    xtype: 'combobox',
-                    name: 'pi',
-                    queryMode: 'local',
-                    displayField: 'name',
-                    valueField: 'piId',
-                    fieldLabel: 'Principal Investigator',
-                    emptyText: 'Principal Investigator',
-                    store: 'principalInvestigatorsStore',
-                    forceSelection: true,
-                    allowBlank: false
+                    xtype: 'container',
+                    layout: 'hbox',
+                    items: [
+                        {
+                            xtype: 'combobox',
+                            name: 'organization',
+                            id: 'organizationField',
+                            itemId: 'organizationField',
+                            queryMode: 'local',
+                            displayField: 'name',
+                            valueField: 'organizationId',
+                            fieldLabel: 'Organization',
+                            emptyText: 'Organization',
+                            store: 'organizationsStore',
+                            forceSelection: true,
+                            allowBlank: false,
+                            width: 331
+                        },
+                        {
+                            xtype: 'button',
+                            id: 'addOrganizationBtn',
+                            iconCls: 'x-fa fa-plus'
+                        }
+                    ]
                 },
                 {
-                    xtype: 'combobox',
-                    name: 'organization',
-                    queryMode: 'local',
-                    displayField: 'name',
-                    valueField: 'organizationId',
-                    fieldLabel: 'Organization',
-                    emptyText: 'Organization',
-                    store: 'organizationsStore',
-                    forceSelection: true,
-                    allowBlank: false
+                    xtype: 'container',
+                    layout: 'hbox',
+                    items: [
+                        {
+                            xtype: 'combobox',
+                            name: 'pi',
+                            id: 'piField',
+                            queryMode: 'local',
+                            displayField: 'name',
+                            valueField: 'piId',
+                            fieldLabel: 'Principal Investigator',
+                            emptyText: 'Principal Investigator',
+                            store: 'principalInvestigatorsStore',
+                            forceSelection: true,
+                            allowBlank: false,
+                            disabled: true,
+                            width: 331
+                        },
+                        {
+                            xtype: 'button',
+                            id: 'addPiBtn',
+                            iconCls: 'x-fa fa-plus',
+                            margin: '5px 0 0 0',
+                            disabled: true
+                        }
+                    ]
                 },
                 {
-                    xtype: 'tagfield',
-                    name: 'costUnit',
-                    queryMode: 'local',
-                    displayField: 'name',
-                    valueField: 'costUnitId',
-                    fieldLabel: 'Cost Unit',
-                    store: 'costUnitsStore',
-                    allowBlank: false
+                    xtype: 'container',
+                    layout: 'hbox',
+                    items: [
+                        {
+                            xtype: 'tagfield',
+                            name: 'costUnit',
+                            id: 'costUnitField',
+                            queryMode: 'local',
+                            displayField: 'name',
+                            valueField: 'costUnitId',
+                            fieldLabel: 'Cost Unit',
+                            store: 'costUnitsStore',
+                            allowBlank: false,
+                            disabled: true,
+                            width: 331
+                        },
+                        {
+                            xtype: 'button',
+                            id: 'addCostUnitBtn',
+                            iconCls: 'x-fa fa-plus',
+                            disabled: true
+                        }
+                    ]
                 }
             ]
         }
