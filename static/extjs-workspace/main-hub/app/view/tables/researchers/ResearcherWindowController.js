@@ -59,16 +59,15 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
         // Load organizations
         wnd.setLoading();
         Ext.getStore('organizationsStore').load(function(records, operation, success) {
-            if (!success || records.length == 0) {
+            if (!success) {
                 Ext.ux.ToastMessage('Cannot load Organizations', 'error');
-            } else if (wnd.mode == 'edit') {
+            } else if (records.length == 0) {
+                Ext.ux.ToastMessage('There are no Organizations', 'warning');
+            }
+
+            if (wnd.mode == 'edit') {
                 organizationField.select(record.organizationId);
                 organizationField.fireEvent('select', organizationField, organizationField.findRecordByValue(record.organizationId));
-                piField.select(record.piId);
-
-                // TODO: fix fields loading when Edit option is selected
-                // piField.fireEvent('select', piField, piField.findRecordByValue(record.piId));
-                // costUnitField.select(record.costUnitId);
             }
             wnd.setLoading(false);
         });
@@ -102,21 +101,15 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
                 } else if (records.length == 0) {
                     Ext.ux.ToastMessage('There are no Principal Investigators for the selected Organization', 'warning');
                 }
+
+                if (wnd.mode == 'edit') {
+                    var record = wnd.record.data;
+                    piField.select(record.piId);
+                    piField.fireEvent('select', piField, piField.findRecordByValue(record.piId));
+                }
+                wnd.setLoading(false);
             }
         });
-        wnd.setLoading(false);
-    },
-
-    onAddOrganizationBtnClick: function() {
-        Ext.create('researcher_field_wnd', {title: 'Add Organization', mode: 'organization'}).show();
-    },
-
-    onAddPiBtnClick: function() {
-        Ext.create('researcher_field_wnd', {title: 'Add Principal Investigator', mode: 'pi'}).show();
-    },
-
-    onAddCostUnitBtnClick: function() {
-        Ext.create('researcher_field_wnd', {title: 'Add Cost Unit', mode: 'cost_unit'}).show();
     },
 
     onPiFieldSelect: function(fld, record) {
@@ -142,9 +135,26 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
                 } else if (records.length == 0) {
                     Ext.ux.ToastMessage('There are no Cost Units for the selected Principal Investigator', 'warning');
                 }
+
+                if (wnd.mode == 'edit') {
+                    var record = wnd.record.data;
+                    costUnitField.select(record.costUnitId);
+                }
+                wnd.setLoading(false);
             }
         });
-        wnd.setLoading(false);
+    },
+
+    onAddOrganizationBtnClick: function() {
+        Ext.create('researcher_field_wnd', {title: 'Add Organization', mode: 'organization'}).show();
+    },
+
+    onAddPiBtnClick: function() {
+        Ext.create('researcher_field_wnd', {title: 'Add Principal Investigator', mode: 'pi'}).show();
+    },
+
+    onAddCostUnitBtnClick: function() {
+        Ext.create('researcher_field_wnd', {title: 'Add Cost Unit', mode: 'cost_unit'}).show();
     },
 
     onAddResearcherWndBtnClick: function(btn) {
