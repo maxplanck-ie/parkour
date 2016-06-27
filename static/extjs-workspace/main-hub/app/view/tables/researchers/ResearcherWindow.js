@@ -69,6 +69,7 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindow', {
                             emptyText: 'Organization',
                             store: 'organizationsStore',
                             forceSelection: true,
+                            allowBlank: false,
                             width: 331
                         },
                         {
@@ -93,6 +94,7 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindow', {
                             emptyText: 'Principal Investigator',
                             store: 'principalInvestigatorsStore',
                             forceSelection: true,
+                            allowBlank: false,
                             disabled: true,
                             width: 331
                         },
@@ -118,6 +120,7 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindow', {
                             valueField: 'costUnitId',
                             fieldLabel: 'Cost Unit',
                             store: 'costUnitsStore',
+                            allowBlank: false,
                             disabled: true,
                             width: 331
                         },
