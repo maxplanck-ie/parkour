@@ -10,6 +10,15 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
             '#organizationField': {
                 select: 'onOrganizationFieldSelect'
             },
+            '#addOrganizationBtn': {
+                click: 'onAddOrganizationBtnClick'
+            },
+            '#addPiBtn': {
+                click: 'onAddPiBtnClick'
+            },
+            '#addCostUnitBtn': {
+                click: 'onAddCostUnitBtnClick'
+            },
             '#piField': {
                 select: 'onPiFieldSelect'
             },
@@ -88,10 +97,26 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
             callback: function(records, operation, success) {
                 piField.setDisabled(false);
                 addPiBtn.setDisabled(false);
-                if (!success || records.length == 0) Ext.ux.ToastMessage('Cannot load Principal Investigators', 'error');
+                if (!success) {
+                    Ext.ux.ToastMessage('Cannot load Principal Investigators', 'error');
+                } else if (records.length == 0) {
+                    Ext.ux.ToastMessage('There are no Principal Investigators for the selected Organization', 'warning');
+                }
             }
         });
         wnd.setLoading(false);
+    },
+
+    onAddOrganizationBtnClick: function() {
+        Ext.create('researcher_field_wnd', {title: 'Add Organization', mode: 'organization'}).show();
+    },
+
+    onAddPiBtnClick: function() {
+        Ext.create('researcher_field_wnd', {title: 'Add Principal Investigator', mode: 'pi'}).show();
+    },
+
+    onAddCostUnitBtnClick: function() {
+        Ext.create('researcher_field_wnd', {title: 'Add Cost Unit', mode: 'cost_unit'}).show();
     },
 
     onPiFieldSelect: function(fld, record) {
@@ -112,7 +137,11 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
             callback: function(records, operation, success) {
                 costUnitField.setDisabled(false);
                 addCostUnitBtn.setDisabled(false);
-                if (!success || records.length == 0) Ext.ux.ToastMessage('Cannot load Cost Units', 'error');
+                if (!success) {
+                    Ext.ux.ToastMessage('Cannot load Cost Units', 'error');
+                } else if (records.length == 0) {
+                    Ext.ux.ToastMessage('There are no Cost Units for the selected Principal Investigator', 'warning');
+                }
             }
         });
         wnd.setLoading(false);

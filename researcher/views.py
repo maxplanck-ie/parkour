@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.http import HttpResponse
 from researcher.models import Researcher, PrincipalInvestigator, Organization, CostUnit
 from common.utils import *
@@ -53,8 +52,10 @@ def add_researcher(request):
     last_name = request.POST.get('last_name', '')
     telephone = request.POST.get('telephone', '')
     email = request.POST.get('email', '')
-    pi_id = int(request.POST.get('pi', 0))
-    organization_id = int(request.POST.get('organization', 0))
+    pi_id = request.POST.get('pi')
+    pi_id = int(pi_id) if pi_id != '' else 0
+    organization_id = request.POST.get('organization')
+    organization_id = int(organization_id) if organization_id != '' else 0
     cost_unit = json.loads(request.POST.get('cost_unit', '[]'))
 
     try:
@@ -75,13 +76,16 @@ def edit_researcher(request):
     """ Edit existing researcher """
     error = str()
 
-    researcher_id = int(request.POST.get('researcher_id', 1))
+    researcher_id = request.POST.get('researcher_id')
+    researcher_id = int(researcher_id) if researcher_id != '' else 0
     first_name = request.POST.get('first_name', '')
     last_name = request.POST.get('last_name', '')
     telephone = request.POST.get('telephone', '')
     email = request.POST.get('email', '')
-    pi_id = int(request.POST.get('pi', 0))
-    organization_id = int(request.POST.get('organization', 0))
+    pi_id = request.POST.get('pi')
+    pi_id = int(pi_id) if pi_id != '' else 0
+    organization_id = request.POST.get('organization')
+    organization_id = int(organization_id) if organization_id != '' else 0
     cost_unit = json.loads(request.POST.get('cost_unit', '[]'))
 
     try:
@@ -104,7 +108,8 @@ def edit_researcher(request):
 def delete_researcher(request):
     error = str()
 
-    researcher_id = int(request.POST.get('researcher_id', 0))
+    researcher_id = request.POST.get('researcher_id')
+    researcher_id = int(researcher_id) if researcher_id != '' else 0
 
     try:
         researcher = Researcher.objects.get(id=researcher_id)
@@ -138,8 +143,10 @@ def get_pis(request):
     error = str()
     data = []
 
+    organization_id = request.GET.get('organization_id')
+    organization_id = int(organization_id) if organization_id != '' else 0
+
     try:
-        organization_id = int(request.GET.get('organization_id', 0))
         data = [{'name': pi.name, 'piId': pi.id}
                 for pi in PrincipalInvestigator.objects.filter(organization=organization_id)]
         data = sorted(data, key=lambda x: x['name'])
@@ -156,8 +163,10 @@ def get_cost_units(request):
     error = str()
     data = []
 
+    pi_id = request.GET.get('pi_id')
+    pi_id = int(pi_id) if pi_id != '' else 0
+
     try:
-        pi_id = int(request.GET.get('pi_id', 0))
         data = [{'name': cost_unit.name, 'costUnitId': cost_unit.id}
                 for cost_unit in CostUnit.objects.filter(pi=pi_id)]
         data = sorted(data, key=lambda x: x['name'])
@@ -167,3 +176,35 @@ def get_cost_units(request):
 
     return HttpResponse(json.dumps({'success': not error, 'error': error, 'data': data}),
                         content_type='application/json')
+
+
+def add_researcher_field(request):
+    """ Add new Organization, Principal Investigator or Cost Unit """
+    error = str()
+
+    mode = request.POST.get('mode', '')
+    name = request.POST.get('name', '')
+    organization_id = request.POST.get('organization_id')
+    organization_id = int(organization_id) if organization_id != '' else 0
+    pi_id = request.POST.get('pi_id')
+    pi_id = int(pi_id) if pi_id != '' else 0
+
+    try:
+        if mode == 'organization':
+            organization = Organization(name=name)
+            organization.save()
+        elif mode == 'pi':
+            organization = Organization.objects.get(id=organization_id)
+            pi = PrincipalInvestigator(name=name, organization=organization)
+            pi.save()
+        elif mode == 'cost_unit':
+            pi = PrincipalInvestigator.objects.get(id=pi_id)
+            cost_unit = CostUnit(name=name, pi=pi)
+            cost_unit.save()
+        else:
+            raise ValueError('Wrong mode (field)')
+    except Exception as e:
+        print('[ERROR]: add_researcher_field():', e)
+        error = str(e)
+
+    return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')

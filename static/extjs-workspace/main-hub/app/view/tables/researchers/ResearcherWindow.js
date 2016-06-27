@@ -3,7 +3,10 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindow', {
     alias: 'researcher_wnd',
     xtype: 'researcher_wnd',
 
-    requires: ['MainHub.view.tables.researchers.ResearcherWindowController'],
+    requires: [
+        'MainHub.view.tables.researchers.ResearcherWindowController',
+        'MainHub.view.tables.researchers.ResearcherFieldWindow'
+    ],
 
     controller: 'researcher_wnd',
 
