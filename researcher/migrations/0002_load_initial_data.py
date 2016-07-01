@@ -8,6 +8,7 @@ from django.core.management import call_command
 
 def load_fixture(apps, schema_editor):
     call_command('loaddata', 'initial_data', app_label='researcher')
+    call_command('loaddata', 'researchers', app_label='researcher')
 
 
 def unload_fixture(apps, schema_editor):
