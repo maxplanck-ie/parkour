@@ -107,7 +107,7 @@ ALLOWED_HOSTS = ['*']
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
 STATIC_URL = '/static/'
 
 
@@ -126,7 +126,3 @@ STATICFILES_DIRS = [
 # except ImportError:
 #     from wui.prod_settings import *
 #     DEBUG = False
-
-print('BASE_DIR', BASE_DIR)
-print('PROJECT_ROOT', PROJECT_ROOT)
-print('STATIC_ROOT', STATIC_ROOT)
