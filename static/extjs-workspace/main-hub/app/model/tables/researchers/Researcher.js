@@ -16,7 +16,7 @@ Ext.define('MainHub.model.tables.researchers.Researcher', {
         },
         {
             type: 'string',
-            name: 'telephone'
+            name: 'phone'
         },
         {
             type: 'string',

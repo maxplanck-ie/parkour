@@ -44,9 +44,9 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindow', {
                     emptyText: 'Last name'
                 },
                 {
-                    name: 'telephone',
-                    fieldLabel: 'Telephone',
-                    emptyText: 'Telephone'
+                    name: 'phone',
+                    fieldLabel: 'Phone',
+                    emptyText: 'Phone'
                 },
                 {
                     name: 'email',

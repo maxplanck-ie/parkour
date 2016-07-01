@@ -26,7 +26,7 @@ def get_researchers(request):
                 'researcherId': researcher.id,
                 'firstName': researcher.first_name,
                 'lastName': researcher.last_name,
-                'telephone': researcher.telephone,
+                'phone': researcher.phone,
                 'email': researcher.email,
                 'pi': researcher.pi.name,
                 'piId': researcher.pi_id,
@@ -50,7 +50,7 @@ def add_researcher(request):
 
     first_name = request.POST.get('first_name', '')
     last_name = request.POST.get('last_name', '')
-    telephone = request.POST.get('telephone', '')
+    phone = request.POST.get('phone', '')
     email = request.POST.get('email', '')
     pi_id = request.POST.get('pi')
     pi_id = int(pi_id) if pi_id != '' else 0
@@ -61,7 +61,7 @@ def add_researcher(request):
     try:
         pi = PrincipalInvestigator.objects.get(id=pi_id)
         organization = Organization.objects.get(id=organization_id)
-        researcher = Researcher(first_name=first_name, last_name=last_name, telephone=telephone,
+        researcher = Researcher(first_name=first_name, last_name=last_name, phone=phone,
                                 email=email, pi=pi, organization=organization)
         researcher.save()
         researcher.cost_unit.add(*cost_unit)
@@ -80,7 +80,7 @@ def edit_researcher(request):
     researcher_id = int(researcher_id) if researcher_id != '' else 0
     first_name = request.POST.get('first_name', '')
     last_name = request.POST.get('last_name', '')
-    telephone = request.POST.get('telephone', '')
+    phone = request.POST.get('phone', '')
     email = request.POST.get('email', '')
     pi_id = request.POST.get('pi')
     pi_id = int(pi_id) if pi_id != '' else 0
@@ -92,7 +92,7 @@ def edit_researcher(request):
         researcher = Researcher.objects.get(id=researcher_id)
         researcher.first_name = first_name
         researcher.last_name = last_name
-        researcher.telephone = telephone
+        researcher.phone = phone
         researcher.email = email
         researcher.pi = PrincipalInvestigator.objects.get(id=pi_id)
         researcher.organization = Organization.objects.get(id=organization_id)

@@ -51,7 +51,7 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
             form.setValues({
                 firstName: record.firstName,
                 lastName: record.lastName,
-                telephone: record.telephone,
+                phone: record.phone,
                 email: record.email
             });
         }
@@ -174,7 +174,7 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
                 params: {
                     'first_name': data.firstName,
                     'last_name': data.lastName,
-                    'telephone': data.telephone,
+                    'phone': data.phone,
                     'email': data.email,
                     'pi': data.pi,
                     'organization': data.organization,
@@ -225,7 +225,7 @@ Ext.define('MainHub.view.tables.researchers.ResearcherWindowController', {
                 params: {
                     'first_name': data.firstName,
                     'last_name': data.lastName,
-                    'telephone': data.telephone,
+                    'phone': data.phone,
                     'email': data.email,
                     'pi': data.pi,
                     'organization': data.organization,

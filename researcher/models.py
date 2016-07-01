@@ -27,7 +27,7 @@ class CostUnit(models.Model):
 class Researcher(models.Model):
     first_name = models.CharField('First name', max_length=150)
     last_name = models.CharField('Last name', max_length=150)
-    telephone = models.CharField('Telephone', max_length=100)
+    phone = models.CharField('Phone', max_length=100)
     email = models.CharField('Email', max_length=100)
     organization = models.ForeignKey(Organization, verbose_name='Organization')
     pi = models.ForeignKey(PrincipalInvestigator, verbose_name='Principal Investigator')
