@@ -2,8 +2,7 @@ import os
 import dj_database_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -100,6 +99,10 @@ USE_L10N = True
 USE_TZ = True
 
 
+# Honor the 'X-Forwarded-Proto' header for request.is_secure()
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+
 # Allow all host headers
 ALLOWED_HOSTS = ['*']
 
@@ -119,10 +122,3 @@ STATICFILES_DIRS = [
 
 # WhiteNoise compression and caching support
 # STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
-
-# try:
-#     from wui.dev_settings import *
-#     DEBUG = True
-# except ImportError:
-#     from wui.prod_settings import *
-#     DEBUG = False

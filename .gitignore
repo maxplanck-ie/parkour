@@ -61,7 +61,5 @@ target/
 # Ipython Notebook
 .ipynb_checkpoints
 
-wui/dev_settings.py
-
 .idea/
 .DS_Store
