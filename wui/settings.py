@@ -9,11 +9,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = os.environ['SECRET_KEY']
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
 LOGIN_URL = '/login/'
 
 
@@ -64,21 +59,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'wui.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/1.9/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'djangoapp',
-        'USER': 'djangoapp',
-        'PASSWORD': 'djangoapp',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
-
-
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
 
@@ -116,3 +96,10 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
    os.path.join(BASE_DIR, 'static')
 ]
+
+try:
+    from wui.dev_settings import *
+    DEBUG = True
+except ImportError:
+    from wui.prod_settings import *
+    DEBUG = False
