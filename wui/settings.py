@@ -1,7 +1,9 @@
 import os
+import dj_database_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -61,6 +63,14 @@ TEMPLATES = [
 WSGI_APPLICATION = 'wui.wsgi.application'
 
 
+# Database
+# https://docs.djangoproject.com/en/1.9/ref/settings/#databases
+
+DATABASES = {
+    'default': dj_database_url.config()
+}
+
+
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
 
@@ -89,8 +99,19 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
+
+# Allow all host headers
+ALLOWED_HOSTS = ['*']
+
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/1.9/howto/static-files/
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
+
+
+# Extra places for collectstatic to find static files.
 
 STATICFILES_DIRS = [
    os.path.join(BASE_DIR, 'static')
@@ -99,9 +120,13 @@ STATICFILES_DIRS = [
 # WhiteNoise compression and caching support
 # STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
-try:
-    from wui.dev_settings import *
-    DEBUG = True
-except ImportError:
-    from wui.prod_settings import *
-    DEBUG = False
+# try:
+#     from wui.dev_settings import *
+#     DEBUG = True
+# except ImportError:
+#     from wui.prod_settings import *
+#     DEBUG = False
+
+print('BASE_DIR', BASE_DIR)
+print('PROJECT_ROOT', PROJECT_ROOT)
+print('STATIC_ROOT', STATIC_ROOT)
