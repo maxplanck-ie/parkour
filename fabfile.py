@@ -8,6 +8,6 @@ def backup_db():
     local('heroku pg:backups capture ')
 
 
-def deploy_prod():
+def deploy():
     local('git push heroku %s:master' % branch)
     local('heroku run python manage.py migrate --app muscat-noir')
