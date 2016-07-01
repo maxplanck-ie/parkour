@@ -89,6 +89,14 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
+STATIC_URL = '/static/'
+
+STATICFILES_DIRS = [
+   os.path.join(BASE_DIR, 'static')
+]
+
+# WhiteNoise compression and caching support
 # STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 try:

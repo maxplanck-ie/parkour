@@ -11,5 +11,5 @@ def backup_db():
 def deploy():
     local('git push heroku %s:master' % branch)
     # local('heroku run python manage.py collectstatic --noinput --app muscat-noir')
-    # local('heroku run python manage.py collectstatic --app muscat-noir')
+    local('heroku run python manage.py collectstatic --app muscat-noir')
     local('heroku run python manage.py migrate --app muscat-noir')
