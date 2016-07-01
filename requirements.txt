@@ -1,5 +1,4 @@
 dj-database-url==0.4.1
-dj-static==0.0.6
 Django==1.9.6
 ecdsa==0.13
 Fabric3==1.11.1.post1
@@ -9,3 +8,4 @@ psycopg2==2.6.1
 pycrypto==2.6.1
 six==1.10.0
 static3==0.7.0
+whitenoise==3.2
