@@ -71,8 +71,11 @@ WSGI_APPLICATION = 'wui.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
+# postgres://USER:PASSWORD@HOST:PORT/NAME
 DATABASES = {
-    'default': dj_database_url.config()
+    'default': dj_database_url.config(
+        default='postgres://djangoapp:djangoapp@localhost:5432/djangoapp'
+    )
 }
 
 
