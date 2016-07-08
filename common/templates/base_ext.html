@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <script type="text/javascript" src="{% static 'js/jquery-2.2.4.min.js' %}"></script>
 
-    <link rel="stylesheet" href="{% static 'extjs-workspace/ext/build/classic/theme-triton/resources/theme-triton-all.css' %}">
+    <link rel="stylesheet" href="{% static 'main-hub/ext/build/classic/theme-triton/resources/theme-triton-all.css' %}">
 
     {# Global variables #}
     {% include 'globals.html' %}
@@ -22,9 +22,8 @@
     {% block css %}{% endblock %}
     {% block extjs_app %}{% endblock %}
 
-    <script type="text/javascript" src="{% static 'extjs-workspace/global/overrides/csrf.js' %}"></script>
-
-{#    <script type="text/javascript" src="{% static 'extjs-workspace/ext/build/classic/theme-triton/theme-triton-debug.js' %}"></script>#}
+    <script type="text/javascript" src="{% static 'main-hub/overrides/csrf.js' %}"></script>
+{#    <script type="text/javascript" src="{% static 'main-hub/ext/build/classic/theme-triton/theme-triton-debug.js' %}"></script>#}
 </head>
 
 <body>

@@ -3,7 +3,6 @@ import dj_database_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
 # Quick-start development settings - unsuitable for production
@@ -11,9 +10,14 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 SECRET_KEY = os.environ['SECRET_KEY']
 
-LOGIN_URL = '/login/'
-
+# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+
+# Allow all host headers
+# ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
+
+LOGIN_URL = '/login/'
 
 
 # Application definition
@@ -102,11 +106,7 @@ USE_TZ = True
 
 
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-
-# Allow all host headers
-ALLOWED_HOSTS = ['*']
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Static files (CSS, JavaScript, Images)
@@ -114,9 +114,6 @@ ALLOWED_HOSTS = ['*']
 
 # STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
-
-
-# Extra places for collectstatic to find static files.
 
 STATICFILES_DIRS = [
    os.path.join(BASE_DIR, 'static')
