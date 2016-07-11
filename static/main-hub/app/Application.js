@@ -3,13 +3,13 @@
  * calls Ext.application(). This is the ideal place to handle application launch and
  * initialization details.
  */
- // Ext.Loader.setConfig({
- //     enabled : true,
- //     disableCaching : true, // For debug only
- //     paths : {
- //         'Ext.ux': '/static/main-hub/packages/ux'
- //     }
- // });
+ Ext.Loader.setConfig({
+     enabled : true,
+     disableCaching : true, // For debug only
+     paths : {
+         'Ext.ux': '/static/main-hub/packages/ux'
+     }
+ });
 
 Ext.define('MainHub.Application', {
     extend: 'Ext.app.Application',
@@ -28,7 +28,7 @@ Ext.define('MainHub.Application', {
     ],
 
     requires: [
-        // 'Ext.ux.ToastMessage'
+        'Ext.ux.ToastMessage'
     ],
 
     launch: function () {
