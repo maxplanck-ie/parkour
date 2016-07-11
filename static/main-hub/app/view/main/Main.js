@@ -39,7 +39,7 @@ Ext.define('MainHub.view.main.Main', {
                     xtype: 'component',
                     reference: 'logo',
                     cls: 'main-logo',
-                    html: '<div class="logo"><img src="static/main-hub/resources/images/logo.png">Django App</div>',
+                    html: '<div class="logo"><img src="static/main-hub/resources/images/logo.png">Parkour</div>',
                     width: 250
                 },
                 {
