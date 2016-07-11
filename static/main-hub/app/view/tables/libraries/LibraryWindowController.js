@@ -4,9 +4,21 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
 
     config: {
         control: {
+            '#': {
+                boxready: 'onLibraryWindowBoxready'
+            },
             '#cancelBtn': {
                 click: 'onCancelBtnClick'
             }
+        }
+    },
+
+    onLibraryWindowBoxready: function(wnd) {
+        if (wnd.mode == 'add') {
+            Ext.getCmp('saveAndAddLibraryWndBtn').show();
+            Ext.getCmp('addLibraryWndBtn').show();
+        } else {
+
         }
     },
 
