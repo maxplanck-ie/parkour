@@ -74,7 +74,7 @@ WSGI_APPLICATION = 'wui.wsgi.application'
 # postgres://USER:PASSWORD@HOST:PORT/NAME
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgres://djangoapp:djangoapp@localhost:5432/djangoapp'
+        default='postgres://parkour:c572892b098f36c8cb906eeb8906d4cc@localhost:5432/parkour'
     )
 }
 
