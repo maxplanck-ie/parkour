@@ -1,1 +1,1 @@
-# django-app
+# LIMS system 'Parkour'
