@@ -3,7 +3,6 @@ Ext.define('MainHub.view.tables.requests.Requests', {
     xtype: 'requests',
 
     requires: [
-        'Ext.container.Container',
         'MainHub.view.tables.requests.RequestsController',
         'MainHub.view.tables.requests.RequestWindow'
     ],

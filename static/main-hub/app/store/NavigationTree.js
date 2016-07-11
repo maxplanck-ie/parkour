@@ -10,19 +10,19 @@ Ext.define('MainHub.store.NavigationTree', {
     root: {
         expanded: true,
         children: [
-            {
-                text: 'Start Page',
-                iconCls: 'x-fa fa-th-large',
-                viewType: 'startpage',
-                leaf: true
-            },
-            {
-                text: 'Dashboard',
-                iconCls: 'x-fa fa-desktop',
-                viewType: 'dashboard',
-                // routeId: 'dashboard', // routeId defaults to viewType
-                leaf: true
-            },
+            // {
+            //     text: 'Start Page',
+            //     iconCls: 'x-fa fa-th-large',
+            //     viewType: 'startpage',
+            //     leaf: true
+            // },
+            // {
+            //     text: 'Dashboard',
+            //     iconCls: 'x-fa fa-desktop',
+            //     viewType: 'dashboard',
+            //     // routeId: 'dashboard', // routeId defaults to viewType
+            //     leaf: true
+            // },
             {
                 text: 'Tables',
                 iconCls: 'x-fa fa-table',
@@ -39,6 +39,12 @@ Ext.define('MainHub.store.NavigationTree', {
                         text: 'Requests',
                         iconCls: 'x-fa fa-external-link-square',
                         viewType: 'requests',
+                        leaf: true
+                    },
+                    {
+                        text: 'Libraries',
+                        iconCls: 'x-fa fa-flask',
+                        viewType: 'libraries',
                         leaf: true
                     }
                 ]
