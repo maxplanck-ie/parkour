@@ -10,6 +10,7 @@ Ext.define('MainHub.view.main.Main', {
         'MainHub.view.startpage.StartPage',
         'MainHub.view.tables.researchers.Researchers',
         'MainHub.view.tables.requests.Requests',
+        'MainHub.view.tables.libraries.Libraries',
         'MainHub.store.NavigationTree'
     ],
 
