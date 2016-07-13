@@ -13,8 +13,7 @@ SECRET_KEY = os.environ['SECRET_KEY']
 DEBUG = True
 
 # Allow all host headers
-# ALLOWED_HOSTS = ['*']
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 LOGIN_URL = '/login/'
 
@@ -72,11 +71,11 @@ WSGI_APPLICATION = 'wui.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'parkour',
-        'USER': 'parkour',
-        'PASSWORD': 'c572892b098f36c8cb906eeb8906d4cc',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.environ['DB_NAME'],
+        'USER': os.environ['DB_USER'],
+        'PASSWORD': os.environ['DB_PASS'],
+        'HOST': os.environ['DB_SERVICE'],
+        'PORT': os.environ['DB_PORT'],
     }
 }
 
