@@ -1,5 +1,4 @@
 import os
-import dj_database_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -37,7 +36,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
-    # 'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -71,11 +69,15 @@ WSGI_APPLICATION = 'wui.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-# postgres://USER:PASSWORD@HOST:PORT/NAME
 DATABASES = {
-    'default': dj_database_url.config(
-        default='postgres://parkour:c572892b098f36c8cb906eeb8906d4cc@localhost:5432/parkour'
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'parkour',
+        'USER': 'parkour',
+        'PASSWORD': 'c572892b098f36c8cb906eeb8906d4cc',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
 }
 
 
@@ -121,6 +123,3 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
    os.path.join(BASE_DIR, 'static')
 ]
-
-# WhiteNoise compression and caching support
-# STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
