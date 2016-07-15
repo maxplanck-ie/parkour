@@ -19,7 +19,8 @@
 {% endif %}
 
 <div class="wrapper">
-    <form class="form-signin" method="post" action="{% url 'login' %}">
+{#    <form class="form-signin" method="post" action="{% url 'login' %}">#}
+    <form class="form-signin" method="post" action="{% url 'django.contrib.auth.views.login' %}">
         {% csrf_token %}
         <h2 class="form-signin-heading">Login</h2>
         <input type="text" class="form-control" id="id_username" name="username" placeholder="Username" required="" autofocus="" />
