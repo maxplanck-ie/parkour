@@ -65,3 +65,4 @@ target/
 .DS_Store
 
 wui/dev_settings.py
+staticfiles/
