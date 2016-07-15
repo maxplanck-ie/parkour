@@ -64,4 +64,4 @@ target/
 .idea/
 .DS_Store
 
-staticfiles/
+wui/dev_settings.py
