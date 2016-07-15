@@ -1,15 +1,9 @@
 from fabric.api import *
 
 
-branch = local('git rev-parse --abbrev-ref HEAD', capture=True)
-
-
-def backup_db():
-    local('heroku pg:backups capture ')
-
-
 def deploy():
-    local('git push heroku %s:master' % branch)
-    local('heroku run python manage.py migrate --app muscat-noir')
-    local('heroku run python manage.py collectstatic --app muscat-noir')
-    # local('heroku run python manage.py collectstatic --noinput --app muscat-noir')
+    branch_name = local('git rev-parse --abbrev-ref HEAD', capture=True)
+    container_id = local('docker ps -q -f name=parkourdocker_parkour_1', capture=True)
+    local('docker exec -it %s /bin/bash' % container_id)
+    local('git checkout %s && git pull && exit' % branch_name)
+    local('docker update --restart=always %s' % container_id)
