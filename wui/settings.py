@@ -109,6 +109,12 @@ USE_L10N = True
 USE_TZ = True
 
 
+ADMINS = [
+    ('Devon P. Ryan', 'dpryan79@gmail.com'),
+    ('Evgeny Anatskiy', 'evgeny.anatskiy@gmail.com'),
+]
+
+
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 # SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
