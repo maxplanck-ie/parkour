@@ -3,6 +3,9 @@ from researcher.models import Researcher, PrincipalInvestigator, Organization, C
 from common.utils import *
 
 import json
+import logging
+
+logger = logging.getLogger('db')
 
 
 def get_researchers(request):
@@ -36,8 +39,9 @@ def get_researchers(request):
                 'costUnitId': cost_units_id,
             })
     except Exception as e:
-        print('[ERROR]: get_researchers():', e)
         error = str(e)
+        print('[ERROR]: get_researchers(): %s' % error)
+        logger.debug(error)
 
     return HttpResponse(json.dumps({'success': not error, 'error': error,
                                     'data': sorted(data, key=lambda x: x['lastName'].lower())}),
@@ -66,8 +70,9 @@ def add_researcher(request):
         researcher.save()
         researcher.cost_unit.add(*cost_unit)
     except Exception as e:
-        print('[ERROR]: add_researcher():', e)
         error = str(e)
+        print('[ERROR]: add_researcher(): %s' % error)
+        logger.debug(error)
 
     return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')
 
@@ -99,8 +104,9 @@ def edit_researcher(request):
         researcher.cost_unit = cost_unit
         researcher.save()
     except Exception as e:
-        print('[ERROR]: edit_researcher():', e)
         error = str(e)
+        print('[ERROR]: edit_researcher(): %s' % error)
+        logger.debug(error)
 
     return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')
 
@@ -115,8 +121,9 @@ def delete_researcher(request):
         researcher = Researcher.objects.get(id=researcher_id)
         researcher.delete()
     except Exception as e:
-        print('[ERROR]: delete_researcher():', e)
         error = str(e)
+        print('[ERROR]: delete_researcher(): %s' % error)
+        logger.debug(error)
 
     return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')
 
@@ -131,8 +138,9 @@ def get_organizations(request):
                 for organization in Organization.objects.all()]
         data = sorted(data, key=lambda x: x['name'])
     except Exception as e:
-        print('[ERROR]: get_organizations():', e)
         error = str(e)
+        print('[ERROR]: get_organizations(): %s' % error)
+        logger.debug(error)
 
     return HttpResponse(json.dumps({'success': not error, 'error': error, 'data': data}),
                         content_type='application/json')
@@ -151,8 +159,9 @@ def get_pis(request):
                 for pi in PrincipalInvestigator.objects.filter(organization=organization_id)]
         data = sorted(data, key=lambda x: x['name'])
     except Exception as e:
-        print('[ERROR]: get_pis():', e)
         error = str(e)
+        print('[ERROR]: get_pis(): %s' % error)
+        logger.debug(error)
 
     return HttpResponse(json.dumps({'success': not error, 'error': error, 'data': data}),
                         content_type='application/json')
@@ -171,8 +180,9 @@ def get_cost_units(request):
                 for cost_unit in CostUnit.objects.filter(pi=pi_id)]
         data = sorted(data, key=lambda x: x['name'])
     except Exception as e:
-        print('[ERROR]: get_cost_units():', e)
         error = str(e)
+        print('[ERROR]: get_cost_units(): %s' % error)
+        logger.debug(error)
 
     return HttpResponse(json.dumps({'success': not error, 'error': error, 'data': data}),
                         content_type='application/json')
@@ -204,7 +214,8 @@ def add_researcher_field(request):
         else:
             raise ValueError('Wrong mode (field)')
     except Exception as e:
-        print('[ERROR]: add_researcher_field():', e)
         error = str(e)
+        print('[ERROR]: add_researcher_field(): %s' % error)
+        logger.debug(error)
 
     return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')

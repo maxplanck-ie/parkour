@@ -4,6 +4,9 @@ from researcher.models import Researcher
 
 import json
 from datetime import datetime
+import logging
+
+logger = logging.getLogger('db')
 
 
 def get_requests(request):
@@ -25,8 +28,9 @@ def get_requests(request):
             'termsOfUseAccept': req.terms_of_use_accept
                 } for req in requests]
     except Exception as e:
-        print('[ERROR]: add_researcher():', e)
         error = str(e)
+        print('[ERROR]: get_requests(): %s' % error)
+        logger.debug(error)
 
     return HttpResponse(json.dumps({'success': not error, 'error': error,
                                     'data': sorted(data, key=lambda x: x['requestId'])}),
@@ -51,8 +55,9 @@ def add_request(request):
                       researcher_id=Researcher.objects.get(id=researcher_id))
         req.save()
     except Exception as e:
-        print('[ERROR]: add_request():', e)
         error = str(e)
+        print('[ERROR]: add_request(): %s' % error)
+        logger.debug(error)
 
     return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')
 
@@ -79,8 +84,9 @@ def edit_request(request):
         req.researcher_id = Researcher.objects.get(id=researcher_id)
         req.save()
     except Exception as e:
-        print('[ERROR]: edit_request():', e)
         error = str(e)
+        print('[ERROR]: edit_request(): %s' % error)
+        logger.debug(error)
 
     return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')
 
@@ -94,7 +100,8 @@ def delete_request(request):
         req = Request.objects.get(id=request_id)
         req.delete()
     except Exception as e:
-        print('[ERROR]: delete_request():', e)
         error = str(e)
+        print('[ERROR]: delete_request(): %s' % error)
+        logger.debug(error)
 
     return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')
