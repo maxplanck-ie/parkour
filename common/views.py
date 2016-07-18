@@ -14,7 +14,5 @@ def index(request):
 @login_required
 def get_username(request):
     user = request.user
-    data = {}
-    if user.is_authenticated():
-        data['username'] = user.first_name + ' ' + user.last_name
+    data = {'username': user.first_name + ' ' + user.last_name}
     return HttpResponse(json.dumps({'data': data}), content_type='application/json')
