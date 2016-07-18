@@ -2,6 +2,7 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+LOG_DIR = os.path.join(BASE_DIR, 'logs')
 
 
 # Quick-start development settings - unsuitable for production
@@ -103,7 +104,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Berlin'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
@@ -113,6 +114,71 @@ ADMINS = [
     ('Devon P. Ryan', 'dpryan79@gmail.com'),
     ('Evgeny Anatskiy', 'evgeny.anatskiy@gmail.com'),
 ]
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'standard': {
+            'format': '[%(levelname)s] [%(asctime)s] [%(module)s:%(lineno)s]: %(message)s',
+            'datefmt': "%d/%b/%Y %H:%M:%S"
+        },
+        'custom': {
+            'format': '[%(levelname)s] [%(asctime)s] [%(pathname)s:%(lineno)s]: %(funcName)s(): %(message)s',
+            'datefmt': "%d/%b/%Y %H:%M:%S"
+        }
+    },
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        }
+    },
+    'handlers': {
+        # 'mail_admins': {
+        #     'level': 'ERROR',
+        #     'filters': ['require_debug_false'],
+        #     'class': 'common.logger.admin_email_handler.CustomAdminEmailHandler'
+        # },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'standard',
+        },
+        'logfile': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOG_DIR, 'django.log'),
+            'formatter': 'standard',
+            'maxBytes': 15 * 1024 * 1024,  # 15 MB
+            'backupCount': 2,
+        },
+        'dblogfile': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOG_DIR, 'db.log'),
+            'formatter': 'custom',
+            'maxBytes': 15 * 1024 * 1024,
+            'backupCount': 2,
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['logfile'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'db': {
+            'handlers': ['console', 'dblogfile'],
+            'level': 'DEBUG',
+            'propagate': True
+        },
+        # 'django.request': {
+        #     'handlers': ['mail_admins'],
+        #     'level': 'ERROR',
+        #     'propagate': False,
+        # },
+    },
+}
 
 
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
