@@ -27,8 +27,8 @@ class CostUnit(models.Model):
 class Researcher(models.Model):
     first_name = models.CharField('First name', max_length=150)
     last_name = models.CharField('Last name', max_length=150)
-    phone = models.CharField('Phone', max_length=100)
-    email = models.CharField('Email', max_length=100)
+    phone = models.CharField('Phone', max_length=100, null=True)
+    email = models.CharField('Email', max_length=100, null=True)
     organization = models.ForeignKey(Organization, verbose_name='Organization')
     pi = models.ForeignKey(PrincipalInvestigator, verbose_name='Principal Investigator')
     cost_unit = models.ManyToManyField(CostUnit, verbose_name='Cost Unit')
