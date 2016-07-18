@@ -1,14 +1,18 @@
 {% extends 'base.html' %}
+{% load staticfiles %}
 
 {% block css %}
     <style>
         body {
-            background: #eee !important;
+            background: url("{% static 'images/login-page-background.jpg' %}") no-repeat center center fixed;
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            background-size: cover;
         }
     </style>
 {% endblock css %}
 
-{% block title %}Login{% endblock title %}
+{% block title %}Parkour | Login{% endblock title %}
 
 {% block content %}
 
@@ -18,10 +22,10 @@
     </div>
 {% endif %}
 
-<div class="wrapper">
+<div id="login-form">
     <form class="form-signin" method="post" action="{% url 'login' %}">
         {% csrf_token %}
-        <h2 class="form-signin-heading">Login</h2>
+        <h2 class="form-signin-heading">Parkour</h2>
         <input type="text" class="form-control" id="id_username" name="username" placeholder="Username" required="" autofocus="" />
         <input type="password" class="form-control" id="id_password" name="password" placeholder="Password" required=""/>
         <input class="btn btn-lg btn-primary btn-block" type="submit" value="Login" />

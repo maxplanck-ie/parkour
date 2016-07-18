@@ -1,10 +1,21 @@
-.wrapper {
-    margin-top: 180px;
-    margin-bottom: 80px;
+#login-form {
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, Verdana, sans-serif;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -150px;
+    margin-left: -175px;
+    width: 350px;
+    height: 300px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#login-form h2 {
+    text-align: center;
 }
 
 .form-signin {
-    max-width: 380px;
     padding: 15px 35px 45px;
     margin: 0 auto;
     background-color: #fff;
@@ -38,6 +49,16 @@
     margin-bottom: 20px;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
+}
+
+#login-form input[type="submit"] {
+    background-color: #9cc96b;
+    border: 1px solid #90c258;
+    border-radius: 3px;
+}
+
+#login-form input[type="submit"]:hover {
+    background-color: #90c258;
 }
 
 #block-404, #block-500 {
