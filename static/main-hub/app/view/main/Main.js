@@ -58,17 +58,10 @@ Ext.define('MainHub.view.main.Main', {
                 },
                 {
                     xtype: 'button',
-                    text: 'Menu',
-                    // iconCls:'x-fa fa-th-large',
-                    // ui: 'header',
-                    menu: {
-                        xtype: 'menu',
-                        items: [{
-                            text: 'Logout',
-                            iconCls: 'x-fa fa-sign-out',
-                            href: 'logout'
-                        }]
-                    }
+                    ui: 'header',
+                    iconCls: 'x-fa fa-sign-out',
+                    href: 'logout',
+                    tooltip: 'Logout'
                 }
             ]
         },
