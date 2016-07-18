@@ -2,9 +2,6 @@
 [run]
 branch = True
 
-plugins =
-    django_coverage_plugin
-
 [report]
 # Regexes for lines to exclude from consideration
 exclude_lines =

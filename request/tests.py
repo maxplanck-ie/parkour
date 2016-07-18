@@ -6,5 +6,5 @@ class RequestModelTestCase(TestCase):
     def setUp(self):
         self.request = Request.objects.create()
 
-    def test(self):
+    def test_request(self):
         self.assertEqual(str(self.request), self.request.name)
