@@ -3,6 +3,13 @@
  * calls Ext.application(). This is the ideal place to handle application launch and
  * initialization details.
  */
+Ext.Loader.setConfig({
+    enabled: true,
+    paths: {
+        'Ext.ux': 'static/main-hub/ext/packages/ux/classic/src/'
+    }
+});
+
 Ext.define('MainHub.Application', {
     extend: 'Ext.app.Application',
 
