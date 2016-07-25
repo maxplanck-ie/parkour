@@ -57,7 +57,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 name: 'libraryName',
                                 fieldLabel: 'Library Name',
                                 emptyText: 'Library Name',
-                                labelAttrTpl: 'data-qtip="This is a quick tip!"',
+                                labelAttrTpl: 'data-qtip="Name must be unique for assigned project. Field must contain only A-Za-z0-9 as well as - and _."',
                                 regex: new RegExp("^[A-Za-z0-9_\-]+$"),
                                 regexText: 'Only A-Za-z0-9 as well as _ and - are allowed'
                             },
@@ -75,6 +75,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 name: 'libraryProtocol',
                                 fieldLabel: 'Protocol for Library Preparation',
                                 emptyText: 'Protocol for Library Preparation',
+                                labelAttrTpl: 'data-qtip="Select library construction protocol from predefined list or select other and specify in the comment field (below)."',
                                 forceSelection: true,
                                 
                                 store: Ext.create('Ext.data.Store', {
@@ -101,6 +102,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 name: 'libraryType',
                                 fieldLabel: 'Library Type',
                                 emptyText: 'Library Type',
+                                labelAttrTpl: 'data-qtip="Library Type is automatically filled based on library construction protocol, if needed select other and specify in the comment field (below)."',
                                 forceSelection: true,
 
                                 store: Ext.create('Ext.data.Store', {
@@ -127,6 +129,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 name: 'organism',
                                 fieldLabel: 'Organism',
                                 emptyText: 'Organism',
+                                labelAttrTpl: 'data-qtip="Select from list with predefined options or select other and specify in the comment field (below)."',
                                 forceSelection: true,
 
                                 store: Ext.create('Ext.data.Store', {
@@ -153,6 +156,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 name: 'indexReads',
                                 fieldLabel: 'Number of Index Reads',
                                 emptyText: 'Number of Index Reads',
+                                labelAttrTpl: 'data-qtip="Number of Index Reads = 0: Libraries do not carry any barcode, no barcode will be read during sequencing.<br/><br/>Number of Index Reads = 1: Single-indexed libraries. Index on adapter P7 will be read during sequencing (true for most applications).<br/><br/>Number of Index Reads = 2: Dual-indexed libraries. Index on Adapter P7 and P5 will be read. (i.e Nextera libraries or if a high degree of multiplexing is needed)."',
                                 forceSelection: true,
 
                                 store: Ext.create('Ext.data.Store', {
@@ -172,19 +176,21 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             },
                             {
                                 name: 'index1',
-                                fieldLabel: 'Index 1',
-                                emptyText: 'Index 1',
+                                fieldLabel: 'Index 1 (I7)',
+                                emptyText: 'Index 1 (I7)',
+                                labelAttrTpl: 'data-qtip="Select from predefined list; make sure the displayed index is the sequence used for barcoding. Or enter sequence of index used for barcoding (typically 6 nucleotides)."',
                                 colspan: 2
                             },
                             {
                                 name: 'index2',
-                                fieldLabel: 'Index 2',
-                                emptyText: 'Index 2',
+                                fieldLabel: 'Index 2 (I5)',
+                                emptyText: 'Index 2 (I5)',
                                 colspan: 2
                             },
                             {
                                 xtype: 'fieldcontainer',
                                 fieldLabel: 'Equal Representation of Nucleotides',
+                                labelAttrTpl: 'data-qtip="In case your insert (up- and downstream of sequencing adaptors) has an uneven representation of nucleotides. For best sequencing quality all 4 nucleotides should be at each position represented at an equal frequency. This is true for applications like ChIP-Seq, RNA-Seq and WGS but can get problematic if amplicons are sequenced or samples that contain internal barcodes."',
                                 defaultType: 'radiofield',
                                 defaults: {
                                     // flex: 1
@@ -216,7 +222,8 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             {
                                 name: 'DANADissolvedIn',
                                 fieldLabel: 'DNA Dissolved In',
-                                emptyText: 'DNA Dissolved In'
+                                emptyText: 'DNA Dissolved In',
+                                labelAttrTpl: 'data-qtip=""'
                             },
                             {
                                 xtype: 'checkboxfield',
@@ -229,6 +236,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 name: 'concentration',
                                 fieldLabel: 'Concentration (ng/µl)',
                                 emptyText: 'Concentration (ng/µl)',
+                                labelAttrTpl: 'data-qtip=""',
                                 minValue: 0
                             },
                             {
@@ -245,6 +253,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 name: 'concentrationDeterminedBy',
                                 fieldLabel: 'Concentration Determined by',
                                 emptyText: 'Concentration Determined by',
+                                labelAttrTpl: 'data-qtip=""',
                                 // forceSelection: true,
 
                                 store: Ext.create('Ext.data.Store', {
@@ -267,6 +276,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 name: 'sampleVolume',
                                 fieldLabel: 'Sample Volume (µl)',
                                 emptyText: 'Sample Volume (µl)',
+                                labelAttrTpl: 'data-qtip=""',
                                 minValue: 0,
                                 allowDecimals: false
                             },
@@ -281,6 +291,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 name: 'qPCRResult',
                                 fieldLabel: 'qPCR Result (nM)',
                                 emptyText: 'qPCR Result (nM)',
+                                labelAttrTpl: 'data-qtip=""',
                                 minValue: 0
                             },
                             {
@@ -297,6 +308,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 name: 'sequencingRunCondition',
                                 fieldLabel: 'Sequencing Run Condition',
                                 emptyText: 'Sequencing Run Condition',
+                                labelAttrTpl: 'data-qtip=""',
                                 forceSelection: true,
 
                                 store: Ext.create('Ext.data.Store', {
@@ -319,6 +331,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 name: 'sequencingDepth',
                                 fieldLabel: 'Sequencing Depth (M)',
                                 emptyText: 'Sequencing Depth (M)',
+                                labelAttrTpl: 'data-qtip=""',
                                 minValue: 0,
                                 allowDecimals: false
                             },
@@ -333,6 +346,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 name: 'comments',
                                 fieldLabel: 'Comments',
                                 emptyText: 'Comments',
+                                labelAttrTpl: 'data-qtip=""',
                                 // width: 435,
                                 colspan: 2
                             }
