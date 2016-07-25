@@ -69,6 +69,8 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             },
                             {
                                 xtype: 'combobox',
+                                id: 'libraryProtocolField',
+                                itemId: 'libraryProtocolField',
                                 queryMode: 'local',
                                 displayField: 'name',
                                 valueField: 'id',
@@ -76,17 +78,8 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 fieldLabel: 'Protocol for Library Preparation',
                                 emptyText: 'Protocol for Library Preparation',
                                 labelAttrTpl: 'data-qtip="Select library construction protocol from predefined list or select other and specify in the comment field (below)."',
-                                forceSelection: true,
-                                
-                                store: Ext.create('Ext.data.Store', {
-                                    model: 'LibraryField',
-                                    data: [
-                                        {id: 1, name: 'Protocol 1'},
-                                        {id: 2, name: 'Protocol 2'},
-                                        {id: 3, name: 'Protocol 3'},
-                                        {id: 4, name: 'Other (specify in comments)'}
-                                    ]
-                                })
+                                store: 'libraryProtocolsStore',
+                                forceSelection: true
                             },
                             {
                                 xtype: 'checkboxfield',
@@ -96,6 +89,8 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             },
                             {
                                 xtype: 'combobox',
+                                id: 'libraryTypeField',
+                                itemId: 'libraryTypeField',
                                 queryMode: 'local',
                                 displayField: 'name',
                                 valueField: 'id',
@@ -103,23 +98,18 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 fieldLabel: 'Library Type',
                                 emptyText: 'Library Type',
                                 labelAttrTpl: 'data-qtip="Library Type is automatically filled based on library construction protocol, if needed select other and specify in the comment field (below)."',
+                                store: 'libraryTypeStore',
                                 forceSelection: true,
-
-                                store: Ext.create('Ext.data.Store', {
-                                    model: 'LibraryField',
-                                    data: [
-                                        {id: 1, name: 'Type 1'},
-                                        {id: 2, name: 'Type 2'},
-                                        {id: 3, name: 'Type 3'},
-                                        {id: 4, name: 'Other (specify in comments)'}
-                                    ]
-                                })
+                                disabled: true
                             },
                             {
                                 xtype: 'checkboxfield',
+                                id: 'keepLibraryTypeField',
+                                itemId: 'keepLibraryTypeField',
                                 name: 'keepLibraryType',
                                 boxLabel: 'Keep',
-                                margin: '-10px 0 0 15px'
+                                margin: '-10px 0 0 15px',
+                                disabled: true
                             },
                             {
                                 xtype: 'combobox',
@@ -130,17 +120,19 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 fieldLabel: 'Organism',
                                 emptyText: 'Organism',
                                 labelAttrTpl: 'data-qtip="Select from list with predefined options or select other and specify in the comment field (below)."',
+                                store: 'organismsStore',
                                 forceSelection: true,
+                                // disabled: true,
 
-                                store: Ext.create('Ext.data.Store', {
-                                    model: 'LibraryField',
-                                    data: [
-                                        {id: 1, name: 'Organism 1'},
-                                        {id: 2, name: 'Organism 2'},
-                                        {id: 3, name: 'Organism 3'},
-                                        {id: 4, name: 'Other (specify in comments)'}
-                                    ]
-                                })
+                                // store: Ext.create('Ext.data.Store', {
+                                //     model: 'LibraryField',
+                                //     data: [
+                                //         {id: 1, name: 'Organism 1'},
+                                //         {id: 2, name: 'Organism 2'},
+                                //         {id: 3, name: 'Organism 3'},
+                                //         {id: 4, name: 'Other (specify in comments)'}
+                                //     ]
+                                // })
                             },
                             {
                                 xtype: 'checkboxfield',
@@ -162,9 +154,9 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 store: Ext.create('Ext.data.Store', {
                                     model: 'LibraryField',
                                     data: [
-                                        {id: 1, name: '1'},
-                                        {id: 2, name: '2'},
-                                        {id: 3, name: '3'}
+                                        {id: 1, name: '0'},
+                                        {id: 2, name: '1'},
+                                        {id: 3, name: '2'}
                                     ]
                                 })
                             },
@@ -179,13 +171,15 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 fieldLabel: 'Index 1 (I7)',
                                 emptyText: 'Index 1 (I7)',
                                 labelAttrTpl: 'data-qtip="Select from predefined list; make sure the displayed index is the sequence used for barcoding. Or enter sequence of index used for barcoding (typically 6 nucleotides)."',
-                                colspan: 2
+                                colspan: 2,
+                                disabled: true
                             },
                             {
                                 name: 'index2',
                                 fieldLabel: 'Index 2 (I5)',
                                 emptyText: 'Index 2 (I5)',
-                                colspan: 2
+                                colspan: 2,
+                                disabled: true
                             },
                             {
                                 xtype: 'fieldcontainer',
