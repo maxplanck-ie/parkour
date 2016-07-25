@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'common',
     'researcher',
     'request',
+    'library',
 ]
 
 MIDDLEWARE_CLASSES = [

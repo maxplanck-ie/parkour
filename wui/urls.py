@@ -22,12 +22,13 @@ urlpatterns = [
     url(r'', include('common.urls')),
     url(r'', include('researcher.urls')),
     url(r'', include('request.urls')),
+    url(r'', include('library.urls')),
 ]
 
 from django.views.defaults import page_not_found, server_error
 from wui import settings
 if settings.DEBUG:
     urlpatterns += [
-        url(r'^404/$', page_not_found, kwargs={'exception': Exception("Page not Found")}),
+        url(r'^404/$', page_not_found, kwargs={'exception': Exception('Page not Found')}),
         url(r'^500/$', server_error),
     ]
