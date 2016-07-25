@@ -31,9 +31,10 @@ Ext.define('MainHub.view.main.Main', {
     items: [
         {
             xtype: 'toolbar',
+            itemId: 'headerBar',
             cls: 'sencha-dash-dash-headerbar shadow',
             height: 64,
-            itemId: 'headerBar',
+            padding: 0,
             items: [
                 {
                     xtype: 'component',
