@@ -12,16 +12,6 @@ class LibraryProtocolAdmin(admin.ModelAdmin):
         other_library_type.save()
 
 
-@admin.register(LibraryType)
-class LibraryTypeAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(Organism)
-class OrganismAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(IndexType)
-class IndexTypeAdmin(admin.ModelAdmin):
+@admin.register(LibraryType, Organism, IndexType)
+class LibraryAdmin(admin.ModelAdmin):
     pass
