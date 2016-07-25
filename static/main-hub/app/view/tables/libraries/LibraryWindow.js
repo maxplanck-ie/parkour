@@ -112,6 +112,22 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 disabled: true
                             },
                             {
+                                xtype: 'numberfield',
+                                name: 'enrichmentCycles',
+                                fieldLabel: 'Number of enrichment cycles',
+                                emptyText: 'Number of enrichment cycles',
+                                labelAttrTpl: 'data-qtip=""',
+                                allowDecimals: false,
+                                minValue: 0,
+                                maxValue: 99
+                            },
+                            {
+                                xtype: 'checkboxfield',
+                                name: 'keepEnrichmentCycles',
+                                boxLabel: 'Keep',
+                                margin: '-10px 0 0 15px'
+                            },
+                            {
                                 xtype: 'combobox',
                                 queryMode: 'local',
                                 displayField: 'name',
