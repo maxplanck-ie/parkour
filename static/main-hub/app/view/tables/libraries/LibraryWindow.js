@@ -121,18 +121,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 emptyText: 'Organism',
                                 labelAttrTpl: 'data-qtip="Select from list with predefined options or select other and specify in the comment field (below)."',
                                 store: 'organismsStore',
-                                forceSelection: true,
-                                // disabled: true,
-
-                                // store: Ext.create('Ext.data.Store', {
-                                //     model: 'LibraryField',
-                                //     data: [
-                                //         {id: 1, name: 'Organism 1'},
-                                //         {id: 2, name: 'Organism 2'},
-                                //         {id: 3, name: 'Organism 3'},
-                                //         {id: 4, name: 'Other (specify in comments)'}
-                                //     ]
-                                // })
+                                forceSelection: true
                             },
                             {
                                 xtype: 'checkboxfield',
