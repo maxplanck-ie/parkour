@@ -1,3 +1,10 @@
+coverage==4.1
 Django==1.9.7
+ecdsa==0.13
+Fabric3==1.11.1.post1
 gunicorn==19.6.0
+paramiko==1.17.1
 psycopg2==2.6.2
+pycrypto==2.6.1
+pyperclip==1.5.27
+six==1.10.0

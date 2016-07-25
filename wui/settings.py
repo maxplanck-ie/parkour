@@ -59,6 +59,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'debug': True,
         },
     },
 ]
@@ -163,19 +164,23 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['logfile'],
-            'level': 'DEBUG',
+            'handlers': ['console'],
+            'level': 'WARNING',
             'propagate': True,
+        },
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
         },
         'db': {
             'handlers': ['console', 'dblogfile'],
             'level': 'DEBUG',
-            'propagate': True
         },
         # 'django.request': {
         #     'handlers': ['mail_admins'],
         #     'level': 'ERROR',
-        #     'propagate': False,
+        #     'propagate': True,
         # },
     },
 }

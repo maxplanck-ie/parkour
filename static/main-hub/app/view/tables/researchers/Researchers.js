@@ -4,7 +4,6 @@ Ext.define('MainHub.view.tables.researchers.Researchers', {
 
     requires: [
         'Ext.container.Container',
-        'Ext.toolbar.Paging',
         'MainHub.view.tables.researchers.ResearchersController',
         'MainHub.view.tables.researchers.ResearcherWindow'
     ],
