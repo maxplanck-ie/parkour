@@ -1,10 +1,10 @@
 from django.conf.urls import url
-from library import views
+from library.views import LibraryField
 
 
 urlpatterns = [
-    url(r'^get_library_protocols/$', views.get_library_protocols, name='get_library_protocols'),
-    url(r'^get_library_type/$', views.get_library_type, name='get_library_type'),
-    url(r'^get_organisms/$', views.get_organisms, name='get_organisms'),
-    url(r'^get_index_types/$', views.get_index_types, name='get_index_types'),
+    url(r'^get_library_protocols/$', LibraryField.as_view(), name='get_library_protocols'),
+    url(r'^get_library_type/$', LibraryField.as_view(), name='get_library_type'),
+    url(r'^get_organisms/$', LibraryField.as_view(), name='get_organisms'),
+    url(r'^get_index_types/$', LibraryField.as_view(), name='get_index_types'),
 ]
