@@ -10,6 +10,9 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             '#libraryProtocolField': {
                 select: 'onLibraryProtocolFieldSelect'
             },
+            '#indexReadsField': {
+                select: 'onIndexReadsFieldSelect'
+            },
             '#cancelBtn': {
                 click: 'onCancelBtnClick'
             }
@@ -59,6 +62,22 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
                 wnd.setLoading(false);
             }
         });
+    },
+
+    onIndexReadsFieldSelect: function(fld, record) {
+        var index1Field = Ext.getCmp('index1Field'),
+            index2Field = Ext.getCmp('index2Field');
+
+        if (record.data.id == 1) {
+            index1Field.setDisabled(true);
+            index2Field.setDisabled(true);
+        } else if (record.data.id == 2) {
+            index1Field.setDisabled(false);
+            index2Field.setDisabled(true);
+        } else {
+            index1Field.setDisabled(false);
+            index2Field.setDisabled(false);
+        }
     },
 
     onCancelBtnClick: function(btn) {

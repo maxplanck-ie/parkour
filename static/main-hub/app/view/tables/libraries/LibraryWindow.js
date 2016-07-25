@@ -131,6 +131,8 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             },
                             {
                                 xtype: 'combobox',
+                                id: 'indexReadsField',
+                                itemId: 'indexReadsField',
                                 queryMode: 'local',
                                 displayField: 'name',
                                 valueField: 'id',
@@ -157,6 +159,8 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             },
                             {
                                 name: 'index1',
+                                id: 'index1Field',
+                                itemId: 'index1Field',
                                 fieldLabel: 'Index 1 (I7)',
                                 emptyText: 'Index 1 (I7)',
                                 labelAttrTpl: 'data-qtip="Select from predefined list; make sure the displayed index is the sequence used for barcoding. Or enter sequence of index used for barcoding (typically 6 nucleotides)."',
@@ -165,6 +169,8 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             },
                             {
                                 name: 'index2',
+                                id: 'index2Field',
+                                itemId: 'index2Field',
                                 fieldLabel: 'Index 2 (I5)',
                                 emptyText: 'Index 2 (I5)',
                                 colspan: 2,
