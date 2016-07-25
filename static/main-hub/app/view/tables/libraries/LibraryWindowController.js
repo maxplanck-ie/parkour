@@ -40,6 +40,13 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             if (!success) Ext.ux.ToastMessage('Cannot load Organisms', 'error');
             wnd.setLoading(false);
         });
+
+        // Load Index Types
+        wnd.setLoading();
+        Ext.getStore('indexTypesStore').load(function(records, operation, success) {
+            if (!success) Ext.ux.ToastMessage('Cannot load Index Types', 'error');
+            wnd.setLoading(false);
+        });
     },
 
     onLibraryProtocolFieldSelect: function(fld, record) {

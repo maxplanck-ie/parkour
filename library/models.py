@@ -22,3 +22,10 @@ class Organism(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class IndexType(models.Model):
+    name = models.CharField('Index Type', max_length=200)
+
+    def __str__(self):
+        return self.name

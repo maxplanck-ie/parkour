@@ -147,6 +147,24 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             },
                             {
                                 xtype: 'combobox',
+                                queryMode: 'local',
+                                displayField: 'name',
+                                valueField: 'id',
+                                name: 'indexType',
+                                fieldLabel: 'Index Type',
+                                emptyText: 'Index Type',
+                                labelAttrTpl: 'data-qtip="Select from list with predefined options or select other and specify in the comment field (below)."',
+                                store: 'indexTypesStore',
+                                forceSelection: true
+                            },
+                            {
+                                xtype: 'checkboxfield',
+                                name: 'keepIndexType',
+                                boxLabel: 'Keep',
+                                margin: '-10px 0 0 15px'
+                            },
+                            {
+                                xtype: 'combobox',
                                 id: 'indexReadsField',
                                 itemId: 'indexReadsField',
                                 queryMode: 'local',

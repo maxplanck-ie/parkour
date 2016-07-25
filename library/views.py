@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from library.models import LibraryProtocol, LibraryType, Organism
+from library.models import LibraryProtocol, LibraryType, Organism, IndexType
 
 import json
 import logging
@@ -67,6 +67,27 @@ def get_organisms(request):
     except Exception as e:
         error = str(e)
         print('[ERROR]: get_organisms(): %s' % error)
+        logger.debug(error)
+
+    return HttpResponse(json.dumps({'success': not error, 'error': error, 'data': data}),
+                        content_type='application/json')
+
+
+def get_index_types(request):
+    """ Get the list of all index types """
+    error = str()
+    data = []
+
+    try:
+        index_types = IndexType.objects.all()
+        data = [{'name': i_type.name, 'indexTypeId': i_type.id} for i_type in index_types]
+
+        # Move 'Other' option to the end of list
+        index = next(index for (index, d) in enumerate(data) if d['name'] == 'Other')
+        data += [data.pop(index)]
+    except Exception as e:
+        error = str(e)
+        print('[ERROR]: get_index_types(): %s' % error)
         logger.debug(error)
 
     return HttpResponse(json.dumps({'success': not error, 'error': error, 'data': data}),

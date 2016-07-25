@@ -1,5 +1,5 @@
 from django.contrib import admin
-from library.models import LibraryProtocol, LibraryType, Organism
+from library.models import LibraryProtocol, LibraryType, Organism, IndexType
 
 
 @admin.register(LibraryProtocol)
@@ -19,4 +19,9 @@ class LibraryTypeAdmin(admin.ModelAdmin):
 
 @admin.register(Organism)
 class OrganismAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(IndexType)
+class IndexTypeAdmin(admin.ModelAdmin):
     pass

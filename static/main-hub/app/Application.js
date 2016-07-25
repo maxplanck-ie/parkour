@@ -26,7 +26,8 @@ Ext.define('MainHub.Application', {
         'Requests',
         'tables.libraries.LibraryProtocols',
         'tables.libraries.LibraryType',
-        'tables.libraries.Organisms'
+        'tables.libraries.Organisms',
+        'tables.libraries.IndexTypes'
     ],
 
     requires: [
