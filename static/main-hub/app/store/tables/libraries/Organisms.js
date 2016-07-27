@@ -3,10 +3,10 @@ Ext.define('MainHub.store.tables.libraries.Organisms', {
     storeId: 'organismsStore',
 
     requires: [
-        'MainHub.model.tables.libraries.Organism'
+        'MainHub.model.tables.libraries.LibraryField'
     ],
 
-    model: 'MainHub.model.tables.libraries.Organism',
+    model: 'MainHub.model.tables.libraries.LibraryField',
 
     proxy: {
         type: 'ajax',

@@ -75,7 +75,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         wnd.setLoading();
         libraryTypeStore.load({
             params: {
-                'library_protocol_id': record.data.libraryProtocolId
+                'library_protocol_id': record.data.id
             },
             callback: function(records, operation, success) {
                 libraryTypeField.setDisabled(false);
@@ -102,7 +102,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         wnd.setLoading();
         indexI7Store.load({
             params: {
-                'index_type_id': record.data.indexTypeId
+                'index_type_id': record.data.id
             },
             callback: function(records, operation, success) {
                 if (!success) Ext.ux.ToastMessage('Cannot load Index I7', 'error');
@@ -114,7 +114,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         wnd.setLoading();
         indexI5Store.load({
             params: {
-                'index_type_id': record.data.indexTypeId
+                'index_type_id': record.data.id
             },
             callback: function(records, operation, success) {
                 if (!success) Ext.ux.ToastMessage('Cannot load Index I5', 'error');

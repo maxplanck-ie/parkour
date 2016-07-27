@@ -40,7 +40,7 @@ class LibraryField(View):
     def get_library_protocols():
         """ Get the list of all library protocols """
         library_protocols = LibraryProtocol.objects.all()
-        data = [{'name': protocol.name, 'libraryProtocolId': protocol.id, 'provider': protocol.provider}
+        data = [{'id': protocol.id, 'name': protocol.name, 'provider': protocol.provider}
                 for protocol in library_protocols]
         return data
 
@@ -49,35 +49,35 @@ class LibraryField(View):
         library_protocol_id = self.request.GET.get('library_protocol_id')
         library_protocol = LibraryProtocol.objects.get(id=library_protocol_id)
         library_types = LibraryType.objects.filter(library_protocol__in=[library_protocol])
-        data = [{'name': lib_type.name, 'libraryTypeId': lib_type.id} for lib_type in library_types]
+        data = [{'id': lib_type.id, 'name': lib_type.name} for lib_type in library_types]
         return data
 
     @staticmethod
     def get_organisms():
         """ Get the list of all organisms """
         organisms = Organism.objects.all()
-        data = [{'name': organism.name, 'organismId': organism.id} for organism in organisms]
+        data = [{'id': organism.id, 'name': organism.name} for organism in organisms]
         return data
 
     @staticmethod
     def get_index_types():
         """ Get the list of all index types """
         index_types = IndexType.objects.all()
-        data = [{'name': index_type.name, 'indexTypeId': index_type.id} for index_type in index_types]
+        data = [{'id': index_type.id, 'name': index_type.name} for index_type in index_types]
         return data
 
     def get_index_i7(self):
         """ Get the list of all indices i7 for a given index type """
         index_type = self.request.GET.get('index_type_id')
         indices = IndexI7.objects.filter(index_type=index_type)
-        data = [{'indexId': index.id, 'index': '%s - %s' % (index.index_id, index.index), } for index in indices]
+        data = [{'id': index.id, 'index': '%s - %s' % (index.index_id, index.index), } for index in indices]
         return data
 
     def get_index_i5(self):
         """ Get the list of all indices i5 for a given index type """
         index_type = self.request.GET.get('index_type_id')
         indices = IndexI5.objects.filter(index_type=index_type)
-        data = [{'indexId': index.id, 'index': '%s - %s' % (index.index_id, index.index), } for index in indices]
+        data = [{'id': index.id, 'index': '%s - %s' % (index.index_id, index.index), } for index in indices]
         return data
 
     @staticmethod

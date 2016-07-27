@@ -3,10 +3,10 @@ Ext.define('MainHub.store.tables.libraries.IndexI7', {
     storeId: 'indexI7Store',
 
     requires: [
-        'MainHub.model.tables.libraries.Index'
+        'MainHub.model.tables.libraries.LibraryField'
     ],
 
-    model: 'MainHub.model.tables.libraries.Index',
+    model: 'MainHub.model.tables.libraries.LibraryField',
 
     proxy: {
         type: 'ajax',

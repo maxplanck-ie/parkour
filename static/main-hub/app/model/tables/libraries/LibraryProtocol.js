@@ -4,7 +4,7 @@ Ext.define('MainHub.model.tables.libraries.LibraryProtocol', {
     fields: [
         {
             type: 'int',
-            name: 'libraryProtocolId'
+            name: 'id'
         },
         {
             type: 'string',
