@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.views.generic import View
 from django.core.urlresolvers import resolve
-from library.models import LibraryProtocol, LibraryType, Organism, IndexType
+from library.models import LibraryProtocol, LibraryType, Organism, IndexType, IndexI7, IndexI5
 
 import json
 import logging
@@ -20,9 +20,10 @@ class LibraryField(View):
             data = getattr(self, resolve(request.path).url_name)()
 
             try:
-                # Move 'Other' option to the end of list
-                index = next(index for (index, d) in enumerate(data) if d['name'] == 'Other')
-                data += [data.pop(index)]
+                if data and 'name' in data[0].keys():
+                    # Move 'Other' option to the end of list
+                    index = next(index for (index, d) in enumerate(data) if d['name'] == 'Other')
+                    data += [data.pop(index)]
             except StopIteration:
                 pass
 
@@ -62,4 +63,18 @@ class LibraryField(View):
         """ Get the list of all index types """
         index_types = IndexType.objects.all()
         data = [{'name': index_type.name, 'indexTypeId': index_type.id} for index_type in index_types]
+        return data
+
+    def get_index_i7(self):
+        """ Get the list of all indices i7 for a given index type """
+        index_type = self.request.GET.get('index_type_id')
+        indices = IndexI7.objects.filter(index_type=index_type)
+        data = [{'indexId': index.id, 'index': '%s - %s' % (index.index_id, index.index), } for index in indices]
+        return data
+
+    def get_index_i5(self):
+        """ Get the list of all indices i5 for a given index type """
+        index_type = self.request.GET.get('index_type_id')
+        indices = IndexI5.objects.filter(index_type=index_type)
+        data = [{'indexId': index.id, 'index': '%s - %s' % (index.index_id, index.index), } for index in indices]
         return data

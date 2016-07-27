@@ -10,6 +10,9 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             '#libraryProtocolField': {
                 select: 'onLibraryProtocolFieldSelect'
             },
+            '#indexType': {
+                select: 'onIndexTypeSelect'
+            },
             '#indexReadsField': {
                 select: 'onIndexReadsFieldSelect'
             },
@@ -66,6 +69,36 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
                 keepLibraryTypeField.setDisabled(false);
                 if (!success) Ext.ux.ToastMessage('Cannot load Principal Investigators', 'error');
 
+                wnd.setLoading(false);
+            }
+        });
+    },
+
+    onIndexTypeSelect: function(fld, record) {
+        var wnd = fld.up('library_wnd'),
+            indexI7Store = Ext.getStore('indexI7Store'),
+            indexI5Store = Ext.getStore('indexI5Store');
+
+        // Load Index I7
+        wnd.setLoading();
+        indexI7Store.load({
+            params: {
+                'index_type_id': record.data.indexTypeId
+            },
+            callback: function(records, operation, success) {
+                if (!success) Ext.ux.ToastMessage('Cannot load Index I7', 'error');
+                wnd.setLoading(false);
+            }
+        });
+
+        // Load Index I5
+        wnd.setLoading();
+        indexI5Store.load({
+            params: {
+                'index_type_id': record.data.indexTypeId
+            },
+            callback: function(records, operation, success) {
+                if (!success) Ext.ux.ToastMessage('Cannot load Index I5', 'error');
                 wnd.setLoading(false);
             }
         });

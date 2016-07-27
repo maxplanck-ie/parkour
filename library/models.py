@@ -29,3 +29,23 @@ class IndexType(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Index(models.Model):
+    index_id = models.CharField('Index ID', max_length=50)
+    index = models.CharField('Index', max_length=200)
+    index_type = models.ForeignKey(IndexType, verbose_name='Index Type')
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return self.index_id
+
+
+class IndexI7(Index):
+    pass
+
+
+class IndexI5(Index):
+    pass

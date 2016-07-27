@@ -147,6 +147,8 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             },
                             {
                                 xtype: 'combobox',
+                                id: 'indexType',
+                                itemId: 'indexType',
                                 queryMode: 'local',
                                 displayField: 'name',
                                 valueField: 'id',
@@ -192,21 +194,32 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 margin: '-10px 0 0 15px'
                             },
                             {
+                                xtype: 'combobox',
+                                queryMode: 'local',
+                                displayField: 'index',
+                                valueField: 'id',
                                 name: 'index1',
                                 id: 'index1Field',
                                 itemId: 'index1Field',
                                 fieldLabel: 'Index 1 (I7)',
                                 emptyText: 'Index 1 (I7)',
                                 labelAttrTpl: 'data-qtip="Select from predefined list; make sure the displayed index is the sequence used for barcoding. Or enter sequence of index used for barcoding (typically 6 nucleotides)."',
+                                store: 'indexI7Store',
                                 colspan: 2,
                                 disabled: true
                             },
                             {
+                                xtype: 'combobox',
+                                queryMode: 'local',
+                                displayField: 'index',
+                                valueField: 'id',
                                 name: 'index2',
                                 id: 'index2Field',
                                 itemId: 'index2Field',
                                 fieldLabel: 'Index 2 (I5)',
                                 emptyText: 'Index 2 (I5)',
+                                labelAttrTpl: 'data-qtip="Select from predefined list; make sure the displayed index is the sequence used for barcoding. Or enter sequence of index used for barcoding (typically 6 nucleotides)."',
+                                store: 'indexI5Store',
                                 colspan: 2,
                                 disabled: true
                             },
