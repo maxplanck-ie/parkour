@@ -89,3 +89,6 @@ class Library(models.Model):
     class Meta:
         verbose_name = 'Library'
         verbose_name_plural = 'Libraries'
+
+    def __str__(self):
+        return self.library_name

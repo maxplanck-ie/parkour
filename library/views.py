@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from django.views.generic import View
+from django.views.generic import View, DetailView
 from django.core.urlresolvers import resolve
 from library.models import LibraryProtocol, LibraryType, Organism, IndexType, IndexI7, IndexI5, ConcentrationMethod, \
     SequencingRunCondition, Library
@@ -94,27 +94,67 @@ class LibraryField(View):
         data = [{'id': method.id, 'name': method.name} for method in methods]
         return data
 
-    def save_library(self):
-        """ Save library """
 
-        library_name = self.request.GET.get('library_name')
-        library_protocol = self.request.GET.get('library_protocol')
-        library_type = self.request.GET.get('library_type')
-        enrichment_cycles = int(self.request.GET.get('enrichment_cycles'))
-        organism = self.request.GET.get('organism')
-        index_type = self.request.GET.get('index_type')
-        index_reads = int(self.request.GET.get('index_reads'))
-        index_i7 = self.request.GET.get('index_i7')
-        index_i5 = self.request.GET.get('index_i5')
-        equal_representation_nucleotides = bool(self.request.GET.get('equal_representation_nucleotides'))
-        dna_dissolved_in = self.request.GET.get('dna_dissolved_in')
-        concentration = float(self.request.GET.get('concentration'))
-        concentration_determined_by = self.request.GET.get('concentration_determined_by')
-        sample_volume = int(self.request.GET.get('sample_volume'))
-        qpcr_result = float(self.request.GET.get('qpcr_result'))
-        sequencing_run_condition = self.request.GET.get('sequencing_run_condition')
-        sequencing_depth = int(self.request.GET.get('sequencing_depth'))
-        comments = self.request.GET.get('comments')
+class LibraryView(View):
+    def get(self, request):
+        """ Get the list of all libraries """
+        error = str()
+        data = []
+
+        try:
+            libraries = Library.objects.select_related()
+            data = [{
+                        'id': library.id,
+                        'libraryName': library.library_name,
+                        'date': library.date.strftime('%d.%m.%Y'),
+                        'libraryProtocol': library.library_protocol.name,
+                        'libraryType': library.library_type.name,
+                        'enrichmentCycles': library.enrichment_cycles,
+                        'organism': library.organism.name,
+                        'indexType': library.index_type.name,
+                        'indexReads': library.index_reads,
+                        'indexI7': library.index_i7,
+                        'indexI5': library.index_i5,
+                        'equalRepresentation': library.equal_representation_nucleotides,
+                        'DNADissolvedIn': library.dna_dissolved_in,
+                        'concentration': library.concentration,
+                        'concentrationMethod': library.concentration_determined_by.name,
+                        'sampleVolume': library.sample_volume,
+                        'qPCRResult': library.qpcr_result,
+                        'sequencingRunCondition': library.sequencing_run_condition.name,
+                        'sequencingDepth': library.sequencing_depth,
+                        'comments': library.comments
+                    } for library in libraries]
+        except Exception as e:
+            error = str(e)
+            print('[ERROR]: %s' % error)
+            logger.debug(error)
+
+        return HttpResponse(json.dumps({'success': not error, 'error': error, 'data': data}),
+                            content_type='application/json')
+
+    def post(self, request):
+        """ Save Library """
+        error = str()
+
+        library_name = self.request.POST.get('library_name')
+        library_protocol = self.request.POST.get('library_protocol')
+        library_type = self.request.POST.get('library_type')
+        enrichment_cycles = int(self.request.POST.get('enrichment_cycles'))
+        organism = self.request.POST.get('organism')
+        index_type = self.request.POST.get('index_type')
+        index_reads = int(self.request.POST.get('index_reads'))
+        index_i7 = self.request.POST.get('index_i7')
+        index_i5 = self.request.POST.get('index_i5')
+        equal_representation_nucleotides = bool(self.request.POST.get('equal_representation_nucleotides'))
+        dna_dissolved_in = self.request.POST.get('dna_dissolved_in')
+        concentration = float(self.request.POST.get('concentration'))
+        concentration_determined_by = self.request.POST.get('concentration_determined_by')
+        sample_volume = int(self.request.POST.get('sample_volume'))
+        qpcr_result = float(self.request.POST.get('qpcr_result'))
+        sequencing_run_condition = self.request.POST.get('sequencing_run_condition')
+        sequencing_depth = int(self.request.POST.get('sequencing_depth'))
+        comments = self.request.POST.get('comments')
 
         if index_i7:
             try:
@@ -128,4 +168,21 @@ class LibraryField(View):
             except ValueError:
                 pass
 
-        return []
+        try:
+            library = Library(library_name=library_name, library_protocol_id=library_protocol,
+                              library_type_id=library_type, enrichment_cycles=enrichment_cycles,
+                              organism_id=organism, index_type_id=index_type, index_reads=index_reads,
+                              index_i7=index_i7, index_i5=index_i5,
+                              equal_representation_nucleotides=equal_representation_nucleotides,
+                              dna_dissolved_in=dna_dissolved_in, concentration=concentration,
+                              concentration_determined_by_id=concentration_determined_by,
+                              sample_volume=sample_volume, qpcr_result=qpcr_result,
+                              sequencing_run_condition_id=sequencing_run_condition,
+                              sequencing_depth=sequencing_depth, comments=comments)
+            library.save()
+        except Exception as e:
+            error = str(e)
+            print('[ERROR]: %s' % error)
+            logger.debug(error)
+
+        return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')

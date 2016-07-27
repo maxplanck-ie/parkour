@@ -73,7 +73,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 itemId: 'libraryProtocolField',
                                 queryMode: 'local',
                                 displayField: 'name',
-                                valueField: 'libraryProtocolId',
+                                valueField: 'id',
                                 name: 'libraryProtocol',
                                 fieldLabel: 'Protocol for Library Preparation',
                                 emptyText: 'Protocol for Library Preparation',

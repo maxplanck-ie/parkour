@@ -164,7 +164,6 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             // wnd.setLoading('Adding...');
             Ext.Ajax.request({
                 url: 'save_library/',
-                method: 'GET',
                 timeout: 1000000,
                 scope: this,
 

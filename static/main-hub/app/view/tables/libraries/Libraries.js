@@ -39,9 +39,31 @@ Ext.define('MainHub.view.tables.libraries.Libraries', {
                 ]
             },
 
-            store: [],
+            store: 'librariesStore',
 
-            columns: [],
+            columns: {
+                items: [
+                    { text: 'Name', dataIndex: 'libraryName', locked: true },
+                    { text: 'Date', dataIndex: 'date' },
+                    { text: 'Protocol', dataIndex: 'libraryProtocol' },
+                    { text: 'Type', dataIndex: 'libraryType' },
+                    { text: 'Enrichment Cycles', dataIndex: 'enrichmentCycles' },
+                    { text: 'Organism', dataIndex: 'organism' },
+                    { text: 'Index Type', dataIndex: 'indexType' },
+                    { text: 'Index Reads', dataIndex: 'indexReads' },
+                    { text: 'Index I7', dataIndex: 'indexI7' },
+                    { text: 'Index I5', dataIndex: 'indexI5' },
+                    { text: 'Equal Representation', dataIndex: 'equalRepresentation' },
+                    { text: 'DNA Dissolved In', dataIndex: 'DNADissolvedIn' },
+                    { text: 'Concentration', dataIndex: 'concentration' },
+                    { text: 'Concentration Method', dataIndex: 'concentrationMethod' },
+                    { text: 'Sample Volume', dataIndex: 'sampleVolume' },
+                    { text: 'qPCR Result', dataIndex: 'qPCRResult' },
+                    { text: 'Sequencing Run Condition', dataIndex: 'sequencingRunCondition' },
+                    { text: 'Sequencing Depth', dataIndex: 'sequencingDepth' },
+                    { text: 'Comments', dataIndex: 'comments' }
+                ]
+            },
 
             plugins: [
                 {
