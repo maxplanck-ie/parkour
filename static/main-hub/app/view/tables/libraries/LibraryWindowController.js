@@ -16,6 +16,9 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             '#indexReadsField': {
                 select: 'onIndexReadsFieldSelect'
             },
+            '#addLibraryWndBtn': {
+                click: 'onAddLibraryWndBtnClick'
+            },
             '#cancelBtn': {
                 click: 'onCancelBtnClick'
             }
@@ -117,6 +120,17 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         } else {
             index1Field.setDisabled(false);
             index2Field.setDisabled(false);
+        }
+    },
+
+    onAddLibraryWndBtnClick: function(btn) {
+        var wnd = btn.up('library_wnd'),
+            form = Ext.getCmp('libraryForm');
+
+        if (form.isValid()) {
+            var data = form.getForm().getFieldValues();
+
+            // debugger;
         }
     },
 
