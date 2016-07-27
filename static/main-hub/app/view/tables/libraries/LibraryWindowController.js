@@ -161,7 +161,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         if (form.isValid()) {
             var data = form.getForm().getFieldValues();
 
-            // wnd.setLoading('Adding...');
+            wnd.setLoading('Adding...');
             Ext.Ajax.request({
                 url: 'save_library/',
                 timeout: 1000000,
@@ -192,22 +192,22 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
                     var obj = Ext.JSON.decode(response.responseText);
 
                     if (obj.success) {
-                        // var grid = Ext.getCmp('researchersTable');
-                        // grid.fireEvent('refresh', grid);
+                        var grid = Ext.getCmp('librariesTable');
+                        grid.fireEvent('refresh', grid);
                         Ext.ux.ToastMessage('Library has been added!');
                     } else {
                         Ext.ux.ToastMessage(obj.error, 'error');
                         console.log('[ERROR]: save_library(): ' + obj.error);
                         console.log(response);
                     }
-                    // wnd.close();
+                    wnd.close();
                 },
 
                 failure: function(response) {
                     Ext.ux.ToastMessage(response.statusText, 'error');
                     console.log('[ERROR]: save_library()');
                     console.log(response);
-                    // wnd.close();
+                    wnd.close();
                 }
             });
         } else {
