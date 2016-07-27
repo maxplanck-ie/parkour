@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.views.generic import View
 from django.core.urlresolvers import resolve
 from library.models import LibraryProtocol, LibraryType, Organism, IndexType, IndexI7, IndexI5, ConcentrationMethod, \
-    SequencingRunCondition
+    SequencingRunCondition, Library
 
 import json
 import logging
