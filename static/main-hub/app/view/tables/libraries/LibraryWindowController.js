@@ -16,6 +16,9 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             '#indexReadsField': {
                 select: 'onIndexReadsFieldSelect'
             },
+            '#saveAndAddLibraryWndBtn': {
+                click: 'onSaveAndAddLibraryWndBtnClick'
+            },
             '#addLibraryWndBtn': {
                 click: 'onAddLibraryWndBtnClick'
             },
@@ -80,7 +83,13 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
     onIndexTypeSelect: function(fld, record) {
         var wnd = fld.up('library_wnd'),
             indexI7Store = Ext.getStore('indexI7Store'),
-            indexI5Store = Ext.getStore('indexI5Store');
+            indexI5Store = Ext.getStore('indexI5Store'),
+            indexI7Field = Ext.getCmp('indexI7Field'),
+            indexI5Field = Ext.getCmp('indexI5Field');
+
+        // Remove values before loading new stores
+        indexI7Field.clearValue();
+        indexI5Field.clearValue();
 
         // Load Index I7
         wnd.setLoading();
@@ -108,29 +117,88 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
     },
 
     onIndexReadsFieldSelect: function(fld, record) {
-        var index1Field = Ext.getCmp('index1Field'),
-            index2Field = Ext.getCmp('index2Field');
+        var indexI7Field = Ext.getCmp('indexI7Field'),
+            indexI5Field = Ext.getCmp('indexI5Field');
 
         if (record.data.id == 1) {
-            index1Field.setDisabled(true);
-            index2Field.setDisabled(true);
+            indexI7Field.setDisabled(true);
+            indexI5Field.setDisabled(true);
         } else if (record.data.id == 2) {
-            index1Field.setDisabled(false);
-            index2Field.setDisabled(true);
+            indexI7Field.setDisabled(false);
+            indexI5Field.setDisabled(true);
         } else {
-            index1Field.setDisabled(false);
-            index2Field.setDisabled(false);
+            indexI7Field.setDisabled(false);
+            indexI5Field.setDisabled(false);
         }
     },
 
+    onSaveAndAddLibraryWndBtnClick: function() {
+        this.saveLibrary();
+    },
+
     onAddLibraryWndBtnClick: function(btn) {
-        var wnd = btn.up('library_wnd'),
-            form = Ext.getCmp('libraryForm');
+        this.saveLibrary();
+    },
+
+    saveLibrary: function() {
+        var form = Ext.getCmp('libraryForm'),
+            wnd = form.up('library_wnd');
 
         if (form.isValid()) {
             var data = form.getForm().getFieldValues();
 
-            // debugger;
+            // wnd.setLoading('Adding...');
+            Ext.Ajax.request({
+                url: 'save_library/',
+                method: 'GET',
+                timeout: 1000000,
+                scope: this,
+
+                params: {
+                    'library_name': data.libraryName,
+                    'library_protocol': data.libraryProtocol,
+                    'library_type': data.libraryType,
+                    'enrichment_cycles': data.enrichmentCycles,
+                    'organism': data.organism,
+                    'index_type': data.indexType,
+                    'index_reads': data.indexReads,
+                    'index_i7': data.indexI7,
+                    'index_i5': data.indexI5,
+                    'equal_representation_nucleotides': data.equalRepresentationOfNucleotides,
+                    'dna_dissolved_in': data.DNADissolvedIn,
+                    'concentration': data.concentration,
+                    'concentration_determined_by': data.concentrationDeterminedBy,
+                    'sample_volume': data.sampleVolume,
+                    'qpcr_result': data.qPCRResult,
+                    'sequencing_run_condition': data.sequencingRunCondition,
+                    'sequencing_depth': data.sequencingDepth,
+                    'comments': data.comments
+                },
+
+                success: function (response) {
+                    var obj = Ext.JSON.decode(response.responseText);
+
+                    if (obj.success) {
+                        // var grid = Ext.getCmp('researchersTable');
+                        // grid.fireEvent('refresh', grid);
+                        Ext.ux.ToastMessage('Library has been added!');
+                    } else {
+                        Ext.ux.ToastMessage(obj.error, 'error');
+                        console.log('[ERROR]: save_library(): ' + obj.error);
+                        console.log(response);
+                    }
+                    // wnd.close();
+                },
+
+                failure: function(response) {
+                    Ext.ux.ToastMessage(response.statusText, 'error');
+                    console.log('[ERROR]: save_library()');
+                    console.log(response);
+                    // wnd.close();
+                }
+            });
+        } else {
+            Ext.ux.ToastMessage('Check the form', 'warning');
         }
     },
 

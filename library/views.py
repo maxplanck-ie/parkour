@@ -78,3 +78,39 @@ class LibraryField(View):
         indices = IndexI5.objects.filter(index_type=index_type)
         data = [{'indexId': index.id, 'index': '%s - %s' % (index.index_id, index.index), } for index in indices]
         return data
+
+    def save_library(self):
+        """ Save library """
+
+        library_name = self.request.GET.get('library_name')
+        library_protocol = self.request.GET.get('library_protocol')
+        library_type = self.request.GET.get('library_type')
+        enrichment_cycles = int(self.request.GET.get('enrichment_cycles'))
+        organism = self.request.GET.get('organism')
+        index_type = self.request.GET.get('index_type')
+        index_reads = int(self.request.GET.get('index_reads'))
+        index_i7 = self.request.GET.get('index_i7')
+        index_i5 = self.request.GET.get('index_i5')
+        equal_representation_nucleotides = bool(self.request.GET.get('equal_representation_nucleotides'))
+        dna_dissolved_in = self.request.GET.get('dna_dissolved_in')
+        concentration = float(self.request.GET.get('concentration'))
+        concentration_determined_by = self.request.GET.get('concentration_determined_by')
+        sample_volume = int(self.request.GET.get('sample_volume'))
+        qpcr_result = float(self.request.GET.get('qpcr_result'))
+        sequencing_run_condition = self.request.GET.get('sequencing_run_condition')
+        sequencing_depth = int(self.request.GET.get('sequencing_depth'))
+        comments = self.request.GET.get('comments')
+
+        if index_i7:
+            try:
+                index_i7 = IndexI7.objects.get(id=int(index_i7)).index
+            except ValueError:
+                pass
+
+        if index_i5:
+            try:
+                index_i5 = IndexI5.objects.get(id=int(index_i5)).index
+            except ValueError:
+                pass
+
+        return []

@@ -198,9 +198,9 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 queryMode: 'local',
                                 displayField: 'index',
                                 valueField: 'indexId',
-                                name: 'index1',
-                                id: 'index1Field',
-                                itemId: 'index1Field',
+                                name: 'indexI7',
+                                id: 'indexI7Field',
+                                itemId: 'indexI7Field',
                                 fieldLabel: 'Index 1 (I7)',
                                 emptyText: 'Index 1 (I7)',
                                 labelAttrTpl: 'data-qtip="Select from predefined list; make sure the displayed index is the sequence used for barcoding. Or enter sequence of index used for barcoding (typically 6 nucleotides)."',
@@ -213,9 +213,9 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 queryMode: 'local',
                                 displayField: 'index',
                                 valueField: 'indexId',
-                                name: 'index2',
-                                id: 'index2Field',
-                                itemId: 'index2Field',
+                                name: 'indexI5',
+                                id: 'indexI5Field',
+                                itemId: 'indexI5Field',
                                 fieldLabel: 'Index 2 (I5)',
                                 emptyText: 'Index 2 (I5)',
                                 labelAttrTpl: 'data-qtip="Select from predefined list; make sure the displayed index is the sequence used for barcoding. Or enter sequence of index used for barcoding (typically 6 nucleotides)."',
@@ -231,32 +231,27 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 defaults: {
                                     // flex: 1
                                 },
+                                colspan: 2,
                                 layout: 'hbox',
                                 items: [
                                     {
                                         boxLabel: 'Yes',
                                         name: 'equalRepresentationOfNucleotides',
-                                        inputValue: 1,
+                                        inputValue: true,
                                         id: 'radio1',
+                                        checked: true,
                                         margin: '0 15px 0 0'
                                     },
                                     {
                                         boxLabel: 'No',
                                         name: 'equalRepresentationOfNucleotides',
-                                        inputValue: 0,
+                                        inputValue: false,
                                         id: 'radio2'
                                     }
                                 ]
                             },
-
                             {
-                                xtype: 'checkboxfield',
-                                name: 'keepEqualRepresentationOfNucleotides',
-                                boxLabel: 'Keep',
-                                margin: '-10px 0 0 15px'
-                            },
-                            {
-                                name: 'DANADissolvedIn',
+                                name: 'DNADissolvedIn',
                                 fieldLabel: 'DNA Dissolved In',
                                 emptyText: 'DNA Dissolved In',
                                 labelAttrTpl: 'data-qtip=""'
