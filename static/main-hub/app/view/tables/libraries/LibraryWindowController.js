@@ -63,6 +63,13 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             if (!success) Ext.ux.ToastMessage('Cannot load Concentration Methods', 'error');
             wnd.setLoading(false);
         });
+
+        // Load Sequencing Run Conditions
+        wnd.setLoading();
+        Ext.getStore('sequencingRunConditionsStore').load(function(records, operation, success) {
+            if (!success) Ext.ux.ToastMessage('Cannot load Sequencing Run Conditions', 'error');
+            wnd.setLoading(false);
+        });
     },
 
     onLibraryProtocolFieldSelect: function(fld, record) {

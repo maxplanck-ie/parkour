@@ -332,17 +332,8 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 fieldLabel: 'Sequencing Run Condition',
                                 emptyText: 'Sequencing Run Condition',
                                 labelAttrTpl: 'data-qtip=""',
-                                // store: 'sequencingRunConditionsStore',
-                                forceSelection: true,
-
-                                store: Ext.create('Ext.data.Store', {
-                                    model: 'LibraryField',
-                                    data: [
-                                        {id: 1, name: 'Condition 1'},
-                                        {id: 2, name: 'Condition 2'},
-                                        {id: 3, name: 'Condition 3'}
-                                    ]
-                                })
+                                store: 'sequencingRunConditionsStore',
+                                forceSelection: true
                             },
                             {
                                 xtype: 'checkboxfield',
