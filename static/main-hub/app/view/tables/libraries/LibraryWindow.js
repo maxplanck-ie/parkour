@@ -285,16 +285,8 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 fieldLabel: 'Concentration Determined by',
                                 emptyText: 'Concentration Determined by',
                                 labelAttrTpl: 'data-qtip=""',
-                                // forceSelection: true,
-
-                                store: Ext.create('Ext.data.Store', {
-                                    model: 'LibraryField',
-                                    data: [
-                                        {id: 1, name: 'Fluorometry'},
-                                        {id: 2, name: 'Spectrophotometry'},
-                                        {id: 3, name: 'Not in the list'}
-                                    ]
-                                })
+                                store: 'concentrationMethodsStore'
+                                // forceSelection: true
                             },
                             {
                                 xtype: 'checkboxfield',
@@ -340,6 +332,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 fieldLabel: 'Sequencing Run Condition',
                                 emptyText: 'Sequencing Run Condition',
                                 labelAttrTpl: 'data-qtip=""',
+                                // store: 'sequencingRunConditionsStore',
                                 forceSelection: true,
 
                                 store: Ext.create('Ext.data.Store', {

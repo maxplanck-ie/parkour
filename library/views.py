@@ -1,7 +1,8 @@
 from django.http import HttpResponse
 from django.views.generic import View
 from django.core.urlresolvers import resolve
-from library.models import LibraryProtocol, LibraryType, Organism, IndexType, IndexI7, IndexI5
+from library.models import LibraryProtocol, LibraryType, Organism, IndexType, IndexI7, IndexI5, ConcentrationMethod, \
+    SequencingRunCondition
 
 import json
 import logging
@@ -77,6 +78,20 @@ class LibraryField(View):
         index_type = self.request.GET.get('index_type_id')
         indices = IndexI5.objects.filter(index_type=index_type)
         data = [{'indexId': index.id, 'index': '%s - %s' % (index.index_id, index.index), } for index in indices]
+        return data
+
+    @staticmethod
+    def get_concentration_methods():
+        """ Get the list of all concentration methods """
+        methods = ConcentrationMethod.objects.all()
+        data = [{'id': method.id, 'name': method.name} for method in methods]
+        return data
+
+    @staticmethod
+    def get_sequencing_run_conditions():
+        """  Get the list of all sequencing run conditions """
+        methods = SequencingRunCondition.objects.all()
+        data = [{'id': method.id, 'name': method.name} for method in methods]
         return data
 
     def save_library(self):

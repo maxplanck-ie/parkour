@@ -56,6 +56,13 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             if (!success) Ext.ux.ToastMessage('Cannot load Index Types', 'error');
             wnd.setLoading(false);
         });
+
+        // Load Concentration Methods
+        wnd.setLoading();
+        Ext.getStore('concentrationMethodsStore').load(function(records, operation, success) {
+            if (!success) Ext.ux.ToastMessage('Cannot load Concentration Methods', 'error');
+            wnd.setLoading(false);
+        });
     },
 
     onLibraryProtocolFieldSelect: function(fld, record) {

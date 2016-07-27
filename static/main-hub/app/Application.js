@@ -29,7 +29,9 @@ Ext.define('MainHub.Application', {
         'tables.libraries.Organisms',
         'tables.libraries.IndexTypes',
         'tables.libraries.IndexI7',
-        'tables.libraries.IndexI5'
+        'tables.libraries.IndexI5',
+        'tables.libraries.ConcentrationMethods',
+        'tables.libraries.SequencingRunConditions'
     ],
 
     requires: [

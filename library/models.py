@@ -49,3 +49,17 @@ class IndexI7(Index):
 
 class IndexI5(Index):
     pass
+
+
+class ConcentrationMethod(models.Model):
+    name = models.CharField('Name', max_length=200)
+
+    def __str__(self):
+        return self.name
+
+
+class SequencingRunCondition(models.Model):
+    name = models.CharField('Name', max_length=200)
+
+    def __str__(self):
+        return self.name
