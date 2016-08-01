@@ -195,16 +195,17 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
     },
 
     onSaveAndAddWndBtnClick: function() {
+        this.saveLibrary(true);
+    },
+
+    onAddWndBtnClick: function() {
         this.saveLibrary();
     },
 
-    onAddWndBtnClick: function(btn) {
-        this.saveLibrary();
-    },
-
-    saveLibrary: function() {
+    saveLibrary: function(addAnother) {
         var form = Ext.getCmp('libraryForm'),
             wnd = form.up('library_wnd');
+        addAnother = addAnother || false;
 
         if (form.isValid()) {
             var data = form.getForm().getFieldValues();
@@ -244,7 +245,14 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
                         var grid = Ext.getCmp('librariesTable');
                         grid.fireEvent('refresh', grid);
                         Ext.ux.ToastMessage('Library has been added!');
-                        wnd.close();
+
+                        // Preserve all fields except for Name, if 'Save and Add another' button was pressed
+                        if (addAnother) {
+                            Ext.getCmp('libraryName').reset();
+                            wnd.setLoading(false);
+                        } else {
+                            wnd.close();
+                        }
                     } else {
                         if (obj.error.indexOf('duplicate key value') > -1) {
                             Ext.ux.ToastMessage('Record with name "' + data.name + '" already exists. Enter a different name.', 'error');

@@ -89,6 +89,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                         items: [
                             {
                                 name: 'name',
+                                id: 'libraryName',
                                 fieldLabel: 'Library Name <sup><strong><span class="field-tooltip" tooltip-text="Name must be unique for assigned project. Field must contain only A-Za-z0-9 as well as - and _">[?]</span></strong></sup>',
                                 emptyText: 'Library Name',
                                 regex: new RegExp("^[A-Za-z0-9_\-]+$"),
@@ -324,8 +325,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                 itemId: 'saveAndAddWndBtn',
                 id: 'saveAndAddWndBtn',
                 text: 'Save and Add another',
-                hidden: true,
-                disabled: true
+                hidden: true
             },
             {
                 xtype: 'button',
