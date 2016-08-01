@@ -85,7 +85,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             {
                                 xtype: 'numberfield',
                                 name: 'enrichmentCycles',
-                                fieldLabel: 'Number of enrichment cycles',
+                                fieldLabel: 'Number of enrichment cycles <sup><strong><span class="field-tooltip" tooltip-text="Number of PCR cycles done for library enrichment">[?]</span></strong></sup>',
                                 emptyText: 'Number of enrichment cycles',
                                 allowDecimals: false,
                                 minValue: 0,
@@ -164,7 +164,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             },
                             {
                                 xtype: 'fieldcontainer',
-                                fieldLabel: 'Equal Representation of Nucleotides <sup><strong><span class="field-tooltip" tooltip-text="In case your insert (up- and downstream of sequencing adaptors) has an uneven representation of nucleotides. For best sequencing quality all 4 nucleotides should be at each position represented at an equal frequency. This is true for applications like ChIP-Seq, RNA-Seq and WGS but can get problematic if amplicons are sequenced or samples that contain internal barcodes">[?]</span></strong></sup>',
+                                fieldLabel: 'Equal Representation of Nucleotides <sup><strong><span class="field-tooltip" tooltip-text="For best sequencing quality all 4 nucleotides should be at each position of the insert (up- and downstream of sequencing adaptors) represented at an equal frequency.<br><br>This is true i.e. for applications like ChIP-Seq, RNA-Seq and WGS (<strong>select Yes</strong>).<br><br>In case your insert has an uneven representation of nucleotides (Amplicon-Seq, internal usage of barcodes) <strong>select No</strong> and specify in the comments field (below).">[?]</span></strong></sup>',
                                 defaultType: 'radiofield',
                                 defaults: {
                                     // flex: 1
