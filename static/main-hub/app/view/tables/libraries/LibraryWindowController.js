@@ -4,8 +4,16 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
 
     config: {
         control: {
-            '#': {
-                boxready: 'onLibraryWindowBoxready'
+            '#libraryCardBtn': {
+                click: 'onCardBtnClick',
+                // mouseover: 'onCardBtnMouseover'
+            },
+            '#sampleCardBtn': {
+                click: 'onCardBtnClick',
+                // mouseover: 'onCardBtnMouseover'
+            },
+            '#libraryCard': {
+                activate: 'onLibraryCardActivate'
             },
             '#libraryProtocolField': {
                 select: 'onLibraryProtocolFieldSelect'
@@ -16,11 +24,11 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             '#indexReadsField': {
                 select: 'onIndexReadsFieldSelect'
             },
-            '#saveAndAddLibraryWndBtn': {
-                click: 'onSaveAndAddLibraryWndBtnClick'
+            '#saveAndAddWndBtn': {
+                click: 'onSaveAndAddWndBtnClick'
             },
-            '#addLibraryWndBtn': {
-                click: 'onAddLibraryWndBtnClick'
+            '#addWndBtn': {
+                click: 'onAddWndBtnClick'
             },
             '#cancelBtn': {
                 click: 'onCancelBtnClick'
@@ -28,10 +36,39 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         }
     },
 
-    onLibraryWindowBoxready: function(wnd) {
+    onCardBtnClick: function(btn) {
+        var wnd = btn.up('library_wnd'),
+            layout = btn.up('panel').getLayout();
+
+        wnd.setSize(670, 700);
+        wnd.center();
+        wnd.getDockedItems('toolbar[dock="bottom"]')[0].show();
+
+        if (btn.itemId == 'libraryCardBtn') {
+            wnd.setTitle('Add Library');
+            layout.setActiveItem(1);
+            Ext.getCmp('libraryForm').reset();
+        } else {
+            wnd.setTitle('Add Sample');
+            layout.setActiveItem(2);
+        }
+    },
+
+    onCardBtnMouseover: function(btn) {
+        var cardHelpText = Ext.getCmp('cardHelpText');
+        if (btn.itemId == 'libraryCardBtn') {
+            cardHelpText.setHtml('<p style="text-align:center">Choose <strong>Library</strong> if samples for sequencing are completely prepared by user</p>');
+        } else {
+            cardHelpText.setHtml('<p style="text-align:center">Choose <strong>Sample</strong> if libraries are prepared by facility</p>');
+        }
+    },
+
+    onLibraryCardActivate: function(card) {
+        var wnd = card.up('library_wnd');
+
         if (wnd.mode == 'add') {
-            Ext.getCmp('saveAndAddLibraryWndBtn').show();
-            Ext.getCmp('addLibraryWndBtn').show();
+            Ext.getCmp('saveAndAddWndBtn').show();
+            Ext.getCmp('addWndBtn').show();
         } else {
 
         }
@@ -157,11 +194,11 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         }
     },
 
-    onSaveAndAddLibraryWndBtnClick: function() {
+    onSaveAndAddWndBtnClick: function() {
         this.saveLibrary();
     },
 
-    onAddLibraryWndBtnClick: function(btn) {
+    onAddWndBtnClick: function(btn) {
         this.saveLibrary();
     },
 

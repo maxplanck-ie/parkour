@@ -27,6 +27,6 @@ Ext.define('MainHub.view.tables.libraries.LibrariesController', {
     },
     
     onAddLibraryBtnClick: function(btn) {
-        Ext.create('library_wnd', {title: 'Add Library', mode: 'add'}).show();
+        Ext.create('library_wnd', {title: 'Add Library/Sample', mode: 'add'}).show();
     }
 });

@@ -15,21 +15,60 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
 
     controller: 'tables-libraries-librarywindow',
 
-    height: 700,
-    width: 670,
+    height: 225,
+    width: 400,
 
     modal: true,
     resizable: false,
-    layout: 'fit',  // to make the form fit into the tab
+    layout: 'fit',
 
     items: [
         {
-            xtype: 'tabpanel',
+            xtype: 'panel',
             border: 0,
+            layout: 'card',
             items: [
                 {
-                    title: 'Library',       // Tab 'Library'
-                    border: 0,
+                    xtype: 'container',
+                    layout: {
+                        type: 'vbox',
+                        align: 'center',
+                        pack: 'center'
+                    },
+                    defaults: {
+                        border: 0
+                    },
+                    items: [
+                        {
+                            xtype: 'container',
+                            layout: 'hbox',
+                            defaultType: 'button',
+                            defaults: {
+                                margin: 10,
+                                width: 100,
+                                height: 40
+                            },
+                            items: [
+                                {
+                                    itemId: 'libraryCardBtn',
+                                    text: 'Library'
+                                },
+                                {
+                                    itemId: 'sampleCardBtn',
+                                    text: 'Sample'
+                                }
+                            ]
+                        },
+                        {
+                            id: 'cardHelpText',
+                            width: 350,
+                            html: '<p style="text-align:center">Choose <strong>Library</strong> if samples for sequencing are completely prepared by user.<br><br>Choose <strong>Sample</strong> if libraries are prepared by facility.</p>'
+                        }
+                    ]
+                },
+                {
+                    xtype: 'container',
+                    id: 'libraryCard',
                     scrollable: 'y',
 
                     items: [{
@@ -38,12 +77,12 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                         itemId: 'libraryForm',
                         border: 0,
                         padding: 15,
-
                         defaultType: 'textfield',
                         defaults: {
                             submitEmptyText: false,
                             allowBlank: false,
                             labelWidth: 220,
+                            labelStyle: 'padding: 5px 0 0 0',
                             anchor: '100%'
                         },
 
@@ -191,14 +230,12 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 name: 'DNADissolvedIn',
                                 fieldLabel: 'DNA Dissolved In',
                                 emptyText: 'DNA Dissolved In',
-                                labelAttrTpl: 'data-qtip=""'
                             },
                             {
                                 xtype: 'numberfield',
                                 name: 'concentration',
                                 fieldLabel: 'Concentration (ng/µl)',
                                 emptyText: 'Concentration (ng/µl)',
-                                labelAttrTpl: 'data-qtip=""',
                                 minValue: 0
                             },
                             {
@@ -209,9 +246,8 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 name: 'concentrationDeterminedBy',
                                 fieldLabel: 'Concentration Determined by',
                                 emptyText: 'Concentration Determined by',
-                                labelAttrTpl: 'data-qtip=""',
-                                store: 'concentrationMethodsStore'
-                                // forceSelection: true
+                                store: 'concentrationMethodsStore',
+                                forceSelection: true
                             },
                             {
                                 xtype: 'numberfield',
@@ -267,44 +303,45 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                     }]
                 },
                 {
-                    title: 'Sample',       // Tab 'Sample'
-                    border: 0,
-                    padding: 15,
-
-                    html: ':)'
+                    html: ':)'      // Sample card
                 }
             ]
         }
     ],
 
-    bbar: [
-        '->',
-        {
-            xtype: 'button',
-            itemId: 'cancelBtn',
-            text: 'Cancel'
-        },
-        {
-            xtype: 'button',
-            itemId: 'saveAndAddLibraryWndBtn',
-            id: 'saveAndAddLibraryWndBtn',
-            text: 'Save and Add another',
-            hidden: true,
-            disabled: true
-        },
-        {
-            xtype: 'button',
-            itemId: 'addLibraryWndBtn',
-            id: 'addLibraryWndBtn',
-            text: 'Add',
-            hidden: true
-        },
-        {
-            xtype: 'button',
-            itemId: 'editLibraryWndBtn',
-            id: 'editLibraryWndBtn',
-            text: 'Update',
-            hidden: true
-        }
-    ]
+    dockedItems: [{
+        xtype: 'toolbar',
+        dock: 'bottom',
+        items: [
+            '->',
+            {
+                xtype: 'button',
+                itemId: 'cancelBtn',
+                text: 'Cancel'
+            },
+            {
+                xtype: 'button',
+                itemId: 'saveAndAddWndBtn',
+                id: 'saveAndAddWndBtn',
+                text: 'Save and Add another',
+                hidden: true,
+                disabled: true
+            },
+            {
+                xtype: 'button',
+                itemId: 'addWndBtn',
+                id: 'addWndBtn',
+                text: 'Add',
+                hidden: true
+            },
+            {
+                xtype: 'button',
+                itemId: 'editLibraryWndBtn',
+                id: 'editLibraryWndBtn',
+                text: 'Update',
+                hidden: true
+            }
+        ],
+        hidden: true
+    }]
 });
