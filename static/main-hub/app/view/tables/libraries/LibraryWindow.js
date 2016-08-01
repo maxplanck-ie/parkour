@@ -16,7 +16,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
     controller: 'tables-libraries-librarywindow',
 
     height: 700,
-    width: 500,
+    width: 680,
 
     modal: true,
     resizable: false,
@@ -49,7 +49,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             allowBlank: false,
                             labelWidth: 150,
                             anchor: '100%',
-                            width: 375
+                            width: 555
                         },
 
                         items: [
