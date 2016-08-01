@@ -36,6 +36,17 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
 
         }
 
+        // Initialize tooltips
+        $.each($('.field-tooltip'), function(idx, item) {
+            Ext.create('Ext.tip.ToolTip', {
+                title: 'Help',
+                target: item,
+                html: $(item).attr('tooltip-text'),
+                dismissDelay: 15000,
+                maxWidth: 300
+            });
+        });
+
         // Load Library Protocols
         wnd.setLoading();
         Ext.getStore('libraryProtocolsStore').load(function(records, operation, success) {
