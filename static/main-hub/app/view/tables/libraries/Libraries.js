@@ -58,6 +58,7 @@ Ext.define('MainHub.view.tables.libraries.Libraries', {
                     { text: 'Concentration', dataIndex: 'concentration' },
                     { text: 'Concentration Method', dataIndex: 'concentrationMethod' },
                     { text: 'Sample Volume', dataIndex: 'sampleVolume' },
+                    { text: 'Mean Fragment Size', dataIndex: 'meanFragmentSize' },
                     { text: 'qPCR Result', dataIndex: 'qPCRResult' },
                     { text: 'Sequencing Run Condition', dataIndex: 'sequencingRunCondition' },
                     { text: 'Sequencing Depth', dataIndex: 'sequencingDepth' },

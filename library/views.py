@@ -120,6 +120,7 @@ class LibraryView(View):
                         'concentration': library.concentration,
                         'concentrationMethod': library.concentration_determined_by.name,
                         'sampleVolume': library.sample_volume,
+                        'meanFragmentSize': library.mean_fragment_size,
                         'qPCRResult': library.qpcr_result,
                         'sequencingRunCondition': library.sequencing_run_condition.name,
                         'sequencingDepth': library.sequencing_depth,
@@ -151,6 +152,7 @@ class LibraryView(View):
         concentration = float(self.request.POST.get('concentration'))
         concentration_determined_by = self.request.POST.get('concentration_determined_by')
         sample_volume = int(self.request.POST.get('sample_volume'))
+        mean_fragment_size = int(self.request.POST.get('mean_fragment_size'))
         qpcr_result = float(self.request.POST.get('qpcr_result'))
         sequencing_run_condition = self.request.POST.get('sequencing_run_condition')
         sequencing_depth = int(self.request.POST.get('sequencing_depth'))
@@ -176,8 +178,8 @@ class LibraryView(View):
                               equal_representation_nucleotides=equal_representation_nucleotides,
                               dna_dissolved_in=dna_dissolved_in, concentration=concentration,
                               concentration_determined_by_id=concentration_determined_by,
-                              sample_volume=sample_volume, qpcr_result=qpcr_result,
-                              sequencing_run_condition_id=sequencing_run_condition,
+                              sample_volume=sample_volume, mean_fragment_size=mean_fragment_size,
+                              qpcr_result=qpcr_result, sequencing_run_condition_id=sequencing_run_condition,
                               sequencing_depth=sequencing_depth, comments=comments)
             library.save()
         except Exception as e:

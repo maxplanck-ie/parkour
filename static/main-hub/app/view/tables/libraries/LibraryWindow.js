@@ -218,7 +218,14 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 name: 'sampleVolume',
                                 fieldLabel: 'Sample Volume (µl)',
                                 emptyText: 'Sample Volume (µl)',
-                                labelAttrTpl: 'data-qtip=""',
+                                minValue: 0,
+                                allowDecimals: false
+                            },
+                            {
+                                xtype: 'numberfield',
+                                name: 'meanFragmentSize',
+                                fieldLabel: 'Mean Fragment Size (bp) <sup><strong><span class="field-tooltip" tooltip-text="Specify mean fragments size of library, upload Bioanalyzer or Fragmentanalyzer files">[?]</span></strong></sup>',
+                                emptyText: 'Mean Fragment Size (bp)',
                                 minValue: 0,
                                 allowDecimals: false
                             },
@@ -227,7 +234,6 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 name: 'qPCRResult',
                                 fieldLabel: 'qPCR Result (nM)',
                                 emptyText: 'qPCR Result (nM)',
-                                labelAttrTpl: 'data-qtip=""',
                                 minValue: 0
                             },
                             {
@@ -238,7 +244,6 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 name: 'sequencingRunCondition',
                                 fieldLabel: 'Sequencing Run Condition',
                                 emptyText: 'Sequencing Run Condition',
-                                labelAttrTpl: 'data-qtip=""',
                                 store: 'sequencingRunConditionsStore',
                                 forceSelection: true
                             },
@@ -247,7 +252,6 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 name: 'sequencingDepth',
                                 fieldLabel: 'Sequencing Depth (M)',
                                 emptyText: 'Sequencing Depth (M)',
-                                labelAttrTpl: 'data-qtip=""',
                                 minValue: 0,
                                 allowDecimals: false
                             },
@@ -256,9 +260,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 name: 'comments',
                                 fieldLabel: 'Comments',
                                 emptyText: 'Comments',
-                                labelAttrTpl: 'data-qtip=""',
-                                allowBlank: true,
-                                colspan: 2
+                                allowBlank: true
                             }
                         ]
                     }]

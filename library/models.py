@@ -81,6 +81,7 @@ class Library(models.Model):
     concentration = models.FloatField('Concentration')
     concentration_determined_by = models.ForeignKey(ConcentrationMethod, verbose_name='Concentration Determined by')
     sample_volume = models.IntegerField('Sample Volume')
+    mean_fragment_size = models.IntegerField('Mean Fragment Size')
     qpcr_result = models.FloatField('qPCR Result')
     sequencing_run_condition = models.ForeignKey(SequencingRunCondition, verbose_name='Sequencing Run Condition')
     sequencing_depth = models.IntegerField('Sequencing Depth')

@@ -193,6 +193,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
                     'concentration': data.concentration,
                     'concentration_determined_by': data.concentrationDeterminedBy,
                     'sample_volume': data.sampleVolume,
+                    'mean_fragment_size': data.meanFragmentSize,
                     'qpcr_result': data.qPCRResult,
                     'sequencing_run_condition': data.sequencingRunCondition,
                     'sequencing_depth': data.sequencingDepth,

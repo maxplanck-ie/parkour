@@ -15,12 +15,13 @@ Ext.define('MainHub.model.tables.libraries.Library', {
         {name: 'indexI5', type: 'string'},
         {name: 'equalRepresentation', type: 'string'},
         {name: 'DNADissolvedIn', type: 'string'},
-        {name: 'concentration', type: 'string'},
+        {name: 'concentration', type: 'float'},
         {name: 'concentrationMethod', type: 'string'},
-        {name: 'sampleVolume', type: 'string'},
-        {name: 'qPCRResult', type: 'string'},
+        {name: 'sampleVolume', type: 'int'},
+        {name: 'meanFragmentSize', type: 'int'},
+        {name: 'qPCRResult', type: 'float'},
         {name: 'sequencingRunCondition', type: 'string'},
-        {name: 'sequencingDepth', type: 'string'},
+        {name: 'sequencingDepth', type: 'int'},
         {name: 'comments', type: 'string'}
     ]
 });
