@@ -75,8 +75,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
     onLibraryProtocolFieldSelect: function(fld, record) {
         var wnd = fld.up('library_wnd'),
             libraryTypeStore = Ext.getStore('libraryTypeStore'),
-            libraryTypeField = Ext.getCmp('libraryTypeField'),
-            keepLibraryTypeField = Ext.getCmp('keepLibraryTypeField');
+            libraryTypeField = Ext.getCmp('libraryTypeField');
 
         // Load Library Type
         wnd.setLoading();
@@ -85,10 +84,11 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
                 'library_protocol_id': record.data.id
             },
             callback: function(records, operation, success) {
-                libraryTypeField.setDisabled(false);
-                keepLibraryTypeField.setDisabled(false);
-                if (!success) Ext.ux.ToastMessage('Cannot load Principal Investigators', 'error');
-
+                if (!success) {
+                    Ext.ux.ToastMessage('Cannot load Principal Investigators', 'error');
+                } else {
+                    libraryTypeField.setDisabled(false);
+                }
                 wnd.setLoading(false);
             }
         });

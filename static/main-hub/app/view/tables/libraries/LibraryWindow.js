@@ -16,7 +16,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
     controller: 'tables-libraries-librarywindow',
 
     height: 700,
-    width: 680,
+    width: 650,
 
     modal: true,
     resizable: false,
@@ -36,10 +36,6 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                         xtype: 'form',
                         id: 'libraryForm',
                         itemId: 'libraryForm',
-                        layout: {
-                            type: 'table',
-                            columns: 2
-                        },
                         border: 0,
                         padding: 15,
 
@@ -47,25 +43,19 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                         defaults: {
                             submitEmptyText: false,
                             allowBlank: false,
-                            labelWidth: 150,
-                            anchor: '100%',
-                            width: 555
+                            labelWidth: 200,
+                            anchor: '100%'
                         },
 
                         items: [
                             {
                                 name: 'libraryName',
-                                fieldLabel: 'Library Name',
+                                // fieldLabel: 'Library Name <strong><a href="#" class="field-tooltip">[?]</a></strong>',
+                                fieldLabel: 'Library Name <sup><strong><span class="field-tooltip" tooltip-text="Name must be unique for assigned project. Field must contain only A-Za-z0-9 as well as - and _">[?]</span></strong></sup>',
                                 emptyText: 'Library Name',
-                                labelAttrTpl: 'data-qtip="Name must be unique for assigned project. Field must contain only A-Za-z0-9 as well as - and _."',
+                                // labelAttrTpl: 'data-qtip="Name must be unique for assigned project. Field must contain only A-Za-z0-9 as well as - and _."',
                                 regex: new RegExp("^[A-Za-z0-9_\-]+$"),
                                 regexText: 'Only A-Za-z0-9 as well as _ and - are allowed'
-                            },
-                            {
-                                xtype: 'checkboxfield',
-                                name: 'keepLibraryName',
-                                boxLabel: 'Keep',
-                                margin: '-10px 0 0 15px'
                             },
                             {
                                 xtype: 'combobox',
@@ -80,12 +70,6 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 labelAttrTpl: 'data-qtip="Select library construction protocol from predefined list or select other and specify in the comment field (below)."',
                                 store: 'libraryProtocolsStore',
                                 forceSelection: true
-                            },
-                            {
-                                xtype: 'checkboxfield',
-                                name: 'keepLibraryProtocol',
-                                boxLabel: 'Keep',
-                                margin: '-10px 0 0 15px'
                             },
                             {
                                 xtype: 'combobox',
@@ -103,15 +87,6 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 disabled: true
                             },
                             {
-                                xtype: 'checkboxfield',
-                                id: 'keepLibraryTypeField',
-                                itemId: 'keepLibraryTypeField',
-                                name: 'keepLibraryType',
-                                boxLabel: 'Keep',
-                                margin: '-10px 0 0 15px',
-                                disabled: true
-                            },
-                            {
                                 xtype: 'numberfield',
                                 name: 'enrichmentCycles',
                                 fieldLabel: 'Number of enrichment cycles',
@@ -120,12 +95,6 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 allowDecimals: false,
                                 minValue: 0,
                                 maxValue: 99
-                            },
-                            {
-                                xtype: 'checkboxfield',
-                                name: 'keepEnrichmentCycles',
-                                boxLabel: 'Keep',
-                                margin: '-10px 0 0 15px'
                             },
                             {
                                 xtype: 'combobox',
@@ -140,12 +109,6 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 forceSelection: true
                             },
                             {
-                                xtype: 'checkboxfield',
-                                name: 'keepOrganism',
-                                boxLabel: 'Keep',
-                                margin: '-10px 0 0 15px'
-                            },
-                            {
                                 xtype: 'combobox',
                                 id: 'indexType',
                                 itemId: 'indexType',
@@ -158,12 +121,6 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 labelAttrTpl: 'data-qtip="Select from list with predefined options or select other and specify in the comment field (below)."',
                                 store: 'indexTypesStore',
                                 forceSelection: true
-                            },
-                            {
-                                xtype: 'checkboxfield',
-                                name: 'keepIndexType',
-                                boxLabel: 'Keep',
-                                margin: '-10px 0 0 15px'
                             },
                             {
                                 xtype: 'combobox',
@@ -188,12 +145,6 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 })
                             },
                             {
-                                xtype: 'checkboxfield',
-                                name: 'keepIndexReads',
-                                boxLabel: 'Keep',
-                                margin: '-10px 0 0 15px'
-                            },
-                            {
                                 xtype: 'combobox',
                                 queryMode: 'local',
                                 displayField: 'index',
@@ -205,7 +156,6 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 emptyText: 'Index 1 (I7)',
                                 labelAttrTpl: 'data-qtip="Select from predefined list; make sure the displayed index is the sequence used for barcoding. Or enter sequence of index used for barcoding (typically 6 nucleotides)."',
                                 store: 'indexI7Store',
-                                colspan: 2,
                                 disabled: true
                             },
                             {
@@ -220,7 +170,6 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 emptyText: 'Index 2 (I5)',
                                 labelAttrTpl: 'data-qtip="Select from predefined list; make sure the displayed index is the sequence used for barcoding. Or enter sequence of index used for barcoding (typically 6 nucleotides)."',
                                 store: 'indexI5Store',
-                                colspan: 2,
                                 disabled: true
                             },
                             {
@@ -231,7 +180,6 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 defaults: {
                                     // flex: 1
                                 },
-                                colspan: 2,
                                 layout: 'hbox',
                                 items: [
                                     {
@@ -257,24 +205,12 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 labelAttrTpl: 'data-qtip=""'
                             },
                             {
-                                xtype: 'checkboxfield',
-                                name: 'keepDANADissolvedIn',
-                                boxLabel: 'Keep',
-                                margin: '-10px 0 0 15px'
-                            },
-                            {
                                 xtype: 'numberfield',
                                 name: 'concentration',
                                 fieldLabel: 'Concentration (ng/µl)',
                                 emptyText: 'Concentration (ng/µl)',
                                 labelAttrTpl: 'data-qtip=""',
                                 minValue: 0
-                            },
-                            {
-                                xtype: 'checkboxfield',
-                                name: 'keepConcentration',
-                                boxLabel: 'Keep',
-                                margin: '-10px 0 0 15px'
                             },
                             {
                                 xtype: 'combobox',
@@ -289,12 +225,6 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 // forceSelection: true
                             },
                             {
-                                xtype: 'checkboxfield',
-                                name: 'keepConcentrationDeterminedBy',
-                                boxLabel: 'Keep',
-                                margin: '-10px 0 0 15px'
-                            },
-                            {
                                 xtype: 'numberfield',
                                 name: 'sampleVolume',
                                 fieldLabel: 'Sample Volume (µl)',
@@ -304,24 +234,12 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 allowDecimals: false
                             },
                             {
-                                xtype: 'checkboxfield',
-                                name: 'keepSampleVolume',
-                                boxLabel: 'Keep',
-                                margin: '-10px 0 0 15px'
-                            },
-                            {
                                 xtype: 'numberfield',
                                 name: 'qPCRResult',
                                 fieldLabel: 'qPCR Result (nM)',
                                 emptyText: 'qPCR Result (nM)',
                                 labelAttrTpl: 'data-qtip=""',
                                 minValue: 0
-                            },
-                            {
-                                xtype: 'checkboxfield',
-                                name: 'keepQPCRResult',
-                                boxLabel: 'Keep',
-                                margin: '-10px 0 0 15px'
                             },
                             {
                                 xtype: 'combobox',
@@ -336,12 +254,6 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 forceSelection: true
                             },
                             {
-                                xtype: 'checkboxfield',
-                                name: 'keepSequencingRunCondition',
-                                boxLabel: 'Keep',
-                                margin: '-10px 0 0 15px'
-                            },
-                            {
                                 xtype: 'numberfield',
                                 name: 'sequencingDepth',
                                 fieldLabel: 'Sequencing Depth (M)',
@@ -351,18 +263,11 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 allowDecimals: false
                             },
                             {
-                                xtype: 'checkboxfield',
-                                name: 'keepSequencingDepth',
-                                boxLabel: 'Keep',
-                                margin: '-10px 0 0 15px'
-                            },
-                            {
                                 xtype: 'textarea',
                                 name: 'comments',
                                 fieldLabel: 'Comments',
                                 emptyText: 'Comments',
                                 labelAttrTpl: 'data-qtip=""',
-                                // width: 435,
                                 allowBlank: true,
                                 colspan: 2
                             }
