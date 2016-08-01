@@ -269,8 +269,9 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             {
                                 xtype: 'numberfield',
                                 name: 'qPCRResult',
-                                fieldLabel: 'qPCR Result (nM)',
+                                fieldLabel: 'qPCR Result (nM) <sup><strong><span class="field-tooltip" tooltip-text="Use this field if qPCR was done for library quantification">[?]</span></strong></sup>',
                                 emptyText: 'qPCR Result (nM)',
+                                allowBlank: true,
                                 minValue: 0
                             },
                             {
