@@ -1,8 +1,9 @@
 from django.http import HttpResponse
-from django.views.generic import View, DetailView
+from django.views.generic import View
 from django.core.urlresolvers import resolve
 from library.models import LibraryProtocol, LibraryType, Organism, IndexType, IndexI7, IndexI5, ConcentrationMethod, \
     SequencingRunCondition, Library
+from common.utils import get_simple_field_dict
 
 import json
 import logging
@@ -49,22 +50,19 @@ class LibraryField(View):
         library_protocol_id = self.request.GET.get('library_protocol_id')
         library_protocol = LibraryProtocol.objects.get(id=library_protocol_id)
         library_types = LibraryType.objects.filter(library_protocol__in=[library_protocol])
-        data = [{'id': lib_type.id, 'name': lib_type.name} for lib_type in library_types]
-        return data
+        return get_simple_field_dict(library_types)
 
     @staticmethod
     def get_organisms():
         """ Get the list of all organisms """
         organisms = Organism.objects.all()
-        data = [{'id': organism.id, 'name': organism.name} for organism in organisms]
-        return data
+        return get_simple_field_dict(organisms)
 
     @staticmethod
     def get_index_types():
         """ Get the list of all index types """
         index_types = IndexType.objects.all()
-        data = [{'id': index_type.id, 'name': index_type.name} for index_type in index_types]
-        return data
+        return get_simple_field_dict(index_types)
 
     def get_index_i7(self):
         """ Get the list of all indices i7 for a given index type """
@@ -84,15 +82,13 @@ class LibraryField(View):
     def get_concentration_methods():
         """ Get the list of all concentration methods """
         methods = ConcentrationMethod.objects.all()
-        data = [{'id': method.id, 'name': method.name} for method in methods]
-        return data
+        return get_simple_field_dict(methods)
 
     @staticmethod
     def get_sequencing_run_conditions():
         """  Get the list of all sequencing run conditions """
-        methods = SequencingRunCondition.objects.all()
-        data = [{'id': method.id, 'name': method.name} for method in methods]
-        return data
+        conditions = SequencingRunCondition.objects.all()
+        return get_simple_field_dict(conditions)
 
 
 class LibraryView(View):
