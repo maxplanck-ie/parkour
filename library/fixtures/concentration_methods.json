@@ -1,1 +1,0 @@
-[{"model": "library.concentrationmethod", "pk": 1, "fields": {"name": "Fluorometry"}}, {"model": "library.concentrationmethod", "pk": 2, "fields": {"name": "Spectrophotometry"}}, {"model": "library.concentrationmethod", "pk": 3, "fields": {"name": "Other"}}]

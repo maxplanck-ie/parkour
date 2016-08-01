@@ -179,7 +179,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
                 scope: this,
 
                 params: {
-                    'library_name': data.libraryName,
+                    'name': data.name,
                     'library_protocol': data.libraryProtocol,
                     'library_type': data.libraryType,
                     'enrichment_cycles': data.enrichmentCycles,
@@ -207,12 +207,17 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
                         var grid = Ext.getCmp('librariesTable');
                         grid.fireEvent('refresh', grid);
                         Ext.ux.ToastMessage('Library has been added!');
+                        wnd.close();
                     } else {
-                        Ext.ux.ToastMessage(obj.error, 'error');
+                        if (obj.error.indexOf('duplicate key value') > -1) {
+                            Ext.ux.ToastMessage('Record with name "' + data.name + '" already exists. Enter a different name.', 'error');
+                        } else {
+                            Ext.ux.ToastMessage(obj.error, 'error');
+                        }
                         console.log('[ERROR]: save_library(): ' + obj.error);
                         console.log(response);
+                        wnd.setLoading(false);
                     }
-                    wnd.close();
                 },
 
                 failure: function(response) {

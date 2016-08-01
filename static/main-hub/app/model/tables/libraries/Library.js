@@ -3,7 +3,8 @@ Ext.define('MainHub.model.tables.libraries.Library', {
 
     fields: [
         {name: 'id', type: 'int'},
-        {name: 'libraryName', type: 'string'},
+        {name: 'name', type: 'string'},
+        {name: 'recordType', type: 'string'},
         {name: 'date', type: 'string'},
         {name: 'libraryProtocol', type: 'string'},
         {name: 'libraryType', type: 'string'},

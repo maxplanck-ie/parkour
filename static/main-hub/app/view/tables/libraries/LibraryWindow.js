@@ -49,7 +49,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
 
                         items: [
                             {
-                                name: 'libraryName',
+                                name: 'name',
                                 fieldLabel: 'Library Name <sup><strong><span class="field-tooltip" tooltip-text="Name must be unique for assigned project. Field must contain only A-Za-z0-9 as well as - and _">[?]</span></strong></sup>',
                                 emptyText: 'Library Name',
                                 regex: new RegExp("^[A-Za-z0-9_\-]+$"),
@@ -242,7 +242,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 displayField: 'name',
                                 valueField: 'id',
                                 name: 'sequencingRunCondition',
-                                fieldLabel: 'Sequencing Run Condition',
+                                fieldLabel: 'Sequencing Run Condition <sup><strong><span class="field-tooltip" tooltip-text="Select from list with predefined options or select other and specify in the comments field (below)">[?]</span></strong></sup>',
                                 emptyText: 'Sequencing Run Condition',
                                 store: 'sequencingRunConditionsStore',
                                 forceSelection: true
@@ -260,7 +260,8 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 name: 'comments',
                                 fieldLabel: 'Comments',
                                 emptyText: 'Comments',
-                                allowBlank: true
+                                allowBlank: true,
+                                height: 150
                             }
                         ]
                     }]

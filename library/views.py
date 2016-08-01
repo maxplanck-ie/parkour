@@ -99,29 +99,31 @@ class LibraryView(View):
 
         try:
             libraries = Library.objects.select_related()
-            data = [{
-                        'id': library.id,
-                        'libraryName': library.library_name,
-                        'date': library.date.strftime('%d.%m.%Y'),
-                        'libraryProtocol': library.library_protocol.name,
-                        'libraryType': library.library_type.name,
-                        'enrichmentCycles': library.enrichment_cycles,
-                        'organism': library.organism.name,
-                        'indexType': library.index_type.name,
-                        'indexReads': library.index_reads,
-                        'indexI7': library.index_i7,
-                        'indexI5': library.index_i5,
-                        'equalRepresentation': library.equal_representation_nucleotides,
-                        'DNADissolvedIn': library.dna_dissolved_in,
-                        'concentration': library.concentration,
-                        'concentrationMethod': library.concentration_determined_by.name,
-                        'sampleVolume': library.sample_volume,
-                        'meanFragmentSize': library.mean_fragment_size,
-                        'qPCRResult': library.qpcr_result,
-                        'sequencingRunCondition': library.sequencing_run_condition.name,
-                        'sequencingDepth': library.sequencing_depth,
-                        'comments': library.comments
-                    } for library in libraries]
+            libraries_data = [{
+                'id': library.id,
+                'name': library.name,
+                'recordType': 'L',
+                'date': library.date.strftime('%d.%m.%Y'),
+                'libraryProtocol': library.library_protocol.name,
+                'libraryType': library.library_type.name,
+                'enrichmentCycles': library.enrichment_cycles,
+                'organism': library.organism.name,
+                'indexType': library.index_type.name,
+                'indexReads': library.index_reads,
+                'indexI7': library.index_i7,
+                'indexI5': library.index_i5,
+                'equalRepresentation': library.equal_representation_nucleotides,
+                'DNADissolvedIn': library.dna_dissolved_in,
+                'concentration': library.concentration,
+                'concentrationMethod': library.concentration_determined_by.name,
+                'sampleVolume': library.sample_volume,
+                'meanFragmentSize': library.mean_fragment_size,
+                'qPCRResult': library.qpcr_result,
+                'sequencingRunCondition': library.sequencing_run_condition.name,
+                'sequencingDepth': library.sequencing_depth,
+                'comments': library.comments
+            } for library in libraries]
+            data = sorted(libraries_data, key=lambda x: x['id'], reverse=True)
         except Exception as e:
             error = str(e)
             print('[ERROR]: %s' % error)
@@ -134,7 +136,7 @@ class LibraryView(View):
         """ Save Library """
         error = str()
 
-        library_name = self.request.POST.get('library_name')
+        name = self.request.POST.get('name')
         library_protocol = self.request.POST.get('library_protocol')
         library_type = self.request.POST.get('library_type')
         enrichment_cycles = int(self.request.POST.get('enrichment_cycles'))
@@ -167,10 +169,9 @@ class LibraryView(View):
                 pass
 
         try:
-            library = Library(library_name=library_name, library_protocol_id=library_protocol,
-                              library_type_id=library_type, enrichment_cycles=enrichment_cycles,
-                              organism_id=organism, index_type_id=index_type, index_reads=index_reads,
-                              index_i7=index_i7, index_i5=index_i5,
+            library = Library(name=name, library_protocol_id=library_protocol, library_type_id=library_type,
+                              enrichment_cycles=enrichment_cycles, organism_id=organism, index_type_id=index_type,
+                              index_reads=index_reads, index_i7=index_i7, index_i5=index_i5,
                               equal_representation_nucleotides=equal_representation_nucleotides,
                               dna_dissolved_in=dna_dissolved_in, concentration=concentration,
                               concentration_determined_by_id=concentration_determined_by,

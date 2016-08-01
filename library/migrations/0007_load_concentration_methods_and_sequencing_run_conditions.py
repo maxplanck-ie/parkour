@@ -7,11 +7,13 @@ from django.core.management import call_command
 
 
 def load_fixture(apps, schema_editor):
-    call_command('loaddata', 'concentration_methods', app_label='library')
+    call_command('loaddata', 'concentration_methods_sequencing_run_conditions', app_label='library')
 
 
 def unload_fixture(apps, schema_editor):
     ConcentrationMethod = apps.get_model('library', 'ConcentrationMethod')
+    SequencingRunCondition = apps.get_model('library', 'SequencingRunCondition')
+    SequencingRunCondition.objects.all().delete()
     ConcentrationMethod.objects.all().delete()
 
 

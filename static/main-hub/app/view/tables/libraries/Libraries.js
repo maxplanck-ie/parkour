@@ -43,7 +43,8 @@ Ext.define('MainHub.view.tables.libraries.Libraries', {
 
             columns: {
                 items: [
-                    { text: 'Name', dataIndex: 'libraryName', locked: true },
+                    { text: 'Name', dataIndex: 'name', width: 150, locked: true },
+                    { text: '', dataIndex: 'recordType', width: 30, locked: true },
                     { text: 'Date', dataIndex: 'date' },
                     { text: 'Protocol', dataIndex: 'libraryProtocol' },
                     { text: 'Type', dataIndex: 'libraryType' },
