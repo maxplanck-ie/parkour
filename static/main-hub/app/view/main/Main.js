@@ -54,9 +54,7 @@ Ext.define('MainHub.view.main.Main', {
                 {
                     xtype: 'tbtext',
                     cls: 'top-user-name',
-                    listeners: {
-                        beforerender: 'onUsernameBeforerender'
-                    }
+                    text: USERNAME      // from 'globals.html'
                 },
                 {
                     xtype: 'button',

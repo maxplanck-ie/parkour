@@ -23,22 +23,6 @@ Ext.define('MainHub.view.main.MainController', {
         }
     },
 
-    onUsernameBeforerender: function(username) {
-        Ext.Ajax.request({
-            url: 'get_username/',
-
-            success: function (response) {
-                var obj = Ext.JSON.decode(response.responseText);
-                username.setData(obj.data.username);
-            },
-
-            failure: function(response) {
-                console.log('[ERROR]: get_username()');
-                console.log(response);
-            }
-        });
-    },
-
     onNavigationTreeSelectionChange: function (tree, node) {
         var to = node && (node.get('routeId') || node.get('viewType'));
 
