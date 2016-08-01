@@ -392,7 +392,8 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
             itemId: 'saveAndAddLibraryWndBtn',
             id: 'saveAndAddLibraryWndBtn',
             text: 'Save and Add another',
-            hidden: true
+            hidden: true,
+            disabled: true
         },
         {
             xtype: 'button',
