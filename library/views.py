@@ -138,6 +138,16 @@ class LibraryView(View):
         """ Save Library """
         error = str()
 
+        try:
+            getattr(self, resolve(request.path).url_name)()
+        except Exception as e:
+            error = str(e)
+            print('[ERROR]: %s' % error)
+            logger.debug(error)
+
+        return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')
+
+    def save_library(self):
         name = self.request.POST.get('name')
         library_protocol = self.request.POST.get('library_protocol')
         library_type = self.request.POST.get('library_type')
@@ -170,20 +180,26 @@ class LibraryView(View):
             except ValueError:
                 pass
 
-        try:
-            library = Library(name=name, library_protocol_id=library_protocol, library_type_id=library_type,
-                              enrichment_cycles=enrichment_cycles, organism_id=organism, index_type_id=index_type,
-                              index_reads=index_reads, index_i7=index_i7, index_i5=index_i5,
-                              equal_representation_nucleotides=equal_representation_nucleotides,
-                              dna_dissolved_in=dna_dissolved_in, concentration=concentration,
-                              concentration_determined_by_id=concentration_determined_by,
-                              sample_volume=sample_volume, mean_fragment_size=mean_fragment_size,
-                              qpcr_result=qpcr_result, sequencing_run_condition_id=sequencing_run_condition,
-                              sequencing_depth=sequencing_depth, comments=comments)
-            library.save()
-        except Exception as e:
-            error = str(e)
-            print('[ERROR]: %s' % error)
-            logger.debug(error)
+        library = Library(name=name, library_protocol_id=library_protocol, library_type_id=library_type,
+                          enrichment_cycles=enrichment_cycles, organism_id=organism, index_type_id=index_type,
+                          index_reads=index_reads, index_i7=index_i7, index_i5=index_i5,
+                          equal_representation_nucleotides=equal_representation_nucleotides,
+                          dna_dissolved_in=dna_dissolved_in, concentration=concentration,
+                          concentration_determined_by_id=concentration_determined_by,
+                          sample_volume=sample_volume, mean_fragment_size=mean_fragment_size,
+                          qpcr_result=qpcr_result, sequencing_run_condition_id=sequencing_run_condition,
+                          sequencing_depth=sequencing_depth, comments=comments)
+        library.save()
 
-        return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')
+    def edit_library(self):
+        pass
+
+    def delete_library(self):
+        record_type = self.request.POST.get('record_type')
+        record_id = self.request.POST.get('record_id')
+
+        if record_type == 'L':
+            record = Library.objects.get(id=record_id)
+            record.delete()
+        elif record_type == 'S':
+            pass
