@@ -42,10 +42,12 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             },
                             items: [
                                 {
+                                    id: 'libraryCardBtn',
                                     itemId: 'libraryCardBtn',
                                     text: 'Library'
                                 },
                                 {
+                                    id: 'sampleCardBtn',
                                     itemId: 'sampleCardBtn',
                                     text: 'Sample'
                                 }
@@ -331,7 +333,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                 xtype: 'button',
                 itemId: 'editLibraryWndBtn',
                 id: 'editLibraryWndBtn',
-                text: 'Update',
+                text: 'Save',
                 hidden: true
             }
         ],

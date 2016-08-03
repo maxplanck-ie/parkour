@@ -4,6 +4,9 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
 
     config: {
         control: {
+            '#': {
+                boxready: 'onLibraryWindowBoxready'
+            },
             '#libraryCardBtn': {
                 click: 'onCardBtnClick',
                 // mouseover: 'onCardBtnMouseover'
@@ -36,6 +39,19 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         }
     },
 
+    onLibraryWindowBoxready: function (wnd) {
+        // Bypass Selection (Library/Sample) dialog if editing
+        if (wnd.mode == 'edit') {
+            if (wnd.record.data.recordType == 'L') {
+                var libraryCardBtn = Ext.getCmp('libraryCardBtn');
+                libraryCardBtn.fireEvent('click', libraryCardBtn);
+            } else {
+                var sampleCardBtn = Ext.getCmp('sampleCardBtn');
+                sampleCardBtn.fireEvent('click', sampleCardBtn);
+            }
+        }
+    },
+
     onCardBtnClick: function(btn) {
         var wnd = btn.up('library_wnd'),
             layout = btn.up('panel').getLayout();
@@ -45,11 +61,11 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         wnd.getDockedItems('toolbar[dock="bottom"]')[0].show();
 
         if (btn.itemId == 'libraryCardBtn') {
-            wnd.setTitle('Add Library');
+            if (wnd.mode == 'add') wnd.setTitle('Add Library');
             layout.setActiveItem(1);
             Ext.getCmp('libraryForm').reset();
         } else {
-            wnd.setTitle('Add Sample');
+            if (wnd.mode == 'add') wnd.setTitle('Add Sample');
             layout.setActiveItem(2);
         }
     },
@@ -70,7 +86,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             Ext.getCmp('saveAndAddWndBtn').show();
             Ext.getCmp('addWndBtn').show();
         } else {
-
+            Ext.getCmp('editLibraryWndBtn').show();
         }
 
         // Initialize tooltips

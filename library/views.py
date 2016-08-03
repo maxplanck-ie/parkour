@@ -95,37 +95,11 @@ class LibraryField(View):
 
 class LibraryView(View):
     def get(self, request):
-        """ Get the list of all libraries """
         error = str()
         data = []
 
         try:
-            libraries = Library.objects.select_related()
-            libraries_data = [{
-                'id': library.id,
-                'name': library.name,
-                'recordType': 'L',
-                'date': library.date.strftime('%d.%m.%Y'),
-                'libraryProtocol': library.library_protocol.name,
-                'libraryType': library.library_type.name,
-                'enrichmentCycles': library.enrichment_cycles,
-                'organism': library.organism.name,
-                'indexType': library.index_type.name,
-                'indexReads': library.index_reads,
-                'indexI7': library.index_i7,
-                'indexI5': library.index_i5,
-                'equalRepresentation': library.equal_representation_nucleotides,
-                'DNADissolvedIn': library.dna_dissolved_in,
-                'concentration': library.concentration,
-                'concentrationMethod': library.concentration_determined_by.name,
-                'sampleVolume': library.sample_volume,
-                'meanFragmentSize': library.mean_fragment_size,
-                'qPCRResult': library.qpcr_result,
-                'sequencingRunCondition': library.sequencing_run_condition.name,
-                'sequencingDepth': library.sequencing_depth,
-                'comments': library.comments
-            } for library in libraries]
-            data = sorted(libraries_data, key=lambda x: x['id'], reverse=True)
+            data = getattr(self, resolve(request.path).url_name)()
         except Exception as e:
             error = str(e)
             print('[ERROR]: %s' % error)
@@ -146,6 +120,45 @@ class LibraryView(View):
             logger.debug(error)
 
         return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')
+
+    @staticmethod
+    def get_libraries():
+        """ Get the list of all libraries """
+
+        libraries = Library.objects.select_related()
+        libraries_data = [{
+            'id': library.id,
+            'name': library.name,
+            'recordType': 'L',
+            'date': library.date.strftime('%d.%m.%Y'),
+            'libraryProtocol': library.library_protocol.name,
+            'libraryType': library.library_type.name,
+            'enrichmentCycles': library.enrichment_cycles,
+            'organism': library.organism.name,
+            'indexType': library.index_type.name,
+            'indexReads': library.index_reads,
+            'indexI7': library.index_i7,
+            'indexI5': library.index_i5,
+            'equalRepresentation': library.equal_representation_nucleotides,
+            'DNADissolvedIn': library.dna_dissolved_in,
+            'concentration': library.concentration,
+            'concentrationMethod': library.concentration_determined_by.name,
+            'sampleVolume': library.sample_volume,
+            'meanFragmentSize': library.mean_fragment_size,
+            'qPCRResult': library.qpcr_result,
+            'sequencingRunCondition': library.sequencing_run_condition.name,
+            'sequencingDepth': library.sequencing_depth,
+            'comments': library.comments
+        } for library in libraries]
+
+        data = sorted(libraries_data, key=lambda x: x['id'], reverse=True)
+
+        return data
+
+    def get_library(self):
+        """ Get library by a given id """
+
+        return []
 
     def save_library(self):
         name = self.request.POST.get('name')

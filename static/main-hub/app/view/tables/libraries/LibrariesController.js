@@ -64,7 +64,10 @@ Ext.define('MainHub.view.tables.libraries.LibrariesController', {
     },
 
     editRecord: function(record) {
-        // Ext.create('library_wnd', {title: 'Edit Researcher', mode: 'edit', record: record}).show();
+        Ext.create('library_wnd', {
+            title: record.data.recordType == 'L' ? 'Edit Library' : 'Edit Sample',
+            mode: 'edit', record: record
+        }).show();
     },
 
     deleteRecord: function(record) {
