@@ -144,10 +144,22 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
 
     onIndexTypeSelect: function(fld, record) {
         var wnd = fld.up('library_wnd'),
+            indexReadsField = Ext.getCmp('indexReadsField'),
             indexI7Store = Ext.getStore('indexI7Store'),
             indexI5Store = Ext.getStore('indexI5Store'),
             indexI7Field = Ext.getCmp('indexI7Field'),
             indexI5Field = Ext.getCmp('indexI5Field');
+
+        indexReadsField.enable();
+        if (record.data.id == 1 || record.data.id == 2) {
+            // TruSeq small RNA (I7, RPI1-RPI48) or TruSeq DNA/RNA (I7, A001 - A027):
+            // # of index reads: 0,1
+            indexReadsField.getStore().setData( [{id: 1, name: 0}, {id: 2, name: 1}] );
+        } else {
+            // Nextera (I7, N701-N712; I5 S501-S517):
+            // # of index reads: 0,1,2
+            indexReadsField.getStore().setData( [{id: 1, name: 0}, {id: 2, name: 1}, {id: 3, name: 2}] )
+        }
 
         // Remove values before loading new stores
         indexI7Field.clearValue();

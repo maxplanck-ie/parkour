@@ -69,6 +69,7 @@ class LibraryField(View):
         index_type = self.request.GET.get('index_type_id')
         indices = IndexI7.objects.filter(index_type=index_type)
         data = [{'id': index.id, 'index': '%s - %s' % (index.index_id, index.index), } for index in indices]
+        data = sorted(data, key=lambda x: x['id'])
         return data
 
     def get_index_i5(self):
@@ -76,6 +77,7 @@ class LibraryField(View):
         index_type = self.request.GET.get('index_type_id')
         indices = IndexI5.objects.filter(index_type=index_type)
         data = [{'id': index.id, 'index': '%s - %s' % (index.index_id, index.index), } for index in indices]
+        data = sorted(data, key=lambda x: x['id'])
         return data
 
     @staticmethod
