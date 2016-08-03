@@ -165,9 +165,9 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
-            'level': 'WARNING',
-            'propagate': True,
+            'handlers': ['logfile'],
+            'level': 'ERROR',
+            'propagate': False,
         },
         'django.db.backends': {
             'handlers': ['console'],
