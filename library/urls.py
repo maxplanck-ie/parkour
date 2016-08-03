@@ -13,9 +13,6 @@ urlpatterns = [
     url(r'^get_sequencing_run_conditions/$', LibraryField.as_view(), name='get_sequencing_run_conditions'),
 
     url(r'^get_libraries/$', LibraryView.as_view(), name='get_libraries'),
-    url(r'^get_library/$', LibraryView.as_view(), name='get_library'),
-
     url(r'^save_library/$', LibraryView.as_view(), name='save_library'),
-    url(r'^edit_library/$', LibraryView.as_view(), name='edit_library'),
     url(r'^delete_library/$', LibraryView.as_view(), name='delete_library'),
 ]

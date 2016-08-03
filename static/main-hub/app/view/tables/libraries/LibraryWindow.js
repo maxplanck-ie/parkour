@@ -127,6 +127,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             },
                             {
                                 xtype: 'combobox',
+                                id: 'organismField',
                                 queryMode: 'local',
                                 displayField: 'name',
                                 valueField: 'id',
@@ -155,7 +156,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 itemId: 'indexReadsField',
                                 queryMode: 'local',
                                 displayField: 'name',
-                                valueField: 'id',
+                                valueField: 'name',
                                 name: 'indexReads',
                                 fieldLabel: 'Number of Index Reads <sup><strong><span class="field-tooltip" tooltip-text="Number of Index Reads = 0: Libraries do not carry any barcode, no barcode will be read during sequencing.<br/><br/>Number of Index Reads = 1: Single-indexed libraries. Index on adapter P7 will be read during sequencing (true for most applications).<br/><br/>Number of Index Reads = 2: Dual-indexed libraries. Index on Adapter P7 and P5 will be read. (i.e Nextera libraries or if a high degree of multiplexing is needed)">[?]</span></strong></sup>',
                                 emptyText: 'Number of Index Reads',
@@ -173,8 +174,8 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             {
                                 xtype: 'combobox',
                                 queryMode: 'local',
-                                displayField: 'index',
-                                valueField: 'id',
+                                displayField: 'name',
+                                valueField: 'index',
                                 name: 'indexI7',
                                 id: 'indexI7Field',
                                 itemId: 'indexI7Field',
@@ -186,8 +187,8 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             {
                                 xtype: 'combobox',
                                 queryMode: 'local',
-                                displayField: 'index',
-                                valueField: 'id',
+                                displayField: 'name',
+                                valueField: 'index',
                                 name: 'indexI5',
                                 id: 'indexI5Field',
                                 itemId: 'indexI5Field',
@@ -198,6 +199,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             },
                             {
                                 xtype: 'fieldcontainer',
+                                id: 'equalRepresentation',
                                 fieldLabel: 'Equal Representation of Nucleotides <sup><strong><span class="field-tooltip" tooltip-text="For best sequencing quality all 4 nucleotides should be at each position of the insert (up- and downstream of sequencing adaptors) represented at an equal frequency.<br><br>This is true i.e. for applications like ChIP-Seq, RNA-Seq and WGS (<strong>select Yes</strong>).<br><br>In case your insert has an uneven representation of nucleotides (Amplicon-Seq, internal usage of barcodes) <strong>select No</strong> and specify in the comments field (below).">[?]</span></strong></sup>',
                                 defaultType: 'radiofield',
                                 defaults: {
@@ -209,7 +211,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                         boxLabel: 'Yes',
                                         name: 'equalRepresentationOfNucleotides',
                                         inputValue: true,
-                                        id: 'radio1',
+                                        id: 'equalRepresentationRadio1',
                                         checked: true,
                                         margin: '0 15px 0 0'
                                     },
@@ -217,7 +219,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                         boxLabel: 'No',
                                         name: 'equalRepresentationOfNucleotides',
                                         inputValue: false,
-                                        id: 'radio2'
+                                        id: 'equalRepresentationRadio2'
                                     }
                                 ]
                             },
@@ -235,6 +237,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             },
                             {
                                 xtype: 'combobox',
+                                id: 'concentrationMethodField',
                                 queryMode: 'local',
                                 displayField: 'name',
                                 valueField: 'id',
@@ -270,6 +273,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             },
                             {
                                 xtype: 'combobox',
+                                id: 'sequencingRunConditionField',
                                 queryMode: 'local',
                                 displayField: 'name',
                                 valueField: 'id',
@@ -327,13 +331,6 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                 itemId: 'addWndBtn',
                 id: 'addWndBtn',
                 text: 'Add',
-                hidden: true
-            },
-            {
-                xtype: 'button',
-                itemId: 'editLibraryWndBtn',
-                id: 'editLibraryWndBtn',
-                text: 'Save',
                 hidden: true
             }
         ],

@@ -61,12 +61,14 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         wnd.getDockedItems('toolbar[dock="bottom"]')[0].show();
 
         if (btn.itemId == 'libraryCardBtn') {
-            if (wnd.mode == 'add') wnd.setTitle('Add Library');
             layout.setActiveItem(1);
-            Ext.getCmp('libraryForm').reset();
+            if (wnd.mode == 'add') {
+                wnd.setTitle('Add Library');
+                Ext.getCmp('libraryForm').reset();
+            }
         } else {
-            if (wnd.mode == 'add') wnd.setTitle('Add Sample');
             layout.setActiveItem(2);
+            if (wnd.mode == 'add') wnd.setTitle('Add Sample');
         }
     },
 
@@ -82,11 +84,28 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
     onLibraryCardActivate: function(card) {
         var wnd = card.up('library_wnd');
 
+        Ext.getCmp('addWndBtn').show();
         if (wnd.mode == 'add') {
             Ext.getCmp('saveAndAddWndBtn').show();
-            Ext.getCmp('addWndBtn').show();
         } else {
-            Ext.getCmp('editLibraryWndBtn').show();
+            var record = wnd.record.data,
+                form = Ext.getCmp('libraryForm').getForm();
+
+            // Load field values
+            form.setValues({
+                name: record.name,
+                enrichmentCycles: record.enrichmentCycles,
+                DNADissolvedIn: record.DNADissolvedIn,
+                concentration: record.concentration,
+                sampleVolume: record.sampleVolume,
+                meanFragmentSize: record.meanFragmentSize,
+                qPCRResult: record.qPCRResult,
+                sequencingDepth: record.sequencingDepth,
+                comments: record.comments
+            });
+            if (record.equalRepresentation == 'No') Ext.getCmp('equalRepresentationRadio2').setValue(true);
+
+            Ext.getCmp('addWndBtn').setConfig('text', 'Save');
         }
 
         // Initialize tooltips
@@ -104,6 +123,13 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         wnd.setLoading();
         Ext.getStore('libraryProtocolsStore').load(function(records, operation, success) {
             if (!success) Ext.ux.ToastMessage('Cannot load Library Protocols', 'error');
+
+            if (wnd.mode == 'edit') {
+                var libraryProtocolField = Ext.getCmp('libraryProtocolField');
+                libraryProtocolField.select(record.libraryProtocolId);
+                libraryProtocolField.fireEvent('select', libraryProtocolField, libraryProtocolField.findRecordByValue(record.libraryProtocolId));
+            }
+
             wnd.setLoading(false);
         });
 
@@ -111,6 +137,13 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         wnd.setLoading();
         Ext.getStore('organismsStore').load(function(records, operation, success) {
             if (!success) Ext.ux.ToastMessage('Cannot load Organisms', 'error');
+
+            if (wnd.mode == 'edit') {
+                var organismField = Ext.getCmp('organismField');
+                organismField.select(record.organismId);
+                organismField.fireEvent('select', organismField, organismField.findRecordByValue(record.organismId));
+            }
+
             wnd.setLoading(false);
         });
 
@@ -118,6 +151,13 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         wnd.setLoading();
         Ext.getStore('indexTypesStore').load(function(records, operation, success) {
             if (!success) Ext.ux.ToastMessage('Cannot load Index Types', 'error');
+
+            if (wnd.mode == 'edit') {
+                var indexType = Ext.getCmp('indexType');
+                indexType.select(record.indexTypeId);
+                indexType.fireEvent('select', indexType, indexType.findRecordByValue(record.indexTypeId));
+            }
+
             wnd.setLoading(false);
         });
 
@@ -125,6 +165,13 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         wnd.setLoading();
         Ext.getStore('concentrationMethodsStore').load(function(records, operation, success) {
             if (!success) Ext.ux.ToastMessage('Cannot load Concentration Methods', 'error');
+
+            if (wnd.mode == 'edit') {
+                var concentrationMethodField = Ext.getCmp('concentrationMethodField');
+                concentrationMethodField.select(record.concentrationMethodId);
+                concentrationMethodField.fireEvent('select', concentrationMethodField, concentrationMethodField.findRecordByValue(record.concentrationMethodId));
+            }
+
             wnd.setLoading(false);
         });
 
@@ -132,6 +179,13 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         wnd.setLoading();
         Ext.getStore('sequencingRunConditionsStore').load(function(records, operation, success) {
             if (!success) Ext.ux.ToastMessage('Cannot load Sequencing Run Conditions', 'error');
+
+            if (wnd.mode == 'edit') {
+                var sequencingRunConditionField = Ext.getCmp('sequencingRunConditionField');
+                sequencingRunConditionField.select(record.sequencingRunConditionId);
+                sequencingRunConditionField.fireEvent('select', sequencingRunConditionField, sequencingRunConditionField.findRecordByValue(record.sequencingRunConditionId));
+            }
+
             wnd.setLoading(false);
         });
     },
@@ -152,6 +206,12 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
                     Ext.ux.ToastMessage('Cannot load Principal Investigators', 'error');
                 } else {
                     libraryTypeField.setDisabled(false);
+
+                    if (wnd.mode == 'edit') {
+                        var record = wnd.record.data;
+                        libraryTypeField.select(record.libraryTypeId);
+                        libraryTypeField.fireEvent('select', libraryTypeField, libraryTypeField.findRecordByValue(record.libraryTypeId));
+                    }
                 }
                 wnd.setLoading(false);
             }
@@ -174,7 +234,13 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         } else {
             // Nextera (I7, N701-N712; I5 S501-S517):
             // # of index reads: 0,1,2
-            indexReadsField.getStore().setData( [{id: 1, name: 0}, {id: 2, name: 1}, {id: 3, name: 2}] )
+            indexReadsField.getStore().setData( [{id: 1, name: 0}, {id: 2, name: 1}, {id: 3, name: 2}] );
+        }
+
+        if (wnd.mode == 'edit') {
+            var wndRecord = wnd.record.data;
+            indexReadsField.select(wndRecord.indexReads);
+            indexReadsField.fireEvent('select', indexReadsField, indexReadsField.findRecordByValue(wndRecord.indexReads));
         }
 
         // Remove values before loading new stores
@@ -189,6 +255,11 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             },
             callback: function(records, operation, success) {
                 if (!success) Ext.ux.ToastMessage('Cannot load Index I7', 'error');
+
+                if (wnd.mode == 'edit') {
+                    indexI7Field.setValue(wndRecord.indexI7);
+                }
+
                 wnd.setLoading(false);
             }
         });
@@ -201,6 +272,11 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             },
             callback: function(records, operation, success) {
                 if (!success) Ext.ux.ToastMessage('Cannot load Index I5', 'error');
+
+                if (wnd.mode == 'edit') {
+                    indexI5Field.setValue(wndRecord.indexI5);
+                }
+
                 wnd.setLoading(false);
             }
         });
@@ -245,7 +321,9 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
                 scope: this,
 
                 params: {
+                    'mode': wnd.mode,
                     'name': data.name,
+                    'library_id': (typeof wnd.record !== 'undefined') ? wnd.record.data.id : '',
                     'library_protocol': data.libraryProtocol,
                     'library_type': data.libraryType,
                     'enrichment_cycles': data.enrichmentCycles,
@@ -272,7 +350,12 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
                     if (obj.success) {
                         var grid = Ext.getCmp('librariesTable');
                         grid.fireEvent('refresh', grid);
-                        Ext.ux.ToastMessage('Library has been added!');
+
+                        if (wnd.mode == 'add') {
+                            Ext.ux.ToastMessage('Library has been added!');
+                        } else {
+                            Ext.ux.ToastMessage('Library has been updated!');
+                        }
 
                         // Preserve all fields except for Name, if 'Save and Add another' button was pressed
                         if (addAnother) {

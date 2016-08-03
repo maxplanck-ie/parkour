@@ -68,7 +68,8 @@ class LibraryField(View):
         """ Get the list of all indices i7 for a given index type """
         index_type = self.request.GET.get('index_type_id')
         indices = IndexI7.objects.filter(index_type=index_type)
-        data = [{'id': index.id, 'index': '%s - %s' % (index.index_id, index.index), } for index in indices]
+        data = [{'id': index.id, 'name': '%s - %s' % (index.index_id, index.index), 'index': index.index}
+                for index in indices]
         data = sorted(data, key=lambda x: x['id'])
         return data
 
@@ -76,7 +77,8 @@ class LibraryField(View):
         """ Get the list of all indices i5 for a given index type """
         index_type = self.request.GET.get('index_type_id')
         indices = IndexI5.objects.filter(index_type=index_type)
-        data = [{'id': index.id, 'index': '%s - %s' % (index.index_id, index.index), } for index in indices]
+        data = [{'id': index.id, 'name': '%s - %s' % (index.index_id, index.index), 'index': index.index}
+                for index in indices]
         data = sorted(data, key=lambda x: x['id'])
         return data
 
@@ -132,21 +134,27 @@ class LibraryView(View):
             'recordType': 'L',
             'date': library.date.strftime('%d.%m.%Y'),
             'libraryProtocol': library.library_protocol.name,
+            'libraryProtocolId': library.library_protocol.id,
             'libraryType': library.library_type.name,
+            'libraryTypeId': library.library_type.id,
             'enrichmentCycles': library.enrichment_cycles,
             'organism': library.organism.name,
+            'organismId': library.organism.id,
             'indexType': library.index_type.name,
+            'indexTypeId': library.index_type.id,
             'indexReads': library.index_reads,
             'indexI7': library.index_i7,
             'indexI5': library.index_i5,
-            'equalRepresentation': library.equal_representation_nucleotides,
+            'equalRepresentation': 'Yes' if library.equal_representation_nucleotides else 'No',
             'DNADissolvedIn': library.dna_dissolved_in,
             'concentration': library.concentration,
             'concentrationMethod': library.concentration_determined_by.name,
+            'concentrationMethodId': library.concentration_determined_by.id,
             'sampleVolume': library.sample_volume,
             'meanFragmentSize': library.mean_fragment_size,
             'qPCRResult': library.qpcr_result,
             'sequencingRunCondition': library.sequencing_run_condition.name,
+            'sequencingRunConditionId': library.sequencing_run_condition.id,
             'sequencingDepth': library.sequencing_depth,
             'comments': library.comments
         } for library in libraries]
@@ -155,13 +163,11 @@ class LibraryView(View):
 
         return data
 
-    def get_library(self):
-        """ Get library by a given id """
-
-        return []
-
     def save_library(self):
+        """ Add new Library or update existing one """
+        mode = self.request.POST.get('mode')
         name = self.request.POST.get('name')
+        library_id = self.request.POST.get('library_id')
         library_protocol = self.request.POST.get('library_protocol')
         library_type = self.request.POST.get('library_type')
         enrichment_cycles = int(self.request.POST.get('enrichment_cycles'))
@@ -170,7 +176,7 @@ class LibraryView(View):
         index_reads = int(self.request.POST.get('index_reads'))
         index_i7 = self.request.POST.get('index_i7')
         index_i5 = self.request.POST.get('index_i5')
-        equal_representation_nucleotides = bool(self.request.POST.get('equal_representation_nucleotides'))
+        equal_representation_nucleotides = json.loads(self.request.POST.get('equal_representation_nucleotides'))
         dna_dissolved_in = self.request.POST.get('dna_dissolved_in')
         concentration = float(self.request.POST.get('concentration'))
         concentration_determined_by = self.request.POST.get('concentration_determined_by')
@@ -181,19 +187,8 @@ class LibraryView(View):
         sequencing_depth = int(self.request.POST.get('sequencing_depth'))
         comments = self.request.POST.get('comments')
 
-        if index_i7:
-            try:
-                index_i7 = IndexI7.objects.get(id=int(index_i7)).index
-            except ValueError:
-                pass
-
-        if index_i5:
-            try:
-                index_i5 = IndexI5.objects.get(id=int(index_i5)).index
-            except ValueError:
-                pass
-
-        library = Library(name=name, library_protocol_id=library_protocol, library_type_id=library_type,
+        if mode == 'add':
+            lib = Library(name=name, library_protocol_id=library_protocol, library_type_id=library_type,
                           enrichment_cycles=enrichment_cycles, organism_id=organism, index_type_id=index_type,
                           index_reads=index_reads, index_i7=index_i7, index_i5=index_i5,
                           equal_representation_nucleotides=equal_representation_nucleotides,
@@ -202,12 +197,32 @@ class LibraryView(View):
                           sample_volume=sample_volume, mean_fragment_size=mean_fragment_size,
                           qpcr_result=qpcr_result, sequencing_run_condition_id=sequencing_run_condition,
                           sequencing_depth=sequencing_depth, comments=comments)
-        library.save()
-
-    def edit_library(self):
-        pass
+            lib.save()
+        elif mode == 'edit':
+            lib = Library.objects.get(id=library_id)
+            lib.name = name
+            lib.library_protocol_id = library_protocol
+            lib.library_type_id = library_type
+            lib.enrichment_cycles = enrichment_cycles
+            lib.organism_id = organism
+            lib.index_type_id = index_type
+            lib.index_reads = index_reads
+            lib.index_i7 = index_i7
+            lib.index_i5 = index_i5
+            lib.equal_representation_nucleotides = equal_representation_nucleotides
+            lib.dna_dissolved_in = dna_dissolved_in
+            lib.concentration = concentration
+            lib.concentration_determined_by_id = concentration_determined_by
+            lib.sample_volume = sample_volume
+            lib.mean_fragment_size = mean_fragment_size
+            lib.qpcr_result = qpcr_result
+            lib.sequencing_run_condition_id = sequencing_run_condition
+            lib.sequencing_depth = sequencing_depth
+            lib.comments = comments
+            lib.save()
 
     def delete_library(self):
+        """ Delete Library with a given id """
         record_type = self.request.POST.get('record_type')
         record_id = self.request.POST.get('record_id')
 
