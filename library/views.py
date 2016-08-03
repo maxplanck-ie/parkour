@@ -99,9 +99,6 @@ class LibraryView(View):
         error = str()
         data = []
 
-        # Test Server Error (500)
-        print(Error500)
-
         try:
             libraries = Library.objects.select_related()
             libraries_data = [{
