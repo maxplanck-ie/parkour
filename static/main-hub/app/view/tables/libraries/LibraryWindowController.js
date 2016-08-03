@@ -127,7 +127,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             if (wnd.mode == 'edit') {
                 var libraryProtocolField = Ext.getCmp('libraryProtocolField');
                 libraryProtocolField.select(record.libraryProtocolId);
-                libraryProtocolField.fireEvent('select', libraryProtocolField, libraryProtocolField.findRecordByValue(record.libraryProtocolId));
+                libraryProtocolField.fireEvent('select', libraryProtocolField, libraryProtocolField.findRecordByValue(record.libraryProtocolId), 'edit');
             }
 
             wnd.setLoading(false);
@@ -155,7 +155,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             if (wnd.mode == 'edit') {
                 var indexType = Ext.getCmp('indexType');
                 indexType.select(record.indexTypeId);
-                indexType.fireEvent('select', indexType, indexType.findRecordByValue(record.indexTypeId));
+                indexType.fireEvent('select', indexType, indexType.findRecordByValue(record.indexTypeId), 'edit');
             }
 
             wnd.setLoading(false);
@@ -190,10 +190,12 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         });
     },
 
-    onLibraryProtocolFieldSelect: function(fld, record) {
+    onLibraryProtocolFieldSelect: function(fld, record, eOpts) {
         var wnd = fld.up('library_wnd'),
             libraryTypeStore = Ext.getStore('libraryTypeStore'),
             libraryTypeField = Ext.getCmp('libraryTypeField');
+
+        libraryTypeField.reset();
 
         // Load Library Type
         wnd.setLoading();
@@ -207,7 +209,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
                 } else {
                     libraryTypeField.setDisabled(false);
 
-                    if (wnd.mode == 'edit') {
+                    if (wnd.mode == 'edit' && eOpts == 'edit') {
                         var record = wnd.record.data;
                         libraryTypeField.select(record.libraryTypeId);
                         libraryTypeField.fireEvent('select', libraryTypeField, libraryTypeField.findRecordByValue(record.libraryTypeId));
@@ -218,7 +220,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         });
     },
 
-    onIndexTypeSelect: function(fld, record) {
+    onIndexTypeSelect: function(fld, record, eOpts) {
         var wnd = fld.up('library_wnd'),
             indexReadsField = Ext.getCmp('indexReadsField'),
             indexI7Store = Ext.getStore('indexI7Store'),
@@ -226,7 +228,11 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             indexI7Field = Ext.getCmp('indexI7Field'),
             indexI5Field = Ext.getCmp('indexI5Field');
 
+        indexReadsField.reset();
         indexReadsField.enable();
+        indexI7Field.disable();
+        indexI5Field.disable();
+
         if (record.data.id == 1 || record.data.id == 2) {
             // TruSeq small RNA (I7, RPI1-RPI48) or TruSeq DNA/RNA (I7, A001 - A027):
             // # of index reads: 0,1
@@ -237,15 +243,15 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             indexReadsField.getStore().setData( [{id: 1, name: 0}, {id: 2, name: 1}, {id: 3, name: 2}] );
         }
 
-        if (wnd.mode == 'edit') {
+        if (wnd.mode == 'edit' && eOpts == 'edit') {
             var wndRecord = wnd.record.data;
             indexReadsField.select(wndRecord.indexReads);
             indexReadsField.fireEvent('select', indexReadsField, indexReadsField.findRecordByValue(wndRecord.indexReads));
         }
 
         // Remove values before loading new stores
-        indexI7Field.clearValue();
-        indexI5Field.clearValue();
+        indexI7Field.reset();
+        indexI5Field.reset();
 
         // Load Index I7
         wnd.setLoading();
@@ -255,11 +261,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             },
             callback: function(records, operation, success) {
                 if (!success) Ext.ux.ToastMessage('Cannot load Index I7', 'error');
-
-                if (wnd.mode == 'edit') {
-                    indexI7Field.setValue(wndRecord.indexI7);
-                }
-
+                if (wnd.mode == 'edit' && eOpts == 'edit') indexI7Field.setValue(wndRecord.indexI7);
                 wnd.setLoading(false);
             }
         });
@@ -272,11 +274,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             },
             callback: function(records, operation, success) {
                 if (!success) Ext.ux.ToastMessage('Cannot load Index I5', 'error');
-
-                if (wnd.mode == 'edit') {
-                    indexI5Field.setValue(wndRecord.indexI5);
-                }
-
+                if (wnd.mode == 'edit' && eOpts == 'edit') indexI5Field.setValue(wndRecord.indexI5);
                 wnd.setLoading(false);
             }
         });
