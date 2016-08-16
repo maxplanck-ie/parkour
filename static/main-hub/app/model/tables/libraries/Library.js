@@ -40,6 +40,6 @@ Ext.define('MainHub.model.tables.libraries.Library', {
         {name: 'rnaQualityId', type: 'int'},
         {name: 'rnaSpikeIn', type: 'string'},
         {name: 'samplePreparationProtocol', type: 'string'},
-        {name: 'requestedSampletreatment', type: 'string'}
+        {name: 'requestedSampleTreatment', type: 'string'}
     ]
 });

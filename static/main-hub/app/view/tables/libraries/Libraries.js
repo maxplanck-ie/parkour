@@ -56,7 +56,9 @@ Ext.define('MainHub.view.tables.libraries.Libraries', {
                     { text: 'Index Reads', dataIndex: 'indexReads' },
                     { text: 'Index I7', dataIndex: 'indexI7' },
                     { text: 'Index I5', dataIndex: 'indexI5' },
-                    { text: 'Equal Representation', dataIndex: 'equalRepresentation' },
+                    { text: 'Equal Representation', dataIndex: 'equalRepresentation', renderer: function(val) {
+                        return val == 'True' ? 'Yes' : 'No';
+                    } },
                     { text: 'DNA Dissolved In', dataIndex: 'DNADissolvedIn' },
                     { text: 'Concentration', dataIndex: 'concentration' },
                     { text: 'Concentration Method', dataIndex: 'concentrationMethod' },
@@ -65,9 +67,25 @@ Ext.define('MainHub.view.tables.libraries.Libraries', {
                     { text: 'qPCR Result', dataIndex: 'qPCRResult' },
                     { text: 'Sequencing Run Condition', dataIndex: 'sequencingRunCondition' },
                     { text: 'Sequencing Depth', dataIndex: 'sequencingDepth' },
-                    { text: 'DNase Treatment', dataIndex: 'DNaseTreatment' },
+                    { text: 'DNase Treatment', dataIndex: 'DNaseTreatment', renderer: function(val) {
+                        if (val == 'True') {
+                            return 'Yes';
+                        } else if (val == 'False') {
+                            return 'No';
+                        } else {
+                            return '';
+                        }
+                    } },
                     { text: 'RNA Quality', dataIndex: 'rnaQuality' },
-                    { text: 'RNA Spike In', dataIndex: 'rnaSpikeIn' },
+                    { text: 'RNA Spike In', dataIndex: 'rnaSpikeIn', renderer: function(val) {
+                        if (val == 'True') {
+                            return 'Yes';
+                        } else if (val == 'False') {
+                            return 'No';
+                        } else {
+                            return '';
+                        }
+                    } },
                     { text: 'Sample Preparation Protocol', dataIndex: 'samplePreparationProtocol' },
                     { text: 'Requested Sample Treatment', dataIndex: 'requestedSampletreatment' },
                     { text: 'Comments', dataIndex: 'comments' }

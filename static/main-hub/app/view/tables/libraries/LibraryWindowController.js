@@ -72,7 +72,10 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             }
         } else {
             layout.setActiveItem(2);
-            if (wnd.mode == 'add') wnd.setTitle('Add Sample');
+            if (wnd.mode == 'add') {
+                wnd.setTitle('Add Sample');
+                Ext.getCmp('sampleForm').reset();
+            }
         }
     },
 
@@ -183,7 +186,25 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         if (wnd.mode == 'add') {
             Ext.getCmp('saveAndAddWndBtn').show();
         } else {
+            var record = wnd.record.data,
+                form = Ext.getCmp('sampleForm').getForm();
 
+            form.setValues({
+                name: record.name,
+                DNADissolvedIn: record.DNADissolvedIn,
+                concentration: record.concentration,
+                sampleVolume: record.sampleVolume,
+                sampleAmplifiedCycles: record.amplifiedCycles,
+                sequencingDepth: record.sequencingDepth,
+                samplePreparationProtocol: record.samplePreparationProtocol,
+                requestedSampleTreatment: record.requestedSampleTreatment,
+                comments: record.comments
+            });
+            if (record.equalRepresentation == 'False') Ext.getCmp('equalRepresentationRadio4').setValue(true);
+            if (record.DNaseTreatment == 'False') Ext.getCmp('DNaseTreatmentRadio2').setValue(true);
+            if (record.rnaSpikeIn == 'False') Ext.getCmp('rnaSpikeInRadio2').setValue(true);
+
+            Ext.getCmp('addWndBtn').setConfig('text', 'Save');
         }
 
         this.initializeTooltips();
@@ -193,11 +214,11 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         Ext.getStore('nucleicAcidTypesStore').load(function(records, operation, success) {
             if (!success) Ext.ux.ToastMessage('Cannot load Nucleic Acid Types', 'error');
 
-            // if (wnd.mode == 'edit') {
-            //     var librarySampleProtocolField = Ext.getCmp('librarySampleProtocolField');
-            //     librarySampleProtocolField.select(record.libraryProtocolId);
-            //     librarySampleProtocolField.fireEvent('select', librarySampleProtocolField, librarySampleProtocolField.findRecordByValue(record.libraryProtocolId), 'edit');
-            // }
+            if (wnd.mode == 'edit') {
+                var nucleicAcidTypeField = Ext.getCmp('nucleicAcidTypeField');
+                nucleicAcidTypeField.select(record.nucleicAcidTypeId);
+                nucleicAcidTypeField.fireEvent('select', nucleicAcidTypeField, nucleicAcidTypeField.findRecordByValue(record.nucleicAcidTypeId), 'edit');
+            }
 
             wnd.setLoading(false);
         });
@@ -207,11 +228,11 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         Ext.getStore('organismsStore').load(function(records, operation, success) {
             if (!success) Ext.ux.ToastMessage('Cannot load Organisms', 'error');
 
-            // if (wnd.mode == 'edit') {
-            //     var organismField = Ext.getCmp('organismField');
-            //     organismField.select(record.organismId);
-            //     organismField.fireEvent('select', organismField, organismField.findRecordByValue(record.organismId));
-            // }
+            if (wnd.mode == 'edit') {
+                var organismSampleField = Ext.getCmp('organismSampleField');
+                organismSampleField.select(record.organismId);
+                organismSampleField.fireEvent('select', organismSampleField, organismSampleField.findRecordByValue(record.organismId));
+            }
 
             wnd.setLoading(false);
         });
@@ -221,11 +242,11 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         Ext.getStore('concentrationMethodsStore').load(function(records, operation, success) {
             if (!success) Ext.ux.ToastMessage('Cannot load Concentration Methods', 'error');
 
-            // if (wnd.mode == 'edit') {
-            //     var concentrationMethodField = Ext.getCmp('concentrationMethodField');
-            //     concentrationMethodField.select(record.concentrationMethodId);
-            //     concentrationMethodField.fireEvent('select', concentrationMethodField, concentrationMethodField.findRecordByValue(record.concentrationMethodId));
-            // }
+            if (wnd.mode == 'edit') {
+                var concentrationSampleMethodField = Ext.getCmp('concentrationSampleMethodField');
+                concentrationSampleMethodField.select(record.concentrationMethodId);
+                concentrationSampleMethodField.fireEvent('select', concentrationSampleMethodField, concentrationSampleMethodField.findRecordByValue(record.concentrationMethodId));
+            }
 
             wnd.setLoading(false);
         });
@@ -233,6 +254,13 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         // Load RNA Qualities
         Ext.getStore('rnaQualityStore').load(function(records, operation, success) {
             if (!success) Ext.ux.ToastMessage('Cannot load RNA Qualities', 'error');
+
+            if (wnd.mode == 'edit') {
+                var rnaQualityField = Ext.getCmp('rnaQualityField');
+                rnaQualityField.select(record.rnaQualityId);
+                rnaQualityField.fireEvent('select', rnaQualityField, rnaQualityField.findRecordByValue(record.rnaQualityId));
+            }
+
             wnd.setLoading(false);
         });
 
@@ -241,11 +269,11 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         Ext.getStore('sequencingRunConditionsStore').load(function(records, operation, success) {
             if (!success) Ext.ux.ToastMessage('Cannot load Sequencing Run Conditions', 'error');
 
-            // if (wnd.mode == 'edit') {
-            //     var sequencingRunConditionField = Ext.getCmp('sequencingRunConditionField');
-            //     sequencingRunConditionField.select(record.sequencingRunConditionId);
-            //     sequencingRunConditionField.fireEvent('select', sequencingRunConditionField, sequencingRunConditionField.findRecordByValue(record.sequencingRunConditionId));
-            // }
+            if (wnd.mode == 'edit') {
+                var sequencingRunConditionSampleField = Ext.getCmp('sequencingRunConditionSampleField');
+                sequencingRunConditionSampleField.select(record.sequencingRunConditionId);
+                sequencingRunConditionSampleField.fireEvent('select', sequencingRunConditionSampleField, sequencingRunConditionSampleField.findRecordByValue(record.sequencingRunConditionId));
+            }
 
             wnd.setLoading(false);
         });
@@ -382,18 +410,18 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             },
             callback: function(records, operation, success) {
                 if (!success) {
-                Ext.ux.ToastMessage('Cannot load Sample Protocols', 'error');
-            } else {
-                sampleProtocolField.setDisabled(false);
-            }
+                    Ext.ux.ToastMessage('Cannot load Sample Protocols', 'error');
+                } else {
+                    sampleProtocolField.setDisabled(false);
+                }
 
-            // if (wnd.mode == 'edit') {
-            //     var librarySampleProtocolField = Ext.getCmp('librarySampleProtocolField');
-            //     librarySampleProtocolField.select(record.libraryProtocolId);
-            //     librarySampleProtocolField.fireEvent('select', librarySampleProtocolField, librarySampleProtocolField.findRecordByValue(record.libraryProtocolId), 'edit');
-            // }
+                if (wnd.mode == 'edit') {
+                    var sampleProtocolId = wnd.record.data.libraryProtocolId;
+                    sampleProtocolField.select(sampleProtocolId);
+                    sampleProtocolField.fireEvent('select', sampleProtocolField, sampleProtocolField.findRecordByValue(sampleProtocolId), 'edit');
+                }
 
-            wnd.setLoading(false);
+                wnd.setLoading(false);
             }
         });
     },
@@ -506,7 +534,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             data = form.getForm().getFieldValues();
 
             if (form.isValid()) {
-                // wnd.setLoading('Adding...');
+                wnd.setLoading('Adding...');
 
                 Ext.Ajax.request({
                     url: 'save_sample/',
