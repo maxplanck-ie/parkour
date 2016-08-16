@@ -125,11 +125,11 @@ class LibraryView(View):
 
     @staticmethod
     def get_libraries():
-        """ Get the list of all libraries """
+        """ Get the list of all libraries and samples """
 
         libraries = Library.objects.select_related()
         libraries_data = [{
-            'id': library.id,
+            'libraryId': library.id,
             'name': library.name,
             'recordType': 'L',
             'date': library.date.strftime('%d.%m.%Y'),
@@ -159,7 +159,37 @@ class LibraryView(View):
             'comments': library.comments
         } for library in libraries]
 
-        data = sorted(libraries_data, key=lambda x: x['id'], reverse=True)
+        samples = Sample.objects.select_related()
+        samples_data = [{
+            'sampleId': sample.id,
+            'name': sample.name,
+            'recordType': 'S',
+            'date': sample.date.strftime('%d.%m.%Y'),
+            'nucleicAcidType': sample.nucleic_acid_type.name,
+            'nucleicAcidTypeId': sample.nucleic_acid_type_id,
+            'libraryProtocol': sample.sample_protocol.name,
+            'amplifiedCycles': sample.amplified_cycles,
+            'organism': sample.organism.name,
+            'organismId': sample.organism.id,
+            'equalRepresentation': 'Yes' if sample.equal_representation_nucleotides else 'No',
+            'DNADissolvedIn': sample.dna_dissolved_in,
+            'concentration': sample.concentration,
+            'concentrationMethod': sample.concentration_determined_by.name,
+            'concentrationMethodId': sample.concentration_determined_by.id,
+            'sampleVolume': sample.sample_volume,
+            'sequencingRunCondition': sample.sequencing_run_condition.name,
+            'sequencingRunConditionId': sample.sequencing_run_condition.id,
+            'sequencingDepth': sample.sequencing_depth,
+            'DNaseTreatment': sample.dnase_treatment,
+            'rnaQuality': sample.rna_quality.name if sample.rna_quality else '',
+            'rnaQualityId': sample.rna_quality_id if sample.rna_quality else '',
+            'rnaSpikeIn': sample.rna_spike_in,
+            'samplePreparationProtocol': sample.sample_preparation_protocol,
+            'requestedSampletreatment': sample.requested_sample_treatment,
+            'comments': sample.comments
+        } for sample in samples]
+
+        data = sorted(libraries_data + samples_data, key=lambda x: (x['date'], x['recordType']))
 
         return data
 
@@ -223,14 +253,9 @@ class LibraryView(View):
 
     def delete_library(self):
         """ Delete Library with a given id """
-        record_type = self.request.POST.get('record_type')
         record_id = self.request.POST.get('record_id')
-
-        if record_type == 'L':
-            record = Library.objects.get(id=record_id)
-            record.delete()
-        elif record_type == 'S':
-            pass
+        record = Library.objects.get(id=record_id)
+        record.detete()
 
 
 class SampleField(View):
@@ -281,3 +306,78 @@ class SampleField(View):
         """ Get the list of all rna qialities """
         qualities = RNAQuality.objects.all()
         return get_simple_field_dict(qualities)
+
+
+class SampleView(View):
+    def get(self, request):
+        error = str()
+        data = []
+
+        try:
+            data = getattr(self, resolve(request.path).url_name)()
+        except Exception as e:
+            error = str(e)
+            print('[ERROR]: %s' % error)
+            logger.debug(error)
+
+        return HttpResponse(json.dumps({'success': not error, 'error': error, 'data': data}),
+                            content_type='application/json')
+
+    def post(self, request):
+        """ Save Sample """
+        error = str()
+
+        try:
+            getattr(self, resolve(request.path).url_name)()
+        except Exception as e:
+            error = str(e)
+            print('[ERROR]: %s' % error)
+            logger.debug(error)
+
+        return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')
+
+    def save_sample(self):
+        """ Add new Sample or update existing one """
+        mode = self.request.POST.get('mode')
+        name = self.request.POST.get('name')
+        sample_id = self.request.POST.get('sample_id')
+        nucleic_acid_type_id = self.request.POST.get('nucleic_acid_type_id')
+        sample_protocol_id = self.request.POST.get('sample_protocol_id')
+        organism_id = self.request.POST.get('organism_id')
+        equal_representation_nucleotides = json.loads(self.request.POST.get('equal_representation_nucleotides'))
+        dna_dissolved_in = self.request.POST.get('dna_dissolved_in')
+        concentration = float(self.request.POST.get('concentration'))
+        concentration_determined_by_id = self.request.POST.get('concentration_determined_by_id')
+        sample_volume = self.request.POST.get('sample_volume')
+        sample_amplified_cycles = int(self.request.POST.get('sample_amplified_cycles'))
+        dnase_treatment = None if self.request.POST.get('dnase_treatment') == '' else \
+            json.loads(self.request.POST.get('dnase_treatment'))
+        rna_quality_id = self.request.POST.get('rna_quality_id')
+        rna_spike_in = None if self.request.POST.get('rna_spike_in') == '' else \
+            json.loads(self.request.POST.get('rna_spike_in'))
+        sample_preparation_protocol = self.request.POST.get('sample_preparation_protocol')
+        requested_sample_treatment = self.request.POST.get('requested_sample_treatment')
+        sequencing_run_condition_id = self.request.POST.get('sequencing_run_condition_id')
+        sequencing_depth = int(self.request.POST.get('sequencing_depth'))
+        comments = self.request.POST.get('comments')
+
+        if mode == 'add':
+            smpl = Sample(name=name, nucleic_acid_type_id=nucleic_acid_type_id, sample_protocol_id=sample_protocol_id,
+                          organism_id=organism_id, equal_representation_nucleotides=equal_representation_nucleotides,
+                          dna_dissolved_in=dna_dissolved_in, concentration=concentration,
+                          concentration_determined_by_id=concentration_determined_by_id, sample_volume=sample_volume,
+                          amplified_cycles=sample_amplified_cycles, dnase_treatment=dnase_treatment,
+                          rna_quality_id=rna_quality_id, rna_spike_in=rna_spike_in,
+                          sample_preparation_protocol=sample_preparation_protocol,
+                          requested_sample_treatment=requested_sample_treatment,
+                          sequencing_run_condition_id=sequencing_run_condition_id, sequencing_depth=sequencing_depth,
+                          comments=comments)
+            smpl.save()
+        elif mode == 'edit':
+            pass
+
+    def delete_sample(self):
+        """ Delete Sample with a given id """
+        record_id = self.request.POST.get('record_id')
+        record = Sample.objects.get(id=record_id)
+        record.delete()

@@ -80,8 +80,7 @@ Ext.define('MainHub.view.tables.libraries.LibrariesController', {
             scope: this,
 
             params: {
-                'record_id': record.data.id,
-                'record_type': record.data.recordType
+                'record_id': record.data.recordType == 'L' ? record.data.libraryId : record.data.sampleId,
             },
 
             success: function (response) {

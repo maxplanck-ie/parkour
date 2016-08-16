@@ -2,6 +2,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
     extend: 'Ext.window.Window',
     alias: 'library_wnd',
     xtype: 'library_wnd',
+    id: 'library_wnd',
 
     requires: ['MainHub.view.tables.libraries.LibraryWindowController'],
 
@@ -17,6 +18,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
     items: [
         {
             xtype: 'panel',
+            id: 'librarySamplePanel',
             border: 0,
             layout: 'card',
             items: [
@@ -414,7 +416,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             },
                             {
                                 xtype: 'numberfield',
-                                name: 'concentrationSample',
+                                name: 'concentration',
                                 fieldLabel: 'Concentration (ng/µl)',
                                 emptyText: 'Concentration (ng/µl)',
                                 minValue: 0
@@ -433,7 +435,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             },
                             {
                                 xtype: 'numberfield',
-                                name: 'librarySampleVolume',
+                                name: 'sampleVolume',
                                 fieldLabel: 'Sample Volume (µl)',
                                 emptyText: 'Sample Volume (µl)',
                                 minValue: 0,

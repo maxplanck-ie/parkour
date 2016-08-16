@@ -46,9 +46,11 @@ Ext.define('MainHub.view.tables.libraries.Libraries', {
                     { text: 'Name', dataIndex: 'name', width: 150, locked: true },
                     { text: '', dataIndex: 'recordType', width: 30, locked: true },
                     { text: 'Date', dataIndex: 'date' },
+                    { text: 'Nucleic Acid Type', dataIndex: 'nucleicAcidType' },
                     { text: 'Protocol', dataIndex: 'libraryProtocol' },
                     { text: 'Type', dataIndex: 'libraryType' },
                     { text: 'Enrichment Cycles', dataIndex: 'enrichmentCycles' },
+                    { text: 'Amplified Cycles', dataIndex: 'amplifiedCycles' },
                     { text: 'Organism', dataIndex: 'organism' },
                     { text: 'Index Type', dataIndex: 'indexType' },
                     { text: 'Index Reads', dataIndex: 'indexReads' },
@@ -63,6 +65,11 @@ Ext.define('MainHub.view.tables.libraries.Libraries', {
                     { text: 'qPCR Result', dataIndex: 'qPCRResult' },
                     { text: 'Sequencing Run Condition', dataIndex: 'sequencingRunCondition' },
                     { text: 'Sequencing Depth', dataIndex: 'sequencingDepth' },
+                    { text: 'DNase Treatment', dataIndex: 'DNaseTreatment' },
+                    { text: 'RNA Quality', dataIndex: 'rnaQuality' },
+                    { text: 'RNA Spike In', dataIndex: 'rnaSpikeIn' },
+                    { text: 'Sample Preparation Protocol', dataIndex: 'samplePreparationProtocol' },
+                    { text: 'Requested Sample Treatment', dataIndex: 'requestedSampletreatment' },
                     { text: 'Comments', dataIndex: 'comments' }
                 ]
             },

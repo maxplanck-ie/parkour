@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from library.views import LibraryField, LibraryView, SampleField
+from library.views import LibraryField, LibraryView, SampleField, SampleView
 
 
 urlpatterns = [
@@ -19,4 +19,7 @@ urlpatterns = [
     url(r'^get_nucleic_acid_types/$', SampleField.as_view(), name='get_nucleic_acid_types'),
     url(r'^get_sample_protocols/$', SampleField.as_view(), name='get_sample_protocols'),
     url(r'^get_rna_qualities/$', SampleField.as_view(), name='get_rna_qualities'),
+
+    url(r'^save_sample/$', SampleView.as_view(), name='save_sample'),
+    url(r'^delete_sample/$', SampleView.as_view(), name='delete_sample'),
 ]

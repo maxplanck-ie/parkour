@@ -419,84 +419,166 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
     },
 
     saveLibrary: function(addAnother) {
-        var form = Ext.getCmp('libraryForm'),
-            wnd = form.up('library_wnd');
+        var form = null, data = null, wnd = Ext.getCmp('library_wnd'),
+            card = Ext.getCmp('librarySamplePanel').getLayout().getActiveItem().id;
         addAnother = addAnother || false;
 
-        if (form.isValid()) {
-            var data = form.getForm().getFieldValues();
+        if (card == 'libraryCard') {
+            form = Ext.getCmp('libraryForm');
+            data = form.getForm().getFieldValues();
 
-            wnd.setLoading('Adding...');
-            Ext.Ajax.request({
-                url: 'save_library/',
-                timeout: 1000000,
-                scope: this,
+            if (form.isValid()) {
+                wnd.setLoading('Adding...');
+                Ext.Ajax.request({
+                    url: 'save_library/',
+                    timeout: 1000000,
+                    scope: this,
 
-                params: {
-                    'mode': wnd.mode,
-                    'name': data.name,
-                    'library_id': (typeof wnd.record !== 'undefined') ? wnd.record.data.id : '',
-                    'library_protocol': data.libraryProtocol,
-                    'library_type': data.libraryType,
-                    'enrichment_cycles': data.enrichmentCycles,
-                    'organism': data.organism,
-                    'index_type': data.indexType,
-                    'index_reads': data.indexReads,
-                    'index_i7': data.indexI7,
-                    'index_i5': data.indexI5,
-                    'equal_representation_nucleotides': data.equalRepresentationOfNucleotides,
-                    'dna_dissolved_in': data.DNADissolvedIn,
-                    'concentration': data.concentration,
-                    'concentration_determined_by': data.concentrationDeterminedBy,
-                    'sample_volume': data.sampleVolume,
-                    'mean_fragment_size': data.meanFragmentSize,
-                    'qpcr_result': data.qPCRResult,
-                    'sequencing_run_condition': data.sequencingRunCondition,
-                    'sequencing_depth': data.sequencingDepth,
-                    'comments': data.comments
-                },
+                    params: {
+                        'mode': wnd.mode,
+                        'name': data.name,
+                        'library_id': (typeof wnd.record !== 'undefined') ? wnd.record.data.libraryId : '',
+                        'library_protocol': data.libraryProtocol,
+                        'library_type': data.libraryType,
+                        'enrichment_cycles': data.enrichmentCycles,
+                        'organism': data.organism,
+                        'index_type': data.indexType,
+                        'index_reads': data.indexReads,
+                        'index_i7': data.indexI7,
+                        'index_i5': data.indexI5,
+                        'equal_representation_nucleotides': data.equalRepresentationOfNucleotides,
+                        'dna_dissolved_in': data.DNADissolvedIn,
+                        'concentration': data.concentration,
+                        'concentration_determined_by': data.concentrationDeterminedBy,
+                        'sample_volume': data.sampleVolume,
+                        'mean_fragment_size': data.meanFragmentSize,
+                        'qpcr_result': data.qPCRResult,
+                        'sequencing_run_condition': data.sequencingRunCondition,
+                        'sequencing_depth': data.sequencingDepth,
+                        'comments': data.comments
+                    },
 
-                success: function (response) {
-                    var obj = Ext.JSON.decode(response.responseText);
+                    success: function (response) {
+                        var obj = Ext.JSON.decode(response.responseText);
 
-                    if (obj.success) {
-                        var grid = Ext.getCmp('librariesTable');
-                        grid.fireEvent('refresh', grid);
+                        if (obj.success) {
+                            var grid = Ext.getCmp('librariesTable');
+                            grid.fireEvent('refresh', grid);
 
-                        if (wnd.mode == 'add') {
-                            Ext.ux.ToastMessage('Library has been added!');
+                            if (wnd.mode == 'add') {
+                                Ext.ux.ToastMessage('Library has been added!');
+                            } else {
+                                Ext.ux.ToastMessage('Library has been updated!');
+                            }
+
+                            // Preserve all fields except for Name, if 'Save and Add another' button was pressed
+                            if (addAnother) {
+                                Ext.getCmp('libraryName').reset();
+                                wnd.setLoading(false);
+                            } else {
+                                wnd.close();
+                            }
                         } else {
-                            Ext.ux.ToastMessage('Library has been updated!');
-                        }
-
-                        // Preserve all fields except for Name, if 'Save and Add another' button was pressed
-                        if (addAnother) {
-                            Ext.getCmp('libraryName').reset();
+                            if (obj.error.indexOf('duplicate key value') > -1) {
+                                Ext.ux.ToastMessage('Record with name "' + data.name + '" already exists. Enter a different name.', 'error');
+                            } else {
+                                Ext.ux.ToastMessage(obj.error, 'error');
+                            }
+                            console.log('[ERROR]: save_library(): ' + obj.error);
+                            console.log(response);
                             wnd.setLoading(false);
-                        } else {
-                            wnd.close();
                         }
-                    } else {
-                        if (obj.error.indexOf('duplicate key value') > -1) {
-                            Ext.ux.ToastMessage('Record with name "' + data.name + '" already exists. Enter a different name.', 'error');
-                        } else {
-                            Ext.ux.ToastMessage(obj.error, 'error');
-                        }
-                        console.log('[ERROR]: save_library(): ' + obj.error);
-                        console.log(response);
-                        wnd.setLoading(false);
-                    }
-                },
+                    },
 
-                failure: function(response) {
-                    Ext.ux.ToastMessage(response.statusText, 'error');
-                    console.log('[ERROR]: save_library()');
-                    console.log(response);
-                    wnd.close();
-                }
-            });
+                    failure: function(response) {
+                        Ext.ux.ToastMessage(response.statusText, 'error');
+                        console.log('[ERROR]: save_library()');
+                        console.log(response);
+                        wnd.close();
+                    }
+                });
+            } else {
+                Ext.ux.ToastMessage('Check the form', 'warning');
+            }
+
         } else {
-            Ext.ux.ToastMessage('Check the form', 'warning');
+            form = Ext.getCmp('sampleForm');
+            data = form.getForm().getFieldValues();
+
+            if (form.isValid()) {
+                // wnd.setLoading('Adding...');
+
+                Ext.Ajax.request({
+                    url: 'save_sample/',
+                    timeout: 1000000,
+                    scope: this,
+
+                    params: {
+                        'mode': wnd.mode,
+                        'name': data.name,
+                        'sample_id': (typeof wnd.record !== 'undefined') ? wnd.record.data.sampleId : '',
+                        'nucleic_acid_type_id': data.nucleicAcidType,
+                        'sample_protocol_id': data.sampleProtocol,
+                        // 'library_type_id': data.libraryType,
+                        'organism_id': data.organism,
+                        'equal_representation_nucleotides': data.equalRepresentationOfNucleotides,
+                        'dna_dissolved_in': data.DNADissolvedIn,
+                        'concentration': data.concentration,
+                        'concentration_determined_by_id': data.concentrationDeterminedBy,
+                        'sample_volume': data.sampleVolume,
+                        'sample_amplified_cycles': data.sampleAmplifiedCycles,
+                        'dnase_treatment': data.DNaseTreatment,
+                        'rna_quality_id': data.rnaQuality,
+                        'rna_spike_in': data.rnaSpikeIn,
+                        'sample_preparation_protocol': data.samplePreparationProtocol,
+                        'requested_sample_treatment': data.requestedSampleTreatment,
+                        'sequencing_run_condition_id': data.sequencingRunCondition,
+                        'sequencing_depth': data.sequencingDepth,
+                        'comments': data.comments
+                    },
+
+                    success: function (response) {
+                        var obj = Ext.JSON.decode(response.responseText);
+
+                        if (obj.success) {
+                            var grid = Ext.getCmp('librariesTable');
+                            grid.fireEvent('refresh', grid);
+
+                            if (wnd.mode == 'add') {
+                                Ext.ux.ToastMessage('Sample has been added!');
+                            } else {
+                                Ext.ux.ToastMessage('Sample has been updated!');
+                            }
+
+                            // Preserve all fields except for Name, if 'Save and Add another' button was pressed
+                            if (addAnother) {
+                                Ext.getCmp('sampleName').reset();
+                                wnd.setLoading(false);
+                            } else {
+                                wnd.close();
+                            }
+                        } else {
+                            if (obj.error.indexOf('duplicate key value') > -1) {
+                                Ext.ux.ToastMessage('Record with name "' + data.name + '" already exists. Enter a different name.', 'error');
+                            } else {
+                                Ext.ux.ToastMessage(obj.error, 'error');
+                            }
+                            console.log('[ERROR]: save_sample(): ' + obj.error);
+                            console.log(response);
+                            wnd.setLoading(false);
+                        }
+                    },
+
+                    failure: function (response) {
+                        Ext.ux.ToastMessage(response.statusText, 'error');
+                        console.log('[ERROR]: save_sample()');
+                        console.log(response);
+                        wnd.close();
+                    }
+                });
+            } else {
+                Ext.ux.ToastMessage('Check the form', 'warning');
+            }
         }
     },
 
