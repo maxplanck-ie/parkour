@@ -1,6 +1,6 @@
 from django.contrib import admin
 from library.models import LibraryProtocol, LibraryType, Organism, IndexType, IndexI5, IndexI7, ConcentrationMethod, \
-    SequencingRunCondition, Library
+    SequencingRunCondition, Library, NucleicAcidType, RNAQuality, Sample
 
 
 @admin.register(LibraryProtocol)
@@ -14,6 +14,6 @@ class LibraryProtocolAdmin(admin.ModelAdmin):
 
 
 @admin.register(LibraryType, Organism, IndexType, IndexI5, IndexI7, ConcentrationMethod, SequencingRunCondition,
-                Library)
+                Library, NucleicAcidType, RNAQuality, Sample)
 class LibraryAdmin(admin.ModelAdmin):
     pass
