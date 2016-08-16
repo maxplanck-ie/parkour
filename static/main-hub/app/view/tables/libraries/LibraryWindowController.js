@@ -8,12 +8,10 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
                 boxready: 'onLibraryWindowBoxready'
             },
             '#libraryCardBtn': {
-                click: 'onCardBtnClick',
-                // mouseover: 'onCardBtnMouseover'
+                click: 'onCardBtnClick'
             },
             '#sampleCardBtn': {
-                click: 'onCardBtnClick',
-                // mouseover: 'onCardBtnMouseover'
+                click: 'onCardBtnClick'
             },
             '#libraryCard': {
                 activate: 'onLibraryCardActivate'
@@ -26,6 +24,12 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             },
             '#indexReadsField': {
                 select: 'onIndexReadsFieldSelect'
+            },
+            '#sampleCard': {
+                activate: 'onSampleCardActivate'
+            },
+            '#nucleicAcidTypeField': {
+                select: 'onNucleicAcidTypeFieldSelect'
             },
             '#saveAndAddWndBtn': {
                 click: 'onSaveAndAddWndBtnClick'
@@ -72,15 +76,6 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         }
     },
 
-    onCardBtnMouseover: function(btn) {
-        var cardHelpText = Ext.getCmp('cardHelpText');
-        if (btn.itemId == 'libraryCardBtn') {
-            cardHelpText.setHtml('<p style="text-align:center">Choose <strong>Library</strong> if samples for sequencing are completely prepared by user</p>');
-        } else {
-            cardHelpText.setHtml('<p style="text-align:center">Choose <strong>Sample</strong> if libraries are prepared by facility</p>');
-        }
-    },
-
     onLibraryCardActivate: function(card) {
         var wnd = card.up('library_wnd');
 
@@ -108,16 +103,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             Ext.getCmp('addWndBtn').setConfig('text', 'Save');
         }
 
-        // Initialize tooltips
-        $.each($('.field-tooltip'), function(idx, item) {
-            Ext.create('Ext.tip.ToolTip', {
-                title: 'Help',
-                target: item,
-                html: $(item).attr('tooltip-text'),
-                dismissDelay: 15000,
-                maxWidth: 300
-            });
-        });
+        this.initializeTooltips();
 
         // Load Library Protocols
         wnd.setLoading();
@@ -185,6 +171,81 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
                 sequencingRunConditionField.select(record.sequencingRunConditionId);
                 sequencingRunConditionField.fireEvent('select', sequencingRunConditionField, sequencingRunConditionField.findRecordByValue(record.sequencingRunConditionId));
             }
+
+            wnd.setLoading(false);
+        });
+    },
+
+    onSampleCardActivate: function(card) {
+        var wnd = card.up('library_wnd');
+
+        Ext.getCmp('addWndBtn').show();
+        if (wnd.mode == 'add') {
+            Ext.getCmp('saveAndAddWndBtn').show();
+        } else {
+
+        }
+
+        this.initializeTooltips();
+
+        // Load Nucleic Acid Types
+        wnd.setLoading();
+        Ext.getStore('nucleicAcidTypesStore').load(function(records, operation, success) {
+            if (!success) Ext.ux.ToastMessage('Cannot load Nucleic Acid Types', 'error');
+
+            // if (wnd.mode == 'edit') {
+            //     var librarySampleProtocolField = Ext.getCmp('librarySampleProtocolField');
+            //     librarySampleProtocolField.select(record.libraryProtocolId);
+            //     librarySampleProtocolField.fireEvent('select', librarySampleProtocolField, librarySampleProtocolField.findRecordByValue(record.libraryProtocolId), 'edit');
+            // }
+
+            wnd.setLoading(false);
+        });
+
+        // Load Organisms
+        wnd.setLoading();
+        Ext.getStore('organismsStore').load(function(records, operation, success) {
+            if (!success) Ext.ux.ToastMessage('Cannot load Organisms', 'error');
+
+            // if (wnd.mode == 'edit') {
+            //     var organismField = Ext.getCmp('organismField');
+            //     organismField.select(record.organismId);
+            //     organismField.fireEvent('select', organismField, organismField.findRecordByValue(record.organismId));
+            // }
+
+            wnd.setLoading(false);
+        });
+
+        // Load Concentration Methods
+        wnd.setLoading();
+        Ext.getStore('concentrationMethodsStore').load(function(records, operation, success) {
+            if (!success) Ext.ux.ToastMessage('Cannot load Concentration Methods', 'error');
+
+            // if (wnd.mode == 'edit') {
+            //     var concentrationMethodField = Ext.getCmp('concentrationMethodField');
+            //     concentrationMethodField.select(record.concentrationMethodId);
+            //     concentrationMethodField.fireEvent('select', concentrationMethodField, concentrationMethodField.findRecordByValue(record.concentrationMethodId));
+            // }
+
+            wnd.setLoading(false);
+        });
+
+        // Load RNA Qualities
+        Ext.getStore('rnaQualityStore').load(function(records, operation, success) {
+            if (!success) Ext.ux.ToastMessage('Cannot load RNA Qualities', 'error');
+            wnd.setLoading(false);
+        });
+
+        // Load Sequencing Run Conditions
+        wnd.setLoading();
+        Ext.getStore('sequencingRunConditionsStore').load(function(records, operation, success) {
+            if (!success) Ext.ux.ToastMessage('Cannot load Sequencing Run Conditions', 'error');
+
+            // if (wnd.mode == 'edit') {
+            //     var sequencingRunConditionField = Ext.getCmp('sequencingRunConditionField');
+            //     sequencingRunConditionField.select(record.sequencingRunConditionId);
+            //     sequencingRunConditionField.fireEvent('select', sequencingRunConditionField, sequencingRunConditionField.findRecordByValue(record.sequencingRunConditionId));
+            // }
 
             wnd.setLoading(false);
         });
@@ -296,12 +357,65 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         }
     },
 
+    onNucleicAcidTypeFieldSelect: function(fld, record) {
+        var wnd = fld.up('library_wnd'),
+            sampleProtocolField = Ext.getCmp('sampleProtocolField'),
+            DNaseTreatmentField = Ext.getCmp('DNaseTreatmentField'),
+            rnaQualityField = Ext.getCmp('rnaQualityField'),
+            rnaSpikeInField = Ext.getCmp('rnaSpikeInField');
+
+        if (record.data.type == 'RNA') {
+            DNaseTreatmentField.setDisabled(false);
+            rnaQualityField.setDisabled(false);
+            rnaSpikeInField.setDisabled(false);
+        } else {
+            DNaseTreatmentField.setDisabled(true);
+            rnaQualityField.setDisabled(true);
+            rnaSpikeInField.setDisabled(true);
+        }
+
+        // Load Sample Protocols
+        wnd.setLoading();
+        Ext.getStore('sampleProtocolsStore').load({
+            params: {
+                'type': record.data.type
+            },
+            callback: function(records, operation, success) {
+                if (!success) {
+                Ext.ux.ToastMessage('Cannot load Sample Protocols', 'error');
+            } else {
+                sampleProtocolField.setDisabled(false);
+            }
+
+            // if (wnd.mode == 'edit') {
+            //     var librarySampleProtocolField = Ext.getCmp('librarySampleProtocolField');
+            //     librarySampleProtocolField.select(record.libraryProtocolId);
+            //     librarySampleProtocolField.fireEvent('select', librarySampleProtocolField, librarySampleProtocolField.findRecordByValue(record.libraryProtocolId), 'edit');
+            // }
+
+            wnd.setLoading(false);
+            }
+        });
+    },
+
     onSaveAndAddWndBtnClick: function() {
         this.saveLibrary(true);
     },
 
     onAddWndBtnClick: function() {
         this.saveLibrary();
+    },
+
+    initializeTooltips: function () {
+        $.each($('.field-tooltip'), function(idx, item) {
+            Ext.create('Ext.tip.ToolTip', {
+                title: 'Help',
+                target: item,
+                html: $(item).attr('tooltip-text'),
+                dismissDelay: 15000,
+                maxWidth: 300
+            });
+        });
     },
 
     saveLibrary: function(addAnother) {

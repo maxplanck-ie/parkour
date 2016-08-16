@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.views.generic import View
 from django.core.urlresolvers import resolve
 from library.models import LibraryProtocol, LibraryType, Organism, IndexType, IndexI7, IndexI5, ConcentrationMethod, \
-    SequencingRunCondition, Library
+    SequencingRunCondition, Library, NucleicAcidType, SampleProtocol, RNAQuality, Sample
 from common.utils import get_simple_field_dict
 
 import json
@@ -231,3 +231,53 @@ class LibraryView(View):
             record.delete()
         elif record_type == 'S':
             pass
+
+
+class SampleField(View):
+    """ Base class for Sample field views """
+    def get(self, request):
+        error = str()
+        data = []
+
+        try:
+            # Call one of the class methods
+            data = getattr(self, resolve(request.path).url_name)()
+
+            try:
+                if data and 'name' in data[0].keys():
+                    # Move 'Other' option to the end of list
+                    index = next(index for (index, d) in enumerate(data) if d['name'] == 'Other')
+                    data += [data.pop(index)]
+            except StopIteration:
+                pass
+
+        except Exception as e:
+            error = str(e)
+            print('[ERROR]: %s' % error)
+            logger.debug(error)
+
+        return HttpResponse(json.dumps({'success': not error, 'error': error, 'data': data}),
+                            content_type='application/json')
+
+    @staticmethod
+    def get_nucleic_acid_types():
+        """ Get the list of all nucleic acid types """
+        nucleic_acid_types = NucleicAcidType.objects.all()
+        data = [{'id': item.id, 'name': item.name, 'type': item.type} for item in nucleic_acid_types]
+        return data
+
+    def get_sample_protocols(self):
+        """ Get the list of all sample protocols """
+        sample_type = self.request.GET.get('type')
+        sample_protocols = SampleProtocol.objects.filter(type=sample_type)
+        data = [{'id': item.id, 'name': item.name, 'type': item.type, 'provider': item.provider,
+                 'catalog': item.catalog, 'explanation': item.explanation,
+                 'inputRequirements': item.input_requirements, 'typicalApplication': item.typical_application,
+                 'comments': item.comments} for item in sample_protocols]
+        return data
+
+    @staticmethod
+    def get_rna_qualities():
+        """ Get the list of all rna qialities """
+        qualities = RNAQuality.objects.all()
+        return get_simple_field_dict(qualities)

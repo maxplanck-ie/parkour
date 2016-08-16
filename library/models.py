@@ -80,8 +80,6 @@ class RNAQuality(SimpleField):
 class LibrarySampleAbstract(models.Model):
     name = models.CharField('Name', max_length=200, unique=True)
     date = models.DateField('Date', auto_now_add=True)
-    library_protocol = models.ForeignKey(LibraryProtocol, verbose_name='Library Protocol')
-    library_type = models.ForeignKey(LibraryType, verbose_name='Library Type')
     organism = models.ForeignKey(Organism, verbose_name='Organism')
     concentration = models.FloatField('Concentration')
     concentration_determined_by = models.ForeignKey(ConcentrationMethod, verbose_name='Concentration Determined by')
@@ -100,6 +98,8 @@ class LibrarySampleAbstract(models.Model):
 
 
 class Library(LibrarySampleAbstract):
+    library_protocol = models.ForeignKey(LibraryProtocol, verbose_name='Library Protocol')
+    library_type = models.ForeignKey(LibraryType, verbose_name='Library Type')
     enrichment_cycles = models.IntegerField('No. of Enrichment Cycles')
     index_type = models.ForeignKey(IndexType, verbose_name='Index Type')
     index_reads = models.IntegerField('Index Reads')
@@ -113,7 +113,22 @@ class Library(LibrarySampleAbstract):
         verbose_name_plural = 'Libraries'
 
 
+class SampleProtocol(models.Model):
+    name = models.CharField('Name', max_length=200)
+    type = models.CharField('Type', max_length=3, choices=(('DNA', 'DNA'), ('RNA', 'RNA')), default='DNA')
+    provider = models.CharField('Provider', max_length=150)
+    catalog = models.CharField('Catalog', max_length=150)
+    explanation = models.CharField('Explanation', max_length=250)
+    input_requirements = models.CharField('Input Requirements', max_length=150)
+    typical_application = models.CharField('Typical Application', max_length=100)
+    comments = models.TextField('Comments', null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Sample(LibrarySampleAbstract):
+    sample_protocol = models.ForeignKey(SampleProtocol, verbose_name='Sample Protocol')
     nucleic_acid_type = models.ForeignKey(NucleicAcidType, verbose_name='Nucleic Acid Type')
     amplified_cycles = models.IntegerField('Sample Amplified Cycles')
     dnase_treatment = models.NullBooleanField('DNase Treatment')

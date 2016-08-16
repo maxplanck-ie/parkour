@@ -32,7 +32,10 @@ Ext.define('MainHub.Application', {
         'tables.libraries.IndexI7',
         'tables.libraries.IndexI5',
         'tables.libraries.ConcentrationMethods',
-        'tables.libraries.SequencingRunConditions'
+        'tables.libraries.SequencingRunConditions',
+        'tables.libraries.NucleicAcidTypes',
+        'tables.libraries.RNAQuality',
+        'tables.libraries.SampleProtocols'
     ],
 
     requires: [
