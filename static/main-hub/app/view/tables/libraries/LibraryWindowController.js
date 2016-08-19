@@ -31,6 +31,9 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             '#nucleicAcidTypeField': {
                 select: 'onNucleicAcidTypeFieldSelect'
             },
+            '#sampleProtocolField': {
+                select: 'onSampleProtocolFieldSelect'
+            },
             '#saveAndAddWndBtn': {
                 click: 'onSaveAndAddWndBtnClick'
             },
@@ -181,6 +184,8 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
 
     onSampleCardActivate: function(card) {
         var wnd = card.up('library_wnd');
+
+        Ext.getCmp('sampleProtocolInfo').hide();
 
         Ext.getCmp('addWndBtn').show();
         if (wnd.mode == 'add') {
@@ -424,6 +429,24 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
                 wnd.setLoading(false);
             }
         });
+    },
+
+    onSampleProtocolFieldSelect: function(fld, record) {
+        var wnd = fld.up('library_wnd'),
+            sampleProtocolInfo = Ext.getCmp('sampleProtocolInfo');
+
+        if (record.get('name') != 'Other') {
+            sampleProtocolInfo.show();
+            sampleProtocolInfo.setHtml(
+                '<strong>Provider, Catalog: </strong>' + record.get('provider') + ', ' + record.get('catalog') + '<br>' +
+                '<strong>Explanation: </strong>' + record.get('explanation') + '<br>' +
+                '<strong>Input Requirements: </strong>' + record.get('inputRequirements') + '<br>' +
+                '<strong>Typical Application: </strong>' + record.get('typicalApplication') + '<br>' +
+                '<strong>Comments: </strong>' + record.get('comments')
+            );
+        } else {
+            sampleProtocolInfo.hide();
+        }
     },
 
     onSaveAndAddWndBtnClick: function() {

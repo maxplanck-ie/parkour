@@ -361,6 +361,11 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 disabled: true
                             },
                             {
+                                xtype: 'container',
+                                id: 'sampleProtocolInfo',
+                                margin: '0 0 15px 15px'
+                            },
+                            {
                                 xtype: 'combobox',
                                 id: 'sampleTypeField',
                                 itemId: 'sampleTypeField',
