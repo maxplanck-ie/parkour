@@ -256,7 +256,7 @@ class LibraryView(View):
         """ Delete Library with a given id """
         record_id = self.request.POST.get('record_id')
         record = Library.objects.get(id=record_id)
-        record.detete()
+        record.delete()
 
 
 class SampleField(View):
