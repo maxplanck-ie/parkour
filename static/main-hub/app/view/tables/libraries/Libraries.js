@@ -28,7 +28,7 @@ Ext.define('MainHub.view.tables.libraries.Libraries', {
             },
 
             header: {
-                title: 'Libraries',
+                title: 'Libraries and Samples',
                 items: [
                     {
                         xtype: 'textfield',

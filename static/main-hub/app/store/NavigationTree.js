@@ -42,7 +42,7 @@ Ext.define('MainHub.store.NavigationTree', {
                         leaf: true
                     },
                     {
-                        text: 'Libraries',
+                        text: 'Libraries/Samples',
                         iconCls: 'x-fa fa-flask',
                         viewType: 'libraries',
                         leaf: true
