@@ -17,8 +17,6 @@ class LibraryField(View):
         error = str()
         data = []
 
-        print(Ff)
-
         try:
             # Call one of the class methods
             data = getattr(self, resolve(request.path).url_name)()
