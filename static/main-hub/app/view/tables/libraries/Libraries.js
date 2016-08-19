@@ -57,7 +57,7 @@ Ext.define('MainHub.view.tables.libraries.Libraries', {
                     { text: 'Date', dataIndex: 'date' },
                     { text: 'Nucleic Acid Type', dataIndex: 'nucleicAcidType' },
                     { text: 'Protocol', dataIndex: 'libraryProtocol' },
-                    { text: 'Type', dataIndex: 'libraryType' },
+                    { text: 'Library Type', dataIndex: 'libraryType' },
                     { text: 'Enrichment Cycles', dataIndex: 'enrichmentCycles' },
                     { text: 'Amplified Cycles', dataIndex: 'amplifiedCycles' },
                     { text: 'Organism', dataIndex: 'organism' },
