@@ -123,7 +123,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'standard': {
-            'format': '[%(levelname)s] [%(asctime)s] [%(module)s:%(lineno)s]: %(message)s',
+            'format': '[%(levelname)s] [%(asctime)s] %(message)s',
             'datefmt': "%d/%b/%Y %H:%M:%S"
         },
         'custom': {
@@ -150,7 +150,7 @@ LOGGING = {
         'logfile': {
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(LOG_DIR, 'django.log'),
-            'formatter': 'standard',
+            'formatter': 'custom',
             'maxBytes': 15 * 1024 * 1024,  # 15 MB
             'backupCount': 2,
         },
@@ -165,8 +165,8 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['logfile'],
-            'level': 'ERROR',
+            'handlers': ['console'] if DEBUG else ['console', 'logfile'],
+            'level': 'DEBUG' if DEBUG else 'ERROR',
             'propagate': False,
         },
         'django.db.backends': {
