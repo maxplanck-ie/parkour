@@ -20,6 +20,12 @@ Ext.define('MainHub.view.tables.libraries.Libraries', {
             height: Ext.Element.getViewportHeight() - 64,
             region: 'center',
             padding: 15,
+            viewConfig: {
+                stripeRows: false,
+                getRowClass: function(record) {
+                    return record.get('recordType') == 'L' ? 'library-row' : 'sample-row';
+                }
+            },
 
             header: {
                 title: 'Libraries',
@@ -43,7 +49,10 @@ Ext.define('MainHub.view.tables.libraries.Libraries', {
 
             columns: {
                 items: [
-                    { text: 'Name', dataIndex: 'name', width: 150, locked: true },
+                    { text: 'Name', dataIndex: 'name', width: 150, locked: true, renderer: function(val, meta) {
+                        meta.tdStyle = 'font-weight:bold';
+                        return val;
+                    } },
                     { text: '', dataIndex: 'recordType', width: 30, locked: true },
                     { text: 'Date', dataIndex: 'date' },
                     { text: 'Nucleic Acid Type', dataIndex: 'nucleicAcidType' },
