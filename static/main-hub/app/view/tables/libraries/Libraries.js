@@ -35,7 +35,8 @@ Ext.define('MainHub.view.tables.libraries.Libraries', {
                         itemId: 'searchField',
                         emptyText: 'Search',
                         width: 200,
-                        margin: '0 15px 0 0'
+                        margin: '0 15px 0 0',
+                        disabled: true
                     },
                     {
                         xtype: 'button',
