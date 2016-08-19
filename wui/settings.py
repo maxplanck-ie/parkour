@@ -193,14 +193,6 @@ LOGGING = {
     },
 }
 
-test = {
-    'handlers': ['console'] if DEBUG else ['console', 'logfile'],
-    'level': 'DEBUG' if DEBUG else 'ERROR',
-    'propagate': False,
-}
-with open(os.path.join(LOG_DIR, 'test.txt'), 'w') as f:
-    f.write(str(test))
-
 
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 # SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

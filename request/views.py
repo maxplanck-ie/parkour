@@ -14,8 +14,6 @@ def get_requests(request):
     error = str()
     data = []
 
-    print(Error500)
-
     try:
         requests = Request.objects.all()
         data = [{
