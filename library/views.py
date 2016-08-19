@@ -375,7 +375,26 @@ class SampleView(View):
                           comments=comments)
             smpl.save()
         elif mode == 'edit':
-            pass
+            smpl = Sample.objects.get(id=sample_id)
+            smpl.name = name
+            smpl.nucleic_acid_type_id = nucleic_acid_type_id
+            smpl.sample_protocol_id = sample_protocol_id
+            smpl.organism_id = organism_id
+            smpl.equal_representation_nucleotides = equal_representation_nucleotides
+            smpl.dna_dissolved_in = dna_dissolved_in
+            smpl.concentration = concentration
+            smpl.concentration_determined_by_id = concentration_determined_by_id
+            smpl.sample_volume = sample_volume
+            smpl.amplified_cycles = sample_amplified_cycles
+            smpl.dnase_treatment = dnase_treatment
+            smpl.rna_quality_id = rna_quality_id
+            smpl.rna_spike_in = rna_spike_in
+            smpl.sample_preparation_protocol = sample_preparation_protocol
+            smpl.requested_sample_treatment = requested_sample_treatment
+            smpl.sequencing_run_condition_id = sequencing_run_condition_id
+            smpl.sequencing_depth = sequencing_depth
+            smpl.comments = comments
+            smpl.save()
 
     def delete_sample(self):
         """ Delete Sample with a given id """
