@@ -97,7 +97,7 @@ Ext.define('MainHub.view.tables.libraries.Libraries', {
                         }
                     } },
                     { text: 'Sample Preparation Protocol', dataIndex: 'samplePreparationProtocol' },
-                    { text: 'Requested Sample Treatment', dataIndex: 'requestedSampletreatment' },
+                    { text: 'Requested Sample Treatment', dataIndex: 'requestedSampleTreatment' },
                     { text: 'Comments', dataIndex: 'comments' }
                 ]
             },

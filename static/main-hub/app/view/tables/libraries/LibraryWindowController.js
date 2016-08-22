@@ -435,7 +435,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         var wnd = fld.up('library_wnd'),
             sampleProtocolInfo = Ext.getCmp('sampleProtocolInfo');
 
-        if (record.get('name') != 'Other') {
+        if (record && record.get('name') != 'Other') {
             sampleProtocolInfo.show();
             sampleProtocolInfo.setHtml(
                 '<strong>Provider, Catalog: </strong>' + record.get('provider') + ', ' + record.get('catalog') + '<br>' +
