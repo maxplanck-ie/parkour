@@ -1,8 +1,10 @@
 from django.http import HttpResponse
 from django.views.generic import View
 from django.core.urlresolvers import resolve
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 from library.models import LibraryProtocol, LibraryType, Organism, IndexType, IndexI7, IndexI5, ConcentrationMethod, \
-    SequencingRunCondition, Library, NucleicAcidType, SampleProtocol, RNAQuality, Sample
+    SequencingRunCondition, Library, NucleicAcidType, SampleProtocol, RNAQuality, Sample, FileSample
 from common.utils import get_simple_field_dict
 
 import json
@@ -401,3 +403,46 @@ class SampleView(View):
         record_id = self.request.POST.get('record_id')
         record = Sample.objects.get(id=record_id)
         record.delete()
+
+
+@csrf_exempt
+@login_required
+def upload_file_sample(request):
+    error = ''
+    file_ids = []
+
+    if request.method == 'POST' and any(request.FILES):
+        try:
+            for file in request.FILES.getlist('files'):
+                f = FileSample(name=file.name, file=file)
+                f.save()
+                file_ids.append(f.id)
+        except Exception as e:
+            error = str(e)
+            print('[ERROR]: %s' % error)
+            logger.debug(error)
+
+    return HttpResponse(json.dumps({'success': not error, 'error': error, 'file_ids': file_ids}),
+                        content_type='application/json')
+
+
+@login_required
+def get_file_sample(request):
+    error = ''
+    data = []
+
+    try:
+        file_ids = json.loads(request.GET.get('file_ids'))
+        files = [f for f in FileSample.objects.all() if f.id in file_ids]
+        data = [{
+            'id': file.id,
+            'name': file.name,
+            'size': file.file.size
+        } for file in files]
+    except Exception as e:
+        error = str(e)
+        print('[ERROR]: %s' % error)
+        logger.debug(error)
+
+    return HttpResponse(json.dumps({'success': not error, 'error': error, 'data': data}),
+                        content_type='application/json')

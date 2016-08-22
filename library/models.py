@@ -1,5 +1,19 @@
 from django.db import models
 
+from functools import partial
+from time import strftime
+import uuid
+import os
+
+
+def _update_filename(instance, filename, path):
+    filename = '%s_%s' % (uuid.uuid4(), filename)
+    return os.path.join(strftime(path), filename)
+
+
+def upload_to(path):
+    return partial(_update_filename, path=path)
+
 
 class LibraryProtocol(models.Model):
     name = models.CharField('Protocol', max_length=200)
@@ -75,6 +89,15 @@ class RNAQuality(SimpleField):
     class Meta:
         verbose_name = 'RNA Quality'
         verbose_name_plural = 'RNA Qualities'
+
+
+# class FileLibrary(models.Model):
+#     file = models.FileField(upload_to='libraries/%Y/%m/%d/')
+
+
+class FileSample(models.Model):
+    name = models.CharField('Name', max_length=200)
+    file = models.FileField(upload_to=upload_to('samples/%Y/%m/%d/'))
 
 
 class LibrarySampleAbstract(models.Model):

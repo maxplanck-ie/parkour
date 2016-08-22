@@ -71,13 +71,13 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             layout.setActiveItem(1);
             if (wnd.mode == 'add') {
                 wnd.setTitle('Add Library');
-                Ext.getCmp('libraryForm').reset();
+                Ext.getCmp('libraryName').reset();
             }
         } else {
             layout.setActiveItem(2);
             if (wnd.mode == 'add') {
                 wnd.setTitle('Add Sample');
-                Ext.getCmp('sampleForm').reset();
+                Ext.getCmp('sampleName').reset();
             }
         }
     },
@@ -553,8 +553,8 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             }
 
         } else {
-            form = Ext.getCmp('sampleForm');
-            data = form.getForm().getFieldValues();
+            form = Ext.getCmp('sampleForm').getForm();
+            data = form.getFieldValues();
 
             if (form.isValid()) {
                 wnd.setLoading('Adding...');

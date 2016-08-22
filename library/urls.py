@@ -1,5 +1,6 @@
 from django.conf.urls import url
-from library.views import LibraryField, LibraryView, SampleField, SampleView
+from library.views import LibraryField, LibraryView, SampleField, SampleView, upload_file_sample, \
+    get_file_sample
 
 
 urlpatterns = [
@@ -22,4 +23,6 @@ urlpatterns = [
 
     url(r'^save_sample/$', SampleView.as_view(), name='save_sample'),
     url(r'^delete_sample/$', SampleView.as_view(), name='delete_sample'),
+    url(r'^upload_file_sample/$', upload_file_sample, name='upload_file_sample'),
+    url(r'^get_file_sample/$', get_file_sample, name='get_file_sample'),
 ]

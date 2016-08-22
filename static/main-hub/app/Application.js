@@ -35,7 +35,8 @@ Ext.define('MainHub.Application', {
         'tables.libraries.SequencingRunConditions',
         'tables.libraries.NucleicAcidTypes',
         'tables.libraries.RNAQuality',
-        'tables.libraries.SampleProtocols'
+        'tables.libraries.SampleProtocols',
+        'tables.libraries.FileSample'
     ],
 
     requires: [
