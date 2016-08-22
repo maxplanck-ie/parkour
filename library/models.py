@@ -79,7 +79,7 @@ class RNAQuality(SimpleField):
 
 class LibrarySampleAbstract(models.Model):
     name = models.CharField('Name', max_length=200, unique=True)
-    date = models.DateField('Date', auto_now_add=True)
+    date = models.DateTimeField('Date', auto_now_add=True)
     organism = models.ForeignKey(Organism, verbose_name='Organism')
     concentration = models.FloatField('Concentration')
     concentration_determined_by = models.ForeignKey(ConcentrationMethod, verbose_name='Concentration Determined by')
