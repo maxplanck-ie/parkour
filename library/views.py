@@ -3,8 +3,9 @@ from django.views.generic import View
 from django.core.urlresolvers import resolve
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-from library.models import LibraryProtocol, LibraryType, Organism, IndexType, IndexI7, IndexI5, ConcentrationMethod, \
-    SequencingRunCondition, Library, NucleicAcidType, SampleProtocol, RNAQuality, Sample, FileSample
+from library.models import LibraryProtocol, LibraryType, Organism, IndexType, \
+    IndexI7, IndexI5, ConcentrationMethod, SequencingRunCondition, Library, \
+    NucleicAcidType, SampleProtocol, RNAQuality, Sample, FileSample
 from common.utils import get_simple_field_dict
 
 import json
@@ -26,7 +27,11 @@ class LibraryField(View):
             try:
                 if data and 'name' in data[0].keys():
                     # Move 'Other' option to the end of list
-                    index = next(index for (index, d) in enumerate(data) if d['name'] == 'Other')
+                    index = next(
+                        index 
+                        for (index, d) in enumerate(data) 
+                        if d['name'] == 'Other'
+                    )
                     data += [data.pop(index)]
             except StopIteration:
                 pass
@@ -36,8 +41,14 @@ class LibraryField(View):
             print('[ERROR]: %s' % error)
             logger.debug(error)
 
-        return HttpResponse(json.dumps({'success': not error, 'error': error, 'data': data}),
-                            content_type='application/json')
+        return HttpResponse(
+            json.dumps({
+                'success': not error, 
+                'error': error, 
+                'data': data,
+            }),
+            content_type='application/json',
+        )
 
     @staticmethod
     def get_library_protocols():
@@ -51,7 +62,9 @@ class LibraryField(View):
         """ Get library type for a given library protocol id """
         library_protocol_id = self.request.GET.get('library_protocol_id')
         library_protocol = LibraryProtocol.objects.get(id=library_protocol_id)
-        library_types = LibraryType.objects.filter(library_protocol__in=[library_protocol])
+        library_types = LibraryType.objects.filter(
+            library_protocol__in=[library_protocol]
+        )
         return get_simple_field_dict(library_types)
 
     @staticmethod
@@ -70,8 +83,14 @@ class LibraryField(View):
         """ Get the list of all indices i7 for a given index type """
         index_type = self.request.GET.get('index_type_id')
         indices = IndexI7.objects.filter(index_type=index_type)
-        data = [{'id': index.id, 'name': '%s - %s' % (index.index_id, index.index), 'index': index.index}
-                for index in indices]
+        data = [
+            {
+                'id': index.id, 
+                'name': '%s - %s' % (index.index_id, index.index), 
+                'index': index.index,
+            }
+            for index in indices
+        ]
         data = sorted(data, key=lambda x: x['id'])
         return data
 
@@ -79,8 +98,14 @@ class LibraryField(View):
         """ Get the list of all indices i5 for a given index type """
         index_type = self.request.GET.get('index_type_id')
         indices = IndexI5.objects.filter(index_type=index_type)
-        data = [{'id': index.id, 'name': '%s - %s' % (index.index_id, index.index), 'index': index.index}
-                for index in indices]
+        data = [
+            {
+                'id': index.id, 
+                'name': '%s - %s' % (index.index_id, index.index), 
+                'index': index.index,
+            }
+            for index in indices
+        ]
         data = sorted(data, key=lambda x: x['id'])
         return data
 
@@ -109,8 +134,14 @@ class LibraryView(View):
             print('[ERROR]: %s' % error)
             logger.debug(error)
 
-        return HttpResponse(json.dumps({'success': not error, 'error': error, 'data': data}),
-                            content_type='application/json')
+        return HttpResponse(
+            json.dumps({
+                'success': not error, 
+                'error': error, 
+                'data': data,
+            }),
+            content_type='application/json',
+        )
 
     def post(self, request):
         """ Save Library """
@@ -123,76 +154,101 @@ class LibraryView(View):
             print('[ERROR]: %s' % error)
             logger.debug(error)
 
-        return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')
+        return HttpResponse(
+            json.dumps({
+                'success': not error, 
+                'error': error,
+            }), 
+            content_type='application/json',
+        )
 
     @staticmethod
     def get_libraries():
         """ Get the list of all libraries and samples """
 
         libraries = Library.objects.select_related()
-        libraries_data = [{
-            'libraryId': library.id,
-            'name': library.name,
-            'recordType': 'L',
-            'date': library.date.strftime('%d.%m.%Y'),
-            'libraryProtocol': library.library_protocol.name,
-            'libraryProtocolId': library.library_protocol.id,
-            'libraryType': library.library_type.name,
-            'libraryTypeId': library.library_type.id,
-            'enrichmentCycles': library.enrichment_cycles,
-            'organism': library.organism.name,
-            'organismId': library.organism.id,
-            'indexType': library.index_type.name,
-            'indexTypeId': library.index_type.id,
-            'indexReads': library.index_reads,
-            'indexI7': library.index_i7,
-            'indexI5': library.index_i5,
-            'equalRepresentation': str(library.equal_representation_nucleotides),
-            'DNADissolvedIn': library.dna_dissolved_in,
-            'concentration': library.concentration,
-            'concentrationMethod': library.concentration_determined_by.name,
-            'concentrationMethodId': library.concentration_determined_by.id,
-            'sampleVolume': library.sample_volume,
-            'meanFragmentSize': library.mean_fragment_size,
-            'qPCRResult': library.qpcr_result,
-            'sequencingRunCondition': library.sequencing_run_condition.name,
-            'sequencingRunConditionId': library.sequencing_run_condition.id,
-            'sequencingDepth': library.sequencing_depth,
-            'comments': library.comments
-        } for library in libraries]
+        libraries_data = [
+            {
+                'libraryId': library.id,
+                'name': library.name,
+                'recordType': 'L',
+                'date': library.date.strftime('%d.%m.%Y'),
+                'libraryProtocol': library.library_protocol.name,
+                'libraryProtocolId': library.library_protocol.id,
+                'libraryType': library.library_type.name,
+                'libraryTypeId': library.library_type.id,
+                'enrichmentCycles': library.enrichment_cycles,
+                'organism': library.organism.name,
+                'organismId': library.organism.id,
+                'indexType': library.index_type.name,
+                'indexTypeId': library.index_type.id,
+                'indexReads': library.index_reads,
+                'indexI7': library.index_i7,
+                'indexI5': library.index_i5,
+                'equalRepresentation': 
+                    str(library.equal_representation_nucleotides),
+                'DNADissolvedIn': library.dna_dissolved_in,
+                'concentration': library.concentration,
+                'concentrationMethod': 
+                    library.concentration_determined_by.name,
+                'concentrationMethodId': 
+                    library.concentration_determined_by.id,
+                'sampleVolume': library.sample_volume,
+                'meanFragmentSize': library.mean_fragment_size,
+                'qPCRResult': library.qpcr_result,
+                'sequencingRunCondition': 
+                    library.sequencing_run_condition.name,
+                'sequencingRunConditionId': 
+                    library.sequencing_run_condition.id,
+                'sequencingDepth': library.sequencing_depth,
+                'comments': library.comments,
+            } 
+            for library in libraries
+        ]
 
         samples = Sample.objects.select_related()
-        samples_data = [{
-            'sampleId': sample.id,
-            'name': sample.name,
-            'recordType': 'S',
-            'date': sample.date.strftime('%d.%m.%Y'),
-            'nucleicAcidType': sample.nucleic_acid_type.name,
-            'nucleicAcidTypeId': sample.nucleic_acid_type_id,
-            'libraryProtocol': sample.sample_protocol.name,
-            'libraryProtocolId': sample.sample_protocol_id,
-            'amplifiedCycles': sample.amplified_cycles,
-            'organism': sample.organism.name,
-            'organismId': sample.organism.id,
-            'equalRepresentation': str(sample.equal_representation_nucleotides),
-            'DNADissolvedIn': sample.dna_dissolved_in,
-            'concentration': sample.concentration,
-            'concentrationMethod': sample.concentration_determined_by.name,
-            'concentrationMethodId': sample.concentration_determined_by.id,
-            'sampleVolume': sample.sample_volume,
-            'sequencingRunCondition': sample.sequencing_run_condition.name,
-            'sequencingRunConditionId': sample.sequencing_run_condition.id,
-            'sequencingDepth': sample.sequencing_depth,
-            'DNaseTreatment': str(sample.dnase_treatment),
-            'rnaQuality': sample.rna_quality.name if sample.rna_quality else '',
-            'rnaQualityId': sample.rna_quality_id if sample.rna_quality else '',
-            'rnaSpikeIn': str(sample.rna_spike_in),
-            'samplePreparationProtocol': sample.sample_preparation_protocol,
-            'requestedSampleTreatment': sample.requested_sample_treatment,
-            'comments': sample.comments
-        } for sample in samples]
+        samples_data = [
+            {
+                'sampleId': sample.id,
+                'name': sample.name,
+                'recordType': 'S',
+                'date': sample.date.strftime('%d.%m.%Y'),
+                'nucleicAcidType': sample.nucleic_acid_type.name,
+                'nucleicAcidTypeId': sample.nucleic_acid_type_id,
+                'libraryProtocol': sample.sample_protocol.name,
+                'libraryProtocolId': sample.sample_protocol_id,
+                'amplifiedCycles': sample.amplified_cycles,
+                'organism': sample.organism.name,
+                'organismId': sample.organism.id,
+                'equalRepresentation': 
+                    str(sample.equal_representation_nucleotides),
+                'DNADissolvedIn': sample.dna_dissolved_in,
+                'concentration': sample.concentration,
+                'concentrationMethod': sample.concentration_determined_by.name,
+                'concentrationMethodId': sample.concentration_determined_by.id,
+                'sampleVolume': sample.sample_volume,
+                'sequencingRunCondition': sample.sequencing_run_condition.name,
+                'sequencingRunConditionId': sample.sequencing_run_condition.id,
+                'sequencingDepth': sample.sequencing_depth,
+                'DNaseTreatment': str(sample.dnase_treatment),
+                'rnaQuality': sample.rna_quality.name \
+                    if sample.rna_quality else '',
+                'rnaQualityId': sample.rna_quality_id \
+                    if sample.rna_quality else '',
+                'rnaSpikeIn': str(sample.rna_spike_in),
+                'samplePreparationProtocol': 
+                    sample.sample_preparation_protocol,
+                'requestedSampleTreatment': sample.requested_sample_treatment,
+                'comments': sample.comments,
+            } 
+            for sample in samples
+        ]
 
-        data = sorted(libraries_data + samples_data, key=lambda x: (x['date'], x['recordType']))
+        data = sorted(
+            libraries_data + samples_data, 
+            key=lambda x: (x['date'], x['recordType']),
+            reverse=True,
+        )
 
         return data
 
@@ -209,28 +265,45 @@ class LibraryView(View):
         index_reads = int(self.request.POST.get('index_reads'))
         index_i7 = self.request.POST.get('index_i7')
         index_i5 = self.request.POST.get('index_i5')
-        equal_representation_nucleotides = json.loads(self.request.POST.get('equal_representation_nucleotides'))
+        equal_representation_nucleotides = \
+        json.loads(self.request.POST.get('equal_representation_nucleotides'))
         dna_dissolved_in = self.request.POST.get('dna_dissolved_in')
         concentration = float(self.request.POST.get('concentration'))
-        concentration_determined_by = self.request.POST.get('concentration_determined_by')
+        concentration_determined_by = \
+            self.request.POST.get('concentration_determined_by')
         sample_volume = int(self.request.POST.get('sample_volume'))
         mean_fragment_size = int(self.request.POST.get('mean_fragment_size'))
         qpcr_result = float(self.request.POST.get('qpcr_result'))
-        sequencing_run_condition = self.request.POST.get('sequencing_run_condition')
+        sequencing_run_condition = \
+            self.request.POST.get('sequencing_run_condition')
         sequencing_depth = int(self.request.POST.get('sequencing_depth'))
         comments = self.request.POST.get('comments')
 
         if mode == 'add':
-            lib = Library(name=name, library_protocol_id=library_protocol, library_type_id=library_type,
-                          enrichment_cycles=enrichment_cycles, organism_id=organism, index_type_id=index_type,
-                          index_reads=index_reads, index_i7=index_i7, index_i5=index_i5,
-                          equal_representation_nucleotides=equal_representation_nucleotides,
-                          dna_dissolved_in=dna_dissolved_in, concentration=concentration,
-                          concentration_determined_by_id=concentration_determined_by,
-                          sample_volume=sample_volume, mean_fragment_size=mean_fragment_size,
-                          qpcr_result=qpcr_result, sequencing_run_condition_id=sequencing_run_condition,
-                          sequencing_depth=sequencing_depth, comments=comments)
+            lib = Library(
+                name=name, 
+                library_protocol_id=library_protocol, 
+                library_type_id=library_type,
+                enrichment_cycles=enrichment_cycles, 
+                organism_id=organism, 
+                index_type_id=index_type,
+                index_reads=index_reads, 
+                index_i7=index_i7, 
+                index_i5=index_i5,
+                equal_representation_nucleotides=\
+                    equal_representation_nucleotides,
+                dna_dissolved_in=dna_dissolved_in, 
+                concentration=concentration,
+                concentration_determined_by_id=concentration_determined_by,
+                sample_volume=sample_volume, 
+                mean_fragment_size=mean_fragment_size,
+                qpcr_result=qpcr_result, 
+                sequencing_run_condition_id=sequencing_run_condition,
+                sequencing_depth=sequencing_depth, 
+                comments=comments,
+            )
             lib.save()
+
         elif mode == 'edit':
             lib = Library.objects.get(id=library_id)
             lib.name = name
@@ -242,7 +315,8 @@ class LibraryView(View):
             lib.index_reads = index_reads
             lib.index_i7 = index_i7
             lib.index_i5 = index_i5
-            lib.equal_representation_nucleotides = equal_representation_nucleotides
+            lib.equal_representation_nucleotides = \
+                equal_representation_nucleotides
             lib.dna_dissolved_in = dna_dissolved_in
             lib.concentration = concentration
             lib.concentration_determined_by_id = concentration_determined_by
@@ -263,6 +337,7 @@ class LibraryView(View):
 
 class SampleField(View):
     """ Base class for Sample field views """
+
     def get(self, request):
         error = str()
         data = []
@@ -274,7 +349,11 @@ class SampleField(View):
             try:
                 if data and 'name' in data[0].keys():
                     # Move 'Other' option to the end of list
-                    index = next(index for (index, d) in enumerate(data) if d['name'] == 'Other')
+                    index = next(
+                        index 
+                        for (index, d) in enumerate(data) 
+                        if d['name'] == 'Other'
+                    )
                     data += [data.pop(index)]
             except StopIteration:
                 pass
@@ -284,24 +363,47 @@ class SampleField(View):
             print('[ERROR]: %s' % error)
             logger.debug(error)
 
-        return HttpResponse(json.dumps({'success': not error, 'error': error, 'data': data}),
-                            content_type='application/json')
+        return HttpResponse(
+            json.dumps({
+                'success': not error, 
+                'error': error, 
+                'data': data,
+            }),
+            content_type='application/json',
+        )
 
     @staticmethod
     def get_nucleic_acid_types():
         """ Get the list of all nucleic acid types """
         nucleic_acid_types = NucleicAcidType.objects.all()
-        data = [{'id': item.id, 'name': item.name, 'type': item.type} for item in nucleic_acid_types]
+        data = [
+            {
+                'id': item.id, 
+                'name': item.name, 
+                'type': item.type,
+            } 
+            for item in nucleic_acid_types
+        ]
         return data
 
     def get_sample_protocols(self):
         """ Get the list of all sample protocols """
         sample_type = self.request.GET.get('type')
         sample_protocols = SampleProtocol.objects.filter(type=sample_type)
-        data = [{'id': item.id, 'name': item.name, 'type': item.type, 'provider': item.provider,
-                 'catalog': item.catalog, 'explanation': item.explanation,
-                 'inputRequirements': item.input_requirements, 'typicalApplication': item.typical_application,
-                 'comments': item.comments} for item in sample_protocols]
+        data = [
+            {
+                'id': item.id, 
+                'name': item.name, 
+                'type': item.type, 
+                'provider': item.provider,
+                'catalog': item.catalog, 
+                'explanation': item.explanation,
+                'inputRequirements': item.input_requirements, 
+                'typicalApplication': item.typical_application,
+                'comments': item.comments,
+            } 
+            for item in sample_protocols
+        ]
         return data
 
     @staticmethod
@@ -312,6 +414,8 @@ class SampleField(View):
 
 
 class SampleView(View):
+    """ """
+
     def get(self, request):
         error = str()
         data = []
@@ -323,8 +427,14 @@ class SampleView(View):
             print('[ERROR]: %s' % error)
             logger.debug(error)
 
-        return HttpResponse(json.dumps({'success': not error, 'error': error, 'data': data}),
-                            content_type='application/json')
+        return HttpResponse(
+            json.dumps({
+                'success': not error, 
+                'error': error, 
+                'data': data,
+            }),
+            content_type='application/json',
+        )
 
     def post(self, request):
         """ Save Sample """
@@ -337,7 +447,13 @@ class SampleView(View):
             print('[ERROR]: %s' % error)
             logger.debug(error)
 
-        return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')
+        return HttpResponse(
+            json.dumps({
+                'success': not error, 
+                'error': error,
+            }), 
+            content_type='application/json',
+        )
 
     def save_sample(self):
         """ Add new Sample or update existing one """
@@ -347,45 +463,71 @@ class SampleView(View):
         nucleic_acid_type_id = self.request.POST.get('nucleic_acid_type_id')
         sample_protocol_id = self.request.POST.get('sample_protocol_id')
         organism_id = self.request.POST.get('organism_id')
-        equal_representation_nucleotides = json.loads(self.request.POST.get('equal_representation_nucleotides'))
+        equal_representation_nucleotides = \
+        json.loads(self.request.POST.get('equal_representation_nucleotides'))
         dna_dissolved_in = self.request.POST.get('dna_dissolved_in')
         concentration = float(self.request.POST.get('concentration'))
-        concentration_determined_by_id = self.request.POST.get('concentration_determined_by_id')
+        concentration_determined_by_id = \
+            self.request.POST.get('concentration_determined_by_id')
         sample_volume = self.request.POST.get('sample_volume')
-        sample_amplified_cycles = int(self.request.POST.get('sample_amplified_cycles'))
-        dnase_treatment = None if self.request.POST.get('dnase_treatment') == '' else \
-            json.loads(self.request.POST.get('dnase_treatment'))
+        sample_amplified_cycles = \
+            int(self.request.POST.get('sample_amplified_cycles'))
+        dnase_treatment = None \
+            if self.request.POST.get('dnase_treatment') == '' \
+            else json.loads(self.request.POST.get('dnase_treatment'))
         rna_quality_id = self.request.POST.get('rna_quality_id')
-        rna_spike_in = None if self.request.POST.get('rna_spike_in') == '' else \
-            json.loads(self.request.POST.get('rna_spike_in'))
-        sample_preparation_protocol = self.request.POST.get('sample_preparation_protocol')
-        requested_sample_treatment = self.request.POST.get('requested_sample_treatment')
-        sequencing_run_condition_id = self.request.POST.get('sequencing_run_condition_id')
+        rna_spike_in = None \
+            if self.request.POST.get('rna_spike_in') == '' \
+            else json.loads(self.request.POST.get('rna_spike_in'))
+        sample_preparation_protocol = \
+            self.request.POST.get('sample_preparation_protocol')
+        requested_sample_treatment = \
+            self.request.POST.get('requested_sample_treatment')
+        sequencing_run_condition_id = \
+            self.request.POST.get('sequencing_run_condition_id')
         sequencing_depth = int(self.request.POST.get('sequencing_depth'))
         comments = self.request.POST.get('comments')
+        files = json.loads(self.request.POST.get('files'))
 
         if mode == 'add':
-            smpl = Sample(name=name, nucleic_acid_type_id=nucleic_acid_type_id, sample_protocol_id=sample_protocol_id,
-                          organism_id=organism_id, equal_representation_nucleotides=equal_representation_nucleotides,
-                          dna_dissolved_in=dna_dissolved_in, concentration=concentration,
-                          concentration_determined_by_id=concentration_determined_by_id, sample_volume=sample_volume,
-                          amplified_cycles=sample_amplified_cycles, dnase_treatment=dnase_treatment,
-                          rna_quality_id=rna_quality_id, rna_spike_in=rna_spike_in,
-                          sample_preparation_protocol=sample_preparation_protocol,
-                          requested_sample_treatment=requested_sample_treatment,
-                          sequencing_run_condition_id=sequencing_run_condition_id, sequencing_depth=sequencing_depth,
-                          comments=comments)
+            smpl = Sample(
+                name=name, 
+                nucleic_acid_type_id=nucleic_acid_type_id, 
+                sample_protocol_id=sample_protocol_id,
+                organism_id=organism_id, 
+                equal_representation_nucleotides=\
+                    equal_representation_nucleotides,
+                dna_dissolved_in=dna_dissolved_in, 
+                concentration=concentration,
+                concentration_determined_by_id=concentration_determined_by_id,
+                sample_volume=sample_volume,
+                amplified_cycles=sample_amplified_cycles, 
+                dnase_treatment=dnase_treatment,
+                rna_quality_id=rna_quality_id, 
+                rna_spike_in=rna_spike_in,
+                sample_preparation_protocol=sample_preparation_protocol,
+                requested_sample_treatment=requested_sample_treatment,
+                sequencing_run_condition_id=sequencing_run_condition_id,
+                sequencing_depth=sequencing_depth,
+                comments=comments,
+            )
             smpl.save()
+            smpl.files.add(*files)
+
+            import pdb; pdb.set_trace()
+
         elif mode == 'edit':
             smpl = Sample.objects.get(id=sample_id)
             smpl.name = name
             smpl.nucleic_acid_type_id = nucleic_acid_type_id
             smpl.sample_protocol_id = sample_protocol_id
             smpl.organism_id = organism_id
-            smpl.equal_representation_nucleotides = equal_representation_nucleotides
+            smpl.equal_representation_nucleotides = \
+                equal_representation_nucleotides
             smpl.dna_dissolved_in = dna_dissolved_in
             smpl.concentration = concentration
-            smpl.concentration_determined_by_id = concentration_determined_by_id
+            smpl.concentration_determined_by_id = \
+                concentration_determined_by_id
             smpl.sample_volume = sample_volume
             smpl.amplified_cycles = sample_amplified_cycles
             smpl.dnase_treatment = dnase_treatment
@@ -408,6 +550,8 @@ class SampleView(View):
 @csrf_exempt
 @login_required
 def upload_file_sample(request):
+    """ """
+
     error = ''
     file_ids = []
 
@@ -422,27 +566,45 @@ def upload_file_sample(request):
             print('[ERROR]: %s' % error)
             logger.debug(error)
 
-    return HttpResponse(json.dumps({'success': not error, 'error': error, 'file_ids': file_ids}),
-                        content_type='application/json')
+    return HttpResponse(
+        json.dumps({
+            'success': not error, 
+            'error': error, 
+            'file_ids': file_ids,
+        }),
+        content_type='application/json',
+    )
 
 
 @login_required
 def get_file_sample(request):
+    """ """
+
     error = ''
     data = []
 
     try:
-        file_ids = json.loads(request.GET.get('file_ids'))
+        file_ids = json.loads(request.POST.get('file_ids'))
         files = [f for f in FileSample.objects.all() if f.id in file_ids]
-        data = [{
-            'id': file.id,
-            'name': file.name,
-            'size': file.file.size
-        } for file in files]
+        data = [
+            {
+                'id': file.id,
+                'name': file.name,
+                'size': file.file.size,
+                'path': '',
+            } 
+            for file in files
+        ]
     except Exception as e:
         error = str(e)
         print('[ERROR]: %s' % error)
         logger.debug(error)
 
-    return HttpResponse(json.dumps({'success': not error, 'error': error, 'data': data}),
-                        content_type='application/json')
+    return HttpResponse(
+        json.dumps({
+            'success': not error, 
+            'error': error, 
+            'data': data,
+        }),
+        content_type='application/json',
+    )

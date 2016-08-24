@@ -581,14 +581,18 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                             } },
                                             {
                                                 xtype: 'actioncolumn',
-                                                width: 40,
-                                                items: [{
-                                                    // icon: 'delete.png',
-                                                    tooltip: 'Delete',
-                                                    handler: function(grid, rowIndex, colIndex) {
-
+                                                width: 80,
+                                                items: [
+                                                    {
+                                                        tooltip: 'Download',
+                                                        handler: function(grid, rowIndex, colIndex) {}
+                                                    },
+                                                    {
+                                                        // icon: 'delete.png',
+                                                        tooltip: 'Delete',
+                                                        handler: function(grid, rowIndex, colIndex) {}
                                                     }
-                                                }]
+                                                ]
                                             }
                                         ]
                                     },
@@ -634,14 +638,25 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                                                         params: Ext.JSON.encode(form.getFieldValues()),
                                                                         success: function(f, action) {
                                                                             var obj = Ext.JSON.decode(action.response.responseText);
-
+                                                                            
                                                                             if (obj.success && obj.file_ids.length > 0) {
-                                                                                Ext.getStore('fileSampleStore').load({
+                                                                                Ext.Ajax.request({
+                                                                                    url: 'get_file_sample/',
+                                                                                    timeout: 1000000,
+                                                                                    scope: this,
                                                                                     params: {
                                                                                         'file_ids': Ext.JSON.encode(obj.file_ids)
                                                                                     },
-                                                                                    callback: function(records, operation, success) {
-                                                                                        if (!success) Ext.ux.ToastMessage('Cannot load Sample Files', 'error');
+                                                                                    success: function(response) {
+                                                                                        var obj = Ext.JSON.decode(response.responseText);
+
+                                                                                        if (obj.success) {
+                                                                                            Ext.getStore('fileSampleStore').add(obj.data);
+                                                                                        } else {
+                                                                                            Ext.ux.ToastMessage(response.statusText, 'error');
+                                                                                            console.log('[ERROR]: save_library()');
+                                                                                            console.log(response); 
+                                                                                        }
                                                                                     }
                                                                                 });
                                                                             } else {

@@ -553,10 +553,10 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             }
 
         } else {
-            form = Ext.getCmp('sampleForm').getForm();
-            data = form.getFieldValues();
+            form = Ext.getCmp('sampleForm');
+            data = form.getForm().getFieldValues();
 
-            if (form.isValid()) {
+            if (form.getForm().isValid()) {
                 wnd.setLoading('Adding...');
 
                 Ext.Ajax.request({
@@ -585,7 +585,8 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
                         'requested_sample_treatment': data.requestedSampleTreatment,
                         'sequencing_run_condition_id': data.sequencingRunCondition,
                         'sequencing_depth': data.sequencingDepth,
-                        'comments': data.comments
+                        'comments': data.comments,
+                        'files': Ext.JSON.encode(Ext.pluck(form.down('grid').getStore().data.items, 'id'))
                     },
 
                     success: function (response) {
