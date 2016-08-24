@@ -586,7 +586,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
                         'sequencing_run_condition_id': data.sequencingRunCondition,
                         'sequencing_depth': data.sequencingDepth,
                         'comments': data.comments,
-                        'files': Ext.JSON.encode(Ext.pluck(form.down('grid').getStore().data.items, 'id'))
+                        'files': Ext.JSON.encode(form.down('filegridfield').getValue())
                     },
 
                     success: function (response) {

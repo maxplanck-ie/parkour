@@ -6,7 +6,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
 
     requires: [
         'MainHub.view.tables.libraries.LibraryWindowController',
-        'Ext.ux.MultiFileField'
+        'Ext.ux.FileGridField'
     ],
 
     controller: 'tables-libraries-librarywindow',
@@ -553,143 +553,10 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 allowDecimals: false
                             },
                             {
-                                xtype: 'fieldcontainer',
+                                xtype: 'filegridfield',
                                 fieldLabel: 'Files',
-                                items: [{
-                                    xtype: 'grid',
-                                    name: 'files',
-                                    height: 180,
-                                    columns: {
-                                        items: [
-                                            { text: 'File Name', dataIndex: 'name', flex: 1 },
-                                            { text: 'Size', dataIndex: 'size', width: 100, renderer: function(val) {
-                                                var dim = '', KB = 1000, MB = 1000 * 1000;
-                                                val = parseInt(val);
-
-                                                if (val >= KB && val < MB) {
-                                                    val = (val / KB).toFixed(2);
-                                                    dim = ' KB';
-                                                } else if (val >= MB) {
-                                                    val = (val / MB).toFixed(2);
-                                                    dim = ' MB';
-                                                } else {
-                                                    val = val.toString();
-                                                    dim = ' bytes';
-                                                }
-
-                                                return val + dim;
-                                            } },
-                                            {
-                                                xtype: 'actioncolumn',
-                                                width: 80,
-                                                items: [
-                                                    {
-                                                        tooltip: 'Download',
-                                                        handler: function(grid, rowIndex, colIndex) {}
-                                                    },
-                                                    {
-                                                        // icon: 'delete.png',
-                                                        tooltip: 'Delete',
-                                                        handler: function(grid, rowIndex, colIndex) {}
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    },
-                                    store: 'fileSampleStore',
-
-                                    bbar: [
-                                        '->',
-                                        {
-                                            xtype: 'button',
-                                            text: 'Add file(s)',
-                                            handler: function() {
-                                                Ext.widget({
-                                                    xtype: 'window',
-                                                    title: 'Upload file(s)',
-                                                    width: 450,
-                                                    autoShow: true,
-
-                                                    items: [{
-                                                        xtype: 'form',
-                                                        items: [{
-                                                            xtype: 'multifilefield',
-                                                            name: 'files',
-                                                            fieldLabel: 'File(s)',
-                                                            labelWidth: 50,
-                                                            buttonText: 'Select',
-                                                            allowBlank: false,
-                                                            width: 413,
-                                                            margin: 15
-                                                        }]
-                                                    }],
-                                                    buttons: [
-                                                        {
-                                                            text: 'Upload',
-                                                            handler: function(btn) {
-                                                                var wnd = btn.up('window'),
-                                                                    form = wnd.down('form').getForm();
-
-                                                                if (form.isValid()) {
-                                                                    form.submit({
-                                                                        url: 'upload_file_sample/',
-                                                                        method: 'POST',
-                                                                        waitMsg: 'Uploading...',
-                                                                        params: Ext.JSON.encode(form.getFieldValues()),
-                                                                        success: function(f, action) {
-                                                                            var obj = Ext.JSON.decode(action.response.responseText);
-                                                                            
-                                                                            if (obj.success && obj.file_ids.length > 0) {
-                                                                                Ext.Ajax.request({
-                                                                                    url: 'get_file_sample/',
-                                                                                    timeout: 1000000,
-                                                                                    scope: this,
-                                                                                    params: {
-                                                                                        'file_ids': Ext.JSON.encode(obj.file_ids)
-                                                                                    },
-                                                                                    success: function(response) {
-                                                                                        var obj = Ext.JSON.decode(response.responseText);
-
-                                                                                        if (obj.success) {
-                                                                                            Ext.getStore('fileSampleStore').add(obj.data);
-                                                                                        } else {
-                                                                                            Ext.ux.ToastMessage(response.statusText, 'error');
-                                                                                            console.log('[ERROR]: save_library()');
-                                                                                            console.log(response); 
-                                                                                        }
-                                                                                    }
-                                                                                });
-                                                                            } else {
-                                                                                Ext.ux.ToastMessage(obj.error, 'error');
-                                                                                console.log('[ERROR]: ' + 'upload_file_sample/' + ' : ' + obj.error);
-                                                                                console.log(response);
-                                                                            }
-                                                                            wnd.close();
-                                                                        },
-                                                                        failure: function(response) {
-                                                                            Ext.ux.ToastMessage(response.statusText, 'error');
-                                                                            console.log('[ERROR]: ' + 'upload_file_sample/');
-                                                                            console.log(response);
-                                                                            wnd.close();
-                                                                        }
-                                                                    });
-                                                                } else {
-                                                                    Ext.ux.ToastMessage('You did not select any file(s)', 'warning');
-                                                                }
-                                                            }
-                                                        },
-                                                        {
-                                                            text: 'Cancel',
-                                                            handler: function () {
-                                                                this.up('window').close();
-                                                            }
-                                                        }
-                                                    ]
-                                                });
-                                            }
-                                        }
-                                    ]
-                                }]
+                                uploadFileUrl: 'upload_file_sample/',
+                                getFileUrl: 'get_file_sample/'
                             },
                             {
                                 xtype: 'textarea',

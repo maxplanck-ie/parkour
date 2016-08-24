@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+from django.conf import settings
 from django.views.generic import View
 from django.core.urlresolvers import resolve
 from django.views.decorators.csrf import csrf_exempt
@@ -246,7 +247,7 @@ class LibraryView(View):
 
         data = sorted(
             libraries_data + samples_data, 
-            key=lambda x: (x['date'], x['recordType']),
+            key=lambda x: (x['date'], x['recordType'], x['name']),
             reverse=True,
         )
 
@@ -514,8 +515,6 @@ class SampleView(View):
             smpl.save()
             smpl.files.add(*files)
 
-            import pdb; pdb.set_trace()
-
         elif mode == 'edit':
             smpl = Sample.objects.get(id=sample_id)
             smpl.name = name
@@ -570,7 +569,7 @@ def upload_file_sample(request):
         json.dumps({
             'success': not error, 
             'error': error, 
-            'file_ids': file_ids,
+            'fileIds': file_ids,
         }),
         content_type='application/json',
     )
@@ -591,7 +590,7 @@ def get_file_sample(request):
                 'id': file.id,
                 'name': file.name,
                 'size': file.file.size,
-                'path': '',
+                'path': settings.MEDIA_URL + file.file.name,
             } 
             for file in files
         ]
