@@ -351,7 +351,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 displayField: 'name',
                                 valueField: 'id',
                                 name: 'nucleicAcidType',
-                                fieldLabel: 'Nucleic Acid Type <sup><strong><span class="field-tooltip" tooltip-text="Select nucleic acid type of your sample or select other in specify in the comments field (below)">[?]</span></strong></sup>',
+                                fieldLabel: 'Nucleic Acid Type <sup><strong><span class="field-tooltip" tooltip-text="Select nucleic acid type of your sample or select other and specify in the comments field (below)">[?]</span></strong></sup>',
                                 emptyText: 'Nucleic Acid Type',
                                 store: 'nucleicAcidTypesStore',
                                 forceSelection: true
@@ -426,8 +426,8 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             },
                             {
                                 name: 'DNADissolvedIn',
-                                fieldLabel: 'DNA Dissolved In',
-                                emptyText: 'DNA Dissolved In',
+                                fieldLabel: 'DNA/RNA Dissolved In',
+                                emptyText: 'DNA/RNA Dissolved In',
                             },
                             {
                                 xtype: 'numberfield',
@@ -459,11 +459,12 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             {
                                 xtype: 'numberfield',
                                 name: 'sampleAmplifiedCycles',
-                                fieldLabel: 'Sample amplified (cyles) <sup><strong><span class="field-tooltip" tooltip-text="Indicate number of cycles used for sample amplification">[?]</span></strong></sup>',
+                                fieldLabel: 'Sample amplified (cyles) <sup><strong><span class="field-tooltip" tooltip-text="If sample has been already amplified, indicate the number of cycles">[?]</span></strong></sup>',
                                 emptyText: 'Sample amplified (cyles)',
                                 allowDecimals: false,
                                 minValue: 0,
-                                maxValue: 99
+                                maxValue: 99,
+                                allowBlank: true
                             },
                             {
                                 xtype: 'fieldcontainer',

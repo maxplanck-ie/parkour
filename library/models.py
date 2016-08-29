@@ -225,7 +225,11 @@ class Sample(LibrarySampleAbstract):
         NucleicAcidType, 
         verbose_name='Nucleic Acid Type',
     )
-    amplified_cycles = models.IntegerField('Sample Amplified Cycles')
+    amplified_cycles = models.IntegerField(
+        'Sample Amplified Cycles',
+        null=True, 
+        blank=True,
+    )
     dnase_treatment = models.NullBooleanField('DNase Treatment')
     rna_quality = models.ForeignKey(
         RNAQuality, 
