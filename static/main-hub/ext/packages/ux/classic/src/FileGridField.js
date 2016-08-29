@@ -6,12 +6,14 @@ Ext.define('Ext.ux.FileGridField', {
 
     uploadFileUrl: '',
     getFileUrl: '',
+    deleteFileUrl: '',
 
     initComponent: function () {
         var me = this;
 
         me.items = [{
             xtype: 'grid',
+            deleteFileUrl: me.deleteFileUrl,
             height: 180,
             columns: {
                 items: [
@@ -37,7 +39,7 @@ Ext.define('Ext.ux.FileGridField', {
                         width: 36,
                         dataIndex: 'path',
                         xtype: 'templatecolumn',
-                        tpl: '<a href="{path}"><img src="/static/main-hub/resources/images/download.png"></a>'
+                        tpl: '<a href="{path}" target="_blank"><img src="/static/main-hub/resources/images/download.png"></a>'
                     },
                     {
                         xtype: 'actioncolumn',
@@ -120,6 +122,7 @@ Ext.define('Ext.ux.FileGridField', {
                     if (obj.success && obj.fileIds.length > 0) {
                         Ext.Ajax.request({
                             url: getFileUrl,
+                            method: 'GET',
                             timeout: 1000000,
                             scope: this,
                             params: {
@@ -156,8 +159,8 @@ Ext.define('Ext.ux.FileGridField', {
         }
     },
 
-    deleteFile: function(grid, rowIndex, colIndex, item, e, record) {
-
+    deleteFile: function(view, rowIndex, colIndex, item, e, record) {
+        view.up().getStore().removeAt(rowIndex);
     },
 
     getValue: function() {

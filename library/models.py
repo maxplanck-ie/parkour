@@ -1,4 +1,7 @@
 from django.db import models
+from django.db.models.signals import post_delete, pre_delete
+from django.dispatch import receiver
+
 
 from functools import partial
 from time import strftime
@@ -111,6 +114,12 @@ class FileSample(models.Model):
         return self.name
 
 
+@receiver(post_delete, sender=FileSample)
+def filesample_delete(sender, instance, **kwargs):
+    # Pass False so FileField doesn't save the model.
+    instance.file.delete(False)
+
+
 class LibrarySampleAbstract(models.Model):
     name = models.CharField('Name', max_length=200, unique=True)
     date = models.DateTimeField('Date', auto_now_add=True)
@@ -221,3 +230,8 @@ class Sample(LibrarySampleAbstract):
         blank=True,
     )
     files=models.ManyToManyField(FileSample)
+
+@receiver(pre_delete, sender=Sample)
+def sample_delete(sender, instance, **kwargs):
+    for file in instance.files.all():
+        file.delete()

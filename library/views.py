@@ -241,6 +241,7 @@ class LibraryView(View):
                     sample.sample_preparation_protocol,
                 'requestedSampleTreatment': sample.requested_sample_treatment,
                 'comments': sample.comments,
+                'files': [file.id for file in sample.files.all()],
             } 
             for sample in samples
         ]
@@ -537,12 +538,23 @@ class SampleView(View):
             smpl.sequencing_run_condition_id = sequencing_run_condition_id
             smpl.sequencing_depth = sequencing_depth
             smpl.comments = comments
+            old_files = [file for file in smpl.files.all()]
+            smpl.files.clear()
             smpl.save()
+            smpl.files.add(*files)
+            new_files = [file for file in smpl.files.all()]
+
+            # Delete files
+            files_to_delete = list(set(old_files) - set(new_files))
+            for file in files_to_delete:
+                file.delete()
 
     def delete_sample(self):
         """ Delete Sample with a given id """
         record_id = self.request.POST.get('record_id')
         record = Sample.objects.get(id=record_id)
+        for file in record.files.all():
+            file.delete()
         record.delete()
 
 
@@ -583,7 +595,7 @@ def get_file_sample(request):
     data = []
 
     try:
-        file_ids = json.loads(request.POST.get('file_ids'))
+        file_ids = json.loads(request.GET.get('file_ids'))
         files = [f for f in FileSample.objects.all() if f.id in file_ids]
         data = [
             {

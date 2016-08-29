@@ -1,6 +1,7 @@
 from django.contrib import admin
-from library.models import LibraryProtocol, LibraryType, Organism, IndexType, IndexI5, IndexI7, ConcentrationMethod, \
-    SequencingRunCondition, Library, NucleicAcidType, SampleProtocol, RNAQuality, Sample
+from library.models import LibraryProtocol, LibraryType, Organism, IndexType, \
+	IndexI5, IndexI7, ConcentrationMethod, SequencingRunCondition, Library, \
+	NucleicAcidType, SampleProtocol, RNAQuality, Sample, FileSample
 
 
 @admin.register(LibraryProtocol)
@@ -13,7 +14,14 @@ class LibraryProtocolAdmin(admin.ModelAdmin):
         other_library_type.save()
 
 
-@admin.register(LibraryType, Organism, IndexType, IndexI5, IndexI7, ConcentrationMethod, SequencingRunCondition,
-                Library, NucleicAcidType, SampleProtocol, RNAQuality, Sample)
+@admin.register(
+	LibraryType, Organism, IndexType, IndexI5, IndexI7, ConcentrationMethod,
+	SequencingRunCondition, Library, NucleicAcidType, SampleProtocol, 
+	RNAQuality, FileSample)
 class LibraryAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(Sample)
+class SampleAdmin(admin.ModelAdmin):
+    exclude = ('files',)

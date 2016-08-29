@@ -556,7 +556,8 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 xtype: 'filegridfield',
                                 fieldLabel: 'Files',
                                 uploadFileUrl: 'upload_file_sample/',
-                                getFileUrl: 'get_file_sample/'
+                                getFileUrl: 'get_file_sample/',
+                                deleteFileUrl: 'delete_file_sample/'
                             },
                             {
                                 xtype: 'textarea',

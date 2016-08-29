@@ -190,6 +190,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
         Ext.getCmp('addWndBtn').show();
         if (wnd.mode == 'add') {
             Ext.getCmp('saveAndAddWndBtn').show();
+            Ext.getStore('fileSampleStore').removeAll();
         } else {
             var record = wnd.record.data,
                 form = Ext.getCmp('sampleForm').getForm();
@@ -208,6 +209,16 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
             if (record.equalRepresentation == 'False') Ext.getCmp('equalRepresentationRadio4').setValue(true);
             if (record.DNaseTreatment == 'False') Ext.getCmp('DNaseTreatmentRadio2').setValue(true);
             if (record.rnaSpikeIn == 'False') Ext.getCmp('rnaSpikeInRadio2').setValue(true);
+            if (record.files.length > 0) {
+                Ext.getStore('fileSampleStore').load({
+                    params: {
+                        'file_ids': Ext.JSON.encode(record.files)
+                    },
+                    callback: function(records, operation, success) {
+                        if (!success) Ext.ux.ToastMessage('Cannot load Sample files', 'error');
+                    }
+                });
+            }
 
             Ext.getCmp('addWndBtn').setConfig('text', 'Save');
         }
@@ -602,9 +613,10 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
                                 Ext.ux.ToastMessage('Sample has been updated!');
                             }
 
-                            // Preserve all fields except for Name, if 'Save and Add another' button was pressed
+                            // Preserve all fields except for Name and Files, if 'Save and Add another' button was pressed
                             if (addAnother) {
                                 Ext.getCmp('sampleName').reset();
+                                Ext.getStore('fileSampleStore').removeAll();
                                 wnd.setLoading(false);
                             } else {
                                 wnd.close();

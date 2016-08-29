@@ -1,6 +1,6 @@
 from django.conf.urls import url
-from library.views import LibraryField, LibraryView, SampleField, SampleView, upload_file_sample, \
-    get_file_sample
+from library.views import LibraryField, LibraryView, SampleField, SampleView, \
+    upload_file_sample, get_file_sample
 
 
 urlpatterns = [
