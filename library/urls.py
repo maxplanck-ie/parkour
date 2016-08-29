@@ -1,6 +1,6 @@
 from django.conf.urls import url
 from library.views import LibraryField, LibraryView, SampleField, SampleView, \
-    upload_file_sample, get_file_sample
+    upload_file_library, get_file_library, upload_file_sample, get_file_sample
 
 
 urlpatterns = [
@@ -16,6 +16,8 @@ urlpatterns = [
     url(r'^get_libraries/$', LibraryView.as_view(), name='get_libraries'),
     url(r'^save_library/$', LibraryView.as_view(), name='save_library'),
     url(r'^delete_library/$', LibraryView.as_view(), name='delete_library'),
+    url(r'^upload_file_library/$', upload_file_library, name='upload_file_library'),
+    url(r'^get_file_library/$', get_file_library, name='get_file_library'),
 
     url(r'^get_nucleic_acid_types/$', SampleField.as_view(), name='get_nucleic_acid_types'),
     url(r'^get_sample_protocols/$', SampleField.as_view(), name='get_sample_protocols'),

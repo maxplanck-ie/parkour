@@ -297,6 +297,13 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                                 allowDecimals: false
                             },
                             {
+                                xtype: 'filegridfield',
+                                fieldLabel: 'Files',
+                                store: 'fileLibraryStore',
+                                uploadFileUrl: 'upload_file_library/',
+                                getFileUrl: 'get_file_library/'
+                            },
+                            {
                                 xtype: 'textarea',
                                 name: 'comments',
                                 fieldLabel: 'Comments',
@@ -555,9 +562,9 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             {
                                 xtype: 'filegridfield',
                                 fieldLabel: 'Files',
+                                store: 'fileSampleStore',
                                 uploadFileUrl: 'upload_file_sample/',
-                                getFileUrl: 'get_file_sample/',
-                                deleteFileUrl: 'delete_file_sample/'
+                                getFileUrl: 'get_file_sample/'
                             },
                             {
                                 xtype: 'textarea',

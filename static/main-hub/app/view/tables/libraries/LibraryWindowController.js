@@ -87,6 +87,7 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
 
         Ext.getCmp('addWndBtn').show();
         if (wnd.mode == 'add') {
+            Ext.getStore('fileSampleStore').removeAll();
             Ext.getCmp('saveAndAddWndBtn').show();
         } else {
             var record = wnd.record.data,
@@ -105,6 +106,16 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
                 comments: record.comments
             });
             if (record.equalRepresentation == 'No') Ext.getCmp('equalRepresentationRadio2').setValue(true);
+            if (record.files.length > 0) {
+                Ext.getStore('fileLibraryStore').load({
+                    params: {
+                        'file_ids': Ext.JSON.encode(record.files)
+                    },
+                    callback: function(records, operation, success) {
+                        if (!success) Ext.ux.ToastMessage('Cannot load Sample files', 'error');
+                    }
+                });
+            }
 
             Ext.getCmp('addWndBtn').setConfig('text', 'Save');
         }
@@ -189,8 +200,8 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
 
         Ext.getCmp('addWndBtn').show();
         if (wnd.mode == 'add') {
-            Ext.getCmp('saveAndAddWndBtn').show();
             Ext.getStore('fileSampleStore').removeAll();
+            Ext.getCmp('saveAndAddWndBtn').show();
         } else {
             var record = wnd.record.data,
                 form = Ext.getCmp('sampleForm').getForm();
@@ -517,7 +528,8 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
                         'qpcr_result': data.qPCRResult,
                         'sequencing_run_condition': data.sequencingRunCondition,
                         'sequencing_depth': data.sequencingDepth,
-                        'comments': data.comments
+                        'comments': data.comments,
+                        'files': Ext.JSON.encode(form.down('filegridfield').getValue())
                     },
 
                     success: function (response) {

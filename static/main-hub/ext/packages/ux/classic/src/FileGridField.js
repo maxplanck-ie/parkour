@@ -4,16 +4,15 @@ Ext.define('Ext.ux.FileGridField', {
 
     requires: ['Ext.ux.MultiFileField'],
 
+    store: '',
     uploadFileUrl: '',
     getFileUrl: '',
-    deleteFileUrl: '',
 
     initComponent: function () {
         var me = this;
 
         me.items = [{
             xtype: 'grid',
-            deleteFileUrl: me.deleteFileUrl,
             height: 180,
             columns: {
                 items: [
@@ -53,7 +52,7 @@ Ext.define('Ext.ux.FileGridField', {
                     }
                 ]
             },   
-            store: 'fileSampleStore',
+            store: me.store,
             bbar: [
                 '->',
                 {
@@ -132,7 +131,7 @@ Ext.define('Ext.ux.FileGridField', {
                                 var obj = Ext.JSON.decode(response.responseText);
 
                                 if (obj.success) {
-                                    Ext.getStore('fileSampleStore').add(obj.data);
+                                    grid.getStore().add(obj.data);
                                 } else {
                                     Ext.ux.ToastMessage(response.statusText, 'error');
                                     console.log('[ERROR]: ' + getFileUrl);

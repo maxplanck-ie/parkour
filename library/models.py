@@ -102,8 +102,18 @@ class RNAQuality(SimpleField):
         verbose_name_plural = 'RNA Qualities'
 
 
-# class FileLibrary(models.Model):
-#     file = models.FileField(upload_to='libraries/%Y/%m/%d/')
+class FileLibrary(models.Model):
+    name = models.CharField('Name', max_length=200)
+    file = models.FileField(upload_to=upload_to('libraries/%Y/%m/%d/'))
+
+    def __str__(self):
+        return self.name
+
+
+@receiver(post_delete, sender=FileLibrary)
+def filelibrary_delete(sender, instance, **kwargs):
+    # Pass False so FileField doesn't save the model.
+    instance.file.delete(False)
 
 
 class FileSample(models.Model):
@@ -171,10 +181,17 @@ class Library(LibrarySampleAbstract):
     )
     mean_fragment_size = models.IntegerField('Mean Fragment Size')
     qpcr_result = models.FloatField('qPCR Result', null=True, blank=True)
+    files=models.ManyToManyField(FileLibrary)
 
     class Meta:
         verbose_name = 'Library'
         verbose_name_plural = 'Libraries'
+
+
+@receiver(pre_delete, sender=Library)
+def sample_delete(sender, instance, **kwargs):
+    for file in instance.files.all():
+        file.delete()
 
 
 class SampleProtocol(models.Model):

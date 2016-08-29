@@ -6,7 +6,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from library.models import LibraryProtocol, LibraryType, Organism, IndexType, \
     IndexI7, IndexI5, ConcentrationMethod, SequencingRunCondition, Library, \
-    NucleicAcidType, SampleProtocol, RNAQuality, Sample, FileSample
+    NucleicAcidType, SampleProtocol, RNAQuality, Sample, FileSample, \
+    FileLibrary
 from common.utils import get_simple_field_dict
 
 import json
@@ -203,6 +204,7 @@ class LibraryView(View):
                     library.sequencing_run_condition.id,
                 'sequencingDepth': library.sequencing_depth,
                 'comments': library.comments,
+                'files': [file.id for file in library.files.all()],
             } 
             for library in libraries
         ]
@@ -280,6 +282,7 @@ class LibraryView(View):
             self.request.POST.get('sequencing_run_condition')
         sequencing_depth = int(self.request.POST.get('sequencing_depth'))
         comments = self.request.POST.get('comments')
+        files = json.loads(self.request.POST.get('files'))
 
         if mode == 'add':
             lib = Library(
@@ -305,6 +308,7 @@ class LibraryView(View):
                 comments=comments,
             )
             lib.save()
+            lib.files.add(*files)
 
         elif mode == 'edit':
             lib = Library.objects.get(id=library_id)
@@ -328,12 +332,23 @@ class LibraryView(View):
             lib.sequencing_run_condition_id = sequencing_run_condition
             lib.sequencing_depth = sequencing_depth
             lib.comments = comments
+            old_files = [file for file in lib.files.all()]
+            lib.files.clear()
             lib.save()
+            lib.files.add(*files)
+            new_files = [file for file in lib.files.all()]
+
+            # Delete files
+            files_to_delete = list(set(old_files) - set(new_files))
+            for file in files_to_delete:
+                file.delete()
 
     def delete_library(self):
         """ Delete Library with a given id """
         record_id = self.request.POST.get('record_id')
         record = Library.objects.get(id=record_id)
+        for file in record.files.all():
+            file.delete()
         record.delete()
 
 
@@ -597,6 +612,69 @@ def get_file_sample(request):
     try:
         file_ids = json.loads(request.GET.get('file_ids'))
         files = [f for f in FileSample.objects.all() if f.id in file_ids]
+        data = [
+            {
+                'id': file.id,
+                'name': file.name,
+                'size': file.file.size,
+                'path': settings.MEDIA_URL + file.file.name,
+            } 
+            for file in files
+        ]
+    except Exception as e:
+        error = str(e)
+        print('[ERROR]: %s' % error)
+        logger.debug(error)
+
+    return HttpResponse(
+        json.dumps({
+            'success': not error, 
+            'error': error, 
+            'data': data,
+        }),
+        content_type='application/json',
+    )
+
+
+@csrf_exempt
+@login_required
+def upload_file_library(request):
+    """ """
+
+    error = ''
+    file_ids = []
+
+    if request.method == 'POST' and any(request.FILES):
+        try:
+            for file in request.FILES.getlist('files'):
+                f = FileLibrary(name=file.name, file=file)
+                f.save()
+                file_ids.append(f.id)
+        except Exception as e:
+            error = str(e)
+            print('[ERROR]: %s' % error)
+            logger.debug(error)
+
+    return HttpResponse(
+        json.dumps({
+            'success': not error, 
+            'error': error, 
+            'fileIds': file_ids,
+        }),
+        content_type='application/json',
+    )
+
+
+@login_required
+def get_file_library(request):
+    """ """
+
+    error = ''
+    data = []
+
+    try:
+        file_ids = json.loads(request.GET.get('file_ids'))
+        files = [f for f in FileLibrary.objects.all() if f.id in file_ids]
         data = [
             {
                 'id': file.id,

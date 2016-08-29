@@ -36,6 +36,7 @@ Ext.define('MainHub.Application', {
         'tables.libraries.NucleicAcidTypes',
         'tables.libraries.RNAQuality',
         'tables.libraries.SampleProtocols',
+        'tables.libraries.FileLibrary',
         'tables.libraries.FileSample'
     ],
 
