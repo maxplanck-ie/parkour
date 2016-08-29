@@ -1,5 +1,12 @@
 import os
 
+try:
+    from wui.dev_settings import *
+    DEBUG = True
+except ImportError:
+    from wui.prod_settings import *
+    DEBUG = False
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG_DIR = os.path.join(BASE_DIR, 'logs')
@@ -11,7 +18,7 @@ LOG_DIR = os.path.join(BASE_DIR, 'logs')
 SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
 
 # Allow all host headers
 ALLOWED_HOSTS = ['*']
@@ -32,6 +39,7 @@ INSTALLED_APPS = [
     'common',
     'researcher',
     'request',
+    'library',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -122,7 +130,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'standard': {
-            'format': '[%(levelname)s] [%(asctime)s] [%(module)s:%(lineno)s]: %(message)s',
+            'format': '[%(levelname)s] [%(asctime)s] %(message)s',
             'datefmt': "%d/%b/%Y %H:%M:%S"
         },
         'custom': {
@@ -149,7 +157,7 @@ LOGGING = {
         'logfile': {
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(LOG_DIR, 'django.log'),
-            'formatter': 'standard',
+            'formatter': 'custom',
             'maxBytes': 15 * 1024 * 1024,  # 15 MB
             'backupCount': 2,
         },
@@ -164,9 +172,9 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
-            'level': 'WARNING',
-            'propagate': True,
+            'handlers': ['console'] if DEBUG else ['console', 'logfile'],
+            'level': 'DEBUG' if DEBUG else 'ERROR',
+            'propagate': False,
         },
         'django.db.backends': {
             'handlers': ['console'],
@@ -201,9 +209,6 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-try:
-    from wui.dev_settings import *
-    DEBUG = True
-except ImportError:
-    from wui.prod_settings import *
-    DEBUG = False
+MEDIA_URL = '/media/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

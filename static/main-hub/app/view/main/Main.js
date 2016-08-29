@@ -31,9 +31,10 @@ Ext.define('MainHub.view.main.Main', {
     items: [
         {
             xtype: 'toolbar',
+            itemId: 'headerBar',
             cls: 'sencha-dash-dash-headerbar shadow',
             height: 64,
-            itemId: 'headerBar',
+            padding: 0,
             items: [
                 {
                     xtype: 'component',
@@ -53,9 +54,7 @@ Ext.define('MainHub.view.main.Main', {
                 {
                     xtype: 'tbtext',
                     cls: 'top-user-name',
-                    listeners: {
-                        beforerender: 'onUsernameBeforerender'
-                    }
+                    text: USERNAME      // from 'globals.html'
                 },
                 {
                     xtype: 'button',

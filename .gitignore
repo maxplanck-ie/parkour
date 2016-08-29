@@ -67,3 +67,4 @@ target/
 wui/dev_settings.py
 staticfiles/
 logs/
+media/

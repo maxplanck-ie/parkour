@@ -18,12 +18,26 @@ Ext.define('MainHub.Application', {
     appFolder: '/static/main-hub/app',
 
     stores: [
-      'NavigationTree',
-      'tables.researchers.Researchers',
-      'tables.researchers.PrincipalInvestigators',
-      'tables.researchers.Organizations',
-      'tables.researchers.CostUnits',
-      'Requests'
+        'NavigationTree',
+        'tables.researchers.Researchers',
+        'tables.researchers.PrincipalInvestigators',
+        'tables.researchers.Organizations',
+        'tables.researchers.CostUnits',
+        'Requests',
+        'tables.libraries.Libraries',
+        'tables.libraries.LibraryProtocols',
+        'tables.libraries.LibraryType',
+        'tables.libraries.Organisms',
+        'tables.libraries.IndexTypes',
+        'tables.libraries.IndexI7',
+        'tables.libraries.IndexI5',
+        'tables.libraries.ConcentrationMethods',
+        'tables.libraries.SequencingRunConditions',
+        'tables.libraries.NucleicAcidTypes',
+        'tables.libraries.RNAQuality',
+        'tables.libraries.SampleProtocols',
+        'tables.libraries.FileLibrary',
+        'tables.libraries.FileSample'
     ],
 
     requires: [
