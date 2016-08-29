@@ -48,6 +48,20 @@ Ext.define('MainHub.store.NavigationTree', {
                         leaf: true
                     }
                 ]
+            },
+            {
+                text: 'Quality Control',
+                iconCls: 'x-fa fa-check-square',
+                expanded: true,
+                selectable: false,
+                children: [
+                    {
+                        text: 'Incoming Libraries/Samples',
+                        iconCls: 'x-fa fa-check',
+                        viewType: 'incoming-libraries',
+                        leaf: true
+                    }
+                ]
             }
         ]
     }

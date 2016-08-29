@@ -37,7 +37,8 @@ Ext.define('MainHub.Application', {
         'tables.libraries.RNAQuality',
         'tables.libraries.SampleProtocols',
         'tables.libraries.FileLibrary',
-        'tables.libraries.FileSample'
+        'tables.libraries.FileSample',
+        'QualityControl.IncomingLibraries'
     ],
 
     requires: [
