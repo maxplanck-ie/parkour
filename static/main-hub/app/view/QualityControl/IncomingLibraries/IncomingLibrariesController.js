@@ -7,15 +7,20 @@ Ext.define('MainHub.view.QualityControl.IncomingLibraries.IncomingLibrariesContr
             '#incomingLibraries': {
                 boxready: 'onIncomingLibrariesTableBoxready',
                 refresh: 'onIncomingLibrariesTableRefresh',
-                beforeedit: 'onIncomingLibrariesTableBeforeEdit',
-                edit: 'onIncomingLibrariesTableEdit'
+                edit: 'onIncomingLibrariesTableEdit',
             }
         }
     },
 
     onIncomingLibrariesTableBoxready: function(grid) {
         // Triggers when the table is shown for the first time
-        grid.fireEvent('refresh', grid);
+        Ext.getStore('concentrationMethodsStore').load(function(records, operation, success) {
+            if (!success) {
+                Ext.ux.ToastMessage('Cannot load Concentration Methods', 'error');
+            } else {
+                grid.fireEvent('refresh', grid);
+            }
+        });
     },
 
     onIncomingLibrariesTableRefresh: function(grid) {
@@ -24,30 +29,58 @@ Ext.define('MainHub.view.QualityControl.IncomingLibraries.IncomingLibrariesContr
         grid.getStore().reload();
     },
 
-    onIncomingLibrariesTableBeforeEdit: function() {
-        Ext.getStore('concentrationMethodsStore').load(function(records, operation, success) {
-            if (!success) Ext.ux.ToastMessage('Cannot load Concentration Methods', 'error');
-        });
-    },
-
     onIncomingLibrariesTableEdit: function(editor, context) {
-        context.record.set(context.newValues);
+        var grid = this.getView().down('grid'),
+            record = context.record,
+            changes = record.getChanges(),
+            values = context.newValues,
+            amountFacility = values.amountFacility;
 
-        // Set date if Concentration field was filled in
-        if (context.field == 'concentrationFacility') {
-            var date = new Date();
-
-            var dd = date.getDate();
-            if (dd < 10) dd = '0' + dd;
-
-            var mm = date.getMonth() + 1;
-            if (mm < 10) mm = '0' + mm;
-
-            var yy = date.getFullYear();
-
-            context.record.set('dateFacility', dd + '.' + mm + '.' + yy);
+        // Compute Amount
+        if (Object.keys(changes).indexOf('amountFacility') == -1 && values.dilutionFactor != '' && 
+            values.concentrationFacility != '' && values.sampleVolumeFacility != '') {
+            amountFacility = parseFloat(values.dilutionFactor) * parseFloat(values.concentrationFacility) * parseFloat(values.sampleVolumeFacility);
         }
 
-        // TODO: update DB record
+        var url = 'qc_incoming_libraries/';
+        Ext.Ajax.request({
+            url: url,
+            method: 'POST',
+            timeout: 1000000,
+            scope: this,
+
+            params: {
+                'record_type': record.get('recordType'),
+                'record_id': (record.get('recordType') == 'L') ? record.get('libraryId') : record.get('sampleId'),
+                'dilution_factor': values.dilutionFactor,
+                'concentration_facility': values.concentrationFacility,
+                'concentration_method_facility_id': values.concentrationMethodFacility,
+                'sample_volume_facility': values.sampleVolumeFacility,
+                'amount_facility': amountFacility,
+                'qpcr_result_facility': values.qPCRResultFacility,
+                'rna_quality_facility': values.rnaQualityFacility,
+                'size_distribution_facility': values.sizeDistributionFacility,
+                'comments_facility': values.commentsFacility,
+                'qc_result': values.qcResult,
+            },
+
+            success: function (response) {
+                var obj = Ext.JSON.decode(response.responseText);
+
+                if (obj.success) {
+                    grid.fireEvent('refresh', grid);
+                } else {
+                    Ext.ux.ToastMessage(obj.error, 'error');
+                    console.log('[ERROR]: ' + url + ': ' + obj.error);
+                    console.log(response);
+                }
+            },
+
+            failure: function (response) {
+                Ext.ux.ToastMessage(response.statusText, 'error');
+                console.log('[ERROR]: ' + url);
+                console.log(response);
+            }
+        });
     }
 });

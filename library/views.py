@@ -12,6 +12,7 @@ from common.utils import get_simple_field_dict
 
 import json
 import logging
+from datetime import datetime
 
 logger = logging.getLogger('db')
 
@@ -211,6 +212,24 @@ class LibraryView(View):
                 'sequencingDepth': library.sequencing_depth,
                 'comments': library.comments,
                 'files': [file.id for file in library.files.all()],
+                'dilutionFactor': library.dilution_factor,
+                'concentrationFacility': library.concentration_facility,
+                'concentrationMethodFacility':
+                    library.concentration_determined_by_facility.name
+                    if library.concentration_determined_by_facility is not None
+                    else '',
+                'concentrationMethodFacilityId': 
+                    library.concentration_determined_by_facility.id
+                    if library.concentration_determined_by_facility is not None
+                    else '',
+                'dateFacility': library.date_facility.strftime('%d.%m.%Y')
+                    if library.date_facility is not None else '',
+                'sampleVolumeFacility': library.sample_volume_facility,
+                'amountFacility': library.amount_facility,
+                'sizeDistributionFacility': library.size_distribution_facility,
+                'commentsFacility': library.comments_facility,
+                'qcResult': library.qc_result,
+                'qPCRResultFacility': library.qpcr_result_facility,
             }
             for library in libraries
         ]
@@ -250,6 +269,24 @@ class LibraryView(View):
                 'requestedSampleTreatment': sample.requested_sample_treatment,
                 'comments': sample.comments,
                 'files': [file.id for file in sample.files.all()],
+                'dilutionFactor': sample.dilution_factor,
+                'concentrationFacility': sample.concentration_facility,
+                'concentrationMethodFacility':
+                    sample.concentration_determined_by_facility.name
+                    if sample.concentration_determined_by_facility is not None
+                    else '',
+                'concentrationMethodFacilityId': 
+                    sample.concentration_determined_by_facility.id
+                    if sample.concentration_determined_by_facility is not None
+                    else '',
+                'dateFacility': sample.date_facility.strftime('%d.%m.%Y')
+                    if sample.date_facility is not None else '',
+                'sampleVolumeFacility': sample.sample_volume_facility,
+                'amountFacility': sample.amount_facility,
+                'sizeDistributionFacility': sample.size_distribution_facility,
+                'commentsFacility': sample.comments_facility,
+                'qcResult': sample.qc_result,
+                'rnaQualityFacility': sample.rna_quality_facility,
             }
             for sample in samples
         ]
@@ -589,7 +626,6 @@ class SampleView(View):
 @login_required
 def upload_file_sample(request):
     """ """
-
     error = ''
     file_ids = []
 
@@ -652,7 +688,6 @@ def get_file_sample(request):
 @login_required
 def upload_file_library(request):
     """ """
-
     error = ''
     file_ids = []
 
@@ -680,7 +715,6 @@ def upload_file_library(request):
 @login_required
 def get_file_library(request):
     """ """
-
     error = ''
     data = []
 
@@ -707,5 +741,65 @@ def get_file_library(request):
             'error': error,
             'data': data,
         }),
+        content_type='application/json',
+    )
+
+
+def qc_incoming_libraries(request):
+    """ """
+    error = ''
+
+    try:
+        record_type = request.POST.get('record_type')
+        record_id = request.POST.get('record_id')
+        dilution_factor = request.POST.get('dilution_factor')
+        dilution_factor = int(dilution_factor) \
+            if dilution_factor != '' else None
+        concentration_facility = request.POST.get('concentration_facility')
+        concentration_facility = float(concentration_facility) \
+            if concentration_facility != '' else None
+        concentration_method_facility_id = \
+            request.POST.get('concentration_method_facility_id')
+        sample_volume_facility = request.POST.get('sample_volume_facility')
+        sample_volume_facility = int(sample_volume_facility) \
+            if sample_volume_facility != '' else None
+        amount_facility = request.POST.get('amount_facility')
+        amount_facility = float(amount_facility) \
+            if amount_facility != '' else None
+        qpcr_result_facility = request.POST.get('qpcr_result_facility')
+        qpcr_result_facility = float(qpcr_result_facility) \
+            if qpcr_result_facility != '' else None
+        rna_quality_facility = request.POST.get('rna_quality_facility')
+        rna_quality_facility = float(rna_quality_facility) \
+            if rna_quality_facility != '' else None
+        size_distribution_facility = \
+            request.POST.get('size_distribution_facility')
+        comments_facility = request.POST.get('comments_facility')
+        qc_result = request.POST.get('qc_result')
+
+        if record_type == 'L':
+            obj = Library.objects.get(id=record_id)
+            obj.qpcr_result_facility = qpcr_result_facility
+        else:
+            obj = Sample.objects.get(id=record_id)
+            obj.rna_quality_facility = rna_quality_facility
+        obj.dilution_factor = dilution_factor
+        obj.concentration_facility = concentration_facility
+        obj.concentration_determined_by_facility_id = \
+            concentration_method_facility_id
+        obj.sample_volume_facility = sample_volume_facility
+        obj.amount_facility = amount_facility
+        obj.size_distribution_facility = size_distribution_facility
+        obj.comments_facility = comments_facility
+        obj.qc_result = qc_result
+        obj.save()
+
+    except Exception as e:
+        error = str(e)
+        print('[ERROR]: %s' % error)
+        logger.debug(error)
+
+    return HttpResponse(
+        json.dumps({'success': not error, 'error': error,}),
         content_type='application/json',
     )

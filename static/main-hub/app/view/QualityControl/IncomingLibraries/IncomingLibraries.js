@@ -54,7 +54,7 @@ Ext.define('MainHub.view.QualityControl.IncomingLibraries.IncomingLibraries', {
                     { text: 'Mean Fragment Size (bp)', dataIndex: 'meanFragmentSize', flex: 1, tdCls: 'userEntry' },
                     { text: 'RNA Quality (RIN, RQN)', dataIndex: 'rnaQuality', flex: 1, tdCls: 'userEntry' },
 
-                    { text: 'Dilution Factor', dataIndex: 'dilutionFactorFacility', flex: 1, tdCls: 'facilityEntry', 
+                    { text: 'Dilution Factor', dataIndex: 'dilutionFactor', flex: 1, tdCls: 'facilityEntry', 
                       editor: {
                         xtype: 'numberfield',
                         minValue: 0,
@@ -75,12 +75,7 @@ Ext.define('MainHub.view.QualityControl.IncomingLibraries.IncomingLibraries', {
                         valueField: 'id',
                         store: 'concentrationMethodsStore',
                         forceSelection: true
-                      },
-                      renderer: function(val, meta) {
-                        if (typeof val != 'undefined') {
-                            return Ext.getStore('concentrationMethodsStore').findRecord('id', val).get('name');
-                        }
-                      } 
+                      }
                     },
                     { text: 'Date', dataIndex: 'dateFacility', flex: 1, tdCls: 'facilityEntry' },
                     { text: 'Sample volume (µl)', dataIndex: 'sampleVolumeFacility', flex: 1, tdCls: 'facilityEntry', 
@@ -88,11 +83,12 @@ Ext.define('MainHub.view.QualityControl.IncomingLibraries.IncomingLibraries', {
                         xtype: 'numberfield',
                         minValue: 0,
                         allowDecimals: false
-                      } 
+                      },
                     },
                     { text: 'Amount (ng)', dataIndex: 'amountFacility', flex: 1, tdCls: 'facilityEntry', 
                       editor: {
-                        xtype: 'textfield',
+                        xtype: 'numberfield',
+                        minValue: 0
                       } 
                     },
                     { text: 'qPCR result (nM)', dataIndex: 'qPCRResultFacility', flex: 1, tdCls: 'facilityEntry', 
@@ -108,7 +104,8 @@ Ext.define('MainHub.view.QualityControl.IncomingLibraries.IncomingLibraries', {
                     },
                     { text: 'RNA Quality (RIN, RQN)', dataIndex: 'rnaQualityFacility', flex: 1, tdCls: 'facilityEntry', 
                       editor: {
-                        xtype: 'textfield'
+                        xtype: 'numberfield',
+                        minValue: 0
                       } 
                     },
                     { text: 'Comments', dataIndex: 'commentsFacility', width: 150, tdCls: 'facilityEntry', 

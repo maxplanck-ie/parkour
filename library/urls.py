@@ -1,9 +1,11 @@
 from django.conf.urls import url
 from library.views import LibraryField, LibraryView, SampleField, SampleView, \
-    upload_file_library, get_file_library, upload_file_sample, get_file_sample
+    upload_file_library, get_file_library, upload_file_sample, \
+    get_file_sample, qc_incoming_libraries
 
 
 urlpatterns = [
+    # Libraries
     url(r'^get_library_protocols/$', LibraryField.as_view(), name='get_library_protocols'),
     url(r'^get_library_type/$', LibraryField.as_view(), name='get_library_type'),
     url(r'^get_organisms/$', LibraryField.as_view(), name='get_organisms'),
@@ -19,6 +21,7 @@ urlpatterns = [
     url(r'^upload_file_library/$', upload_file_library, name='upload_file_library'),
     url(r'^get_file_library/$', get_file_library, name='get_file_library'),
 
+    # Samples
     url(r'^get_nucleic_acid_types/$', SampleField.as_view(), name='get_nucleic_acid_types'),
     url(r'^get_sample_protocols/$', SampleField.as_view(), name='get_sample_protocols'),
     url(r'^get_rna_qualities/$', SampleField.as_view(), name='get_rna_qualities'),
@@ -27,4 +30,7 @@ urlpatterns = [
     url(r'^delete_sample/$', SampleView.as_view(), name='delete_sample'),
     url(r'^upload_file_sample/$', upload_file_sample, name='upload_file_sample'),
     url(r'^get_file_sample/$', get_file_sample, name='get_file_sample'),
+
+    # Quality Control
+    url(r'^qc_incoming_libraries/$', qc_incoming_libraries, name='qc_incoming_libraries'),
 ]

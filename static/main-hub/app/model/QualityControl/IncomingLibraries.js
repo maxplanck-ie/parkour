@@ -1,11 +1,18 @@
 Ext.define('MainHub.model.QualityControl.IncomingLibraries', {
-    extend: 'MainHub.model.Base',
+    extend: 'MainHub.model.tables.libraries.Library',
 
     fields: [
-        {  name: 'libraryId', 	 type: 'int' 	 },
-        {  name: 'sampleId',  	 type: 'int' 	 },
-        {  name: 'name',		 type: 'string'  },
-        {  name: 'recordType',	 type: 'string'  },
-        {  name: 'dateFacility', type: 'string'  },
+        {  name: 'dilutionFactor', 					type: 'string'  },
+        {  name: 'concentrationFacility', 			type: 'string'  },
+        {  name: 'concentrationMethodFacility', 	type: 'string'  },
+        {  name: 'concentrationMethodFacilityId', 	type: 'int'  	},
+        {  name: 'dateFacility', 					type: 'string'  },
+        {  name: 'sampleVolumeFacility', 			type: 'string'  },
+        {  name: 'amountFacility', 					type: 'string'  },
+        {  name: 'sizeDistributionFacility', 		type: 'string'  },
+        {  name: 'commentsFacility', 				type: 'string'  },
+        {  name: 'qcResult', 						type: 'string'  },
+        {  name: 'qPCRResultFacility', 				type: 'string'  },
+        {  name: 'rnaQualityFacility', 				type: 'string'  },
     ]
 });

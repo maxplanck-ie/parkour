@@ -151,6 +151,57 @@ class LibrarySampleAbstract(models.Model):
     sequencing_depth = models.IntegerField('Sequencing Depth')
     comments = models.TextField('Comments', null=True, blank=True)
 
+    # Quality Control
+    dilution_factor = models.IntegerField(
+        'Dilution Factor', 
+        null=True, 
+        blank=True,
+    )
+    concentration_facility = models.FloatField(
+        'Concentration (facility)',
+        null=True, 
+        blank=True,
+    )
+    concentration_determined_by_facility = models.ForeignKey(
+        ConcentrationMethod, 
+        verbose_name='Concentration Determined by (facility)',
+        related_name='+',
+        null=True,
+        blank=True,
+    )
+    date_facility = models.DateTimeField(
+        'Date (facility)',
+        null=True,
+        blank=True,
+    )
+    sample_volume_facility = models.IntegerField(
+        'Sample Volume (facility)',
+        null=True, 
+        blank=True,
+    )
+    amount_facility = models.FloatField(
+        'Amount',
+        null=True,
+        blank=True,
+    )
+    size_distribution_facility = models.CharField(
+        'Size Distribution',
+        max_length=200,
+        null=True,
+        blank=True,
+    )
+    comments_facility = models.TextField(
+        'Comments (facility)',
+        null=True,
+        blank=True,
+    )
+    qc_result = models.CharField(
+        'QC Result',
+        max_length=50,
+        null=True,
+        blank=True,
+    )
+
     class Meta:
         abstract = True
 
@@ -182,6 +233,13 @@ class Library(LibrarySampleAbstract):
     mean_fragment_size = models.IntegerField('Mean Fragment Size')
     qpcr_result = models.FloatField('qPCR Result', null=True, blank=True)
     files=models.ManyToManyField(FileLibrary)
+
+    # Quality Control
+    qpcr_result_facility = models.FloatField(
+        'qPCR Result (facility)', 
+        null=True, 
+        blank=True,
+    )
 
     class Meta:
         verbose_name = 'Library'
@@ -227,30 +285,37 @@ class Sample(LibrarySampleAbstract):
     )
     amplified_cycles = models.IntegerField(
         'Sample Amplified Cycles',
-        null=True, 
+        null=True,
         blank=True,
     )
     dnase_treatment = models.NullBooleanField('DNase Treatment')
     rna_quality = models.ForeignKey(
-        RNAQuality, 
-        verbose_name='RNA Quality', 
-        null=True, 
+        RNAQuality,
+        verbose_name='RNA Quality',
+        null=True,
         blank=True,
     )
     rna_spike_in = models.NullBooleanField('RNA Spike in')
     sample_preparation_protocol = models.CharField(
-        'Sample Preparation Protocol', 
-        max_length=250, 
-        null=True, 
+        'Sample Preparation Protocol',
+        max_length=250,
+        null=True,
         blank=True,
     )
     requested_sample_treatment = models.CharField(
-        'Requested Sample Treatment', 
-        max_length=250, 
-        null=True, 
+        'Requested Sample Treatment',
+        max_length=250,
+        null=True,
         blank=True,
     )
     files=models.ManyToManyField(FileSample)
+
+    # Quality Control
+    rna_quality_facility = models.FloatField(
+        'RNA Quality (RIN, RQN) (facility)',
+        null=True,
+        blank=True,
+    )
 
 @receiver(pre_delete, sender=Sample)
 def sample_delete(sender, instance, **kwargs):
