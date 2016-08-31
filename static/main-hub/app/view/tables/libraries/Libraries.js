@@ -4,7 +4,7 @@ Ext.define('MainHub.view.tables.libraries.Libraries', {
 
     requires: [
         'MainHub.view.tables.libraries.LibrariesController',
-        'MainHub.view.tables.libraries.LibraryWindow'
+        'MainHub.view.tables.requests.LibraryWindow'
     ],
 
     controller: 'tables-libraries-libraries',
@@ -37,11 +37,6 @@ Ext.define('MainHub.view.tables.libraries.Libraries', {
                         width: 200,
                         margin: '0 15px 0 0',
                         disabled: true
-                    },
-                    {
-                        xtype: 'button',
-                        itemId: 'addLibraryBtn',
-                        text: 'Add'
                     }
                 ]
             },

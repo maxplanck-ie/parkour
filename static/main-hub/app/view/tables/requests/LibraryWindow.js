@@ -1,15 +1,15 @@
-Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
+Ext.define('MainHub.view.tables.requests.LibraryWindow', {
     extend: 'Ext.window.Window',
     alias: 'library_wnd',
     xtype: 'library_wnd',
     id: 'library_wnd',
 
     requires: [
-        'MainHub.view.tables.libraries.LibraryWindowController',
+        'MainHub.view.tables.requests.LibraryWindowController',
         'Ext.ux.FileGridField'
     ],
 
-    controller: 'tables-libraries-librarywindow',
+    controller: 'tables-requests-librarywindow',
 
     height: 225,
     width: 400,

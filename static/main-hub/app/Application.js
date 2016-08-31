@@ -38,7 +38,8 @@ Ext.define('MainHub.Application', {
         'tables.libraries.SampleProtocols',
         'tables.libraries.FileLibrary',
         'tables.libraries.FileSample',
-        'QualityControl.IncomingLibraries'
+        'QualityControl.IncomingLibraries',
+        'tables.requests.LibrariesInRequest'
     ],
 
     requires: [

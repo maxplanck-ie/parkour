@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 from request.models import Request
 from researcher.models import Researcher
+# from library.models import Library, Sample
 
 import json
 from datetime import datetime
@@ -144,6 +145,51 @@ def delete_request(request):
         json.dumps({
             'success': not error,
             'error': error,
+        }),
+        content_type='application/json',
+    )
+
+
+def get_libraries_in_request(request):
+    """ """
+    error = ''
+    data = []
+
+    try:
+        request_id = request.GET.get('request_id')
+        req = Request.objects.get(id=request_id)
+        libraries = [
+            {
+                'name': library.name,
+                'recordType': 'L',
+                'libraryId': library.id,
+            }
+            for library in req.libraries.all()
+        ]
+        samples = [
+            {
+                'name': sample.name,
+                'recordType': 'S',
+                'libraryId': sample.id,
+            }
+            for sample in req.samples.all()
+        ]
+        data = sorted(
+            libraries + samples,
+            key=lambda x: (x['recordType'], x['name']),
+            reverse=True,
+        )
+
+    except Exception as e:
+        error = str(e)
+        print('[ERROR]: get_libraries_in_request(): %s' % error)
+        logger.debug(error)
+
+    return HttpResponse(
+        json.dumps({
+            'success': not error,
+            'error': error,
+            'data': data,
         }),
         content_type='application/json',
     )

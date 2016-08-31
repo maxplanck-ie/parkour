@@ -45,29 +45,29 @@ Ext.define('MainHub.view.QualityControl.IncomingLibraries.IncomingLibraries', {
                       }
                     },
                     { text: '', dataIndex: 'recordType', width: 30, tdCls: 'userEntry' },
-                    { text: 'Nucleic Acid Type', dataIndex: 'nucleicAcidType', flex: 1, tdCls: 'userEntry' },
-                    { text: 'Protocol', dataIndex: 'libraryProtocol', flex: 1, tdCls: 'userEntry' },
-                    { text: 'Concentration (user) (ng/µl)', dataIndex: 'concentration', flex: 1, tdCls: 'userEntry' },
-                    { text: 'Concentration Method', dataIndex: 'concentrationMethod', flex: 1, tdCls: 'userEntry' },
-                    { text: 'Sample Volume (µl)', dataIndex: 'sampleVolume', flex: 1, tdCls: 'userEntry' },
-                    { text: 'qPCR Result (nM)', dataIndex: 'qPCRResult', flex: 1, tdCls: 'userEntry' },
-                    { text: 'Mean Fragment Size (bp)', dataIndex: 'meanFragmentSize', flex: 1, tdCls: 'userEntry' },
-                    { text: 'RNA Quality (RIN, RQN)', dataIndex: 'rnaQuality', flex: 1, tdCls: 'userEntry' },
+                    { text: 'Nucleic Acid Type', dataIndex: 'nucleicAcidType', tdCls: 'userEntry' },
+                    { text: 'Protocol', dataIndex: 'libraryProtocol', tdCls: 'userEntry' },
+                    { text: 'Concentration (user) (ng/µl)', dataIndex: 'concentration', tdCls: 'userEntry' },
+                    { text: 'Concentration Method', dataIndex: 'concentrationMethod', tdCls: 'userEntry' },
+                    { text: 'Sample Volume (µl)', dataIndex: 'sampleVolume', tdCls: 'userEntry' },
+                    { text: 'qPCR Result (nM)', dataIndex: 'qPCRResult', tdCls: 'userEntry' },
+                    { text: 'Mean Fragment Size (bp)', dataIndex: 'meanFragmentSize', tdCls: 'userEntry' },
+                    { text: 'RNA Quality (RIN, RQN)', dataIndex: 'rnaQuality', tdCls: 'userEntry' },
 
-                    { text: 'Dilution Factor', dataIndex: 'dilutionFactor', flex: 1, tdCls: 'facilityEntry', 
+                    { text: 'Dilution Factor', dataIndex: 'dilutionFactor', tdCls: 'facilityEntry', 
                       editor: {
                         xtype: 'numberfield',
                         minValue: 0,
                         allowDecimals: false
                       } 
                     },
-                    { text: 'Concentration (ng/µl)', dataIndex: 'concentrationFacility', flex: 1, tdCls: 'facilityEntry', 
+                    { text: 'Concentration (ng/µl)', dataIndex: 'concentrationFacility', tdCls: 'facilityEntry', 
                       editor: {
                         xtype: 'numberfield',
                         minValue: 0
                       } 
                     },
-                    { text: 'Concentration Method', dataIndex: 'concentrationMethodFacility', width: 100, tdCls: 'facilityEntry', 
+                    { text: 'Concentration Method', dataIndex: 'concentrationMethodFacility', tdCls: 'facilityEntry', 
                       editor: {
                         xtype: 'combobox',
                         queryMode: 'local',
@@ -77,43 +77,43 @@ Ext.define('MainHub.view.QualityControl.IncomingLibraries.IncomingLibraries', {
                         forceSelection: true
                       }
                     },
-                    { text: 'Date', dataIndex: 'dateFacility', flex: 1, tdCls: 'facilityEntry' },
-                    { text: 'Sample volume (µl)', dataIndex: 'sampleVolumeFacility', flex: 1, tdCls: 'facilityEntry', 
+                    { text: 'Date', dataIndex: 'dateFacility', tdCls: 'facilityEntry' },
+                    { text: 'Sample volume (µl)', dataIndex: 'sampleVolumeFacility', tdCls: 'facilityEntry', 
                       editor: {
                         xtype: 'numberfield',
                         minValue: 0,
                         allowDecimals: false
                       },
                     },
-                    { text: 'Amount (ng)', dataIndex: 'amountFacility', flex: 1, tdCls: 'facilityEntry', 
+                    { text: 'Amount (ng)', dataIndex: 'amountFacility', tdCls: 'facilityEntry', 
                       editor: {
                         xtype: 'numberfield',
                         minValue: 0
                       } 
                     },
-                    { text: 'qPCR result (nM)', dataIndex: 'qPCRResultFacility', flex: 1, tdCls: 'facilityEntry', 
+                    { text: 'qPCR result (nM)', dataIndex: 'qPCRResultFacility', tdCls: 'facilityEntry', 
                       editor: {
                         xtype: 'numberfield',
                         minValue: 0
                       }
                     },
-                    { text: 'Size distribution', dataIndex: 'sizeDistributionFacility', flex: 1, tdCls: 'facilityEntry', 
+                    { text: 'Size distribution', dataIndex: 'sizeDistributionFacility', tdCls: 'facilityEntry', 
                       editor: {
                         xtype: 'textfield'
                       } 
                     },
-                    { text: 'RNA Quality (RIN, RQN)', dataIndex: 'rnaQualityFacility', flex: 1, tdCls: 'facilityEntry', 
+                    { text: 'RNA Quality (RIN, RQN)', dataIndex: 'rnaQualityFacility', tdCls: 'facilityEntry', 
                       editor: {
                         xtype: 'numberfield',
                         minValue: 0
                       } 
                     },
-                    { text: 'Comments', dataIndex: 'commentsFacility', width: 150, tdCls: 'facilityEntry', 
+                    { text: 'Comments', dataIndex: 'commentsFacility', tdCls: 'facilityEntry', 
                       editor: {
                         xtype: 'textarea'
                       }
                     },
-                    { text: 'QC Result', dataIndex: 'qcResultFacility', width: 100, tdCls: 'facilityEntry', 
+                    { text: 'QC Result', dataIndex: 'qcResultFacility', tdCls: 'facilityEntry', 
                       editor: {
                         xtype: 'combobox',
                         queryMode: 'local',

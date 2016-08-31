@@ -7,8 +7,8 @@ Ext.define('MainHub.view.tables.requests.RequestWindow', {
 
     controller: 'request_wnd',
 
-    height: 380,
-    width: 650,
+    height: 445,
+    width: 700,
 
     modal: true,
     resizable: false,
@@ -63,7 +63,8 @@ Ext.define('MainHub.view.tables.requests.RequestWindow', {
                             xtype: 'textarea',
                             fieldLabel: 'Description',
                             emptyText: 'Description',
-                            allowBlank: false
+                            allowBlank: false,
+                            height: 150
                         },
                         {
                             name: 'termsOfUseAccept',
@@ -73,39 +74,33 @@ Ext.define('MainHub.view.tables.requests.RequestWindow', {
                     ]
                 },
                 {
-                    xtype: 'container',
-                    padding: '25px 15px 0 0',
-                    items: [
+                    xtype: 'grid',
+                    id: 'librariesInRequestTable',
+                    title: 'Libraries/Samples',
+                    width: 295,
+                    height: 350,
+                    padding: '15px 15px 15px 0',
+
+                    columns: {
+                        items: [
+                            { xtype: 'rownumberer', width: 40 },
+                            { text: 'Name', dataIndex: 'name', flex: 1 },
+                            { text: '', dataIndex: 'recordType', width: 35 }
+                        ]
+                    },
+
+                    store: 'librariesInRequestStore',
+
+                    bbar: [
                         {
-                            xtype: 'label',
-                            text: 'Researcher:',
-                            style: {
-                                // color: '#cecece',
-                                fontWeight: 400
-                            }
+                            text: 'Load from File',
+                            itemId: 'loadFromFileBtn',
+                            disabled: true
                         },
+                        '->',
                         {
-                            xtype: 'grid',
-                            id: 'researchersInRequestWindow',
-                            width: 245,
-                            height: 242,
-                            padding: '15px 15px 15px 0',
-
-                            columns: {
-                                items: [
-                                    { text: 'First name', dataIndex: 'firstName', flex: 1 },
-                                    { text: 'Last name', dataIndex: 'lastName', flex: 1 }
-                                ]
-                            },
-
-                            tbar: [
-                                {
-                                    xtype: 'textfield',
-                                    itemId: 'searchField',
-                                    emptyText: 'Search',
-                                    width: 212
-                                }
-                            ]
+                            text: 'Add',
+                            itemId: 'addLibraryBtn'
                         }
                     ]
                 }
@@ -113,7 +108,7 @@ Ext.define('MainHub.view.tables.requests.RequestWindow', {
         }
     ],
 
-    bbar: [
+    buttons: [
         '->',
         {
             xtype: 'button',

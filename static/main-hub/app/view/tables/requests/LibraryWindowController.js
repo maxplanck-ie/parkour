@@ -1,6 +1,6 @@
-Ext.define('MainHub.view.tables.libraries.LibraryWindowController', {
+Ext.define('MainHub.view.tables.requests.LibraryWindowController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.tables-libraries-librarywindow',
+    alias: 'controller.tables-requests-librarywindow',
 
     config: {
         control: {

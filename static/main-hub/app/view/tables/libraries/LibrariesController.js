@@ -8,10 +8,6 @@ Ext.define('MainHub.view.tables.libraries.LibrariesController', {
                 boxready: 'onLibrariesTableBoxready',
                 refresh: 'onLibrariesTableRefresh',
                 itemcontextmenu: 'onLibrariesTableItemContextMenu'
-            },
-            
-            '#addLibraryBtn': {
-                click: 'onAddLibraryBtnClick'
             }
         }
     },
@@ -26,10 +22,6 @@ Ext.define('MainHub.view.tables.libraries.LibrariesController', {
         grid.getStore().removeAll();
         grid.getStore().reload();
     },
-    
-    onAddLibraryBtnClick: function(btn) {
-        Ext.create('library_wnd', {title: 'Add Library/Sample', mode: 'add'}).show();
-    },
 
     onLibrariesTableItemContextMenu: function(grid, record, item, index, e) {
         var me = this;
@@ -41,7 +33,7 @@ Ext.define('MainHub.view.tables.libraries.LibrariesController', {
                     text: 'Edit',
                     iconCls: 'x-fa fa-pencil',
                     handler: function() {
-                        me.editRecord(record)
+                        me.editRecord(record);
                     }
                 },
                 {
@@ -93,15 +85,15 @@ Ext.define('MainHub.view.tables.libraries.LibrariesController', {
 
                 } else {
                     Ext.ux.ToastMessage(obj.error, 'error');
-                    console.log('[ERROR]: ' + url.replace('/', '()'));
-                    console.log(response);
+                    console.error('[ERROR]: ' + url.replace('/', '()'));
+                    console.error(response);
                 }
             },
 
             failure: function(response) {
                 Ext.ux.ToastMessage(response.statusText, 'error');
-                console.log('[ERROR]: ' + + url.replace('/', '()'));
-                console.log(response);
+                console.error('[ERROR]: ' + url.replace('/', '()'));
+                console.error(response);
             }
         });
     }
