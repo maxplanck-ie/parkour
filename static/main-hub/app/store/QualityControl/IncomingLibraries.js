@@ -8,6 +8,9 @@ Ext.define('MainHub.store.QualityControl.IncomingLibraries', {
 
     model: 'MainHub.model.QualityControl.IncomingLibraries',
 
+    groupField: 'requestName',
+    groupDir: 'DESC',
+
     proxy: {
         type: 'ajax',
         url: 'get_libraries/',

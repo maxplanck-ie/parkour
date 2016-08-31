@@ -4,6 +4,7 @@ from django.views.generic import View
 from django.core.urlresolvers import resolve
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from request.models import Request
 from library.models import LibraryProtocol, LibraryType, Organism, IndexType, \
     IndexI7, IndexI5, ConcentrationMethod, SequencingRunCondition, Library, \
     NucleicAcidType, SampleProtocol, RNAQuality, Sample, FileSample, \
@@ -12,7 +13,7 @@ from common.utils import get_simple_field_dict
 
 import json
 import logging
-from datetime import datetime
+# from datetime import datetime
 
 logger = logging.getLogger('db')
 
@@ -174,125 +175,139 @@ class LibraryView(View):
     @staticmethod
     def get_libraries():
         """ Get the list of all libraries and samples """
+        data = []
 
-        libraries = Library.objects.select_related()
-        libraries_data = [
-            {
-                'libraryId': library.id,
-                'name': library.name,
-                'recordType': 'L',
-                'date': library.date.strftime('%d.%m.%Y'),
-                'libraryProtocol': library.library_protocol.name,
-                'libraryProtocolId': library.library_protocol.id,
-                'libraryType': library.library_type.name,
-                'libraryTypeId': library.library_type.id,
-                'enrichmentCycles': library.enrichment_cycles,
-                'organism': library.organism.name,
-                'organismId': library.organism.id,
-                'indexType': library.index_type.name,
-                'indexTypeId': library.index_type.id,
-                'indexReads': library.index_reads,
-                'indexI7': library.index_i7,
-                'indexI5': library.index_i5,
-                'equalRepresentation':
-                    str(library.equal_representation_nucleotides),
-                'DNADissolvedIn': library.dna_dissolved_in,
-                'concentration': library.concentration,
-                'concentrationMethod':
-                    library.concentration_determined_by.name,
-                'concentrationMethodId':
-                    library.concentration_determined_by.id,
-                'sampleVolume': library.sample_volume,
-                'meanFragmentSize': library.mean_fragment_size,
-                'qPCRResult': library.qpcr_result,
-                'sequencingRunCondition':
-                    library.sequencing_run_condition.name,
-                'sequencingRunConditionId':
-                    library.sequencing_run_condition.id,
-                'sequencingDepth': library.sequencing_depth,
-                'comments': library.comments,
-                'files': [file.id for file in library.files.all()],
-                'dilutionFactor': library.dilution_factor,
-                'concentrationFacility': library.concentration_facility,
-                'concentrationMethodFacility':
-                    library.concentration_determined_by_facility.name
-                    if library.concentration_determined_by_facility is not None
-                    else '',
-                'concentrationMethodFacilityId': 
-                    library.concentration_determined_by_facility.id
-                    if library.concentration_determined_by_facility is not None
-                    else '',
-                'dateFacility': library.date_facility.strftime('%d.%m.%Y')
-                    if library.date_facility is not None else '',
-                'sampleVolumeFacility': library.sample_volume_facility,
-                'amountFacility': library.amount_facility,
-                'sizeDistributionFacility': library.size_distribution_facility,
-                'commentsFacility': library.comments_facility,
-                'qcResult': library.qc_result,
-                'qPCRResultFacility': library.qpcr_result_facility,
-            }
-            for library in libraries
-        ]
+        requests = Request.objects.select_related()
+        for request in requests:
+            libraries_data = [
+                {
+                    'requestName': request.name,
+                    'requestId': request.id,
+                    'libraryId': library.id,
+                    'name': library.name,
+                    'recordType': 'L',
+                    'date': library.date.strftime('%d.%m.%Y'),
+                    'libraryProtocol': library.library_protocol.name,
+                    'libraryProtocolId': library.library_protocol.id,
+                    'libraryType': library.library_type.name,
+                    'libraryTypeId': library.library_type.id,
+                    'enrichmentCycles': library.enrichment_cycles,
+                    'organism': library.organism.name,
+                    'organismId': library.organism.id,
+                    'indexType': library.index_type.name,
+                    'indexTypeId': library.index_type.id,
+                    'indexReads': library.index_reads,
+                    'indexI7': library.index_i7,
+                    'indexI5': library.index_i5,
+                    'equalRepresentation':
+                        str(library.equal_representation_nucleotides),
+                    'DNADissolvedIn': library.dna_dissolved_in,
+                    'concentration': library.concentration,
+                    'concentrationMethod':
+                        library.concentration_determined_by.name,
+                    'concentrationMethodId':
+                        library.concentration_determined_by.id,
+                    'sampleVolume': library.sample_volume,
+                    'meanFragmentSize': library.mean_fragment_size,
+                    'qPCRResult': library.qpcr_result,
+                    'sequencingRunCondition':
+                        library.sequencing_run_condition.name,
+                    'sequencingRunConditionId':
+                        library.sequencing_run_condition.id,
+                    'sequencingDepth': library.sequencing_depth,
+                    'comments': library.comments,
+                    'files': [file.id for file in library.files.all()],
+                    'dilutionFactor': library.dilution_factor,
+                    'concentrationFacility': library.concentration_facility,
+                    'concentrationMethodFacility':
+                        library.concentration_determined_by_facility.name
+                        if library.concentration_determined_by_facility is \
+                        not None else '',
+                    'concentrationMethodFacilityId':
+                        library.concentration_determined_by_facility.id
+                        if library.concentration_determined_by_facility is \
+                        not None else '',
+                    'dateFacility': library.date_facility.strftime('%d.%m.%Y')
+                        if library.date_facility is not None else '',
+                    'sampleVolumeFacility': library.sample_volume_facility,
+                    'amountFacility': library.amount_facility,
+                    'sizeDistributionFacility':
+                        library.size_distribution_facility,
+                    'commentsFacility': library.comments_facility,
+                    'qcResult': library.qc_result,
+                    'qPCRResultFacility': library.qpcr_result_facility,
+                }
+                for library in request.libraries.all()
+            ]
 
-        samples = Sample.objects.select_related()
-        samples_data = [
-            {
-                'sampleId': sample.id,
-                'name': sample.name,
-                'recordType': 'S',
-                'date': sample.date.strftime('%d.%m.%Y'),
-                'nucleicAcidType': sample.nucleic_acid_type.name,
-                'nucleicAcidTypeId': sample.nucleic_acid_type_id,
-                'libraryProtocol': sample.sample_protocol.name,
-                'libraryProtocolId': sample.sample_protocol_id,
-                'amplifiedCycles': sample.amplified_cycles,
-                'organism': sample.organism.name,
-                'organismId': sample.organism.id,
-                'equalRepresentation':
-                    str(sample.equal_representation_nucleotides),
-                'DNADissolvedIn': sample.dna_dissolved_in,
-                'concentration': sample.concentration,
-                'concentrationMethod': sample.concentration_determined_by.name,
-                'concentrationMethodId': sample.concentration_determined_by.id,
-                'sampleVolume': sample.sample_volume,
-                'sequencingRunCondition': sample.sequencing_run_condition.name,
-                'sequencingRunConditionId': sample.sequencing_run_condition.id,
-                'sequencingDepth': sample.sequencing_depth,
-                'DNaseTreatment': str(sample.dnase_treatment),
-                'rnaQuality': sample.rna_quality.name
-                    if sample.rna_quality else '',
-                'rnaQualityId': sample.rna_quality_id
-                    if sample.rna_quality else '',
-                'rnaSpikeIn': str(sample.rna_spike_in),
-                'samplePreparationProtocol':
-                    sample.sample_preparation_protocol,
-                'requestedSampleTreatment': sample.requested_sample_treatment,
-                'comments': sample.comments,
-                'files': [file.id for file in sample.files.all()],
-                'dilutionFactor': sample.dilution_factor,
-                'concentrationFacility': sample.concentration_facility,
-                'concentrationMethodFacility':
-                    sample.concentration_determined_by_facility.name
-                    if sample.concentration_determined_by_facility is not None
-                    else '',
-                'concentrationMethodFacilityId': 
-                    sample.concentration_determined_by_facility.id
-                    if sample.concentration_determined_by_facility is not None
-                    else '',
-                'dateFacility': sample.date_facility.strftime('%d.%m.%Y')
-                    if sample.date_facility is not None else '',
-                'sampleVolumeFacility': sample.sample_volume_facility,
-                'amountFacility': sample.amount_facility,
-                'sizeDistributionFacility': sample.size_distribution_facility,
-                'commentsFacility': sample.comments_facility,
-                'qcResult': sample.qc_result,
-                'rnaQualityFacility': sample.rna_quality_facility,
-            }
-            for sample in samples
-        ]
+            samples_data = [
+                {
+                    'requestName': request.name,
+                    'requestId': request.id,
+                    'sampleId': sample.id,
+                    'name': sample.name,
+                    'recordType': 'S',
+                    'date': sample.date.strftime('%d.%m.%Y'),
+                    'nucleicAcidType': sample.nucleic_acid_type.name,
+                    'nucleicAcidTypeId': sample.nucleic_acid_type_id,
+                    'libraryProtocol': sample.sample_protocol.name,
+                    'libraryProtocolId': sample.sample_protocol_id,
+                    'amplifiedCycles': sample.amplified_cycles,
+                    'organism': sample.organism.name,
+                    'organismId': sample.organism.id,
+                    'equalRepresentation':
+                        str(sample.equal_representation_nucleotides),
+                    'DNADissolvedIn': sample.dna_dissolved_in,
+                    'concentration': sample.concentration,
+                    'concentrationMethod':
+                        sample.concentration_determined_by.name,
+                    'concentrationMethodId':
+                        sample.concentration_determined_by.id,
+                    'sampleVolume': sample.sample_volume,
+                    'sequencingRunCondition':
+                        sample.sequencing_run_condition.name,
+                    'sequencingRunConditionId':
+                        sample.sequencing_run_condition.id,
+                    'sequencingDepth': sample.sequencing_depth,
+                    'DNaseTreatment': str(sample.dnase_treatment),
+                    'rnaQuality': sample.rna_quality.name
+                        if sample.rna_quality else '',
+                    'rnaQualityId': sample.rna_quality_id
+                        if sample.rna_quality else '',
+                    'rnaSpikeIn': str(sample.rna_spike_in),
+                    'samplePreparationProtocol':
+                        sample.sample_preparation_protocol,
+                    'requestedSampleTreatment':
+                        sample.requested_sample_treatment,
+                    'comments': sample.comments,
+                    'files': [file.id for file in sample.files.all()],
+                    'dilutionFactor': sample.dilution_factor,
+                    'concentrationFacility': sample.concentration_facility,
+                    'concentrationMethodFacility':
+                        sample.concentration_determined_by_facility.name
+                        if sample.concentration_determined_by_facility is \
+                        not None else '',
+                    'concentrationMethodFacilityId':
+                        sample.concentration_determined_by_facility.id
+                        if sample.concentration_determined_by_facility is \
+                        not None else '',
+                    'dateFacility': sample.date_facility.strftime('%d.%m.%Y')
+                        if sample.date_facility is not None else '',
+                    'sampleVolumeFacility': sample.sample_volume_facility,
+                    'amountFacility': sample.amount_facility,
+                    'sizeDistributionFacility':
+                        sample.size_distribution_facility,
+                    'commentsFacility': sample.comments_facility,
+                    'qcResult': sample.qc_result,
+                    'rnaQualityFacility': sample.rna_quality_facility,
+                }
+                for sample in request.samples.all()
+            ]
+
+            data += libraries_data + samples_data
 
         data = sorted(
-            libraries_data + samples_data,
+            data,
             key=lambda x: (x['date'], x['recordType'], x['name']),
             reverse=True,
         )
@@ -536,8 +551,9 @@ class SampleView(View):
         concentration_determined_by_id = \
             self.request.POST.get('concentration_determined_by_id')
         sample_volume = self.request.POST.get('sample_volume')
-        sample_amplified_cycles = \
-            int(self.request.POST.get('sample_amplified_cycles'))
+        sample_amplified_cycles = None \
+            if self.request.POST.get('sample_amplified_cycles') == '' \
+            else int(self.request.POST.get('sample_amplified_cycles'))
         dnase_treatment = None \
             if self.request.POST.get('dnase_treatment') == '' \
             else json.loads(self.request.POST.get('dnase_treatment'))
@@ -800,6 +816,9 @@ def qc_incoming_libraries(request):
         logger.debug(error)
 
     return HttpResponse(
-        json.dumps({'success': not error, 'error': error,}),
+        json.dumps({
+            'success': not error,
+            'error': error,
+        }),
         content_type='application/json',
     )

@@ -38,13 +38,13 @@ Ext.define('MainHub.view.QualityControl.IncomingLibraries.IncomingLibraries', {
 
             columns: {
                 items: [
-                    { text: 'Name', dataIndex: 'name', width: 150, locked: true, tdCls: 'userEntry', 
+                    { text: 'Name', dataIndex: 'name', width: 150, tdCls: 'userEntry', 
                       renderer: function(val, meta) {
                         meta.tdStyle = 'font-weight:bold';
                         return val;
                       }
                     },
-                    { text: '', dataIndex: 'recordType', width: 30, locked: true, tdCls: 'userEntry' },
+                    { text: '', dataIndex: 'recordType', width: 30, tdCls: 'userEntry' },
                     { text: 'Nucleic Acid Type', dataIndex: 'nucleicAcidType', flex: 1, tdCls: 'userEntry' },
                     { text: 'Protocol', dataIndex: 'libraryProtocol', flex: 1, tdCls: 'userEntry' },
                     { text: 'Concentration (user) (ng/µl)', dataIndex: 'concentration', flex: 1, tdCls: 'userEntry' },
@@ -134,6 +134,11 @@ Ext.define('MainHub.view.QualityControl.IncomingLibraries.IncomingLibraries', {
                     }
                 ]
             },
+
+            features: [{
+                ftype:'grouping',
+                groupHeaderTpl: '<strong>Request: {name}</strong> (No. of Libraries/Samples: {rows.length})'
+            }],
 
             plugins: [
                 {

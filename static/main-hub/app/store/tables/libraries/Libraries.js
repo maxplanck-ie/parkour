@@ -8,6 +8,9 @@ Ext.define('MainHub.store.tables.libraries.Libraries', {
 
     model: 'MainHub.model.tables.libraries.Library',
 
+    groupField: 'requestName',
+    groupDir: 'DESC',
+
     proxy: {
         type: 'ajax',
         url: 'get_libraries/',

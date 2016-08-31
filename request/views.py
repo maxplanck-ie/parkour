@@ -15,26 +15,42 @@ def get_requests(request):
     data = []
 
     try:
-        requests = Request.objects.all()
-        data = [{
-            'requestId': req.id,
-            'status': req.status,
-            'name': req.name,
-            'projectType': req.project_type,
-            'dateCreated': req.date_created.strftime('%d.%m.%Y'),
-            'description': req.description,
-            'researcherId': req.researcher_id.id,
-            'researcher': '{0} {1}'.format(req.researcher_id.first_name, req.researcher_id.last_name),
-            'termsOfUseAccept': req.terms_of_use_accept
-                } for req in requests]
+        requests = Request.objects.select_related()
+        data = [
+            {
+                'requestId': req.id,
+                'status': req.status,
+                'name': req.name,
+                'projectType': req.project_type,
+                'dateCreated': req.date_created.strftime('%d.%m.%Y'),
+                'description': req.description,
+                'researcherId': req.researcher_id.id,
+                'researcher': '{0} {1}'.format(
+                    req.researcher_id.first_name,
+                    req.researcher_id.last_name,
+                ),
+                'termsOfUseAccept': req.terms_of_use_accept
+            }
+            for req in requests
+        ]
+
     except Exception as e:
         error = str(e)
         print('[ERROR]: get_requests(): %s' % error)
         logger.debug(error)
 
-    return HttpResponse(json.dumps({'success': not error, 'error': error,
-                                    'data': sorted(data, key=lambda x: x['requestId'])}),
-                        content_type='application/json')
+    return HttpResponse(
+        json.dumps({
+            'success': not error,
+            'error': error,
+            'data': sorted(
+                data,
+                key=lambda x: x['requestId'],
+                reverse=True,
+            )
+        }),
+        content_type='application/json',
+    )
 
 
 def add_request(request):
@@ -50,16 +66,29 @@ def add_request(request):
     researcher_id = int(request.POST.get('researcher_id', 0))
 
     try:
-        req = Request(status=status, name=name, project_type=project_type, date_created=date_created,
-                      description=description, terms_of_use_accept=terms_of_use_accept,
-                      researcher_id=Researcher.objects.get(id=researcher_id))
+        req = Request(
+            status=status,
+            name=name,
+            project_type=project_type,
+            date_created=date_created,
+            description=description,
+            terms_of_use_accept=terms_of_use_accept,
+            researcher_id=Researcher.objects.get(id=researcher_id),
+        )
         req.save()
+
     except Exception as e:
         error = str(e)
         print('[ERROR]: add_request(): %s' % error)
         logger.debug(error)
 
-    return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')
+    return HttpResponse(
+        json.dumps({
+            'success': not error,
+            'error': error,
+        }),
+        content_type='application/json',
+    )
 
 
 def edit_request(request):
@@ -83,25 +112,38 @@ def edit_request(request):
         req.terms_of_use_accept = terms_of_use_accept
         req.researcher_id = Researcher.objects.get(id=researcher_id)
         req.save()
+
     except Exception as e:
         error = str(e)
         print('[ERROR]: edit_request(): %s' % error)
         logger.debug(error)
 
-    return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')
+    return HttpResponse(
+        json.dumps({
+            'success': not error,
+            'error': error,
+        }),
+        content_type='application/json',
+    )
 
 
 def delete_request(request):
     error = str()
 
-    request_id = int(request.POST.get('request_id', 0))
-
     try:
+        request_id = int(request.POST.get('request_id'))
         req = Request.objects.get(id=request_id)
         req.delete()
+
     except Exception as e:
         error = str(e)
         print('[ERROR]: delete_request(): %s' % error)
         logger.debug(error)
 
-    return HttpResponse(json.dumps({'success': not error, 'error': error}), content_type='application/json')
+    return HttpResponse(
+        json.dumps({
+            'success': not error,
+            'error': error,
+        }),
+        content_type='application/json',
+    )

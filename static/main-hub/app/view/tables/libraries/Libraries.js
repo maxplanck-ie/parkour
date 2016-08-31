@@ -50,11 +50,11 @@ Ext.define('MainHub.view.tables.libraries.Libraries', {
 
             columns: {
                 items: [
-                    { text: 'Name', dataIndex: 'name', width: 150, locked: true, renderer: function(val, meta) {
+                    { text: 'Name', dataIndex: 'name', width: 150, renderer: function(val, meta) {
                         meta.tdStyle = 'font-weight:bold';
                         return val;
                     } },
-                    { text: '', dataIndex: 'recordType', width: 30, locked: true },
+                    { text: '', dataIndex: 'recordType', width: 30 },
                     { text: 'Date', dataIndex: 'date' },
                     { text: 'Nucleic Acid Type', dataIndex: 'nucleicAcidType' },
                     { text: 'Protocol', dataIndex: 'libraryProtocol' },
@@ -102,13 +102,16 @@ Ext.define('MainHub.view.tables.libraries.Libraries', {
                 ]
             },
 
-            plugins: [
-                {
-                    ptype: 'bufferedrenderer',
-                    trailingBufferZone: 100,
-                    leadingBufferZone: 100
-                }
-            ]
+            features: [{
+                ftype:'grouping',
+                groupHeaderTpl: '<strong>Request: {name}</strong> (No. of Libraries/Samples: {rows.length})'
+            }],
+
+            plugins: [{
+                ptype: 'bufferedrenderer',
+                trailingBufferZone: 100,
+                leadingBufferZone: 100
+            }]
         }
     ]
 });

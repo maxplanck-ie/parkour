@@ -459,8 +459,8 @@ Ext.define('MainHub.view.tables.libraries.LibraryWindow', {
                             {
                                 xtype: 'numberfield',
                                 name: 'sampleAmplifiedCycles',
-                                fieldLabel: 'Sample amplified (cyles) <sup><strong><span class="field-tooltip" tooltip-text="If sample has been already amplified, indicate the number of cycles">[?]</span></strong></sup>',
-                                emptyText: 'Sample amplified (cyles)',
+                                fieldLabel: 'Sample amplified (cycles) <sup><strong><span class="field-tooltip" tooltip-text="If sample has been already amplified, indicate the number of cycles">[?]</span></strong></sup>',
+                                emptyText: 'Sample amplified (cycles)',
                                 allowDecimals: false,
                                 minValue: 0,
                                 maxValue: 99,
