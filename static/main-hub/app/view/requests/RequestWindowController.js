@@ -61,10 +61,18 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
     onAddRequestWndBtnClick: function(btn) {
         var form = Ext.getCmp('requestForm'),
             wnd = btn.up('request_wnd'),
-            grid = Ext.getCmp('researchersInRequestWindow');
+            records = Ext.getCmp('librariesInRequestTable').getStore().data.items;
 
-        if (form.isValid()) {
+        if (form.isValid() && records.length > 0) {
             var data = form.getForm().getFieldValues();
+
+            var libraries = records.filter(function(item) {
+                return item.get('recordType') === 'L';
+            });
+
+            var samples = records.filter(function(item) {
+                return item.get('recordType') === 'S';
+            });
 
             wnd.setLoading('Adding...');
             Ext.Ajax.request({
@@ -78,15 +86,21 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                     'project_type': data.projectType,
                     'description': data.description,
                     'terms_of_use_accept': data.termsOfUseAccept,
-                    'researcher_id': 1     // temporarily
+                    'researcher_id': 1,     // temporarily
+                    'libraries': Ext.JSON.encode(Ext.Array.pluck(Ext.Array.pluck(libraries, 'data'), 'libraryId')),
+                    'samples': Ext.JSON.encode(Ext.Array.pluck(Ext.Array.pluck(samples, 'data'), 'sampleId'))
                 },
 
                 success: function (response) {
                     var obj = Ext.JSON.decode(response.responseText);
 
                     if (obj.success) {
-                        var grid = Ext.getCmp('requestsTable');
-                        grid.fireEvent('refresh', grid);
+                        var requestsGrid = Ext.getCmp('requestsTable'),
+                            librariesGrid = Ext.getCmp('librariesTable');
+                        requestsGrid.fireEvent('refresh', requestsGrid);
+                        if (typeof librariesGrid != 'undefined') {
+                            librariesGrid.fireEvent('refresh', librariesGrid);
+                        }
                         Ext.ux.ToastMessage('Record has been added!');
                     } else {
                         Ext.ux.ToastMessage(obj.error, 'error');
@@ -103,6 +117,8 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                     wnd.close();
                 }
             });
+        } else if (records.length === 0) {
+            Ext.ux.ToastMessage('You did not add any Libraries/Samples', 'warning');
         } else {
             Ext.ux.ToastMessage('Check the form', 'warning');
         }
@@ -135,8 +151,12 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                     var obj = Ext.JSON.decode(response.responseText);
 
                     if (obj.success) {
-                        var grid = Ext.getCmp('requestsTable');
-                        grid.fireEvent('refresh', grid);
+                        var requestsGrid = Ext.getCmp('requestsTable'),
+                            librariesGrid = Ext.getCmp('librariesTable');
+                        requestsGrid.fireEvent('refresh', requestsGrid);
+                        if (typeof librariesGrid != 'undefined') {
+                            librariesGrid.fireEvent('refresh', librariesGrid);
+                        }
                         Ext.ux.ToastMessage('Record has been updated!');
                     } else {
                         Ext.ux.ToastMessage(obj.error, 'error');

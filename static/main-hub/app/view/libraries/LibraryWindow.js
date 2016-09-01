@@ -603,7 +603,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                 xtype: 'button',
                 itemId: 'addWndBtn',
                 id: 'addWndBtn',
-                text: 'Add',
+                text: 'Save and Close',
                 hidden: true
             }
         ],

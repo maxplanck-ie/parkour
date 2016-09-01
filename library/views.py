@@ -518,24 +518,30 @@ class SampleView(View):
     def post(self, request):
         """ Save Sample """
         error = str()
+        data = None
 
         try:
-            getattr(self, resolve(request.path).url_name)()
+            data = getattr(self, resolve(request.path).url_name)()
         except Exception as e:
             error = str(e)
             print('[ERROR]: %s' % error)
             logger.debug(error)
 
+        result = {
+            'success': not error,
+            'error': error,
+        }
+        if data:
+            result.update({'data': data})
+
         return HttpResponse(
-            json.dumps({
-                'success': not error,
-                'error': error,
-            }),
+            json.dumps(result),
             content_type='application/json',
         )
 
     def save_sample(self):
         """ Add new Sample or update existing one """
+        data = {}
         mode = self.request.POST.get('mode')
         name = self.request.POST.get('name')
         sample_id = self.request.POST.get('sample_id')
@@ -594,6 +600,11 @@ class SampleView(View):
                 comments=comments,
             )
             smpl.save()
+            data = [{
+                'name': smpl.name,
+                'recordType': 'S',
+                'sampleId': smpl.id
+            }]
             smpl.files.add(*files)
 
         elif mode == 'edit':
@@ -629,6 +640,8 @@ class SampleView(View):
             for file in files_to_delete:
                 file.delete()
 
+        return data
+
     def delete_sample(self):
         """ Delete Sample with a given id """
         record_id = self.request.POST.get('record_id')
@@ -636,6 +649,7 @@ class SampleView(View):
         for file in record.files.all():
             file.delete()
         record.delete()
+        return None
 
 
 @csrf_exempt

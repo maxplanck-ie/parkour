@@ -23,9 +23,9 @@ class FormFieldsAdmin(admin.ModelAdmin):
 
 @admin.register(Library)
 class LibraryAdmin(admin.ModelAdmin):
-    exclude = ('files',)
+    exclude = ('files', 'is_in_request',)
 
 
 @admin.register(Sample)
 class SampleAdmin(admin.ModelAdmin):
-    exclude = ('files',)
+    exclude = ('files', 'is_in_request',)

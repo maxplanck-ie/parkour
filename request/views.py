@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from request.models import Request
 from researcher.models import Researcher
-# from library.models import Library, Sample
+from library.models import Library, Sample
 
 import json
 from datetime import datetime
@@ -58,15 +58,19 @@ def add_request(request):
     """ Add new request """
     error = str()
 
-    status = request.POST.get('status', '')
-    name = request.POST.get('name', '')
-    project_type = request.POST.get('project_type', '')
-    date_created = datetime.now()
-    description = request.POST.get('description', '')
-    terms_of_use_accept = bool(request.POST.get('terms_of_use_accept', ''))
-    researcher_id = int(request.POST.get('researcher_id', 0))
-
     try:
+        status = request.POST.get('status')
+        name = request.POST.get('name')
+        project_type = request.POST.get('project_type')
+        date_created = datetime.now()
+        description = request.POST.get('description')
+        terms_of_use_accept = bool(request.POST.get('terms_of_use_accept'))
+        researcher_id = int(request.POST.get('researcher_id'))
+        libraries = json.loads(request.POST.get('libraries'))
+        samples = json.loads(request.POST.get('samples'))
+
+        print(samples)
+
         req = Request(
             status=status,
             name=name,
@@ -77,6 +81,18 @@ def add_request(request):
             researcher_id=Researcher.objects.get(id=researcher_id),
         )
         req.save()
+
+        request_libraries = Library.objects.filter(id__in=libraries)
+        for library in request_libraries:
+            library.is_in_request = True
+            library.save()
+        req.libraries.add(*libraries)
+
+        request_samples = Sample.objects.filter(id__in=samples)
+        for sample in request_samples:
+            sample.is_in_request = True
+            sample.save()
+        req.samples.add(*samples)
 
     except Exception as e:
         error = str(e)

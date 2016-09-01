@@ -536,13 +536,12 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                         var obj = Ext.JSON.decode(response.responseText);
 
                         if (obj.success) {
-                            var grid = Ext.getCmp('librariesTable');
-                            grid.fireEvent('refresh', grid);
-
                             if (wnd.mode == 'add') {
                                 Ext.ux.ToastMessage('Library has been added!');
                             } else {
                                 Ext.ux.ToastMessage('Library has been updated!');
+                                var grid = Ext.getCmp('librariesTable');
+                                grid.fireEvent('refresh', grid);
                             }
 
                             // Preserve all fields except for Name, if 'Save and Add another' button was pressed
@@ -558,16 +557,16 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                             } else {
                                 Ext.ux.ToastMessage(obj.error, 'error');
                             }
-                            console.log('[ERROR]: save_library(): ' + obj.error);
-                            console.log(response);
+                            console.error('[ERROR]: save_library(): ' + obj.error);
+                            console.error(response);
                             wnd.setLoading(false);
                         }
                     },
 
                     failure: function(response) {
                         Ext.ux.ToastMessage(response.statusText, 'error');
-                        console.log('[ERROR]: save_library()');
-                        console.log(response);
+                        console.error('[ERROR]: save_library()');
+                        console.error(response);
                         wnd.close();
                     }
                 });
@@ -613,16 +612,17 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                     },
 
                     success: function (response) {
-                        var obj = Ext.JSON.decode(response.responseText);
+                        var obj = Ext.JSON.decode(response.responseText), grid = null;
 
                         if (obj.success) {
-                            var grid = Ext.getCmp('librariesTable');
-                            grid.fireEvent('refresh', grid);
-
                             if (wnd.mode == 'add') {
                                 Ext.ux.ToastMessage('Sample has been added!');
+                                grid = Ext.getCmp('librariesInRequestTable');
+                                grid.getStore().add(obj.data);
                             } else {
                                 Ext.ux.ToastMessage('Sample has been updated!');
+                                grid = Ext.getCmp('librariesTable');
+                                grid.fireEvent('refresh', grid);
                             }
 
                             // Preserve all fields except for Name and Files, if 'Save and Add another' button was pressed
@@ -639,16 +639,16 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                             } else {
                                 Ext.ux.ToastMessage(obj.error, 'error');
                             }
-                            console.log('[ERROR]: save_sample(): ' + obj.error);
-                            console.log(response);
+                            console.error('[ERROR]: save_sample/: ' + obj.error);
+                            console.error(response);
                             wnd.setLoading(false);
                         }
                     },
 
                     failure: function (response) {
                         Ext.ux.ToastMessage(response.statusText, 'error');
-                        console.log('[ERROR]: save_sample()');
-                        console.log(response);
+                        console.error('[ERROR]: save_sample/');
+                        console.error(response);
                         wnd.close();
                     }
                 });

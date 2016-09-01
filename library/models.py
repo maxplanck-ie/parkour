@@ -150,6 +150,7 @@ class LibrarySampleAbstract(models.Model):
     )
     sequencing_depth = models.IntegerField('Sequencing Depth')
     comments = models.TextField('Comments', null=True, blank=True)
+    is_in_request = models.BooleanField(default=False)
 
     # Quality Control
     dilution_factor = models.IntegerField(
