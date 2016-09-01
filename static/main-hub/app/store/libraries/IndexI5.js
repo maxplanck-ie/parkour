@@ -1,16 +1,16 @@
-Ext.define('MainHub.store.Requests', {
+Ext.define('MainHub.store.libraries.IndexI5', {
     extend: 'Ext.data.Store',
-    storeId: 'requestsStore',
+    storeId: 'indexI5Store',
 
     requires: [
-        'MainHub.model.requests.Request'
+        'MainHub.model.libraries.Index'
     ],
 
-    model: 'MainHub.model.requests.Request',
+    model: 'MainHub.model.libraries.Index',
 
     proxy: {
         type: 'ajax',
-        url: 'get_requests/',
+        url: 'get_index_i5/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"
@@ -22,14 +22,14 @@ Ext.define('MainHub.store.Requests', {
             successProperty: 'success'
         }
     },
-    
+
     listeners: {
         load: function(store, records, success, operation) {
             if (!success) {
                 var response = operation._response,
                     obj = Ext.JSON.decode(response.responseText);
-                console.error('[ERROR]: get_requests/: ' + obj.error);
-                console.error(response);
+                console.log('[ERROR]: get_index_i5(): ' + obj.error);
+                console.log(response);
             }
         }
     }

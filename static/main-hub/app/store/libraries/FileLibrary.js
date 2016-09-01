@@ -1,16 +1,16 @@
-Ext.define('MainHub.store.Requests', {
+Ext.define('MainHub.store.libraries.FileLibrary', {
     extend: 'Ext.data.Store',
-    storeId: 'requestsStore',
+    storeId: 'fileLibraryStore',
 
     requires: [
-        'MainHub.model.requests.Request'
+        'MainHub.model.libraries.FileLibrarySample'
     ],
 
-    model: 'MainHub.model.requests.Request',
+    model: 'MainHub.model.libraries.FileLibrarySample',
 
     proxy: {
         type: 'ajax',
-        url: 'get_requests/',
+        url: 'get_file_library/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"
@@ -22,14 +22,14 @@ Ext.define('MainHub.store.Requests', {
             successProperty: 'success'
         }
     },
-    
+
     listeners: {
         load: function(store, records, success, operation) {
             if (!success) {
                 var response = operation._response,
                     obj = Ext.JSON.decode(response.responseText);
-                console.error('[ERROR]: get_requests/: ' + obj.error);
-                console.error(response);
+                console.log('[ERROR]: get_file_library(): ' + obj.error);
+                console.log(response);
             }
         }
     }

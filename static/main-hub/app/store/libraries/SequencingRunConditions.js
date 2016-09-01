@@ -1,16 +1,16 @@
-Ext.define('MainHub.store.Requests', {
+Ext.define('MainHub.store.libraries.SequencingRunConditions', {
     extend: 'Ext.data.Store',
-    storeId: 'requestsStore',
+    storeId: 'sequencingRunConditionsStore',
 
     requires: [
-        'MainHub.model.requests.Request'
+        'MainHub.model.libraries.LibraryField'
     ],
 
-    model: 'MainHub.model.requests.Request',
+    model: 'MainHub.model.libraries.LibraryField',
 
     proxy: {
         type: 'ajax',
-        url: 'get_requests/',
+        url: 'get_sequencing_run_conditions/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"
@@ -22,13 +22,13 @@ Ext.define('MainHub.store.Requests', {
             successProperty: 'success'
         }
     },
-    
+
     listeners: {
         load: function(store, records, success, operation) {
             if (!success) {
                 var response = operation._response,
                     obj = Ext.JSON.decode(response.responseText);
-                console.error('[ERROR]: get_requests/: ' + obj.error);
+                console.errorerror('[ERROR]: get_sequencing_run_conditions/: ' + obj.error);
                 console.error(response);
             }
         }

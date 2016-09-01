@@ -1,16 +1,16 @@
-Ext.define('MainHub.store.Requests', {
+Ext.define('MainHub.store.researchers.Researchers', {
     extend: 'Ext.data.Store',
-    storeId: 'requestsStore',
+    storeId: 'researchersStore',
 
     requires: [
-        'MainHub.model.requests.Request'
+        'MainHub.model.researchers.Researcher'
     ],
 
-    model: 'MainHub.model.requests.Request',
+    model: 'MainHub.model.researchers.Researcher',
 
     proxy: {
         type: 'ajax',
-        url: 'get_requests/',
+        url: 'get_researchers/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"
@@ -22,13 +22,13 @@ Ext.define('MainHub.store.Requests', {
             successProperty: 'success'
         }
     },
-    
+
     listeners: {
         load: function(store, records, success, operation) {
             if (!success) {
                 var response = operation._response,
                     obj = Ext.JSON.decode(response.responseText);
-                console.error('[ERROR]: get_requests/: ' + obj.error);
+                console.error('[ERROR]: get_researchers/: ' + obj.error);
                 console.error(response);
             }
         }

@@ -24,7 +24,7 @@ Ext.define('MainHub.view.startpage.StartPage', {
             style: {
                 border: '1px solid #ccc'
             }
-        },
+        }
         // {
         //     xtype: 'box',
         //     html: '<h1>Box 2</h1>',

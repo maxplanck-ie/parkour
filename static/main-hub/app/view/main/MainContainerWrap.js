@@ -2,9 +2,7 @@ Ext.define('MainHub.view.main.MainContainerWrap', {
     extend: 'Ext.container.Container',
     xtype: 'maincontainerwrap',
 
-    requires : [
-        'Ext.layout.container.HBox'
-    ],
+    requires : [],
 
     scrollable: 'y',
 

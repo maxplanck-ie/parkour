@@ -2,9 +2,7 @@ Ext.define('MainHub.view.reports.BlankReport', {
     extend: 'Ext.container.Container',
     xtype: 'reportblank',
 
-    requires: [
-        'Ext.container.Container'
-    ],
+    requires: [],
 
     anchor : '100% -1',
 

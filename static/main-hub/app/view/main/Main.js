@@ -8,11 +8,10 @@ Ext.define('MainHub.view.main.Main', {
         'MainHub.view.main.MainContainerWrap',
         'MainHub.view.reports.BlankReport',
         'MainHub.view.startpage.StartPage',
-        'MainHub.view.tables.researchers.Researchers',
-        'MainHub.view.tables.requests.Requests',
-        'MainHub.view.tables.libraries.Libraries',
-        'MainHub.view.QualityControl.IncomingLibraries.IncomingLibraries',
-        'MainHub.store.NavigationTree'
+        'MainHub.view.researchers.Researchers',
+        'MainHub.view.requests.Requests',
+        'MainHub.view.libraries.Libraries',
+        'MainHub.view.quality-control.IncomingLibraries'
     ],
 
     controller: 'main',

@@ -1,16 +1,16 @@
-Ext.define('MainHub.store.Requests', {
+Ext.define('MainHub.store.researchers.CostUnits', {
     extend: 'Ext.data.Store',
-    storeId: 'requestsStore',
+    storeId: 'costUnitsStore',
 
     requires: [
-        'MainHub.model.requests.Request'
+        'MainHub.model.researchers.CostUnit'
     ],
 
-    model: 'MainHub.model.requests.Request',
+    model: 'MainHub.model.researchers.CostUnit',
 
     proxy: {
         type: 'ajax',
-        url: 'get_requests/',
+        url: 'get_cost_units/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"
@@ -22,13 +22,13 @@ Ext.define('MainHub.store.Requests', {
             successProperty: 'success'
         }
     },
-    
+
     listeners: {
         load: function(store, records, success, operation) {
             if (!success) {
                 var response = operation._response,
                     obj = Ext.JSON.decode(response.responseText);
-                console.error('[ERROR]: get_requests/: ' + obj.error);
+                console.error('[ERROR]: get_cost_units/: ' + obj.error);
                 console.error(response);
             }
         }

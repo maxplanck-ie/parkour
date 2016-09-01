@@ -164,5 +164,5 @@ Ext.define('Ext.ux.FileGridField', {
 
     getValue: function() {
         return Ext.pluck(this.down('grid').getStore().data.items, 'id');
-    },
+    }
 });
