@@ -226,11 +226,11 @@ class LibraryView(View):
                     'concentrationFacility': library.concentration_facility,
                     'concentrationMethodFacility':
                         library.concentration_determined_by_facility.name
-                        if library.concentration_determined_by_facility is \
+                        if library.concentration_determined_by_facility is
                         not None else '',
                     'concentrationMethodFacilityId':
                         library.concentration_determined_by_facility.id
-                        if library.concentration_determined_by_facility is \
+                        if library.concentration_determined_by_facility is
                         not None else '',
                     'dateFacility': library.date_facility.strftime('%d.%m.%Y')
                         if library.date_facility is not None else '',
@@ -290,11 +290,11 @@ class LibraryView(View):
                     'concentrationFacility': sample.concentration_facility,
                     'concentrationMethodFacility':
                         sample.concentration_determined_by_facility.name
-                        if sample.concentration_determined_by_facility is \
+                        if sample.concentration_determined_by_facility is
                         not None else '',
                     'concentrationMethodFacilityId':
                         sample.concentration_determined_by_facility.id
-                        if sample.concentration_determined_by_facility is \
+                        if sample.concentration_determined_by_facility is
                         not None else '',
                     'dateFacility': sample.date_facility.strftime('%d.%m.%Y')
                         if sample.date_facility is not None else '',
@@ -363,8 +363,8 @@ class LibraryView(View):
                 index_reads=index_reads,
                 index_i7=index_i7,
                 index_i5=index_i5,
-                equal_representation_nucleotides=\
-                    equal_representation_nucleotides,
+                equal_representation_nucleotides=
+                equal_representation_nucleotides,
                 dna_dissolved_in=dna_dissolved_in,
                 concentration=concentration,
                 concentration_determined_by_id=concentration_determined_by,
@@ -597,8 +597,8 @@ class SampleView(View):
                 nucleic_acid_type_id=nucleic_acid_type_id,
                 sample_protocol_id=sample_protocol_id,
                 organism_id=organism_id,
-                equal_representation_nucleotides=\
-                    equal_representation_nucleotides,
+                equal_representation_nucleotides=
+                equal_representation_nucleotides,
                 dna_dissolved_in=dna_dissolved_in,
                 concentration=concentration,
                 concentration_determined_by_id=concentration_determined_by_id,

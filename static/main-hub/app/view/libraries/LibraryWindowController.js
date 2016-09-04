@@ -492,172 +492,127 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
     },
 
     saveLibrary: function(addAnother) {
-        var form = null, data = null, wnd = Ext.getCmp('library_wnd'),
+        var form = null, url = '', data = {}, params = {}, nameFieldName = '', fileStoreName = '', 
+            wnd = Ext.getCmp('library_wnd'), 
             card = Ext.getCmp('librarySamplePanel').getLayout().getActiveItem().id;
         addAnother = addAnother || false;
 
         if (card == 'libraryCard') {
             form = Ext.getCmp('libraryForm');
             data = form.getForm().getFieldValues();
-
-            if (form.isValid()) {
-                wnd.setLoading('Adding...');
-                Ext.Ajax.request({
-                    url: 'save_library/',
-                    timeout: 1000000,
-                    scope: this,
-
-                    params: {
-                        'mode': wnd.mode,
-                        'name': data.name,
-                        'library_id': (typeof wnd.record !== 'undefined') ? wnd.record.data.libraryId : '',
-                        'library_protocol': data.libraryProtocol,
-                        'library_type': data.libraryType,
-                        'enrichment_cycles': data.enrichmentCycles,
-                        'organism': data.organism,
-                        'index_type': data.indexType,
-                        'index_reads': data.indexReads,
-                        'index_i7': data.indexI7,
-                        'index_i5': data.indexI5,
-                        'equal_representation_nucleotides': data.equalRepresentationOfNucleotides,
-                        'dna_dissolved_in': data.DNADissolvedIn,
-                        'concentration': data.concentration,
-                        'concentration_determined_by': data.concentrationDeterminedBy,
-                        'sample_volume': data.sampleVolume,
-                        'mean_fragment_size': data.meanFragmentSize,
-                        'qpcr_result': data.qPCRResult,
-                        'sequencing_run_condition': data.sequencingRunCondition,
-                        'sequencing_depth': data.sequencingDepth,
-                        'comments': data.comments,
-                        'files': Ext.JSON.encode(form.down('filegridfield').getValue())
-                    },
-
-                    success: function (response) {
-                        var obj = Ext.JSON.decode(response.responseText), grid = null;
-
-                        if (obj.success) {
-                            if (wnd.mode == 'add') {
-                                Ext.ux.ToastMessage('Library has been added!');
-                                grid = Ext.getCmp('librariesInRequestTable');
-                                grid.getStore().add(obj.data);
-                            } else {
-                                Ext.ux.ToastMessage('Library has been updated!');
-                                grid = Ext.getCmp('librariesTable');
-                                grid.fireEvent('refresh', grid);
-                            }
-
-                            // Preserve all fields except for Name, if 'Save and Add another' button was pressed
-                            if (addAnother) {
-                                Ext.getCmp('libraryName').reset();
-                                Ext.getStore('fileLibraryStore').removeAll();
-                                wnd.setLoading(false);
-                            } else {
-                                wnd.close();
-                            }
-                        } else {
-                            if (obj.error.indexOf('duplicate key value') > -1) {
-                                Ext.ux.ToastMessage('Record with name "' + data.name + '" already exists. Enter a different name.', 'error');
-                            } else {
-                                Ext.ux.ToastMessage(obj.error, 'error');
-                            }
-                            console.error('[ERROR]: save_library/: ' + obj.error);
-                            console.error(response);
-                            wnd.setLoading(false);
-                        }
-                    },
-
-                    failure: function(response) {
-                        Ext.ux.ToastMessage(response.statusText, 'error');
-                        console.error('[ERROR]: save_library/');
-                        console.error(response);
-                        wnd.close();
-                    }
-                });
-            } else {
-                Ext.ux.ToastMessage('Check the form', 'warning');
-            }
-
-        } else {
+            url = 'save_library/';
+            nameFieldName = 'libraryName';
+            fileStoreName = 'fileLibraryStore';
+            params = {
+                'mode': wnd.mode,
+                'name': data.name,
+                'library_id': (typeof wnd.record !== 'undefined') ? wnd.record.data.libraryId : '',
+                'library_protocol': data.libraryProtocol,
+                'library_type': data.libraryType,
+                'enrichment_cycles': data.enrichmentCycles,
+                'organism': data.organism,
+                'index_type': data.indexType,
+                'index_reads': data.indexReads,
+                'index_i7': data.indexI7,
+                'index_i5': data.indexI5,
+                'equal_representation_nucleotides': data.equalRepresentationOfNucleotides,
+                'dna_dissolved_in': data.DNADissolvedIn,
+                'concentration': data.concentration,
+                'concentration_determined_by': data.concentrationDeterminedBy,
+                'sample_volume': data.sampleVolume,
+                'mean_fragment_size': data.meanFragmentSize,
+                'qpcr_result': data.qPCRResult,
+                'sequencing_run_condition': data.sequencingRunCondition,
+                'sequencing_depth': data.sequencingDepth,
+                'comments': data.comments,
+                'files': Ext.JSON.encode(form.down('filegridfield').getValue())
+            };
+        } 
+        else {
             form = Ext.getCmp('sampleForm');
             data = form.getForm().getFieldValues();
+            url = 'save_sample/';
+            nameFieldName = 'sampleName';
+            fileStoreName = 'fileSampleStore';
+            params = {
+                'mode': wnd.mode,
+                'name': data.name,
+                'sample_id': (typeof wnd.record !== 'undefined') ? wnd.record.data.sampleId : '',
+                'nucleic_acid_type_id': data.nucleicAcidType,
+                'sample_protocol_id': data.sampleProtocol,
+                // 'library_type_id': data.libraryType,
+                'organism_id': data.organism,
+                'equal_representation_nucleotides': data.equalRepresentationOfNucleotides,
+                'dna_dissolved_in': data.DNADissolvedIn,
+                'concentration': data.concentration,
+                'concentration_determined_by_id': data.concentrationDeterminedBy,
+                'sample_volume': data.sampleVolume,
+                'sample_amplified_cycles': data.sampleAmplifiedCycles,
+                'dnase_treatment': data.DNaseTreatment,
+                'rna_quality_id': data.rnaQuality,
+                'rna_spike_in': data.rnaSpikeIn,
+                'sample_preparation_protocol': data.samplePreparationProtocol,
+                'requested_sample_treatment': data.requestedSampleTreatment,
+                'sequencing_run_condition_id': data.sequencingRunCondition,
+                'sequencing_depth': data.sequencingDepth,
+                'comments': data.comments,
+                'files': Ext.JSON.encode(form.down('filegridfield').getValue())
+            };
+        }
+        data = form.getForm().getFieldValues();
 
-            if (form.getForm().isValid()) {
-                wnd.setLoading('Adding...');
+        if (form.isValid()) {
+            wnd.setLoading('Adding...');
+            Ext.Ajax.request({
+                url: url,
+                method: 'POST',
+                timeout: 1000000,
+                scope: this,
+                params: params,
 
-                Ext.Ajax.request({
-                    url: 'save_sample/',
-                    timeout: 1000000,
-                    scope: this,
+                success: function (response) {
+                    var obj = Ext.JSON.decode(response.responseText), grid = null;
 
-                    params: {
-                        'mode': wnd.mode,
-                        'name': data.name,
-                        'sample_id': (typeof wnd.record !== 'undefined') ? wnd.record.data.sampleId : '',
-                        'nucleic_acid_type_id': data.nucleicAcidType,
-                        'sample_protocol_id': data.sampleProtocol,
-                        // 'library_type_id': data.libraryType,
-                        'organism_id': data.organism,
-                        'equal_representation_nucleotides': data.equalRepresentationOfNucleotides,
-                        'dna_dissolved_in': data.DNADissolvedIn,
-                        'concentration': data.concentration,
-                        'concentration_determined_by_id': data.concentrationDeterminedBy,
-                        'sample_volume': data.sampleVolume,
-                        'sample_amplified_cycles': data.sampleAmplifiedCycles,
-                        'dnase_treatment': data.DNaseTreatment,
-                        'rna_quality_id': data.rnaQuality,
-                        'rna_spike_in': data.rnaSpikeIn,
-                        'sample_preparation_protocol': data.samplePreparationProtocol,
-                        'requested_sample_treatment': data.requestedSampleTreatment,
-                        'sequencing_run_condition_id': data.sequencingRunCondition,
-                        'sequencing_depth': data.sequencingDepth,
-                        'comments': data.comments,
-                        'files': Ext.JSON.encode(form.down('filegridfield').getValue())
-                    },
-
-                    success: function (response) {
-                        var obj = Ext.JSON.decode(response.responseText), grid = null;
-
-                        if (obj.success) {
-                            if (wnd.mode == 'add') {
-                                Ext.ux.ToastMessage('Sample has been added!');
-                                grid = Ext.getCmp('librariesInRequestTable');
-                                grid.getStore().add(obj.data);
-                            } else {
-                                Ext.ux.ToastMessage('Sample has been updated!');
-                                grid = Ext.getCmp('librariesTable');
-                                grid.fireEvent('refresh', grid);
-                            }
-
-                            // Preserve all fields except for Name and Files, if 'Save and Add another' button was pressed
-                            if (addAnother) {
-                                Ext.getCmp('sampleName').reset();
-                                Ext.getStore('fileSampleStore').removeAll();
-                                wnd.setLoading(false);
-                            } else {
-                                wnd.close();
-                            }
+                    if (obj.success) {
+                        if (wnd.mode == 'add') {
+                            Ext.ux.ToastMessage('Record has been added!');
+                            grid = Ext.getCmp('librariesInRequestTable');
+                            grid.getStore().add(obj.data);
                         } else {
-                            if (obj.error.indexOf('duplicate key value') > -1) {
-                                Ext.ux.ToastMessage('Record with name "' + data.name + '" already exists. Enter a different name.', 'error');
-                            } else {
-                                Ext.ux.ToastMessage(obj.error, 'error');
-                            }
-                            console.error('[ERROR]: save_sample/: ' + obj.error);
-                            console.error(response);
-                            wnd.setLoading(false);
+                            Ext.ux.ToastMessage('Record has been updated!');
+                            grid = Ext.getCmp('librariesTable');
+                            grid.fireEvent('refresh', grid);
                         }
-                    },
 
-                    failure: function (response) {
-                        Ext.ux.ToastMessage(response.statusText, 'error');
-                        console.error('[ERROR]: save_sample/');
+                        // Preserve all fields except for Name, if 'Save and Add another' button was pressed
+                        if (addAnother) {
+                            Ext.getCmp(nameFieldName).reset();
+                            Ext.getStore(fileStoreName).removeAll();
+                            wnd.setLoading(false);
+                        } else {
+                            wnd.close();
+                        }
+                    } else {
+                        if (obj.error.indexOf('duplicate key value') > -1) {
+                            Ext.ux.ToastMessage('Record with name "' + data.name + '" already exists. Enter a different name.', 'error');
+                        } else {
+                            Ext.ux.ToastMessage(obj.error, 'error');
+                        }
+                        console.error('[ERROR]: ' + url + ': ' + obj.error);
                         console.error(response);
-                        wnd.close();
+                        wnd.setLoading(false);
                     }
-                });
-            } else {
-                Ext.ux.ToastMessage('Check the form', 'warning');
-            }
+                },
+
+                failure: function(response) {
+                    Ext.ux.ToastMessage(response.statusText, 'error');
+                    console.error('[ERROR]: ' + url);
+                    console.error(response);
+                    wnd.close();
+                }
+            });
+        } else {
+            Ext.ux.ToastMessage('Check the form', 'warning');
         }
     },
 
