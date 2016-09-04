@@ -156,19 +156,24 @@ class LibraryView(View):
     def post(self, request):
         """ Save Library """
         error = str()
+        data = None
 
         try:
-            getattr(self, resolve(request.path).url_name)()
+            data = getattr(self, resolve(request.path).url_name)()
         except Exception as e:
             error = str(e)
             print('[ERROR]: %s' % error)
             logger.debug(error)
 
+        result = {
+            'success': not error,
+            'error': error,
+        }
+        if data:
+            result.update({'data': data})
+
         return HttpResponse(
-            json.dumps({
-                'success': not error,
-                'error': error,
-            }),
+            json.dumps(result),
             content_type='application/json',
         )
 
@@ -316,6 +321,7 @@ class LibraryView(View):
 
     def save_library(self):
         """ Add new Library or update existing one """
+        data = None
         mode = self.request.POST.get('mode')
         name = self.request.POST.get('name')
         library_id = self.request.POST.get('library_id')
@@ -370,6 +376,11 @@ class LibraryView(View):
                 comments=comments,
             )
             lib.save()
+            data = [{
+                'name': lib.name,
+                'recordType': 'L',
+                'libraryId': lib.id
+            }]
             lib.files.add(*files)
 
         elif mode == 'edit':
@@ -405,6 +416,8 @@ class LibraryView(View):
             for file in files_to_delete:
                 file.delete()
 
+        return data
+
     def delete_library(self):
         """ Delete Library with a given id """
         record_id = self.request.POST.get('record_id')
@@ -412,6 +425,7 @@ class LibraryView(View):
         for file in record.files.all():
             file.delete()
         record.delete()
+        return None
 
 
 class SampleField(View):
@@ -541,7 +555,7 @@ class SampleView(View):
 
     def save_sample(self):
         """ Add new Sample or update existing one """
-        data = {}
+        data = None
         mode = self.request.POST.get('mode')
         name = self.request.POST.get('name')
         sample_id = self.request.POST.get('sample_id')

@@ -533,20 +533,23 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                     },
 
                     success: function (response) {
-                        var obj = Ext.JSON.decode(response.responseText);
+                        var obj = Ext.JSON.decode(response.responseText), grid = null;
 
                         if (obj.success) {
                             if (wnd.mode == 'add') {
                                 Ext.ux.ToastMessage('Library has been added!');
+                                grid = Ext.getCmp('librariesInRequestTable');
+                                grid.getStore().add(obj.data);
                             } else {
                                 Ext.ux.ToastMessage('Library has been updated!');
-                                var grid = Ext.getCmp('librariesTable');
+                                grid = Ext.getCmp('librariesTable');
                                 grid.fireEvent('refresh', grid);
                             }
 
                             // Preserve all fields except for Name, if 'Save and Add another' button was pressed
                             if (addAnother) {
                                 Ext.getCmp('libraryName').reset();
+                                Ext.getStore('fileLibraryStore').removeAll();
                                 wnd.setLoading(false);
                             } else {
                                 wnd.close();
@@ -557,7 +560,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                             } else {
                                 Ext.ux.ToastMessage(obj.error, 'error');
                             }
-                            console.error('[ERROR]: save_library(): ' + obj.error);
+                            console.error('[ERROR]: save_library/: ' + obj.error);
                             console.error(response);
                             wnd.setLoading(false);
                         }
@@ -565,7 +568,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
 
                     failure: function(response) {
                         Ext.ux.ToastMessage(response.statusText, 'error');
-                        console.error('[ERROR]: save_library()');
+                        console.error('[ERROR]: save_library/');
                         console.error(response);
                         wnd.close();
                     }
