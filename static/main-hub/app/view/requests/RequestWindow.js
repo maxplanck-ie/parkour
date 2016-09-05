@@ -120,17 +120,8 @@ Ext.define('MainHub.view.requests.RequestWindow', {
         },
         {
             xtype: 'button',
-            itemId: 'addRequestWndBtn',
-            id: 'addRequestWndBtn',
-            text: 'Add',
-            hidden: true
-        },
-        {
-            xtype: 'button',
-            itemId: 'editRequestWndBtn',
-            id: 'editRequestWndBtn',
-            text: 'Update',
-            hidden: true
+            itemId: 'saveRequestWndBtn',
+            text: 'Save'
         }
     ]
 });

@@ -54,13 +54,20 @@ def get_requests(request):
     )
 
 
-def add_request(request):
-    """ Add new request """
+def save_request(request):
+    """ Add new or edit an existing request """
     error = str()
-
+    mode = request.POST.get('mode')
+    
     try:
         if request.method == 'POST':
-            form = RequestForm(request.POST)
+            if mode == 'add':
+                form = RequestForm(request.POST)
+            elif mode == 'edit':
+                request_id = request.POST.get('request_id')
+                req = Request.objects.get(id=request_id)
+                form = RequestForm(request.POST, instance=req)
+
             if form.is_valid():
                 req = form.save()
                 libraries = json.loads(request.POST.get('libraries'))
@@ -77,39 +84,12 @@ def add_request(request):
                     sample.is_in_request = True
                     sample.save()
                 req.samples.add(*samples)
+            
             else:
                 error = 'Form is invalid'
-                print('[ERROR]: add_request/: %s' % form.errors.as_data())
+                print('[ERROR]: edit_request/: %s' % form.errors.as_data())
                 logger.debug(form.errors.as_data())
-    except Exception as e:
-        error = str(e)
-        print('[ERROR]: add_request/: %s' % error)
-        logger.debug(error)
-
-    return HttpResponse(
-        json.dumps({
-            'success': not error,
-            'error': error,
-        }),
-        content_type='application/json',
-    )
-
-
-def edit_request(request):
-    """ Edit existing request """
-    error = str()
-
-    try:
-        if request.method == 'POST':
-            request_id = request.POST.get('request_id')
-            req = Request.objects.get(id=request_id)
-            form = RequestForm(request.POST, instance=req)
-            if form.is_valid():
-                req.save()
-            else:
-                error = 'Form is invalid'
-                print('[ERROR]: add_request/: %s' % form.errors.as_data())
-                logger.debug(form.errors.as_data())
+    
     except Exception as e:
         error = str(e)
         print('[ERROR]: edit_request/: %s' % error)
@@ -167,7 +147,7 @@ def get_libraries_in_request(request):
             {
                 'name': sample.name,
                 'recordType': 'S',
-                'libraryId': sample.id,
+                'sampleId': sample.id,
                 'barcode': sample.barcode,
             }
             for sample in req.samples.all()

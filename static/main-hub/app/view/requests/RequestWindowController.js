@@ -7,11 +7,8 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
             '#': {
                 boxready: 'onRequestWindowBoxready'
             },
-            '#addRequestWndBtn': {
-                click: 'onAddRequestWndBtnClick'
-            },
-            '#editRequestWndBtn': {
-                click: 'onEditRequestWndBtnClick'
+            '#saveRequestWndBtn': {
+                click: 'onSaveRequestWndBtnClick'
             },
             '#addLibraryBtn': {
                 click: 'onAddLibraryBtnClick'
@@ -26,10 +23,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
         var grid = Ext.getCmp('researchersInRequestWindow');
 
         if (wnd.mode == 'add') {
-            Ext.getCmp('addRequestWndBtn').show();
             Ext.getStore('librariesInRequestStore').removeAll();
-        } else {
-            Ext.getCmp('editRequestWndBtn').show();
         }
 
         // Set form fields with request data
@@ -58,9 +52,9 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
         }
     },
 
-    onAddRequestWndBtnClick: function(btn) {
-        var form = Ext.getCmp('requestForm'),
-            wnd = btn.up('request_wnd'),
+    onSaveRequestWndBtnClick: function(btn) {
+        var wnd = btn.up('request_wnd'),
+            form = Ext.getCmp('requestForm'),
             records = Ext.getCmp('librariesInRequestTable').getStore().data.items;
 
         if (form.isValid() && records.length > 0) {
@@ -74,14 +68,16 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                 return item.get('recordType') === 'S';
             });
 
-            wnd.setLoading('Adding...');
+            wnd.setLoading('Saving...');
             Ext.Ajax.request({
-                url: 'add_request/',
+                url: 'save_request/',
                 method: 'POST',
                 timeout: 1000000,
                 scope: this,
 
                 params: {
+                    'mode': wnd.mode,
+                    'request_id': (typeof wnd.record != 'undefined') ? wnd.record.get('requestId') : '',
                     'status': data.status,
                     'name': data.name,
                     'project_type': data.projectType,
@@ -102,10 +98,10 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                         if (typeof librariesGrid != 'undefined') {
                             librariesGrid.fireEvent('refresh', librariesGrid);
                         }
-                        Ext.ux.ToastMessage('Record has been added!');
+                        Ext.ux.ToastMessage('Request has been saved!');
                     } else {
                         Ext.ux.ToastMessage(obj.error, 'error');
-                        console.error('[ERROR]: add_request(): ' + obj.error);
+                        console.error('[ERROR]: save_request/: ' + obj.error);
                         console.error(response);
                     }
                     wnd.close();
@@ -113,68 +109,13 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
 
                 failure: function(response) {
                     Ext.ux.ToastMessage(response.statusText, 'error');
-                    console.error('[ERROR]: add_request()');
+                    console.error('[ERROR]: save_request/');
                     console.error(response);
                     wnd.close();
                 }
             });
         } else if (records.length === 0) {
             Ext.ux.ToastMessage('You did not add any Libraries/Samples', 'warning');
-        } else {
-            Ext.ux.ToastMessage('Check the form', 'warning');
-        }
-    },
-
-    onEditRequestWndBtnClick: function(btn) {
-        var wnd = btn.up('request_wnd'),
-            form = Ext.getCmp('requestForm');
-
-        if (form.isValid()) {
-            var data = form.getForm().getFieldValues();
-
-            wnd.setLoading('Updating...');
-            Ext.Ajax.request({
-                url: 'edit_request/',
-                method: 'POST',
-                timeout: 1000000,
-                scope: this,
-
-                params: {
-                    'status': data.status,
-                    'name': data.name,
-                    'project_type': data.projectType,
-                    'description': data.description,
-                    'terms_of_use_accept': data.termsOfUseAccept,
-                    'researcher_id': 1,     // temporarily
-                    'request_id': wnd.record.data.requestId
-                },
-
-                success: function (response) {
-                    var obj = Ext.JSON.decode(response.responseText);
-
-                    if (obj.success) {
-                        var requestsGrid = Ext.getCmp('requestsTable'),
-                            librariesGrid = Ext.getCmp('librariesTable');
-                        requestsGrid.fireEvent('refresh', requestsGrid);
-                        if (typeof librariesGrid != 'undefined') {
-                            librariesGrid.fireEvent('refresh', librariesGrid);
-                        }
-                        Ext.ux.ToastMessage('Record has been updated!');
-                    } else {
-                        Ext.ux.ToastMessage(obj.error, 'error');
-                        console.error('[ERROR]: edit_request(): ' + obj.error);
-                        console.error(response);
-                    }
-                    wnd.close();
-                },
-
-                failure: function(response) {
-                    Ext.ux.ToastMessage(response.statusText, 'error');
-                    console.error('[ERROR]: edit_request()');
-                    console.error(response);
-                    wnd.close();
-                }
-            });
         } else {
             Ext.ux.ToastMessage('Check the form', 'warning');
         }
