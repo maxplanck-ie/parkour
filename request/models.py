@@ -6,7 +6,7 @@ from library.models import Library, Sample
 
 class Request(models.Model):
     status = models.IntegerField(null=True)
-    name = models.CharField('Name', max_length=250)
+    name = models.CharField('Name', max_length=250, unique=True)
     project_type = models.CharField('Project Type', max_length=100, null=True)
     date_created = models.DateTimeField('Date', auto_now_add=True)
     description = models.TextField(null=True)

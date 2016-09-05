@@ -101,9 +101,11 @@ def edit_request(request):
 
     try:
         if request.method == 'POST':
-            form = RequestForm(request.POST)
+            request_id = request.POST.get('request_id')
+            req = Request.objects.get(id=request_id)
+            form = RequestForm(request.POST, instance=req)
             if form.is_valid():
-                form.save()
+                req.save()
             else:
                 error = 'Form is invalid'
                 print('[ERROR]: add_request/: %s' % form.errors.as_data())

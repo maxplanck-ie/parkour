@@ -7,8 +7,8 @@ from django.contrib.auth.decorators import login_required
 from request.models import Request
 from library.models import LibraryProtocol, LibraryType, Organism, IndexType, \
     IndexI7, IndexI5, ConcentrationMethod, SequencingRunCondition, Library, \
-    NucleicAcidType, SampleProtocol, RNAQuality, Sample, FileSample, \
-    FileLibrary
+    LibraryForm, NucleicAcidType, SampleProtocol, RNAQuality, Sample, \
+    SampleForm, FileSample, FileLibrary
 from common.utils import get_simple_field_dict
 
 import json
@@ -323,98 +323,45 @@ class LibraryView(View):
         """ Add new Library or update existing one """
         data = None
         mode = self.request.POST.get('mode')
-        name = self.request.POST.get('name')
-        library_id = self.request.POST.get('library_id')
-        library_protocol = self.request.POST.get('library_protocol')
-        library_type = self.request.POST.get('library_type')
-        enrichment_cycles = int(self.request.POST.get('enrichment_cycles'))
-        organism = self.request.POST.get('organism')
-        index_type = self.request.POST.get('index_type')
-        index_reads = int(self.request.POST.get('index_reads'))
-        index_i7 = self.request.POST.get('index_i7')
-        index_i5 = self.request.POST.get('index_i5')
-        equal_representation_nucleotides = \
-            json.loads(
-                self.request.POST.get('equal_representation_nucleotides')
-            )
-        dna_dissolved_in = self.request.POST.get('dna_dissolved_in')
-        concentration = float(self.request.POST.get('concentration'))
-        concentration_determined_by = \
-            self.request.POST.get('concentration_determined_by')
-        sample_volume = int(self.request.POST.get('sample_volume'))
-        mean_fragment_size = int(self.request.POST.get('mean_fragment_size'))
-        qpcr_result = None \
-            if self.request.POST.get('qpcr_result') == '' \
-            else float(self.request.POST.get('qpcr_result'))
-        sequencing_run_condition = \
-            self.request.POST.get('sequencing_run_condition')
-        sequencing_depth = int(self.request.POST.get('sequencing_depth'))
-        comments = self.request.POST.get('comments')
-        files = json.loads(self.request.POST.get('files'))
 
-        if mode == 'add':
-            lib = Library(
-                name=name,
-                library_protocol_id=library_protocol,
-                library_type_id=library_type,
-                enrichment_cycles=enrichment_cycles,
-                organism_id=organism,
-                index_type_id=index_type,
-                index_reads=index_reads,
-                index_i7=index_i7,
-                index_i5=index_i5,
-                equal_representation_nucleotides=
-                equal_representation_nucleotides,
-                dna_dissolved_in=dna_dissolved_in,
-                concentration=concentration,
-                concentration_determined_by_id=concentration_determined_by,
-                sample_volume=sample_volume,
-                mean_fragment_size=mean_fragment_size,
-                qpcr_result=qpcr_result,
-                sequencing_run_condition_id=sequencing_run_condition,
-                sequencing_depth=sequencing_depth,
-                comments=comments,
-            )
-            lib.save()
-            data = [{
-                'name': lib.name,
-                'recordType': 'L',
-                'libraryId': lib.id
-            }]
-            lib.files.add(*files)
+        if self.request.method == 'POST':
+            mode = self.request.POST.get('mode')
+            library_id = self.request.POST.get('library_id')
+            files = json.loads(self.request.POST.get('files'))
 
-        elif mode == 'edit':
-            lib = Library.objects.get(id=library_id)
-            lib.name = name
-            lib.library_protocol_id = library_protocol
-            lib.library_type_id = library_type
-            lib.enrichment_cycles = enrichment_cycles
-            lib.organism_id = organism
-            lib.index_type_id = index_type
-            lib.index_reads = index_reads
-            lib.index_i7 = index_i7
-            lib.index_i5 = index_i5
-            lib.equal_representation_nucleotides = \
-                equal_representation_nucleotides
-            lib.dna_dissolved_in = dna_dissolved_in
-            lib.concentration = concentration
-            lib.concentration_determined_by_id = concentration_determined_by
-            lib.sample_volume = sample_volume
-            lib.mean_fragment_size = mean_fragment_size
-            lib.qpcr_result = qpcr_result
-            lib.sequencing_run_condition_id = sequencing_run_condition
-            lib.sequencing_depth = sequencing_depth
-            lib.comments = comments
-            old_files = [file for file in lib.files.all()]
-            lib.files.clear()
-            lib.save()
-            lib.files.add(*files)
-            new_files = [file for file in lib.files.all()]
+            if mode == 'add':
+                form = LibraryForm(self.request.POST)
+            elif mode == 'edit':
+                lib = Library.objects.get(id=library_id)
+                form = LibraryForm(self.request.POST, instance=lib)
 
-            # Delete files
-            files_to_delete = list(set(old_files) - set(new_files))
-            for file in files_to_delete:
-                file.delete()
+            if form.is_valid():
+                lib = form.save()
+
+                if mode == 'add':
+                    lib.files.add(*files)
+                    data = [{
+                        'name': lib.name,
+                        'recordType': 'L',
+                        'libraryId': lib.id
+                    }]
+
+                elif mode == 'edit':
+                    # import pdb; pdb.set_trace()
+                    old_files = [file for file in lib.files.all()]
+                    lib.files.clear()
+                    lib.save()
+                    lib.files.add(*files)
+                    new_files = [file for file in lib.files.all()]
+
+                    # Delete files
+                    files_to_delete = list(set(old_files) - set(new_files))
+                    for file in files_to_delete:
+                        file.delete()
+            else:
+                error = 'Form is invalid'
+                print('[ERROR]: save_sample/: %s' % form.errors.as_data())
+                logger.debug(form.errors.as_data())
 
         return data
 
@@ -556,103 +503,45 @@ class SampleView(View):
     def save_sample(self):
         """ Add new Sample or update existing one """
         data = None
-        mode = self.request.POST.get('mode')
-        name = self.request.POST.get('name')
-        sample_id = self.request.POST.get('sample_id')
-        nucleic_acid_type_id = self.request.POST.get('nucleic_acid_type_id')
-        sample_protocol_id = self.request.POST.get('sample_protocol_id')
-        organism_id = self.request.POST.get('organism_id')
-        equal_representation_nucleotides = \
-            json.loads(
-                self.request.POST.get('equal_representation_nucleotides')
-            )
-        dna_dissolved_in = self.request.POST.get('dna_dissolved_in')
-        concentration = float(self.request.POST.get('concentration'))
-        concentration_determined_by_id = \
-            self.request.POST.get('concentration_determined_by_id')
-        sample_volume = self.request.POST.get('sample_volume')
-        sample_amplified_cycles = None \
-            if self.request.POST.get('sample_amplified_cycles') == '' \
-            else int(self.request.POST.get('sample_amplified_cycles'))
-        dnase_treatment = None \
-            if self.request.POST.get('dnase_treatment') == '' \
-            else json.loads(self.request.POST.get('dnase_treatment'))
-        rna_quality_id = self.request.POST.get('rna_quality_id')
-        rna_spike_in = None \
-            if self.request.POST.get('rna_spike_in') == '' \
-            else json.loads(self.request.POST.get('rna_spike_in'))
-        sample_preparation_protocol = \
-            self.request.POST.get('sample_preparation_protocol')
-        requested_sample_treatment = \
-            self.request.POST.get('requested_sample_treatment')
-        sequencing_run_condition_id = \
-            self.request.POST.get('sequencing_run_condition_id')
-        sequencing_depth = int(self.request.POST.get('sequencing_depth'))
-        comments = self.request.POST.get('comments')
-        files = json.loads(self.request.POST.get('files'))
+        
+        if self.request.method == 'POST':
+            mode = self.request.POST.get('mode')
+            sample_id = self.request.POST.get('sample_id')
+            files = json.loads(self.request.POST.get('files'))
 
-        if mode == 'add':
-            smpl = Sample(
-                name=name,
-                nucleic_acid_type_id=nucleic_acid_type_id,
-                sample_protocol_id=sample_protocol_id,
-                organism_id=organism_id,
-                equal_representation_nucleotides=
-                equal_representation_nucleotides,
-                dna_dissolved_in=dna_dissolved_in,
-                concentration=concentration,
-                concentration_determined_by_id=concentration_determined_by_id,
-                sample_volume=sample_volume,
-                amplified_cycles=sample_amplified_cycles,
-                dnase_treatment=dnase_treatment,
-                rna_quality_id=rna_quality_id,
-                rna_spike_in=rna_spike_in,
-                sample_preparation_protocol=sample_preparation_protocol,
-                requested_sample_treatment=requested_sample_treatment,
-                sequencing_run_condition_id=sequencing_run_condition_id,
-                sequencing_depth=sequencing_depth,
-                comments=comments,
-            )
-            smpl.save()
-            data = [{
-                'name': smpl.name,
-                'recordType': 'S',
-                'sampleId': smpl.id
-            }]
-            smpl.files.add(*files)
+            if mode == 'add':
+                form = SampleForm(self.request.POST)
+            elif mode == 'edit':
+                smpl = Sample.objects.get(id=sample_id)
+                form = SampleForm(self.request.POST, instance=smpl)
 
-        elif mode == 'edit':
-            smpl = Sample.objects.get(id=sample_id)
-            smpl.name = name
-            smpl.nucleic_acid_type_id = nucleic_acid_type_id
-            smpl.sample_protocol_id = sample_protocol_id
-            smpl.organism_id = organism_id
-            smpl.equal_representation_nucleotides = \
-                equal_representation_nucleotides
-            smpl.dna_dissolved_in = dna_dissolved_in
-            smpl.concentration = concentration
-            smpl.concentration_determined_by_id = \
-                concentration_determined_by_id
-            smpl.sample_volume = sample_volume
-            smpl.amplified_cycles = sample_amplified_cycles
-            smpl.dnase_treatment = dnase_treatment
-            smpl.rna_quality_id = rna_quality_id
-            smpl.rna_spike_in = rna_spike_in
-            smpl.sample_preparation_protocol = sample_preparation_protocol
-            smpl.requested_sample_treatment = requested_sample_treatment
-            smpl.sequencing_run_condition_id = sequencing_run_condition_id
-            smpl.sequencing_depth = sequencing_depth
-            smpl.comments = comments
-            old_files = [file for file in smpl.files.all()]
-            smpl.files.clear()
-            smpl.save()
-            smpl.files.add(*files)
-            new_files = [file for file in smpl.files.all()]
+            if form.is_valid():
+                smpl = form.save()
 
-            # Delete files
-            files_to_delete = list(set(old_files) - set(new_files))
-            for file in files_to_delete:
-                file.delete()
+                if mode == 'add':
+                    smpl.files.add(*files)
+                    data = [{
+                        'name': smpl.name,
+                        'recordType': 'S',
+                        'sampleId': smpl.id
+                    }]
+
+                elif mode == 'edit':
+                    # import pdb; pdb.set_trace()
+                    old_files = [file for file in smpl.files.all()]
+                    smpl.files.clear()
+                    smpl.save()
+                    smpl.files.add(*files)
+                    new_files = [file for file in smpl.files.all()]
+
+                    # Delete files
+                    files_to_delete = list(set(old_files) - set(new_files))
+                    for file in files_to_delete:
+                        file.delete()
+            else:
+                error = 'Form is invalid'
+                print('[ERROR]: save_sample/: %s' % form.errors.as_data())
+                logger.debug(form.errors.as_data())
 
         return data
 

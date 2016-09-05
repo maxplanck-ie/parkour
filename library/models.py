@@ -1,4 +1,5 @@
 from django.db import models
+from django.forms import ModelForm
 from django.db.models.signals import post_delete, pre_delete
 from django.dispatch import receiver
 
@@ -151,6 +152,7 @@ class LibrarySampleAbstract(models.Model):
     sequencing_depth = models.IntegerField('Sequencing Depth')
     comments = models.TextField('Comments', null=True, blank=True)
     is_in_request = models.BooleanField(default=False)
+    barcode = models.CharField('Barcode', max_length=9, null=True, blank=True)
 
     # Quality Control
     dilution_factor = models.IntegerField(
@@ -247,6 +249,32 @@ class Library(LibrarySampleAbstract):
         verbose_name_plural = 'Libraries'
 
 
+class LibraryForm(ModelForm):
+    class Meta:
+        model = Library
+        fields = (
+            'name', 
+            'library_protocol',
+            'library_type',
+            'enrichment_cycles',
+            'organism',
+            'index_type',
+            'index_reads',
+            'index_i7',
+            'index_i5',
+            'equal_representation_nucleotides',
+            'dna_dissolved_in',
+            'concentration',
+            'concentration_determined_by',
+            'sample_volume',
+            'mean_fragment_size',
+            'qpcr_result',
+            'sequencing_run_condition',
+            'sequencing_depth',
+            'comments',
+        )
+
+
 @receiver(pre_delete, sender=Library)
 def sample_delete(sender, instance, **kwargs):
     for file in instance.files.all():
@@ -317,6 +345,32 @@ class Sample(LibrarySampleAbstract):
         null=True,
         blank=True,
     )
+
+
+class SampleForm(ModelForm):
+    class Meta:
+        model = Sample
+        fields = (
+            'name', 
+            'nucleic_acid_type',
+            'sample_protocol',
+            'organism',
+            'equal_representation_nucleotides',
+            'dna_dissolved_in',
+            'concentration',
+            'concentration_determined_by',
+            'sample_volume',
+            'amplified_cycles',
+            'dnase_treatment',
+            'rna_quality',
+            'rna_spike_in',
+            'sample_preparation_protocol',
+            'requested_sample_treatment',
+            'sequencing_run_condition',
+            'sequencing_depth',
+            'comments',
+        )
+
 
 @receiver(pre_delete, sender=Sample)
 def sample_delete(sender, instance, **kwargs):
