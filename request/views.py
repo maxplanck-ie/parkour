@@ -117,7 +117,7 @@ def edit_request(request):
     name = request.POST.get('name', '')
     project_type = request.POST.get('project_type', '')
     description = request.POST.get('description', '')
-    terms_of_use_accept = bool(request.POST.get('terms_of_use_accept', ''))
+    terms_of_use_accept = json.loads(request.POST.get('terms_of_use_accept'))
     researcher_id = int(request.POST.get('researcher_id', 0))
 
     try:
