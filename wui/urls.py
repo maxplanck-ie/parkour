@@ -26,6 +26,7 @@ urlpatterns = [
     url(r'', include('researcher.urls')),
     url(r'', include('request.urls')),
     url(r'', include('library.urls')),
+    url(r'', include('qualitycheck.urls')),
 ]
 
 from django.views.defaults import page_not_found, server_error

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'researcher',
     'request',
     'library',
+    'qualitycheck',
 ]
 
 MIDDLEWARE_CLASSES = [

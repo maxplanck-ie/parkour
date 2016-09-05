@@ -34,12 +34,21 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
             record = context.record,
             changes = record.getChanges(),
             values = context.newValues,
-            amountFacility = values.amountFacility;
+            amountFacility = (values.amountFacility != null) ? values.amountFacility : '',
+            dilutionFactor = (values.dilutionFactor != null) ? values.dilutionFactor : '',
+            concentrationFacility = (values.concentrationFacility != null) ? values.concentrationFacility : '',
+            concentrationMethodFacility = (values.concentrationMethodFacility != null) ? values.concentrationMethodFacility : '',
+            sampleVolumeFacility = (values.sampleVolumeFacility != null) ? values.sampleVolumeFacility : '',
+            qPCRResultFacility = (values.qPCRResultFacility != null) ? values.qPCRResultFacility : '',
+            rnaQualityFacility = (values.rnaQualityFacility != null) ? values.rnaQualityFacility : '',
+            sizeDistributionFacility = (values.sizeDistributionFacility != null) ? values.sizeDistributionFacility : '',
+            commentsFacility = (values.commentsFacility != null) ? values.commentsFacility : '',
+            qcResult = (values.qcResult != null) ? values.qcResult : '';
 
         // Compute Amount
-        if (Object.keys(changes).indexOf('amountFacility') == -1 && values.dilutionFactor !== '' && 
-            values.concentrationFacility !== '' && values.sampleVolumeFacility !== '') {
-            amountFacility = parseFloat(values.dilutionFactor) * parseFloat(values.concentrationFacility) * parseFloat(values.sampleVolumeFacility);
+        if (Object.keys(changes).indexOf('amountFacility') == -1 && dilutionFactor !== '' && 
+            concentrationFacility !== '' && sampleVolumeFacility !== '') {
+            amountFacility = parseFloat(dilutionFactor) * parseFloat(concentrationFacility) * parseFloat(sampleVolumeFacility);
         }
 
         var url = 'qc_incoming_libraries/';
@@ -52,16 +61,16 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
             params: {
                 'record_type': record.get('recordType'),
                 'record_id': (record.get('recordType') == 'L') ? record.get('libraryId') : record.get('sampleId'),
-                'dilution_factor': values.dilutionFactor,
-                'concentration_facility': values.concentrationFacility,
-                'concentration_method_facility_id': values.concentrationMethodFacility,
-                'sample_volume_facility': values.sampleVolumeFacility,
+                'dilution_factor': dilutionFactor,
+                'concentration_facility': concentrationFacility,
+                'concentration_method_facility_id': concentrationMethodFacility,
+                'sample_volume_facility': sampleVolumeFacility,
                 'amount_facility': amountFacility,
-                'qpcr_result_facility': values.qPCRResultFacility,
-                'rna_quality_facility': values.rnaQualityFacility,
-                'size_distribution_facility': values.sizeDistributionFacility,
-                'comments_facility': values.commentsFacility,
-                'qc_result': values.qcResult
+                'qpcr_result_facility': qPCRResultFacility,
+                'rna_quality_facility': rnaQualityFacility,
+                'size_distribution_facility': sizeDistributionFacility,
+                'comments_facility': commentsFacility,
+                'qc_result': qcResult
             },
 
             success: function (response) {
@@ -71,15 +80,15 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
                     grid.fireEvent('refresh', grid);
                 } else {
                     Ext.ux.ToastMessage(obj.error, 'error');
-                    console.log('[ERROR]: ' + url + ': ' + obj.error);
-                    console.log(response);
+                    console.error('[ERROR]: ' + url + ': ' + obj.error);
+                    console.error(response);
                 }
             },
 
             failure: function (response) {
                 Ext.ux.ToastMessage(response.statusText, 'error');
-                console.log('[ERROR]: ' + url);
-                console.log(response);
+                console.error('[ERROR]: ' + url);
+                console.error(response);
             }
         });
     }

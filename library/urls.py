@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from library.views import LibraryField, LibraryView, SampleField, SampleView, \
     upload_file_library, get_file_library, upload_file_sample, \
-    get_file_sample, qc_incoming_libraries
+    get_file_sample
 
 
 urlpatterns = [
@@ -30,7 +30,4 @@ urlpatterns = [
     url(r'^delete_sample/$', SampleView.as_view(), name='delete_sample'),
     url(r'^upload_file_sample/$', upload_file_sample, name='upload_file_sample'),
     url(r'^get_file_sample/$', get_file_sample, name='get_file_sample'),
-
-    # Quality Control
-    url(r'^qc_incoming_libraries/$', qc_incoming_libraries, name='qc_incoming_libraries'),
 ]
