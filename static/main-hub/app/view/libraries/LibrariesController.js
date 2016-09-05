@@ -8,6 +8,12 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
                 boxready: 'onLibrariesTableBoxready',
                 refresh: 'onLibrariesTableRefresh',
                 itemcontextmenu: 'onLibrariesTableItemContextMenu'
+            },
+            '#showLibrariesCheckbox': {
+                change: 'onShowLibrariesCheckboxChange'
+            },
+            '#showSamplesCheckbox': {
+                change: 'onShowSamplesCheckboxChange'
             }
         }
     },
@@ -95,6 +101,31 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
                 console.error('[ERROR]: ' + url.replace('/', '()'));
                 console.error(response);
             }
+        });
+    },
+
+    onShowLibrariesCheckboxChange: function(cb, showLibraries) {
+        var store = Ext.getCmp('librariesTable').getStore(),
+            showSamples = Ext.getCmp('showSamplesCheckbox').getValue();
+        this.filterStore(store, showLibraries, showSamples);
+    },
+
+    onShowSamplesCheckboxChange: function(cb, showSamples) {
+        var store = Ext.getCmp('librariesTable').getStore(),
+            showLibraries = Ext.getCmp('showLibrariesCheckbox').getValue();
+        this.filterStore(store, showLibraries, showSamples);
+    },
+
+    filterStore: function(store, showLibraries, showSamples) {
+        store.clearFilter();
+        store.filterBy(function(record) {
+            var res = false;
+            if (record.get('recordType') == 'L') {
+                res = res || showLibraries;
+            } else {
+                res = res || showSamples;
+            }
+            return res;
         });
     }
 });

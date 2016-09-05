@@ -30,27 +30,29 @@ Ext.define('MainHub.view.libraries.Libraries', {
             header: {
                 title: 'Libraries and Samples',
                 items: [
-                    // {
-                    //     xtype: 'fieldcontainer',
-                    //     defaultType: 'checkboxfield',
-                    //     layout: 'hbox',
-                    //     margin: '0 20 0 0',
-                    //     items: [
-                    //         {
-                    //             boxLabel: 'Show Libraries',
-                    //             itemId: 'showLibraries',
-                    //             margin: '0 15 0 0',
-                    //             cls: 'grid-header-checkbox',
-                    //             checked: true
-                    //         },
-                    //         {
-                    //             boxLabel: 'Show Samples',
-                    //             itemId: 'showSamples',
-                    //             cls: 'grid-header-checkbox',
-                    //             checked: true
-                    //         }
-                    //     ]
-                    // },
+                    {
+                        xtype: 'fieldcontainer',
+                        defaultType: 'checkboxfield',
+                        layout: 'hbox',
+                        margin: '0 20 0 0',
+                        items: [
+                            {
+                                boxLabel: 'Show Libraries',
+                                itemId: 'showLibrariesCheckbox',
+                                id: 'showLibrariesCheckbox',
+                                margin: '0 15 0 0',
+                                cls: 'grid-header-checkbox',
+                                checked: true
+                            },
+                            {
+                                boxLabel: 'Show Samples',
+                                itemId: 'showSamplesCheckbox',
+                                id: 'showSamplesCheckbox',
+                                cls: 'grid-header-checkbox',
+                                checked: true
+                            }
+                        ]
+                    },
                     {
                         xtype: 'textfield',
                         itemId: 'searchField',
