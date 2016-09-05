@@ -44,6 +44,7 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
                       }
                     },
                     { text: '', dataIndex: 'recordType', width: 30, tdCls: 'userEntry' },
+                    { text: 'Barcode', dataIndex: 'barcode', width: 90, tdCls: 'userEntry' },
                     { text: 'Nucleic Acid Type', dataIndex: 'nucleicAcidType', tdCls: 'userEntry' },
                     { text: 'Protocol', dataIndex: 'libraryProtocol', tdCls: 'userEntry' },
                     { text: 'Concentration (user) (ng/µl)', dataIndex: 'concentration', tdCls: 'userEntry' },
