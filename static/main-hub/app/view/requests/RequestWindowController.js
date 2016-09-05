@@ -78,6 +78,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
             Ext.Ajax.request({
                 url: 'add_request/',
                 method: 'POST',
+                timeout: 1000000,
                 scope: this,
 
                 params: {
@@ -135,6 +136,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
             Ext.Ajax.request({
                 url: 'edit_request/',
                 method: 'POST',
+                timeout: 1000000,
                 scope: this,
 
                 params: {

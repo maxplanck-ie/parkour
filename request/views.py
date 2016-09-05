@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from request.models import Request
+from request.models import Request, RequestForm
 from researcher.models import Researcher
 from library.models import Library, Sample
 
@@ -37,7 +37,7 @@ def get_requests(request):
 
     except Exception as e:
         error = str(e)
-        print('[ERROR]: get_requests(): %s' % error)
+        print('[ERROR]: get_requests/: %s' % error)
         logger.debug(error)
 
     return HttpResponse(
@@ -59,44 +59,31 @@ def add_request(request):
     error = str()
 
     try:
-        status = request.POST.get('status')
-        name = request.POST.get('name')
-        project_type = request.POST.get('project_type')
-        date_created = datetime.now()
-        description = request.POST.get('description')
-        terms_of_use_accept = bool(request.POST.get('terms_of_use_accept'))
-        researcher_id = int(request.POST.get('researcher_id'))
-        libraries = json.loads(request.POST.get('libraries'))
-        samples = json.loads(request.POST.get('samples'))
+        if request.method == 'POST':
+            form = RequestForm(request.POST)
+            if form.is_valid():
+                req = form.save()
+                libraries = json.loads(request.POST.get('libraries'))
+                samples = json.loads(request.POST.get('samples'))
 
-        print(samples)
+                request_libraries = Library.objects.filter(id__in=libraries)
+                for library in request_libraries:
+                    library.is_in_request = True
+                    library.save()
+                req.libraries.add(*libraries)
 
-        req = Request(
-            status=status,
-            name=name,
-            project_type=project_type,
-            date_created=date_created,
-            description=description,
-            terms_of_use_accept=terms_of_use_accept,
-            researcher_id=Researcher.objects.get(id=researcher_id),
-        )
-        req.save()
-
-        request_libraries = Library.objects.filter(id__in=libraries)
-        for library in request_libraries:
-            library.is_in_request = True
-            library.save()
-        req.libraries.add(*libraries)
-
-        request_samples = Sample.objects.filter(id__in=samples)
-        for sample in request_samples:
-            sample.is_in_request = True
-            sample.save()
-        req.samples.add(*samples)
-
+                request_samples = Sample.objects.filter(id__in=samples)
+                for sample in request_samples:
+                    sample.is_in_request = True
+                    sample.save()
+                req.samples.add(*samples)
+            else:
+                error = 'Form is invalid'
+                print('[ERROR]: add_request/: %s' % form.errors.as_data())
+                logger.debug(form.errors.as_data())
     except Exception as e:
         error = str(e)
-        print('[ERROR]: add_request(): %s' % error)
+        print('[ERROR]: add_request/: %s' % error)
         logger.debug(error)
 
     return HttpResponse(
@@ -112,27 +99,18 @@ def edit_request(request):
     """ Edit existing request """
     error = str()
 
-    request_id = int(request.POST.get('request_id', 0))
-    status = request.POST.get('status', '')
-    name = request.POST.get('name', '')
-    project_type = request.POST.get('project_type', '')
-    description = request.POST.get('description', '')
-    terms_of_use_accept = json.loads(request.POST.get('terms_of_use_accept'))
-    researcher_id = int(request.POST.get('researcher_id', 0))
-
     try:
-        req = Request.objects.get(id=request_id)
-        req.status = status
-        req.name = name
-        req.project_type = project_type
-        req.description = description
-        req.terms_of_use_accept = terms_of_use_accept
-        req.researcher_id = Researcher.objects.get(id=researcher_id)
-        req.save()
-
+        if request.method == 'POST':
+            form = RequestForm(request.POST)
+            if form.is_valid():
+                form.save()
+            else:
+                error = 'Form is invalid'
+                print('[ERROR]: add_request/: %s' % form.errors.as_data())
+                logger.debug(form.errors.as_data())
     except Exception as e:
         error = str(e)
-        print('[ERROR]: edit_request(): %s' % error)
+        print('[ERROR]: edit_request/: %s' % error)
         logger.debug(error)
 
     return HttpResponse(
@@ -154,7 +132,7 @@ def delete_request(request):
 
     except Exception as e:
         error = str(e)
-        print('[ERROR]: delete_request(): %s' % error)
+        print('[ERROR]: delete_request/: %s' % error)
         logger.debug(error)
 
     return HttpResponse(
@@ -198,7 +176,7 @@ def get_libraries_in_request(request):
 
     except Exception as e:
         error = str(e)
-        print('[ERROR]: get_libraries_in_request(): %s' % error)
+        print('[ERROR]: get_libraries_in_request/: %s' % error)
         logger.debug(error)
 
     return HttpResponse(

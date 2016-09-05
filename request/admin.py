@@ -4,5 +4,5 @@ from request.models import Request
 
 
 @admin.register(Request)
-class ResearcherAdmin(admin.ModelAdmin):
+class RequestAdmin(admin.ModelAdmin):
     pass
