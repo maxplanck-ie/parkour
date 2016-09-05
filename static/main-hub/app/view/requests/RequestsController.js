@@ -41,16 +41,16 @@ Ext.define('MainHub.view.requests.RequestsController', {
                 } else {
                     grid.setLoading(false);
                     Ext.ux.ToastMessage(obj.error, 'error');
-                    console.log('[ERROR]: get_requests()');
-                    console.log(response);
+                    console.error('[ERROR]: get_requests/');
+                    console.error(response);
                 }
             },
 
             failure: function(response) {
                 grid.setLoading(false);
                 Ext.ux.ToastMessage(response.statusText, 'error');
-                console.log('[ERROR]: get_requests()');
-                console.log(response);
+                console.error('[ERROR]: get_requests/');
+                console.error(response);
             }
         });
     },
@@ -137,15 +137,15 @@ Ext.define('MainHub.view.requests.RequestsController', {
 
                 } else {
                     Ext.ux.ToastMessage(obj.error, 'error');
-                    console.log('[ERROR]: delete_request()');
-                    console.log(response);
+                    console.error('[ERROR]: delete_request/');
+                    console.error(response);
                 }
             },
 
             failure: function(response) {
                 Ext.ux.ToastMessage(response.statusText, 'error');
-                console.log('[ERROR]: delete_request()');
-                console.log(response);
+                console.error('[ERROR]: delete_request/');
+                console.error(response);
             }
         });
     }
