@@ -4,6 +4,7 @@ Ext.define('MainHub.model.requests.LibrariesInRequest', {
     fields: [
         {  name: 'name',        type: 'string'  },
         {  name: 'recordType',  type: 'string'  },
+        {  name: 'barcode',		type: 'string'  },
         {  name: 'libraryId',   type: 'int'     },
         {  name: 'sampleId',    type: 'int'     }
     ]

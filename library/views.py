@@ -13,7 +13,7 @@ from common.utils import get_simple_field_dict
 
 import json
 import logging
-# from datetime import datetime
+from datetime import datetime
 
 logger = logging.getLogger('db')
 
@@ -221,6 +221,7 @@ class LibraryView(View):
                         library.sequencing_run_condition.id,
                     'sequencingDepth': library.sequencing_depth,
                     'comments': library.comments,
+                    'barcode': library.barcode,
                     'files': [file.id for file in library.files.all()],
                     'dilutionFactor': library.dilution_factor,
                     'concentrationFacility': library.concentration_facility,
@@ -285,6 +286,7 @@ class LibraryView(View):
                     'requestedSampleTreatment':
                         sample.requested_sample_treatment,
                     'comments': sample.comments,
+                    'barcode': sample.barcode,
                     'files': [file.id for file in sample.files.all()],
                     'dilutionFactor': sample.dilution_factor,
                     'concentrationFacility': sample.concentration_facility,
@@ -339,11 +341,14 @@ class LibraryView(View):
                 lib = form.save()
 
                 if mode == 'add':
+                    lib.barcode = generate_barcode('L', str(lib.id))
                     lib.files.add(*files)
+                    lib.save()
                     data = [{
                         'name': lib.name,
                         'recordType': 'L',
-                        'libraryId': lib.id
+                        'libraryId': lib.id,
+                        'barcode': lib.barcode,
                     }]
 
                 elif mode == 'edit':
@@ -519,11 +524,14 @@ class SampleView(View):
                 smpl = form.save()
 
                 if mode == 'add':
+                    smpl.barcode = generate_barcode('S', str(smpl.id))
                     smpl.files.add(*files)
+                    smpl.save()
                     data = [{
                         'name': smpl.name,
                         'recordType': 'S',
-                        'sampleId': smpl.id
+                        'sampleId': smpl.id,
+                        'barcode': smpl.barcode,
                     }]
 
                 elif mode == 'edit':
@@ -676,6 +684,12 @@ def get_file_library(request):
         }),
         content_type='application/json',
     )
+
+
+def generate_barcode(record_type, record_id):
+    barcode = datetime.now().strftime('%y') + record_type
+    barcode += '0' * (6 - len(record_id)) + record_id
+    return barcode
 
 
 def qc_incoming_libraries(request):

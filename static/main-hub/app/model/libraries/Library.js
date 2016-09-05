@@ -34,6 +34,7 @@ Ext.define('MainHub.model.libraries.Library', {
         {  name: 'sequencingRunConditionId',  type: 'int'     },
         {  name: 'sequencingDepth',           type: 'string'  },
         {  name: 'comments',                  type: 'string'  },
+        {  name: 'barcode',                   type: 'string'  },
 
         {  name: 'nucleicAcidType',           type: 'string'  },
         {  name: 'nucleicAcidTypeId',         type: 'int'     },

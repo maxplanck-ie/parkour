@@ -10,7 +10,7 @@ Ext.define('MainHub.view.requests.RequestWindow', {
     controller: 'request_wnd',
 
     height: 445,
-    width: 700,
+    width: 750,
 
     modal: true,
     resizable: false,
@@ -79,7 +79,7 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                     xtype: 'grid',
                     id: 'librariesInRequestTable',
                     title: 'Libraries/Samples',
-                    width: 295,
+                    width: 345,
                     height: 350,
                     padding: '15px 15px 15px 0',
 
@@ -87,7 +87,8 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                         items: [
                             { xtype: 'rownumberer', width: 40 },
                             { text: 'Name', dataIndex: 'name', flex: 1 },
-                            { text: '', dataIndex: 'recordType', width: 35 }
+                            { text: '', dataIndex: 'recordType', width: 35 },
+                            { text: 'Barcode', dataIndex: 'barcode', width: 90 }
                         ]
                     },
 

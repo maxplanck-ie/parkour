@@ -72,6 +72,7 @@ Ext.define('MainHub.view.libraries.Libraries', {
                         return val;
                     } },
                     { text: '', dataIndex: 'recordType', width: 30 },
+                    { text: 'Barcode', dataIndex: 'barcode', width: 90 },
                     { text: 'Date', dataIndex: 'date' },
                     { text: 'Nucleic Acid Type', dataIndex: 'nucleicAcidType' },
                     { text: 'Protocol', dataIndex: 'libraryProtocol' },

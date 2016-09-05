@@ -93,6 +93,9 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             var record = wnd.record.data,
                 form = Ext.getCmp('libraryForm').getForm();
 
+            // Show Library barcode
+            Ext.getCmp('libraryBarcodeField').show().setHtml(record.barcode);
+
             // Load field values
             form.setValues({
                 name: record.name,
@@ -205,6 +208,9 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         } else {
             var record = wnd.record.data,
                 form = Ext.getCmp('sampleForm').getForm();
+            
+            // Show Sample barcode
+            Ext.getCmp('sampleBarcodeField').show().setHtml(record.barcode);
 
             form.setValues({
                 name: record.name,

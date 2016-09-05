@@ -159,6 +159,7 @@ def get_libraries_in_request(request):
                 'name': library.name,
                 'recordType': 'L',
                 'libraryId': library.id,
+                'barcode': library.barcode,
             }
             for library in req.libraries.all()
         ]
@@ -167,6 +168,7 @@ def get_libraries_in_request(request):
                 'name': sample.name,
                 'recordType': 'S',
                 'libraryId': sample.id,
+                'barcode': sample.barcode,
             }
             for sample in req.samples.all()
         ]
