@@ -1,9 +1,9 @@
-Ext.define('MainHub.view.quality-control.IncomingLibraries', {
+Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
     extend: 'Ext.container.Container',
     xtype: 'incoming-libraries',
 
     requires: [
-        'MainHub.view.quality-control.IncomingLibrariesController'
+        'MainHub.view.qualitycontrol.IncomingLibrariesController'
     ],
 
     controller: 'qualitycontrol-incominglibraries',

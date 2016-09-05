@@ -1,4 +1,4 @@
-Ext.define('MainHub.model.quality-control.IncomingLibraries', {
+Ext.define('MainHub.model.qualitycontrol.IncomingLibraries', {
     extend: 'MainHub.model.libraries.Library',
 
     fields: [

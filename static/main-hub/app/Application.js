@@ -23,7 +23,7 @@ Ext.define('MainHub.Application', {
         'researchers.PrincipalInvestigators',
         'researchers.Organizations',
         'researchers.CostUnits',
-        'Requests',
+        'requests.Requests',
         'libraries.Libraries',
         'libraries.LibraryProtocols',
         'libraries.LibraryType',
@@ -38,7 +38,7 @@ Ext.define('MainHub.Application', {
         'libraries.SampleProtocols',
         'libraries.FileLibrary',
         'libraries.FileSample',
-        'quality-control.IncomingLibraries',
+        'qualitycontrol.IncomingLibraries',
         'requests.LibrariesInRequest'
     ],
 

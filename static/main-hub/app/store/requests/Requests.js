@@ -1,4 +1,4 @@
-Ext.define('MainHub.store.Requests', {
+Ext.define('MainHub.store.requests.Requests', {
     extend: 'Ext.data.Store',
     storeId: 'requestsStore',
 

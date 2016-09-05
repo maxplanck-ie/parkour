@@ -32,7 +32,7 @@ Ext.define('MainHub.view.requests.RequestsController', {
                 var obj = Ext.JSON.decode(response.responseText);
 
                 if (obj.success) {
-                    var store = Ext.create('MainHub.store.Requests', {
+                    var store = Ext.create('MainHub.store.requests.Requests', {
                         data: obj.data
                     });
 

@@ -1,4 +1,4 @@
-Ext.define('MainHub.view.quality-control.IncomingLibrariesController', {
+Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.qualitycontrol-incominglibraries',
     
