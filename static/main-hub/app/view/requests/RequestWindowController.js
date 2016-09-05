@@ -1,6 +1,6 @@
 Ext.define('MainHub.view.requests.RequestWindowController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.request_wnd',
+    alias: 'controller.requests-requestwindow',
 
     config: {
         control: {

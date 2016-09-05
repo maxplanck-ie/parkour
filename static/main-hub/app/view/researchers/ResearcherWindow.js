@@ -8,7 +8,7 @@ Ext.define('MainHub.view.researchers.ResearcherWindow', {
         'MainHub.view.researchers.ResearcherFieldWindow'
     ],
 
-    controller: 'researcher_wnd',
+    controller: 'researchers-researcherwindow',
 
     height: 470,
     width: 400,

@@ -1,6 +1,6 @@
 Ext.define('MainHub.view.researchers.ResearcherFieldWindowController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.researcher_field_wnd',
+    alias: 'controller.researchers-researcherfieldwindow',
 
     config: {
         control: {

@@ -5,7 +5,7 @@ Ext.define('MainHub.view.researchers.ResearcherFieldWindow', {
 
     requires: ['MainHub.view.researchers.ResearcherFieldWindowController'],
 
-    controller: 'researcher_field_wnd',
+    controller: 'researchers-researcherfieldwindow',
 
     height: 155,
     width: 350,

@@ -7,7 +7,7 @@ Ext.define('MainHub.view.requests.RequestWindow', {
         'MainHub.view.requests.RequestWindowController'
     ],
 
-    controller: 'request_wnd',
+    controller: 'requests-requestwindow',
 
     height: 445,
     width: 750,
