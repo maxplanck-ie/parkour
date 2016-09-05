@@ -145,17 +145,8 @@ Ext.define('MainHub.view.researchers.ResearcherWindow', {
         },
         {
             xtype: 'button',
-            itemId: 'addResearcherWndBtn',
-            id: 'addResearcherWndBtn',
-            text: 'Add',
-            hidden: true
-        },
-        {
-            xtype: 'button',
-            itemId: 'editResearcherWndBtn',
-            id: 'editResearcherWndBtn',
-            text: 'Update',
-            hidden: true
+            itemId: 'saveResearcherBtn',
+            text: 'Save'
         }
     ]
 });

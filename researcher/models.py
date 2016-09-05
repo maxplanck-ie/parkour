@@ -1,4 +1,5 @@
 from django.db import models
+from django.forms import ModelForm
 
 
 class Organization(models.Model):
@@ -18,7 +19,10 @@ class PrincipalInvestigator(models.Model):
 
 class CostUnit(models.Model):
     name = models.CharField('Cost Unit', max_length=150)
-    pi = models.ForeignKey(PrincipalInvestigator, verbose_name='Principal Investigator')
+    pi = models.ForeignKey(
+        PrincipalInvestigator,
+        verbose_name='Principal Investigator',
+    )
 
     def __str__(self):
         return '%s (%s: %s)' % (self.name, self.pi.organization.name, self.pi.name)
@@ -30,8 +34,19 @@ class Researcher(models.Model):
     phone = models.CharField('Phone', max_length=100, null=True)
     email = models.CharField('Email', max_length=100, null=True)
     organization = models.ForeignKey(Organization, verbose_name='Organization')
-    pi = models.ForeignKey(PrincipalInvestigator, verbose_name='Principal Investigator')
+    pi = models.ForeignKey(
+        PrincipalInvestigator,
+        verbose_name='Principal Investigator',
+    )
     cost_unit = models.ManyToManyField(CostUnit, verbose_name='Cost Unit')
 
     def __str__(self):
-        return '%s %s (%s)' % (self.first_name, self.last_name, self.organization)
+        return '%s %s (%s)' % (
+            self.first_name, self.last_name, self.organization
+        )
+
+
+class ResearcherForm(ModelForm):
+    class Meta:
+        model = Researcher
+        exclude = ('cost_unit',)
