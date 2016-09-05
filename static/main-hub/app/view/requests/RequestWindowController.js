@@ -55,9 +55,10 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
     onSaveRequestWndBtnClick: function(btn) {
         var wnd = btn.up('request_wnd'),
             form = Ext.getCmp('requestForm'),
-            records = Ext.getCmp('librariesInRequestTable').getStore().data.items;
+            records = Ext.getCmp('librariesInRequestTable').getStore().data.items,
+            termsOfUseAccept = Ext.getCmp('termsOfUseAccept').getValue();
 
-        if (form.isValid() && records.length > 0) {
+        if (termsOfUseAccept && form.isValid() && records.length > 0) {
             var data = form.getForm().getFieldValues();
 
             var libraries = records.filter(function(item) {
@@ -114,10 +115,14 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                     wnd.close();
                 }
             });
-        } else if (records.length === 0) {
-            Ext.ux.ToastMessage('You did not add any Libraries/Samples', 'warning');
         } else {
-            Ext.ux.ToastMessage('Check the form', 'warning');
+            if (!form.isValid()) {
+                Ext.ux.ToastMessage('Check the form', 'warning');
+            } else if (records.length === 0) {
+                Ext.ux.ToastMessage('You did not add any Libraries/Samples', 'warning');
+            } else if (!termsOfUseAccept) {
+                Ext.ux.ToastMessage('You did not accept Terms of Use', 'warning');
+            }
         }
     },
 

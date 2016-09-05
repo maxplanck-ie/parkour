@@ -55,13 +55,13 @@ Ext.define('MainHub.view.requests.Requests', {
                             metaData.tdAttr = 'data-qtip="' + value + '" data-qwidth=300';
                             return value;
                         }
-                    },
-                    { text: 'Terms of Use (accept)', dataIndex: 'termsOfUseAccept', flex: 1,
-                        renderer: function(value) {
-                            var checked = value ? 'checked' : '';
-                            return '<input type="checkbox" ' + checked + ' onclick="return false;" onkeydown="return false;" />';
-                        }
                     }
+                    // { text: 'Terms of Use (accept)', dataIndex: 'termsOfUseAccept', flex: 1,
+                    //     renderer: function(value) {
+                    //         var checked = value ? 'checked' : '';
+                    //         return '<input type="checkbox" ' + checked + ' onclick="return false;" onkeydown="return false;" />';
+                    //     }
+                    // }
                 ]
             },
 

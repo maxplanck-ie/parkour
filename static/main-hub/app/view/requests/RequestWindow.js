@@ -43,10 +43,7 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                             emptyText: 'Status',
                             minValue: 0,
                             maxValue: 10,
-                            allowBlank: false,
-                            hideTrigger: true,
-                            keyNavEnabled: false,
-                            mouseWheelEnabled: false
+                            allowBlank: false
                         },
                         {
                             name: 'name',
@@ -70,6 +67,7 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                         },
                         {
                             name: 'termsOfUseAccept',
+                            id: 'termsOfUseAccept',
                             xtype: 'checkboxfield',
                             boxLabel: 'Terms of Use (accept)'
                         }
