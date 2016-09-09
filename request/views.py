@@ -110,6 +110,9 @@ def delete_request(request):
     try:
         request_id = int(request.POST.get('request_id'))
         req = Request.objects.get(id=request_id)
+        libraries_samples = list(req.libraries.all()) + list(req.samples.all())
+        for obj in libraries_samples:
+            obj.delete()
         req.delete()
 
     except Exception as e:

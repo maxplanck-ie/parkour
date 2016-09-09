@@ -8,7 +8,7 @@ from request.models import Request
 from library.models import LibraryProtocol, LibraryType, Organism, IndexType, \
     IndexI7, IndexI5, ConcentrationMethod, SequencingRunCondition, Library, \
     LibraryForm, NucleicAcidType, SampleProtocol, RNAQuality, Sample, \
-    SampleForm, FileSample, FileLibrary
+    SampleForm, FileSample, FileLibrary, BarcodeCounter
 from common.utils import get_simple_field_dict
 
 import json
@@ -341,9 +341,12 @@ class LibraryView(View):
                 lib = form.save()
 
                 if mode == 'add':
-                    lib.barcode = generate_barcode('L', str(lib.id))
+                    counter = BarcodeCounter.load()
+                    counter.increment()
+                    lib.barcode = generate_barcode('L', str(counter.counter))
                     lib.files.add(*files)
                     lib.save()
+                    counter.save()
                     data = [{
                         'name': lib.name,
                         'recordType': 'L',
@@ -524,9 +527,12 @@ class SampleView(View):
                 smpl = form.save()
 
                 if mode == 'add':
-                    smpl.barcode = generate_barcode('S', str(smpl.id))
+                    counter = BarcodeCounter.load()
+                    counter.increment()
+                    smpl.barcode = generate_barcode('S', str(counter.counter))
                     smpl.files.add(*files)
                     smpl.save()
+                    counter.save()
                     data = [{
                         'name': smpl.name,
                         'recordType': 'S',
@@ -686,7 +692,7 @@ def get_file_library(request):
     )
 
 
-def generate_barcode(record_type, record_id):
+def generate_barcode(record_type, counter):
     barcode = datetime.now().strftime('%y') + record_type
-    barcode += '0' * (6 - len(record_id)) + record_id
+    barcode += '0' * (6 - len(counter)) + counter
     return barcode

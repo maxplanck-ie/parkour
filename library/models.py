@@ -131,6 +131,33 @@ def filesample_delete(sender, instance, **kwargs):
     instance.file.delete(False)
 
 
+class BarcodeSingletonModel(models.Model):
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super(BarcodeSingletonModel, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        pass
+
+    @classmethod
+    def load(cls):
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj
+
+
+class BarcodeCounter(BarcodeSingletonModel):
+    counter = models.IntegerField(default=0)
+
+    def increment(self):
+        self.counter += 1
+
+    def __str__(self):
+        return str(self.counter)
+
+
 class LibrarySampleAbstract(models.Model):
     name = models.CharField('Name', max_length=200, unique=True)
     date = models.DateTimeField('Date', auto_now_add=True)
