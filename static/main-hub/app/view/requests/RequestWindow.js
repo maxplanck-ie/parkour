@@ -86,12 +86,17 @@ Ext.define('MainHub.view.requests.RequestWindow', {
 
                     store: 'librariesInRequestStore',
 
+                    // dockedItems: [{
+                    //     xtype: 'toolbar',
+                    //     dock: 'bottom',
+                    //     layout: { pack: 'center' },
+                    //     items: [{
+                    //         text: 'Add',
+                    //         itemId: 'addLibraryBtn'
+                    //     }]
+                    // }]
+
                     bbar: [
-                        {
-                            text: 'Load from File',
-                            itemId: 'loadFromFileBtn',
-                            disabled: true
-                        },
                         '->',
                         {
                             text: 'Add',
