@@ -40,6 +40,9 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             '#addWndBtn': {
                 click: 'onAddWndBtnClick'
             },
+            '#loadFromFileBtn': {
+                click: 'onLoadFromFileBtnClick'
+            },
             '#cancelBtn': {
                 click: 'onCancelBtnClick'
             }
@@ -63,7 +66,12 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         var wnd = btn.up('library_wnd'),
             layout = btn.up('panel').getLayout();
 
-        wnd.setSize(670, 700);
+        if (wnd.mode == 'add') {
+            wnd.setSize(885, 700);
+        } else {
+            wnd.setSize(635, 700);
+        }
+
         wnd.center();
         wnd.getDockedItems('toolbar[dock="bottom"]')[0].show();
 
@@ -204,6 +212,8 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         Ext.getCmp('addWndBtn').show();
         if (wnd.mode == 'add') {
             Ext.getStore('fileSampleStore').removeAll();
+            Ext.getCmp('loadSamplesFromFile').show();
+            Ext.getCmp('loadFromFileBtn').show();
             Ext.getCmp('saveAndAddWndBtn').show();
         } else {
             var record = wnd.record.data,
@@ -620,6 +630,10 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         } else {
             Ext.ux.ToastMessage('Check the form', 'warning');
         }
+    },
+
+    onLoadFromFileBtnClick: function(btn) {
+        
     },
 
     onCancelBtnClick: function(btn) {
