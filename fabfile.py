@@ -1,9 +1,16 @@
 from fabric.api import *
+from fabric.contrib.console import confirm
 import pyperclip
 
 import os
 
 env.password = os.environ['FAB_PASS']
+
+
+def build_client():
+    if confirm('Rebuild client?'):
+        with lcd('static/main-hub/'):
+            local('sencha app build')
 
 
 @hosts(os.environ['FAB_HOST'])

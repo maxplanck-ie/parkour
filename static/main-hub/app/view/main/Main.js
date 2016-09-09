@@ -8,10 +8,10 @@ Ext.define('MainHub.view.main.Main', {
         'MainHub.view.main.MainContainerWrap',
         'MainHub.view.reports.BlankReport',
         'MainHub.view.startpage.StartPage',
-        'MainHub.view.tables.researchers.Researchers',
-        'MainHub.view.tables.requests.Requests',
-        'MainHub.view.tables.libraries.Libraries',
-        'MainHub.store.NavigationTree'
+        'MainHub.view.researchers.Researchers',
+        'MainHub.view.requests.Requests',
+        'MainHub.view.libraries.Libraries',
+        'MainHub.view.qualitycontrol.IncomingLibraries'
     ],
 
     controller: 'main',
@@ -41,7 +41,7 @@ Ext.define('MainHub.view.main.Main', {
                     reference: 'logo',
                     cls: 'main-logo',
                     html: '<div class="logo"><img src="static/main-hub/resources/images/logo.png">Parkour</div>',
-                    width: 250
+                    width: 320
                 },
                 {
                     margin: '0 0 0 8',
@@ -77,7 +77,7 @@ Ext.define('MainHub.view.main.Main', {
                     itemId: 'navigationTreeList',
                     ui: 'navigation',
                     store: 'NavigationTree',
-                    width: 250,
+                    width: 320,
                     expanderFirst: false,
                     expanderOnly: false,
                     listeners: {

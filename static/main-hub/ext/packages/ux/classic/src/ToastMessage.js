@@ -42,8 +42,11 @@ Ext.define('Ext.ux.ToastMessage', {
             msgType: 'default',
             autoClose: this.autoClose,
             autoCloseDelay: this.autoCloseDelay,
-            minWidth: 125,
-            maxWidth: 300,
+            // minWidth: 125,
+            // maxWidth: 300,
+            width: 250,
+            minHeight: 150,
+            height: 'auto',
             align: this.align
         });
 

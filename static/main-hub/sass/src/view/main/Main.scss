@@ -1,5 +1,3 @@
-
-
 .x-title-icon-navigation {
     font-family: FontAwesome;
     color: #fff;
@@ -73,7 +71,7 @@
 
     // Various sizes for the pieces:
     $item-icon-font-size: 18px,
-    $item-icon-width: 35px,
+    $item-icon-width: 44px,
     $item-expander-font-size: 16px,
     $item-expander-width: 24px,
 
@@ -114,4 +112,13 @@
     width: 100%;
     z-index: 10;
     border: none;
+}
+
+.grid-header-checkbox {
+    font-size: 13px;
+}
+
+.grid-header-checkbox,
+.grid-header-checkbox > div.x-form-item-body > div.x-form-cb-wrap-inner > span.x-form-checkbox {
+    color: #fff;
 }
