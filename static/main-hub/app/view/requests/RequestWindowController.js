@@ -35,8 +35,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                 status: record.status,
                 name: record.name,
                 projectType: record.projectType,
-                description: record.description,
-                termsOfUseAccept: record.termsOfUseAccept
+                description: record.description
             });
 
             Ext.getStore('librariesInRequestStore').load({
@@ -55,10 +54,9 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
     onSaveRequestWndBtnClick: function(btn) {
         var wnd = btn.up('request_wnd'),
             form = Ext.getCmp('requestForm'),
-            records = Ext.getCmp('librariesInRequestTable').getStore().data.items,
-            termsOfUseAccept = Ext.getCmp('termsOfUseAccept').getValue();
+            records = Ext.getCmp('librariesInRequestTable').getStore().data.items;
 
-        if (termsOfUseAccept && form.isValid() && records.length > 0) {
+        if (form.isValid() && records.length > 0) {
             var data = form.getForm().getFieldValues();
 
             var libraries = records.filter(function(item) {
@@ -83,7 +81,6 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                     'name': data.name,
                     'project_type': data.projectType,
                     'description': data.description,
-                    'terms_of_use_accept': data.termsOfUseAccept,
                     'researcher_id': 1,     // temporarily
                     'libraries': Ext.JSON.encode(Ext.Array.pluck(Ext.Array.pluck(libraries, 'data'), 'libraryId')),
                     'samples': Ext.JSON.encode(Ext.Array.pluck(Ext.Array.pluck(samples, 'data'), 'sampleId'))
@@ -115,14 +112,10 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                     wnd.close();
                 }
             });
+        } else if (records.length === 0) {
+            Ext.ux.ToastMessage('You did not add any Libraries/Samples', 'warning');
         } else {
-            if (!form.isValid()) {
-                Ext.ux.ToastMessage('Check the form', 'warning');
-            } else if (records.length === 0) {
-                Ext.ux.ToastMessage('You did not add any Libraries/Samples', 'warning');
-            } else if (!termsOfUseAccept) {
-                Ext.ux.ToastMessage('You did not accept Terms of Use', 'warning');
-            }
+            Ext.ux.ToastMessage('Check the form', 'warning');
         }
     },
 

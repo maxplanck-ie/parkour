@@ -56,12 +56,6 @@ Ext.define('MainHub.view.requests.Requests', {
                             return value;
                         }
                     }
-                    // { text: 'Terms of Use (accept)', dataIndex: 'termsOfUseAccept', flex: 1,
-                    //     renderer: function(value) {
-                    //         var checked = value ? 'checked' : '';
-                    //         return '<input type="checkbox" ' + checked + ' onclick="return false;" onkeydown="return false;" />';
-                    //     }
-                    // }
                 ]
             },
 

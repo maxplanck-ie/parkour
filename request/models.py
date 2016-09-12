@@ -11,7 +11,6 @@ class Request(models.Model):
     date_created = models.DateTimeField('Date', auto_now_add=True)
     description = models.TextField(null=True)
     researcher_id = models.ForeignKey(Researcher, null=True)
-    terms_of_use_accept = models.BooleanField(default=True)
     libraries = models.ManyToManyField(Library, blank=True)
     samples = models.ManyToManyField(Sample, blank=True)
 

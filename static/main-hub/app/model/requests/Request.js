@@ -27,10 +27,6 @@ Ext.define('MainHub.model.requests.Request', {
             name: 'description'
         },
         {
-            type: 'bool',
-            name: 'termsOfUseAccept'
-        },
-        {
             type: 'string',
             name: 'researcher'
         }

@@ -9,7 +9,7 @@ Ext.define('MainHub.view.requests.RequestWindow', {
 
     controller: 'requests-requestwindow',
 
-    height: 445,
+    height: 400,
     width: 750,
 
     modal: true,
@@ -64,12 +64,6 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                             emptyText: 'Description',
                             allowBlank: false,
                             height: 150
-                        },
-                        {
-                            name: 'termsOfUseAccept',
-                            id: 'termsOfUseAccept',
-                            xtype: 'checkboxfield',
-                            boxLabel: 'Terms of Use (accept)'
                         }
                     ]
                 },
@@ -78,7 +72,7 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                     id: 'librariesInRequestTable',
                     title: 'Libraries/Samples',
                     width: 345,
-                    height: 350,
+                    height: 306,
                     padding: '15px 15px 15px 0',
 
                     columns: {

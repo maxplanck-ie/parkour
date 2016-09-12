@@ -30,7 +30,6 @@ def get_requests(request):
                     req.researcher_id.first_name,
                     req.researcher_id.last_name,
                 ),
-                'termsOfUseAccept': req.terms_of_use_accept
             }
             for req in requests
         ]

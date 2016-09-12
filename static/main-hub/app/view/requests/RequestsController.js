@@ -32,8 +32,6 @@ Ext.define('MainHub.view.requests.RequestsController', {
             store = grid.getStore(),
             columns = Ext.pluck(grid.getColumns(), 'dataIndex');
 
-        columns.pop();  // do not consider 'Terms of Use' column
-
         store.clearFilter();
         store.filterBy(function(record) {
             var res = false;
