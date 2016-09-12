@@ -7,7 +7,9 @@ except ImportError:
     from wui.prod_settings import *
     DEBUG = False
 
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG_DIR = os.path.join(BASE_DIR, 'logs')
 
@@ -17,8 +19,6 @@ LOG_DIR = os.path.join(BASE_DIR, 'logs')
 
 SECRET_KEY = os.environ['SECRET_KEY']
 
-# SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
 
 # Allow all host headers
 ALLOWED_HOSTS = ['*']
@@ -121,9 +121,15 @@ USE_TZ = True
 
 
 ADMINS = [
-    ('Devon P. Ryan', 'dpryan79@gmail.com'),
-    ('Evgeny Anatskiy', 'evgeny.anatskiy@gmail.com'),
+    # ('Devon P. Ryan', 'dpryan79@gmail.com'),
+    ('Evgeny Anatskiy', 'anatskiy@ie-freiburg.mpg.de'),
 ]
+
+
+# Email config
+EMAIL_HOST = 'mail.ie-freiburg.mpg.de'
+EMAIL_SUBJECT_PREFIX = '[Parkour] '
+SERVER_EMAIL = 'parkour_support@ie-freiburg.mpg.de'
 
 
 LOGGING = {
@@ -145,11 +151,11 @@ LOGGING = {
         }
     },
     'handlers': {
-        # 'mail_admins': {
-        #     'level': 'ERROR',
-        #     'filters': ['require_debug_false'],
-        #     'class': 'common.logger.admin_email_handler.CustomAdminEmailHandler'
-        # },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'common.logger.CustomAdminEmailHandler'
+        },
         'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
@@ -172,6 +178,11 @@ LOGGING = {
         },
     },
     'loggers': {
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
         'django': {
             'handlers': ['console'] if DEBUG else ['console', 'logfile'],
             'level': 'DEBUG' if DEBUG else 'ERROR',
@@ -186,11 +197,6 @@ LOGGING = {
             'handlers': ['console', 'dblogfile'],
             'level': 'DEBUG',
         },
-        # 'django.request': {
-        #     'handlers': ['mail_admins'],
-        #     'level': 'ERROR',
-        #     'propagate': True,
-        # },
     },
 }
 
