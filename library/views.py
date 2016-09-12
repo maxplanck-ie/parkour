@@ -9,7 +9,7 @@ from library.models import LibraryProtocol, LibraryType, Organism, IndexType, \
     IndexI7, IndexI5, ConcentrationMethod, SequencingRunCondition, Library, \
     LibraryForm, NucleicAcidType, SampleProtocol, RNAQuality, Sample, \
     SampleForm, FileSample, FileLibrary, BarcodeCounter
-from common.utils import get_simple_field_dict
+from common.utils import get_simple_field_dict, get_form_errors
 
 import json
 import logging
@@ -367,9 +367,7 @@ class LibraryView(View):
                     for file in files_to_delete:
                         file.delete()
             else:
-                error = 'Form is invalid'
-                print('[ERROR]: save_sample/: %s' % form.errors.as_data())
-                logger.debug(form.errors.as_data())
+                raise Exception(get_form_errors(form.errors))
 
         return data
 
@@ -553,9 +551,7 @@ class SampleView(View):
                     for file in files_to_delete:
                         file.delete()
             else:
-                error = 'Form is invalid'
-                print('[ERROR]: save_sample/: %s' % form.errors.as_data())
-                logger.debug(form.errors.as_data())
+                raise Exception(get_form_errors(form.errors))
 
         return data
 

@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from researcher.models import Researcher, PrincipalInvestigator, \
     Organization, CostUnit, ResearcherForm
-# from common.utils import *
+from common.utils import get_form_errors
 
 import json
 import logging
@@ -73,9 +73,7 @@ def save_researcher(request):
                 researcher = form.save()
                 researcher.cost_unit.add(*cost_unit)
             else:
-                error = 'Form is invalid'
-                print('[ERROR]: save_researcher/: %s' % form.errors.as_data())
-                logger.debug(form.errors.as_data())     
+                raise Exception(get_form_errors(form.errors)) 
 
         except Exception as e:
             error = str(e)

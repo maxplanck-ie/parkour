@@ -46,7 +46,7 @@ Ext.define('Ext.ux.ToastMessage', {
             // maxWidth: 300,
             width: 250,
             minHeight: 150,
-            height: 'auto',
+            // height: 'auto',
             align: this.align
         });
 

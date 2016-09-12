@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from request.models import Request, RequestForm
 from researcher.models import Researcher
 from library.models import Library, Sample
+from common.utils import get_form_errors
 
 import json
 from datetime import datetime
@@ -85,9 +86,7 @@ def save_request(request):
                 req.samples.add(*samples)
             
             else:
-                error = 'Form is invalid'
-                print('[ERROR]: edit_request/: %s' % form.errors.as_data())
-                logger.debug(form.errors.as_data())
+                raise Exception(get_form_errors(form.errors))
     
     except Exception as e:
         error = str(e)
