@@ -34,14 +34,20 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             '#sampleProtocolField': {
                 select: 'onSampleProtocolFieldSelect'
             },
-            '#saveAndAddWndBtn': {
-                click: 'onSaveAndAddWndBtnClick'
+            // '#saveAndAddWndBtn': {
+            //     click: 'onSaveAndAddWndBtnClick'
+            // },
+            '#keepAndAddWndBtn': {
+                click: 'onKeepAndAddWndBtnClick'
             },
             '#addWndBtn': {
                 click: 'onAddWndBtnClick'
             },
             '#loadFromFileBtn': {
                 click: 'onLoadFromFileBtnClick'
+            },
+            '#loadSamplesFromFile': {
+                selectionchange: 'onLoadSamplesFromFileSelection'
             },
             '#cancelBtn': {
                 click: 'onCancelBtnClick'
@@ -205,121 +211,35 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
     },
 
     onSampleCardActivate: function(card) {
-        var wnd = card.up('library_wnd');
+        var wnd = card.up('library_wnd'), form = null, record = null;
 
         Ext.getCmp('sampleProtocolInfo').hide();
+        this.initializeTooltips();
 
         Ext.getCmp('addWndBtn').show();
         if (wnd.mode == 'add') {
             Ext.getStore('fileSampleStore').removeAll();
             Ext.getCmp('loadSamplesFromFile').show();
             Ext.getCmp('loadFromFileBtn').show();
-            Ext.getCmp('saveAndAddWndBtn').show();
+            // Ext.getCmp('saveAndAddWndBtn').show();
+            Ext.getCmp('keepAndAddWndBtn').show();
+            Ext.getCmp('loadSamplesFromFile').setStore(
+                Ext.create('Ext.data.Store', {
+                    model: 'MainHub.model.libraries.Library',
+                    data: []
+                })
+            );
         } else {
-            var record = wnd.record.data,
-                form = Ext.getCmp('sampleForm').getForm();
+            form = Ext.getCmp('sampleForm').getForm();
+            record = wnd.record.data;
             
             // Show Sample barcode
             Ext.getCmp('sampleBarcodeField').show().setHtml(record.barcode);
 
-            form.setValues({
-                name: record.name,
-                DNADissolvedIn: record.DNADissolvedIn,
-                concentration: record.concentration,
-                sampleVolume: record.sampleVolume,
-                sampleAmplifiedCycles: record.amplifiedCycles,
-                sequencingDepth: record.sequencingDepth,
-                samplePreparationProtocol: record.samplePreparationProtocol,
-                requestedSampleTreatment: record.requestedSampleTreatment,
-                comments: record.comments
-            });
-            if (record.equalRepresentation == 'False') Ext.getCmp('equalRepresentationRadio4').setValue(true);
-            if (record.DNaseTreatment == 'False') Ext.getCmp('DNaseTreatmentRadio2').setValue(true);
-            if (record.rnaSpikeIn == 'False') Ext.getCmp('rnaSpikeInRadio2').setValue(true);
-            if (record.files.length > 0) {
-                Ext.getStore('fileSampleStore').load({
-                    params: {
-                        'file_ids': Ext.JSON.encode(record.files)
-                    },
-                    callback: function(records, operation, success) {
-                        if (!success) Ext.ux.ToastMessage('Cannot load Sample files', 'error');
-                    }
-                });
-            }
-
             Ext.getCmp('addWndBtn').setConfig('text', 'Save');
         }
 
-        this.initializeTooltips();
-
-        // Load Nucleic Acid Types
-        wnd.setLoading();
-        Ext.getStore('nucleicAcidTypesStore').load(function(records, operation, success) {
-            if (!success) Ext.ux.ToastMessage('Cannot load Nucleic Acid Types', 'error');
-
-            if (wnd.mode == 'edit') {
-                var nucleicAcidTypeField = Ext.getCmp('nucleicAcidTypeField');
-                nucleicAcidTypeField.select(record.nucleicAcidTypeId);
-                nucleicAcidTypeField.fireEvent('select', nucleicAcidTypeField, nucleicAcidTypeField.findRecordByValue(record.nucleicAcidTypeId), 'edit');
-            }
-
-            wnd.setLoading(false);
-        });
-
-        // Load Organisms
-        wnd.setLoading();
-        Ext.getStore('organismsStore').load(function(records, operation, success) {
-            if (!success) Ext.ux.ToastMessage('Cannot load Organisms', 'error');
-
-            if (wnd.mode == 'edit') {
-                var organismSampleField = Ext.getCmp('organismSampleField');
-                organismSampleField.select(record.organismId);
-                organismSampleField.fireEvent('select', organismSampleField, organismSampleField.findRecordByValue(record.organismId));
-            }
-
-            wnd.setLoading(false);
-        });
-
-        // Load Concentration Methods
-        wnd.setLoading();
-        Ext.getStore('concentrationMethodsStore').load(function(records, operation, success) {
-            if (!success) Ext.ux.ToastMessage('Cannot load Concentration Methods', 'error');
-
-            if (wnd.mode == 'edit') {
-                var concentrationSampleMethodField = Ext.getCmp('concentrationSampleMethodField');
-                concentrationSampleMethodField.select(record.concentrationMethodId);
-                concentrationSampleMethodField.fireEvent('select', concentrationSampleMethodField, concentrationSampleMethodField.findRecordByValue(record.concentrationMethodId));
-            }
-
-            wnd.setLoading(false);
-        });
-
-        // Load RNA Qualities
-        Ext.getStore('rnaQualityStore').load(function(records, operation, success) {
-            if (!success) Ext.ux.ToastMessage('Cannot load RNA Qualities', 'error');
-
-            if (wnd.mode == 'edit') {
-                var rnaQualityField = Ext.getCmp('rnaQualityField');
-                rnaQualityField.select(record.rnaQualityId);
-                rnaQualityField.fireEvent('select', rnaQualityField, rnaQualityField.findRecordByValue(record.rnaQualityId));
-            }
-
-            wnd.setLoading(false);
-        });
-
-        // Load Sequencing Run Conditions
-        wnd.setLoading();
-        Ext.getStore('sequencingRunConditionsStore').load(function(records, operation, success) {
-            if (!success) Ext.ux.ToastMessage('Cannot load Sequencing Run Conditions', 'error');
-
-            if (wnd.mode == 'edit') {
-                var sequencingRunConditionSampleField = Ext.getCmp('sequencingRunConditionSampleField');
-                sequencingRunConditionSampleField.select(record.sequencingRunConditionId);
-                sequencingRunConditionSampleField.fireEvent('select', sequencingRunConditionSampleField, sequencingRunConditionSampleField.findRecordByValue(record.sequencingRunConditionId));
-            }
-
-            wnd.setLoading(false);
-        });
+        this.setSampleForm(wnd, form, record);
     },
 
     onLibraryProtocolFieldSelect: function(fld, record, eOpts) {
@@ -462,6 +382,9 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                     var sampleProtocolId = wnd.record.data.libraryProtocolId;
                     sampleProtocolField.select(sampleProtocolId);
                     sampleProtocolField.fireEvent('select', sampleProtocolField, sampleProtocolField.findRecordByValue(sampleProtocolId), 'edit');
+                } else {
+                    // TODO: reset sampleProtocolField if adding new Sample
+                    // TODO: set load sampleProtocolField if switching samples in the grid
                 }
 
                 wnd.setLoading(false);
@@ -489,6 +412,27 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
 
     onSaveAndAddWndBtnClick: function() {
         this.saveLibrary(true);
+    },
+
+    onKeepAndAddWndBtnClick: function() {
+        // For Samples only (yet)
+        var wnd = Ext.getCmp('library_wnd'),
+            form = Ext.getCmp('sampleForm'),
+            data = form.getForm().getFieldValues(),
+            files = form.down('filegridfield').getValue();
+
+        if (form.isValid()) {
+            var record = this.getSampleRecord(data, files),
+                samplesGrid = Ext.getCmp('loadSamplesFromFile');
+            
+            if (samplesGrid.isDisabled()) samplesGrid.enable();
+            
+            samplesGrid.getStore().add(record);
+            Ext.getCmp('sampleName').reset();
+            Ext.getStore('fileSampleStore').removeAll();
+        } else {
+            Ext.ux.ToastMessage('Check the form', 'warning');
+        }
     },
 
     onAddWndBtnClick: function() {
@@ -633,10 +577,176 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
     },
 
     onLoadFromFileBtnClick: function(btn) {
-        
+        Ext.create('Ext.ux.FileUploadWindow', {
+            onFileUpload: function() {
+                var me = this,
+                    form = this.down('form').getForm(),
+                    url = 'load_samples_from_file/';
+
+                if (form.isValid()) {
+                    form.submit({
+                        url: url,
+                        method: 'POST',
+                        waitMsg: 'Uploading...',
+                        params: Ext.JSON.encode(form.getFieldValues()),
+                        
+                        success: function(f, action) {
+                            var obj = Ext.JSON.decode(action.response.responseText);
+
+                            if (obj.success) {
+                                var grid = Ext.getCmp('loadSamplesFromFile'),
+                                    store = grid.getStore();
+                                store.add(obj.data);
+                                grid.enable();
+                                me.close();
+                            } else {
+                                debugger;
+                            }
+                        },
+
+                        failure: function(response) {
+                            console.error('[ERROR]: ' + url);
+                            console.error(response);
+                        }
+                    });
+                } else {
+                    Ext.ux.ToastMessage('You did not select any file', 'warning');
+                }
+            }
+        });
+    },
+
+    onLoadSamplesFromFileSelection: function(view, selection) {
+        var wnd = Ext.getCmp('library_wnd'),
+            form = Ext.getCmp('sampleForm').getForm(),
+            record = selection[0].data;
+        form.reset();
+        this.setSampleForm(wnd, form, record);
     },
 
     onCancelBtnClick: function(btn) {
         btn.up('library_wnd').close();
+    },
+
+    getSampleRecord: function(data, files) {
+        return {
+            'name': data.name,
+            'nucleicAcidTypeId': data.nucleicAcidType,
+            'sampleProtocolId': data.sampleProtocol,
+            'organismId': data.organism,
+            'equalRepresentationOfNucleotides': data.equalRepresentationOfNucleotides,
+            'DNADissolvedIn': data.DNADissolvedIn,
+            'concentration': data.concentration,
+            'concentrationMethodId': data.concentrationDeterminedBy,
+            'sampleVolume': data.sampleVolume,
+            'sampleAmplifiedCycles': data.sampleAmplifiedCycles,
+            'DNaseTreatment': data.DNaseTreatment,
+            'rnaQuality': data.rnaQuality,
+            'rnaSpikeIn': data.rnaSpikeIn,
+            'samplePreparationProtocol': data.samplePreparationProtocol,
+            'requestedSampleTreatment': data.requestedSampleTreatment,
+            'sequencingRunConditionId': data.sequencingRunCondition,
+            'sequencingDepth': data.sequencingDepth,
+            'comments': data.comments,
+            'files': files
+        }
+    },
+
+    setSampleForm: function(wnd, form, record) {
+        if (wnd.mode == 'edit' || form != null) {
+            form.setValues({
+                name: record.name,
+                DNADissolvedIn: record.DNADissolvedIn,
+                concentration: record.concentration,
+                sampleVolume: record.sampleVolume,
+                sampleAmplifiedCycles: record.amplifiedCycles,
+                sequencingDepth: record.sequencingDepth,
+                samplePreparationProtocol: record.samplePreparationProtocol,
+                requestedSampleTreatment: record.requestedSampleTreatment,
+                comments: record.comments
+            });
+            if (record.equalRepresentation == 'False') Ext.getCmp('equalRepresentationRadio4').setValue(true);
+            if (record.DNaseTreatment == 'False') Ext.getCmp('DNaseTreatmentRadio2').setValue(true);
+            if (record.rnaSpikeIn == 'False') Ext.getCmp('rnaSpikeInRadio2').setValue(true);
+            if (record.files.length > 0) {
+                Ext.getStore('fileSampleStore').load({
+                    params: {
+                        'file_ids': Ext.JSON.encode(record.files)
+                    },
+                    callback: function(records, operation, success) {
+                        if (!success) Ext.ux.ToastMessage('Cannot load Sample files', 'error');
+                    }
+                });
+            }
+        }
+
+        // Load Nucleic Acid Types
+        // wnd.setLoading();
+        Ext.getStore('nucleicAcidTypesStore').load(function(records, operation, success) {
+            if (!success) Ext.ux.ToastMessage('Cannot load Nucleic Acid Types', 'error');
+
+            if (wnd.mode == 'edit' || record != null) {
+                var nucleicAcidTypeField = Ext.getCmp('nucleicAcidTypeField');
+                nucleicAcidTypeField.select(record.nucleicAcidTypeId);
+                nucleicAcidTypeField.fireEvent('select', nucleicAcidTypeField, nucleicAcidTypeField.findRecordByValue(record.nucleicAcidTypeId), 'edit');
+            }
+
+            // wnd.setLoading(false);
+        });
+
+        // Load Organisms
+        // wnd.setLoading();
+        Ext.getStore('organismsStore').load(function(records, operation, success) {
+            if (!success) Ext.ux.ToastMessage('Cannot load Organisms', 'error');
+
+            if (wnd.mode == 'edit' || record != null) {
+                var organismSampleField = Ext.getCmp('organismSampleField');
+                organismSampleField.select(record.organismId);
+                organismSampleField.fireEvent('select', organismSampleField, organismSampleField.findRecordByValue(record.organismId));
+            }
+
+            // wnd.setLoading(false);
+        });
+
+        // Load Concentration Methods
+        // wnd.setLoading();
+        Ext.getStore('concentrationMethodsStore').load(function(records, operation, success) {
+            if (!success) Ext.ux.ToastMessage('Cannot load Concentration Methods', 'error');
+
+            if (wnd.mode == 'edit' || record != null) {
+                var concentrationSampleMethodField = Ext.getCmp('concentrationSampleMethodField');
+                concentrationSampleMethodField.select(record.concentrationMethodId);
+                concentrationSampleMethodField.fireEvent('select', concentrationSampleMethodField, concentrationSampleMethodField.findRecordByValue(record.concentrationMethodId));
+            }
+
+            // wnd.setLoading(false);
+        });
+
+        // Load RNA Qualities
+        Ext.getStore('rnaQualityStore').load(function(records, operation, success) {
+            if (!success) Ext.ux.ToastMessage('Cannot load RNA Qualities', 'error');
+
+            if (wnd.mode == 'edit' || record != null) {
+                var rnaQualityField = Ext.getCmp('rnaQualityField');
+                rnaQualityField.select(record.rnaQualityId);
+                rnaQualityField.fireEvent('select', rnaQualityField, rnaQualityField.findRecordByValue(record.rnaQualityId));
+            }
+
+            // wnd.setLoading(false);
+        });
+
+        // Load Sequencing Run Conditions
+        // wnd.setLoading();
+        Ext.getStore('sequencingRunConditionsStore').load(function(records, operation, success) {
+            if (!success) Ext.ux.ToastMessage('Cannot load Sequencing Run Conditions', 'error');
+
+            if (wnd.mode == 'edit' || record != null) {
+                var sequencingRunConditionSampleField = Ext.getCmp('sequencingRunConditionSampleField');
+                sequencingRunConditionSampleField.select(record.sequencingRunConditionId);
+                sequencingRunConditionSampleField.fireEvent('select', sequencingRunConditionSampleField, sequencingRunConditionSampleField.findRecordByValue(record.sequencingRunConditionId));
+            }
+
+            // wnd.setLoading(false);
+        });
     }
 });

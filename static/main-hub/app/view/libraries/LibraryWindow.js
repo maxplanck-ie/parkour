@@ -6,7 +6,8 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
 
     requires: [
         'MainHub.view.libraries.LibraryWindowController',
-        'Ext.ux.FileGridField'
+        'Ext.ux.FileGridField',
+        'Ext.ux.FileUploadWindow'
     ],
 
     controller: 'libraries-librarywindow',
@@ -346,15 +347,19 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                     { text: 'Name', dataIndex: 'name', flex: 1 }
                                 ]
                             },
-                            store: [],
                             width: 250,
                             height: 607,
+                            border: 0,
+                            disabled: true,
                             hidden: true
                         },
                         {
                             xtype: 'container',
                             height: 607,
                             scrollable: 'y',
+                            style: {
+                                borderLeft: '1px solid #d0d0d0'
+                            },
                             items: [
                                 {
                                     xtype: 'container',
@@ -652,16 +657,23 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                 hidden: true
             },
             '->',
+            // {
+            //     xtype: 'button',
+            //     itemId: 'cancelBtn',
+            //     text: 'Cancel'
+            // },
+            // {
+            //     xtype: 'button',
+            //     itemId: 'saveAndAddWndBtn',
+            //     id: 'saveAndAddWndBtn',
+            //     text: 'Save and Add another',
+            //     hidden: true
+            // },
             {
                 xtype: 'button',
-                itemId: 'cancelBtn',
-                text: 'Cancel'
-            },
-            {
-                xtype: 'button',
-                itemId: 'saveAndAddWndBtn',
-                id: 'saveAndAddWndBtn',
-                text: 'Save and Add another',
+                itemId: 'keepAndAddWndBtn',
+                id: 'keepAndAddWndBtn',
+                text: 'Keep and Add another',
                 hidden: true
             },
             {

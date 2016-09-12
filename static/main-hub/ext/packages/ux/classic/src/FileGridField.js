@@ -134,22 +134,22 @@ Ext.define('Ext.ux.FileGridField', {
                                     grid.getStore().add(obj.data);
                                 } else {
                                     Ext.ux.ToastMessage(response.statusText, 'error');
-                                    console.log('[ERROR]: ' + getFileUrl);
-                                    console.log(response); 
+                                    console.error('[ERROR]: ' + getFileUrl);
+                                    console.error(response); 
                                 }
                             }
                         });
                     } else {
                         Ext.ux.ToastMessage(obj.error, 'error');
-                        console.log('[ERROR]: ' + uploadFileUrl + ' : ' + obj.error);
-                        console.log(response);
+                        console.error('[ERROR]: ' + uploadFileUrl + ' : ' + obj.error);
+                        console.error(response);
                     }
                     wnd.close();
                 },
                 failure: function(response) {
                     Ext.ux.ToastMessage(response.statusText, 'error');
-                    console.log('[ERROR]: ' + uploadFileUrl);
-                    console.log(response);
+                    console.error('[ERROR]: ' + uploadFileUrl);
+                    console.error(response);
                     wnd.close();
                 }
             });

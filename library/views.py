@@ -14,6 +14,8 @@ from common.utils import get_simple_field_dict, get_form_errors
 import json
 import logging
 from datetime import datetime
+import io
+import csv
 
 logger = logging.getLogger('db')
 
@@ -692,3 +694,61 @@ def generate_barcode(record_type, counter):
     barcode = datetime.now().strftime('%y') + record_type
     barcode += '0' * (6 - len(counter)) + counter
     return barcode
+
+
+@csrf_exempt
+@login_required
+def load_samples_from_file(request):
+    """  """
+    error = ''
+    data = []
+
+    if request.method == 'POST' and any(request.FILES):
+        try:
+            file = request.FILES.get('file')
+            if file.name.endswith('.csv') or file.name.endswith('.tsv'):
+                file_content = file.read()
+                file_content = file_content.decode('utf-8')
+                if file.name.endswith('.csv'):
+                    records = csv.DictReader(io.StringIO(file_content))
+                else:
+                    records = csv.DictReader(
+                        io.StringIO(file_content),
+                        delimiter='\t',
+                    )
+                data = prepare_samples(records)
+            else:
+                raise Exception('Wrong file type')
+
+        except Exception as e:
+            error = str(e)
+            print('[ERROR]: %s' % error)
+            logger.debug(error)
+
+    return HttpResponse(
+        json.dumps({
+            'success': not error,
+            'error': error,
+            'data': data,
+        }),
+        content_type='application/json',
+    )
+
+
+def prepare_samples(samples):
+    """ """
+    result = []
+
+    for sample in samples:
+        try:
+            result.append({
+                'name': sample['Sample Name'],
+                'DNADissolvedIn': sample['DNA/RNA Dissolved In'],
+                'concentration': '%.2f' % float(sample['Concentration']),
+                'sampleVolume': int(sample['Sample Volume']),
+                'sequencingDepth': int(sample['Sequencing Depth']),
+            })
+        except Exception:
+            pass
+
+    return sorted(result, key=lambda x: x['name'])
