@@ -20,39 +20,7 @@ Ext.define('MainHub.view.requests.RequestsController', {
 
     onRequestsTableRefresh: function(grid) {
         grid.getStore().removeAll();
-
-        grid.setLoading(true);
-        Ext.Ajax.request({
-            url: 'get_requests/',
-            method: 'POST',
-            timeout: 1000000,
-            scope: this,
-
-            success: function (response) {
-                var obj = Ext.JSON.decode(response.responseText);
-
-                if (obj.success) {
-                    var store = Ext.create('MainHub.store.requests.Requests', {
-                        data: obj.data
-                    });
-
-                    grid.setStore(store);
-                    grid.setLoading(false);
-                } else {
-                    grid.setLoading(false);
-                    Ext.ux.ToastMessage(obj.error, 'error');
-                    console.error('[ERROR]: get_requests/');
-                    console.error(response);
-                }
-            },
-
-            failure: function(response) {
-                grid.setLoading(false);
-                Ext.ux.ToastMessage(response.statusText, 'error');
-                console.error('[ERROR]: get_requests/');
-                console.error(response);
-            }
-        });
+        Ext.getStore('requestsStore').load();
     },
 
     onAddRequestBtnClick: function(btn) {

@@ -26,10 +26,10 @@ Ext.define('MainHub.store.requests.Requests', {
     listeners: {
         load: function(store, records, success, operation) {
             if (!success) {
-                var response = operation._response,
-                    obj = Ext.JSON.decode(response.responseText);
-                console.error('[ERROR]: get_requests/: ' + obj.error);
-                console.error(response);
+                var error = operation.error;
+                Ext.ux.ToastMessage(error.statusText, 'error');
+                console.error('[ERROR]: get_requests/: ' + error.statusText);
+                console.error(error.response);
             }
         }
     }
