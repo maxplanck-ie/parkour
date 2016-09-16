@@ -66,6 +66,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                 sampleCardBtn.fireEvent('click', sampleCardBtn);
             }
         }
+        wnd.justLoaded = true;
     },
 
     onCardBtnClick: function(btn) {
@@ -250,7 +251,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         libraryTypeField.reset();
 
         // Load Library Type
-        wnd.setLoading();
+        // wnd.setLoading();
         libraryTypeStore.load({
             params: {
                 'library_protocol_id': record.data.id
@@ -267,7 +268,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                         libraryTypeField.fireEvent('select', libraryTypeField, libraryTypeField.findRecordByValue(record.libraryTypeId));
                     }
                 }
-                wnd.setLoading(false);
+                // wnd.setLoading(false);
             }
         });
     },
@@ -306,7 +307,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         indexI5Field.reset();
 
         // Load Index I7
-        wnd.setLoading();
+        // wnd.setLoading();
         indexI7Store.load({
             params: {
                 'index_type_id': record.data.id
@@ -314,12 +315,12 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             callback: function(records, operation, success) {
                 if (!success) Ext.ux.ToastMessage('Cannot load Index I7', 'error');
                 if (wnd.mode == 'edit' && eOpts == 'edit') indexI7Field.setValue(wndRecord.indexI7);
-                wnd.setLoading(false);
+                // wnd.setLoading(false);
             }
         });
 
         // Load Index I5
-        wnd.setLoading();
+        // wnd.setLoading();
         indexI5Store.load({
             params: {
                 'index_type_id': record.data.id
@@ -327,7 +328,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             callback: function(records, operation, success) {
                 if (!success) Ext.ux.ToastMessage('Cannot load Index I5', 'error');
                 if (wnd.mode == 'edit' && eOpts == 'edit') indexI5Field.setValue(wndRecord.indexI5);
-                wnd.setLoading(false);
+                // wnd.setLoading(false);
             }
         });
     },
@@ -366,7 +367,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         }
 
         // Load Sample Protocols
-        wnd.setLoading();
+        // wnd.setLoading();
         Ext.getStore('sampleProtocolsStore').load({
             params: {
                 'type': record.data.type
@@ -378,16 +379,22 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                     sampleProtocolField.setDisabled(false);
                 }
 
-                if (wnd.mode == 'edit') {
-                    var sampleProtocolId = wnd.record.data.libraryProtocolId;
+                sampleProtocolField.clearValue();
+
+                var sampleProtocolId = null;
+                if (wnd.mode == 'edit' && wnd.justLoaded) {
+                    wnd.justLoaded = false;
+                    sampleProtocolId = wnd.record.data.libraryProtocolId;
                     sampleProtocolField.select(sampleProtocolId);
                     sampleProtocolField.fireEvent('select', sampleProtocolField, sampleProtocolField.findRecordByValue(sampleProtocolId), 'edit');
-                } else {
-                    // TODO: reset sampleProtocolField if adding new Sample
-                    // TODO: set load sampleProtocolField if switching samples in the grid
+                } else if (wnd.mode == 'add' && typeof wnd.selectionChange != 'undefined' && wnd.selectionChange) {
+                    var grid = Ext.getCmp('loadSamplesFromFile');
+                    sampleProtocolId = grid.getSelectionModel().getSelection()[0].data.sampleProtocolId;
+                    sampleProtocolField.select(sampleProtocolId);
+                    sampleProtocolField.fireEvent('select', sampleProtocolField, sampleProtocolField.findRecordByValue(sampleProtocolId), 'edit');
                 }
 
-                wnd.setLoading(false);
+                // wnd.setLoading(false);
             }
         });
     },
@@ -622,6 +629,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             record = selection[0].data;
         form.reset();
         this.setSampleForm(wnd, form, record);
+        wnd.selectionChange = true;
     },
 
     onCancelBtnClick: function(btn) {
