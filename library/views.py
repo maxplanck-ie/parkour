@@ -513,47 +513,51 @@ class SampleView(View):
         data = None
 
         if self.request.method == 'POST':
-            mode = self.request.POST.get('mode')
-            sample_id = self.request.POST.get('sample_id')
-            files = json.loads(self.request.POST.get('files'))
+            forms = json.loads(self.request.POST.get('forms'))
+            mode = forms[0]['mode']
+            sample_id = forms[0]['sample_id']
 
-            if mode == 'add':
-                form = SampleForm(self.request.POST)
-            elif mode == 'edit':
-                smpl = Sample.objects.get(id=sample_id)
-                form = SampleForm(self.request.POST, instance=smpl)
+            # mode = self.request.POST.get('mode')
+            # sample_id = self.request.POST.get('sample_id')
+            # files = json.loads(self.request.POST.get('files'))
 
-            if form.is_valid():
-                smpl = form.save()
+            # if mode == 'add':
+            #     form = SampleForm(self.request.POST)
+            # elif mode == 'edit':
+            #     smpl = Sample.objects.get(id=sample_id)
+            #     form = SampleForm(self.request.POST, instance=smpl)
 
-                if mode == 'add':
-                    counter = BarcodeCounter.load()
-                    counter.increment()
-                    smpl.barcode = generate_barcode('S', str(counter.counter))
-                    smpl.files.add(*files)
-                    smpl.save()
-                    counter.save()
-                    data = [{
-                        'name': smpl.name,
-                        'recordType': 'S',
-                        'sampleId': smpl.id,
-                        'barcode': smpl.barcode,
-                    }]
+            # if form.is_valid():
+            #     smpl = form.save()
 
-                elif mode == 'edit':
-                    # import pdb; pdb.set_trace()
-                    old_files = [file for file in smpl.files.all()]
-                    smpl.files.clear()
-                    smpl.save()
-                    smpl.files.add(*files)
-                    new_files = [file for file in smpl.files.all()]
+            #     if mode == 'add':
+            #         counter = BarcodeCounter.load()
+            #         counter.increment()
+            #         smpl.barcode = generate_barcode('S', str(counter.counter))
+            #         smpl.files.add(*files)
+            #         smpl.save()
+            #         counter.save()
+            #         data = [{
+            #             'name': smpl.name,
+            #             'recordType': 'S',
+            #             'sampleId': smpl.id,
+            #             'barcode': smpl.barcode,
+            #         }]
 
-                    # Delete files
-                    files_to_delete = list(set(old_files) - set(new_files))
-                    for file in files_to_delete:
-                        file.delete()
-            else:
-                raise Exception(get_form_errors(form.errors))
+            #     elif mode == 'edit':
+            #         # import pdb; pdb.set_trace()
+            #         old_files = [file for file in smpl.files.all()]
+            #         smpl.files.clear()
+            #         smpl.save()
+            #         smpl.files.add(*files)
+            #         new_files = [file for file in smpl.files.all()]
+
+            #         # Delete files
+            #         files_to_delete = list(set(old_files) - set(new_files))
+            #         for file in files_to_delete:
+            #             file.delete()
+            # else:
+            #     raise Exception(get_form_errors(form.errors))
 
         return data
 

@@ -489,7 +489,15 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
     },
 
     saveLibrary: function(addAnother) {
-        var form = null, url = '', data = {}, params = {}, nameFieldName = '', fileStoreName = '', 
+        var me = this,
+            form = null,
+            grid = null,
+            url = '',
+            data = {},
+            params = {},
+            records = [],
+            nameFieldName = '',
+            fileStoreName = '',
             wnd = Ext.getCmp('library_wnd'), 
             card = Ext.getCmp('librarySamplePanel').getLayout().getActiveItem().id;
         addAnother = addAnother || false;
@@ -527,36 +535,25 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         } 
         else {
             form = Ext.getCmp('sampleForm');
+            grid = Ext.getCmp('loadSamplesFromFile');
+            records = grid.getStore().data.items;
             data = form.getForm().getFieldValues();
             url = 'save_sample/';
-            nameFieldName = 'sampleName';
-            fileStoreName = 'fileSampleStore';
-            params = {
-                'mode': wnd.mode,
-                'name': data.name,
-                'sample_id': (typeof wnd.record !== 'undefined') ? wnd.record.data.sampleId : '',
-                'nucleic_acid_type': data.nucleicAcidType,
-                'sample_protocol': data.sampleProtocol,
-                // 'library_type_id': data.libraryType,
-                'organism': data.organism,
-                'equal_representation_nucleotides': data.equalRepresentationOfNucleotides,
-                'dna_dissolved_in': data.DNADissolvedIn,
-                'concentration': data.concentration,
-                'concentration_determined_by': data.concentrationDeterminedBy,
-                'sample_volume': data.sampleVolume,
-                'sample_amplified_cycles': data.sampleAmplifiedCycles,
-                'dnase_treatment': data.DNaseTreatment,
-                'rna_quality': data.rnaQuality,
-                'rna_spike_in': data.rnaSpikeIn,
-                'sample_preparation_protocol': data.samplePreparationProtocol,
-                'requested_sample_treatment': data.requestedSampleTreatment,
-                'sequencing_run_condition': data.sequencingRunCondition,
-                'sequencing_depth': data.sequencingDepth,
-                'comments': data.comments,
-                'files': Ext.JSON.encode(form.down('filegridfield').getValue())
-            };
+            // nameFieldName = 'sampleName';
+            // fileStoreName = 'fileSampleStore';
+
+            params = {'forms': []};
+            if (records.length == 0) {
+                params.forms.push(me.prepareSampleParams(wnd, data, form.down('filegridfield').getValue(), false));
+            } else {
+                Ext.Array.each(records, function(record) {
+                    params.forms.push(me.prepareSampleParams(wnd, record.data, record.get('files'), true));
+                });
+            }
+            params.forms = Ext.JSON.encode(params.forms);
         }
-        data = form.getForm().getFieldValues();
+
+        // data = form.getForm().getFieldValues();
 
         if (form.isValid()) {
             wnd.setLoading('Adding...');
@@ -582,19 +579,17 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                         }
 
                         // Preserve all fields except for Name, if 'Save and Add another' button was pressed
-                        if (addAnother) {
-                            Ext.getCmp(nameFieldName).reset();
-                            Ext.getStore(fileStoreName).removeAll();
-                            wnd.setLoading(false);
-                        } else {
-                            wnd.close();
-                        }
+                        // if (addAnother) {
+                        //     Ext.getCmp(nameFieldName).reset();
+                        //     Ext.getStore(fileStoreName).removeAll();
+                        //     wnd.setLoading(false);
+                        // } else {
+                        //     wnd.close();
+                        // }
+
+                        wnd.close();
                     } else {
-                        if (obj.error.indexOf('duplicate key value') > -1) {
-                            Ext.ux.ToastMessage('Record with name "' + data.name + '" already exists. Enter a different name.', 'error');
-                        } else {
-                            Ext.ux.ToastMessage(obj.error, 'error');
-                        }
+                        Ext.ux.ToastMessage(obj.error, 'error');
                         console.error('[ERROR]: ' + url + ': ' + obj.error);
                         console.error(response);
                         wnd.setLoading(false);
@@ -687,6 +682,34 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             'sequencingRunConditionId': data.sequencingRunCondition,
             'sequencingDepth': data.sequencingDepth,
             'comments': data.comments,
+            'files': files
+        }
+    },
+
+    prepareSampleParams: function(wnd, data, files, multiple) {
+        return {
+            'mode': wnd.mode,
+            'name': data.name,
+            'sample_id': (typeof wnd.record !== 'undefined') ? wnd.record.data.sampleId : '',
+            'nucleic_acid_type': multiple ? data.nucleicAcidTypeId : data.nucleicAcidType,
+            'sample_protocol': multiple ? data.sampleProtocolId : data.sampleProtocol,
+            // 'library_type_id': data.libraryType,
+            'organism': multiple ? data.organismId : data.organism,
+            'equal_representation_nucleotides': data.equalRepresentationOfNucleotides,
+            'dna_dissolved_in': data.DNADissolvedIn,
+            'concentration': data.concentration,
+            'concentration_determined_by': multiple ? data.concentrationMethodId : data.concentrationDeterminedBy,
+            'sample_volume': data.sampleVolume,
+            'sample_amplified_cycles': data.sampleAmplifiedCycles,
+            'dnase_treatment': data.DNaseTreatment,
+            'rna_quality': multiple ? data.rnaQualityId : data.rnaQuality,
+            'rna_spike_in': data.rnaSpikeIn,
+            'sample_preparation_protocol': data.samplePreparationProtocol,
+            'requested_sample_treatment': data.requestedSampleTreatment,
+            'sequencing_run_condition': multiple ? data.sequencingRunConditionId : data.sequencingRunCondition,
+            'sequencing_depth': data.sequencingDepth,
+            'comments': data.comments,
+            // 'files': Ext.JSON.encode(form.down('filegridfield').getValue())
             'files': files
         }
     },
