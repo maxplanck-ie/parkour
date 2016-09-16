@@ -214,10 +214,10 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
     onSampleCardActivate: function(card) {
         var wnd = card.up('library_wnd'), form = null, record = null;
 
+        Ext.getCmp('addWndBtn').show();
         Ext.getCmp('sampleProtocolInfo').hide();
         this.initializeTooltips();
 
-        Ext.getCmp('addWndBtn').show();
         if (wnd.mode == 'add') {
             Ext.getStore('fileSampleStore').removeAll();
             Ext.getCmp('loadSamplesFromFile').show();
@@ -239,6 +239,31 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
 
             Ext.getCmp('addWndBtn').setConfig('text', 'Save');
         }
+
+        // Load Nucleic Acid Types
+        Ext.getStore('nucleicAcidTypesStore').load(function(records, operation, success) {
+            if (!success) Ext.ux.ToastMessage('Cannot load Nucleic Acid Types', 'error');
+        });
+
+        // Load Organisms
+        Ext.getStore('organismsStore').load(function(records, operation, success) {
+            if (!success) Ext.ux.ToastMessage('Cannot load Organisms', 'error');
+        });
+
+        // Load RNA Qualities
+        Ext.getStore('rnaQualityStore').load(function(records, operation, success) {
+            if (!success) Ext.ux.ToastMessage('Cannot load RNA Qualities', 'error');
+        });
+
+        // Load Sequencing Run Conditions
+        Ext.getStore('sequencingRunConditionsStore').load(function(records, operation, success) {
+            if (!success) Ext.ux.ToastMessage('Cannot load Sequencing Run Conditions', 'error');
+        });
+
+        // Load Concentration Methods
+        Ext.getStore('concentrationMethodsStore').load(function(records, operation, success) {
+            if (!success) Ext.ux.ToastMessage('Cannot load Concentration Methods', 'error');
+        });
 
         this.setSampleForm(wnd, form, record);
     },
@@ -426,9 +451,12 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         var wnd = Ext.getCmp('library_wnd'),
             form = Ext.getCmp('sampleForm'),
             data = form.getForm().getFieldValues(),
-            files = form.down('filegridfield').getValue();
+            files = form.down('filegridfield').getValue(),
+            grid = Ext.getCmp('loadSamplesFromFile'),
+            sampleName = Ext.getCmp('sampleName').getValue(),
+            samplesInGrid = Ext.Array.pluck(Ext.Array.pluck(grid.getStore().data.items, 'data'), 'name');
 
-        if (form.isValid()) {
+        if (form.isValid() && samplesInGrid.indexOf(sampleName) == -1) {
             var record = this.getSampleRecord(data, files),
                 samplesGrid = Ext.getCmp('loadSamplesFromFile');
             
@@ -437,6 +465,8 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             samplesGrid.getStore().add(record);
             Ext.getCmp('sampleName').reset();
             Ext.getStore('fileSampleStore').removeAll();
+        } else if (samplesInGrid.indexOf(sampleName) > -1) {
+            Ext.ux.ToastMessage('Sample Name must be unique', 'warning');
         } else {
             Ext.ux.ToastMessage('Check the form', 'warning');
         }
@@ -607,7 +637,8 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                                 grid.enable();
                                 me.close();
                             } else {
-                                debugger;
+                                Ext.ux.ToastMessage('There is a problem with the provided file', 'error');
+                                // print to the console
                             }
                         },
 
@@ -649,7 +680,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             'sampleVolume': data.sampleVolume,
             'sampleAmplifiedCycles': data.sampleAmplifiedCycles,
             'DNaseTreatment': data.DNaseTreatment,
-            'rnaQuality': data.rnaQuality,
+            'rnaQualityId': data.rnaQuality,
             'rnaSpikeIn': data.rnaSpikeIn,
             'samplePreparationProtocol': data.samplePreparationProtocol,
             'requestedSampleTreatment': data.requestedSampleTreatment,
@@ -688,73 +719,26 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             }
         }
 
-        // Load Nucleic Acid Types
-        // wnd.setLoading();
-        Ext.getStore('nucleicAcidTypesStore').load(function(records, operation, success) {
-            if (!success) Ext.ux.ToastMessage('Cannot load Nucleic Acid Types', 'error');
+        if (wnd.mode == 'edit' || record != null) {
+            var nucleicAcidTypeField = Ext.getCmp('nucleicAcidTypeField');
+            nucleicAcidTypeField.select(record.nucleicAcidTypeId);
+            nucleicAcidTypeField.fireEvent('select', nucleicAcidTypeField, nucleicAcidTypeField.findRecordByValue(record.nucleicAcidTypeId), 'edit');
 
-            if (wnd.mode == 'edit' || record != null) {
-                var nucleicAcidTypeField = Ext.getCmp('nucleicAcidTypeField');
-                nucleicAcidTypeField.select(record.nucleicAcidTypeId);
-                nucleicAcidTypeField.fireEvent('select', nucleicAcidTypeField, nucleicAcidTypeField.findRecordByValue(record.nucleicAcidTypeId), 'edit');
-            }
+            var organismSampleField = Ext.getCmp('organismSampleField');
+            organismSampleField.select(record.organismId);
+            organismSampleField.fireEvent('select', organismSampleField, organismSampleField.findRecordByValue(record.organismId));
+        
+            var concentrationSampleMethodField = Ext.getCmp('concentrationSampleMethodField');
+            concentrationSampleMethodField.select(record.concentrationMethodId);
+            concentrationSampleMethodField.fireEvent('select', concentrationSampleMethodField, concentrationSampleMethodField.findRecordByValue(record.concentrationMethodId));
 
-            // wnd.setLoading(false);
-        });
+            var rnaQualityField = Ext.getCmp('rnaQualityField');
+            rnaQualityField.select(record.rnaQualityId);
+            rnaQualityField.fireEvent('select', rnaQualityField, rnaQualityField.findRecordByValue(record.rnaQualityId));
 
-        // Load Organisms
-        // wnd.setLoading();
-        Ext.getStore('organismsStore').load(function(records, operation, success) {
-            if (!success) Ext.ux.ToastMessage('Cannot load Organisms', 'error');
-
-            if (wnd.mode == 'edit' || record != null) {
-                var organismSampleField = Ext.getCmp('organismSampleField');
-                organismSampleField.select(record.organismId);
-                organismSampleField.fireEvent('select', organismSampleField, organismSampleField.findRecordByValue(record.organismId));
-            }
-
-            // wnd.setLoading(false);
-        });
-
-        // Load Concentration Methods
-        // wnd.setLoading();
-        Ext.getStore('concentrationMethodsStore').load(function(records, operation, success) {
-            if (!success) Ext.ux.ToastMessage('Cannot load Concentration Methods', 'error');
-
-            if (wnd.mode == 'edit' || record != null) {
-                var concentrationSampleMethodField = Ext.getCmp('concentrationSampleMethodField');
-                concentrationSampleMethodField.select(record.concentrationMethodId);
-                concentrationSampleMethodField.fireEvent('select', concentrationSampleMethodField, concentrationSampleMethodField.findRecordByValue(record.concentrationMethodId));
-            }
-
-            // wnd.setLoading(false);
-        });
-
-        // Load RNA Qualities
-        Ext.getStore('rnaQualityStore').load(function(records, operation, success) {
-            if (!success) Ext.ux.ToastMessage('Cannot load RNA Qualities', 'error');
-
-            if (wnd.mode == 'edit' || record != null) {
-                var rnaQualityField = Ext.getCmp('rnaQualityField');
-                rnaQualityField.select(record.rnaQualityId);
-                rnaQualityField.fireEvent('select', rnaQualityField, rnaQualityField.findRecordByValue(record.rnaQualityId));
-            }
-
-            // wnd.setLoading(false);
-        });
-
-        // Load Sequencing Run Conditions
-        // wnd.setLoading();
-        Ext.getStore('sequencingRunConditionsStore').load(function(records, operation, success) {
-            if (!success) Ext.ux.ToastMessage('Cannot load Sequencing Run Conditions', 'error');
-
-            if (wnd.mode == 'edit' || record != null) {
-                var sequencingRunConditionSampleField = Ext.getCmp('sequencingRunConditionSampleField');
-                sequencingRunConditionSampleField.select(record.sequencingRunConditionId);
-                sequencingRunConditionSampleField.fireEvent('select', sequencingRunConditionSampleField, sequencingRunConditionSampleField.findRecordByValue(record.sequencingRunConditionId));
-            }
-
-            // wnd.setLoading(false);
-        });
+            var sequencingRunConditionSampleField = Ext.getCmp('sequencingRunConditionSampleField');
+            sequencingRunConditionSampleField.select(record.sequencingRunConditionId);
+            sequencingRunConditionSampleField.fireEvent('select', sequencingRunConditionSampleField, sequencingRunConditionSampleField.findRecordByValue(record.sequencingRunConditionId));
+        }
     }
 });
