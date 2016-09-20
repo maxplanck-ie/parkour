@@ -486,7 +486,7 @@ class SampleView(View):
 
     def post(self, request):
         """ Save Sample """
-        error = str()
+        error = ''
         data = None
 
         try:
@@ -501,7 +501,9 @@ class SampleView(View):
             'error': error,
         }
         if data:
-            result.update({'data': data})
+            result.update({'data': data['data']})
+            result['error'] = data['errors']
+            result['success'] = False
 
         return HttpResponse(
             json.dumps(result),
@@ -510,56 +512,61 @@ class SampleView(View):
 
     def save_sample(self):
         """ Add new Sample or update existing one """
-        data = None
+        result = {'data': [], 'errors': ''}
+        errors = []
 
         if self.request.method == 'POST':
             forms = json.loads(self.request.POST.get('forms'))
             mode = forms[0]['mode']
-            sample_id = forms[0]['sample_id']
 
-            # mode = self.request.POST.get('mode')
-            # sample_id = self.request.POST.get('sample_id')
-            # files = json.loads(self.request.POST.get('files'))
+            if mode == 'add':
+                for f in forms:
+                    files = f['files']
+                    form = SampleForm(f)
+                    if form.is_valid():
+                        smpl = form.save()
+                        counter = BarcodeCounter.load()
+                        counter.increment()
+                        smpl.barcode = generate_barcode(
+                            'S',
+                            str(counter.counter),
+                        )
+                        smpl.files.add(*files)
+                        smpl.save()
+                        counter.save()
+                        result['data'].append({
+                            'name': smpl.name,
+                            'recordType': 'S',
+                            'sampleId': smpl.id,
+                            'barcode': smpl.barcode,
+                        })
+                    else:
+                        errors.append(get_form_errors(f['name'], form.errors))
 
-            # if mode == 'add':
-            #     form = SampleForm(self.request.POST)
-            # elif mode == 'edit':
-            #     smpl = Sample.objects.get(id=sample_id)
-            #     form = SampleForm(self.request.POST, instance=smpl)
+                if any(errors):
+                    result['errors'] = 'Form is invalid<br/><br/>'
+                    for error in errors:
+                        result['errors'] += error
 
-            # if form.is_valid():
-            #     smpl = form.save()
+            elif mode == 'edit':
+                sample_id = forms[0]['sample_id']
+                files = forms[0]['files']
+                smpl = Sample.objects.get(id=sample_id)
+                form = SampleForm(forms[0], instance=smpl)
 
-            #     if mode == 'add':
-            #         counter = BarcodeCounter.load()
-            #         counter.increment()
-            #         smpl.barcode = generate_barcode('S', str(counter.counter))
-            #         smpl.files.add(*files)
-            #         smpl.save()
-            #         counter.save()
-            #         data = [{
-            #             'name': smpl.name,
-            #             'recordType': 'S',
-            #             'sampleId': smpl.id,
-            #             'barcode': smpl.barcode,
-            #         }]
 
-            #     elif mode == 'edit':
-            #         # import pdb; pdb.set_trace()
-            #         old_files = [file for file in smpl.files.all()]
-            #         smpl.files.clear()
-            #         smpl.save()
-            #         smpl.files.add(*files)
-            #         new_files = [file for file in smpl.files.all()]
+                old_files = [file for file in smpl.files.all()]
+                smpl.files.clear()
+                smpl.save()
+                smpl.files.add(*files)
+                new_files = [file for file in smpl.files.all()]
 
-            #         # Delete files
-            #         files_to_delete = list(set(old_files) - set(new_files))
-            #         for file in files_to_delete:
-            #             file.delete()
-            # else:
-            #     raise Exception(get_form_errors(form.errors))
+                # Delete files
+                files_to_delete = list(set(old_files) - set(new_files))
+                for file in files_to_delete:
+                    file.delete()
 
-        return data
+        return result
 
     def delete_sample(self):
         """ Delete Sample with a given id """

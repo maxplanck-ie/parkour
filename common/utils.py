@@ -17,8 +17,9 @@ def get_simple_field_dict(data):
     return [{'id': obj.id, 'name': obj.name} for obj in data]
 
 
-def get_form_errors(errors):
-    result = 'Form is invalid:<br/><br/>'
+def get_form_errors(name, errors):
+    result = '<div>%s:<br/><br/>' % name
     for error_field, error_message in errors.items():
         result += 'Field "%s":<br/>%s' % (error_field, error_message)
+    result += '</div>'
     return result

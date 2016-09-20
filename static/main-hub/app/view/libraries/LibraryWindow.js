@@ -656,6 +656,14 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                 text: 'Load from File',
                 hidden: true
             },
+            {
+                xtype: 'button',
+                itemId: 'downloadFileTemplate',
+                id: 'downloadFileTemplate',
+                text: 'Download File Template',
+                disabled: true,
+                hidden: true
+            },
             '->',
             // {
             //     xtype: 'button',
@@ -674,6 +682,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                 itemId: 'keepAndAddWndBtn',
                 id: 'keepAndAddWndBtn',
                 text: 'Keep and Add another',
+                tooltip: 'Preserve the filled form and add it to the left section (without sending it to the server)',
                 hidden: true
             },
             {
@@ -681,6 +690,8 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                 itemId: 'addWndBtn',
                 id: 'addWndBtn',
                 text: 'Save and Close',
+                // tooltip: 'Save all preserved forms and send it to the server',
+                tooltip: 'Save the filles form and send it to the server',
                 hidden: true
             }
         ],

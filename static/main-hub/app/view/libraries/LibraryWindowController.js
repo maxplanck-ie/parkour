@@ -222,6 +222,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             Ext.getStore('fileSampleStore').removeAll();
             Ext.getCmp('loadSamplesFromFile').show();
             Ext.getCmp('loadFromFileBtn').show();
+            Ext.getCmp('downloadFileTemplate').show();
             // Ext.getCmp('saveAndAddWndBtn').show();
             Ext.getCmp('keepAndAddWndBtn').show();
             Ext.getCmp('loadSamplesFromFile').setStore(
@@ -555,7 +556,14 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
 
         // data = form.getForm().getFieldValues();
 
-        if (form.isValid()) {
+        var condition = false;
+        if (grid != null && records.length == 0 && form.isValid()) {
+            condition = true;
+        } else if (grid != null && records.length > 0) {
+            condition = true;
+        }
+
+        if (condition) {
             wnd.setLoading('Adding...');
             Ext.Ajax.request({
                 url: url,
@@ -577,16 +585,6 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                             grid = Ext.getCmp('librariesTable');
                             grid.fireEvent('refresh', grid);
                         }
-
-                        // Preserve all fields except for Name, if 'Save and Add another' button was pressed
-                        // if (addAnother) {
-                        //     Ext.getCmp(nameFieldName).reset();
-                        //     Ext.getStore(fileStoreName).removeAll();
-                        //     wnd.setLoading(false);
-                        // } else {
-                        //     wnd.close();
-                        // }
-
                         wnd.close();
                     } else {
                         Ext.ux.ToastMessage(obj.error, 'error');
@@ -702,7 +700,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             'sample_volume': data.sampleVolume,
             'sample_amplified_cycles': data.sampleAmplifiedCycles,
             'dnase_treatment': data.DNaseTreatment,
-            'rna_quality': multiple ? data.rnaQualityId : data.rnaQuality,
+            'rna_quality': multiple ? (data.rnaQualityId == 0 ? null : data.rnaQualityId) : data.rnaQuality,
             'rna_spike_in': data.rnaSpikeIn,
             'sample_preparation_protocol': data.samplePreparationProtocol,
             'requested_sample_treatment': data.requestedSampleTreatment,
