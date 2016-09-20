@@ -16,6 +16,11 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             '#libraryCard': {
                 activate: 'onLibraryCardActivate'
             },
+            '#sampleCard': {
+                activate: 'onSampleCardActivate'
+            },
+
+            // Library Fields
             '#libraryProtocolField': {
                 select: 'onLibraryProtocolFieldSelect'
             },
@@ -25,8 +30,10 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             '#indexReadsField': {
                 select: 'onIndexReadsFieldSelect'
             },
-            '#sampleCard': {
-                activate: 'onSampleCardActivate'
+            
+            // Sample Fields
+            '#sampleName': {
+                change: 'onSampleNameFieldChange'
             },
             '#nucleicAcidTypeField': {
                 select: 'onNucleicAcidTypeFieldSelect'
@@ -34,6 +41,11 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             '#sampleProtocolField': {
                 select: 'onSampleProtocolFieldSelect'
             },
+            '#equalRepresentationSample': {
+                change:'onEqualRepresentationSampleFieldChange'
+            },
+
+            // Buttons
             // '#saveAndAddWndBtn': {
             //     click: 'onSaveAndAddWndBtnClick'
             // },
@@ -241,31 +253,6 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             Ext.getCmp('addWndBtn').setConfig('text', 'Save');
         }
 
-        // Load Nucleic Acid Types
-        Ext.getStore('nucleicAcidTypesStore').load(function(records, operation, success) {
-            if (!success) Ext.ux.ToastMessage('Cannot load Nucleic Acid Types', 'error');
-        });
-
-        // Load Organisms
-        Ext.getStore('organismsStore').load(function(records, operation, success) {
-            if (!success) Ext.ux.ToastMessage('Cannot load Organisms', 'error');
-        });
-
-        // Load RNA Qualities
-        Ext.getStore('rnaQualityStore').load(function(records, operation, success) {
-            if (!success) Ext.ux.ToastMessage('Cannot load RNA Qualities', 'error');
-        });
-
-        // Load Sequencing Run Conditions
-        Ext.getStore('sequencingRunConditionsStore').load(function(records, operation, success) {
-            if (!success) Ext.ux.ToastMessage('Cannot load Sequencing Run Conditions', 'error');
-        });
-
-        // Load Concentration Methods
-        Ext.getStore('concentrationMethodsStore').load(function(records, operation, success) {
-            if (!success) Ext.ux.ToastMessage('Cannot load Concentration Methods', 'error');
-        });
-
         this.setSampleForm(wnd, form, record);
     },
 
@@ -375,6 +362,16 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         }
     },
 
+    onSampleNameFieldChange: function(fld, newValue) {
+        var wnd = Ext.getCmp('library_wnd'),
+            grid = Ext.getCmp('loadSamplesFromFile'),
+            selection = grid.getSelectionModel().getSelection();
+
+        if (typeof wnd.isSetting != 'undefined' && !wnd.isSetting && selection.length > 0) {
+            selection[0].set('name', newValue);
+        }
+    },
+
     onNucleicAcidTypeFieldSelect: function(fld, record) {
         var wnd = fld.up('library_wnd'),
             sampleProtocolField = Ext.getCmp('sampleProtocolField'),
@@ -440,6 +437,16 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             );
         } else {
             sampleProtocolInfo.hide();
+        }
+    },
+
+    onEqualRepresentationSampleFieldChange: function(fld, newValue) {
+        var wnd = Ext.getCmp('library_wnd'),
+            grid = Ext.getCmp('loadSamplesFromFile'),
+            selection = grid.getSelectionModel().getSelection();
+
+        if (typeof wnd.isSetting != 'undefined' && !wnd.isSetting && selection.length > 0) {
+            selection[0].set('equalRepresentationOfNucleotides', newValue);
         }
     },
 
@@ -651,9 +658,11 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         var wnd = Ext.getCmp('library_wnd'),
             form = Ext.getCmp('sampleForm').getForm(),
             record = selection[0].data;
+        wnd.isSetting = true;
         form.reset();
         this.setSampleForm(wnd, form, record);
         wnd.selectionChange = true;
+        wnd.isSetting = false;
     },
 
     onCancelBtnClick: function(btn) {
@@ -671,7 +680,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             'concentration': data.concentration,
             'concentrationMethodId': data.concentrationDeterminedBy,
             'sampleVolume': data.sampleVolume,
-            'sampleAmplifiedCycles': data.sampleAmplifiedCycles,
+            'amplifiedCycles': data.amplifiedCycles,
             'DNaseTreatment': data.DNaseTreatment,
             'rnaQualityId': data.rnaQuality,
             'rnaSpikeIn': data.rnaSpikeIn,
@@ -698,7 +707,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             'concentration': data.concentration,
             'concentration_determined_by': multiple ? data.concentrationMethodId : data.concentrationDeterminedBy,
             'sample_volume': data.sampleVolume,
-            'sample_amplified_cycles': data.sampleAmplifiedCycles,
+            'sample_amplified_cycles': data.amplifiedCycles,
             'dnase_treatment': data.DNaseTreatment,
             'rna_quality': multiple ? (data.rnaQualityId == 0 ? null : data.rnaQualityId) : data.rnaQuality,
             'rna_spike_in': data.rnaSpikeIn,
@@ -714,20 +723,10 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
 
     setSampleForm: function(wnd, form, record) {
         if (wnd.mode == 'edit' || form != null) {
-            form.setValues({
-                name: record.name,
-                DNADissolvedIn: record.DNADissolvedIn,
-                concentration: record.concentration,
-                sampleVolume: record.sampleVolume,
-                sampleAmplifiedCycles: record.amplifiedCycles,
-                sequencingDepth: record.sequencingDepth,
-                samplePreparationProtocol: record.samplePreparationProtocol,
-                requestedSampleTreatment: record.requestedSampleTreatment,
-                comments: record.comments
-            });
-            if (record.equalRepresentation == 'False') Ext.getCmp('equalRepresentationRadio4').setValue(true);
-            if (record.DNaseTreatment == 'False') Ext.getCmp('DNaseTreatmentRadio2').setValue(true);
-            if (record.rnaSpikeIn == 'False') Ext.getCmp('rnaSpikeInRadio2').setValue(true);
+            form.setValues(record);
+            if (record.equalRepresentation == 'False' || record.equalRepresentation == false) Ext.getCmp('equalRepresentationRadio4').setValue(true);
+            if (record.DNaseTreatment == 'False' || record.DNaseTreatment == false) Ext.getCmp('DNaseTreatmentRadio2').setValue(true);
+            if (record.rnaSpikeIn == 'False' || record.rnaSpikeIn == false) Ext.getCmp('rnaSpikeInRadio2').setValue(true);
             if (record.files.length > 0) {
                 Ext.getStore('fileSampleStore').load({
                     params: {

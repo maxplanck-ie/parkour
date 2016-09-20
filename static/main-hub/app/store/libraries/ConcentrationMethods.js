@@ -23,13 +23,16 @@ Ext.define('MainHub.store.libraries.ConcentrationMethods', {
         }
     },
 
+    autoLoad: true,
+
     listeners: {
         load: function(store, records, success, operation) {
             if (!success) {
                 var response = operation._response,
                     obj = Ext.JSON.decode(response.responseText);
-                console.log('[ERROR]: get_concentration_methods(): ' + obj.error);
-                console.log(response);
+                Ext.ux.ToastMessage('Cannot load Concentration Methods', 'error');
+                console.error('[ERROR]: get_concentration_methods/: ' + obj.error);
+                console.error(response);
             }
         }
     }

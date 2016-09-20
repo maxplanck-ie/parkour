@@ -23,11 +23,14 @@ Ext.define('MainHub.store.libraries.NucleicAcidTypes', {
         }
     },
 
+    autoLoad: true,
+
     listeners: {
         load: function(store, records, success, operation) {
             if (!success) {
                 var response = operation._response,
                     obj = Ext.JSON.decode(response.responseText);
+                Ext.ux.ToastMessage('Cannot load Nucleic Acid Types', 'error');
                 console.error('[ERROR]: get_nucleic_acid_types/: ' + obj.error);
                 console.error(response);
             }

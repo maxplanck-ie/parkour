@@ -347,6 +347,9 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                     { text: 'Name', dataIndex: 'name', flex: 1 }
                                 ]
                             },
+                            viewConfig: {
+                                markDirty: false
+                            },
                             width: 250,
                             height: 607,
                             border: 0,
@@ -397,6 +400,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                         {
                                             name: 'name',
                                             id: 'sampleName',
+                                            itemId: 'sampleName',
                                             fieldLabel: 'Sample Name <sup><strong><span class="field-tooltip" tooltip-text="Name must be unique for assigned project. Field must contain only A-Za-z0-9 as well as - and _">[?]</span></strong></sup>',
                                             emptyText: 'Sample Name',
                                             regex: new RegExp("^[A-Za-z0-9_\-]+$"),
@@ -432,7 +436,8 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                         {
                                             xtype: 'container',
                                             id: 'sampleProtocolInfo',
-                                            margin: '0 0 15px 15px'
+                                            margin: '0 0 15px 15px',
+                                            width: 585
                                         },
                                         {
                                             xtype: 'combobox',
@@ -463,6 +468,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                         {
                                             xtype: 'fieldcontainer',
                                             id: 'equalRepresentationSample',
+                                            itemId: 'equalRepresentationSample',
                                             fieldLabel: 'Equal Representation of Nucleotides <sup><strong><span class="field-tooltip" tooltip-text="For best sequencing quality all 4 nucleotides should be at each position of the insert (up- and downstream of sequencing adaptors) represented at an equal frequency.<br><br>This is true i.e. for applications like ChIP-Seq, RNA-Seq and WGS (<strong>select Yes</strong>).<br><br>In case your insert has an uneven representation of nucleotides (Amplicon-Seq, internal usage of barcodes) <strong>select No</strong> and specify in the comments field (below).">[?]</span></strong></sup>',
                                             defaultType: 'radiofield',
                                             layout: 'hbox',
@@ -517,7 +523,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                         },
                                         {
                                             xtype: 'numberfield',
-                                            name: 'sampleAmplifiedCycles',
+                                            name: 'amplifiedCycles',
                                             fieldLabel: 'Sample amplified (cycles) <sup><strong><span class="field-tooltip" tooltip-text="If sample has been already amplified, indicate the number of cycles">[?]</span></strong></sup>',
                                             emptyText: 'Sample amplified (cycles)',
                                             allowDecimals: false,

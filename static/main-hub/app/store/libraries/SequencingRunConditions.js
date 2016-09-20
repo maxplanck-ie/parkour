@@ -23,11 +23,14 @@ Ext.define('MainHub.store.libraries.SequencingRunConditions', {
         }
     },
 
+    autoLoad: true,
+
     listeners: {
         load: function(store, records, success, operation) {
             if (!success) {
                 var response = operation._response,
                     obj = Ext.JSON.decode(response.responseText);
+                Ext.ux.ToastMessage('Cannot load Sequencing Run Conditions', 'error');
                 console.errorerror('[ERROR]: get_sequencing_run_conditions/: ' + obj.error);
                 console.error(response);
             }

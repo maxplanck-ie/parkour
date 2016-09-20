@@ -23,11 +23,14 @@ Ext.define('MainHub.store.libraries.RNAQuality', {
         }
     },
 
+    autoLoad: true,
+
     listeners: {
         load: function(store, records, success, operation) {
             if (!success) {
                 var response = operation._response,
                     obj = Ext.JSON.decode(response.responseText);
+                Ext.ux.ToastMessage('Cannot load RNA Qualities', 'error');
                 console.error('[ERROR]: get_organisms/: ' + obj.error);
                 console.error(response);
             }
