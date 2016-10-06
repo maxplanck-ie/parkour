@@ -23,7 +23,6 @@ def get_requests(request):
                 'requestId': req.id,
                 'status': req.status,
                 'name': req.name,
-                'projectType': req.project_type,
                 'dateCreated': req.date_created.strftime('%d.%m.%Y'),
                 'description': req.description,
                 'researcherId': req.researcher_id.id,
@@ -70,6 +69,10 @@ def save_request(request):
 
             if form.is_valid():
                 req = form.save()
+                if mode == 'add':
+                    req.status = 0
+                    req.name = 'Request ' + str(req.id)
+                    req.save()
                 libraries = json.loads(request.POST.get('libraries'))
                 samples = json.loads(request.POST.get('samples'))
 

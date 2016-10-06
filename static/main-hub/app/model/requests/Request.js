@@ -16,10 +16,6 @@ Ext.define('MainHub.model.requests.Request', {
         },
         {
             type: 'string',
-            name: 'projectType'
-        },
-        {
-            type: 'string',
             name: 'dateCreated'
         },
         {

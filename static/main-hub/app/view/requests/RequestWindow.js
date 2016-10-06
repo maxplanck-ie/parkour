@@ -37,25 +37,12 @@ Ext.define('MainHub.view.requests.RequestWindow', {
 
                     items: [
                         {
-                            name: 'status',
-                            xtype: 'numberfield',
-                            fieldLabel: 'Status',
-                            emptyText: 'Status',
-                            minValue: 0,
-                            maxValue: 10,
-                            allowBlank: false
-                        },
-                        {
                             name: 'name',
+                            id: 'requestName',
                             fieldLabel: 'Name',
                             emptyText: 'Name',
-                            allowBlank: false
-                        },
-                        {
-                            name: 'projectType',
-                            fieldLabel: 'Project Type',
-                            emptyText: 'Project Type',
-                            allowBlank: false
+                            readOnly: true,
+                            disabled: true
                         },
                         {
                             name: 'description',
@@ -63,7 +50,7 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                             fieldLabel: 'Description',
                             emptyText: 'Description',
                             allowBlank: false,
-                            height: 150
+                            height: 234
                         }
                     ]
                 },

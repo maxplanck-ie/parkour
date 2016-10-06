@@ -32,22 +32,20 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                 record = wnd.record.data;
 
             form.setValues({
-                status: record.status,
                 name: record.name,
-                projectType: record.projectType,
                 description: record.description
             });
 
-            Ext.getStore('librariesInRequestStore').load({
-                    params: {
-                        'request_id': record.requestId
-                    },
-                    callback: function(records, operation, success) {
-                        if (!success) Ext.ux.ToastMessage('Cannot load Libraries/Samples', 'error');
-                    }
-                });
+            Ext.getCmp('requestName').enable();
 
-            wnd.setLoading(false);
+            Ext.getStore('librariesInRequestStore').load({
+                params: {
+                    'request_id': record.requestId
+                },
+                callback: function(records, operation, success) {
+                    if (!success) Ext.ux.ToastMessage('Cannot load Libraries/Samples', 'error');
+                }
+            });
         }
     },
 
@@ -77,9 +75,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                 params: {
                     'mode': wnd.mode,
                     'request_id': (typeof wnd.record != 'undefined') ? wnd.record.get('requestId') : '',
-                    'status': data.status,
                     'name': data.name,
-                    'project_type': data.projectType,
                     'description': data.description,
                     'researcher_id': 1,     // temporarily
                     'libraries': Ext.JSON.encode(Ext.Array.pluck(Ext.Array.pluck(libraries, 'data'), 'libraryId')),

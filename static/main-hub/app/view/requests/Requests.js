@@ -45,9 +45,8 @@ Ext.define('MainHub.view.requests.Requests', {
 
             columns: {
                 items: [
-                    { text: 'Status', dataIndex: 'status', width: 60 },
+                    // { text: 'Status', dataIndex: 'status', width: 60 },
                     { text: 'Name', dataIndex: 'name', flex: 1 },
-                    { text: 'Project Type', dataIndex: 'projectType', flex: 1 },
                     { text: 'Researcher', dataIndex: 'researcher', flex: 1 },
                     { text: 'Date Created', dataIndex: 'dateCreated', flex: 1 },
                     { text: 'Description', dataIndex: 'description', flex: 1,
