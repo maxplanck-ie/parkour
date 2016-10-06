@@ -508,8 +508,8 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                             displayField: 'name',
                                             valueField: 'id',
                                             name: 'concentrationDeterminedBy',
-                                            fieldLabel: 'Concentration Determined by',
-                                            emptyText: 'Concentration Determined by',
+                                            fieldLabel: 'Concentration Determined By',
+                                            emptyText: 'Concentration Determined By',
                                             store: 'concentrationMethodsStore',
                                             forceSelection: true
                                         },

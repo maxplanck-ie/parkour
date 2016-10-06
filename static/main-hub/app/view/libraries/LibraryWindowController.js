@@ -32,17 +32,19 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             },
             
             // Sample Fields
-            '#sampleName': {
-                change: 'onSampleNameFieldChange'
-            },
             '#nucleicAcidTypeField': {
                 select: 'onNucleicAcidTypeFieldSelect'
             },
             '#sampleProtocolField': {
                 select: 'onSampleProtocolFieldSelect'
             },
-            '#equalRepresentationSample': {
-                change:'onEqualRepresentationSampleFieldChange'
+
+            'textfield': {
+                change: 'onTextfieldChange'
+            },
+
+            'radiofield': {
+                change: 'onRadiofieldChange'
             },
 
             // Buttons
@@ -173,8 +175,8 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
 
             if (wnd.mode == 'edit') {
                 var organismField = Ext.getCmp('organismField');
-                organismField.select(record.organismId);
-                organismField.fireEvent('select', organismField, organismField.findRecordByValue(record.organismId));
+                organismField.select(record.organism);
+                organismField.fireEvent('select', organismField, organismField.findRecordByValue(record.organism));
             }
 
             wnd.setLoading(false);
@@ -201,8 +203,8 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
 
             if (wnd.mode == 'edit') {
                 var concentrationMethodField = Ext.getCmp('concentrationMethodField');
-                concentrationMethodField.select(record.concentrationMethodId);
-                concentrationMethodField.fireEvent('select', concentrationMethodField, concentrationMethodField.findRecordByValue(record.concentrationMethodId));
+                concentrationMethodField.select(record.concentrationMethod);
+                concentrationMethodField.fireEvent('select', concentrationMethodField, concentrationMethodField.findRecordByValue(record.concentrationMethod));
             }
 
             wnd.setLoading(false);
@@ -362,16 +364,6 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         }
     },
 
-    onSampleNameFieldChange: function(fld, newValue) {
-        var wnd = Ext.getCmp('library_wnd'),
-            grid = Ext.getCmp('loadSamplesFromFile'),
-            selection = grid.getSelectionModel().getSelection();
-
-        if (typeof wnd.isSetting != 'undefined' && !wnd.isSetting && selection.length > 0) {
-            selection[0].set('name', newValue);
-        }
-    },
-
     onNucleicAcidTypeFieldSelect: function(fld, record) {
         var wnd = fld.up('library_wnd'),
             sampleProtocolField = Ext.getCmp('sampleProtocolField'),
@@ -390,7 +382,6 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         }
 
         // Load Sample Protocols
-        // wnd.setLoading();
         Ext.getStore('sampleProtocolsStore').load({
             params: {
                 'type': record.data.type
@@ -402,22 +393,25 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                     sampleProtocolField.setDisabled(false);
                 }
 
+                var selectionChange = typeof wnd.selectionChange != 'undefined' && wnd.selectionChange,
+                    sampleProtocol = null;
+
+                if (selectionChange) {
+                    var grid = Ext.getCmp('loadSamplesFromFile');
+                    sampleProtocol = grid.getSelectionModel().getSelection()[0].data.sampleProtocol;
+                }
                 sampleProtocolField.clearValue();
 
-                var sampleProtocolId = null;
+                // var sampleProtocolId = null;
                 if (wnd.mode == 'edit' && wnd.justLoaded) {
                     wnd.justLoaded = false;
-                    sampleProtocolId = wnd.record.data.libraryProtocolId;
-                    sampleProtocolField.select(sampleProtocolId);
-                    sampleProtocolField.fireEvent('select', sampleProtocolField, sampleProtocolField.findRecordByValue(sampleProtocolId), 'edit');
-                } else if (wnd.mode == 'add' && typeof wnd.selectionChange != 'undefined' && wnd.selectionChange) {
-                    var grid = Ext.getCmp('loadSamplesFromFile');
-                    sampleProtocolId = grid.getSelectionModel().getSelection()[0].data.sampleProtocolId;
-                    sampleProtocolField.select(sampleProtocolId);
-                    sampleProtocolField.fireEvent('select', sampleProtocolField, sampleProtocolField.findRecordByValue(sampleProtocolId), 'edit');
+                    sampleProtocol = wnd.record.data.libraryProtocol;
+                    sampleProtocolField.select(sampleProtocol);
+                    sampleProtocolField.fireEvent('select', sampleProtocolField, sampleProtocolField.findRecordByValue(sampleProtocol), 'edit');
+                } else if (wnd.mode == 'add' && selectionChange) {
+                    sampleProtocolField.select(sampleProtocol);
+                    sampleProtocolField.fireEvent('select', sampleProtocolField, sampleProtocolField.findRecordByValue(sampleProtocol), 'edit');
                 }
-
-                // wnd.setLoading(false);
             }
         });
     },
@@ -440,13 +434,24 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         }
     },
 
-    onEqualRepresentationSampleFieldChange: function(fld, newValue) {
+    onTextfieldChange: function(fld, newValue) {
         var wnd = Ext.getCmp('library_wnd'),
             grid = Ext.getCmp('loadSamplesFromFile'),
             selection = grid.getSelectionModel().getSelection();
 
         if (typeof wnd.isSetting != 'undefined' && !wnd.isSetting && selection.length > 0) {
-            selection[0].set('equalRepresentationOfNucleotides', newValue);
+            selection[0].set(fld.name, newValue);
+        }
+    },
+
+    onRadiofieldChange: function(fld, newValue) {
+        var wnd = Ext.getCmp('library_wnd'),
+            grid = Ext.getCmp('loadSamplesFromFile'),
+            selection = grid.getSelectionModel().getSelection();
+
+        if ((typeof wnd.isSetting != 'undefined' && !wnd.isSetting && selection.length > 0) && 
+            (fld.id == 'equalRepresentationRadio3' || fld.id == 'DNaseTreatmentRadio1' || fld.id == 'rnaSpikeInRadio1')) {
+            selection[0].set(fld.name, newValue);
         }
     },
 
@@ -552,10 +557,10 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
 
             params = {'forms': []};
             if (records.length == 0) {
-                params.forms.push(me.prepareSampleParams(wnd, data, form.down('filegridfield').getValue(), false));
+                params.forms.push(me.prepareSampleParams(wnd, data, form.down('filegridfield').getValue()));
             } else {
                 Ext.Array.each(records, function(record) {
-                    params.forms.push(me.prepareSampleParams(wnd, record.data, record.get('files'), true));
+                    params.forms.push(me.prepareSampleParams(wnd, record.data, record.get('files')));
                 });
             }
             params.forms = Ext.JSON.encode(params.forms);
@@ -672,48 +677,48 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
     getSampleRecord: function(data, files) {
         return {
             'name': data.name,
-            'nucleicAcidTypeId': data.nucleicAcidType,
-            'sampleProtocolId': data.sampleProtocol,
-            'organismId': data.organism,
+            'nucleicAcidType': data.nucleicAcidType,
+            'sampleProtocol': data.sampleProtocol,
+            'organism': data.organism,
             'equalRepresentationOfNucleotides': data.equalRepresentationOfNucleotides,
             'DNADissolvedIn': data.DNADissolvedIn,
             'concentration': data.concentration,
-            'concentrationMethodId': data.concentrationDeterminedBy,
+            'concentrationDeterminedBy': data.concentrationDeterminedBy,
             'sampleVolume': data.sampleVolume,
             'amplifiedCycles': data.amplifiedCycles,
             'DNaseTreatment': data.DNaseTreatment,
-            'rnaQualityId': data.rnaQuality,
+            'rnaQuality': data.rnaQuality,
             'rnaSpikeIn': data.rnaSpikeIn,
             'samplePreparationProtocol': data.samplePreparationProtocol,
             'requestedSampleTreatment': data.requestedSampleTreatment,
-            'sequencingRunConditionId': data.sequencingRunCondition,
+            'sequencingRunCondition': data.sequencingRunCondition,
             'sequencingDepth': data.sequencingDepth,
             'comments': data.comments,
             'files': files
         }
     },
 
-    prepareSampleParams: function(wnd, data, files, multiple) {
+    prepareSampleParams: function(wnd, data, files) {
         return {
             'mode': wnd.mode,
             'name': data.name,
             'sample_id': (typeof wnd.record !== 'undefined') ? wnd.record.data.sampleId : '',
-            'nucleic_acid_type': multiple ? data.nucleicAcidTypeId : data.nucleicAcidType,
-            'sample_protocol': multiple ? data.sampleProtocolId : data.sampleProtocol,
+            'nucleic_acid_type': data.nucleicAcidType,
+            'sample_protocol': data.sampleProtocol,
             // 'library_type_id': data.libraryType,
-            'organism': multiple ? data.organismId : data.organism,
+            'organism': data.organism,
             'equal_representation_nucleotides': data.equalRepresentationOfNucleotides,
             'dna_dissolved_in': data.DNADissolvedIn,
             'concentration': data.concentration,
-            'concentration_determined_by': multiple ? data.concentrationMethodId : data.concentrationDeterminedBy,
+            'concentration_determined_by': data.concentrationDeterminedBy,
             'sample_volume': data.sampleVolume,
             'sample_amplified_cycles': data.amplifiedCycles,
             'dnase_treatment': data.DNaseTreatment,
-            'rna_quality': multiple ? (data.rnaQualityId == 0 ? null : data.rnaQualityId) : data.rnaQuality,
+            'rna_quality': (data.rnaQuality == 0) ? null : data.rnaQuality,
             'rna_spike_in': data.rnaSpikeIn,
             'sample_preparation_protocol': data.samplePreparationProtocol,
             'requested_sample_treatment': data.requestedSampleTreatment,
-            'sequencing_run_condition': multiple ? data.sequencingRunConditionId : data.sequencingRunCondition,
+            'sequencing_run_condition': data.sequencingRunCondition,
             'sequencing_depth': data.sequencingDepth,
             'comments': data.comments,
             // 'files': Ext.JSON.encode(form.down('filegridfield').getValue())
@@ -724,7 +729,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
     setSampleForm: function(wnd, form, record) {
         if (wnd.mode == 'edit' || form != null) {
             form.setValues(record);
-            if (record.equalRepresentation == 'False' || record.equalRepresentation == false) Ext.getCmp('equalRepresentationRadio4').setValue(true);
+            if (record.equalRepresentationOfNucleotides == 'False' || record.equalRepresentationOfNucleotides == false) Ext.getCmp('equalRepresentationRadio4').setValue(true);
             if (record.DNaseTreatment == 'False' || record.DNaseTreatment == false) Ext.getCmp('DNaseTreatmentRadio2').setValue(true);
             if (record.rnaSpikeIn == 'False' || record.rnaSpikeIn == false) Ext.getCmp('rnaSpikeInRadio2').setValue(true);
             if (record.files.length > 0) {
@@ -741,24 +746,24 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
 
         if (wnd.mode == 'edit' || record != null) {
             var nucleicAcidTypeField = Ext.getCmp('nucleicAcidTypeField');
-            nucleicAcidTypeField.select(record.nucleicAcidTypeId);
-            nucleicAcidTypeField.fireEvent('select', nucleicAcidTypeField, nucleicAcidTypeField.findRecordByValue(record.nucleicAcidTypeId), 'edit');
+            nucleicAcidTypeField.select(record.nucleicAcidType);
+            nucleicAcidTypeField.fireEvent('select', nucleicAcidTypeField, nucleicAcidTypeField.findRecordByValue(record.nucleicAcidType), 'edit');
 
             var organismSampleField = Ext.getCmp('organismSampleField');
-            organismSampleField.select(record.organismId);
-            organismSampleField.fireEvent('select', organismSampleField, organismSampleField.findRecordByValue(record.organismId));
+            organismSampleField.select(record.organism);
+            organismSampleField.fireEvent('select', organismSampleField, organismSampleField.findRecordByValue(record.organism));
         
             var concentrationSampleMethodField = Ext.getCmp('concentrationSampleMethodField');
-            concentrationSampleMethodField.select(record.concentrationMethodId);
-            concentrationSampleMethodField.fireEvent('select', concentrationSampleMethodField, concentrationSampleMethodField.findRecordByValue(record.concentrationMethodId));
+            concentrationSampleMethodField.select(record.concentrationDeterminedBy);
+            concentrationSampleMethodField.fireEvent('select', concentrationSampleMethodField, concentrationSampleMethodField.findRecordByValue(record.concentrationDeterminedBy));
 
             var rnaQualityField = Ext.getCmp('rnaQualityField');
-            rnaQualityField.select(record.rnaQualityId);
-            rnaQualityField.fireEvent('select', rnaQualityField, rnaQualityField.findRecordByValue(record.rnaQualityId));
+            rnaQualityField.select(record.rnaQuality);
+            rnaQualityField.fireEvent('select', rnaQualityField, rnaQualityField.findRecordByValue(record.rnaQuality));
 
             var sequencingRunConditionSampleField = Ext.getCmp('sequencingRunConditionSampleField');
-            sequencingRunConditionSampleField.select(record.sequencingRunConditionId);
-            sequencingRunConditionSampleField.fireEvent('select', sequencingRunConditionSampleField, sequencingRunConditionSampleField.findRecordByValue(record.sequencingRunConditionId));
+            sequencingRunConditionSampleField.select(record.sequencingRunCondition);
+            sequencingRunConditionSampleField.fireEvent('select', sequencingRunConditionSampleField, sequencingRunConditionSampleField.findRecordByValue(record.sequencingRunCondition));
         }
     }
 });

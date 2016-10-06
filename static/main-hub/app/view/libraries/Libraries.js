@@ -74,12 +74,12 @@ Ext.define('MainHub.view.libraries.Libraries', {
                     { text: '', dataIndex: 'recordType', width: 30 },
                     { text: 'Barcode', dataIndex: 'barcode', width: 90 },
                     { text: 'Date', dataIndex: 'date' },
-                    { text: 'Nucleic Acid Type', dataIndex: 'nucleicAcidType' },
-                    { text: 'Protocol', dataIndex: 'libraryProtocol' },
+                    { text: 'Nucleic Acid Type', dataIndex: 'nucleicAcidTypeName' },
+                    { text: 'Protocol', dataIndex: 'libraryProtocolName' },
                     { text: 'Library Type', dataIndex: 'libraryType' },
                     { text: 'Enrichment Cycles', dataIndex: 'enrichmentCycles' },
                     { text: 'Amplified Cycles', dataIndex: 'amplifiedCycles' },
-                    { text: 'Organism', dataIndex: 'organism' },
+                    { text: 'Organism', dataIndex: 'organismName' },
                     { text: 'Index Type', dataIndex: 'indexType' },
                     { text: 'Index Reads', dataIndex: 'indexReads' },
                     { text: 'Index I7', dataIndex: 'indexI7' },
@@ -89,11 +89,11 @@ Ext.define('MainHub.view.libraries.Libraries', {
                     } },
                     { text: 'DNA Dissolved In', dataIndex: 'DNADissolvedIn' },
                     { text: 'Concentration', dataIndex: 'concentration' },
-                    { text: 'Concentration Method', dataIndex: 'concentrationMethod' },
+                    { text: 'Concentration Determined By', dataIndex: 'concentrationDeterminedByName' },
                     { text: 'Sample Volume', dataIndex: 'sampleVolume' },
                     { text: 'Mean Fragment Size', dataIndex: 'meanFragmentSize' },
                     { text: 'qPCR Result', dataIndex: 'qPCRResult' },
-                    { text: 'Sequencing Run Condition', dataIndex: 'sequencingRunCondition' },
+                    { text: 'Sequencing Run Condition', dataIndex: 'sequencingRunConditionName' },
                     { text: 'Sequencing Depth', dataIndex: 'sequencingDepth' },
                     { text: 'DNase Treatment', dataIndex: 'DNaseTreatment', renderer: function(val) {
                         if (val == 'True') {
@@ -104,7 +104,7 @@ Ext.define('MainHub.view.libraries.Libraries', {
                             return '';
                         }
                     } },
-                    { text: 'RNA Quality', dataIndex: 'rnaQuality' },
+                    { text: 'RNA Quality', dataIndex: 'rnaQualityName' },
                     { text: 'RNA Spike In', dataIndex: 'rnaSpikeIn', renderer: function(val) {
                         if (val == 'True') {
                             return 'Yes';

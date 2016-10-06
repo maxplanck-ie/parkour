@@ -206,7 +206,7 @@ class LibraryView(View):
                     'indexReads': library.index_reads,
                     'indexI7': library.index_i7,
                     'indexI5': library.index_i5,
-                    'equalRepresentation':
+                    'equalRepresentationOfNucleotides':
                         str(library.equal_representation_nucleotides),
                     'DNADissolvedIn': library.dna_dissolved_in,
                     'concentration': library.concentration,
@@ -256,31 +256,32 @@ class LibraryView(View):
                     'name': sample.name,
                     'recordType': 'S',
                     'date': sample.date.strftime('%d.%m.%Y'),
-                    'nucleicAcidType': sample.nucleic_acid_type.name,
-                    'nucleicAcidTypeId': sample.nucleic_acid_type_id,
-                    'libraryProtocol': sample.sample_protocol.name,
-                    'libraryProtocolId': sample.sample_protocol_id,
+                    'nucleicAcidType': sample.nucleic_acid_type_id,
+                    'nucleicAcidTypeName': sample.nucleic_acid_type.name,
+                    'libraryProtocol': sample.sample_protocol_id,
+                    'libraryProtocolName': sample.sample_protocol.name,
                     'amplifiedCycles': sample.amplified_cycles,
-                    'organism': sample.organism.name,
-                    'organismId': sample.organism.id,
+                    'organism': sample.organism.id,
+                    'organismName': sample.organism.name,
                     'equalRepresentation':
                         str(sample.equal_representation_nucleotides),
                     'DNADissolvedIn': sample.dna_dissolved_in,
                     'concentration': sample.concentration,
-                    'concentrationMethod':
-                        sample.concentration_determined_by.name,
-                    'concentrationMethodId':
+                    'concentrationDeterminedBy':
                         sample.concentration_determined_by.id,
+                    'concentrationDeterminedByName':
+                        sample.concentration_determined_by.name,
                     'sampleVolume': sample.sample_volume,
                     'sequencingRunCondition':
-                        sample.sequencing_run_condition.name,
-                    'sequencingRunConditionId':
                         sample.sequencing_run_condition.id,
+                    'sequencingRunConditionName':
+                        sample.sequencing_run_condition.name,
+                    
                     'sequencingDepth': sample.sequencing_depth,
                     'DNaseTreatment': str(sample.dnase_treatment),
-                    'rnaQuality': sample.rna_quality.name
+                    'rnaQuality': sample.rna_quality_id
                         if sample.rna_quality else '',
-                    'rnaQualityId': sample.rna_quality_id
+                    'rnaQualityName': sample.rna_quality.name
                         if sample.rna_quality else '',
                     'rnaSpikeIn': str(sample.rna_spike_in),
                     'samplePreparationProtocol':
@@ -502,8 +503,9 @@ class SampleView(View):
         }
         if data:
             result.update({'data': data['data']})
-            result['error'] = data['errors']
-            result['success'] = False
+            if data['errors']:
+                result['error'] = data['errors']
+                result['success'] = False
 
         return HttpResponse(
             json.dumps(result),
