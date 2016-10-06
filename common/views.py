@@ -11,8 +11,7 @@ def index(request):
     user = request.user
     return render(request, 'index.html', {
         'DEBUG': settings.DEBUG,
-        'USERNAME': '%s %s' % (user.first_name, user.last_name)
-        if user.first_name else user.username
+        'USERNAME': '%s' % user.name
     })
 
 

@@ -38,12 +38,12 @@ Ext.define('MainHub.store.NavigationTree', {
             //     // routeId: 'dashboard', // routeId defaults to viewType
             //     leaf: true
             // },
-            {
-                text: 'Researchers',
-                iconCls: 'x-fa fa-user',
-                viewType: 'researchers',
-                leaf: true
-            },
+            // {
+            //     text: 'Researchers',
+            //     iconCls: 'x-fa fa-user',
+            //     viewType: 'researchers',
+            //     leaf: true
+            // },
             {
                 text: 'Submission',
                 iconCls: 'x-fa fa-tasks',

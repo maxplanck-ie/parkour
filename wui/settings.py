@@ -36,8 +36,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'authtools',
     'common',
-    'researcher',
+    # 'researcher',
     'request',
     'library',
     'qualitycheck',
@@ -124,6 +125,9 @@ ADMINS = [
     # ('Devon P. Ryan', 'dpryan79@gmail.com'),
     ('Evgeny Anatskiy', 'anatskiy@ie-freiburg.mpg.de'),
 ]
+
+
+AUTH_USER_MODEL = 'common.User'
 
 
 # Email config

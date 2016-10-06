@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from request.models import Request, RequestForm
-from researcher.models import Researcher
+# from researcher.models import Researcher
 from library.models import Library, Sample
 from common.utils import get_form_errors
 

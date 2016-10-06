@@ -11,10 +11,6 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
-#login-form h2 {
-    text-align: center;
-}
-
 .form-signin {
     padding: 15px 35px 45px;
     margin: 0 auto;

@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('library', '0014_barcodecounter'),
-        ('researcher', '0003_auto_20160718_1638'),
+        # ('researcher', '0003_auto_20160718_1638'),
     ]
 
     operations = [
@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                 ('date_created', models.DateTimeField(auto_now_add=True, verbose_name='Date')),
                 ('description', models.TextField(null=True)),
                 ('libraries', models.ManyToManyField(blank=True, to='library.Library')),
-                ('researcher_id', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='researcher.Researcher')),
+                # ('researcher_id', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='researcher.Researcher')),
                 ('samples', models.ManyToManyField(blank=True, to='library.Sample')),
             ],
         ),
