@@ -7,6 +7,11 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
             '#': {
                 boxready: 'onRequestWindowBoxready'
             },
+            '#librariesInRequestTable': {
+                loadstore: 'onLibrariesInRequestTableLoadStore',
+                refresh: 'onLibrariesInRequestTableRefresh',
+                itemcontextmenu: 'onLibrariesInRequestTableItemContextMenu'
+            },
             '#saveRequestWndBtn': {
                 click: 'onSaveRequestWndBtnClick'
             },
@@ -19,11 +24,23 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
         }
     },
 
+    onLibrariesInRequestTableLoadStore: function(grid, requestId) {
+        grid.getStore().load({
+            params: {
+                'request_id': requestId
+            },
+            callback: function(records, operation, success) {
+                if (!success) Ext.ux.ToastMessage('Cannot load Libraries/Samples', 'error');
+            }
+        });
+    },
+
     onRequestWindowBoxready: function(wnd) {
         if (wnd.mode == 'add') {
             Ext.getStore('librariesInRequestStore').removeAll();
         } else {
             var form = Ext.getCmp('requestForm').getForm(),
+                grid = Ext.getCmp('librariesInRequestTable'),
                 record = wnd.record.data;
 
             // Set form fields with request data
@@ -34,15 +51,84 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
 
             Ext.getCmp('requestName').enable();
 
-            Ext.getStore('librariesInRequestStore').load({
-                params: {
-                    'request_id': record.requestId
-                },
-                callback: function(records, operation, success) {
-                    if (!success) Ext.ux.ToastMessage('Cannot load Libraries/Samples', 'error');
-                }
-            });
+            // Load all Libraries/Samples for current Request
+            grid.fireEvent('loadstore', grid, record.requestId);
         }
+    },
+
+    onLibrariesInRequestTableRefresh: function(grid) {
+        var requestId = grid.up('request_wnd').record.get('requestId');
+
+        // Reload the table
+        grid.getStore().removeAll();
+        grid.fireEvent('loadstore', grid, requestId);
+    },
+
+    onLibrariesInRequestTableItemContextMenu: function(grid, record, item, index, e) {
+        var me = this;
+
+        e.stopEvent();
+        Ext.create('Ext.menu.Menu', {
+            items: [
+                // {
+                //     text: 'Edit',
+                //     iconCls: 'x-fa fa-pencil',
+                //     handler: function() {
+                //         me.editRecord(record);
+                //     }
+                // },
+                {
+                    text: 'Delete',
+                    iconCls: 'x-fa fa-trash',
+                    handler: function() {
+                        Ext.Msg.show({
+                            title: 'Delete record',
+                            message: 'Are you sure you want to delete this record?',
+                            buttons: Ext.Msg.YESNO,
+                            icon: Ext.Msg.QUESTION,
+                            fn: function(btn) {
+                                if (btn == 'yes') me.deleteRecord(record);
+                            }
+                        });
+                    }
+                }
+            ]
+        }).showAt(e.getXY());
+    },
+
+    deleteRecord: function(record) {
+        var url = record.data.recordType == 'L' ? 'delete_library/' : 'delete_sample/';
+
+        Ext.Ajax.request({
+            url: url,
+            method: 'POST',
+            timeout: 1000000,
+            scope: this,
+
+            params: {
+                'record_id': record.data.recordType == 'L' ? record.data.libraryId : record.data.sampleId
+            },
+
+            success: function (response) {
+                var obj = Ext.JSON.decode(response.responseText);
+
+                if (obj.success) {
+                    var grid = Ext.getCmp('librariesInRequestTable');
+                    grid.fireEvent('refresh', grid);
+                    Ext.ux.ToastMessage('Record has been deleted!');
+                } else {
+                    Ext.ux.ToastMessage(obj.error, 'error');
+                    console.error('[ERROR]: ' + url);
+                    console.error(response);
+                }
+            },
+
+            failure: function(response) {
+                Ext.ux.ToastMessage(response.statusText, 'error');
+                console.error('[ERROR]: ' + url);
+                console.error(response);
+            }
+        });
     },
 
     onSaveRequestWndBtnClick: function(btn) {

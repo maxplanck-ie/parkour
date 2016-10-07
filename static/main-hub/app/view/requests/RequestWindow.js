@@ -9,7 +9,7 @@ Ext.define('MainHub.view.requests.RequestWindow', {
 
     controller: 'requests-requestwindow',
 
-    height: 400,
+    height: 500,
     width: 750,
 
     modal: true,
@@ -50,16 +50,17 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                             fieldLabel: 'Description',
                             emptyText: 'Description',
                             allowBlank: false,
-                            height: 234
+                            height: 160
                         }
                     ]
                 },
                 {
                     xtype: 'grid',
                     id: 'librariesInRequestTable',
+                    itemId: 'librariesInRequestTable',
                     title: 'Libraries/Samples',
                     width: 345,
-                    height: 306,
+                    height: 406,
                     padding: '15px 15px 15px 0',
 
                     columns: {
