@@ -1,14 +1,15 @@
 from django.http import HttpResponse
-from request.models import Request, RequestForm
-# from researcher.models import Researcher
-from library.models import Library, Sample
+from django.contrib.auth import get_user_model
 from common.utils import get_form_errors
+from request.models import Request, RequestForm
+from library.models import Library, Sample
 
 import json
 from datetime import datetime
 import logging
 
 logger = logging.getLogger('db')
+User = get_user_model()
 
 
 def get_requests(request):
@@ -25,11 +26,8 @@ def get_requests(request):
                 'name': req.name,
                 'dateCreated': req.date_created.strftime('%d.%m.%Y'),
                 'description': req.description,
-                'researcherId': req.researcher_id.id,
-                'researcher': '{0} {1}'.format(
-                    req.researcher_id.first_name,
-                    req.researcher_id.last_name,
-                ),
+                'researcherId': req.researcher.id,
+                'researcher': req.researcher.name,
             }
             for req in requests
         ]
@@ -68,11 +66,16 @@ def save_request(request):
                 form = RequestForm(request.POST, instance=req)
 
             if form.is_valid():
-                req = form.save()
                 if mode == 'add':
+                    req = form.save(commit=False)
+                    # Set initial values
                     req.status = 0
+                    req.researcher = User.objects.get(id=request.user.id)
+                    req.save()
                     req.name = 'Request ' + str(req.id)
                     req.save()
+                else:
+                    req = form.save()
                 libraries = json.loads(request.POST.get('libraries'))
                 samples = json.loads(request.POST.get('samples'))
 

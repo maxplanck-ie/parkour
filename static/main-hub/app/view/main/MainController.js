@@ -18,8 +18,8 @@ Ext.define('MainHub.view.main.MainController', {
 
     onMainViewRender: function() {
         if (!window.location.hash) {
-            // this.redirectTo("startpage");
-            this.redirectTo("researchers");     // temporarily here
+            this.redirectTo("startpage");
+            // this.redirectTo("researchers");     // temporarily here
         }
     },
 

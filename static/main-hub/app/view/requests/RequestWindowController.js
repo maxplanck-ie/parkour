@@ -20,17 +20,13 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
     },
 
     onRequestWindowBoxready: function(wnd) {
-        var grid = Ext.getCmp('researchersInRequestWindow');
-
         if (wnd.mode == 'add') {
             Ext.getStore('librariesInRequestStore').removeAll();
-        }
-
-        // Set form fields with request data
-        if (wnd.mode == 'edit') {
+        } else {
             var form = Ext.getCmp('requestForm').getForm(),
                 record = wnd.record.data;
 
+            // Set form fields with request data
             form.setValues({
                 name: record.name,
                 description: record.description
@@ -75,9 +71,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                 params: {
                     'mode': wnd.mode,
                     'request_id': (typeof wnd.record != 'undefined') ? wnd.record.get('requestId') : '',
-                    'name': data.name,
                     'description': data.description,
-                    'researcher_id': 1,     // temporarily
                     'libraries': Ext.JSON.encode(Ext.Array.pluck(Ext.Array.pluck(libraries, 'data'), 'libraryId')),
                     'samples': Ext.JSON.encode(Ext.Array.pluck(Ext.Array.pluck(samples, 'data'), 'sampleId'))
                 },

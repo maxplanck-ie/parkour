@@ -8,7 +8,7 @@ Ext.define('MainHub.view.main.Main', {
         'MainHub.view.main.MainContainerWrap',
         'MainHub.view.reports.BlankReport',
         'MainHub.view.startpage.StartPage',
-        'MainHub.view.researchers.Researchers',
+        // 'MainHub.view.researchers.Researchers',
         'MainHub.view.requests.Requests',
         'MainHub.view.libraries.Libraries',
         'MainHub.view.qualitycontrol.IncomingLibraries'
