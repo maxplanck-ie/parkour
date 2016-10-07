@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from django.contrib.auth import get_user_model
+from django.views.decorators.csrf import csrf_exempt
 from common.utils import get_form_errors
 from request.models import Request, RequestForm
 from library.models import Library, Sample
@@ -7,6 +8,10 @@ from library.models import Library, Sample
 import json
 from datetime import datetime
 import logging
+
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
+from reportlab.rl_config import defaultPageSize
 
 logger = logging.getLogger('db')
 User = get_user_model()
@@ -178,3 +183,32 @@ def get_libraries_in_request(request):
         }),
         content_type='application/json',
     )
+
+
+@csrf_exempt
+def generate_pdf(request):
+    """ """
+    request_id = request.GET.get('request_id')
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] =\
+        'inline; filename="PI_Approval_blank.pdf"'
+
+    p = canvas.Canvas(response)
+
+    try:
+        req = Request.objects.get(id=request_id)
+        PAGE_HEIGHT=defaultPageSize[1]  
+        PAGE_WIDTH=defaultPageSize[0] 
+        p.drawCentredString(PAGE_WIDTH/2.0, PAGE_HEIGHT-100, 'Approval Blank') 
+        p.drawString(inch, 10*inch-20, 'Request Name: ' + req.name)
+        p.drawString(inch, 10*inch-35, 'Description: ' + req.description)
+        p.drawString(inch, 10*inch-50, 'Submitted Libraries/Samples:')
+    except:
+        # TODO: Error handling
+        pass
+    finally:
+        p.showPage()
+        p.save()
+
+    return response

@@ -18,39 +18,100 @@ Ext.define('MainHub.view.requests.RequestWindow', {
     items: [
         {
             xtype: 'container',
-            layout: 'hbox',
+            layout: {
+                type: 'table',
+                columns: 2
+            },
+
             items: [
                 {
-                    xtype: 'form',
-                    id: 'requestForm',
-                    itemId: 'requestForm',
-                    layout: 'anchor',
                     border: 0,
                     padding: 15,
                     width: 400,
 
-                    defaultType: 'textfield',
-                    defaults: {
-                        submitEmptyText: false,
-                        anchor: '100%'
-                    },
-
                     items: [
                         {
-                            name: 'name',
-                            id: 'requestName',
-                            fieldLabel: 'Name',
-                            emptyText: 'Name',
-                            readOnly: true,
-                            disabled: true
+                            xtype: 'form',
+                            id: 'requestForm',
+                            itemId: 'requestForm',
+                            layout: 'anchor',
+                            border: 0,
+                            defaultType: 'textfield',
+                            defaults: {
+                                submitEmptyText: false,
+                                anchor: '100%'
+                            },
+
+                            items: [
+                                {
+                                    name: 'name',
+                                    id: 'requestName',
+                                    fieldLabel: 'Name',
+                                    emptyText: 'Name',
+                                    readOnly: true,
+                                    disabled: true
+                                },
+                                {
+                                    name: 'description',
+                                    xtype: 'textarea',
+                                    fieldLabel: 'Description',
+                                    emptyText: 'Description',
+                                    allowBlank: false,
+                                    height: 160
+                                }
+                            ]
                         },
                         {
-                            name: 'description',
-                            xtype: 'textarea',
-                            fieldLabel: 'Description',
-                            emptyText: 'Description',
-                            allowBlank: false,
-                            height: 160
+                            id: 'piApproval',
+                            itemId: 'piApproval',
+                            border: 0,
+                            padding: '10px 0 0 0',
+                            style: {
+                                borderTop: '1px solid #d0d0d0'
+                            },
+                            height: 162,
+                            defaults: {
+                                border: 0,
+                                margin: '5px 0'
+                            },
+
+                            items: [
+                                {
+                                    html: '<strong>Personal Investigator\'s Approval</strong><br>'
+                                },
+                                {
+                                    xtype: 'container',
+                                    layout: 'hbox',
+                                    margin: '5px 0 0 0',
+                                    items: [
+                                        {
+                                            xtype: 'label',
+                                            html: '1. Download the blank:<br>',
+                                            margin: '7px 15px 0 0'
+                                        },
+                                        {
+                                            xtype: 'button',
+                                            itemId: 'generatePDFBtn',
+                                            text: 'Download'
+                                        },
+                                        {
+                                            xtype: 'form',
+                                            id: 'generatePDFForm',
+                                            standardSubmit: true,
+                                            timeout: 100000,
+                                            hidden: true
+                                        }
+                                    ]
+                                },
+
+                                {
+                                    html: '2. Sign it<br>',
+                                    margin: '-3px 0px 5px 0'
+                                },
+                                {
+                                    html: '3. Upload it back using the form:<br>'
+                                }
+                            ]
                         }
                     ]
                 },
@@ -85,7 +146,9 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                             text: 'Add',
                             itemId: 'addLibraryBtn'
                         }
-                    ]
+                    ],
+
+                    rowspan: 2
                 }
             ]
         }

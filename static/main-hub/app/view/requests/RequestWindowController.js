@@ -12,6 +12,9 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                 refresh: 'onLibrariesInRequestTableRefresh',
                 itemcontextmenu: 'onLibrariesInRequestTableItemContextMenu'
             },
+            '#generatePDFBtn': {
+                click: 'onGeneratePDFBtnClick'
+            },
             '#saveRequestWndBtn': {
                 click: 'onSaveRequestWndBtnClick'
             },
@@ -38,6 +41,16 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
     onRequestWindowBoxready: function(wnd) {
         if (wnd.mode == 'add') {
             Ext.getStore('librariesInRequestStore').removeAll();
+            Ext.getCmp('piApproval').mask(
+                'You need to save the request to proceed.', 
+                'pi-approval-mask'
+            );
+
+            // TODO: add css styles:
+            // .pi-approval-mask .x-mask-msg-text {
+            //     background: transparent !important;
+            //     padding: 5px !important;
+            // }
         } else {
             var form = Ext.getCmp('requestForm').getForm(),
                 grid = Ext.getCmp('librariesInRequestTable'),
@@ -50,6 +63,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
             });
 
             Ext.getCmp('requestName').enable();
+            Ext.getCmp('piApproval').enable();
 
             // Load all Libraries/Samples for current Request
             grid.fireEvent('loadstore', grid, record.requestId);
@@ -128,6 +142,25 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                 console.error('[ERROR]: ' + url);
                 console.error(response);
             }
+        });
+    },
+
+    onGeneratePDFBtnClick: function(btn) {
+        var wnd = btn.up('request_wnd'),
+            url = 'generate_pdf/?request_id=' + wnd.record.get('requestId');
+
+        Ext.getCmp('generatePDFForm').submit({
+            target: '_blank',
+            url: url,
+            params: {
+                'request_id': wnd.record.get('requestId')
+            },
+            // success: function(f, action) {
+            //     debugger;
+            // },
+            // failure: function() {
+            //     debugger;
+            // }
         });
     },
 
