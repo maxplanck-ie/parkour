@@ -10,4 +10,5 @@ urlpatterns = [
     url(r'^get_libraries_in_request/$', views.get_libraries_in_request, name='get_libraries_in_request'),
 
     url(r'^generate_pdf/$', views.generate_pdf, name='generate_pdf'),
+    url(r'^upload_pi_approval/$', views.upload_pi_approval, name='upload_pi_approval'),
 ]

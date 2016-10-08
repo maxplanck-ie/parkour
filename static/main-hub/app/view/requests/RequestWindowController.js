@@ -15,6 +15,9 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
             '#generatePDFBtn': {
                 click: 'onGeneratePDFBtnClick'
             },
+            '#uploadBtn': {
+                click: 'onUploadBtnClick'
+            },
             '#saveRequestWndBtn': {
                 click: 'onSaveRequestWndBtnClick'
             },
@@ -64,6 +67,9 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
 
             Ext.getCmp('requestName').enable();
             Ext.getCmp('piApproval').enable();
+            Ext.getCmp('uploadedApproval').setHtml(
+                'Uploaded Approval: <a href="' + record.piApprovalPath + '" target="_blank">' + record.piApprovalName + '</a>'
+            );
 
             // Load all Libraries/Samples for current Request
             grid.fireEvent('loadstore', grid, record.requestId);
@@ -162,6 +168,42 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
             //     debugger;
             // }
         });
+    },
+
+    onUploadBtnClick: function(btn) {
+        var wnd = btn.up('request_wnd'),
+            form = Ext.getCmp('piApprovalForm'),
+            requestId = wnd.record.get('requestId'),
+            url = 'upload_pi_approval/';
+
+        if (form.isValid()) {
+            form.submit({
+                url: url,
+                method: 'POST',
+                waitMsg: 'Uploading...',
+                params: {
+                    'request_id': requestId
+                },
+                success: function(f, action) {
+                    var obj = Ext.JSON.decode(action.response.responseText);
+                    if (obj.success) {
+                        Ext.getCmp('uploadedApproval').setHtml(
+                            'Uploaded Approval: <a href="' + obj.path + '" target="_blank">' + obj.name + '</a>'
+                        );
+                    } else {
+                        Ext.ux.ToastMessage(obj.error, 'error');
+                        console.error('[ERROR]: ' + url + ' : ' + obj.error);
+                        console.error(action.response);
+                    }
+                },
+                failure: function(f, action) {
+                    var errorMsg = (action.failureType == 'server') ? 'Server error.' : 'Error.';
+                    Ext.ux.ToastMessage(errorMsg, 'error');
+                    console.error('[ERROR]: ' + url);
+                    console.error(action.response.responseText);
+                }
+            });
+        }
     },
 
     onSaveRequestWndBtnClick: function(btn) {

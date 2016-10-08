@@ -1,8 +1,10 @@
 from django.http import HttpResponse
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 from common.utils import get_form_errors
-from request.models import Request, RequestForm
+from request.models import Request, RequestForm, FilePIApproval
 from library.models import Library, Sample
 
 import json
@@ -33,6 +35,12 @@ def get_requests(request):
                 'description': req.description,
                 'researcherId': req.researcher.id,
                 'researcher': req.researcher.name,
+                'piApprovalName':
+                    req.pi_approval.name
+                    if req.pi_approval is not None else '',
+                'piApprovalPath':
+                    settings.MEDIA_URL + req.pi_approval.file.name
+                    if req.pi_approval is not None else ''
             }
             for req in requests
         ]
@@ -77,7 +85,7 @@ def save_request(request):
                     req.status = 0
                     req.researcher = User.objects.get(id=request.user.id)
                     req.save()
-                    req.name = 'Request ' + str(req.id)
+                    req.name = 'Request' + str(req.id)  # ensure uniqueness
                     req.save()
                 else:
                     req = form.save()
@@ -200,13 +208,12 @@ def draw_string(p, x, y, string):
 def generate_pdf(request):
     """ """
     request_id = request.GET.get('request_id')
-
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] =\
-        'inline; filename="PI_Approval_blank.pdf"'
 
     try:
         req = Request.objects.get(id=request_id)
+        filename = req.name + '_PI_Approval.pdf'
+        response['Content-Disposition'] = 'inline; filename="%s"' % filename
 
         p = canvas.Canvas(response)
         PAGE_HEIGHT=defaultPageSize[1]
@@ -299,3 +306,38 @@ def generate_pdf(request):
         p.save()
 
     return response
+
+
+@csrf_exempt
+@login_required
+def upload_pi_approval(request):
+    """ """
+    error = ''
+    file_name = ''
+    file_path = ''
+
+    if request.method == 'POST' and any(request.FILES):
+        try:
+            req = Request.objects.get(id=request.POST.get('request_id'))
+            file = request.FILES.get('file')
+            pi_approval = FilePIApproval(name=file.name, file=file)
+            pi_approval.save()
+            req.pi_approval = pi_approval
+            req.save()
+            file_name = pi_approval.name
+            file_path = settings.MEDIA_URL + pi_approval.file.name
+
+        except Exception as e:
+            error = str(e)
+            print('[ERROR]: %s' % error)
+            logger.debug(error)
+
+    return HttpResponse(
+        json.dumps({
+            'success': not error,
+            'error': error,
+            'name': file_name,
+            'path': file_path,
+        }),
+        content_type='application/json',
+    )

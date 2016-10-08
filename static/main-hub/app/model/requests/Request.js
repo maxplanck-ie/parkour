@@ -25,6 +25,14 @@ Ext.define('MainHub.model.requests.Request', {
         {
             type: 'string',
             name: 'researcher'
+        },
+        {
+            type: 'string',
+            name: 'piApprovalName'
+        },
+        {
+            type: 'string',
+            name: 'piApprovalPath'
         }
     ]
 });

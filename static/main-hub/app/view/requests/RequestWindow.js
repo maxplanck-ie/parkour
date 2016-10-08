@@ -69,7 +69,7 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                             style: {
                                 borderTop: '1px solid #d0d0d0'
                             },
-                            height: 162,
+                            height: 180,
                             defaults: {
                                 border: 0,
                                 margin: '5px 0'
@@ -109,7 +109,54 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                                     margin: '-3px 0px 5px 0'
                                 },
                                 {
-                                    html: '3. Upload it back using the form:<br>'
+                                    html: '3. Upload the signed blank back using the form:<br>'
+                                },
+                                {
+                                    layout: 'hbox',
+                                    margin: '0 0 0 15px',
+                                    items: [
+                                        {
+                                            xtype: 'form',
+                                            id: 'piApprovalForm',
+                                            border: 0,
+                                            width: 278,
+                                            items: [{
+                                                xtype: 'filefield',
+                                                name: 'file',
+                                                fieldLabel: 'File',
+                                                labelWidth: 30,
+                                                msgTarget: 'side',
+                                                anchor: '100%',
+                                                buttonText: 'Select...',
+                                                allowBlank: false,
+                                                onFileChange: function(button, e, value) {
+                                                    var me = this,
+                                                        upload = me.fileInputEl.dom,
+                                                        files = upload.files,
+                                                        names = [];
+
+                                                    if (files) {
+                                                        for (var i = 0; i < files.length; i++)
+                                                            names.push(files[i].name);
+                                                        value = names.join(', ');
+                                                    }
+
+                                                    Ext.form.field.File.superclass.setValue.call(this, value);
+                                                }
+                                            }]
+                                        },
+                                        {
+                                            xtype: 'button',
+                                            itemId: 'uploadBtn',
+                                            text: 'Upload',
+                                            margin: '0 0 0 10px'
+                                        }
+                                    ]
+                                },
+                                {
+                                    id: 'uploadedApproval',
+                                    html: 'Uploaded Approval: None',
+                                    margin: '0 0 0 15px'
                                 }
                             ]
                         }
@@ -121,8 +168,8 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                     itemId: 'librariesInRequestTable',
                     title: 'Libraries/Samples',
                     width: 345,
-                    height: 406,
-                    padding: '15px 15px 15px 0',
+                    height: 390,
+                    padding: '0 15px 15px 0',
 
                     columns: {
                         items: [
