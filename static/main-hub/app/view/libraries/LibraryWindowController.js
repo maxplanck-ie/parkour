@@ -586,8 +586,10 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                             grid.getStore().add(obj.data);
                         } else {
                             Ext.ux.ToastMessage('Record has been updated!');
-                            grid = Ext.getCmp('librariesTable');
-                            grid.fireEvent('refresh', grid);
+                            var librariesTable = Ext.getCmp('librariesTable');
+                            librariesTable.fireEvent('refresh', librariesTable);
+                            var requestsTable = Ext.getCmp('requestsTable');
+                            requestsTable.fireEvent('refresh', requestsTable);
                         }
 
                         // Preserve all fields except for Name, if 'Save and Add another' button was pressed

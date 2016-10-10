@@ -47,7 +47,11 @@ def get_requests(request):
                     if req.deep_seq_request is not None else '',
                 'deepSeqRequestPath':
                     settings.MEDIA_URL + req.deep_seq_request.file.name
-                    if req.deep_seq_request is not None else ''
+                    if req.deep_seq_request is not None else '',
+                'sumSeqDepth': sum([
+                    l.sequencing_depth 
+                    for l in list(req.libraries.all())+list(req.samples.all())
+                ])
             }
             for req in requests
         ]

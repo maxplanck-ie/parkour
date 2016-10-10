@@ -33,6 +33,10 @@ Ext.define('MainHub.model.requests.Request', {
         {
             type: 'string',
             name: 'deepSeqRequestPath'
+        },
+        {
+            type: 'int',
+            name: 'sumSeqDepth'
         }
     ]
 });

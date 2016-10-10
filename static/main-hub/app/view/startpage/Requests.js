@@ -58,6 +58,7 @@ Ext.define('MainHub.view.startpage.Requests', {
                     { text: 'Name', dataIndex: 'name', flex: 1 },
                     { text: 'Researcher', dataIndex: 'researcher', flex: 1 },
                     { text: 'Date Created', dataIndex: 'dateCreated', flex: 1 },
+                    { text: 'Sum of Sequencing Depth', dataIndex: 'sumSeqDepth', flex: 1 },
                     { text: 'Description', dataIndex: 'description', flex: 1,
                         renderer: function(value, meta) {
                             meta.tdAttr = 'data-qtip="' + value + '" data-qwidth=300';
