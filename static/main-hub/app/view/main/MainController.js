@@ -40,7 +40,7 @@ Ext.define('MainHub.view.main.MainController', {
             navigationList = refs.navigationTreeList,
             wrapContainer = refs.mainContainerWrap,
             collapsing = !navigationList.getMicro(),
-            new_width = collapsing ? 64 : 250;
+            new_width = collapsing ? 64 : 320;
 
         if (Ext.isIE9m || !Ext.os.is.Desktop) {
             Ext.suspendLayouts();
