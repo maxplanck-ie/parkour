@@ -46,14 +46,8 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
             Ext.getStore('librariesInRequestStore').removeAll();
             Ext.getCmp('piApproval').mask(
                 'You need to save the request to proceed.', 
-                'pi-approval-mask'
+                'deep-seq-request-mask'
             );
-
-            // TODO: add css styles:
-            // .pi-approval-mask .x-mask-msg-text {
-            //     background: transparent !important;
-            //     padding: 5px !important;
-            // }
         } else {
             var form = Ext.getCmp('requestForm').getForm(),
                 grid = Ext.getCmp('librariesInRequestTable'),
