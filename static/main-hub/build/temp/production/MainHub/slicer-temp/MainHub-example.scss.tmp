@@ -1007,17 +1007,19 @@ $include-mainhub-view-main-maincontroller: dynamic(true);;
 $include-mainhub-view-qualitycontrol-incominglibraries: dynamic(true);;
 $include-mainhub-view-qualitycontrol-incominglibrariescontroller: dynamic(true);;
 $include-mainhub-view-reports-blankreport: dynamic(true);;
-$include-mainhub-view-requests-requestwindow: dynamic(true);;
-$include-mainhub-view-requests-requestwindowcontroller: dynamic(true);;
-$include-mainhub-view-requests-requests: dynamic(true);;
-$include-mainhub-view-requests-requestscontroller: dynamic(true);;
 $include-mainhub-view-researchers-researcherfieldwindow: dynamic(true);;
 $include-mainhub-view-researchers-researcherfieldwindowcontroller: dynamic(true);;
 $include-mainhub-view-researchers-researcherwindow: dynamic(true);;
 $include-mainhub-view-researchers-researcherwindowcontroller: dynamic(true);;
 $include-mainhub-view-researchers-researchers: dynamic(true);;
 $include-mainhub-view-researchers-researcherscontroller: dynamic(true);;
+$include-mainhub-view-startpage-requestwindow: dynamic(true);;
+$include-mainhub-view-startpage-requestwindowcontroller: dynamic(true);;
+$include-mainhub-view-startpage-requests: dynamic(true);;
+$include-mainhub-view-startpage-requestscontroller: dynamic(true);;
+$include-mainhub-view-startpage-requestsuser: dynamic(true);;
 $include-mainhub-view-startpage-startpage: dynamic(true);;
+$include-mainhub-view-startpage-startpagecontroller: dynamic(true);;
 
 
 /* ======================== ETC ======================== */
@@ -1526,6 +1528,7 @@ $relative-image-path-for-uis: $MainHub-resource-path;
 @import '../../../../../sass/src/view/libraries/LibraryWindow';
 @import '../../../../../sass/src/view/libraries/Libraries';
 @import '../../../../../sass/src/view/reports/BlankReport';
-@import '../../../../../sass/src/view/requests/RequestWindow';
+@import '../../../../../sass/src/view/startpage/Requests';
+@import '../../../../../sass/src/view/startpage/RequestsUser';
 @import '../../../../../sass/src/view/qualitycontrol/IncomingLibraries';
 @import '../../../../../sass/src/view/main/Main';

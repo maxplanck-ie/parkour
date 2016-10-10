@@ -940,7 +940,7 @@ $include-ext-ux-google-feeds: dynamic(false);;
 $include-ext-ux-grid-subtable: dynamic(false);;
 $include-ext-ux-grid-transformgrid: dynamic(false);;
 $include-ext-ux-layout-center: dynamic(false);;
-$include-ext-ux-layout-responsivecolumn: dynamic(false);;
+$include-ext-ux-layout-responsivecolumn: dynamic(true);;
 $include-ext-ux-rating-picker: dynamic(false);;
 $include-ext-ux-statusbar-statusbar: dynamic(false);;
 $include-ext-ux-statusbar-validationstatus: dynamic(false);;
@@ -1007,17 +1007,19 @@ $include-mainhub-view-main-maincontroller: dynamic(true);;
 $include-mainhub-view-qualitycontrol-incominglibraries: dynamic(true);;
 $include-mainhub-view-qualitycontrol-incominglibrariescontroller: dynamic(true);;
 $include-mainhub-view-reports-blankreport: dynamic(true);;
-$include-mainhub-view-requests-requestwindow: dynamic(true);;
-$include-mainhub-view-requests-requestwindowcontroller: dynamic(true);;
-$include-mainhub-view-requests-requests: dynamic(true);;
-$include-mainhub-view-requests-requestscontroller: dynamic(true);;
 $include-mainhub-view-researchers-researcherfieldwindow: dynamic(false);;
 $include-mainhub-view-researchers-researcherfieldwindowcontroller: dynamic(false);;
 $include-mainhub-view-researchers-researcherwindow: dynamic(false);;
 $include-mainhub-view-researchers-researcherwindowcontroller: dynamic(false);;
 $include-mainhub-view-researchers-researchers: dynamic(false);;
 $include-mainhub-view-researchers-researcherscontroller: dynamic(false);;
+$include-mainhub-view-startpage-requestwindow: dynamic(true);;
+$include-mainhub-view-startpage-requestwindowcontroller: dynamic(true);;
+$include-mainhub-view-startpage-requests: dynamic(true);;
+$include-mainhub-view-startpage-requestscontroller: dynamic(true);;
+$include-mainhub-view-startpage-requestsuser: dynamic(true);;
 $include-mainhub-view-startpage-startpage: dynamic(true);;
+$include-mainhub-view-startpage-startpagecontroller: dynamic(true);;
 $output-paths: ("path": "../resources");
 
 /* ======================== ETC ======================== */
@@ -1443,6 +1445,14 @@ $relative-image-path-for-uis: $theme-triton-resource-path;
 @import '../../../../../ext/classic/theme-triton/sass/src/menu/Menu';
 @import '../../../../../ext/classic/theme-triton/sass/src/tab/Tab';
 
+/* including package ux */
+$ux-resource-root: 'ux' !default;
+$ux-resource-path: 'ux/images' !default;
+$current-package: 'ux';
+$current-resource-root: $ux-resource-root;
+$relative-image-path-for-uis: $ux-resource-path;
+@import '../../../../../ext/packages/ux/classic/sass/src/layout/ResponsiveColumn';
+
 /* including package MainHub */
 $MainHub-resource-root: '' !default;
 $MainHub-resource-path: 'images' !default;
@@ -1452,6 +1462,7 @@ $relative-image-path-for-uis: $MainHub-resource-path;
 @import '../../../../../sass/src/view/libraries/LibraryWindow';
 @import '../../../../../sass/src/view/libraries/Libraries';
 @import '../../../../../sass/src/view/reports/BlankReport';
-@import '../../../../../sass/src/view/requests/RequestWindow';
+@import '../../../../../sass/src/view/startpage/Requests';
+@import '../../../../../sass/src/view/startpage/RequestsUser';
 @import '../../../../../sass/src/view/qualitycontrol/IncomingLibraries';
 @import '../../../../../sass/src/view/main/Main';

@@ -11,8 +11,6 @@ Ext.define('MainHub.view.startpage.Startpage', {
 
     controller: 'startpage',
 
-    layout: 'responsivecolumn',
-
     initComponent: function() {
         var me = this;
 
