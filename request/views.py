@@ -193,19 +193,19 @@ def get_libraries_in_request(request):
 
 def draw_page_header(p, font, font_size):
     """ """
-    page_height = defaultPageSize[1]
     page_width = defaultPageSize[0]
+    page_height = defaultPageSize[1]
     title = 'Deep Sequencing Request'
     p.setFont(font, font_size)
     p.drawCentredString(page_width/2.0, page_height-75, title)
 
 
-def draw_string(p, x, _x, _y, font, font_bold, font_size, label, string):
+def draw_string(p, x, _x, y, font, font_bold, font_size, label, string):
     """ """
     p.setFont(font_bold, font_size)
-    p.drawString(x, _y, label)
+    p.drawString(x, y, label)
     p.setFont(font, font_size)
-    p.drawString(_x, _y, string)
+    p.drawString(_x, y, string)
 
 
 def draw_table_row(p, x, y, string):
@@ -329,7 +329,6 @@ def generate_pdf(request):
         # Signature
         signature_y = 1.5 * inch
         p.setFont(FONT, SMALL_FONT_SIZE-1)
-
         p.line(x, signature_y+10, x+125, signature_y+10)
         p.drawString(x+30, signature_y, '(Date, Signature)')
         p.line(x+150, signature_y+10, x+300, signature_y+10)
