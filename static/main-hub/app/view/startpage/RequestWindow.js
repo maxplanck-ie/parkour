@@ -1,15 +1,15 @@
-Ext.define('MainHub.view.requests.RequestWindow', {
+Ext.define('MainHub.view.startpage.RequestWindow', {
     extend: 'Ext.window.Window',
     alias: 'request_wnd',
     xtype: 'request_wnd',
 
     requires: [
-        'MainHub.view.requests.RequestWindowController'
+        'MainHub.view.startpage.RequestWindowController'
     ],
 
-    controller: 'requests-requestwindow',
+    controller: 'startpage-requestwindow',
 
-    height: 500,
+    height: 515,
     width: 750,
 
     modal: true,
@@ -65,11 +65,11 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                             id: 'deepSeqRequest',
                             itemId: 'deepSeqRequest',
                             border: 0,
-                            padding: '10px 0 0 0',
+                            padding: '10px 0 15px 0',
                             style: {
                                 borderTop: '1px solid #d0d0d0'
                             },
-                            height: 180,
+                            height: 185,
                             defaults: {
                                 border: 0,
                                 margin: '5px 0'
@@ -168,8 +168,8 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                     itemId: 'librariesInRequestTable',
                     title: 'Libraries/Samples',
                     width: 345,
-                    height: 390,
-                    padding: '0 15px 15px 0',
+                    height: 415,
+                    padding: '12px 15px 15px 0',
 
                     columns: {
                         items: [

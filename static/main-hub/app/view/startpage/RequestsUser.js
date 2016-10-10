@@ -1,10 +1,10 @@
-Ext.define('MainHub.view.requests.Requests', {
+Ext.define('MainHub.view.startpage.RequestsUser', {
     extend: 'Ext.container.Container',
-    xtype: 'requests',
+    xtype: 'requests-user',
 
     requires: [
-        'MainHub.view.requests.RequestsController',
-        'MainHub.view.requests.RequestWindow',
+        'MainHub.view.startpage.RequestsController',
+        'MainHub.view.startpage.RequestWindow',
         'MainHub.view.libraries.LibraryWindow'
     ],
 
@@ -45,13 +45,19 @@ Ext.define('MainHub.view.requests.Requests', {
 
             columns: {
                 items: [
-                    // { text: 'Status', dataIndex: 'status', width: 60 },
+                    { text: 'Status', dataIndex: 'status', width: 60, 
+                        renderer: function(value, meta) {
+                            if (value == 0) {
+                                meta.tdAttr = 'data-qtip="Pending submission"';
+                            }
+                            return value;
+                        }
+                    },
                     { text: 'Name', dataIndex: 'name', flex: 1 },
-                    { text: 'Researcher', dataIndex: 'researcher', flex: 1 },
                     { text: 'Date Created', dataIndex: 'dateCreated', flex: 1 },
                     { text: 'Description', dataIndex: 'description', flex: 1,
-                        renderer: function(value, metaData) {
-                            metaData.tdAttr = 'data-qtip="' + value + '" data-qwidth=300';
+                        renderer: function(value, meta) {
+                            meta.tdAttr = 'data-qtip="' + value + '" data-qwidth=300';
                             return value;
                         }
                     }

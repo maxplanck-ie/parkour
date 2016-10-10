@@ -1,6 +1,6 @@
-Ext.define('MainHub.view.requests.RequestWindowController', {
+Ext.define('MainHub.view.startpage.RequestWindowController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.requests-requestwindow',
+    alias: 'controller.startpage-requestwindow',
 
     config: {
         control: {
@@ -48,6 +48,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                 'You need to save the request to proceed.', 
                 'deep-seq-request-mask'
             );
+            Ext.getCmp('deepSeqRequest').body.update('');
         } else {
             var form = Ext.getCmp('requestForm').getForm(),
                 grid = Ext.getCmp('librariesInRequestTable'),
@@ -61,9 +62,12 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
 
             Ext.getCmp('requestName').enable();
             Ext.getCmp('deepSeqRequest').enable();
-            Ext.getCmp('uploadedDeepSeqRequest').setHtml(
-                'Uploaded File: <a href="' + record.deepSeqRequestPath + '" target="_blank">' + record.deepSeqRequestName + '</a>'
-            );
+
+            if (record.deepSeqRequestName != '') {
+                Ext.getCmp('uploadedDeepSeqRequest').setHtml(
+                    'Uploaded File: <a href="' + record.deepSeqRequestPath + '" target="_blank">' + record.deepSeqRequestName + '</a>'
+                );
+            }
 
             // Load all Libraries/Samples for current Request
             grid.fireEvent('loadstore', grid, record.requestId);

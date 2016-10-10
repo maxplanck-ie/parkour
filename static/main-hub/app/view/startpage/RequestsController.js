@@ -1,4 +1,4 @@
-Ext.define('MainHub.view.requests.RequestsController', {
+Ext.define('MainHub.view.startpage.RequestsController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.requests',
 

@@ -19,13 +19,20 @@ logger = logging.getLogger('db')
 User = get_user_model()
 
 
+@login_required
 def get_requests(request):
     """ Get the list of all requests and send it to frontend """
     error = str()
     data = []
 
     try:
-        requests = Request.objects.select_related()
+        if request.user.is_staff:
+            requests = Request.objects.select_related()
+        else:
+            requests = Request.objects.filter(
+                researcher_id=request.user.id
+            ).select_related()
+
         data = [
             {
                 'requestId': req.id,
@@ -44,6 +51,7 @@ def get_requests(request):
             }
             for req in requests
         ]
+        data = sorted(data, key=lambda x: x['status'])
 
     except Exception as e:
         error = str(e)
@@ -64,6 +72,7 @@ def get_requests(request):
     )
 
 
+@login_required
 def save_request(request):
     """ Add new or edit an existing request """
     error = str()
@@ -121,6 +130,7 @@ def save_request(request):
     )
 
 
+@login_required
 def delete_request(request):
     error = str()
 
@@ -146,6 +156,7 @@ def delete_request(request):
     )
 
 
+@login_required
 def get_libraries_in_request(request):
     """ """
     error = ''
@@ -222,6 +233,7 @@ def draw_table_row(p, x, y, string):
 
 
 @csrf_exempt
+@login_required
 def generate_pdf(request):
     """ """
     request_id = request.GET.get('request_id')
@@ -231,7 +243,7 @@ def generate_pdf(request):
         req = Request.objects.get(id=request_id)
         user = User.objects.get(id=req.researcher_id)
         cost_unit = sorted([u.name for u in user.cost_unit.all()])
-        filename = req.name + '_PI_Approval.pdf'
+        filename = req.name + '_Deep_Sequencing_Request.pdf'
         response['Content-Disposition'] = 'inline; filename="%s"' % filename
 
         p = canvas.Canvas(response)

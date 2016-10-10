@@ -11,7 +11,8 @@ def index(request):
     user = request.user
     return render(request, 'index.html', {
         'DEBUG': settings.DEBUG,
-        'USERNAME': '%s' % user.name
+        'USERNAME': '%s' % user.name,
+        'USER_IS_STAFF': user.is_staff
     })
 
 
@@ -44,12 +45,12 @@ def get_navigation_tree(request):
                 'expanded': True,
                 'selectable': False,
                 'children': [
-                    {
-                        'text': 'Requests',
-                        'iconCls': 'x-fa fa-external-link-square',
-                        'viewType': 'requests',
-                        'leaf': True
-                    },
+                    # {
+                    #     'text': 'Requests',
+                    #     'iconCls': 'x-fa fa-external-link-square',
+                    #     'viewType': 'requests',
+                    #     'leaf': True
+                    # },
                     {
                         'text': 'Libraries/Samples',
                         'iconCls': 'x-fa fa-flask',
