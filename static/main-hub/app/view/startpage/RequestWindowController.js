@@ -88,13 +88,13 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
         e.stopEvent();
         Ext.create('Ext.menu.Menu', {
             items: [
-                // {
-                //     text: 'Edit',
-                //     iconCls: 'x-fa fa-pencil',
-                //     handler: function() {
-                //         me.editRecord(record);
-                //     }
-                // },
+                {
+                    text: 'Edit',
+                    iconCls: 'x-fa fa-pencil',
+                    handler: function() {
+                        me.editRecord(record);
+                    }
+                },
                 {
                     text: 'Delete',
                     iconCls: 'x-fa fa-trash',
@@ -112,6 +112,25 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
                 }
             ]
         }).showAt(e.getXY());
+    },
+
+    editRecord: function(record) {
+        var store = Ext.getStore('librariesStore'), 
+            title = '', fullRecord = null;
+
+        if (record.get('recordType') == 'L') {
+            title = 'Edit Library';
+            fullRecord = store.findRecord('libraryId', record.get('libraryId'));
+        } else {
+            title = 'Edit Sample';
+            fullRecord = store.findRecord('sampleId', record.get('sampleId'));
+        }
+
+        Ext.create('library_wnd', {
+            title: title,
+            mode: 'edit',
+            record: fullRecord
+        }).show();
     },
 
     deleteRecord: function(record) {
