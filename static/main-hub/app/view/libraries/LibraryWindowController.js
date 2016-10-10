@@ -581,15 +581,18 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
 
                     if (obj.success) {
                         if (wnd.mode == 'add') {
-                            Ext.ux.ToastMessage('Record has been added!');
                             grid = Ext.getCmp('librariesInRequestTable');
                             grid.getStore().add(obj.data);
+                            Ext.ux.ToastMessage('Record has been added!');
                         } else {
+                            Ext.getStore('requestsStore').reload();
+                            Ext.getStore('librariesStore').reload();
+                            Ext.getStore('librariesInRequestStore').reload({
+                                params: {
+                                    request_id: wnd.record.get('requestId')
+                                }
+                            });
                             Ext.ux.ToastMessage('Record has been updated!');
-                            var librariesTable = Ext.getCmp('librariesTable');
-                            librariesTable.fireEvent('refresh', librariesTable);
-                            var requestsTable = Ext.getCmp('requestsTable');
-                            requestsTable.fireEvent('refresh', requestsTable);
                         }
 
                         // Preserve all fields except for Name, if 'Save and Add another' button was pressed
