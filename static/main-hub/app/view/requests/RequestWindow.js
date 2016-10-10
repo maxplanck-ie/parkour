@@ -62,8 +62,8 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                             ]
                         },
                         {
-                            id: 'piApproval',
-                            itemId: 'piApproval',
+                            id: 'deepSeqRequest',
+                            itemId: 'deepSeqRequest',
                             border: 0,
                             padding: '10px 0 0 0',
                             style: {
@@ -77,7 +77,7 @@ Ext.define('MainHub.view.requests.RequestWindow', {
 
                             items: [
                                 {
-                                    html: '<strong>Personal Investigator\'s Approval</strong><br>'
+                                    html: '<strong>Deep Sequencing Request</strong><br>'
                                 },
                                 {
                                     xtype: 'container',
@@ -117,7 +117,7 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                                     items: [
                                         {
                                             xtype: 'form',
-                                            id: 'piApprovalForm',
+                                            id: 'deepSeqRequestForm',
                                             border: 0,
                                             width: 278,
                                             items: [{
@@ -154,8 +154,8 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                                     ]
                                 },
                                 {
-                                    id: 'uploadedApproval',
-                                    html: 'Uploaded Approval: None',
+                                    id: 'uploadedDeepSeqRequest',
+                                    html: 'Uploaded File: None',
                                     margin: '0 0 0 15px'
                                 }
                             ]

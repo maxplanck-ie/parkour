@@ -44,7 +44,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
     onRequestWindowBoxready: function(wnd) {
         if (wnd.mode == 'add') {
             Ext.getStore('librariesInRequestStore').removeAll();
-            Ext.getCmp('piApproval').mask(
+            Ext.getCmp('deepSeqRequest').mask(
                 'You need to save the request to proceed.', 
                 'deep-seq-request-mask'
             );
@@ -60,9 +60,9 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
             });
 
             Ext.getCmp('requestName').enable();
-            Ext.getCmp('piApproval').enable();
-            Ext.getCmp('uploadedApproval').setHtml(
-                'Uploaded Approval: <a href="' + record.piApprovalPath + '" target="_blank">' + record.piApprovalName + '</a>'
+            Ext.getCmp('deepSeqRequest').enable();
+            Ext.getCmp('uploadedDeepSeqRequest').setHtml(
+                'Uploaded File: <a href="' + record.deepSeqRequestPath + '" target="_blank">' + record.deepSeqRequestName + '</a>'
             );
 
             // Load all Libraries/Samples for current Request
@@ -166,9 +166,9 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
 
     onUploadBtnClick: function(btn) {
         var wnd = btn.up('request_wnd'),
-            form = Ext.getCmp('piApprovalForm'),
+            form = Ext.getCmp('deepSeqRequestForm'),
             requestId = wnd.record.get('requestId'),
-            url = 'upload_pi_approval/';
+            url = 'upload_deep_sequencing_request/';
 
         if (form.isValid()) {
             form.submit({
@@ -181,8 +181,8 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                 success: function(f, action) {
                     var obj = Ext.JSON.decode(action.response.responseText);
                     if (obj.success) {
-                        Ext.getCmp('uploadedApproval').setHtml(
-                            'Uploaded Approval: <a href="' + obj.path + '" target="_blank">' + obj.name + '</a>'
+                        Ext.getCmp('uploadedDeepSeqRequest').setHtml(
+                            'Uploaded File: <a href="' + obj.path + '" target="_blank">' + obj.name + '</a>'
                         );
                     } else {
                         Ext.ux.ToastMessage(obj.error, 'error');

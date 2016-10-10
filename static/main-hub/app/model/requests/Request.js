@@ -28,11 +28,11 @@ Ext.define('MainHub.model.requests.Request', {
         },
         {
             type: 'string',
-            name: 'piApprovalName'
+            name: 'deepSeqRequestName'
         },
         {
             type: 'string',
-            name: 'piApprovalPath'
+            name: 'deepSeqRequestPath'
         }
     ]
 });

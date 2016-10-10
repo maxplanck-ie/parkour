@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from common.utils import get_form_errors
-from request.models import Request, RequestForm, FilePIApproval
+from request.models import Request, RequestForm, FileDeepSeqRequest
 from library.models import Library, Sample
 
 import json
@@ -35,12 +35,12 @@ def get_requests(request):
                 'description': req.description,
                 'researcherId': req.researcher.id,
                 'researcher': req.researcher.name,
-                'piApprovalName':
-                    req.pi_approval.name
-                    if req.pi_approval is not None else '',
-                'piApprovalPath':
-                    settings.MEDIA_URL + req.pi_approval.file.name
-                    if req.pi_approval is not None else ''
+                'deepSeqRequestName':
+                    req.deep_seq_request.name
+                    if req.deep_seq_request is not None else '',
+                'deepSeqRequestPath':
+                    settings.MEDIA_URL + req.deep_seq_request.file.name
+                    if req.deep_seq_request is not None else ''
             }
             for req in requests
         ]
@@ -172,11 +172,7 @@ def get_libraries_in_request(request):
             }
             for sample in req.samples.all()
         ]
-        data = sorted(
-            libraries + samples,
-            key=lambda x: (x['recordType'], x['name']),
-            reverse=True,
-        )
+        data = sorted(libraries+samples, key=lambda x: x['barcode'])
 
     except Exception as e:
         error = str(e)
@@ -280,11 +276,7 @@ def generate_pdf(request):
             }
             for sample in req.samples.all()
         ]
-        data = sorted(
-            libraries + samples,
-            key=lambda x: (x['type'], x['name']),
-            reverse=True,
-        )
+        data = sorted(libraries+samples, key=lambda x: x['barcode'])
 
         # Only ~55 records fit into the page
         for i, record in enumerate(data):
@@ -310,7 +302,7 @@ def generate_pdf(request):
 
 @csrf_exempt
 @login_required
-def upload_pi_approval(request):
+def upload_deep_sequencing_request(request):
     """ """
     error = ''
     file_name = ''
@@ -320,12 +312,12 @@ def upload_pi_approval(request):
         try:
             req = Request.objects.get(id=request.POST.get('request_id'))
             file = request.FILES.get('file')
-            pi_approval = FilePIApproval(name=file.name, file=file)
-            pi_approval.save()
-            req.pi_approval = pi_approval
+            deep_seq_request = FileDeepSeqRequest(name=file.name, file=file)
+            deep_seq_request.save()
+            req.deep_seq_request = deep_seq_request
             req.save()
-            file_name = pi_approval.name
-            file_path = settings.MEDIA_URL + pi_approval.file.name
+            file_name = deep_seq_request.name
+            file_path = settings.MEDIA_URL + deep_seq_request.file.name
 
         except Exception as e:
             error = str(e)

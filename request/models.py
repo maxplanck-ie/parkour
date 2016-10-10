@@ -4,9 +4,9 @@ from django.conf import settings
 from library.models import Library, Sample
 
 
-class FilePIApproval(models.Model):
+class FileDeepSeqRequest(models.Model):
     name = models.CharField('Name', max_length=100)
-    file = models.FileField(upload_to='approvals/%Y/%m/%d/')
+    file = models.FileField(upload_to='requests/%Y/%m/%d/')
 
     def __str__(self):
         return self.name
@@ -23,9 +23,9 @@ class Request(models.Model):
     )
     libraries = models.ManyToManyField(Library, blank=True)
     samples = models.ManyToManyField(Sample, blank=True)
-    pi_approval = models.ForeignKey(
-        FilePIApproval,
-        verbose_name='PI\'s Approval',
+    deep_seq_request = models.ForeignKey(
+        FileDeepSeqRequest,
+        verbose_name='Deep Sequencing Request',
         blank=True,
         null=True,
     )
