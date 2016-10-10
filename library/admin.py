@@ -16,10 +16,24 @@ class LibraryProtocolAdmin(admin.ModelAdmin):
 
 
 @admin.register(
-	LibraryType, Organism, IndexType, IndexI5, IndexI7, ConcentrationMethod,
-	SequencingRunCondition, NucleicAcidType, SampleProtocol, RNAQuality)
+	LibraryType, Organism, IndexType, ConcentrationMethod,
+	SequencingRunCondition, NucleicAcidType, RNAQuality)
 class FormFieldsAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(IndexI5, IndexI7)
+class IndexAdmin(admin.ModelAdmin):
+    list_display = ('index_id', 'index', 'index_type',)
+    list_filter = ('index_type',)
+    search_fields = ('index_id', 'index', 'index_type',)
+
+
+@admin.register(SampleProtocol)
+class SampleProtocolAdmin(admin.ModelAdmin):
+    list_display = ('name', 'type', 'provider', 'typical_application',)
+    list_filter = ('type', 'provider', 'typical_application',)
+    search_fields = ('name', 'type', 'provider', 'typical_application',)
 
 
 @admin.register(Library)

@@ -25,7 +25,11 @@ class CostUnit(models.Model):
     )
 
     def __str__(self):
-        return '%s (%s: %s)' % (self.name, self.pi.organization.name, self.pi.name)
+        return '%s (%s: %s)' % (
+            self.name,
+            self.pi.organization.name,
+            self.pi.name,
+        )
 
 
 class User(AbstractNamedUser):

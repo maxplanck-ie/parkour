@@ -13,7 +13,9 @@ User = get_user_model()
 
 @admin.register(PrincipalInvestigator)
 class PrincipalInvestigatorAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('name', 'organization',)
+    search_fields = ('name', 'organization__name',)
+    list_filter = ('organization',)
 
 
 @admin.register(Organization)
@@ -23,7 +25,9 @@ class OrganizationAdmin(admin.ModelAdmin):
 
 @admin.register(CostUnit)
 class CostUnitAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('name', 'pi',)
+    search_fields = ('name', 'pi__name', 'pi__organization__name',)
+    list_filter = ('pi__organization__name', 'pi__name',)
 
 
 class UserCreationForm(UserCreationForm):
