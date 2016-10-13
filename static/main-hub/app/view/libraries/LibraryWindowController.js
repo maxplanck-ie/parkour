@@ -115,114 +115,101 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         var wnd = card.up('library_wnd');
 
         Ext.getCmp('addWndBtn').show();
-        if (wnd.mode == 'add') {
-            Ext.getStore('fileSampleStore').removeAll();
-            Ext.getCmp('saveAndAddWndBtn').show();
-        } else {
-            var record = wnd.record.data,
-                form = Ext.getCmp('libraryForm').getForm();
-
-            // Show Library barcode
-            Ext.getCmp('libraryBarcodeField').show().setHtml(record.barcode);
-
-            // Load field values
-            form.setValues({
-                name: record.name,
-                enrichmentCycles: record.enrichmentCycles,
-                DNADissolvedIn: record.DNADissolvedIn,
-                concentration: record.concentration,
-                sampleVolume: record.sampleVolume,
-                meanFragmentSize: record.meanFragmentSize,
-                qPCRResult: record.qPCRResult,
-                sequencingDepth: record.sequencingDepth,
-                comments: record.comments
-            });
-            if (record.equalRepresentation == 'No') Ext.getCmp('equalRepresentationRadio2').setValue(true);
-            if (record.files.length > 0) {
-                Ext.getStore('fileLibraryStore').load({
-                    params: {
-                        'file_ids': Ext.JSON.encode(record.files)
-                    },
-                    callback: function(records, operation, success) {
-                        if (!success) Ext.ux.ToastMessage('Cannot load Sample files', 'error');
-                    }
-                });
-            }
-
-            Ext.getCmp('addWndBtn').setConfig('text', 'Save');
-        }
 
         this.initializeTooltips();
 
-        // Load Library Protocols
-        wnd.setLoading();
-        Ext.getStore('libraryProtocolsStore').load(function(records, operation, success) {
-            if (!success) Ext.ux.ToastMessage('Cannot load Library Protocols', 'error');
+        if (wnd.mode == 'add') {
+            Ext.getStore('fileLibraryStore').removeAll();
+            Ext.getCmp('loadLibrariesFromFile').show();
+            Ext.getCmp('loadFromFileBtn').show();
+            Ext.getCmp('keepAndAddWndBtn').show();
+            Ext.getCmp('loadLibrariesFromFile').setStore(
+                Ext.create('Ext.data.Store', {
+                    model: 'MainHub.model.libraries.Library',
+                    data: []
+                })
+            );
+        } else {
+            var form = Ext.getCmp('libraryForm').getForm(),
+                record = wnd.record.data;
+            
+            // Show Sample barcode
+            Ext.getCmp('libraryBarcodeField').show().setHtml(record.barcode);
 
-            if (wnd.mode == 'edit') {
-                var libraryProtocolField = Ext.getCmp('libraryProtocolField');
-                libraryProtocolField.select(record.libraryProtocolId);
-                libraryProtocolField.fireEvent('select', libraryProtocolField, libraryProtocolField.findRecordByValue(record.libraryProtocolId), 'edit');
-            }
+            Ext.getCmp('addWndBtn').setConfig('text', 'Save');
 
-            wnd.setLoading(false);
-        });
+            this.setLibraryForm(wnd, form, record);
+        }
 
-        // Load Organisms
-        wnd.setLoading();
-        Ext.getStore('organismsStore').load(function(records, operation, success) {
-            if (!success) Ext.ux.ToastMessage('Cannot load Organisms', 'error');
+        // // Load Library Protocols
+        // wnd.setLoading();
+        // Ext.getStore('libraryProtocolsStore').load(function(records, operation, success) {
+        //     if (!success) Ext.ux.ToastMessage('Cannot load Library Protocols', 'error');
 
-            if (wnd.mode == 'edit') {
-                var organismField = Ext.getCmp('organismField');
-                organismField.select(record.organism);
-                organismField.fireEvent('select', organismField, organismField.findRecordByValue(record.organism));
-            }
+        //     if (wnd.mode == 'edit') {
+        //         var libraryProtocolField = Ext.getCmp('libraryProtocolField');
+        //         libraryProtocolField.select(record.libraryProtocolId);
+        //         libraryProtocolField.fireEvent('select', libraryProtocolField, libraryProtocolField.findRecordByValue(record.libraryProtocolId), 'edit');
+        //     }
 
-            wnd.setLoading(false);
-        });
+        //     wnd.setLoading(false);
+        // });
 
-        // Load Index Types
-        wnd.setLoading();
-        Ext.getStore('indexTypesStore').load(function(records, operation, success) {
-            if (!success) Ext.ux.ToastMessage('Cannot load Index Types', 'error');
+        // // Load Organisms
+        // wnd.setLoading();
+        // Ext.getStore('organismsStore').load(function(records, operation, success) {
+        //     if (!success) Ext.ux.ToastMessage('Cannot load Organisms', 'error');
 
-            if (wnd.mode == 'edit') {
-                var indexType = Ext.getCmp('indexType');
-                indexType.select(record.indexTypeId);
-                indexType.fireEvent('select', indexType, indexType.findRecordByValue(record.indexTypeId), 'edit');
-            }
+        //     if (wnd.mode == 'edit') {
+        //         var organismField = Ext.getCmp('organismField');
+        //         organismField.select(record.organism);
+        //         organismField.fireEvent('select', organismField, organismField.findRecordByValue(record.organism));
+        //     }
 
-            wnd.setLoading(false);
-        });
+        //     wnd.setLoading(false);
+        // });
 
-        // Load Concentration Methods
-        wnd.setLoading();
-        Ext.getStore('concentrationMethodsStore').load(function(records, operation, success) {
-            if (!success) Ext.ux.ToastMessage('Cannot load Concentration Methods', 'error');
+        // // Load Index Types
+        // wnd.setLoading();
+        // Ext.getStore('indexTypesStore').load(function(records, operation, success) {
+        //     if (!success) Ext.ux.ToastMessage('Cannot load Index Types', 'error');
 
-            if (wnd.mode == 'edit') {
-                var concentrationMethodField = Ext.getCmp('concentrationMethodField');
-                concentrationMethodField.select(record.concentrationMethod);
-                concentrationMethodField.fireEvent('select', concentrationMethodField, concentrationMethodField.findRecordByValue(record.concentrationMethod));
-            }
+        //     if (wnd.mode == 'edit') {
+        //         var indexType = Ext.getCmp('indexType');
+        //         indexType.select(record.indexTypeId);
+        //         indexType.fireEvent('select', indexType, indexType.findRecordByValue(record.indexTypeId), 'edit');
+        //     }
 
-            wnd.setLoading(false);
-        });
+        //     wnd.setLoading(false);
+        // });
 
-        // Load Sequencing Run Conditions
-        wnd.setLoading();
-        Ext.getStore('sequencingRunConditionsStore').load(function(records, operation, success) {
-            if (!success) Ext.ux.ToastMessage('Cannot load Sequencing Run Conditions', 'error');
+        // // Load Concentration Methods
+        // wnd.setLoading();
+        // Ext.getStore('concentrationMethodsStore').load(function(records, operation, success) {
+        //     if (!success) Ext.ux.ToastMessage('Cannot load Concentration Methods', 'error');
 
-            if (wnd.mode == 'edit') {
-                var sequencingRunConditionField = Ext.getCmp('sequencingRunConditionField');
-                sequencingRunConditionField.select(record.sequencingRunConditionId);
-                sequencingRunConditionField.fireEvent('select', sequencingRunConditionField, sequencingRunConditionField.findRecordByValue(record.sequencingRunConditionId));
-            }
+        //     if (wnd.mode == 'edit') {
+        //         var concentrationMethodField = Ext.getCmp('concentrationMethodField');
+        //         concentrationMethodField.select(record.concentrationMethod);
+        //         concentrationMethodField.fireEvent('select', concentrationMethodField, concentrationMethodField.findRecordByValue(record.concentrationMethod));
+        //     }
 
-            wnd.setLoading(false);
-        });
+        //     wnd.setLoading(false);
+        // });
+
+        // // Load Sequencing Run Conditions
+        // wnd.setLoading();
+        // Ext.getStore('sequencingRunConditionsStore').load(function(records, operation, success) {
+        //     if (!success) Ext.ux.ToastMessage('Cannot load Sequencing Run Conditions', 'error');
+
+        //     if (wnd.mode == 'edit') {
+        //         var sequencingRunConditionField = Ext.getCmp('sequencingRunConditionField');
+        //         sequencingRunConditionField.select(record.sequencingRunConditionId);
+        //         sequencingRunConditionField.fireEvent('select', sequencingRunConditionField, sequencingRunConditionField.findRecordByValue(record.sequencingRunConditionId));
+        //     }
+
+        //     wnd.setLoading(false);
+        // });
     },
 
     onSampleCardActivate: function(card) {
@@ -463,25 +450,43 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
 
     onKeepAndAddWndBtnClick: function() {
         // For Samples only (yet)
-        var wnd = Ext.getCmp('library_wnd'),
-            form = Ext.getCmp('sampleForm'),
-            data = form.getForm().getFieldValues(),
-            files = form.down('filegridfield').getValue(),
-            grid = Ext.getCmp('loadSamplesFromFile'),
-            sampleName = Ext.getCmp('sampleName').getValue(),
-            samplesInGrid = Ext.Array.pluck(Ext.Array.pluck(grid.getStore().data.items, 'data'), 'name');
+        var wnd = Ext.getCmp('library_wnd')
+            type = Ext.getCmp('librarySamplePanel').getLayout().getActiveItem().id,
+            form = null,
+            grid = null,
+            files = null,
+            filesStore = null,
+            recordNameField = null;
 
-        if (form.isValid() && samplesInGrid.indexOf(sampleName) == -1) {
-            var record = this.prepareSampleRecord(data, files),
-                samplesGrid = Ext.getCmp('loadSamplesFromFile');
+        if (type == 'libraryCard') {
+            form = Ext.getCmp('libraryForm');
+            grid = Ext.getCmp('loadLibrariesFromFile');
+            recordNameField = Ext.getCmp('libraryName');
+            filesStore = Ext.getStore('fileLibraryStore');
+        } else {
+            form = Ext.getCmp('sampleForm');
+            grid = Ext.getCmp('loadSamplesFromFile');
+            recordNameField = Ext.getCmp('sampleName');
+            filesStore = Ext.getStore('fileSampleStore');
+        }
+
+        var data = form.getForm().getFieldValues(),
+            files = form.down('filegridfield').getValue(),
+            recordName = recordNameField.getValue(),
+            recordsInGrid = Ext.Array.pluck(Ext.Array.pluck(grid.getStore().data.items, 'data'), 'name');
+
+        if (form.isValid() && grid.indexOf(recordName) == -1) {
+            var record = this.prepareRecord(data, files);
             
-            if (samplesGrid.isDisabled()) samplesGrid.enable();
+            if (grid.isDisabled()) {
+                grid.enable();
+            }
             
-            samplesGrid.getStore().add(record);
-            Ext.getCmp('sampleName').reset();
-            Ext.getStore('fileSampleStore').removeAll();
-        } else if (samplesInGrid.indexOf(sampleName) > -1) {
-            Ext.ux.ToastMessage('Sample Name must be unique', 'warning');
+            grid.getStore().add(record);
+            recordNameField.reset();
+            filesStore.removeAll();
+        } else if (recordsInGrid.indexOf(recordName) > -1) {
+            Ext.ux.ToastMessage('Name must be unique', 'warning');
         } else {
             Ext.ux.ToastMessage('Check the form', 'warning');
         }
@@ -559,10 +564,10 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
 
             params = {'forms': []};
             if (records.length == 0) {
-                params.forms.push(me.prepareSampleParams(wnd, data, form.down('filegridfield').getValue()));
+                params.forms.push(me.prepareParams(wnd, data, form.down('filegridfield').getValue()));
             } else {
                 Ext.Array.each(records, function(record) {
-                    params.forms.push(me.prepareSampleParams(wnd, record.data, record.get('files')));
+                    params.forms.push(me.prepareParams(wnd, record.data, record.get('files')));
                 });
             }
             params.forms = Ext.JSON.encode(params.forms);
@@ -701,55 +706,133 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         btn.up('library_wnd').close();
     },
 
-    prepareSampleRecord: function(data, files) {
-        return {
+    prepareRecord: function(data, files) {
+        var type = Ext.getCmp('librarySamplePanel').getLayout().getActiveItem().id,
+            result = {};
+
+        var common = {
             name                                :   data.name,
-            nucleicAcidType                     :   data.nucleicAcidType,
-            sampleProtocol                      :   data.sampleProtocol,
             organism                            :   data.organism,
             equalRepresentationOfNucleotides    :   data.equalRepresentationOfNucleotides,
             DNADissolvedIn                      :   data.DNADissolvedIn,
             concentration                       :   data.concentration,
             concentrationDeterminedBy           :   data.concentrationDeterminedBy,
             sampleVolume                        :   data.sampleVolume,
-            amplifiedCycles                     :   data.amplifiedCycles,
-            DNaseTreatment                      :   data.DNaseTreatment,
-            rnaQuality                          :   data.rnaQuality,
-            rnaSpikeIn                          :   data.rnaSpikeIn,
-            samplePreparationProtocol           :   data.samplePreparationProtocol,
-            requestedSampleTreatment            :   data.requestedSampleTreatment,
             sequencingRunCondition              :   data.sequencingRunCondition,
             sequencingDepth                     :   data.sequencingDepth,
             comments                            :   data.comments,
             files                               :   files
+        };
+
+        if (type == 'libraryCard') {
+            result = Ext.Array.merge(common, {
+                libraryProtocol             :   data.libraryProtocol,
+                libraryType                 :   data.libraryType,
+                enrichmentCycles            :   data.enrichmentCycles,
+                indexType                   :   data.indexType,
+                indexReads                  :   data.indexReads,
+                indexI7                     :   data.indexI7,
+                indexI5                     :   data.indexI5,
+                meanFragmentSize            :   data.meanFragmentSize,
+                qPCRResult                  :   data.qPCRResult
+            });
+        } else {
+            result = Ext.Array.merge(common, {
+                nucleicAcidType             :   data.nucleicAcidType,
+                sampleProtocol              :   data.sampleProtocol,
+                amplifiedCycles             :   data.amplifiedCycles,
+                DNaseTreatment              :   data.DNaseTreatment,
+                rnaQuality                  :   data.rnaQuality,
+                rnaSpikeIn                  :   data.rnaSpikeIn,
+                samplePreparationProtocol   :   data.samplePreparationProtocol,
+                requestedSampleTreatment    :   data.requestedSampleTreatment
+            });
         }
+
+        return result;
     },
 
-    prepareSampleParams: function(wnd, data, files) {
-        return {
+    prepareParams(wnd, data, files) {
+        var type = Ext.getCmp('librarySamplePanel').getLayout().getActiveItem().id,
+            result = {};
+
+        var common = {
             mode                                :   wnd.mode,
             name                                :   data.name,
-            sample_id                           :   (typeof wnd.record !== 'undefined') ? wnd.record.data.sampleId : '',
-            nucleic_acid_type                   :   data.nucleicAcidType,
-            sample_protocol                     :   data.sampleProtocol,
-            // 'library_type_id': data.libraryType,
             organism                            :   data.organism,
             equal_representation_nucleotides    :   data.equalRepresentationOfNucleotides,
             dna_dissolved_in                    :   data.DNADissolvedIn,
             concentration                       :   data.concentration,
             concentration_determined_by         :   data.concentrationDeterminedBy,
             sample_volume                       :   data.sampleVolume,
-            sample_amplified_cycles             :   data.amplifiedCycles,
-            dnase_treatment                     :   data.DNaseTreatment,
-            rna_quality                         :   (data.rnaQuality == 0) ? null : data.rnaQuality,
-            rna_spike_in                        :   data.rnaSpikeIn,
-            sample_preparation_protocol         :   data.samplePreparationProtocol,
-            requested_sample_treatment          :   data.requestedSampleTreatment,
             sequencing_run_condition            :   data.sequencingRunCondition,
             sequencing_depth                    :   data.sequencingDepth,
             comments                            :   data.comments,
             // 'files': Ext.JSON.encode(form.down('filegridfield').getValue())
             files                               :   files
+        };
+
+        if (type == 'libraryCard') {
+            result = Ext.Array.merge(common, {
+                library_id                      :   (typeof wnd.record !== 'undefined') ? wnd.record.data.libraryId : '',
+                library_protocol                :   data.libraryProtocol,
+                library_type                    :   data.libraryType,
+                enrichment_cycles               :   data.enrichmentCycles,
+                index_type                      :   data.indexType,
+                index_reads                     :   data.indexReads,
+                index_i7                        :   data.indexI7,
+                index_i5                        :   data.indexI5,
+                mean_fragment_size              :   data.meanFragmentSize,
+                qpcr_result                     :   data.qPCRResult,
+            });
+        } else {
+            result = Ext.Array.merge(common, {
+                sample_id                       :   (typeof wnd.record !== 'undefined') ? wnd.record.data.sampleId : '',
+                nucleic_acid_type               :   data.nucleicAcidType,
+                sample_protocol                 :   data.sampleProtocol,
+                // 'library_type_id': data.libraryType,
+                sample_amplified_cycles         :   data.amplifiedCycles,
+                dnase_treatment                 :   data.DNaseTreatment,
+                rna_quality                     :   (data.rnaQuality == 0) ? null : data.rnaQuality,
+                rna_spike_in                    :   data.rnaSpikeIn,
+                sample_preparation_protocol     :   data.samplePreparationProtocol,
+                requested_sample_treatment      :   data.requestedSampleTreatment
+            });
+        }
+
+        return result;
+    },
+
+    setLibraryForm: function(wnd, form, record) {
+        if (form != null) {
+            form.setValues(record);
+            if (record.equalRepresentationOfNucleotides == 'False' || record.equalRepresentationOfNucleotides == false) Ext.getCmp('equalRepresentationRadio2').setValue(true);
+            if (record.files.length > 0) {
+                Ext.getStore('fileLibraryStore').load({
+                    params: {
+                        'file_ids': Ext.JSON.encode(record.files)
+                    },
+                    callback: function(records, operation, success) {
+                        if (!success) Ext.ux.ToastMessage('Cannot load Library files', 'error');
+                    }
+                });
+            } else {
+                Ext.getStore('fileLibraryStore').removeAll();
+            }
+        }
+
+        if (record != null) {
+            var organismField = Ext.getCmp('organismField');
+            organismField.select(record.organism);
+            organismField.fireEvent('select', organismField, organismField.findRecordByValue(record.organism));
+        
+            var concentrationMethodField = Ext.getCmp('concentrationMethodField');
+            concentrationMethodField.select(record.concentrationDeterminedBy);
+            concentrationMethodField.fireEvent('select', concentrationMethodField, concentrationMethodField.findRecordByValue(record.concentrationDeterminedBy));
+
+            var sequencingRunConditionField = Ext.getCmp('sequencingRunConditionField');
+            sequencingRunConditionField.select(record.sequencingRunCondition);
+            sequencingRunConditionField.fireEvent('select', sequencingRunConditionField, sequencingRunConditionField.findRecordByValue(record.sequencingRunCondition));
         }
     },
 

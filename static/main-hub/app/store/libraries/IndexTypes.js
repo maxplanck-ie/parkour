@@ -32,5 +32,7 @@ Ext.define('MainHub.store.libraries.IndexTypes', {
                 console.error(response);
             }
         }
-    }
+    },
+
+    autoLoad: true
 });

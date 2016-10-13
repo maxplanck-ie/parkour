@@ -32,5 +32,7 @@ Ext.define('MainHub.store.libraries.LibraryProtocols', {
                 console.error(response);
             }
         }
-    }
+    },
+
+    autoLoad: true
 });
