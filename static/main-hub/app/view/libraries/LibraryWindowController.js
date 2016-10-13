@@ -472,7 +472,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             samplesInGrid = Ext.Array.pluck(Ext.Array.pluck(grid.getStore().data.items, 'data'), 'name');
 
         if (form.isValid() && samplesInGrid.indexOf(sampleName) == -1) {
-            var record = this.getSampleRecord(data, files),
+            var record = this.prepareSampleRecord(data, files),
                 samplesGrid = Ext.getCmp('loadSamplesFromFile');
             
             if (samplesGrid.isDisabled()) samplesGrid.enable();
@@ -701,55 +701,55 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         btn.up('library_wnd').close();
     },
 
-    getSampleRecord: function(data, files) {
+    prepareSampleRecord: function(data, files) {
         return {
-            'name': data.name,
-            'nucleicAcidType': data.nucleicAcidType,
-            'sampleProtocol': data.sampleProtocol,
-            'organism': data.organism,
-            'equalRepresentationOfNucleotides': data.equalRepresentationOfNucleotides,
-            'DNADissolvedIn': data.DNADissolvedIn,
-            'concentration': data.concentration,
-            'concentrationDeterminedBy': data.concentrationDeterminedBy,
-            'sampleVolume': data.sampleVolume,
-            'amplifiedCycles': data.amplifiedCycles,
-            'DNaseTreatment': data.DNaseTreatment,
-            'rnaQuality': data.rnaQuality,
-            'rnaSpikeIn': data.rnaSpikeIn,
-            'samplePreparationProtocol': data.samplePreparationProtocol,
-            'requestedSampleTreatment': data.requestedSampleTreatment,
-            'sequencingRunCondition': data.sequencingRunCondition,
-            'sequencingDepth': data.sequencingDepth,
-            'comments': data.comments,
-            'files': files
+            name                                :   data.name,
+            nucleicAcidType                     :   data.nucleicAcidType,
+            sampleProtocol                      :   data.sampleProtocol,
+            organism                            :   data.organism,
+            equalRepresentationOfNucleotides    :   data.equalRepresentationOfNucleotides,
+            DNADissolvedIn                      :   data.DNADissolvedIn,
+            concentration                       :   data.concentration,
+            concentrationDeterminedBy           :   data.concentrationDeterminedBy,
+            sampleVolume                        :   data.sampleVolume,
+            amplifiedCycles                     :   data.amplifiedCycles,
+            DNaseTreatment                      :   data.DNaseTreatment,
+            rnaQuality                          :   data.rnaQuality,
+            rnaSpikeIn                          :   data.rnaSpikeIn,
+            samplePreparationProtocol           :   data.samplePreparationProtocol,
+            requestedSampleTreatment            :   data.requestedSampleTreatment,
+            sequencingRunCondition              :   data.sequencingRunCondition,
+            sequencingDepth                     :   data.sequencingDepth,
+            comments                            :   data.comments,
+            files                               :   files
         }
     },
 
     prepareSampleParams: function(wnd, data, files) {
         return {
-            'mode': wnd.mode,
-            'name': data.name,
-            'sample_id': (typeof wnd.record !== 'undefined') ? wnd.record.data.sampleId : '',
-            'nucleic_acid_type': data.nucleicAcidType,
-            'sample_protocol': data.sampleProtocol,
+            mode                                :   wnd.mode,
+            name                                :   data.name,
+            sample_id                           :   (typeof wnd.record !== 'undefined') ? wnd.record.data.sampleId : '',
+            nucleic_acid_type                   :   data.nucleicAcidType,
+            sample_protocol                     :   data.sampleProtocol,
             // 'library_type_id': data.libraryType,
-            'organism': data.organism,
-            'equal_representation_nucleotides': data.equalRepresentationOfNucleotides,
-            'dna_dissolved_in': data.DNADissolvedIn,
-            'concentration': data.concentration,
-            'concentration_determined_by': data.concentrationDeterminedBy,
-            'sample_volume': data.sampleVolume,
-            'sample_amplified_cycles': data.amplifiedCycles,
-            'dnase_treatment': data.DNaseTreatment,
-            'rna_quality': (data.rnaQuality == 0) ? null : data.rnaQuality,
-            'rna_spike_in': data.rnaSpikeIn,
-            'sample_preparation_protocol': data.samplePreparationProtocol,
-            'requested_sample_treatment': data.requestedSampleTreatment,
-            'sequencing_run_condition': data.sequencingRunCondition,
-            'sequencing_depth': data.sequencingDepth,
-            'comments': data.comments,
+            organism                            :   data.organism,
+            equal_representation_nucleotides    :   data.equalRepresentationOfNucleotides,
+            dna_dissolved_in                    :   data.DNADissolvedIn,
+            concentration                       :   data.concentration,
+            concentration_determined_by         :   data.concentrationDeterminedBy,
+            sample_volume                       :   data.sampleVolume,
+            sample_amplified_cycles             :   data.amplifiedCycles,
+            dnase_treatment                     :   data.DNaseTreatment,
+            rna_quality                         :   (data.rnaQuality == 0) ? null : data.rnaQuality,
+            rna_spike_in                        :   data.rnaSpikeIn,
+            sample_preparation_protocol         :   data.samplePreparationProtocol,
+            requested_sample_treatment          :   data.requestedSampleTreatment,
+            sequencing_run_condition            :   data.sequencingRunCondition,
+            sequencing_depth                    :   data.sequencingDepth,
+            comments                            :   data.comments,
             // 'files': Ext.JSON.encode(form.down('filegridfield').getValue())
-            'files': files
+            files                               :   files
         }
     },
 
@@ -769,6 +769,8 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                         if (!success) Ext.ux.ToastMessage('Cannot load Sample files', 'error');
                     }
                 });
+            } else {
+                Ext.getStore('fileSampleStore').removeAll();
             }
         }
 

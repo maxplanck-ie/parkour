@@ -101,7 +101,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
                     handler: function() {
                         Ext.Msg.show({
                             title: 'Delete record',
-                            message: 'Are you sure you want to delete this record?',
+                            message: 'Are you sure you want to delete this record? This cannot be undone.',
                             buttons: Ext.Msg.YESNO,
                             icon: Ext.Msg.QUESTION,
                             fn: function(btn) {
@@ -258,12 +258,8 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
                     var obj = Ext.JSON.decode(response.responseText);
 
                     if (obj.success) {
-                        var requestsGrid = Ext.getCmp('requestsTable'),
-                            librariesGrid = Ext.getCmp('librariesTable');
-                        requestsGrid.fireEvent('refresh', requestsGrid);
-                        if (typeof librariesGrid != 'undefined') {
-                            librariesGrid.fireEvent('refresh', librariesGrid);
-                        }
+                        Ext.getStore('requestsStore').reload();
+                        Ext.getStore('librariesStore').reload();
                         Ext.ux.ToastMessage('Request has been saved!');
                     } else {
                         Ext.ux.ToastMessage(obj.error, 'error');
