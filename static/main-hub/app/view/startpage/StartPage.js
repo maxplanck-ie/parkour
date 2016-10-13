@@ -1,39 +1,21 @@
-Ext.define('MainHub.view.startpage.StartPage', {
+Ext.define('MainHub.view.startpage.Startpage', {
     extend: 'Ext.container.Container',
     xtype: 'startpage',
 
     requires: [
-        'Ext.container.Container'
+        'Ext.ux.layout.ResponsiveColumn',
+        'MainHub.view.startpage.StartpageController',
+        'MainHub.view.startpage.Requests',
+        'MainHub.view.startpage.RequestsUser'
     ],
 
-    anchor : '100% -1',
+    controller: 'startpage',
 
-    layout:{
-        type:'hbox',
-        pack:'center',
-        align:'center'
-    },
+    initComponent: function() {
+        var me = this;
 
-    items: [
-        {
-            xtype: 'box',
-            html: '<p>Researchers</p>',
-            width: 100,
-            height: 100,
-            margin: 15,
-            style: {
-                border: '1px solid #ccc'
-            }
-        }
-        // {
-        //     xtype: 'box',
-        //     html: '<h1>Box 2</h1>',
-        //     width: 100,
-        //     height: 100,
-        //     margin: 15,
-        //     style: {
-        //         border: '1px solid #ccc'
-        //     }
-        // }
-    ]
+        me.items = USER_IS_STAFF ? [{ xtype: 'requests' }] : [{ xtype: 'requests-user' }];
+
+        me.callParent(arguments);
+    }
 });

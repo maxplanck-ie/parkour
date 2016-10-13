@@ -8,4 +8,7 @@ urlpatterns = [
     url(r'^delete_request/$', views.delete_request, name='delete_request'),
 
     url(r'^get_libraries_in_request/$', views.get_libraries_in_request, name='get_libraries_in_request'),
+
+    url(r'^generate_pdf/$', views.generate_pdf, name='generate_pdf'),
+    url(r'^upload_deep_sequencing_request/$', views.upload_deep_sequencing_request, name='upload_deep_sequencing_request'),
 ]

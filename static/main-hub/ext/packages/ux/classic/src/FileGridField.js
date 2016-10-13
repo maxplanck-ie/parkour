@@ -135,7 +135,7 @@ Ext.define('Ext.ux.FileGridField', {
                                 } else {
                                     Ext.ux.ToastMessage(response.statusText, 'error');
                                     console.error('[ERROR]: ' + getFileUrl);
-                                    console.error(response); 
+                                    console.error(response);
                                 }
                             }
                         });
@@ -146,10 +146,11 @@ Ext.define('Ext.ux.FileGridField', {
                     }
                     wnd.close();
                 },
-                failure: function(response) {
-                    Ext.ux.ToastMessage(response.statusText, 'error');
+                failure: function(f, action) {
+                    var errorMsg = (action.failureType == 'server') ? 'Server error.' : 'Error.';
+                    Ext.ux.ToastMessage(errorMsg, 'error');
                     console.error('[ERROR]: ' + uploadFileUrl);
-                    console.error(response);
+                    console.error(action.response.responseText);
                     wnd.close();
                 }
             });

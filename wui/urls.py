@@ -21,9 +21,10 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^accounts/', include('authtools.urls')),
 
     url(r'', include('common.urls')),
-    url(r'', include('researcher.urls')),
+    # url(r'', include('researcher.urls')),
     url(r'', include('request.urls')),
     url(r'', include('library.urls')),
     url(r'', include('qualitycheck.urls')),

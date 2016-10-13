@@ -1,10 +1,10 @@
-Ext.define('MainHub.view.requests.Requests', {
+Ext.define('MainHub.view.startpage.Requests', {
     extend: 'Ext.container.Container',
     xtype: 'requests',
 
     requires: [
-        'MainHub.view.requests.RequestsController',
-        'MainHub.view.requests.RequestWindow',
+        'MainHub.view.startpage.RequestsController',
+        'MainHub.view.startpage.RequestWindow',
         'MainHub.view.libraries.LibraryWindow'
     ],
 
@@ -45,14 +45,23 @@ Ext.define('MainHub.view.requests.Requests', {
 
             columns: {
                 items: [
-                    { text: 'Status', dataIndex: 'status', width: 60 },
+                    { text: 'Status', dataIndex: 'status', width: 60, 
+                        renderer: function(value, meta) {
+                            var statusClass = 'request-status pending-submission';
+                            if (value == 0) {
+                                meta.tdAttr = 'data-qtip="Pending submission"';
+
+                            }
+                            return '<div class="' + statusClass + '"></div>';
+                        }
+                    },
                     { text: 'Name', dataIndex: 'name', flex: 1 },
-                    { text: 'Project Type', dataIndex: 'projectType', flex: 1 },
                     { text: 'Researcher', dataIndex: 'researcher', flex: 1 },
                     { text: 'Date Created', dataIndex: 'dateCreated', flex: 1 },
+                    { text: 'Sum of Sequencing Depth', dataIndex: 'sumSeqDepth', flex: 1 },
                     { text: 'Description', dataIndex: 'description', flex: 1,
-                        renderer: function(value, metaData) {
-                            metaData.tdAttr = 'data-qtip="' + value + '" data-qwidth=300';
+                        renderer: function(value, meta) {
+                            meta.tdAttr = 'data-qtip="' + value + '" data-qwidth=300';
                             return value;
                         }
                     }

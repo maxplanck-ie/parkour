@@ -17,10 +17,13 @@ Ext.define('MainHub.view.main.MainController', {
     lastView: null,
 
     onMainViewRender: function() {
-        if (!window.location.hash) {
-            // this.redirectTo("startpage");
-            this.redirectTo("researchers");     // temporarily here
-        }
+        var me = this;
+
+        Ext.getStore('NavigationTree').on('load', function() {
+            if (!window.location.hash) {
+                me.redirectTo("startpage");
+            }
+        });
     },
 
     onNavigationTreeSelectionChange: function (tree, node) {
@@ -37,7 +40,7 @@ Ext.define('MainHub.view.main.MainController', {
             navigationList = refs.navigationTreeList,
             wrapContainer = refs.mainContainerWrap,
             collapsing = !navigationList.getMicro(),
-            new_width = collapsing ? 64 : 250;
+            new_width = collapsing ? 64 : 320;
 
         if (Ext.isIE9m || !Ext.os.is.Desktop) {
             Ext.suspendLayouts();
@@ -144,7 +147,18 @@ Ext.define('MainHub.view.main.MainController', {
         me.lastView = newView;
     },
 
-    onRouteChange:function(id){
-        this.setCurrentView(id);
+    onRouteChange: function(id) {
+        var me = this,
+            store = Ext.getStore('NavigationTree');
+
+        // If a page is loaded for the first time
+        store.on('load', function() {
+            me.setCurrentView(id);
+        })
+
+        // If a page is changed
+        if (store.getCount() > 0) {
+            me.setCurrentView(id);
+        }
     }
 });

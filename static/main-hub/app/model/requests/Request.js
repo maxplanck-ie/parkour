@@ -16,10 +16,6 @@ Ext.define('MainHub.model.requests.Request', {
         },
         {
             type: 'string',
-            name: 'projectType'
-        },
-        {
-            type: 'string',
             name: 'dateCreated'
         },
         {
@@ -29,6 +25,18 @@ Ext.define('MainHub.model.requests.Request', {
         {
             type: 'string',
             name: 'researcher'
+        },
+        {
+            type: 'string',
+            name: 'deepSeqRequestName'
+        },
+        {
+            type: 'string',
+            name: 'deepSeqRequestPath'
+        },
+        {
+            type: 'int',
+            name: 'sumSeqDepth'
         }
     ]
 });

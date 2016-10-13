@@ -589,13 +589,18 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
 
                     if (obj.success) {
                         if (wnd.mode == 'add') {
-                            Ext.ux.ToastMessage('Record has been added!');
                             grid = Ext.getCmp('librariesInRequestTable');
                             grid.getStore().add(obj.data);
+                            Ext.ux.ToastMessage('Record has been added!');
                         } else {
+                            Ext.getStore('requestsStore').reload();
+                            Ext.getStore('librariesStore').reload();
+                            Ext.getStore('librariesInRequestStore').reload({
+                                params: {
+                                    request_id: wnd.record.get('requestId')
+                                }
+                            });
                             Ext.ux.ToastMessage('Record has been updated!');
-                            grid = Ext.getCmp('librariesTable');
-                            grid.fireEvent('refresh', grid);
                         }
                         wnd.close();
                     } else {
