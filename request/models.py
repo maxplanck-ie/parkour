@@ -17,7 +17,7 @@ class Request(models.Model):
     name = models.CharField('Name', max_length=100, blank=True)
     date_created = models.DateTimeField('Date', auto_now_add=True)
     description = models.TextField(null=True)
-    researcher = models.OneToOneField(
+    researcher = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name='Researcher'
     )
