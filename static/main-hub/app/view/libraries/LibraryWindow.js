@@ -660,15 +660,8 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                 itemId: 'loadFromFileBtn',
                 id: 'loadFromFileBtn',
                 text: 'Load from File',
-                hidden: true
-            },
-            {
-                xtype: 'button',
-                itemId: 'downloadFileTemplate',
-                id: 'downloadFileTemplate',
-                text: 'Download File Template',
-                disabled: true,
-                hidden: true
+                hidden: true,
+                disabled: true
             },
             '->',
             // {
@@ -697,7 +690,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                 id: 'addWndBtn',
                 text: 'Save and Close',
                 // tooltip: 'Save all preserved forms and send it to the server',
-                tooltip: 'Save the filles form and send it to the server',
+                tooltip: 'Save the filled form and send it to the server',
                 hidden: true
             }
         ],

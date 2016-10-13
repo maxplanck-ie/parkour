@@ -230,13 +230,13 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
 
         Ext.getCmp('addWndBtn').show();
         Ext.getCmp('sampleProtocolInfo').hide();
+
         this.initializeTooltips();
 
         if (wnd.mode == 'add') {
             Ext.getStore('fileSampleStore').removeAll();
             Ext.getCmp('loadSamplesFromFile').show();
             Ext.getCmp('loadFromFileBtn').show();
-            Ext.getCmp('downloadFileTemplate').show();
             // Ext.getCmp('saveAndAddWndBtn').show();
             Ext.getCmp('keepAndAddWndBtn').show();
             Ext.getCmp('loadSamplesFromFile').setStore(
@@ -253,9 +253,11 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             Ext.getCmp('sampleBarcodeField').show().setHtml(record.barcode);
 
             Ext.getCmp('addWndBtn').setConfig('text', 'Save');
+
+            this.setSampleForm(wnd, form, record);
         }
 
-        this.setSampleForm(wnd, form, record);
+        // this.setSampleForm(wnd, form, record);
     },
 
     onLibraryProtocolFieldSelect: function(fld, record, eOpts) {
@@ -625,6 +627,26 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
 
     onLoadFromFileBtnClick: function(btn) {
         Ext.create('Ext.ux.FileUploadWindow', {
+            buttons: [
+                {
+                    text: 'Download File Template',
+                    handler: function() {}
+                },
+                '->',
+                {
+                    text: 'Upload',
+                    handler: function() {
+                        this.up('window').onFileUpload()
+                    }
+                },
+                {
+                    text: 'Cancel',
+                    handler: function () {
+                        this.up('window').close();
+                    }
+                }
+            ],
+
             onFileUpload: function() {
                 var me = this,
                     form = this.down('form').getForm(),
@@ -732,7 +754,8 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
     },
 
     setSampleForm: function(wnd, form, record) {
-        if (wnd.mode == 'edit' || form != null) {
+        // if (wnd.mode == 'edit' || form != null) {
+        if (form != null) {
             form.setValues(record);
             if (record.equalRepresentationOfNucleotides == 'False' || record.equalRepresentationOfNucleotides == false) Ext.getCmp('equalRepresentationRadio4').setValue(true);
             if (record.DNaseTreatment == 'False' || record.DNaseTreatment == false) Ext.getCmp('DNaseTreatmentRadio2').setValue(true);
@@ -749,7 +772,8 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             }
         }
 
-        if (wnd.mode == 'edit' || record != null) {
+        // if (wnd.mode == 'edit' || record != null) {
+        if (record != null) {
             var nucleicAcidTypeField = Ext.getCmp('nucleicAcidTypeField');
             nucleicAcidTypeField.select(record.nucleicAcidType);
             nucleicAcidTypeField.fireEvent('select', nucleicAcidTypeField, nucleicAcidTypeField.findRecordByValue(record.nucleicAcidType), 'edit');
