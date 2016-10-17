@@ -74,6 +74,7 @@ Ext.define('MainHub.view.startpage.RequestWindow', {
                                 border: 0,
                                 margin: '5px 0'
                             },
+                            hidden: true,
 
                             items: [
                                 {
@@ -159,6 +160,30 @@ Ext.define('MainHub.view.startpage.RequestWindow', {
                                     margin: '0 0 0 15px'
                                 }
                             ]
+                        },
+                        {
+                            xtype: 'container',
+                            id: 'deepSeqRequestMsg',
+                            layout: {
+                                type: 'vbox',
+                                pack: 'center'
+                            },
+                            height: 175,
+                            hidden: true,
+
+                            items: [{
+                                border: 0,
+                                cls: 'lol',
+                                html: '<strong>You need to save the request to proceed.</strong>',
+                                style: {
+                                    // TODO: [Fix] these styles don't apply
+                                    color: '#616161',
+                                    'font-size': '16px !important',
+                                    textAlign: 'center'
+                                },
+                                width: 370
+
+                            }]
                         }
                     ]
                 },

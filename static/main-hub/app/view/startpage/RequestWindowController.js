@@ -44,11 +44,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
     onRequestWindowBoxready: function(wnd) {
         if (wnd.mode == 'add') {
             Ext.getStore('librariesInRequestStore').removeAll();
-            Ext.getCmp('deepSeqRequest').mask(
-                'You need to save the request to proceed.',
-                'deep-seq-request-mask'
-            );
-            Ext.getCmp('deepSeqRequest').body.update('');
+            Ext.getCmp('deepSeqRequestMsg').show();
         } else {
             var form = Ext.getCmp('requestForm').getForm(),
                 grid = Ext.getCmp('librariesInRequestTable'),
@@ -61,7 +57,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
             });
 
             Ext.getCmp('requestName').enable();
-            Ext.getCmp('deepSeqRequest').enable();
+            Ext.getCmp('deepSeqRequest').show();
 
             if (record.deepSeqRequestName !== '') {
                 Ext.getCmp('uploadedDeepSeqRequest').setHtml(
