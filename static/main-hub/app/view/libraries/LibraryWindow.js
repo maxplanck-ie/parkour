@@ -674,7 +674,6 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                 }
                             ]
                         }
-                        
                     ]
                 }
             ]
@@ -694,18 +693,6 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                 disabled: true
             },
             '->',
-            // {
-            //     xtype: 'button',
-            //     itemId: 'cancelBtn',
-            //     text: 'Cancel'
-            // },
-            // {
-            //     xtype: 'button',
-            //     itemId: 'saveAndAddWndBtn',
-            //     id: 'saveAndAddWndBtn',
-            //     text: 'Save and Add another',
-            //     hidden: true
-            // },
             {
                 xtype: 'button',
                 itemId: 'keepAndAddWndBtn',

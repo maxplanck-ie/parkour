@@ -76,16 +76,16 @@ Ext.define('MainHub.view.libraries.Libraries', {
                     { text: 'Date', dataIndex: 'date' },
                     { text: 'Nucleic Acid Type', dataIndex: 'nucleicAcidTypeName' },
                     { text: 'Protocol', dataIndex: 'libraryProtocolName' },
-                    { text: 'Library Type', dataIndex: 'libraryType' },
+                    { text: 'Library Type', dataIndex: 'libraryTypeName' },
                     { text: 'Enrichment Cycles', dataIndex: 'enrichmentCycles' },
                     { text: 'Amplified Cycles', dataIndex: 'amplifiedCycles' },
                     { text: 'Organism', dataIndex: 'organismName' },
-                    { text: 'Index Type', dataIndex: 'indexType' },
+                    { text: 'Index Type', dataIndex: 'indexTypeName' },
                     { text: 'Index Reads', dataIndex: 'indexReads' },
                     { text: 'Index I7', dataIndex: 'indexI7' },
                     { text: 'Index I5', dataIndex: 'indexI5' },
-                    { text: 'Equal Representation', dataIndex: 'equalRepresentation', renderer: function(val) {
-                        return val == 'True' ? 'Yes' : 'No';
+                    { text: 'Equal Representation', dataIndex: 'equalRepresentationOfNucleotides', renderer: function(val) {
+                        return val ? 'Yes' : 'No';
                     } },
                     { text: 'DNA Dissolved In', dataIndex: 'DNADissolvedIn' },
                     { text: 'Concentration', dataIndex: 'concentration' },

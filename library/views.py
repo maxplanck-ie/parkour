@@ -157,7 +157,8 @@ class LibraryView(View):
 
     def post(self, request):
         """ Save Library """
-        error = str()
+        # error = str()
+        error = ''
         data = None
 
         try:
@@ -171,8 +172,12 @@ class LibraryView(View):
             'success': not error,
             'error': error,
         }
+
         if data:
-            result.update({'data': data})
+            result.update({'data': data['data']})
+            if data['errors']:
+                result['error'] = data['errors']
+                result['success'] = False
 
         return HttpResponse(
             json.dumps(result),
@@ -194,15 +199,15 @@ class LibraryView(View):
                     'name': library.name,
                     'recordType': 'L',
                     'date': library.date.strftime('%d.%m.%Y'),
-                    'libraryProtocol': library.library_protocol.name,
-                    'libraryProtocolId': library.library_protocol.id,
-                    'libraryType': library.library_type.name,
-                    'libraryTypeId': library.library_type.id,
+                    'libraryProtocol': library.library_protocol.id,
+                    'libraryProtocolName': library.library_protocol.name,
+                    'libraryType': library.library_type.id,
+                    'libraryTypeName': library.library_type.name,
                     'enrichmentCycles': library.enrichment_cycles,
-                    'organism': library.organism.name,
-                    'organismId': library.organism.id,
-                    'indexType': library.index_type.name,
-                    'indexTypeId': library.index_type.id,
+                    'organism': library.organism.id,
+                    'organismName': library.organism.name,
+                    'indexType': library.index_type.id,
+                    'indexTypeName': library.index_type.name,
                     'indexReads': library.index_reads,
                     'indexI7': library.index_i7,
                     'indexI5': library.index_i5,
@@ -210,17 +215,17 @@ class LibraryView(View):
                         str(library.equal_representation_nucleotides),
                     'DNADissolvedIn': library.dna_dissolved_in,
                     'concentration': library.concentration,
-                    'concentrationMethod':
-                        library.concentration_determined_by.name,
-                    'concentrationMethodId':
+                    'concentrationDeterminedBy':
                         library.concentration_determined_by.id,
+                    'concentrationDeterminedByName':
+                        library.concentration_determined_by.name,
                     'sampleVolume': library.sample_volume,
                     'meanFragmentSize': library.mean_fragment_size,
                     'qPCRResult': library.qpcr_result,
                     'sequencingRunCondition':
-                        library.sequencing_run_condition.name,
-                    'sequencingRunConditionId':
                         library.sequencing_run_condition.id,
+                    'sequencingRunConditionName':
+                        library.sequencing_run_condition.name,
                     'sequencingDepth': library.sequencing_depth,
                     'comments': library.comments,
                     'barcode': library.barcode,
@@ -263,8 +268,8 @@ class LibraryView(View):
                     'amplifiedCycles': sample.amplified_cycles,
                     'organism': sample.organism.id,
                     'organismName': sample.organism.name,
-                    'equalRepresentation':
-                        str(sample.equal_representation_nucleotides),
+                    'equalRepresentationOfNucleotides':
+                        bool(sample.equal_representation_nucleotides),
                     'DNADissolvedIn': sample.dna_dissolved_in,
                     'concentration': sample.concentration,
                     'concentrationDeterminedBy':
@@ -276,7 +281,6 @@ class LibraryView(View):
                         sample.sequencing_run_condition.id,
                     'sequencingRunConditionName':
                         sample.sequencing_run_condition.name,
-                    
                     'sequencingDepth': sample.sequencing_depth,
                     'DNaseTreatment': str(sample.dnase_treatment),
                     'rnaQuality': sample.rna_quality_id
@@ -318,7 +322,7 @@ class LibraryView(View):
 
         data = sorted(
             data,
-            key=lambda x: (x['date'], x['recordType'], x['name']),
+            key=lambda x: (x['date'], x['recordType'], x['barcode']),
             reverse=True,
         )
 
@@ -326,53 +330,61 @@ class LibraryView(View):
 
     def save_library(self):
         """ Add new Library or update existing one """
-        data = None
-        mode = self.request.POST.get('mode')
+        result = {'data': [], 'errors': ''}
+        errors = []
 
         if self.request.method == 'POST':
-            mode = self.request.POST.get('mode')
-            library_id = self.request.POST.get('library_id')
-            files = json.loads(self.request.POST.get('files'))
+            forms = json.loads(self.request.POST.get('forms'))
+            mode = forms[0]['mode']
 
             if mode == 'add':
-                form = LibraryForm(self.request.POST)
-            elif mode == 'edit':
-                lib = Library.objects.get(id=library_id)
-                form = LibraryForm(self.request.POST, instance=lib)
+                for f in forms:
+                    files = f['files']
+                    form = LibraryForm(f)
+                    if form.is_valid():
+                        lib = form.save()
+                        counter = BarcodeCounter.load()
+                        counter.increment()
+                        lib.barcode = generate_barcode(
+                            'L',
+                            str(counter.counter),
+                        )
+                        lib.files.add(*files)
+                        lib.save()
+                        counter.save()
+                        result['data'].append({
+                            'name': lib.name,
+                            'recordType': 'L',
+                            'libraryId': lib.id,
+                            'barcode': lib.barcode,
+                        })
+                    else:
+                        errors.append(get_form_errors(f['name'], form.errors))
 
-            if form.is_valid():
+                if any(errors):
+                    result['errors'] = 'Form is invalid<br/><br/>'
+                    for error in errors:
+                        result['errors'] += error
+
+            elif mode == 'edit':
+                library_id = forms[0]['library_id']
+                files = forms[0]['files']
+                lib = Library.objects.get(id=library_id)
+                form = LibraryForm(forms[0], instance=lib)
                 lib = form.save()
 
-                if mode == 'add':
-                    counter = BarcodeCounter.load()
-                    counter.increment()
-                    lib.barcode = generate_barcode('L', str(counter.counter))
-                    lib.files.add(*files)
-                    lib.save()
-                    counter.save()
-                    data = [{
-                        'name': lib.name,
-                        'recordType': 'L',
-                        'libraryId': lib.id,
-                        'barcode': lib.barcode,
-                    }]
+                old_files = [file for file in lib.files.all()]
+                lib.files.clear()
+                lib.save()
+                lib.files.add(*files)
+                new_files = [file for file in lib.files.all()]
 
-                elif mode == 'edit':
-                    # import pdb; pdb.set_trace()
-                    old_files = [file for file in lib.files.all()]
-                    lib.files.clear()
-                    lib.save()
-                    lib.files.add(*files)
-                    new_files = [file for file in lib.files.all()]
+                # Delete files
+                files_to_delete = list(set(old_files) - set(new_files))
+                for file in files_to_delete:
+                    file.delete()
 
-                    # Delete files
-                    files_to_delete = list(set(old_files) - set(new_files))
-                    for file in files_to_delete:
-                        file.delete()
-            else:
-                raise Exception(get_form_errors(form.errors))
-
-        return data
+        return result
 
     def delete_library(self):
         """ Delete Library with a given id """
@@ -501,6 +513,7 @@ class SampleView(View):
             'success': not error,
             'error': error,
         }
+
         if data:
             result.update({'data': data['data']})
             if data['errors']:
@@ -555,7 +568,7 @@ class SampleView(View):
                 files = forms[0]['files']
                 smpl = Sample.objects.get(id=sample_id)
                 form = SampleForm(forms[0], instance=smpl)
-
+                smpl = form.save()
 
                 old_files = [file for file in smpl.files.all()]
                 smpl.files.clear()
