@@ -48,8 +48,7 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
                         xtype: 'textfield',
                         itemId: 'searchField',
                         emptyText: 'Search',
-                        width: 200,
-                        disabled: true
+                        width: 200
                     }
                 ]
             },

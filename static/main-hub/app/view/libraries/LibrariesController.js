@@ -10,10 +10,13 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
                 itemcontextmenu: 'onLibrariesTableItemContextMenu'
             },
             '#showLibrariesCheckbox': {
-                change: 'onShowLibrariesCheckboxChange'
+                change: 'onFilterChange'
             },
             '#showSamplesCheckbox': {
-                change: 'onShowSamplesCheckboxChange'
+                change: 'onFilterChange'
+            },
+            '#searchField': {
+                change: 'onFilterChange'
             }
         }
     },
@@ -104,28 +107,57 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
         });
     },
 
-    onShowLibrariesCheckboxChange: function(cb, showLibraries) {
-        var store = Ext.getStore('librariesStore'),
-            showSamples = Ext.getCmp('showSamplesCheckbox').getValue();
-        this.filterStore(store, showLibraries, showSamples);
-    },
+    onFilterChange: function(el, value) {
+        var grid = Ext.getCmp('librariesTable'),
+            store = grid.getStore(),
+            columns = Ext.pluck(grid.getColumns(), 'dataIndex'),
+            showLibraries = null,
+            showSamples = null,
+            searchQuery = null;
 
-    onShowSamplesCheckboxChange: function(cb, showSamples) {
-        var store = Ext.getStore('librariesStore'),
-            showLibraries = Ext.getCmp('showLibrariesCheckbox').getValue();
-        this.filterStore(store, showLibraries, showSamples);
-    },
+        if (el.itemId == 'showLibrariesCheckbox') {
+            showLibraries = value;
+            showSamples = el.up().items.items[1].getValue();
+            searchQuery = el.up('header').down('textfield').getValue();
+        } else if (el.itemId == 'showSamplesCheckbox') {
+            showLibraries = el.up().items.items[0].getValue();
+            showSamples = value;
+            searchQuery = el.up('header').down('textfield').getValue();
+        } else if (el.itemId == 'searchField') {
+            showLibraries = el.up().down('fieldcontainer').items.items[0].getValue();
+            showSamples = el.up().down('fieldcontainer').items.items[1].getValue();
+            searchQuery = value;
+        }
 
-    filterStore: function(store, showLibraries, showSamples) {
-        store.clearFilter();
-        store.filterBy(function(record) {
-            var res = false;
-            if (record.get('recordType') == 'L') {
-                res = res || showLibraries;
-            } else {
-                res = res || showSamples;
+        var showFilter = Ext.util.Filter({
+            filterFn: function(record) {
+                var res = false;
+                if (record.get('recordType') == 'L') {
+                    res = res || showLibraries;
+                } else {
+                    res = res || showSamples;
+                }
+                return res;
             }
-            return res;
         });
+
+        var searchFilter = Ext.util.Filter({
+            filterFn: function(record) {
+                var res = false;
+                if (searchQuery) {
+                    Ext.each(columns, function(column) {
+                        if (record.data[column].toLowerCase().indexOf(searchQuery.toLowerCase()) > -1) {
+                            res = res || true;
+                        }
+                    });
+                } else {
+                    res = true;
+                }
+                return res;
+            }
+        });
+
+        store.clearFilter();
+        store.filter([showFilter, searchFilter]);
     }
 });
