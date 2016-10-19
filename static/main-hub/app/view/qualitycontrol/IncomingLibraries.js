@@ -32,7 +32,6 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
                             {
                                 boxLabel: 'Show Libraries',
                                 itemId: 'showLibrariesCheckbox',
-                                id: 'showLibrariesCheckbox',
                                 margin: '0 15 0 0',
                                 cls: 'grid-header-checkbox',
                                 checked: true
@@ -40,7 +39,6 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
                             {
                                 boxLabel: 'Show Samples',
                                 itemId: 'showSamplesCheckbox',
-                                id: 'showSamplesCheckbox',
                                 cls: 'grid-header-checkbox',
                                 checked: true
                             }
