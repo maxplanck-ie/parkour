@@ -475,8 +475,6 @@ class SampleField(View):
 
 
 class SampleView(View):
-    """ """
-
     def get(self, request):
         error = str()
         data = []
@@ -596,7 +594,7 @@ class SampleView(View):
 @csrf_exempt
 @login_required
 def upload_file_sample(request):
-    """ """
+    """ Upload sample's attachments """
     error = ''
     file_ids = []
 
@@ -623,7 +621,7 @@ def upload_file_sample(request):
 
 @login_required
 def get_file_sample(request):
-    """ """
+    """ Get file information for given ids """
 
     error = ''
     data = []
@@ -658,7 +656,7 @@ def get_file_sample(request):
 @csrf_exempt
 @login_required
 def upload_file_library(request):
-    """ """
+    """ Upload library's attachments """
     error = ''
     file_ids = []
 
@@ -685,7 +683,7 @@ def upload_file_library(request):
 
 @login_required
 def get_file_library(request):
-    """ """
+    """ Get file information for given ids """
     error = ''
     data = []
 
@@ -724,25 +722,20 @@ def generate_barcode(record_type, counter):
 
 @csrf_exempt
 @login_required
-def load_samples_from_file(request):
-    """  """
+def load_records_from_file(request):
+    """ Extract rows from an uploaded CSV file """
     error = ''
     data = []
 
     if request.method == 'POST' and any(request.FILES):
         try:
             file = request.FILES.get('file')
-            if file.name.endswith('.csv') or file.name.endswith('.tsv'):
+            records_type = request.POST.get('records_type')
+            if file.name.endswith('.csv'):
                 file_content = file.read()
                 file_content = file_content.decode('utf-8')
-                if file.name.endswith('.csv'):
-                    records = csv.DictReader(io.StringIO(file_content))
-                else:
-                    records = csv.DictReader(
-                        io.StringIO(file_content),
-                        delimiter='\t',
-                    )
-                data = prepare_samples(records)
+                records = csv.DictReader(io.StringIO(file_content))
+                data = prepare_records(records, records_type)
             else:
                 raise Exception('Wrong file type')
 
@@ -761,20 +754,133 @@ def load_samples_from_file(request):
     )
 
 
-def prepare_samples(samples):
-    """ """
+def prepare_records(records, records_type):
+    """
+    Convert data from an uploaded CSV file with records into
+    Library/Sample objects
+    """
     result = []
 
-    for sample in samples:
+    for record in records:
         try:
-            result.append({
-                'name': sample['Sample Name'],
-                'DNADissolvedIn': sample['DNA/RNA Dissolved In'],
-                'concentration': '%.2f' % float(sample['Concentration']),
-                'sampleVolume': int(sample['Sample Volume']),
-                'sequencingDepth': int(sample['Sequencing Depth']),
-            })
-        except Exception:
-            pass
+            if records_type == 'libraries':
+                result.append({
+                    'name':
+                        record['Library Name']
+                        if record['Library Name'] is not None
+                        else '',
+                    'DNADissolvedIn':
+                        record['DNA Dissolved In']
+                        if record['DNA Dissolved In'] is not None
+                        else '',
+                    'concentration':
+                        '%.2f' % float(record['Concentration'])
+                        if record['Concentration'] is not None
+                        else '',
+                    'sampleVolume':
+                        int(record['Sample Volume'])
+                        if record['Sample Volume'] is not None
+                        else '',
+                    'enrichmentCycles':
+                        int(record['Number of Enrichment Cycles'])
+                        if record['Number of Enrichment Cycles'] is not None
+                        else '',
+                    'meanFragmentSize':
+                        int(record['Mean Fragment Size'])
+                        if record['Mean Fragment Size'] is not None
+                        else '',
+                    'qPCRResult':
+                        record['qPCR Result']
+                        if record['qPCR Result'] is not None
+                        else '',
+                    'sequencingDepth':
+                        int(record['Sequencing Depth'])
+                        if record['Sequencing Depth'] is not None
+                        else '',
+                    'files': []
+                })
+            else:
+                result.append({
+                    'name':
+                        record['Sample Name']
+                        if record['Sample Name'] is not None
+                        else '',
+                    'DNADissolvedIn':
+                        record['DNA/RNA Dissolved In']
+                        if record['DNA/RNA Dissolved In'] is not None
+                        else '',
+                    'concentration':
+                        '%.2f' % float(record['Concentration'])
+                        if record['Concentration'] is not None
+                        else '',
+                    'sampleVolume':
+                        int(record['Sample Volume'])
+                        if record['Sample Volume'] is not None
+                        else '',
+                    'amplifiedCycles':
+                        int(record['Sample Amplified Cycles'])
+                        if record['Sample Amplified Cycles'] is not None
+                        else '',
+                    'samplePreparationProtocol':
+                        record['Sample Preparation Protocol']
+                        if record['Sample Preparation Protocol'] is not None
+                        else '',
+                    'requestedSampleTreatment':
+                        record['Requested Sample Treatment']
+                        if record['Requested Sample Treatment'] is not None
+                        else '',
+                    'sequencingDepth':
+                        int(record['Sequencing Depth'])
+                        if record['Sequencing Depth'] is not None
+                        else '',
+                    'files': []
+                })
+
+        except Exception as e:
+            error = str(e)
+            print('[ERROR]: %s' % error)
+            logger.debug(error)
 
     return sorted(result, key=lambda x: x['name'])
+
+
+@csrf_exempt
+@login_required
+def generate_template(request):
+    """ Generate a CSV template for Libraries and Samples """
+    template_type = request.POST.get('template_type')
+    response = HttpResponse(content_type='text/csv')
+
+    try:
+        response['Content-Disposition'] = 'attachment; filename="records.csv"'
+        writer = csv.writer(response)
+
+        if template_type == 'libraries':
+            writer.writerow([
+                'Library Name',
+                'Number of Enrichment Cycles',
+                'DNA Dissolved In',
+                'Concentration',
+                'Sample Volume',
+                'Mean Fragment Size',
+                'qPCR Result',
+                'Sequencing Depth'
+            ])
+        else:
+            writer.writerow([
+                'Sample Name',
+                'DNA/RNA Dissolved In',
+                'Concentration',
+                'Sample Volume',
+                'Sample Amplified Cycles',
+                'Sample Preparation Protocol',
+                'Requested Sample Treatment',
+                'Sequencing Depth'
+            ])
+
+    except Exception as e:
+        error = str(e)
+        print('[ERROR]: %s' % error)
+        logger.debug(error)
+
+    return response

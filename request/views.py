@@ -49,7 +49,7 @@ def get_requests(request):
                     settings.MEDIA_URL + req.deep_seq_request.file.name
                     if req.deep_seq_request is not None else '',
                 'sumSeqDepth': sum([
-                    l.sequencing_depth 
+                    l.sequencing_depth
                     for l in list(req.libraries.all())+list(req.samples.all())
                 ])
             }
@@ -81,7 +81,7 @@ def save_request(request):
     """ Add new or edit an existing request """
     error = str()
     mode = request.POST.get('mode')
-    
+
     try:
         if request.method == 'POST':
             if mode == 'add':
@@ -116,10 +116,10 @@ def save_request(request):
                     sample.is_in_request = True
                     sample.save()
                 req.samples.add(*samples)
-            
+
             else:
                 raise Exception(get_form_errors(form.errors))
-    
+
     except Exception as e:
         error = str(e)
         print('[ERROR]: edit_request/: %s' % error)
@@ -324,7 +324,7 @@ def generate_pdf(request):
 
         draw_string(
             p, x, _x, _y, FONT, FONT_BOLD, DEFAULT_FONT_SIZE,
-            'Principal Investigator:', 
+            'Principal Investigator:',
             user.pi.name if user.pi is not None else '',
         )
         _y -= LINE_SPACING
@@ -393,9 +393,10 @@ def generate_pdf(request):
         p.drawString(x*6.5, inch, page_2)   # Page counter
         p.showPage()
 
-    except:
-        # TODO: Error handling
-        pass
+    except Exception as e:
+        error = str(e)
+        print('[ERROR]: %s' % error)
+        logger.debug(error)
 
     finally:
         p.save()

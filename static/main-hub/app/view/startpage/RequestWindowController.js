@@ -168,7 +168,12 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
         var wnd = btn.up('request_wnd'),
             url = 'generate_pdf/?request_id=' + wnd.record.get('requestId');
 
-        Ext.getCmp('generatePDFForm').submit({
+        var form = Ext.create('Ext.form.Panel', {
+            standardSubmit: true,
+            timeout: 100000
+        });
+
+        form.submit({
             target: '_blank',
             url: url,
             params: {

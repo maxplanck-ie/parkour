@@ -95,13 +95,6 @@ Ext.define('MainHub.view.startpage.RequestWindow', {
                                             itemId: 'generatePDFBtn',
                                             text: 'Download'
                                         },
-                                        {
-                                            xtype: 'form',
-                                            id: 'generatePDFForm',
-                                            standardSubmit: true,
-                                            timeout: 100000,
-                                            hidden: true
-                                        }
                                     ]
                                 },
 

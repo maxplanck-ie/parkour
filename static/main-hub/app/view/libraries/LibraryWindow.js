@@ -689,8 +689,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                 itemId: 'loadFromFileBtn',
                 id: 'loadFromFileBtn',
                 text: 'Load from File',
-                hidden: true,
-                disabled: true
+                hidden: true
             },
             '->',
             {
