@@ -1,7 +1,7 @@
 Ext.define('MainHub.view.libraries.LibrariesController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.libraries-libraries',
-    
+
     config: {
         control: {
             '#librariesTable': {
@@ -105,13 +105,13 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
     },
 
     onShowLibrariesCheckboxChange: function(cb, showLibraries) {
-        var store = Ext.getCmp('librariesTable').getStore(),
+        var store = Ext.getStore('librariesStore'),
             showSamples = Ext.getCmp('showSamplesCheckbox').getValue();
         this.filterStore(store, showLibraries, showSamples);
     },
 
     onShowSamplesCheckboxChange: function(cb, showSamples) {
-        var store = Ext.getCmp('librariesTable').getStore(),
+        var store = Ext.getStore('librariesStore'),
             showLibraries = Ext.getCmp('showLibrariesCheckbox').getValue();
         this.filterStore(store, showLibraries, showSamples);
     },

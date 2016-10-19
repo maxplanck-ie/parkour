@@ -1,13 +1,19 @@
 Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.qualitycontrol-incominglibraries',
-    
+
     config: {
         control: {
             '#incomingLibraries': {
                 boxready: 'onIncomingLibrariesTableBoxready',
                 refresh: 'onIncomingLibrariesTableRefresh',
                 edit: 'onIncomingLibrariesTableEdit'
+            },
+            '#showLibrariesCheckbox': {
+                change: 'onShowLibrariesCheckboxChange'
+            },
+            '#showSamplesCheckbox': {
+                change: 'onShowSamplesCheckboxChange'
             }
         }
     },
@@ -34,19 +40,19 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
             record = context.record,
             changes = record.getChanges(),
             values = context.newValues,
-            amountFacility = (values.amountFacility != null) ? values.amountFacility : '',
-            dilutionFactor = (values.dilutionFactor != null) ? values.dilutionFactor : '',
-            concentrationFacility = (values.concentrationFacility != null) ? values.concentrationFacility : '',
-            concentrationMethodFacility = (values.concentrationMethodFacility != null) ? values.concentrationMethodFacility : '',
-            sampleVolumeFacility = (values.sampleVolumeFacility != null) ? values.sampleVolumeFacility : '',
-            qPCRResultFacility = (values.qPCRResultFacility != null) ? values.qPCRResultFacility : '',
-            rnaQualityFacility = (values.rnaQualityFacility != null) ? values.rnaQualityFacility : '',
-            sizeDistributionFacility = (values.sizeDistributionFacility != null) ? values.sizeDistributionFacility : '',
-            commentsFacility = (values.commentsFacility != null) ? values.commentsFacility : '',
-            qcResult = (values.qcResult != null) ? values.qcResult : '';
+            amountFacility = (values.amountFacility !== null) ? values.amountFacility : '',
+            dilutionFactor = (values.dilutionFactor !== null) ? values.dilutionFactor : '',
+            concentrationFacility = (values.concentrationFacility !== null) ? values.concentrationFacility : '',
+            concentrationMethodFacility = (values.concentrationMethodFacility !== null) ? values.concentrationMethodFacility : '',
+            sampleVolumeFacility = (values.sampleVolumeFacility !== null) ? values.sampleVolumeFacility : '',
+            qPCRResultFacility = (values.qPCRResultFacility !== null) ? values.qPCRResultFacility : '',
+            rnaQualityFacility = (values.rnaQualityFacility !== null) ? values.rnaQualityFacility : '',
+            sizeDistributionFacility = (values.sizeDistributionFacility !== null) ? values.sizeDistributionFacility : '',
+            commentsFacility = (values.commentsFacility !== null) ? values.commentsFacility : '',
+            qcResult = (values.qcResult !== null) ? values.qcResult : '';
 
         // Compute Amount
-        if (Object.keys(changes).indexOf('amountFacility') == -1 && dilutionFactor !== '' && 
+        if (Object.keys(changes).indexOf('amountFacility') == -1 && dilutionFactor !== '' &&
             concentrationFacility !== '' && sampleVolumeFacility !== '') {
             amountFacility = parseFloat(dilutionFactor) * parseFloat(concentrationFacility) * parseFloat(sampleVolumeFacility);
         }
@@ -90,6 +96,31 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
                 console.error('[ERROR]: ' + url);
                 console.error(response);
             }
+        });
+    },
+
+    onShowLibrariesCheckboxChange: function(cb, showLibraries) {
+        var store = Ext.getStore('incomingLibrariesStore'),
+            showSamples = cb.up().items.items[1].getValue();
+        this.filterStore(store, showLibraries, showSamples);
+    },
+
+    onShowSamplesCheckboxChange: function(cb, showSamples) {
+        var store = Ext.getStore('incomingLibrariesStore'),
+            showLibraries = cb.up().items.items[0].getValue();
+        this.filterStore(store, showLibraries, showSamples);
+    },
+
+    filterStore: function(store, showLibraries, showSamples) {
+        store.clearFilter();
+        store.filterBy(function(record) {
+            var res = false;
+            if (record.get('recordType') == 'L') {
+                res = res || showLibraries;
+            } else {
+                res = res || showSamples;
+            }
+            return res;
         });
     }
 });
