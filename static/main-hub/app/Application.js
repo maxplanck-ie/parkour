@@ -39,7 +39,8 @@ Ext.define('MainHub.Application', {
         'libraries.FileLibrary',
         'libraries.FileSample',
         'qualitycontrol.IncomingLibraries',
-        'requests.LibrariesInRequest'
+        'requests.LibrariesInRequest',
+        'pooling.PoolingTree'
     ],
 
     requires: [

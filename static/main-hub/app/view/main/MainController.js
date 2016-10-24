@@ -154,7 +154,7 @@ Ext.define('MainHub.view.main.MainController', {
         // If a page is loaded for the first time
         store.on('load', function() {
             me.setCurrentView(id);
-        })
+        });
 
         // If a page is changed
         if (store.getCount() > 0) {
