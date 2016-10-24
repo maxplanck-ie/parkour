@@ -10,7 +10,8 @@ Ext.define('MainHub.view.main.Main', {
         'MainHub.view.startpage.Startpage',
         // 'MainHub.view.researchers.Researchers',
         'MainHub.view.libraries.Libraries',
-        'MainHub.view.qualitycontrol.IncomingLibraries'
+        'MainHub.view.qualitycontrol.IncomingLibraries',
+        'MainHub.view.pooling.Pooling'
     ],
 
     controller: 'main',

@@ -72,6 +72,12 @@ def get_navigation_tree(request):
                         'leaf': True
                     }
                 ]
+            },
+            {
+                'text': 'Pooling',
+                'iconCls': 'x-fa fa-sort-amount-desc',
+                'viewType': 'pooling',
+                'leaf': True
             }
         ]
     }
