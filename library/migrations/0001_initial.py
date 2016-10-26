@@ -10,6 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
+        ('common', '0002_load_initial_data'),
     ]
 
     operations = [

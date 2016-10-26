@@ -24,11 +24,31 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
                 title: 'Incoming Libraries and Samples',
                 items: [
                     {
+                        xtype: 'fieldcontainer',
+                        defaultType: 'checkboxfield',
+                        layout: 'hbox',
+                        margin: '0 20 0 0',
+                        items: [
+                            {
+                                boxLabel: 'Show Libraries',
+                                itemId: 'showLibrariesCheckbox',
+                                margin: '0 15 0 0',
+                                cls: 'grid-header-checkbox',
+                                checked: true
+                            },
+                            {
+                                boxLabel: 'Show Samples',
+                                itemId: 'showSamplesCheckbox',
+                                cls: 'grid-header-checkbox',
+                                checked: true
+                            }
+                        ]
+                    },
+                    {
                         xtype: 'textfield',
                         itemId: 'searchField',
                         emptyText: 'Search',
-                        width: 200,
-                        disabled: true
+                        width: 200
                     }
                 ]
             },

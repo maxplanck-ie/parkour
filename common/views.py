@@ -67,7 +67,7 @@ def get_navigation_tree(request):
                 'children': [
                     {
                         'text': 'Incoming Libraries/Samples',
-                        'iconCls': 'x-fa fa-check',
+                        'iconCls': 'x-fa fa-arrow-down',
                         'viewType': 'incoming-libraries',
                         'leaf': True
                     }
