@@ -21,7 +21,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
             itemId: 'poolingTreePanel',
             height: Ext.Element.getViewportHeight() - 94,
             margin: '0 15px 0 0',
-            flex: 0.4,
+            flex: 1,
             header: {
                 title: 'Libraries for Pooling',
                 items: [
@@ -75,6 +75,16 @@ Ext.define('MainHub.view.pooling.Pooling', {
                     width: 90
                 },
                 {
+                    text: 'Read Length',
+                    dataIndex: 'sequencingRunConditionName',
+                    width: 100
+                },
+                {
+                    text: 'Index Type',
+                    dataIndex: 'indexTypeName',
+                    width: 90
+                },
+                {
                     text: 'Index I7',
                     dataIndex: 'indexI7',
                     width: 100
@@ -84,37 +94,64 @@ Ext.define('MainHub.view.pooling.Pooling', {
                     dataIndex: 'indexI5',
                     width: 100
                 }
+            ],
+            bbar: [
+                '->',
+                {
+                    xtype: 'button',
+                    itemId: 'createPool',
+                    text: 'Pool'
+                }
             ]
         },
         {
+            xtype: 'grid',
             header: {
-                title: 'Pooling',
+                title: 'Pool',
                 height: 56
             },
-            layout: {
-                type: 'vbox',
-                align: 'stretch'
-            },
-            flex: 0.6,
-            // width: 350,
-            items: [{
-                html: `
-                    <div style="font-family:Monospace;font-size:25px;">
-                        <span style="color:green">G</span>
-                        <span style="color:red">C</span>
-                    <div>
-                `,
-                border: 0,
-                padding: 15
-            }],
+            height: Ext.Element.getViewportHeight() - 94,
+            flex: 1,
+            
             bbar: [
                 '->',
                 {
                     xtype: 'button',
                     itemId: 'savePool',
-                    text: 'Save'
+                    text: 'Save',
+                    disabled: true
                 }
             ]
-        }
+        },
+        // {
+        //     header: {
+        //         title: 'Pooling',
+        //         height: 56
+        //     },
+        //     layout: {
+        //         type: 'vbox',
+        //         align: 'stretch'
+        //     },
+        //     flex: 1,
+        //     // width: 350,
+        //     items: [{
+        //         html: `
+        //             <div style="font-family:Monospace;font-size:25px;">
+        //                 <span style="color:green">G</span>
+        //                 <span style="color:red">C</span>
+        //             <div>
+        //         `,
+        //         border: 0,
+        //         padding: 15
+        //     }],
+        //     bbar: [
+        //         '->',
+        //         {
+        //             xtype: 'button',
+        //             itemId: 'savePool',
+        //             text: 'Pool'
+        //         }
+        //     ]
+        // }
     ]
 });

@@ -21,6 +21,12 @@ def get_pooling_tree(request):
                     'sequencingDepth': library.sequencing_depth,
                     'indexI7': library.index_i7,
                     'indexI5': library.index_i5,
+                    'indexType': library.index_type.id,
+                    'indexTypeName': library.index_type.name,
+                    'sequencingRunCondition':
+                        library.sequencing_run_condition.id,
+                    'sequencingRunConditionName':
+                        library.sequencing_run_condition.name,
                     'iconCls': 'x-fa fa-flask',
                     'checked': False,
                     'leaf': True
