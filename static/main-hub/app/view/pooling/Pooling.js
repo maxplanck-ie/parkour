@@ -69,7 +69,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
                         text: 'Library Name',
                         dataIndex: 'text',
                         sortable: true,
-                        flex: 1
+                        width: 250
                     },
                     {
                         text: 'Seq. Depth',
@@ -116,11 +116,14 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 },
                 height: Ext.Element.getViewportHeight() - 94,
                 flex: 1,
+                features: [{
+                    ftype: 'summary'
+                }],
                 columns: [
                     {
                         text: 'Name',
                         dataIndex: 'name',
-                        flex: 1
+                        width: 250
                     },
                     {
                         text: 'Seq. Depth',
@@ -136,6 +139,17 @@ Ext.define('MainHub.view.pooling.Pooling', {
                         text: '',
                         dataIndex: 'indexI7_1',
                         renderer: me.renderCell,
+                        // summaryType: function(records, values) {
+                        //     var count = {};
+                        //     for (var i = 0; i < values.length; i++) {
+                        //         var nuc = values[i];
+                        //         count[nuc] = count[nuc] ? count[nuc] + 1 : 1;
+                        //     }
+                        //     return count;
+                        // },
+                        // summaryRenderer: function(value, summaryData, dataIndex) {
+                        //     return 'X' + '%';
+                        // },
                         width: 30
                     },
                     {
