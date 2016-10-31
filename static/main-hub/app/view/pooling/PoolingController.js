@@ -45,7 +45,8 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                     sequencingDepth: node.get('sequencingDepth'),
                     sequencingRunCondition: node.get('sequencingRunCondition'),
                     indexI7: indexI7Sequence,
-                    indexI7Id: '',
+                    indexI7Id: node.get('indexI7Id'),
+                    indexI5Id: node.get('indexI5Id'),
                     indexI7_1: indexI7[0],
                     indexI7_2: indexI7[1],
                     indexI7_3: indexI7[2],
@@ -87,7 +88,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         if (store.getCount()) {
             var record = store.findRecord('indexI7', node.get('indexI7'));
             if (record) {
-                Ext.ux.ToastMessage('The selected index is already in the pool.', 'warning');
+                Ext.ux.ToastMessage('Selected index is already in the pool.', 'warning');
                 return false;
             }
         }

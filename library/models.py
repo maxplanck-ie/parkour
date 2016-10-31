@@ -57,7 +57,7 @@ class IndexType(SimpleField):
 
 
 class Index(models.Model):
-    index_id = models.CharField('Index ID', max_length=50)
+    index_id = models.CharField('Index ID', max_length=50, unique=True)
     index = models.CharField('Index', max_length=200)
     index_type = models.ForeignKey(IndexType, verbose_name='Index Type')
 

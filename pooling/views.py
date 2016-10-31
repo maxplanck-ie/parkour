@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 
 from pooling.models import Pool
 from request.models import Request
-from library.models import Library
+from library.models import Library, IndexType, IndexI7, IndexI5
 
 import json
 import logging
@@ -23,12 +23,26 @@ def get_pooling_tree(request):
             if (library.index_i7 or library.index_i5) \
                     and library.is_pooled is False:
 
+                index_i7 = IndexI7.objects.filter(
+                    index=library.index_i7,
+                    index_type=library.index_type
+                )
+                index_i7_id = index_i7[0].index_id if index_i7 else ''
+
+                index_i5 = IndexI5.objects.filter(
+                    index=library.index_i5,
+                    index_type=library.index_type
+                )
+                index_i5_id = index_i5[0].index_id if index_i5 else ''
+
                 libraries.append({
                     'text': library.name,
                     'libraryId': library.id,
                     'sequencingDepth': library.sequencing_depth,
                     'libraryProtocolName': library.library_protocol.name,
                     'indexI7': library.index_i7,
+                    'indexI7Id': index_i7_id,
+                    'indexI5Id': index_i5_id,
                     'indexI5': library.index_i5,
                     'indexType': library.index_type.id,
                     'indexTypeName': library.index_type.name,
