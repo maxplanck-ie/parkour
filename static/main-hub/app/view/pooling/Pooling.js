@@ -156,8 +156,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
                         dataIndex: 'indexI7_1',
                         cls: 'nucleotide-header',
                         renderer: me.renderCell,
-                        summaryType: me.calculateColorDiversityI7,
-                        summaryRenderer: me.renderSummaryI7,
+                        summaryType: me.calculateColorDiversity,
+                        summaryRenderer: me.renderSummary,
                         width: 55
                     },
                     {
@@ -165,8 +165,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
                         dataIndex: 'indexI7_2',
                         cls: 'nucleotide-header',
                         renderer: me.renderCell,
-                        summaryType: me.calculateColorDiversityI7,
-                        summaryRenderer: me.renderSummaryI7,
+                        summaryType: me.calculateColorDiversity,
+                        summaryRenderer: me.renderSummary,
                         width: 55
                     },
                     {
@@ -174,8 +174,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
                         dataIndex: 'indexI7_3',
                         cls: 'nucleotide-header',
                         renderer: me.renderCell,
-                        summaryType: me.calculateColorDiversityI7,
-                        summaryRenderer: me.renderSummaryI7,
+                        summaryType: me.calculateColorDiversity,
+                        summaryRenderer: me.renderSummary,
                         width: 55
                     },
                     {
@@ -183,8 +183,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
                         dataIndex: 'indexI7_4',
                         cls: 'nucleotide-header',
                         renderer: me.renderCell,
-                        summaryType: me.calculateColorDiversityI7,
-                        summaryRenderer: me.renderSummaryI7,
+                        summaryType: me.calculateColorDiversity,
+                        summaryRenderer: me.renderSummary,
                         width: 55
                     },
                     {
@@ -192,8 +192,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
                         dataIndex: 'indexI7_5',
                         cls: 'nucleotide-header',
                         renderer: me.renderCell,
-                        summaryType: me.calculateColorDiversityI7,
-                        summaryRenderer: me.renderSummaryI7,
+                        summaryType: me.calculateColorDiversity,
+                        summaryRenderer: me.renderSummary,
                         width: 55
                     },
                     {
@@ -201,8 +201,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
                         dataIndex: 'indexI7_6',
                         cls: 'nucleotide-header',
                         renderer: me.renderCell,
-                        summaryType: me.calculateColorDiversityI7,
-                        summaryRenderer: me.renderSummaryI7,
+                        summaryType: me.calculateColorDiversity,
+                        summaryRenderer: me.renderSummary,
                         width: 55
                     },
                     {
@@ -229,8 +229,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
                         dataIndex: 'indexI5_1',
                         cls: 'nucleotide-header',
                         renderer: me.renderCell,
-                        // summaryType: me.calculateColorDiversityI5,
-                        // summaryRenderer: me.renderSummaryI5,
+                        summaryType: me.calculateColorDiversity,
+                        summaryRenderer: me.renderSummary,
                         width: 55
                     },
                     {
@@ -238,8 +238,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
                         dataIndex: 'indexI5_2',
                         cls: 'nucleotide-header',
                         renderer: me.renderCell,
-                        // summaryType: me.calculateColorDiversityI5,
-                        // summaryRenderer: me.renderSummaryI5,
+                        summaryType: me.calculateColorDiversity,
+                        summaryRenderer: me.renderSummary,
                         width: 55
                     },
                     {
@@ -247,8 +247,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
                         dataIndex: 'indexI5_3',
                         cls: 'nucleotide-header',
                         renderer: me.renderCell,
-                        // summaryType: me.calculateColorDiversityI5,
-                        // summaryRenderer: me.renderSummaryI5,
+                        summaryType: me.calculateColorDiversity,
+                        summaryRenderer: me.renderSummary,
                         width: 55
                     },
                     {
@@ -256,8 +256,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
                         dataIndex: 'indexI5_4',
                         cls: 'nucleotide-header',
                         renderer: me.renderCell,
-                        // summaryType: me.calculateColorDiversityI5,
-                        // summaryRenderer: me.renderSummaryI5,
+                        summaryType: me.calculateColorDiversity,
+                        summaryRenderer: me.renderSummary,
                         width: 55
                     },
                     {
@@ -265,8 +265,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
                         dataIndex: 'indexI5_5',
                         cls: 'nucleotide-header',
                         renderer: me.renderCell,
-                        // summaryType: me.calculateColorDiversityI5,
-                        // summaryRenderer: me.renderSummaryI5,
+                        summaryType: me.calculateColorDiversity,
+                        summaryRenderer: me.renderSummary,
                         width: 55
                     },
                     {
@@ -274,8 +274,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
                         dataIndex: 'indexI5_6',
                         cls: 'nucleotide-header',
                         renderer: me.renderCell,
-                        // summaryType: me.calculateColorDiversityI5,
-                        // summaryRenderer: me.renderSummaryI5,
+                        summaryType: me.calculateColorDiversity,
+                        summaryRenderer: me.renderSummary,
                         width: 55
                     },
                     {
@@ -320,14 +320,14 @@ Ext.define('MainHub.view.pooling.Pooling', {
         return val;
     },
 
-    calculateColorDiversityI7: function(records, values) {
+    calculateColorDiversity: function(records, values) {
         var diversity = {green: 0, red: 0};
 
         for (var i = 0; i < values.length; i++) {
             var nuc = values[i];
             if (nuc == 'G' || nuc == 'T') {
                 diversity.green += records[i].get('sequencingDepth');
-            } else {
+            } else if (nuc == 'A' || nuc == 'C') {
                 diversity.red += records[i].get('sequencingDepth');
             }
         }
@@ -335,7 +335,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
         return diversity;
     },
 
-    renderSummaryI7: function(value, summaryData, dataIndex) {
+    renderSummary: function(value, summaryData, dataIndex) {
         var result = '',
             grid = Ext.getCmp('poolGrid');
 
