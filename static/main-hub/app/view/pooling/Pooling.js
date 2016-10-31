@@ -263,7 +263,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
             result = green + '%' + '<br>' + red + '%';
 
             if ((green < 20 && red > 80) || (red < 20 && green > 80)) {
-                result += '<br>!'
+                result += '<br>!';
 
                 // Remember the cell in order to highlight it after summary refresh
                 if (grid.problematicCycles.indexOf(this.id) == -1) {
