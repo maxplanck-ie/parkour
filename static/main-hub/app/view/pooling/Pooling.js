@@ -108,6 +108,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 xtype: 'grid',
                 id: 'poolGrid',
                 itemId: 'poolGrid',
+                cls: 'pooling-grid',
                 header: {
                     title: 'Pool',
                     height: 56
@@ -147,7 +148,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
                         width: 90,
                         summaryRenderer: function() {
                             var totalSequencingDepth = Ext.getCmp('poolGrid').getStore().sum('sequencingDepth');
-                            return (totalSequencingDepth > 0) ? 'green:<br>red:' : '';
+                            return (totalSequencingDepth > 0) ? '<span class="summary-green">green:</span><br><span class="summary-red">red:</span>' : '';
                         }
                     },
                     {
@@ -230,10 +231,11 @@ Ext.define('MainHub.view.pooling.Pooling', {
 
     renderCell: function(val, meta) {
         if (val == 'G' || val == 'T') {
-            meta.tdStyle = 'background-color:#dcedc8;text-align:center;';
+            meta.tdStyle = 'background-color:#dcedc8';
         } else if (val == 'A' || val == 'C') {
             meta.tdStyle = 'background-color:#ef9a9a';
         }
+        meta.tdCls = 'nucleotide';
         return val;
     },
 
