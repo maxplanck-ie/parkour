@@ -19,6 +19,7 @@ def get_pooling_tree(request):
                     'text': library.name,
                     'libraryId': library.id,
                     'sequencingDepth': library.sequencing_depth,
+                    'libraryProtocolName': library.library_protocol.name,
                     'indexI7': library.index_i7,
                     'indexI5': library.index_i5,
                     'indexType': library.index_type.id,

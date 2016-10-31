@@ -12,7 +12,9 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             '#poolSize': {
                 boxready: 'onMaxPoolSizeBoxready'
             },
-            '#poolGrid': {}
+            '#poolGrid': {
+                edit: 'onSequenceDepthEdit'
+            }
         }
     },
 
@@ -50,17 +52,31 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                     indexI7_7: indexI7[6],
                     indexI7_8: indexI7[7]
                 });
-
-                var content = Ext.dom.Query.selectNode('.myText'),
-                    rowsContainer = grid.getEl().select('.x-grid-item-container').elements[0];
-
-                rowsContainer.append(content);
             } else {
                 node.set('checked', false);
             }
         } else {
             var record = store.findRecord('libraryId', node.get('libraryId'));
             store.remove(record);
+        }
+
+        // Update Summary
+        grid.getView().refresh();
+
+        // Highlight cells which have low color diversity
+        $.each(grid.problematicCycles, function(idx, id) {
+            $('.x-grid-row-summary .x-grid-cell-' + id).addClass('problematic-cycle');
+        });
+        grid.problematicCycles = [];
+
+        // Update grid's header and enable/disable 'Pool' button
+        if (store.getCount() > 1) {
+            var totalPoolSize = grid.getStore().sum('sequencingDepth');
+            grid.setTitle('Pool (total size: ' + totalPoolSize + ' M)');
+            Ext.getCmp('savePool').setDisabled(false);
+        } else {
+            grid.setTitle('Pool');
+            Ext.getCmp('savePool').setDisabled(true);
         }
     },
 
@@ -100,11 +116,22 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         });
         poolSize += node.get('sequencingDepth');
 
-        if (poolSize >= maxPoolSize) {
+        if (poolSize > maxPoolSize) {
             Ext.ux.ToastMessage('You have exceeded Pool Size.<br>Please increase it.', 'warning');
             // return false;
         }
 
         return true;
+    },
+
+    onSequenceDepthEdit: function(editor, context) {
+        var grid = this.getView().down('grid'),
+            record = context.record,
+            changes = record.getChanges(),
+            value = context.newValues.sequencingDepth;
+
+        record.set('sequencingDepth', value);
+
+        // TODO: update grid's title and summary
     }
 });

@@ -82,6 +82,11 @@ Ext.define('MainHub.view.pooling.Pooling', {
                         width: 100
                     },
                     {
+                        text: 'Protocol',
+                        dataIndex: 'libraryProtocolName',
+                        width: 150
+                    },
+                    {
                         text: 'Index Type',
                         dataIndex: 'indexTypeName',
                         width: 90
@@ -95,14 +100,6 @@ Ext.define('MainHub.view.pooling.Pooling', {
                         text: 'Index I5',
                         dataIndex: 'indexI5',
                         width: 100
-                    }
-                ],
-                bbar: [
-                    '->',
-                    {
-                        xtype: 'button',
-                        itemId: 'createPool',
-                        text: 'Pool'
                     }
                 ]
             },
@@ -119,80 +116,98 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 features: [{
                     ftype: 'summary'
                 }],
+                // plugins: [{
+                //     ptype: 'rowediting',
+                //     clicksToEdit: 2
+                // }],
+                problematicCycles: [],
                 columns: [
                     {
                         text: 'Name',
                         dataIndex: 'name',
-                        width: 250
+                        width: 200
                     },
                     {
                         text: 'Seq. Depth',
                         dataIndex: 'sequencingDepth',
-                        width: 90
+                        width: 90,
+                        summaryType: 'sum',
+                        summaryRenderer: function(value) {
+                            return (value > 0) ? value : '';
+                        },
+                        // editor: {
+                        //     xtype: 'numberfield',
+                        //     minValue: 1
+                        // }
                     },
                     {
                         text: 'Index I7 ID',
                         dataIndex: 'indexI7Id',
-                        width: 90
+                        width: 90,
+                        summaryRenderer: function() {
+                            var totalSequencingDepth = Ext.getCmp('poolGrid').getStore().sum('sequencingDepth');
+                            return (totalSequencingDepth > 0) ? 'green:<br>red:' : '';
+                        }
                     },
                     {
                         text: '',
                         dataIndex: 'indexI7_1',
                         renderer: me.renderCell,
-                        // summaryType: function(records, values) {
-                        //     var count = {};
-                        //     for (var i = 0; i < values.length; i++) {
-                        //         var nuc = values[i];
-                        //         count[nuc] = count[nuc] ? count[nuc] + 1 : 1;
-                        //     }
-                        //     return count;
-                        // },
-                        // summaryRenderer: function(value, summaryData, dataIndex) {
-                        //     return 'X' + '%';
-                        // },
-                        width: 30
+                        summaryType: me.calculateColorDiversityI7,
+                        summaryRenderer: me.renderSummaryI7,
+                        width: 55
                     },
                     {
                         text: '',
                         dataIndex: 'indexI7_2',
                         renderer: me.renderCell,
-                        width: 30
+                        summaryType: me.calculateColorDiversityI7,
+                        summaryRenderer: me.renderSummaryI7,
+                        width: 55
                     },
                     {
                         text: '',
                         dataIndex: 'indexI7_3',
                         renderer: me.renderCell,
-                        width: 30
+                        summaryType: me.calculateColorDiversityI7,
+                        summaryRenderer: me.renderSummaryI7,
+                        width: 55
                     },
                     {
                         text: '',
                         dataIndex: 'indexI7_4',
                         renderer: me.renderCell,
-                        width: 30
+                        summaryType: me.calculateColorDiversityI7,
+                        summaryRenderer: me.renderSummaryI7,
+                        width: 55
                     },
                     {
                         text: '',
                         dataIndex: 'indexI7_5',
                         renderer: me.renderCell,
-                        width: 30
+                        summaryType: me.calculateColorDiversityI7,
+                        summaryRenderer: me.renderSummaryI7,
+                        width: 55
                     },
                     {
                         text: '',
                         dataIndex: 'indexI7_6',
                         renderer: me.renderCell,
-                        width: 30
+                        summaryType: me.calculateColorDiversityI7,
+                        summaryRenderer: me.renderSummaryI7,
+                        width: 55
                     },
                     {
                         text: '',
                         dataIndex: 'indexI7_7',
                         renderer: me.renderCell,
-                        width: 30
+                        width: 55
                     },
                     {
                         text: '',
                         dataIndex: 'indexI7_8',
                         renderer: me.renderCell,
-                        width: 30
+                        width: 55
                     }
                 ],
                 store: [],
@@ -200,12 +215,12 @@ Ext.define('MainHub.view.pooling.Pooling', {
                     '->',
                     {
                         xtype: 'button',
+                        id: 'savePool',
                         itemId: 'savePool',
-                        text: 'Save',
+                        text: 'Pool',
                         disabled: true
                     }
-                ],
-                html: '<div class="myText">!!! TEXT !!!</div>'
+                ]
             }
         ];
 
@@ -214,10 +229,49 @@ Ext.define('MainHub.view.pooling.Pooling', {
 
     renderCell: function(val, meta) {
         if (val == 'G' || val == 'T') {
-            meta.tdStyle = 'background-color:#dcedc8';
+            meta.tdStyle = 'background-color:#dcedc8;text-align:center;';
         } else if (val == 'A' || val == 'C') {
             meta.tdStyle = 'background-color:#ef9a9a';
         }
         return val;
+    },
+
+    calculateColorDiversityI7: function(records, values) {
+        var diversity = {green: 0, red: 0};
+
+        for (var i = 0; i < values.length; i++) {
+            var nuc = values[i];
+            if (nuc == 'G' || nuc == 'T') {
+                diversity.green += records[i].get('sequencingDepth');
+            } else {
+                diversity.red += records[i].get('sequencingDepth');
+            }
+        }
+
+        return diversity;
+    },
+
+    renderSummaryI7: function(value, summaryData, dataIndex) {
+        var result = '',
+            grid = Ext.getCmp('poolGrid');
+
+        if (value.green > 0 || value.red > 0) {
+            var totalSequencingDepth = grid.getStore().sum('sequencingDepth'),
+                green = parseInt(((value.green / totalSequencingDepth) * 100).toFixed(0)),
+                red = parseInt(((value.red / totalSequencingDepth) * 100).toFixed(0));
+
+            result = green + '%' + '<br>' + red + '%';
+
+            if ((green < 20 && red > 80) || (red < 20 && green > 80)) {
+                result += '<br>!'
+
+                // Remember the cell in order to highlight it after summary refresh
+                if (grid.problematicCycles.indexOf(this.id) == -1) {
+                    grid.problematicCycles.push(this.id);
+                }
+            }
+        }
+
+        return result;
     }
 });
