@@ -152,62 +152,143 @@ Ext.define('MainHub.view.pooling.Pooling', {
                         }
                     },
                     {
-                        text: '',
+                        text: '1',
                         dataIndex: 'indexI7_1',
+                        cls: 'nucleotide-header',
                         renderer: me.renderCell,
                         summaryType: me.calculateColorDiversityI7,
                         summaryRenderer: me.renderSummaryI7,
                         width: 55
                     },
                     {
-                        text: '',
+                        text: '2',
                         dataIndex: 'indexI7_2',
+                        cls: 'nucleotide-header',
                         renderer: me.renderCell,
                         summaryType: me.calculateColorDiversityI7,
                         summaryRenderer: me.renderSummaryI7,
                         width: 55
                     },
                     {
-                        text: '',
+                        text: '3',
                         dataIndex: 'indexI7_3',
+                        cls: 'nucleotide-header',
                         renderer: me.renderCell,
                         summaryType: me.calculateColorDiversityI7,
                         summaryRenderer: me.renderSummaryI7,
                         width: 55
                     },
                     {
-                        text: '',
+                        text: '4',
                         dataIndex: 'indexI7_4',
+                        cls: 'nucleotide-header',
                         renderer: me.renderCell,
                         summaryType: me.calculateColorDiversityI7,
                         summaryRenderer: me.renderSummaryI7,
                         width: 55
                     },
                     {
-                        text: '',
+                        text: '5',
                         dataIndex: 'indexI7_5',
+                        cls: 'nucleotide-header',
                         renderer: me.renderCell,
                         summaryType: me.calculateColorDiversityI7,
                         summaryRenderer: me.renderSummaryI7,
                         width: 55
                     },
                     {
-                        text: '',
+                        text: '6',
                         dataIndex: 'indexI7_6',
+                        cls: 'nucleotide-header',
                         renderer: me.renderCell,
                         summaryType: me.calculateColorDiversityI7,
                         summaryRenderer: me.renderSummaryI7,
                         width: 55
                     },
                     {
-                        text: '',
+                        text: '7',
                         dataIndex: 'indexI7_7',
+                        cls: 'nucleotide-header',
                         renderer: me.renderCell,
                         width: 55
                     },
                     {
-                        text: '',
+                        text: '8',
                         dataIndex: 'indexI7_8',
+                        cls: 'nucleotide-header',
+                        renderer: me.renderCell,
+                        width: 55
+                    },
+                    {
+                        text: 'Index I5 ID',
+                        dataIndex: 'indexI5Id',
+                        width: 90
+                    },
+                    {
+                        text: '1',
+                        dataIndex: 'indexI5_1',
+                        cls: 'nucleotide-header',
+                        renderer: me.renderCell,
+                        // summaryType: me.calculateColorDiversityI5,
+                        // summaryRenderer: me.renderSummaryI5,
+                        width: 55
+                    },
+                    {
+                        text: '2',
+                        dataIndex: 'indexI5_2',
+                        cls: 'nucleotide-header',
+                        renderer: me.renderCell,
+                        // summaryType: me.calculateColorDiversityI5,
+                        // summaryRenderer: me.renderSummaryI5,
+                        width: 55
+                    },
+                    {
+                        text: '3',
+                        dataIndex: 'indexI5_3',
+                        cls: 'nucleotide-header',
+                        renderer: me.renderCell,
+                        // summaryType: me.calculateColorDiversityI5,
+                        // summaryRenderer: me.renderSummaryI5,
+                        width: 55
+                    },
+                    {
+                        text: '4',
+                        dataIndex: 'indexI5_4',
+                        cls: 'nucleotide-header',
+                        renderer: me.renderCell,
+                        // summaryType: me.calculateColorDiversityI5,
+                        // summaryRenderer: me.renderSummaryI5,
+                        width: 55
+                    },
+                    {
+                        text: '5',
+                        dataIndex: 'indexI5_5',
+                        cls: 'nucleotide-header',
+                        renderer: me.renderCell,
+                        // summaryType: me.calculateColorDiversityI5,
+                        // summaryRenderer: me.renderSummaryI5,
+                        width: 55
+                    },
+                    {
+                        text: '6',
+                        dataIndex: 'indexI5_6',
+                        cls: 'nucleotide-header',
+                        renderer: me.renderCell,
+                        // summaryType: me.calculateColorDiversityI5,
+                        // summaryRenderer: me.renderSummaryI5,
+                        width: 55
+                    },
+                    {
+                        text: '7',
+                        dataIndex: 'indexI5_7',
+                        cls: 'nucleotide-header',
+                        renderer: me.renderCell,
+                        width: 55
+                    },
+                    {
+                        text: '8',
+                        dataIndex: 'indexI5_8',
+                        cls: 'nucleotide-header',
                         renderer: me.renderCell,
                         width: 55
                     }

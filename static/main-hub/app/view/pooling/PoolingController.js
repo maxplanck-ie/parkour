@@ -39,6 +39,14 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                     $.merge(indexI7, [' ', ' ']);
                 }
 
+                var indexI5Sequence = node.get('indexI5'),
+                    indexI5 = indexI5Sequence.split('');
+                if (indexI5Sequence.length === 0) {
+                    indexI5 = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '];
+                } else if (indexI5Sequence.length == 6) {
+                    $.merge(indexI5, [' ', ' ']);
+                }
+
                 store.add({
                     name: node.get('text'),
                     libraryId: node.get('libraryId'),
@@ -54,7 +62,16 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                     indexI7_5: indexI7[4],
                     indexI7_6: indexI7[5],
                     indexI7_7: indexI7[6],
-                    indexI7_8: indexI7[7]
+                    indexI7_8: indexI7[7],
+
+                    indexI5_1: indexI5[0],
+                    indexI5_2: indexI5[1],
+                    indexI5_3: indexI5[2],
+                    indexI5_4: indexI5[3],
+                    indexI5_5: indexI5[4],
+                    indexI5_6: indexI5[5],
+                    indexI5_7: indexI5[6],
+                    indexI5_8: indexI5[7]
                 });
             } else {
                 node.set('checked', false);

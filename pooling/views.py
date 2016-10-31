@@ -20,8 +20,7 @@ def get_pooling_tree(request):
     for req in requests:
         libraries = []
         for library in req.libraries.all():
-            if (library.index_i7 or library.index_i5) \
-                    and library.is_pooled is False:
+            if library.index_i7 and library.is_pooled is False:
 
                 index_i7 = IndexI7.objects.filter(
                     index=library.index_i7,
