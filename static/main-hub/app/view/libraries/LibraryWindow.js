@@ -143,8 +143,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                     fieldLabel: 'Number of enrichment cycles <sup><strong><span class="field-tooltip" tooltip-text="Number of PCR cycles done for library enrichment">[?]</span></strong></sup>',
                                     emptyText: 'Number of enrichment cycles',
                                     allowDecimals: false,
-                                    minValue: 0,
-                                    maxValue: 99
+                                    minValue: 1
                                 },
                                 {
                                     xtype: 'combobox',
@@ -202,6 +201,8 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                     itemId: 'indexI7Field',
                                     fieldLabel: 'Index 1 (I7) <sup><strong><span class="field-tooltip" tooltip-text="Select from predefined list; make sure the displayed index is the sequence used for barcoding. Or enter sequence of index used for barcoding (typically 6 nucleotides)">[?]</span></strong></sup>',
                                     emptyText: 'Index 1 (I7)',
+                                    regex: new RegExp("^(?=(?:.{6}|.{8})$)[ATCG]+$"),
+                                    regexText: 'Only A, T, C and G (uppercase) are allowed. Index length must be 6 or 8.',
                                     store: 'indexI7Store',
                                     disabled: true
                                 },
@@ -215,6 +216,8 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                     itemId: 'indexI5Field',
                                     fieldLabel: 'Index 2 (I5) <sup><strong><span class="field-tooltip" tooltip-text="Select from predefined list; make sure the displayed index is the sequence used for barcoding. Or enter sequence of index used for barcoding (typically 6 nucleotides)">[?]</span></strong></sup>',
                                     emptyText: 'Index 2 (I5)',
+                                    regex: new RegExp("^(?=(?:.{6}|.{8})$)[ATCG]+$"),
+                                    regexText: 'Only A, T, C and G (uppercase) are allowed. Index length must be 6 or 8.',
                                     store: 'indexI5Store',
                                     disabled: true
                                 },
@@ -254,7 +257,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                     name: 'concentration',
                                     fieldLabel: 'Concentration (ng/µl)',
                                     emptyText: 'Concentration (ng/µl)',
-                                    minValue: 0
+                                    minValue: 1
                                 },
                                 {
                                     xtype: 'combobox',
@@ -273,7 +276,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                     name: 'sampleVolume',
                                     fieldLabel: 'Sample Volume (µl)',
                                     emptyText: 'Sample Volume (µl)',
-                                    minValue: 0,
+                                    minValue: 1,
                                     allowDecimals: false
                                 },
                                 {
@@ -281,7 +284,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                     name: 'meanFragmentSize',
                                     fieldLabel: 'Mean Fragment Size (bp) <sup><strong><span class="field-tooltip" tooltip-text="Specify mean fragments size of library, upload Bioanalyzer or Fragmentanalyzer files">[?]</span></strong></sup>',
                                     emptyText: 'Mean Fragment Size (bp)',
-                                    minValue: 0,
+                                    minValue: 1,
                                     allowDecimals: false
                                 },
                                 {
@@ -290,7 +293,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                     fieldLabel: 'qPCR Result (nM) <sup><strong><span class="field-tooltip" tooltip-text="Use this field if qPCR was done for library quantification">[?]</span></strong></sup>',
                                     emptyText: 'qPCR Result (nM)',
                                     allowBlank: true,
-                                    minValue: 0
+                                    minValue: 1
                                 },
                                 {
                                     xtype: 'combobox',
@@ -309,7 +312,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                     name: 'sequencingDepth',
                                     fieldLabel: 'Sequencing Depth (M)',
                                     emptyText: 'Sequencing Depth (M)',
-                                    minValue: 0,
+                                    minValue: 1,
                                     allowDecimals: false
                                 },
                                 {
@@ -467,7 +470,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                     name: 'concentration',
                                     fieldLabel: 'Concentration (ng/µl)',
                                     emptyText: 'Concentration (ng/µl)',
-                                    minValue: 0
+                                    minValue: 1
                                 },
                                 {
                                     xtype: 'combobox',
@@ -486,7 +489,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                     name: 'sampleVolume',
                                     fieldLabel: 'Sample Volume (µl)',
                                     emptyText: 'Sample Volume (µl)',
-                                    minValue: 0,
+                                    minValue: 1,
                                     allowDecimals: false
                                 },
                                 {
@@ -495,8 +498,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                     fieldLabel: 'Sample amplified (cycles) <sup><strong><span class="field-tooltip" tooltip-text="If sample has been already amplified, indicate the number of cycles">[?]</span></strong></sup>',
                                     emptyText: 'Sample amplified (cycles)',
                                     allowDecimals: false,
-                                    minValue: 0,
-                                    maxValue: 99,
+                                    minValue: 1,
                                     allowBlank: true
                                 },
                                 {
@@ -590,7 +592,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                     name: 'sequencingDepth',
                                     fieldLabel: 'Sequencing Depth (M)',
                                     emptyText: 'Sequencing Depth (M)',
-                                    minValue: 0,
+                                    minValue: 1,
                                     allowDecimals: false
                                 },
                                 {
