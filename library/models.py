@@ -262,7 +262,8 @@ class Library(LibrarySampleAbstract):
     )
     mean_fragment_size = models.IntegerField('Mean Fragment Size')
     qpcr_result = models.FloatField('qPCR Result', null=True, blank=True)
-    files=models.ManyToManyField(FileLibrary)
+    files = models.ManyToManyField(FileLibrary)
+    is_pooled = models.BooleanField('Is pooled?', default=False)
 
     # Quality Control
     qpcr_result_facility = models.FloatField(
@@ -303,7 +304,7 @@ class LibraryForm(ModelForm):
 
 
 @receiver(pre_delete, sender=Library)
-def sample_delete(sender, instance, **kwargs):
+def library_delete(sender, instance, **kwargs):
     for file in instance.files.all():
         file.delete()
 
@@ -364,7 +365,7 @@ class Sample(LibrarySampleAbstract):
         null=True,
         blank=True,
     )
-    files=models.ManyToManyField(FileSample)
+    files = models.ManyToManyField(FileSample)
 
     # Quality Control
     rna_quality_facility = models.FloatField(

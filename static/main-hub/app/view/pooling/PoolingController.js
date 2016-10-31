@@ -14,6 +14,9 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             },
             '#poolGrid': {
                 edit: 'onSequenceDepthEdit'
+            },
+            '#savePool': {
+                click: 'savePool'
             }
         }
     },
@@ -133,5 +136,46 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         record.set('sequencingDepth', value);
 
         // TODO: update grid's title and summary
+    },
+
+    savePool: function(btn) {
+        var store = Ext.getCmp('poolGrid').getStore(),
+            url = 'save_pool/';
+
+        Ext.getCmp('poolingContainer').setLoading('Saving...');
+        Ext.Ajax.request({
+            url: url,
+            method: 'POST',
+            timeout: 1000000,
+            scope: this,
+
+            params: {
+                libraries: Ext.JSON.encode(Ext.Array.pluck(Ext.Array.pluck(store.data.items, 'data'), 'libraryId'))
+            },
+
+            success: function (response) {
+                var obj = Ext.JSON.decode(response.responseText);
+
+                if (obj.success) {
+                    Ext.getStore('PoolingTree').reload();
+                    Ext.getCmp('poolGrid').setTitle('Pool');
+                    Ext.getCmp('poolGrid').getStore().removeAll();
+                    Ext.getCmp('poolingContainer').setLoading(false);
+                    Ext.ux.ToastMessage('Pool has been saved!');
+                } else {
+                    Ext.getCmp('poolingContainer').setLoading(false);
+                    Ext.ux.ToastMessage(obj.error, 'error');
+                    console.error('[ERROR]: ' + url + ': ' + obj.error);
+                    console.error(response);
+                }
+            },
+
+            failure: function (response) {
+                Ext.getCmp('poolingContainer').setLoading(false);
+                Ext.ux.ToastMessage(response.statusText, 'error');
+                console.error('[ERROR]: ' + url);
+                console.error(response);
+            }
+        });
     }
 });

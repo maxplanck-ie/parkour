@@ -1,6 +1,7 @@
 Ext.define('MainHub.view.pooling.Pooling', {
     extend: 'Ext.container.Container',
     xtype: 'pooling',
+    id: 'poolingContainer',
 
     requires: [
         'MainHub.view.pooling.PoolingController',

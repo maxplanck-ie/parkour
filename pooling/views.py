@@ -1,8 +1,14 @@
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
+
+from pooling.models import Pool
 from request.models import Request
+from library.models import Library
 
 import json
+import logging
+
+logger = logging.getLogger('db')
 
 
 @login_required
@@ -14,7 +20,9 @@ def get_pooling_tree(request):
     for req in requests:
         libraries = []
         for library in req.libraries.all():
-            if library.index_i7 or library.index_i5:
+            if (library.index_i7 or library.index_i5) \
+                    and library.is_pooled is False:
+
                 libraries.append({
                     'text': library.name,
                     'libraryId': library.id,
@@ -48,5 +56,43 @@ def get_pooling_tree(request):
 
     return HttpResponse(
         json.dumps(data),
+        content_type='application/json',
+    )
+
+
+@login_required
+def save_pool(request):
+    """ Save pool  """
+    error = ''
+
+    try:
+        libraries = json.loads(request.POST.get('libraries'))
+        name = '_' + request.user.name.replace(' ', '_')
+
+        if request.user.pi:
+            name = request.user.pi.name + name
+
+        pool = Pool(name=name)
+        pool.save()
+        pool.libraries.add(*libraries)
+        pool.name = str(pool.id) + '_' + name
+        pool.save()
+
+        # Make current libraries not available for repeated pooling
+        for library_id in libraries:
+            library = Library.objects.get(id=library_id)
+            library.is_pooled = True
+            library.save()
+
+    except Exception as e:
+        error = str(e)
+        print(error)
+        logger.debug(error)
+
+    return HttpResponse(
+        json.dumps({
+            'success': not error,
+            'error': error,
+        }),
         content_type='application/json',
     )
