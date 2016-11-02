@@ -222,6 +222,10 @@ Ext.define('MainHub.view.pooling.Pooling', {
                     {
                         text: 'Index I5 ID',
                         dataIndex: 'indexI5Id',
+                        summaryRenderer: function() {
+                            var totalSequencingDepth = Ext.getCmp('poolGrid').getStore().sum('sequencingDepth');
+                            return (totalSequencingDepth > 0) ? '<span class="summary-green">green:</span><br><span class="summary-red">red:</span>' : '';
+                        },
                         width: 90
                     },
                     {
