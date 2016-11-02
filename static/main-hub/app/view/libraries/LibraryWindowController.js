@@ -208,7 +208,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         } else {
             var record = wnd.record.data,
                 form = Ext.getCmp('sampleForm').getForm();
-            
+
             // Show Sample barcode
             Ext.getCmp('sampleBarcodeField').show().setHtml(record.barcode);
 
@@ -498,8 +498,8 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
     },
 
     saveLibrary: function(addAnother) {
-        var form = null, url = '', data = {}, params = {}, nameFieldName = '', fileStoreName = '', 
-            wnd = Ext.getCmp('library_wnd'), 
+        var form = null, url = '', data = {}, params = {}, nameFieldName = '', fileStoreName = '',
+            wnd = Ext.getCmp('library_wnd'),
             card = Ext.getCmp('librarySamplePanel').getLayout().getActiveItem().id;
         addAnother = addAnother || false;
 
@@ -533,7 +533,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                 'comments': data.comments,
                 'files': Ext.JSON.encode(form.down('filegridfield').getValue())
             };
-        } 
+        }
         else {
             form = Ext.getCmp('sampleForm');
             data = form.getForm().getFieldValues();

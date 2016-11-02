@@ -195,6 +195,11 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                     xtype: 'combobox',
                                     queryMode: 'local',
                                     displayField: 'name',
+                                    displayTpl: Ext.create('Ext.XTemplate',
+                                        '<tpl for=".">',
+                                            '{index}',
+                                        '</tpl>'
+                                    ),
                                     valueField: 'index',
                                     name: 'indexI7',
                                     id: 'indexI7Field',
@@ -210,6 +215,11 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                     xtype: 'combobox',
                                     queryMode: 'local',
                                     displayField: 'name',
+                                    displayTpl: Ext.create('Ext.XTemplate',
+                                        '<tpl for=".">',
+                                            '{index}',
+                                        '</tpl>'
+                                    ),
                                     valueField: 'index',
                                     name: 'indexI5',
                                     id: 'indexI5Field',
