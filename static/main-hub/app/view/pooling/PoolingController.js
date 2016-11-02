@@ -53,6 +53,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                     sequencingDepth: node.get('sequencingDepth'),
                     sequencingRunCondition: node.get('sequencingRunCondition'),
                     indexI7: indexI7Sequence,
+                    indexI5: indexI5Sequence,
                     indexI7Id: node.get('indexI7Id'),
                     indexI5Id: node.get('indexI5Id'),
                     indexI7_1: indexI7[0],
@@ -63,7 +64,6 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                     indexI7_6: indexI7[5],
                     indexI7_7: indexI7[6],
                     indexI7_8: indexI7[7],
-
                     indexI5_1: indexI5[0],
                     indexI5_2: indexI5[1],
                     indexI5_3: indexI5[2],

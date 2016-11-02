@@ -325,10 +325,12 @@ Ext.define('MainHub.view.pooling.Pooling', {
 
         for (var i = 0; i < values.length; i++) {
             var nuc = values[i];
-            if (nuc == 'G' || nuc == 'T') {
-                diversity.green += records[i].get('sequencingDepth');
-            } else if (nuc == 'A' || nuc == 'C') {
-                diversity.red += records[i].get('sequencingDepth');
+            if (nuc != ' ') {
+                if (nuc == 'G' || nuc == 'T') {
+                    diversity.green += records[i].get('sequencingDepth');
+                } else if (nuc == 'A' || nuc == 'C') {
+                    diversity.red += records[i].get('sequencingDepth');
+                }
             }
         }
 
@@ -337,11 +339,23 @@ Ext.define('MainHub.view.pooling.Pooling', {
 
     renderSummary: function(value, summaryData, dataIndex) {
         var result = '',
-            grid = Ext.getCmp('poolGrid');
+            grid = Ext.getCmp('poolGrid'),
+            totalSequencingDepth = 0;
 
         if (value.green > 0 || value.red > 0) {
-            var totalSequencingDepth = grid.getStore().sum('sequencingDepth'),
-                green = parseInt(((value.green / totalSequencingDepth) * 100).toFixed(0)),
+            if (dataIndex.split('_')[0] == 'indexI5') {
+                // Consider only non empty Index I5 indices
+                grid.getStore().each(function(record) {
+                    if (record.get('indexI5') !== '') {
+                        totalSequencingDepth += record.get('sequencingDepth');
+                    }
+                });
+            } else {
+                // Take all Index I7 indices into the account
+                totalSequencingDepth = grid.getStore().sum('sequencingDepth');
+            }
+
+            var green = parseInt(((value.green / totalSequencingDepth) * 100).toFixed(0)),
                 red = parseInt(((value.red / totalSequencingDepth) * 100).toFixed(0));
 
             result = green + '%' + '<br>' + red + '%';
