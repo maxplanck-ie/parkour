@@ -366,6 +366,7 @@ class Sample(LibrarySampleAbstract):
         blank=True,
     )
     files = models.ManyToManyField(FileSample)
+    is_pooled = models.BooleanField('Is pooled?', default=False)
 
     # Quality Control
     rna_quality_facility = models.FloatField(

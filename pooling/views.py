@@ -37,6 +37,7 @@ def get_pooling_tree(request):
                 libraries.append({
                     'text': library.name,
                     'libraryId': library.id,
+                    'recordType': 'L',
                     'sequencingDepth': library.sequencing_depth,
                     'libraryProtocolName': library.library_protocol.name,
                     'indexI7': library.index_i7,
@@ -49,6 +50,29 @@ def get_pooling_tree(request):
                         library.sequencing_run_condition.id,
                     'sequencingRunConditionName':
                         library.sequencing_run_condition.name,
+                    'iconCls': 'x-fa fa-flask',
+                    'checked': False,
+                    'leaf': True
+                })
+
+        for sample in req.samples.all():
+            if sample.is_pooled is False:
+                libraries.append({
+                    'text': sample.name,
+                    'sampleId': sample.id,
+                    'recordType': 'S',
+                    'sequencingDepth': sample.sequencing_depth,
+                    'libraryProtocolName': sample.sample_protocol.name,
+                    'indexI7': '',
+                    'indexI7Id': '',
+                    'indexI5Id': '',
+                    'indexI5': '',
+                    'indexType': '',
+                    'indexTypeName': '',
+                    'sequencingRunCondition':
+                        sample.sequencing_run_condition.id,
+                    'sequencingRunConditionName':
+                        sample.sequencing_run_condition.name,
                     'iconCls': 'x-fa fa-flask',
                     'checked': False,
                     'leaf': True

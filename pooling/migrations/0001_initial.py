@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('library', '0015_library_is_pooled'),
+        ('library', '0017_sample_is_pooled'),
     ]
 
     operations = [

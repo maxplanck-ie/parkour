@@ -50,6 +50,8 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                 store.add({
                     name: node.get('text'),
                     libraryId: node.get('libraryId'),
+                    sampleId: node.get('sampleId'),
+                    recordType: node.get('recordType'),
                     sequencingDepth: node.get('sequencingDepth'),
                     sequencingRunCondition: node.get('sequencingRunCondition'),
                     indexI7: indexI7Sequence,
@@ -77,7 +79,12 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                 node.set('checked', false);
             }
         } else {
-            var record = store.findRecord('libraryId', node.get('libraryId'));
+            var record = null;
+            if (node.get('recordType') == 'L') {
+                record = store.findRecord('libraryId', node.get('libraryId'));
+            } else {
+                record = store.findRecord('sampleId', node.get('sampleId'));
+            }
             store.remove(record);
         }
 

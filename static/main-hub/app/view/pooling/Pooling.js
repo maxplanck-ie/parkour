@@ -73,6 +73,11 @@ Ext.define('MainHub.view.pooling.Pooling', {
                         width: 250
                     },
                     {
+                        text: '',
+                        dataIndex: 'recordType',
+                        width: 35
+                    },
+                    {
                         text: 'Seq. Depth',
                         dataIndex: 'sequencingDepth',
                         width: 90
@@ -128,6 +133,11 @@ Ext.define('MainHub.view.pooling.Pooling', {
                         text: 'Name',
                         dataIndex: 'name',
                         width: 200
+                    },
+                    {
+                        text: '',
+                        dataIndex: 'recordType',
+                        width: 35
                     },
                     {
                         text: 'Seq. Depth',
