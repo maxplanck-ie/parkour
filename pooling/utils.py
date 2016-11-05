@@ -89,8 +89,8 @@ def calculate_scores2(records_in_result, current_record, current_index):
 
 def generate(library_ids, sample_ids):
     """
-    Generate indices for given libraries/samples, maximizing color diversity
-    (distribution between G/T and A/C) and checking its compatibility.
+    Generate indices for given libraries/samples, checking their compatibility
+    and maximizing color diversity (distribution between G/T and A/C).
     """
     result = []
 
