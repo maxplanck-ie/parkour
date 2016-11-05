@@ -56,7 +56,7 @@ def calculate_scores2(records_in_result, current_record, current_index):
     total_depth = 0
     for record in records_in_result:
         for cycle in range(6):
-            index = convert_index(record['predicted_index']['index'])
+            index = convert_index(record['predicted_index_i7']['index'])
             color = index[cycle]
             color_distribution[cycle][color] += record['depth']
         total_depth += record['depth']
@@ -117,25 +117,52 @@ def generate(library_ids, sample_ids):
     if any(libraries):
         case = 1
         for library in libraries:
+            # Get Index I7
             index_i7 = IndexI7.objects.filter(
                 index=library.index_i7,
                 index_type=library.index_type
-            )[0]
-            index_i7_id = index_i7.index_id if index_i7 else ''
+            )
+            if index_i7:
+                index_i7_id = index_i7[0].index_id
+                index_i7_index = index_i7[0].index
+            else:
+                index_i7_id = ''
+                index_i7_index = ''
+
+            # Get Index I5
+            index_i5 = IndexI5.objects.filter(
+                index=library.index_i5,
+                index_type=library.index_type
+            )
+            if index_i5:
+                index_i5_id = index_i5[0].index_id
+                index_i5_index = index_i5[0].index
+            else:
+                index_i5_id = ''
+                index_i5_index = ''
 
             result.append({
                 'name': library.name,
                 'library_id': library.id,
                 'read_length': library.sequencing_run_condition_id,
                 'depth': library.sequencing_depth,
-                'predicted_index': {
-                    'index': index_i7.index,
+                'predicted_index_i7': {
+                    'index': index_i7_index,
                     'index_id': index_i7_id
+                },
+                'predicted_index_i5': {
+                    'index': index_i5_index,
+                    'index_id': index_i5_id
                 }
             })
 
             try:
-                indices.pop(indices.index(result[0]['predicted_index']))
+                indices.pop(indices.index(result[0]['predicted_index_i7']))
+            except ValueError:
+                pass
+
+            try:
+                indices.pop(indices.index(result[0]['predicted_index_i5']))
             except ValueError:
                 pass
 
@@ -172,14 +199,16 @@ def generate(library_ids, sample_ids):
                     'sample_id': samples[0].id,
                     'read_length': samples[0].sequencing_run_condition_id,
                     'depth': samples[0].sequencing_depth,
-                    'predicted_index': best_pair['index1']
+                    'predicted_index_i7': best_pair['index1'],
+                    'predicted_index_i5': {'index': '', 'index_id': ''}
                 },
                 {
                     'name': samples[1].name,
                     'sample_id': samples[1].id,
                     'read_length': samples[1].sequencing_run_condition_id,
                     'depth': samples[1].sequencing_depth,
-                    'predicted_index': best_pair['index2']
+                    'predicted_index_i7': best_pair['index2'],
+                    'predicted_index_i5': {'index': '', 'index_id': ''}
                 }
             ]
 
@@ -200,7 +229,7 @@ def generate(library_ids, sample_ids):
 
     # Predict indices for the remaining samples
     for sample in samples[start:]:
-        predicted_index = {'avg_score': 100.0}
+        predicted_index_i7 = {'avg_score': 100.0}
 
         for index in indices:
             scores = calculate_scores2(result, sample, index)
@@ -208,20 +237,21 @@ def generate(library_ids, sample_ids):
             # If indices are compatible
             if scores != -1:
                 avg_score = sum(scores) / 6
-                if avg_score < predicted_index['avg_score']:
-                    predicted_index = {
+                if avg_score < predicted_index_i7['avg_score']:
+                    predicted_index_i7 = {
                         'index': index,
                         'avg_score': avg_score
                     }
                     indices.pop(indices.index(index))
 
-        if 'index' in predicted_index.keys():
+        if 'index' in predicted_index_i7.keys():
             result.append({
                 'name': sample.name,
                 'sample_id': sample.id,
                 'read_length': sample.sequencing_run_condition_id,
                 'depth': sample.sequencing_depth,
-                'predicted_index': predicted_index['index']
+                'predicted_index_i7': predicted_index_i7['index'],
+                'predicted_index_i5': {'index': '', 'index_id': ''}
             })
 
         else:

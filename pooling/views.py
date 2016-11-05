@@ -147,13 +147,17 @@ def generate_indices(request):
         generated_indices = generate(library_ids, sample_ids)
 
         for record in sorted(generated_indices, key=lambda x: x['name']):
-            index = record['predicted_index']['index']
+            index_i7 = record['predicted_index_i7']['index']
+            index_i5 = record['predicted_index_i5']['index']
+
             rec = {
                 'name': record['name'],
                 'sequencingDepth': record['depth'],
                 'sequencingRunCondition': record['read_length'],
-                'indexI7': index,
-                'indexI7Id': record['predicted_index']['index_id']
+                'indexI7': index_i7,
+                'indexI7Id': record['predicted_index_i7']['index_id'],
+                'indexI5': index_i5,
+                'indexI5Id': record['predicted_index_i5']['index_id']
             }
 
             if 'sample_id' in record.keys():
@@ -168,8 +172,11 @@ def generate_indices(request):
                     'libraryId': record['library_id']
                 })
 
-            for i in range(len(index)):
-                rec.update({'indexI7_' + str(i+1): rec['indexI7'][i]})
+            for i in range(len(index_i7)):
+                rec.update({'indexI7_' + str(i + 1): rec['indexI7'][i]})
+
+            for i in range(len(index_i5)):
+                rec.update({'indexI5_' + str(i + 1): rec['indexI5'][i]})
 
             data.append(rec)
 
