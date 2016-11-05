@@ -1,6 +1,6 @@
-Ext.define('MainHub.view.pooling.PoolingController', {
+Ext.define('MainHub.view.pooling.IndexGeneratorController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.pooling',
+    alias: 'controller.index-generator',
 
     requires: [],
 

@@ -45,12 +45,6 @@ def get_navigation_tree(request):
                 'expanded': True,
                 'selectable': False,
                 'children': [
-                    # {
-                    #     'text': 'Requests',
-                    #     'iconCls': 'x-fa fa-external-link-square',
-                    #     'viewType': 'requests',
-                    #     'leaf': True
-                    # },
                     {
                         'text': 'Libraries/Samples',
                         'iconCls': 'x-fa fa-flask',
@@ -76,8 +70,28 @@ def get_navigation_tree(request):
             {
                 'text': 'Pooling',
                 'iconCls': 'x-fa fa-sort-amount-desc',
-                'viewType': 'pooling',
-                'leaf': True
+                'expanded': True,
+                'selectable': False,
+                'children': [
+                    {
+                        'text': 'Index Generator',
+                        'iconCls': 'x-fa fa-sort-amount-desc',
+                        'viewType': 'index-generator',
+                        'leaf': True
+                    },
+                    {
+                        'text': 'Library Preparation',
+                        'iconCls': 'x-fa fa-sort-amount-desc',
+                        # 'viewType': '',
+                        'leaf': True
+                    },
+                    {
+                        'text': 'Pooling',
+                        'iconCls': 'x-fa fa-sort-amount-desc',
+                        # 'viewType': '',
+                        'leaf': True
+                    }
+                ]
             }
         ]
     }

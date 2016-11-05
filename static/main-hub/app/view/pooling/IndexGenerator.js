@@ -1,13 +1,13 @@
-Ext.define('MainHub.view.pooling.Pooling', {
+Ext.define('MainHub.view.pooling.IndexGenerator', {
     extend: 'Ext.container.Container',
-    xtype: 'pooling',
+    xtype: 'index-generator',
     id: 'poolingContainer',
 
     requires: [
-        'MainHub.view.pooling.PoolingController',
+        'MainHub.view.pooling.IndexGeneratorController',
     ],
 
-    controller: 'pooling',
+    controller: 'index-generator',
 
     layout: {
         type: 'hbox',
