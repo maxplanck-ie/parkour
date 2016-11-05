@@ -17,6 +17,9 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             },
             '#savePool': {
                 click: 'savePool'
+            },
+            '#generateIndices': {
+                click: 'generateIndicesBtnClick'
             }
         }
     },
@@ -102,9 +105,15 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             var totalPoolSize = grid.getStore().sum('sequencingDepth');
             grid.setTitle('Pool (total size: ' + totalPoolSize + ' M)');
             Ext.getCmp('savePool').setDisabled(false);
+
+            var recordTypes = Ext.pluck(Ext.Array.pluck(store.data.items, 'data'), 'recordType');
+            if (recordTypes.indexOf('S') > -1) {
+                Ext.getCmp('generateIndices').setDisabled(false);
+            }
         } else {
             grid.setTitle('Pool');
             Ext.getCmp('savePool').setDisabled(true);
+            Ext.getCmp('generateIndices').setDisabled(true);
         }
     },
 
@@ -197,6 +206,50 @@ Ext.define('MainHub.view.pooling.PoolingController', {
 
             failure: function (response) {
                 Ext.getCmp('poolingContainer').setLoading(false);
+                Ext.ux.ToastMessage(response.statusText, 'error');
+                console.error('[ERROR]: ' + url);
+                console.error(response);
+            }
+        });
+    },
+
+    generateIndicesBtnClick: function(btn) {
+        var poolingTreePanel = Ext.getCmp('poolingTreePanel'),
+            grid = Ext.getCmp('poolGrid'),
+            store = grid.getStore(),
+            url = 'generate_indices/';
+
+        poolingTreePanel.disable();
+        grid.setLoading('Generating...');
+        Ext.Ajax.request({
+            url: url,
+            method: 'POST',
+            timeout: 1000000,
+            scope: this,
+
+            params: {
+                libraries: Ext.JSON.encode(Ext.Array.pluck(Ext.Array.pluck(store.data.items, 'data'), 'libraryId')),
+                samples: Ext.JSON.encode(Ext.Array.pluck(Ext.Array.pluck(store.data.items, 'data'), 'sampleId'))
+            },
+
+            success: function(response) {
+                var obj = Ext.JSON.decode(response.responseText);
+
+                if (obj.success) {
+                    store.removeAll();
+                    store.add(obj.data);
+                } else {
+                    Ext.ux.ToastMessage(obj.error, 'error');
+                    console.error('[ERROR]: ' + url + ': ' + obj.error);
+                    console.error(response);
+                }
+                poolingTreePanel.enable();
+                grid.setLoading(false);
+            },
+
+            failure: function(response) {
+                poolingTreePanel.enable();
+                grid.setLoading(false);
                 Ext.ux.ToastMessage(response.statusText, 'error');
                 console.error('[ERROR]: ' + url);
                 console.error(response);

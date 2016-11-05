@@ -2,8 +2,9 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 
 from pooling.models import Pool
+from pooling.utils import generate
 from request.models import Request
-from library.models import Library, IndexType, IndexI7, IndexI5
+from library.models import Library, IndexI7, IndexI5
 
 import json
 import logging
@@ -13,7 +14,7 @@ logger = logging.getLogger('db')
 
 @login_required
 def get_pooling_tree(request):
-    """ Get libraries, ready for pooling  """
+    """ Get libraries, ready for pooling. """
     children = []
 
     requests = Request.objects.select_related()
@@ -99,7 +100,7 @@ def get_pooling_tree(request):
 
 @login_required
 def save_pool(request):
-    """ Save pool  """
+    """ Save pool. """
     error = ''
 
     try:
@@ -128,6 +129,58 @@ def save_pool(request):
 
     return HttpResponse(
         json.dumps({
+            'success': not error,
+            'error': error,
+        }),
+        content_type='application/json',
+    )
+
+
+def generate_indices(request):
+    """ Generate indices for libraries and samples. """
+    error = ''
+    data = []
+
+    try:
+        library_ids = json.loads(request.POST.get('libraries'))
+        sample_ids = json.loads(request.POST.get('samples'))
+        generated_indices = generate(library_ids, sample_ids)
+
+        for record in sorted(generated_indices, key=lambda x: x['name']):
+            index = record['predicted_index']['index']
+            rec = {
+                'name': record['name'],
+                'sequencingDepth': record['depth'],
+                'sequencingRunCondition': record['read_length'],
+                'indexI7': index,
+                'indexI7Id': record['predicted_index']['index_id']
+            }
+
+            if 'sample_id' in record.keys():
+                rec.update({
+                    'recordType': 'S',
+                    'sampleId': record['sample_id']
+                })
+
+            if 'library_id' in record.keys():
+                rec.update({
+                    'recordType': 'L',
+                    'libraryId': record['library_id']
+                })
+
+            for i in range(len(index)):
+                rec.update({'indexI7_' + str(i+1): rec['indexI7'][i]})
+
+            data.append(rec)
+
+    except Exception as e:
+        error = str(e)
+        print(error)
+        logger.debug(error)
+
+    return HttpResponse(
+        json.dumps({
+            'data': data,
             'success': not error,
             'error': error,
         }),

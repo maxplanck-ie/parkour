@@ -21,6 +21,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
         me.items = [
             {
                 xtype: 'treepanel',
+                id: 'poolingTreePanel',
                 itemId: 'poolingTreePanel',
                 height: Ext.Element.getViewportHeight() - 94,
                 margin: '0 15px 0 0',
@@ -309,6 +310,13 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 ],
                 store: [],
                 bbar: [
+                    {
+                        xtype: 'button',
+                        id: 'generateIndices',
+                        itemId: 'generateIndices',
+                        text: 'Generate Indices',
+                        disabled: true
+                    },
                     '->',
                     {
                         xtype: 'button',
@@ -339,7 +347,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
 
         for (var i = 0; i < values.length; i++) {
             var nuc = values[i];
-            if (nuc != ' ') {
+            if (nuc != ' ' && typeof nuc != 'undefined') {
                 if (nuc == 'G' || nuc == 'T') {
                     diversity.green += records[i].get('sequencingDepth');
                 } else if (nuc == 'A' || nuc == 'C') {
@@ -357,16 +365,20 @@ Ext.define('MainHub.view.pooling.Pooling', {
             totalSequencingDepth = 0;
 
         if (value.green > 0 || value.red > 0) {
-            if (dataIndex.split('_')[0] == 'indexI5') {
+            if (dataIndex.split('_')[0] == 'indexI7') {
+                // Consider only non empty Index I7 indices
+                grid.getStore().each(function(record) {
+                    if (record.get('indexI7') !== '') {
+                        totalSequencingDepth += record.get('sequencingDepth');
+                    }
+                });
+            } else {
                 // Consider only non empty Index I5 indices
                 grid.getStore().each(function(record) {
                     if (record.get('indexI5') !== '') {
                         totalSequencingDepth += record.get('sequencingDepth');
                     }
                 });
-            } else {
-                // Take all Index I7 indices into the account
-                totalSequencingDepth = grid.getStore().sum('sequencingDepth');
             }
 
             var green = parseInt(((value.green / totalSequencingDepth) * 100).toFixed(0)),
