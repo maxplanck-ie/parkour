@@ -118,28 +118,20 @@ def generate(library_ids, sample_ids):
         case = 1
         for library in libraries:
             # Get Index I7
+            index_i7_index = library.index_i7
             index_i7 = IndexI7.objects.filter(
-                index=library.index_i7,
+                index=index_i7_index,
                 index_type=library.index_type
             )
-            if index_i7:
-                index_i7_id = index_i7[0].index_id
-                index_i7_index = index_i7[0].index
-            else:
-                index_i7_id = ''
-                index_i7_index = ''
+            index_i7_id = index_i7[0].index_id if index_i7 else ''
 
             # Get Index I5
+            index_i5_index = library.index_i5
             index_i5 = IndexI5.objects.filter(
                 index=library.index_i5,
                 index_type=library.index_type
             )
-            if index_i5:
-                index_i5_id = index_i5[0].index_id
-                index_i5_index = index_i5[0].index
-            else:
-                index_i5_id = ''
-                index_i5_index = ''
+            index_i5_id = index_i5[0].index_id if index_i5 else ''
 
             result.append({
                 'name': library.name,
