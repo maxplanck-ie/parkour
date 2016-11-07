@@ -125,7 +125,7 @@ def save_pool(request):
     except Exception as e:
         error = str(e)
         print(error)
-        logger.debug(error)
+        logger.exception(error)
 
     return HttpResponse(
         json.dumps({
@@ -183,7 +183,7 @@ def generate_indices(request):
     except Exception as e:
         error = str(e)
         print(error)
-        logger.debug(error)
+        logger.exception(error)
 
     return HttpResponse(
         json.dumps({

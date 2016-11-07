@@ -1,6 +1,7 @@
 from library.models import Library, Sample, IndexI7, IndexI5
 
 import re
+import random
 
 
 def convert_index(index):
@@ -8,7 +9,7 @@ def convert_index(index):
     return re.sub('T', 'G', re.sub('A|C', 'R', index))
 
 
-def calculate_scores(index1, index2, depth1, depth2):
+def calculate_scores_pair(index1, index2, depth1, depth2):
     """
     Calculate the score for two given indices.
 
@@ -41,11 +42,11 @@ def calculate_scores(index1, index2, depth1, depth2):
     return result
 
 
-def calculate_scores2(records_in_result, current_record, current_index):
+def calculate_scores_n(records_in_result, current_record, current_index):
     """
     Calculate score for N given libraries/samples.
 
-    The scoring principle is the same as in calculate_scores(),
+    The scoring principle is the same as in calculate_scores_pair(),
     but for N libraries and samples.
     """
     result = []
@@ -85,6 +86,18 @@ def calculate_scores2(records_in_result, current_record, current_index):
             return -1
 
     return result
+
+
+def create_dict(sample, index_i7, index_i5):
+    """ Create a dictionary with a sample and its indices. """
+    return {
+        'name': sample.name,
+        'sample_id': sample.id,
+        'read_length': sample.sequencing_run_condition_id,
+        'depth': sample.sequencing_depth,
+        'predicted_index_i7': index_i7,
+        'predicted_index_i5': index_i5
+    }
 
 
 def generate(library_ids, sample_ids):
@@ -167,7 +180,7 @@ def generate(library_ids, sample_ids):
         for i, index1 in enumerate(indices):
             for j, index2 in enumerate(indices[i + 1:]):
                 if index1 != index2:
-                    scores = calculate_scores(
+                    scores = calculate_scores_pair(
                         index1['index'],
                         index2['index'],
                         samples[0].sequencing_depth,
@@ -186,22 +199,16 @@ def generate(library_ids, sample_ids):
 
         if 'index1' in best_pair.keys():
             result = [
-                {
-                    'name': samples[0].name,
-                    'sample_id': samples[0].id,
-                    'read_length': samples[0].sequencing_run_condition_id,
-                    'depth': samples[0].sequencing_depth,
-                    'predicted_index_i7': best_pair['index1'],
-                    'predicted_index_i5': {'index': '', 'index_id': ''}
-                },
-                {
-                    'name': samples[1].name,
-                    'sample_id': samples[1].id,
-                    'read_length': samples[1].sequencing_run_condition_id,
-                    'depth': samples[1].sequencing_depth,
-                    'predicted_index_i7': best_pair['index2'],
-                    'predicted_index_i5': {'index': '', 'index_id': ''}
-                }
+                create_dict(
+                    samples[0],
+                    best_pair['index1'],
+                    {'index': '', 'index_id': ''}
+                ),
+                create_dict(
+                    samples[1],
+                    best_pair['index2'],
+                    {'index': '', 'index_id': ''}
+                )
             ]
 
             # Delete two most matching indices from the list of indices
@@ -210,7 +217,7 @@ def generate(library_ids, sample_ids):
         else:
             # If a pair of two the most compatible indices was not found
             raise Exception('Could not generate indices for '
-                            'the given Samples/Libraries.')
+                            'the given Libraries/Samples.')
 
     if case == 1:
         # If there are any libraries, consider all samples
@@ -219,12 +226,13 @@ def generate(library_ids, sample_ids):
         # case 2: generate indices for all samples, except for the first two
         start = 2
 
-    # Predict indices for the remaining samples
-    for sample in samples[start:]:
+    # Generate indices for the remaining samples
+    num_samples = len(samples)
+    for i, sample in enumerate(samples[start:num_samples]):
         predicted_index_i7 = {'avg_score': 100.0}
 
         for index in indices:
-            scores = calculate_scores2(result, sample, index)
+            scores = calculate_scores_n(result, sample, index)
 
             # If indices are compatible
             if scores != -1:
@@ -237,19 +245,28 @@ def generate(library_ids, sample_ids):
                     indices.pop(indices.index(index))
 
         if 'index' in predicted_index_i7.keys():
-            result.append({
-                'name': sample.name,
-                'sample_id': sample.id,
-                'read_length': sample.sequencing_run_condition_id,
-                'depth': sample.sequencing_depth,
-                'predicted_index_i7': predicted_index_i7['index'],
-                'predicted_index_i5': {'index': '', 'index_id': ''}
-            })
+            result.append(create_dict(
+                sample,
+                predicted_index_i7['index'],
+                {'index': '', 'index_id': ''}
+            ))
 
         else:
-            # Given libraries, if no index can be found for a sample,
-            # raise an exception
-            raise Exception('Could not generate indices for '
-                            'the given Samples/Libraries.')
+            if i + 1 == num_samples:
+                # Given libraries, if an index cannot be found
+                # for the last sample, raise an exception
+                raise Exception('Could not generate indices for '
+                                'the given Libraries/Samples.')
+            else:
+                # Choose a random index and try to generate indices
+                # for the remaining samples
+                index_i7 = random.choice(indices)
+                result.append(create_dict(
+                    sample,
+                    index_i7,
+                    {'index': '', 'index_id': ''}
+                ))
+                indices.pop(indices.index(index_i7))
+                continue
 
     return result

@@ -4,7 +4,7 @@ Ext.define('MainHub.view.pooling.IndexGenerator', {
     id: 'poolingContainer',
 
     requires: [
-        'MainHub.view.pooling.IndexGeneratorController',
+        'MainHub.view.pooling.IndexGeneratorController'
     ],
 
     controller: 'index-generator',
@@ -147,7 +147,7 @@ Ext.define('MainHub.view.pooling.IndexGenerator', {
                         summaryType: 'sum',
                         summaryRenderer: function(value) {
                             return (value > 0) ? value : '';
-                        },
+                        }
                         // editor: {
                         //     xtype: 'numberfield',
                         //     minValue: 1
