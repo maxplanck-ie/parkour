@@ -267,6 +267,5 @@ def generate(library_ids, sample_ids):
                     {'index': '', 'index_id': ''}
                 ))
                 indices.pop(indices.index(index_i7))
-                continue
 
     return result
