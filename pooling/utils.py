@@ -115,6 +115,36 @@ def generate(library_ids, sample_ids):
                        key=lambda x: x.sequencing_depth, reverse=True)
     samples = sorted(samples, key=lambda x: x.sequencing_depth, reverse=True)
 
+    # Index types for all libraries and samples
+    index_types = list(set(
+        [l.index_type for l in libraries] + [s.index_type for s in samples]
+    ))
+
+    # Get indices for each index type
+    new_indices = {}
+    for index_type in index_types:
+        new_indices[index_type.id] = []
+
+        # Index I7
+        if index_type.is_index_i7:
+            new_indices[index_type.id].extend([
+                {
+                    'index': index.index,
+                    'index_id': index.index_id
+                }
+                for index in IndexI7.objects.filter(index_type=index_type.id)
+            ])
+
+        # Index I5
+        if index_type.is_index_i5:
+            new_indices[index_type.id].extend([
+                {
+                    'index': index.index,
+                    'index_id': index.index_id
+                }
+                for index in IndexI5.objects.filter(index_type=index_type.id)
+            ])
+
     # Get the list of all indices
     indices = []
     indices_tmp = []

@@ -53,7 +53,8 @@ class Organism(SimpleField):
 
 
 class IndexType(SimpleField):
-    pass
+    is_index_i7 = models.BooleanField('Is Index I7?', default=False)
+    is_index_i5 = models.BooleanField('Is Index I5?', default=False)
 
 
 class Index(models.Model):
@@ -187,6 +188,18 @@ class LibrarySampleAbstract(models.Model):
         null=True,
         blank=True,
     )
+    index_i7 = models.CharField(
+        'Index I7',
+        max_length=200,
+        null=True,
+        blank=True,
+    )
+    index_i5 = models.CharField(
+        'Index I5',
+        max_length=200,
+        null=True,
+        blank=True,
+    )
 
     # Quality Control
     dilution_factor = models.IntegerField(
@@ -254,18 +267,6 @@ class Library(LibrarySampleAbstract):
     library_type = models.ForeignKey(LibraryType, verbose_name='Library Type')
     enrichment_cycles = models.IntegerField('No. of Enrichment Cycles')
     index_reads = models.IntegerField('Index Reads')
-    index_i7 = models.CharField(
-        'Index I7',
-        max_length=200,
-        null=True,
-        blank=True,
-    )
-    index_i5 = models.CharField(
-        'Index I5',
-        max_length=200,
-        null=True,
-        blank=True,
-    )
     mean_fragment_size = models.IntegerField('Mean Fragment Size')
     qpcr_result = models.FloatField('qPCR Result', null=True, blank=True)
     files = models.ManyToManyField(FileLibrary)
