@@ -10,6 +10,7 @@ Ext.define('MainHub.view.pooling.IndexGeneratorController', {
                 boxready: 'onIndexGeneratorBoxready'
             },
             '#poolingTreePanel': {
+                edit: 'onPoolingTreePanelEdit',
                 checkchange: 'onPoolingTreePanelCheckchange'
             },
             '#poolSize': {
@@ -36,6 +37,21 @@ Ext.define('MainHub.view.pooling.IndexGeneratorController', {
 
     onMaxPoolSizeBoxready: function(cb) {
         cb.select(25, true);
+    },
+
+    onPoolingTreePanelEdit: function(editor, context) {
+        var record = context.record,
+            originalValue = context.originalValue,
+            values = context.newValues;
+
+        if (values.sequencingRunConditionName !== null) {
+            var readLengthRecord = Ext.getStore('sequencingRunConditionsStore')
+                .findRecord('id', values.sequencingRunConditionName);
+            record.set('sequencingRunCondition', readLengthRecord.get('id'));
+            record.set('sequencingRunConditionName', readLengthRecord.get('name'));
+
+            // TODO: update record in the database
+        }
     },
 
     onPoolingTreePanelCheckchange: function(node, checked) {

@@ -63,6 +63,13 @@ Ext.define('MainHub.view.pooling.IndexGenerator', {
                         }
                     ]
                 },
+                viewConfig: {
+                    markDirty: false
+                },
+                plugins: [{
+                    ptype: 'rowediting',
+                    clicksToEdit: 2
+                }],
                 store: 'PoolingTree',
                 rootVisible: false,
                 columns: [
@@ -86,7 +93,15 @@ Ext.define('MainHub.view.pooling.IndexGenerator', {
                     {
                         text: 'Read Length',
                         dataIndex: 'sequencingRunConditionName',
-                        width: 100
+                        width: 100,
+                        editor: {
+                            xtype: 'combobox',
+                            queryMode: 'local',
+                            displayField: 'name',
+                            valueField: 'id',
+                            store: 'sequencingRunConditionsStore',
+                            forceSelection: true
+                        }
                     },
                     {
                         text: 'Protocol',
@@ -125,12 +140,8 @@ Ext.define('MainHub.view.pooling.IndexGenerator', {
                     ftype: 'summary'
                 }],
                 viewConfig: {
-                   markDirty: false
-               },
-                // plugins: [{
-                //     ptype: 'rowediting',
-                //     clicksToEdit: 2
-                // }],
+                    markDirty: false
+                },
                 problematicCycles: [],
                 columns: [
                     {
@@ -151,10 +162,6 @@ Ext.define('MainHub.view.pooling.IndexGenerator', {
                         summaryRenderer: function(value) {
                             return (value > 0) ? value : '';
                         }
-                        // editor: {
-                        //     xtype: 'numberfield',
-                        //     minValue: 1
-                        // }
                     },
                     {
                         text: 'Index I7 ID',
