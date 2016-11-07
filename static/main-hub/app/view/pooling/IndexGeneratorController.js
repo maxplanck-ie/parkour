@@ -43,19 +43,19 @@ Ext.define('MainHub.view.pooling.IndexGeneratorController', {
             store = grid.getStore();
 
         // Reset all samples' indices
-        // store.each(function(record) {
-        //     if (record.get('recordType') == 'S') {
-        //         record.set('indexI7', '');
-        //         record.set('indexI7Id', '');
-        //         record.set('indexI5', '');
-        //         record.set('indexI5Id', '');
-        //
-        //         for (var i = 0; i < 8; i++) {
-        //             record.set('indexI7_' + (i + 1), '');
-        //             record.set('indexI5_' + (i + 1), '');
-        //         }
-        //     }
-        // });
+        store.each(function(record) {
+            if (record.get('recordType') == 'S') {
+                record.set('indexI7', '');
+                record.set('indexI7Id', '');
+                record.set('indexI5', '');
+                record.set('indexI5Id', '');
+
+                for (var i = 0; i < 8; i++) {
+                    record.set('indexI7_' + (i + 1), '');
+                    record.set('indexI5_' + (i + 1), '');
+                }
+            }
+        });
 
         if (checked) {
             if (this.isUnique(store, node) && this.isCompatible(store, node) &&
@@ -74,30 +74,6 @@ Ext.define('MainHub.view.pooling.IndexGeneratorController', {
                 } else if (indexI5Sequence.length == 6) {
                     $.merge(indexI5, [' ', ' ']);
                 }
-
-                // var record = {
-                //     name: node.get('text'),
-                //     libraryId: node.get('libraryId'),
-                //     sampleId: node.get('sampleId'),
-                //     recordType: node.get('recordType'),
-                //     sequencingDepth: node.get('sequencingDepth'),
-                //     sequencingRunCondition: node.get('sequencingRunCondition'),
-                //     indexI7: indexI7Sequence,
-                //     indexI5: indexI5Sequence,
-                //     indexI7Id: node.get('indexI7Id'),
-                //     indexI5Id: node.get('indexI5Id')
-                // };
-                // for (var i = 0; i < 8; i++) {
-                //     var key_i7 = 'indexI7_' + (i + 1),
-                //         key_i5 = 'indexI5_' + (i + 1);
-                //
-                //     $.merge(record, {
-                //         key_i7: indexI7[i],
-                //         key_i5: indexI5[i]
-                //     });
-                // }
-                //
-                // debugger;
 
                 store.add({
                     name: node.get('text'),

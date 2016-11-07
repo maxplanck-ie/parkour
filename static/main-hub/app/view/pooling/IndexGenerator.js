@@ -124,6 +124,9 @@ Ext.define('MainHub.view.pooling.IndexGenerator', {
                 features: [{
                     ftype: 'summary'
                 }],
+                viewConfig: {
+                   markDirty: false
+               },
                 // plugins: [{
                 //     ptype: 'rowediting',
                 //     clicksToEdit: 2
