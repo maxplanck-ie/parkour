@@ -6,6 +6,9 @@ Ext.define('MainHub.view.pooling.IndexGeneratorController', {
 
     config: {
         control: {
+            '#': {
+                boxready: 'onIndexGeneratorBoxready'
+            },
             '#poolingTreePanel': {
                 checkchange: 'onPoolingTreePanelCheckchange'
             },
@@ -22,6 +25,13 @@ Ext.define('MainHub.view.pooling.IndexGeneratorController', {
                 click: 'generateIndicesBtnClick'
             }
         }
+    },
+
+    onIndexGeneratorBoxready: function() {
+        // Clear Pool after reloading PoolingTree
+        Ext.getStore('PoolingTree').on('load', function() {
+            Ext.getCmp('poolGrid').getStore().removeAll();
+        });
     },
 
     onMaxPoolSizeBoxready: function(cb) {
@@ -193,7 +203,6 @@ Ext.define('MainHub.view.pooling.IndexGeneratorController', {
                 if (obj.success) {
                     Ext.getStore('PoolingTree').reload();
                     Ext.getCmp('poolGrid').setTitle('Pool');
-                    Ext.getCmp('poolGrid').getStore().removeAll();
                     Ext.getCmp('poolingContainer').setLoading(false);
                     Ext.ux.ToastMessage('Pool has been saved!');
                 } else {

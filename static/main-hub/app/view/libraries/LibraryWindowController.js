@@ -594,6 +594,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                             });
                             Ext.ux.ToastMessage('Record has been updated!');
                         }
+                        Ext.getStore('PoolingTree').reload();
 
                         // Preserve all fields except for Name, if 'Save and Add another' button was pressed
                         if (addAnother) {
