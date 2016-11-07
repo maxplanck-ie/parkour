@@ -44,11 +44,38 @@ Ext.define('MainHub.view.pooling.IndexGeneratorController', {
             originalValue = context.originalValue,
             values = context.newValues;
 
+        // Set Read Length (Sequencing Run Condition)
         if (values.sequencingRunConditionName !== null) {
             var readLengthRecord = Ext.getStore('sequencingRunConditionsStore')
                 .findRecord('id', values.sequencingRunConditionName);
             record.set('sequencingRunCondition', readLengthRecord.get('id'));
             record.set('sequencingRunConditionName', readLengthRecord.get('name'));
+
+            var recordId = null;
+            if (record.get('recordType') == 'L') {
+                recordId = record.get('libraryId');
+            } else {
+                recordId = record.get('sampleId');
+            }
+
+            // Update record in the database
+            Ext.Ajax.request({
+                url: 'update_sequencing_run_condition/',
+                method: 'POST',
+                scope: this,
+                params: {
+                    record_type: record.get('recordType'),
+                    record_id: recordId,
+                    sequencing_run_condition_id: readLengthRecord.get('id')
+                }
+            });
+        }
+
+        // Set Index Type (for samples)
+        if (record.get('recordType') == 'S' && values.indexTypeName !== null) {
+            var indexTypeRecord = Ext.getStore('indexTypesStore').findRecord('id', values.indexTypeName);
+            record.set('indexType', indexTypeRecord.get('id'));
+            record.set('indexTypeName', indexTypeRecord.get('name'));
 
             // TODO: update record in the database
         }
@@ -75,7 +102,7 @@ Ext.define('MainHub.view.pooling.IndexGeneratorController', {
 
         if (checked) {
             if (this.isUnique(store, node) && this.isCompatible(store, node) &&
-                this.isColorDiversityMaximized(store, node) && this.isPoolSizeOk(store, node)) {
+                this.isIndexTypeSet(store, node) && this.isPoolSizeOk(store, node)) {
 
                 var indexI7Sequence = node.get('indexI7'),
                     indexI7 = indexI7Sequence.split('');
@@ -98,6 +125,7 @@ Ext.define('MainHub.view.pooling.IndexGeneratorController', {
                     recordType: node.get('recordType'),
                     sequencingDepth: node.get('sequencingDepth'),
                     sequencingRunCondition: node.get('sequencingRunCondition'),
+                    indexType: node.get('indexType'),
                     indexI7: indexI7Sequence,
                     indexI5: indexI5Sequence,
                     indexI7Id: node.get('indexI7Id'),
@@ -181,8 +209,18 @@ Ext.define('MainHub.view.pooling.IndexGeneratorController', {
         return true;
     },
 
-    isColorDiversityMaximized: function(store, node) {
-        return true;
+    isIndexTypeSet: function(store, node) {
+        // Check if Index Type is set (only for samples)
+        if (node.get('recordType') == 'S') {
+            if (node.get('indexType') === '') {
+                Ext.ux.ToastMessage('Index Type must be set.', 'warning');
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            return true;
+        }
     },
 
     isPoolSizeOk: function(store, node) {

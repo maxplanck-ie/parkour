@@ -111,7 +111,15 @@ Ext.define('MainHub.view.pooling.IndexGenerator', {
                     {
                         text: 'Index Type',
                         dataIndex: 'indexTypeName',
-                        width: 90
+                        width: 200,
+                        editor: {
+                            xtype: 'combobox',
+                            queryMode: 'local',
+                            displayField: 'name',
+                            valueField: 'id',
+                            store: 'indexTypesStore',
+                            forceSelection: true
+                        }
                     },
                     {
                         text: 'Index I7',

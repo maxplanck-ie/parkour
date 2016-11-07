@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from pooling.models import Pool
 from pooling.utils import generate
 from request.models import Request
-from library.models import Library, IndexI7, IndexI5
+from library.models import Library, Sample, IndexI7, IndexI5
 
 import json
 import logging
@@ -134,6 +134,23 @@ def save_pool(request):
         }),
         content_type='application/json',
     )
+
+
+def update_sequencing_run_condition(request):
+    """ Update Sequencing Run Condition before Index generation. """
+    record_type = request.POST.get('record_type')
+    record_id = request.POST.get('record_id')
+    sequencing_run_condition_id = \
+        request.POST.get('sequencing_run_condition_id')
+
+    if record_type == 'L':
+        record = Library.objects.get(id=record_id)
+    else:
+        record = Sample.objects.get(id=record_id)
+    record.sequencing_run_condition_id = sequencing_run_condition_id
+    record.save()
+
+    return HttpResponse(content_type='application/json')
 
 
 def generate_indices(request):
