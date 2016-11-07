@@ -179,7 +179,14 @@ class LibrarySampleAbstract(models.Model):
     sequencing_depth = models.IntegerField('Sequencing Depth')
     comments = models.TextField('Comments', null=True, blank=True)
     is_in_request = models.BooleanField(default=False)
+    is_pooled = models.BooleanField('Is pooled?', default=False)
     barcode = models.CharField('Barcode', max_length=9, null=True, blank=True)
+    index_type = models.ForeignKey(
+        IndexType,
+        verbose_name='Index Type',
+        null=True,
+        blank=True,
+    )
 
     # Quality Control
     dilution_factor = models.IntegerField(
@@ -246,7 +253,6 @@ class Library(LibrarySampleAbstract):
     )
     library_type = models.ForeignKey(LibraryType, verbose_name='Library Type')
     enrichment_cycles = models.IntegerField('No. of Enrichment Cycles')
-    index_type = models.ForeignKey(IndexType, verbose_name='Index Type')
     index_reads = models.IntegerField('Index Reads')
     index_i7 = models.CharField(
         'Index I7',
@@ -263,7 +269,6 @@ class Library(LibrarySampleAbstract):
     mean_fragment_size = models.IntegerField('Mean Fragment Size')
     qpcr_result = models.FloatField('qPCR Result', null=True, blank=True)
     files = models.ManyToManyField(FileLibrary)
-    is_pooled = models.BooleanField('Is pooled?', default=False)
 
     # Quality Control
     qpcr_result_facility = models.FloatField(
@@ -366,7 +371,6 @@ class Sample(LibrarySampleAbstract):
         blank=True,
     )
     files = models.ManyToManyField(FileSample)
-    is_pooled = models.BooleanField('Is pooled?', default=False)
 
     # Quality Control
     rna_quality_facility = models.FloatField(

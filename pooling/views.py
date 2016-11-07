@@ -68,8 +68,14 @@ def get_pooling_tree(request):
                     'indexI7Id': '',
                     'indexI5Id': '',
                     'indexI5': '',
-                    'indexType': '',
-                    'indexTypeName': '',
+                    'indexType':
+                        sample.index_type.id
+                        if sample.index_type is not None
+                        else '',
+                    'indexTypeName':
+                        sample.index_type.name
+                        if sample.index_type is not None
+                        else '',
                     'sequencingRunCondition':
                         sample.sequencing_run_condition.id,
                     'sequencingRunConditionName':
@@ -150,6 +156,16 @@ def update_sequencing_run_condition(request):
     record.sequencing_run_condition_id = sequencing_run_condition_id
     record.save()
 
+    return HttpResponse(content_type='application/json')
+
+
+def update_index_type(request):
+    """ Update Index Type for a given sample. """
+    sample_id = request.POST.get('sample_id')
+    index_type_id = request.POST.get('index_type_id')
+    sample = Sample.objects.get(id=sample_id)
+    sample.index_type_id = index_type_id
+    sample.save()
     return HttpResponse(content_type='application/json')
 
 

@@ -77,7 +77,16 @@ Ext.define('MainHub.view.pooling.IndexGeneratorController', {
             record.set('indexType', indexTypeRecord.get('id'));
             record.set('indexTypeName', indexTypeRecord.get('name'));
 
-            // TODO: update record in the database
+            // Update record in the database
+            Ext.Ajax.request({
+                url: 'update_index_type/',
+                method: 'POST',
+                scope: this,
+                params: {
+                    sample_id: record.get('sampleId'),
+                    index_type_id: indexTypeRecord.get('id')
+                }
+            });
         }
     },
 
