@@ -119,7 +119,8 @@
 }
 
 .grid-header-checkbox,
-.grid-header-checkbox > div.x-form-item-body > div.x-form-cb-wrap-inner > span.x-form-checkbox {
+.grid-header-checkbox > div.x-form-item-body > div.x-form-cb-wrap-inner > span.x-form-checkbox,
+.grid-header-checkbox label.x-form-cb-label {
     color: #fff;
 }
 
