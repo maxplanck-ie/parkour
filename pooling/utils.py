@@ -88,7 +88,7 @@ def calculate_scores_n(records_in_result, current_record, current_index):
     return result
 
 
-def create_dict(sample, index_i7, index_i5):
+def create_result_dict(sample, index_i7, index_i5):
     """ Create a dictionary with a sample and its indices. """
     return {
         'name': sample.name,
@@ -97,6 +97,14 @@ def create_dict(sample, index_i7, index_i5):
         'depth': sample.sequencing_depth,
         'predicted_index_i7': index_i7,
         'predicted_index_i5': index_i5
+    }
+
+
+def create_index_dict(index, index_id):
+    """ Create a dictionary with an index and its id. """
+    return {
+        'index': index,
+        'index_id': index_id
     }
 
 
@@ -120,41 +128,24 @@ def generate(library_ids, sample_ids):
         [l.index_type for l in libraries] + [s.index_type for s in samples]
     ))
 
-    # Get indices for each index type
-    new_indices = {}
+    # Get indices lists for each index type
+    indices = {}
     for index_type in index_types:
-        new_indices[index_type.id] = []
+        indices[index_type.id] = {'i7': [], 'i5': []}
 
         # Index I7
         if index_type.is_index_i7:
-            new_indices[index_type.id].extend([
-                {
-                    'index': index.index,
-                    'index_id': index.index_id
-                }
+            indices[index_type.id]['i7'].extend([
+                create_index_dict(index.index, index.index_id)
                 for index in IndexI7.objects.filter(index_type=index_type.id)
             ])
 
         # Index I5
         if index_type.is_index_i5:
-            new_indices[index_type.id].extend([
-                {
-                    'index': index.index,
-                    'index_id': index.index_id
-                }
+            indices[index_type.id]['i5'].extend([
+                create_index_dict(index.index, index.index_id)
                 for index in IndexI5.objects.filter(index_type=index_type.id)
             ])
-
-    # Get the list of all indices
-    indices = []
-    indices_tmp = []
-    for index in IndexI7.objects.all():
-        if index.index not in indices_tmp:
-            indices_tmp.append(index.index)
-            indices.append({
-                'index': index.index,
-                'index_id': index.index_id
-            })
 
     # If there are libraries, automatically add them to the result
     if any(libraries):
@@ -176,28 +167,39 @@ def generate(library_ids, sample_ids):
             )
             index_i5_id = index_i5[0].index_id if index_i5 else ''
 
+            predicted_index_i7 = create_index_dict(index_i7_index, index_i7_id)
+            predicted_index_i5 = create_index_dict(index_i5_index, index_i5_id)
+
             result.append({
                 'name': library.name,
                 'library_id': library.id,
                 'read_length': library.sequencing_run_condition_id,
                 'depth': library.sequencing_depth,
-                'predicted_index_i7': {
-                    'index': index_i7_index,
-                    'index_id': index_i7_id
-                },
-                'predicted_index_i5': {
-                    'index': index_i5_index,
-                    'index_id': index_i5_id
-                }
+                'predicted_index_i7': predicted_index_i7,
+                'predicted_index_i5': predicted_index_i5
             })
 
             try:
-                indices.pop(indices.index(result[0]['predicted_index_i7']))
+                # indices.pop(indices.index(predicted_index_i7))
+
+                # Remove index i7 from the list of indices
+                indices[library.index_type.id]['i7'].pop(
+                    indices[library.index_type.id]['i7'].index(
+                        predicted_index_i7
+                    )
+                )
             except ValueError:
                 pass
 
             try:
-                indices.pop(indices.index(result[0]['predicted_index_i5']))
+                # indices.pop(indices.index(result[0]['predicted_index_i5']))
+
+                # Remove index i5 from the list of indices
+                indices[library.index_type.id]['i5'].pop(
+                    indices[library.index_type.id]['i5'].index(
+                        predicted_index_i5
+                    )
+                )
             except ValueError:
                 pass
 
@@ -207,8 +209,8 @@ def generate(library_ids, sample_ids):
         # Find indices with the best scores for the
         # first two samples libraries
         best_pair = {'avg_score': 100.0}
-        for i, index1 in enumerate(indices):
-            for j, index2 in enumerate(indices[i + 1:]):
+        for index1 in indices[samples[0].index_type.id]['i7']:
+            for index2 in indices[samples[1].index_type.id]['i7']:
                 if index1 != index2:
                     scores = calculate_scores_pair(
                         index1['index'],
@@ -229,21 +231,28 @@ def generate(library_ids, sample_ids):
 
         if 'index1' in best_pair.keys():
             result = [
-                create_dict(
+                create_result_dict(
                     samples[0],
                     best_pair['index1'],
-                    {'index': '', 'index_id': ''}
+                    create_index_dict('', '')  # Index I5
                 ),
-                create_dict(
+                create_result_dict(
                     samples[1],
                     best_pair['index2'],
-                    {'index': '', 'index_id': ''}
+                    create_index_dict('', '')  # Index I5
                 )
             ]
 
             # Delete two most matching indices from the list of indices
-            indices.pop(indices.index(best_pair['index1']))
-            indices.pop(indices.index(best_pair['index2']))
+            indices[samples[0].index_type.id]['i7'].pop(
+                indices[samples[0].index_type.id]['i7'].index(
+                    best_pair['index1']
+                )
+            )
+            indices[samples[1].index_type.id]['i7'].pop(
+                indices[samples[1].index_type.id]['i7'].index(
+                    best_pair['index2'])
+            )
         else:
             # If a pair of two the most compatible indices was not found
             raise Exception('Could not generate indices for '
@@ -261,24 +270,37 @@ def generate(library_ids, sample_ids):
     for i, sample in enumerate(samples[start:num_samples]):
         predicted_index_i7 = {'avg_score': 100.0}
 
-        for index in indices:
+        # for index in indices:
+        for index in indices[sample.index_type.id]['i7']:
             scores = calculate_scores_n(result, sample, index)
 
             # If indices are compatible
             if scores != -1:
+                indices_in_result = [
+                    r['predicted_index_i7']['index']
+                    for r in result
+                ]
                 avg_score = sum(scores) / 6
-                if avg_score < predicted_index_i7['avg_score']:
+
+                # Choose an index with a better average score
+                # and make sure it's not in the result
+                if avg_score < predicted_index_i7['avg_score'] \
+                        and index['index'] not in indices_in_result:
+
                     predicted_index_i7 = {
                         'index': index,
                         'avg_score': avg_score
                     }
-                    indices.pop(indices.index(index))
+
+                    indices[sample.index_type.id]['i7'].pop(
+                        indices[sample.index_type.id]['i7'].index(index)
+                    )
 
         if 'index' in predicted_index_i7.keys():
-            result.append(create_dict(
+            result.append(create_result_dict(
                 sample,
                 predicted_index_i7['index'],
-                {'index': '', 'index_id': ''}
+                create_index_dict('', '')  # Index I5
             ))
 
         else:
@@ -290,12 +312,16 @@ def generate(library_ids, sample_ids):
             else:
                 # Choose a random index and try to generate indices
                 # for the remaining samples
-                index_i7 = random.choice(indices)
-                result.append(create_dict(
+                index_i7 = random.choice(indices[sample.index_type.id]['i7'])
+
+                result.append(create_result_dict(
                     sample,
                     index_i7,
-                    {'index': '', 'index_id': ''}
+                    create_index_dict('', '')  # Index I5
                 ))
-                indices.pop(indices.index(index_i7))
+
+                indices[sample.index_type.id]['i7'].pop(
+                    indices[sample.index_type.id]['i7'].index(index_i7)
+                )
 
     return result
