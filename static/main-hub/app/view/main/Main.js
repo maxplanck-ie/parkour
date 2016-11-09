@@ -11,7 +11,8 @@ Ext.define('MainHub.view.main.Main', {
         // 'MainHub.view.researchers.Researchers',
         'MainHub.view.libraries.Libraries',
         'MainHub.view.qualitycontrol.IncomingLibraries',
-        'MainHub.view.pooling.IndexGenerator'
+        'MainHub.view.pooling.IndexGenerator',
+        'MainHub.view.pooling.LibraryPreparation'
     ],
 
     controller: 'main',

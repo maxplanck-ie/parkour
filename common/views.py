@@ -82,7 +82,7 @@ def get_navigation_tree(request):
                     {
                         'text': 'Library Preparation',
                         'iconCls': 'x-fa fa-sort-amount-desc',
-                        # 'viewType': '',
+                        'viewType': 'library-preparation',
                         'leaf': True
                     },
                     {

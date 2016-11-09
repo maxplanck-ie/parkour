@@ -242,3 +242,31 @@ def generate_indices(request):
         }),
         content_type='application/json',
     )
+
+
+def get_library_preparation(request):
+    """ Get the list of samples for Library Preparation """
+    error = ''
+
+    samples = Sample.objects.filter(is_pooled=True)
+
+    data = [
+        {
+            'name': sample.name,
+            'sampleId': sample.id,
+            'barcode': sample.barcode,
+            'libraryProtocol': sample.sample_protocol.id,
+            'libraryProtocolName': sample.sample_protocol.name,
+            'concentration': sample.concentration
+        }
+        for sample in samples
+    ]
+
+    return HttpResponse(
+        json.dumps({
+            'succes': not error,
+            'error': error,
+            'data': data
+        }),
+        content_type='application/json',
+    )
