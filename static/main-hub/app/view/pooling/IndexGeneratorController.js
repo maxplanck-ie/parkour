@@ -264,40 +264,56 @@ Ext.define('MainHub.view.pooling.IndexGeneratorController', {
         var store = Ext.getCmp('poolGrid').getStore(),
             url = 'save_pool/';
 
-        Ext.getCmp('poolingContainer').setLoading('Saving...');
-        Ext.Ajax.request({
-            url: url,
-            method: 'POST',
-            timeout: 1000000,
-            scope: this,
+        if (this.isPoolValid(store)) {
+            Ext.getCmp('poolingContainer').setLoading('Saving...');
+            Ext.Ajax.request({
+                url: url,
+                method: 'POST',
+                timeout: 1000000,
+                scope: this,
 
-            params: {
-                libraries: Ext.JSON.encode(Ext.Array.pluck(Ext.Array.pluck(store.data.items, 'data'), 'libraryId'))
-            },
+                params: {
+                    libraries: Ext.JSON.encode(Ext.Array.pluck(Ext.Array.pluck(store.data.items, 'data'), 'libraryId')),
+                    samples: Ext.JSON.encode(Ext.Array.pluck(Ext.Array.pluck(store.data.items, 'data'), 'sampleId'))
+                },
 
-            success: function (response) {
-                var obj = Ext.JSON.decode(response.responseText);
+                success: function (response) {
+                    var obj = Ext.JSON.decode(response.responseText);
 
-                if (obj.success) {
-                    Ext.getStore('PoolingTree').reload();
-                    Ext.getCmp('poolGrid').setTitle('Pool');
+                    if (obj.success) {
+                        Ext.getStore('PoolingTree').reload();
+                        Ext.getCmp('poolGrid').setTitle('Pool');
+                        Ext.getCmp('poolingContainer').setLoading(false);
+                        Ext.ux.ToastMessage('Pool has been saved!');
+                    } else {
+                        Ext.getCmp('poolingContainer').setLoading(false);
+                        Ext.ux.ToastMessage(obj.error, 'error');
+                        console.error('[ERROR]: ' + url + ': ' + obj.error);
+                    }
+                },
+
+                failure: function (response) {
                     Ext.getCmp('poolingContainer').setLoading(false);
-                    Ext.ux.ToastMessage('Pool has been saved!');
-                } else {
-                    Ext.getCmp('poolingContainer').setLoading(false);
-                    Ext.ux.ToastMessage(obj.error, 'error');
-                    console.error('[ERROR]: ' + url + ': ' + obj.error);
+                    Ext.ux.ToastMessage(response.statusText, 'error');
+                    console.error('[ERROR]: ' + url);
                     console.error(response);
                 }
-            },
+            });
+        } else {
+            Ext.ux.ToastMessage('Some of the indices are empty. The pool cannot be saved.', 'warning');
+        }
+    },
 
-            failure: function (response) {
-                Ext.getCmp('poolingContainer').setLoading(false);
-                Ext.ux.ToastMessage(response.statusText, 'error');
-                console.error('[ERROR]: ' + url);
-                console.error(response);
+    isPoolValid: function(store) {
+        var result = true;
+
+        store.each(function(record) {
+            if (record.get('indexI7_1') === '') {
+                result = false;
             }
         });
+
+        return result;
     },
 
     generateIndicesBtnClick: function(btn) {

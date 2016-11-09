@@ -340,7 +340,7 @@ Ext.define('MainHub.view.pooling.IndexGenerator', {
                         xtype: 'button',
                         id: 'savePool',
                         itemId: 'savePool',
-                        text: 'Pool',
+                        text: 'Save Pool',
                         disabled: true
                     }
                 ]

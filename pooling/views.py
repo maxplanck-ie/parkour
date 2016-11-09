@@ -110,7 +110,16 @@ def save_pool(request):
     error = ''
 
     try:
-        libraries = json.loads(request.POST.get('libraries'))
+        libraries = [
+            library_id
+            for library_id in json.loads(request.POST.get('libraries'))
+            if library_id is not None
+        ]
+        samples = [
+            sample_id
+            for sample_id in json.loads(request.POST.get('samples'))
+            if sample_id is not None
+        ]
         name = '_' + request.user.name.replace(' ', '_')
 
         if request.user.pi:
@@ -119,6 +128,7 @@ def save_pool(request):
         pool = Pool(name=name)
         pool.save()
         pool.libraries.add(*libraries)
+        pool.samples.add(*samples)
         pool.name = str(pool.id) + '_' + name
         pool.save()
 
@@ -127,6 +137,12 @@ def save_pool(request):
             library = Library.objects.get(id=library_id)
             library.is_pooled = True
             library.save()
+
+        # Make current samples not available for repeated pooling
+        for sample_id in samples:
+            sample = Sample.objects.get(id=sample_id)
+            sample.is_pooled = True
+            sample.save()
 
     except Exception as e:
         error = str(e)
