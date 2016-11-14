@@ -33,12 +33,6 @@ def get_navigation_tree(request):
             #     'viewType': 'dashboard',
             #     'leaf': True
             # },
-            # {
-            #     'text': 'Researchers',
-            #     'iconCls': 'x-fa fa-user',
-            #     'viewType': 'researchers',
-            #     'leaf': True
-            # },
             {
                 'text': 'Submission',
                 'iconCls': 'x-fa fa-tasks',
@@ -68,31 +62,23 @@ def get_navigation_tree(request):
                 ]
             },
             {
-                'text': 'Pooling',
+                'text': 'Index Generator',
                 'iconCls': 'x-fa fa-sort-amount-desc',
-                'expanded': True,
-                'selectable': False,
-                'children': [
-                    {
-                        'text': 'Index Generator',
-                        'iconCls': 'x-fa fa-sort-amount-desc',
-                        'viewType': 'index-generator',
-                        'leaf': True
-                    },
-                    {
-                        'text': 'Library Preparation',
-                        'iconCls': 'x-fa fa-sort-amount-desc',
-                        'viewType': 'library-preparation',
-                        'leaf': True
-                    },
-                    {
-                        'text': 'Pooling',
-                        'iconCls': 'x-fa fa-sort-amount-desc',
-                        # 'viewType': '',
-                        'leaf': True
-                    }
-                ]
-            }
+                'viewType': 'index-generator',
+                'leaf': True
+            },
+            {
+                'text': 'Library Preparation',
+                'iconCls': 'x-fa fa-sort-amount-desc',
+                'viewType': 'library-preparation',
+                'leaf': True
+            },
+            # {
+            #     'text': 'Pooling',
+            #     'iconCls': 'x-fa fa-sort-amount-desc',
+            #     # 'viewType': '',
+            #     'leaf': True
+            # }
         ]
     }
 
