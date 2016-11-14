@@ -12,4 +12,5 @@ urlpatterns = [
 
     # Library Preparation
     url(r'^get_library_preparation/$', views.get_library_preparation, name='get_library_preparation'),
+    url(r'^edit_library_preparation/$', views.edit_library_preparation, name='edit_library_preparation'),
 ]

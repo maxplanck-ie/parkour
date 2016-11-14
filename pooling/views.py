@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 
-from pooling.models import Pool, LibraryPreparation
+from pooling.models import Pool, LibraryPreparation, LibraryPreparationForm
 from pooling.utils import generate
 from request.models import Request
 from library.models import Library, Sample, IndexI7, IndexI5
@@ -261,6 +261,7 @@ def get_library_preparation(request):
             'libraryProtocolName': obj.sample.sample_protocol.name,
             'concentrationSample': obj.sample.concentration,
             'startingAmount': obj.starting_amount,
+            'startingVolume': obj.starting_volume,
             'spikeInDescription': obj.spike_in_description,
             'spikeInVolume': obj.spike_in_volume,
             'ulSample': obj.ul_sample,
@@ -277,9 +278,38 @@ def get_library_preparation(request):
 
     return HttpResponse(
         json.dumps({
-            'succes': not error,
+            'success': not error,
             'error': error,
             'data': data
+        }),
+        content_type='application/json',
+    )
+
+
+def edit_library_preparation(request):
+    """ Edit sample in Library Preparation step. """
+    error = ''
+
+    sample_id = request.POST.get('sample_id')
+    obj = LibraryPreparation.objects.get(sample_id=sample_id)
+
+    try:
+        form = LibraryPreparationForm(request.POST, instance=obj)
+
+        if form.is_valid():
+            form.save()
+        else:
+            for key, value in form.errors.items():
+                error += '%s: %s<br/>' % (key, value)
+
+    except Exception as e:
+        error = str(e)
+        logger.exception(e)
+
+    return HttpResponse(
+        json.dumps({
+            'success': not error,
+            'error': error,
         }),
         content_type='application/json',
     )

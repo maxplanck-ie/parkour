@@ -1,4 +1,5 @@
 from django.db import models
+from django.forms import ModelForm
 from library.models import Library, Sample
 
 
@@ -15,6 +16,12 @@ class LibraryPreparation(models.Model):
     sample = models.ForeignKey(Sample, verbose_name='Sample')
 
     starting_amount = models.FloatField(
+        'Starting Amount',
+        null=True,
+        blank=True,
+    )
+
+    starting_volume = models.FloatField(
         'Starting Amount',
         null=True,
         blank=True,
@@ -70,3 +77,20 @@ class LibraryPreparation(models.Model):
 
     def __str__(self):
         return self.sample.name
+
+
+class LibraryPreparationForm(ModelForm):
+    class Meta:
+        model = LibraryPreparation
+        fields = (
+            'starting_amount',
+            'starting_volume',
+            'spike_in_description',
+            'spike_in_volume',
+            'ul_sample',
+            'ul_buffer',
+            'pcr_cycles',
+            'concentration_library',
+            'mean_fragment_size',
+            'nM',
+        )
