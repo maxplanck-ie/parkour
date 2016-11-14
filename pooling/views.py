@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 
-from pooling.models import Pool
+from pooling.models import Pool, LibraryPreparation
 from pooling.utils import generate
 from request.models import Request
 from library.models import Library, Sample, IndexI7, IndexI5
@@ -144,6 +144,10 @@ def save_pool(request):
             sample.is_pooled = True
             sample.save()
 
+            # Create Library Preparation object
+            obj = LibraryPreparation(sample=sample)
+            obj.save()
+
     except Exception as e:
         error = str(e)
         print(error)
@@ -248,18 +252,27 @@ def get_library_preparation(request):
     """ Get the list of samples for Library Preparation """
     error = ''
 
-    samples = Sample.objects.filter(is_pooled=True)
-
     data = [
         {
-            'name': sample.name,
-            'sampleId': sample.id,
-            'barcode': sample.barcode,
-            'libraryProtocol': sample.sample_protocol.id,
-            'libraryProtocolName': sample.sample_protocol.name,
-            'concentration': sample.concentration
+            'name': obj.sample.name,
+            'sampleId': obj.sample.id,
+            'barcode': obj.sample.barcode,
+            'libraryProtocol': obj.sample.sample_protocol.id,
+            'libraryProtocolName': obj.sample.sample_protocol.name,
+            'concentrationSample': obj.sample.concentration,
+            'startingAmount': obj.starting_amount,
+            'spikeInDescription': obj.spike_in_description,
+            'spikeInVolume': obj.spike_in_volume,
+            'ulSample': obj.ul_sample,
+            'ulBuffer': obj.ul_buffer,
+            'indexI7Id': '',
+            'indexI5Id': '',
+            'pcrCycles': obj.pcr_cycles,
+            'concentrationLibrary': obj.concentration_library,
+            'meanFragmentSize': obj.mean_fragment_size,
+            'nM': obj.nM,
         }
-        for sample in samples
+        for obj in LibraryPreparation.objects.all()
     ]
 
     return HttpResponse(
