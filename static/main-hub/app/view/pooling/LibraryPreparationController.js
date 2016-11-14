@@ -6,7 +6,13 @@ Ext.define('MainHub.view.pooling.LibraryPreparationController', {
 
     config: {
         control: {
-
+            '#': {
+                boxready: 'onLibraryPreparationBoxready'
+            }
         }
+    },
+
+    onLibraryPreparationBoxready: function() {
+        Ext.getStore('libraryPreparationStore').load();
     }
 });

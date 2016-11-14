@@ -1,5 +1,5 @@
 Ext.define('MainHub.store.pooling.LibraryPreparation', {
-    extend: 'Ext.data.TreeStore',
+    extend: 'Ext.data.Store',
     storeId: 'libraryPreparationStore',
 
     requires: [
@@ -8,8 +8,8 @@ Ext.define('MainHub.store.pooling.LibraryPreparation', {
 
     model: 'MainHub.model.pooling.LibraryPreparation',
 
-    // groupField: 'libraryProtocol',
-    // groupDir: 'DESC',
+    groupField: 'libraryProtocolName',
+    groupDir: 'DESC',
 
     proxy: {
         type: 'ajax',
@@ -24,7 +24,5 @@ Ext.define('MainHub.store.pooling.LibraryPreparation', {
             rootProperty: 'data',
             successProperty: 'success'
         }
-    },
-
-    autoLoad: true
+    }
 });
