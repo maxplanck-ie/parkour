@@ -249,7 +249,7 @@ def generate_indices(request):
 
 
 def get_library_preparation(request):
-    """ Get the list of samples for Library Preparation """
+    """ Get the list of samples for Library Preparation. """
     error = ''
 
     data = [
@@ -272,7 +272,7 @@ def get_library_preparation(request):
             'meanFragmentSize': obj.mean_fragment_size,
             'nM': obj.nM,
         }
-        for obj in LibraryPreparation.objects.all()
+        for obj in LibraryPreparation.objects.all()[::-1]
     ]
 
     return HttpResponse(
