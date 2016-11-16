@@ -6,7 +6,7 @@ Ext.define('MainHub.model.pooling.LibraryPreparation', {
         {  name: 'sampleId',                type: 'int'     },
         {  name: 'libraryProtocolName',     type: 'string'  },
         {  name: 'libraryProtocol',         type: 'int'     },
-        {  name: 'concentrationSample',     type: 'string'  },
+        {  name: 'concentrationSample',     type: 'float'   },
         {  name: 'startingAmount',          type: 'string'  },
         {  name: 'startingVolume',          type: 'string'  },
         {  name: 'spikeInDescription',      type: 'string'  },

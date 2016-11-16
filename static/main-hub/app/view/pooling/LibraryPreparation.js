@@ -99,7 +99,7 @@ Ext.define('MainHub.view.pooling.LibraryPreparation', {
                 editor: {
                     xtype: 'numberfield',
                     decimalPrecision: 1,
-                    minValue: 1
+                    minValue: 0.1
                 }
             },
             {
@@ -108,7 +108,7 @@ Ext.define('MainHub.view.pooling.LibraryPreparation', {
                 editor: {
                     xtype: 'numberfield',
                     decimalPrecision: 1,
-                    minValue: 1
+                    minValue: 0.1
                 }
             },
             {
