@@ -159,7 +159,7 @@ def save_pool(request):
     return HttpResponse(
         json.dumps({
             'success': not error,
-            'error': error,
+            'error': error
         }),
         content_type='application/json',
     )
@@ -243,9 +243,9 @@ def generate_indices(request):
 
     return HttpResponse(
         json.dumps({
-            'data': data,
             'success': not error,
             'error': error,
+            'data': data
         }),
         content_type='application/json',
     )
@@ -254,11 +254,25 @@ def generate_indices(request):
 def get_library_preparation(request):
     """ Get the list of samples for Library Preparation. """
     error = ''
+    data = []
 
-    # import pdb; pdb.set_trace()
+    for obj in LibraryPreparation.objects.all():
+        index_i7 = IndexI7.objects.get(
+            index=obj.sample.index_i7,
+            index_type_id=obj.sample.index_type_id
+        )
+        index_i7_id = index_i7.index_id
 
-    data = [
-        {
+        try:
+            index_i5 = IndexI5.objects.get(
+                index=obj.sample.index_i5,
+                index_type_id=obj.sample.index_type_id
+            )
+            index_i5_id = index_i5.index_id
+        except IndexI5.DoesNotExist:
+            index_i5_id = ''
+
+        data.append({
             'name': obj.sample.name,
             'sampleId': obj.sample.id,
             'barcode': obj.sample.barcode,
@@ -271,15 +285,13 @@ def get_library_preparation(request):
             'spikeInVolume': obj.spike_in_volume,
             'ulSample': obj.ul_sample,
             'ulBuffer': obj.ul_buffer,
-            'indexI7Id': '',
-            'indexI5Id': '',
+            'indexI7Id': index_i7_id,
+            'indexI5Id': index_i5_id,
             'pcrCycles': obj.pcr_cycles,
             'concentrationLibrary': obj.concentration_library,
             'meanFragmentSize': obj.mean_fragment_size,
-            'nM': obj.nM,
-        }
-        for obj in LibraryPreparation.objects.all()[::-1]
-    ]
+            'nM': obj.nM
+        })
 
     return HttpResponse(
         json.dumps({
@@ -314,7 +326,7 @@ def edit_library_preparation(request):
     return HttpResponse(
         json.dumps({
             'success': not error,
-            'error': error,
+            'error': error
         }),
         content_type='application/json',
     )
