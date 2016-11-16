@@ -265,6 +265,20 @@ Ext.define('MainHub.view.pooling.IndexGeneratorController', {
             url = 'save_pool/';
 
         if (this.isPoolValid(store)) {
+            // Get all libraries' and samples' ids
+            var libraries = [], samples = [];
+            store.each(function(record) {
+                if (record.get('recordType') == 'L') {
+                    libraries.push(record.get('libraryId'));
+                } else {
+                    samples.push({
+                        sample_id: record.get('sampleId'),
+                        index_i7: record.get('indexI7') ? record.get('indexI7') : '',
+                        index_i5: record.get('indexI5') ? record.get('indexI5') : ''
+                    });
+                }
+            });
+
             Ext.getCmp('poolingContainer').setLoading('Saving...');
             Ext.Ajax.request({
                 url: url,
@@ -273,8 +287,8 @@ Ext.define('MainHub.view.pooling.IndexGeneratorController', {
                 scope: this,
 
                 params: {
-                    libraries: Ext.JSON.encode(Ext.Array.pluck(Ext.Array.pluck(store.data.items, 'data'), 'libraryId')),
-                    samples: Ext.JSON.encode(Ext.Array.pluck(Ext.Array.pluck(store.data.items, 'data'), 'sampleId'))
+                    libraries: Ext.JSON.encode(libraries),
+                    samples: Ext.JSON.encode(samples)
                 },
 
                 success: function (response) {

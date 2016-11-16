@@ -113,13 +113,13 @@ def save_pool(request):
         libraries = [
             library_id
             for library_id in json.loads(request.POST.get('libraries'))
-            if library_id is not None
         ]
+
         samples = [
-            sample_id
-            for sample_id in json.loads(request.POST.get('samples'))
-            if sample_id is not None
+            sample['sample_id']
+            for sample in json.loads(request.POST.get('samples'))
         ]
+
         name = '_' + request.user.name.replace(' ', '_')
 
         if request.user.pi:
@@ -139,8 +139,11 @@ def save_pool(request):
             library.save()
 
         # Make current samples not available for repeated pooling
-        for sample_id in samples:
-            sample = Sample.objects.get(id=sample_id)
+        # and set their Index I7 and Index I5 indices
+        for smpl in json.loads(request.POST.get('samples')):
+            sample = Sample.objects.get(id=smpl['sample_id'])
+            sample.index_i7 = smpl['index_i7']
+            sample.index_i5 = smpl['index_i5']
             sample.is_pooled = True
             sample.save()
 
@@ -251,6 +254,8 @@ def generate_indices(request):
 def get_library_preparation(request):
     """ Get the list of samples for Library Preparation. """
     error = ''
+
+    # import pdb; pdb.set_trace()
 
     data = [
         {
