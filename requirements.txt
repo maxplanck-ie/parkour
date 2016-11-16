@@ -16,3 +16,4 @@ pycrypto==2.6.1
 pyperclip==1.5.27
 reportlab==3.3.0
 six==1.10.0
+xlwt==1.1.2

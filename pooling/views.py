@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 
 from pooling.models import Pool, LibraryPreparation, LibraryPreparationForm
 from pooling.utils import generate
@@ -8,6 +9,7 @@ from library.models import Library, Sample, IndexI7, IndexI5
 
 import json
 import logging
+import xlwt
 
 logger = logging.getLogger('db')
 
@@ -330,3 +332,47 @@ def edit_library_preparation(request):
         }),
         content_type='application/json',
     )
+
+
+@csrf_exempt
+@login_required
+def download_benchtop_protocol_xls(request):
+    # response = HttpResponse(content_type='application/vnd.ms-excel')
+    response = HttpResponse(content_type='application/ms-excel')
+    params = request.POST.getlist('params')
+
+    filename = 'Benchtop_Protocol.xls'
+    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet('Benchtop Protocol')
+
+    try:
+        row_num = 0
+
+        font_style = xlwt.XFStyle()
+        font_style.font.bold = True
+
+        for i, column in enumerate(params):
+            ws.write(row_num, i, column, font_style)
+            ws.col(i).width = 6500  # Set column width
+
+        font_style = xlwt.XFStyle()
+        font_style.alignment.wrap = 1
+
+        # for obj in queryset:
+        #     row_num += 1
+        #     row = [
+        #         obj.pk,
+        #         obj.title,
+        #         obj.description,
+        #     ]
+        #     for col_num in xrange(len(row)):
+        #         ws.write(row_num, col_num, row[col_num], font_style)
+
+    except Exception as e:
+        logger.exception(e)
+
+    wb.save(response)
+
+    return response

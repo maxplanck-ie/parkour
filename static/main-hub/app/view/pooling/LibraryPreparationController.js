@@ -10,12 +10,19 @@ Ext.define('MainHub.view.pooling.LibraryPreparationController', {
                 boxready: 'onLibraryPreparationTableBoxready',
                 refresh: 'onLibraryPreparationTableRefresh',
                 edit: 'onLibraryPreparationTableEdit'
+            },
+            '#downloadBenchtopProtocolWindowBtn': {
+                click: 'downloadBenchtopProtocolWindowBtnClick'
             }
         }
     },
 
     onLibraryPreparationTableBoxready: function() {
-        Ext.getStore('libraryPreparationStore').load();
+        Ext.getStore('libraryPreparationStore').load(function(records, operation, success) {
+            if (success && records.length > 0) {
+                Ext.getCmp('downloadBenchtopProtocolWindowBtn').setDisabled(false);
+            }
+        });
     },
 
     onLibraryPreparationTableRefresh: function(grid) {
@@ -102,5 +109,9 @@ Ext.define('MainHub.view.pooling.LibraryPreparationController', {
                 console.error('[ERROR]: ' + url);
             }
         });
+    },
+
+    downloadBenchtopProtocolWindowBtnClick: function(btn) {
+        Ext.create('MainHub.view.pooling.BenchtopProtocolWindow').show();
     }
 });

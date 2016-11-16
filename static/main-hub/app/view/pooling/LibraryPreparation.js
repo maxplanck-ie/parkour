@@ -3,7 +3,8 @@ Ext.define('MainHub.view.pooling.LibraryPreparation', {
     xtype: 'library-preparation',
 
     requires: [
-        'MainHub.view.pooling.LibraryPreparationController'
+        'MainHub.view.pooling.LibraryPreparationController',
+        'MainHub.view.pooling.BenchtopProtocolWindow'
     ],
 
     controller: 'library-preparation',
@@ -157,6 +158,20 @@ Ext.define('MainHub.view.pooling.LibraryPreparation', {
                 text: 'Library QC',
                 dataIndex: 'libraryQC'
             }
-        ]
+        ],
+        dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            items: [
+                '->',
+                {
+                    xtype: 'button',
+                    id: 'downloadBenchtopProtocolWindowBtn',
+                    itemId: 'downloadBenchtopProtocolWindowBtn',
+                    text: 'Download Benchtop Protocol as XLS',
+                    disabled: true
+                }
+            ]
+        }]
     }]
 });
