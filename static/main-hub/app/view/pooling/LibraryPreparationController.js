@@ -45,23 +45,26 @@ Ext.define('MainHub.view.pooling.LibraryPreparationController', {
         if (concentrationSample > 0 && startingAmount > 0 &&
             Object.keys(changes).indexOf('ulSample') == -1) {
                 ulSample = (startingAmount / concentrationSample).toFixed(1);
-                record.set('ulSample', ulSample);
+                // record.set('ulSample', ulSample);
         }
 
         // Set µl Buffer
-        if (startingVolume > 0 && ulSample > 0 && spikeInVolume  &&
-            startingVolume > (ulSample + spikeInVolume) &&
+        if (startingVolume > 0 && ulSample > 0 && spikeInVolume > 0  &&
+            startingVolume > (parseFloat(ulSample) + parseFloat(spikeInVolume)) &&
             Object.keys(changes).indexOf('ulBuffer') == -1) {
                 ulBuffer = (startingVolume - ulSample - spikeInVolume).toFixed(1);
-                record.set('ulBuffer', ulBuffer);
+                // record.set('ulBuffer', ulBuffer);
         }
 
         // Set nM
         if (concentrationLibrary > 0 && meanFragmentSize > 0 &&
             Object.keys(changes).indexOf('nM') == -1) {
                 nM = ((concentrationLibrary / (meanFragmentSize * 650)) * 1000000).toFixed(2);
-                record.set('nM', nM);
+                // record.set('nM', nM);
         }
+
+        // record.commit();0
+        // grid.getStore().commitChanges();
 
         Ext.Ajax.request({
             url: url,
@@ -87,7 +90,7 @@ Ext.define('MainHub.view.pooling.LibraryPreparationController', {
                 var obj = Ext.JSON.decode(response.responseText);
 
                 if (obj.success) {
-                    // grid.fireEvent('refresh', grid);
+                    grid.fireEvent('refresh', grid);
                 } else {
                     Ext.ux.ToastMessage(obj.error, 'error');
                     console.error('[ERROR]: ' + url + ': ' + obj.error);
