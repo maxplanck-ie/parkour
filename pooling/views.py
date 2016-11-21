@@ -275,6 +275,7 @@ def get_library_preparation(request):
             index_i5_id = ''
 
         data.append({
+            'active': False,
             'name': obj.sample.name,
             'sampleId': obj.sample.id,
             'barcode': obj.sample.barcode,
@@ -337,9 +338,11 @@ def edit_library_preparation(request):
 @csrf_exempt
 @login_required
 def download_benchtop_protocol_xls(request):
+    """ Generate Benchtop Protocol as XLS file for selected samples. """
     # response = HttpResponse(content_type='application/vnd.ms-excel')
     response = HttpResponse(content_type='application/ms-excel')
     params = request.POST.getlist('params')
+    samples = json.loads(request.POST.get('samples'))
 
     filename = 'Benchtop_Protocol.xls'
     response['Content-Disposition'] = 'attachment; filename="%s"' % filename
@@ -348,6 +351,7 @@ def download_benchtop_protocol_xls(request):
     ws = wb.add_sheet('Benchtop Protocol')
 
     try:
+        params = ['Sample'] + params
         row_num = 0
 
         font_style = xlwt.XFStyle()
@@ -360,15 +364,27 @@ def download_benchtop_protocol_xls(request):
         font_style = xlwt.XFStyle()
         font_style.alignment.wrap = 1
 
-        # for obj in queryset:
-        #     row_num += 1
-        #     row = [
-        #         obj.pk,
-        #         obj.title,
-        #         obj.description,
-        #     ]
-        #     for col_num in xrange(len(row)):
-        #         ws.write(row_num, col_num, row[col_num], font_style)
+        for sample_id in samples:
+            obj = LibraryPreparation.objects.get(sample_id=sample_id)
+            row_num += 1
+            row = [obj.sample.name]
+
+            for param in params:
+                if param == 'Concentration Sample (ng/µl)':
+                    row.append(obj.sample.concentration)
+                elif param == 'Starting Amount (ng)':
+                    row.append(obj.starting_amount)
+                elif param == 'Starting Volume (ng)':
+                    row.append(obj.starting_volume)
+                elif param == 'Spike-in Volume (µl)':
+                    row.append(obj.spike_in_volume)
+                elif param == 'µl Sample':
+                    row.append(obj.ul_sample)
+                elif param == 'µl Buffer':
+                    row.append(obj.ul_buffer)
+
+            for i, column in enumerate(params):
+                ws.write(row_num, i, row[i], font_style)
 
     except Exception as e:
         logger.exception(e)

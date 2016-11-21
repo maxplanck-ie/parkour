@@ -16,6 +16,8 @@ Ext.define('MainHub.view.pooling.BenchtopProtocolWindow', {
     bodyPadding: 15,
     border: 0,
 
+    samples: [],
+
     items: [{
         border: 0,
         layout: 'vbox',

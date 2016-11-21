@@ -4,7 +4,8 @@ Ext.define('MainHub.view.pooling.LibraryPreparation', {
 
     requires: [
         'MainHub.view.pooling.LibraryPreparationController',
-        'MainHub.view.pooling.BenchtopProtocolWindow'
+        'MainHub.view.pooling.BenchtopProtocolWindow',
+        'Ext.ux.FiddleCheckColumn'
     ],
 
     controller: 'library-preparation',
@@ -42,6 +43,12 @@ Ext.define('MainHub.view.pooling.LibraryPreparation', {
         store: 'libraryPreparationStore',
 
         columns: [
+            {
+                xtype: 'fiddlecheckcolumn',
+             	text: 'Active',
+                dataIndex: 'active',
+                width: 40
+            },
             {
                 text: 'Sample',
                 dataIndex: 'name',
@@ -157,7 +164,11 @@ Ext.define('MainHub.view.pooling.LibraryPreparation', {
             {
                 text: 'Library QC',
                 dataIndex: 'libraryQC'
-            }
+            },
+            // {
+            //     text: 'File',
+            //     dataIndex: 'file'
+            // }
         ],
         dockedItems: [{
             xtype: 'toolbar',

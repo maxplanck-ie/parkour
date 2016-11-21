@@ -21,7 +21,7 @@ Ext.define('Ext.ux.ToastMessage', {
     title: '',
     html: '',
     autoClose: true,
-    autoCloseDelay: 15000,
+    autoCloseDelay: 10000,
     align: 'br',
 
     defaultTypes: {

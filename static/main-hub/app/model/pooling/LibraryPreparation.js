@@ -3,6 +3,7 @@ Ext.define('MainHub.model.pooling.LibraryPreparation', {
 
     fields: [
         {  name: 'name',                    type: 'string'  },
+        {  name: 'active',                  type: 'bool'    },
         {  name: 'sampleId',                type: 'int'     },
         {  name: 'libraryProtocolName',     type: 'string'  },
         {  name: 'libraryProtocol',         type: 'int'     },

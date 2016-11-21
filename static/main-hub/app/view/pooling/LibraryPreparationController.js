@@ -112,6 +112,22 @@ Ext.define('MainHub.view.pooling.LibraryPreparationController', {
     },
 
     downloadBenchtopProtocolWindowBtnClick: function(btn) {
-        Ext.create('MainHub.view.pooling.BenchtopProtocolWindow').show();
+        var store = Ext.getStore('libraryPreparationStore'),
+            samples = [];
+
+        // Get all checked (selected) samples
+        store.each(function(record) {
+            if (record.get('active')) {
+                samples.push(record.get('sampleId'));
+            }
+        });
+
+        if (samples.length > 0) {
+            Ext.create('MainHub.view.pooling.BenchtopProtocolWindow', {
+                samples: samples
+            }).show();
+        } else {
+            Ext.ux.ToastMessage('You did not select any samples.', 'warning');
+        }
     }
 });

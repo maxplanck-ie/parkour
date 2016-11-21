@@ -25,7 +25,8 @@ Ext.define('MainHub.view.pooling.BenchtopProtocolWindowController', {
     },
 
     onDownloadBtn: function(btn) {
-        var form = Ext.getCmp('benchtopProtocolParams').getForm(),
+        var wnd = btn.up('window'),
+            form = Ext.getCmp('benchtopProtocolParams').getForm(),
             data = form.getFieldValues();
 
         if (Object.keys(data).length > 0) {
@@ -33,7 +34,8 @@ Ext.define('MainHub.view.pooling.BenchtopProtocolWindowController', {
                 url: 'download_benchtop_protocol_xls/',
                 target: '_blank',
                 params: {
-                    'params': data.params
+                    'params': data.params,
+                    'samples': Ext.JSON.encode(wnd.samples)
                 }
             });
         } else {
