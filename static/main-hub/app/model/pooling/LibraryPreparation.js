@@ -20,6 +20,7 @@ Ext.define('MainHub.model.pooling.LibraryPreparation', {
         {  name: 'concentrationLibrary',    type: 'string'  },
         {  name: 'meanFragmentSize',        type: 'string'  },
         {  name: 'nM',                      type: 'string'  },
-        {  name: 'libraryQC',               type: 'string'  }
+        {  name: 'libraryQC',               type: 'string'  },
+        {  name: 'file',                    type: 'string'  }
     ]
 });

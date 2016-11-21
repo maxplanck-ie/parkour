@@ -12,6 +12,13 @@ class Pool(models.Model):
         return self.name
 
 
+class LibraryPreparationFile(models.Model):
+    file = models.FileField(upload_to='library_preparation/%Y/%m/%d/')
+
+    def __str__(self):
+        return self.file.name.split('/')[-1]
+
+
 class LibraryPreparation(models.Model):
     sample = models.ForeignKey(Sample, verbose_name='Sample')
 
@@ -73,6 +80,13 @@ class LibraryPreparation(models.Model):
         'nM',
         null=True,
         blank=True,
+    )
+
+    file = models.ForeignKey(
+        LibraryPreparationFile,
+        verbose_name='File',
+        blank=True,
+        null=True,
     )
 
     def __str__(self):

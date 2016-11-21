@@ -14,4 +14,5 @@ urlpatterns = [
     url(r'^get_library_preparation/$', views.get_library_preparation, name='get_library_preparation'),
     url(r'^edit_library_preparation/$', views.edit_library_preparation, name='edit_library_preparation'),
     url(r'^download_benchtop_protocol_xls/$', views.download_benchtop_protocol_xls, name='download_benchtop_protocol_xls'),
+    url(r'^upload_library_preparation_file/$', views.upload_library_preparation_file, name='upload_library_preparation_file'),
 ]

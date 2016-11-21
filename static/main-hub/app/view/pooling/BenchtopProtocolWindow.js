@@ -90,5 +90,5 @@ Ext.define('MainHub.view.pooling.BenchtopProtocolWindow', {
             text: 'Download',
             itemId: 'download'
         }
-    ],
+    ]
 });

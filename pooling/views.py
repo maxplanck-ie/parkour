@@ -1,8 +1,10 @@
+from django.conf import settings
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 
-from pooling.models import Pool, LibraryPreparation, LibraryPreparationForm
+from pooling.models import Pool, LibraryPreparation, LibraryPreparationForm, \
+    LibraryPreparationFile
 from pooling.utils import generate
 from request.models import Request
 from library.models import Library, Sample, IndexI7, IndexI5
@@ -16,7 +18,7 @@ logger = logging.getLogger('db')
 
 @login_required
 def get_pooling_tree(request):
-    """ Get libraries, ready for pooling. """
+    """ Get libraries ready for pooling. """
     children = []
 
     requests = Request.objects.select_related()
@@ -168,7 +170,7 @@ def save_pool(request):
 
 
 def update_sequencing_run_condition(request):
-    """ Update Sequencing Run Condition before Index generation. """
+    """ Update Sequencing Run Condition before index generation. """
     record_type = request.POST.get('record_type')
     record_id = request.POST.get('record_id')
     sequencing_run_condition_id = \
@@ -293,7 +295,11 @@ def get_library_preparation(request):
             'pcrCycles': obj.pcr_cycles,
             'concentrationLibrary': obj.concentration_library,
             'meanFragmentSize': obj.mean_fragment_size,
-            'nM': obj.nM
+            'nM': obj.nM,
+            'file':
+                settings.MEDIA_URL + obj.file.file.name
+                if obj.file
+                else ''
         })
 
     return HttpResponse(
@@ -392,3 +398,43 @@ def download_benchtop_protocol_xls(request):
     wb.save(response)
 
     return response
+
+
+@csrf_exempt
+@login_required
+def upload_library_preparation_file(request):
+    """
+    Upload a file and add it to all samples with a givel Library Protocol.
+    """
+    error = ''
+
+    if request.method == 'POST' and any(request.FILES):
+        try:
+            library_protocol = request.POST.get('library_protocol')
+            uploaded_file = LibraryPreparationFile(
+                file=request.FILES.get('file')
+            )
+            uploaded_file.save()
+
+            # Get all LibraryPreparation objects with a givenLibrary Protocol
+            objects = LibraryPreparation.objects.filter(
+                sample__sample_protocol_id=library_protocol
+            )
+
+            # Attach the file to the objects
+            for obj in objects:
+                obj.file = uploaded_file
+                obj.save()
+
+        except Exception as e:
+            error = str(e)
+            print('[ERROR]: %s' % error)
+            logger.debug(error)
+
+    return HttpResponse(
+        json.dumps({
+            'success': not error,
+            'error': error
+        }),
+        content_type='application/json',
+    )

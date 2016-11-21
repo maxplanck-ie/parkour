@@ -61,7 +61,7 @@ Ext.define('MainHub.view.pooling.LibraryPreparation', {
             },
             {
                 text: 'Concentration Sample (ng/µl)',
-                dataIndex: 'concentrationSample',
+                dataIndex: 'concentrationSample'
             },
             {
                 text: 'Protocol',
@@ -165,10 +165,15 @@ Ext.define('MainHub.view.pooling.LibraryPreparation', {
                 text: 'Library QC',
                 dataIndex: 'libraryQC'
             },
-            // {
-            //     text: 'File',
-            //     dataIndex: 'file'
-            // }
+            {
+                text: 'File',
+                dataIndex: 'file',
+                width: 45,
+                renderer: function(value) {
+                    return (value !== '') ? '<a class="library-preparation-download" href="' +
+                        value + '">' + '<i class="fa fa-download" aria-hidden="true"></i></a>' : '';
+                }
+            }
         ],
         dockedItems: [{
             xtype: 'toolbar',
