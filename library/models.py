@@ -342,38 +342,56 @@ class Sample(LibrarySampleAbstract):
         SampleProtocol,
         verbose_name='Sample Protocol',
     )
+
     nucleic_acid_type = models.ForeignKey(
         NucleicAcidType,
         verbose_name='Nucleic Acid Type',
     )
+
     amplified_cycles = models.IntegerField(
         'Sample Amplified Cycles',
         null=True,
         blank=True,
     )
-    dnase_treatment = models.NullBooleanField('DNase Treatment')
+
+    dnase_treatment = models.NullBooleanField(
+        'DNase Treatment'
+    )
+
     rna_quality = models.ForeignKey(
         RNAQuality,
         verbose_name='RNA Quality',
         null=True,
         blank=True,
     )
-    rna_spike_in = models.NullBooleanField('RNA Spike in')
+
+    rna_spike_in = models.NullBooleanField(
+        'RNA Spike in'
+    )
+
     sample_preparation_protocol = models.CharField(
         'Sample Preparation Protocol',
         max_length=250,
         null=True,
         blank=True,
     )
+
     requested_sample_treatment = models.CharField(
         'Requested Sample Treatment',
         max_length=250,
         null=True,
         blank=True,
     )
+
     files = models.ManyToManyField(FileSample)
 
+    is_converted = models.BooleanField(
+        'Is converted?',
+        default=False
+    )
+
     # Quality Control
+
     rna_quality_facility = models.FloatField(
         'RNA Quality (RIN, RQN) (facility)',
         null=True,

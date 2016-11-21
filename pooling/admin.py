@@ -1,5 +1,5 @@
 from django.contrib import admin
-from pooling.models import Pool, LibraryPreparation
+from pooling.models import Pool, LibraryPreparation, Pooling
 
 
 @admin.register(Pool)
@@ -9,4 +9,9 @@ class PoolAdmin(admin.ModelAdmin):
 
 @admin.register(LibraryPreparation)
 class LibraryPreparationAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Pooling)
+class PoolingAdmin(admin.ModelAdmin):
     pass

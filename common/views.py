@@ -63,22 +63,22 @@ def get_navigation_tree(request):
             },
             {
                 'text': 'Index Generator',
-                'iconCls': 'x-fa fa-sort-amount-desc',
+                'iconCls': 'x-fa fa-cogs',
                 'viewType': 'index-generator',
                 'leaf': True
             },
             {
                 'text': 'Library Preparation',
-                'iconCls': 'x-fa fa-sort-amount-desc',
+                'iconCls': 'x-fa fa-table',
                 'viewType': 'library-preparation',
                 'leaf': True
             },
-            # {
-            #     'text': 'Pooling',
-            #     'iconCls': 'x-fa fa-sort-amount-desc',
-            #     # 'viewType': '',
-            #     'leaf': True
-            # }
+            {
+                'text': 'Pooling',
+                'iconCls': 'x-fa fa-sort-amount-desc',
+                'viewType': 'pooling',
+                'leaf': True
+            }
         ]
     }
 

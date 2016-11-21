@@ -182,8 +182,8 @@ Ext.define('MainHub.view.pooling.LibraryPreparation', {
                 '->',
                 {
                     xtype: 'button',
-                    id: 'downloadBenchtopProtocolWindowBtn',
-                    itemId: 'downloadBenchtopProtocolWindowBtn',
+                    id: 'downloadBenchtopProtocolLPBtn',
+                    itemId: 'downloadBenchtopProtocolLPBtn',
                     text: 'Download Benchtop Protocol as XLS',
                     disabled: true
                 }

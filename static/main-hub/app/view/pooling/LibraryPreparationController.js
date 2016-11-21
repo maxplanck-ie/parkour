@@ -12,8 +12,8 @@ Ext.define('MainHub.view.pooling.LibraryPreparationController', {
                 edit: 'onLibraryPreparationTableEdit',
                 itemcontextmenu: 'onLibraryPreparationTableContextMenu'
             },
-            '#downloadBenchtopProtocolWindowBtn': {
-                click: 'downloadBenchtopProtocolWindowBtnClick'
+            '#downloadBenchtopProtocolLPBtn': {
+                click: 'downloadBenchtopProtocolLPBtnClick'
             }
         }
     },
@@ -21,7 +21,7 @@ Ext.define('MainHub.view.pooling.LibraryPreparationController', {
     onLibraryPreparationTableBoxready: function() {
         Ext.getStore('libraryPreparationStore').load(function(records, operation, success) {
             if (success && records.length > 0) {
-                Ext.getCmp('downloadBenchtopProtocolWindowBtn').setDisabled(false);
+                Ext.getCmp('downloadBenchtopProtocolLPBtn').setDisabled(false);
             }
         });
     },
@@ -112,7 +112,7 @@ Ext.define('MainHub.view.pooling.LibraryPreparationController', {
         });
     },
 
-    downloadBenchtopProtocolWindowBtnClick: function(btn) {
+    downloadBenchtopProtocolLPBtnClick: function(btn) {
         var store = Ext.getStore('libraryPreparationStore'),
             samples = [];
 

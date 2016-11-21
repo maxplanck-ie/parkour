@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 
 from pooling.models import Pool, LibraryPreparation, LibraryPreparationForm, \
-    LibraryPreparationFile
+    LibraryPreparationFile, Pooling, PoolingForm
 from pooling.utils import generate
 from request.models import Request
 from library.models import Library, Sample, IndexI7, IndexI5
@@ -142,6 +142,10 @@ def save_pool(request):
             library.is_pooled = True
             library.save()
 
+            # Create Pooling object
+            # p_obj = Pooling(library=library)
+            # p_obj.save()
+
         # Make current samples not available for repeated pooling
         # and set their Index I7 and Index I5 indices
         for smpl in json.loads(request.POST.get('samples')):
@@ -149,11 +153,17 @@ def save_pool(request):
             sample.index_i7 = smpl['index_i7']
             sample.index_i5 = smpl['index_i5']
             sample.is_pooled = True
+            sample.is_converted = True
+            sample.barcode = sample.barcode.replace('S', 'L')
             sample.save()
 
             # Create Library Preparation object
-            obj = LibraryPreparation(sample=sample)
-            obj.save()
+            lp_obj = LibraryPreparation(sample=sample)
+            lp_obj.save()
+
+            # Create Pooling object
+            # p_obj = Pooling(sample=sample)
+            # p_obj.save()
 
     except Exception as e:
         error = str(e)
@@ -260,47 +270,53 @@ def get_library_preparation(request):
     error = ''
     data = []
 
-    for obj in LibraryPreparation.objects.all():
-        index_i7 = IndexI7.objects.get(
-            index=obj.sample.index_i7,
-            index_type_id=obj.sample.index_type_id
-        )
-        index_i7_id = index_i7.index_id
-
-        try:
-            index_i5 = IndexI5.objects.get(
-                index=obj.sample.index_i5,
+    try:
+        for obj in LibraryPreparation.objects.all():
+            index_i7 = IndexI7.objects.get(
+                index=obj.sample.index_i7,
                 index_type_id=obj.sample.index_type_id
             )
-            index_i5_id = index_i5.index_id
-        except IndexI5.DoesNotExist:
-            index_i5_id = ''
+            index_i7_id = index_i7.index_id
 
-        data.append({
-            'active': False,
-            'name': obj.sample.name,
-            'sampleId': obj.sample.id,
-            'barcode': obj.sample.barcode,
-            'libraryProtocol': obj.sample.sample_protocol.id,
-            'libraryProtocolName': obj.sample.sample_protocol.name,
-            'concentrationSample': obj.sample.concentration,
-            'startingAmount': obj.starting_amount,
-            'startingVolume': obj.starting_volume,
-            'spikeInDescription': obj.spike_in_description,
-            'spikeInVolume': obj.spike_in_volume,
-            'ulSample': obj.ul_sample,
-            'ulBuffer': obj.ul_buffer,
-            'indexI7Id': index_i7_id,
-            'indexI5Id': index_i5_id,
-            'pcrCycles': obj.pcr_cycles,
-            'concentrationLibrary': obj.concentration_library,
-            'meanFragmentSize': obj.mean_fragment_size,
-            'nM': obj.nM,
-            'file':
-                settings.MEDIA_URL + obj.file.file.name
-                if obj.file
-                else ''
-        })
+            try:
+                index_i5 = IndexI5.objects.get(
+                    index=obj.sample.index_i5,
+                    index_type_id=obj.sample.index_type_id
+                )
+                index_i5_id = index_i5.index_id
+            except IndexI5.DoesNotExist:
+                index_i5_id = ''
+
+            data.append({
+                'active': False,
+                'name': obj.sample.name,
+                'sampleId': obj.sample.id,
+                'barcode': obj.sample.barcode,
+                'libraryProtocol': obj.sample.sample_protocol.id,
+                'libraryProtocolName': obj.sample.sample_protocol.name,
+                'concentrationSample': obj.sample.concentration,
+                'startingAmount': obj.starting_amount,
+                'startingVolume': obj.starting_volume,
+                'spikeInDescription': obj.spike_in_description,
+                'spikeInVolume': obj.spike_in_volume,
+                'ulSample': obj.ul_sample,
+                'ulBuffer': obj.ul_buffer,
+                'indexI7Id': index_i7_id,
+                'indexI5Id': index_i5_id,
+                'pcrCycles': obj.pcr_cycles,
+                'concentrationLibrary': obj.concentration_library,
+                'meanFragmentSize': obj.mean_fragment_size,
+                'nM': obj.nM,
+                'file':
+                    settings.MEDIA_URL + obj.file.file.name
+                    if obj.file
+                    else ''
+            })
+
+    except Exception as e:
+        error = str(e)
+        print(error)
+        logger.exception(error)
 
     return HttpResponse(
         json.dumps({
@@ -435,6 +451,95 @@ def upload_library_preparation_file(request):
         json.dumps({
             'success': not error,
             'error': error
+        }),
+        content_type='application/json',
+    )
+
+
+def get_pool(record, record_type):
+    """ Get pool for current library/sample. """
+
+    if record_type == 'L':
+        pools = Pool.objects.all().prefetch_related('libraries')
+        for pool in pools:
+            records = pool.libraries.all()
+            if record in records:
+                return pool
+    else:
+        pools = Pool.objects.all().prefetch_related('samples')
+        for pool in pools:
+            records = pool.samples.all()
+            if record in records:
+                return pool
+
+
+def get_request(record, record_type):
+    """ Get request for current library/sample. """
+
+    if record_type == 'L':
+        requests = Request.objects.all().prefetch_related('libraries')
+        for request in requests:
+            records = request.libraries.all()
+            if record in records:
+                return request
+    else:
+        requests = Request.objects.all().prefetch_related('samples')
+        for request in requests:
+            records = request.samples.all()
+            if record in records:
+                return request
+
+
+def get_pooling(request):
+    """ Get the list of libraries for Pooling. """
+    error = ''
+    data = []
+
+    try:
+        for obj in Pooling.objects.all():
+            if obj.library:
+                # Native library
+                record = obj.library
+                pool = get_pool(record, 'L')
+                req = get_request(record, 'L')
+                concentration = record.concentration
+                mean_fragment_size = record.mean_fragment_size
+
+            else:
+                # Converted sample
+                record = obj.sample
+                pool = get_pool(record, 'S')
+                req = get_request(record, 'S')
+                lib_prep_obj = LibraryPreparation.objects.get(
+                    sample_id=record.id
+                )
+                concentration = lib_prep_obj.concentration_library
+                mean_fragment_size = lib_prep_obj.mean_fragment_size
+
+            data.append({
+                'name': record.name,
+                'barcode': record.barcode,
+                'poolId': pool.id,
+                'poolName': pool.name,
+                'requestId': req.id,
+                'requestName': req.name,
+                'concentration': concentration,
+                'meanFragmentSize': mean_fragment_size,
+                'sequencingDepth': record.sequencing_depth
+            })
+
+            # import pdb; pdb.set_trace()
+
+    except Exception as e:
+        error = str(e)
+        print(error)
+        logger.exception(error)
+
+    return HttpResponse(
+        json.dumps({
+            'success': not error,
+            'error': error,
+            'data': data
         }),
         content_type='application/json',
     )

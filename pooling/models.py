@@ -108,3 +108,71 @@ class LibraryPreparationForm(ModelForm):
             'mean_fragment_size',
             'nM',
         )
+
+
+class Pooling(models.Model):
+    library = models.ForeignKey(
+        Library,
+        verbose_name='Library',
+        null=True,
+        blank=True
+    )
+
+    sample = models.ForeignKey(
+        Sample,
+        verbose_name='Sample',
+        null=True,
+        blank=True
+    )
+
+    concentration_c1 = models.FloatField(
+        'Concentration C1',
+        null=True,
+        blank=True
+    )
+
+    concentration_c2 = models.FloatField(
+        'Concentration C1',
+        null=True,
+        blank=True
+    )
+
+    sample_volume = models.FloatField(
+        'Sample Volume V1',
+        null=True,
+        blank=True
+    )
+
+    sample_buffer = models.FloatField(
+        'Sample Volume V2',
+        null=True,
+        blank=True
+    )
+
+    percentage_sample = models.IntegerField(
+        '% sample in Pool',
+        null=True,
+        blank=True,
+    )
+
+    volume_to_pool = models.FloatField(
+        'Volume to Pool',
+        null=True,
+        blank=True
+    )
+
+    def __str__(self):
+        return self.library.name if self.library else self.sample.name
+
+
+class PoolingForm(ModelForm):
+    class Meta:
+        model = Pooling
+        fields = (
+            'concentration_c1',
+            'concentration_c2',
+            'sample_volume',
+            'sample_buffer',
+            'percentage_sample',
+            'volume_to_pool',
+        )

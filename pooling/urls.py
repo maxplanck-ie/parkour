@@ -15,4 +15,7 @@ urlpatterns = [
     url(r'^edit_library_preparation/$', views.edit_library_preparation, name='edit_library_preparation'),
     url(r'^download_benchtop_protocol_xls/$', views.download_benchtop_protocol_xls, name='download_benchtop_protocol_xls'),
     url(r'^upload_library_preparation_file/$', views.upload_library_preparation_file, name='upload_library_preparation_file'),
+
+    # Pooling
+    url(r'^get_pooling/$', views.get_pooling, name='get_pooling'),
 ]
