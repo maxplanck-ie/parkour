@@ -143,8 +143,9 @@ def save_pool(request):
             library.save()
 
             # Create Pooling object
-            # p_obj = Pooling(library=library)
-            # p_obj.save()
+            pool_obj = Pooling(library=library)
+            #  TODO: update field Concentration C1
+            pool_obj.save()
 
         # Make current samples not available for repeated pooling
         # and set their Index I7 and Index I5 indices
@@ -162,8 +163,9 @@ def save_pool(request):
             lp_obj.save()
 
             # Create Pooling object
-            # p_obj = Pooling(sample=sample)
-            # p_obj.save()
+            pool_obj = Pooling(sample=sample)
+            #  TODO: update field Concentration C1
+            pool_obj.save()
 
     except Exception as e:
         error = str(e)
@@ -456,21 +458,21 @@ def upload_library_preparation_file(request):
     )
 
 
-def get_pool(record, record_type):
-    """ Get pool for current library/sample. """
-
-    if record_type == 'L':
-        pools = Pool.objects.all().prefetch_related('libraries')
-        for pool in pools:
-            records = pool.libraries.all()
-            if record in records:
-                return pool
-    else:
-        pools = Pool.objects.all().prefetch_related('samples')
-        for pool in pools:
-            records = pool.samples.all()
-            if record in records:
-                return pool
+# def get_pool(record, record_type):
+#     """ Get pool for current library/sample. """
+#
+#     if record_type == 'L':
+#         pools = Pool.objects.all().prefetch_related('libraries')
+#         for pool in pools:
+#             records = pool.libraries.all()
+#             if record in records:
+#                 return pool
+#     else:
+#         pools = Pool.objects.all().prefetch_related('samples')
+#         for pool in pools:
+#             records = pool.samples.all()
+#             if record in records:
+#                 return pool
 
 
 def get_request(record, record_type):
@@ -496,39 +498,89 @@ def get_pooling(request):
     data = []
 
     try:
-        for obj in Pooling.objects.all():
-            if obj.library:
-                # Native library
-                record = obj.library
-                pool = get_pool(record, 'L')
-                req = get_request(record, 'L')
-                concentration = record.concentration
-                mean_fragment_size = record.mean_fragment_size
+        pools = Pool.objects.prefetch_related('libraries', 'samples')
+        for pool in pools:
+            libraries = pool.libraries.all()
+            samples = pool.samples.all()
 
-            else:
-                # Converted sample
-                record = obj.sample
-                pool = get_pool(record, 'S')
-                req = get_request(record, 'S')
-                lib_prep_obj = LibraryPreparation.objects.get(
-                    sample_id=record.id
-                )
-                concentration = lib_prep_obj.concentration_library
-                mean_fragment_size = lib_prep_obj.mean_fragment_size
+            sum_sequencing_depth = sum([l.sequencing_depth for l in libraries])
+            sum_sequencing_depth += sum([s.sequencing_depth for s in samples])
+            pool_volume = (len(libraries) + len(samples)) * 10
 
-            data.append({
-                'name': record.name,
-                'barcode': record.barcode,
-                'poolId': pool.id,
-                'poolName': pool.name,
-                'requestId': req.id,
-                'requestName': req.name,
-                'concentration': concentration,
-                'meanFragmentSize': mean_fragment_size,
-                'sequencingDepth': record.sequencing_depth
-            })
+            # Native libraries
+            for library in libraries:
+                req = get_request(library, 'L')
+                percentage_library = \
+                    library.sequencing_depth / sum_sequencing_depth
+                volume_to_pool = percentage_library * pool_volume
 
-            # import pdb; pdb.set_trace()
+                data.append({
+                    'name': library.name,
+                    'barcode': library.barcode,
+                    'poolId': pool.id,
+                    'poolName': pool.name,
+                    'requestId': req.id,
+                    'requestName': req.name,
+                    'concentration': library.concentration_library,
+                    'meanFragmentSize': library.mean_fragment_size,
+                    'sequencingDepth': library.sequencing_depth,
+                    'percentageLibrary': round(percentage_library * 100),
+                    'volumeToPool': volume_to_pool
+                })
+
+            # Converted samples (sample -> library)
+            for sample in samples:
+                lib_prep_obj = LibraryPreparation.objects.get(sample=sample)
+                req = get_request(sample, 'S')
+                percentage_library = \
+                    sample.sequencing_depth / sum_sequencing_depth
+                volume_to_pool = percentage_library * pool_volume
+
+                data.append({
+                    'name': sample.name,
+                    'barcode': sample.barcode,
+                    'poolId': pool.id,
+                    'poolName': pool.name,
+                    'requestId': req.id,
+                    'requestName': req.name,
+                    'concentration': lib_prep_obj.concentration_library,
+                    'meanFragmentSize': lib_prep_obj.mean_fragment_size,
+                    'sequencingDepth': sample.sequencing_depth,
+                    'percentageLibrary': round(percentage_library * 100),
+                    'volumeToPool': volume_to_pool
+                })
+
+        # for obj in Pooling.objects.all():
+        #     if obj.library:
+        #         # Native library
+        #         record = obj.library
+        #         pool = get_pool(record, 'L')
+        #         req = get_request(record, 'L')
+        #         concentration = record.concentration
+        #         mean_fragment_size = record.mean_fragment_size
+        #
+        #     else:
+        #         # Converted sample
+        #         record = obj.sample
+        #         pool = get_pool(record, 'S')
+        #         req = get_request(record, 'S')
+        #         lib_prep_obj = LibraryPreparation.objects.get(
+        #             sample_id=record.id
+        #         )
+        #         concentration = lib_prep_obj.concentration_library
+        #         mean_fragment_size = lib_prep_obj.mean_fragment_size
+        #
+        #     data.append({
+        #         'name': record.name,
+        #         'barcode': record.barcode,
+        #         'poolId': pool.id,
+        #         'poolName': pool.name,
+        #         'requestId': req.id,
+        #         'requestName': req.name,
+        #         'concentration': concentration,
+        #         'meanFragmentSize': mean_fragment_size,
+        #         'sequencingDepth': record.sequencing_depth
+        #     })
 
     except Exception as e:
         error = str(e)

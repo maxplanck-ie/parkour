@@ -149,8 +149,8 @@ class Pooling(models.Model):
         blank=True
     )
 
-    percentage_sample = models.IntegerField(
-        '% sample in Pool',
+    percentage_library = models.IntegerField(
+        '% library in Pool',
         null=True,
         blank=True,
     )
@@ -173,6 +173,4 @@ class PoolingForm(ModelForm):
             'concentration_c2',
             'sample_volume',
             'sample_buffer',
-            'percentage_sample',
-            'volume_to_pool',
         )

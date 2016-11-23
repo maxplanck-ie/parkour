@@ -17,7 +17,7 @@ Ext.define('MainHub.model.pooling.Pooling', {
         {  name: 'sequencingDepth',         type: 'int'     },
         {  name: 'sampleVolume',            type: 'string'  },
         {  name: 'sampleBuffer',            type: 'string'  },
-        {  name: 'percentageSample',        type: 'string'  },
+        {  name: 'percentageLibrary',       type: 'string'  },
         {  name: 'volumeToPool',            type: 'string'  }
     ]
 });

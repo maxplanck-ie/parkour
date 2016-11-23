@@ -27,7 +27,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
         plugins: [
             {
                 ptype: 'rowediting',
-                clicksToEdit: 2
+                clicksToEdit: 1,
+                autoUpdate: true
             },
             {
                 ptype: 'bufferedrenderer',
@@ -38,14 +39,28 @@ Ext.define('MainHub.view.pooling.Pooling', {
         features: [{
             ftype:'grouping',
             groupHeaderTpl: [
-                '<strong>Pool: {name} | Pool size: {children:this.formatChildren} (M reads)</strong>',
+                '<strong>Pool: {name} | Pool size: {children:this.poolSize} M reads | Pool volume: {children:this.poolVolume} {children:this.renderDownloadBtn}</strong>',
                 {
-                    formatChildren: function(children) {
+                    poolSize: function(children) {
                         return Ext.sum(
                             Ext.pluck(
                                 Ext.pluck(children, 'data'), 'sequencingDepth'
                             )
                         );
+                    },
+                    poolVolume: function(children) {
+                        return children.length * 10;
+                    },
+                    renderDownloadBtn: function(children) {
+                        var url = '#';
+
+                        // TODO: get link for the QC template
+                        if (url != '#') {
+                            return '<span style="float:right"><a href="' + url + '">' +
+                                '<i class="fa fa-download" aria-hidden="true"></i></a></span>';
+                        } else {
+                            return '';
+                        }
                     }
                 }
             ]
@@ -77,21 +92,25 @@ Ext.define('MainHub.view.pooling.Pooling', {
             {
                 text: 'Library Concentration (ng/µl)',
                 dataIndex: 'concentration',
-                flex: 1
-            },
-            {
-                text: 'Mean Fragment Size (bp)',
-                dataIndex: 'meanFragmentSize',
                 editor: {
                     xtype: 'numberfield',
-                    allowDecimals: false,
+                    hideTrigger: true,
                     minValue: 1
                 },
                 flex: 1
             },
             {
+                text: 'Mean Fragment Size (bp)',
+                dataIndex: 'meanFragmentSize',
+                flex: 1
+            },
+            {
                 text: 'Library Concentration C1 (nM)',
                 dataIndex: 'concentrationC1',
+                editor: {
+                    xtype: 'numberfield',
+                    minValue: 1
+                },
                 flex: 1
             },
             {
@@ -102,6 +121,11 @@ Ext.define('MainHub.view.pooling.Pooling', {
             {
                 text: 'Normalized Library Concentration C2 (nM)',
                 dataIndex: 'concentrationC2',
+                editor: {
+                    xtype: 'numberfield',
+                    decimalPrecision: 1,
+                    minValue: 1
+                },
                 flex: 1
             },
             {
@@ -110,7 +134,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 editor: {
                     xtype: 'numberfield',
                     decimalPrecision: 1,
-                    minValue: 1
+                    minValue: 0.1
                 },
                 flex: 1
             },
@@ -120,13 +144,16 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 editor: {
                     xtype: 'numberfield',
                     decimalPrecision: 1,
-                    minValue: 1
+                    minValue: 0.1
                 },
                 flex: 1
             },
             {
-                text: '% sample in Pool',
-                dataIndex: 'percentageSample',
+                text: '% library in Pool',
+                dataIndex: 'percentageLibrary',
+                renderer: function(val) {
+                    return val + '%';
+                },
                 flex: 1
             },
             {
@@ -149,6 +176,11 @@ Ext.define('MainHub.view.pooling.Pooling', {
                     id: 'downloadBenchtopProtocolPBtn',
                     itemId: 'downloadBenchtopProtocolPBtn',
                     text: 'Download Benchtop Protocol as XLS',
+                    disabled: true
+                },
+                {
+                    xtype: 'button',
+                    text: 'Download Template QC Normalization and Pooling',
                     disabled: true
                 }
             ]
