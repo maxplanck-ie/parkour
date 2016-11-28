@@ -17,7 +17,7 @@ Ext.define('MainHub.model.pooling.Pooling', {
         {  name: 'concentrationC2',         type: 'string'  },
         {  name: 'sequencingDepth',         type: 'int'     },
         {  name: 'sampleVolume',            type: 'string'  },
-        {  name: 'sampleBuffer',            type: 'string'  },
+        {  name: 'bufferVolume',            type: 'string'  },
         {  name: 'percentageLibrary',       type: 'string'  },
         {  name: 'volumeToPool',            type: 'string'  },
         {  name: 'file',                    type: 'string'  }

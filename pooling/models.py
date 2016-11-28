@@ -146,7 +146,7 @@ class Pooling(models.Model):
     )
 
     concentration_c2 = models.FloatField(
-        'Concentration C1',
+        'Concentration C2',
         null=True,
         blank=True
     )
@@ -157,8 +157,8 @@ class Pooling(models.Model):
         blank=True
     )
 
-    sample_buffer = models.FloatField(
-        'Sample Volume V2',
+    buffer_volume = models.FloatField(
+        'Buffer Volume V2',
         null=True,
         blank=True
     )
@@ -186,5 +186,5 @@ class PoolingForm(ModelForm):
             'concentration_c1',
             'concentration_c2',
             'sample_volume',
-            'sample_buffer',
+            'buffer_volume',
         )

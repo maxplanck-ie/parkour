@@ -331,7 +331,7 @@ def get_library_preparation(request):
 
 
 def edit_library_preparation(request):
-    """ Edit sample in Library Preparation step. """
+    """ Edit sample in the Library Preparation step. """
     error = ''
 
     sample_id = request.POST.get('sample_id')
@@ -509,6 +509,10 @@ def get_pooling(request):
                     'concentration': library.concentration_library,
                     'meanFragmentSize': library.mean_fragment_size,
                     'sequencingDepth': library.sequencing_depth,
+                    'concentrationC1': pooling_obj.concentration_c1,
+                    'concentrationC2': pooling_obj.concentration_c2,
+                    'sampleVolume': pooling_obj.sample_volume,
+                    'bufferVolume': pooling_obj.buffer_volume,
                     'percentageLibrary': round(percentage_library * 100),
                     'volumeToPool': volume_to_pool,
                     'file':
@@ -537,6 +541,10 @@ def get_pooling(request):
                     'concentration': lib_prep_obj.concentration_library,
                     'meanFragmentSize': lib_prep_obj.mean_fragment_size,
                     'sequencingDepth': sample.sequencing_depth,
+                    'concentrationC1': pooling_obj.concentration_c1,
+                    'concentrationC2': pooling_obj.concentration_c2,
+                    'sampleVolume': pooling_obj.sample_volume,
+                    'bufferVolume': pooling_obj.buffer_volume,
                     'percentageLibrary': round(percentage_library * 100),
                     'volumeToPool': volume_to_pool,
                     'file':
@@ -641,6 +649,40 @@ def upload_pooling_template(request):
             error = str(e)
             print('[ERROR]: %s' % error)
             logger.debug(error)
+
+    return HttpResponse(
+        json.dumps({
+            'success': not error,
+            'error': error
+        }),
+        content_type='application/json',
+    )
+
+
+def edit_pooling(request):
+    """ Edit a record in the Pooling step. """
+    error = ''
+
+    library_id = int(request.POST.get('library_id'))
+    sample_id = int(request.POST.get('sample_id'))
+
+    if library_id == 0:
+        obj = Pooling.objects.get(sample_id=sample_id)
+    else:
+        obj = Pooling.objects.get(library_id=library_id)
+
+    try:
+        form = PoolingForm(request.POST, instance=obj)
+
+        if form.is_valid():
+            form.save()
+        else:
+            for key, value in form.errors.items():
+                error += '%s: %s<br/>' % (key, value)
+
+    except Exception as e:
+        error = str(e)
+        logger.exception(e)
 
     return HttpResponse(
         json.dumps({

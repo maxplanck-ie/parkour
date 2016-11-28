@@ -59,8 +59,8 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             meanFragmentSize = values.meanFragmentSize,
             concentrationC1 = values.concentrationC1,
             concentrationC2 = values.concentrationC2,
-            bufferVolume = values.bufferVolume,
             sampleVolume = values.sampleVolume,
+            bufferVolume = values.bufferVolume,
             url = 'edit_pooling/';
 
         // Set Library Concentration C1
@@ -75,6 +75,41 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             Object.keys(changes).indexOf('bufferVolume') == -1) {
                 bufferVolume = ((concentrationC1 * sampleVolume) / concentrationC2 - sampleVolume).toFixed(1);
         }
+
+        Ext.Ajax.request({
+            url: url,
+            method: 'POST',
+            timeout: 1000000,
+            scope: this,
+
+            params: {
+                library_id          :   record.get('libraryId'),
+                sample_id           :   record.get('sampleId'),
+                concentration       :   concentration,
+                concentration_c1    :   concentrationC1,
+                concentration_c2    :   concentrationC2,
+                sample_volume       :   sampleVolume,
+                buffer_volume       :   bufferVolume,
+                percentage_library  :   record.get('percentageLibrary'),
+                volume_to_pool      :   record.get('volumeToPool')
+            },
+
+            success: function (response) {
+                var obj = Ext.JSON.decode(response.responseText);
+
+                if (obj.success) {
+                    grid.fireEvent('refresh', grid);
+                } else {
+                    Ext.ux.ToastMessage(obj.error, 'error');
+                    console.error('[ERROR]: ' + url + ': ' + obj.error);
+                }
+            },
+
+            failure: function (response) {
+                Ext.ux.ToastMessage(response.statusText, 'error');
+                console.error('[ERROR]: ' + url);
+            }
+        });
     },
 
     onDownloadPoolingTemplateBtnClick: function() {
