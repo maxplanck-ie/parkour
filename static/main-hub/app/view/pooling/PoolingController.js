@@ -168,7 +168,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                             if (obj.success) {
                                 Ext.getStore('poolingStore').reload();
                                 me.close();
-                                Ext.ux.ToastMessage('File has been successfully uploaded.', 'info');
+                                Ext.ux.ToastMessage('File has been successfully uploaded.');
                             } else {
                                 Ext.ux.ToastMessage('There is a problem with the provided file.', 'error');
                             }
