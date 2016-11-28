@@ -26,7 +26,7 @@ Ext.define('MainHub.view.startpage.RequestsController', {
     onAddRequestBtnClick: function(btn) {
         Ext.create('request_wnd', {title: 'Add Request', mode: 'add'}).show();
     },
-    
+
     onSearchFieldChange: function(fld, newValue) {
         var grid = Ext.getCmp('requestsTable'),
             store = grid.getStore(),
@@ -99,6 +99,7 @@ Ext.define('MainHub.view.startpage.RequestsController', {
                 if (obj.success) {
                     var grid = Ext.getCmp('requestsTable');
                     grid.fireEvent('refresh', grid);
+                    Ext.getStore('PoolingTree').reload();
                     Ext.ux.ToastMessage('Record has been deleted!');
 
                 } else {

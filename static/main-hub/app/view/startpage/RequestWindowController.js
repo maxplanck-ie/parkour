@@ -45,7 +45,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
         if (wnd.mode == 'add') {
             Ext.getStore('librariesInRequestStore').removeAll();
             Ext.getCmp('deepSeqRequest').mask(
-                'You need to save the request to proceed.', 
+                'You need to save the request to proceed.',
                 'deep-seq-request-mask'
             );
             Ext.getCmp('deepSeqRequest').body.update('');
@@ -63,7 +63,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
             Ext.getCmp('requestName').enable();
             Ext.getCmp('deepSeqRequest').enable();
 
-            if (record.deepSeqRequestName != '') {
+            if (record.deepSeqRequestName !== '') {
                 Ext.getCmp('uploadedDeepSeqRequest').setHtml(
                     'Uploaded File: <a href="' + record.deepSeqRequestPath + '" target="_blank">' + record.deepSeqRequestName + '</a>'
                 );
@@ -115,7 +115,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
     },
 
     editRecord: function(record) {
-        var store = Ext.getStore('librariesStore'), 
+        var store = Ext.getStore('librariesStore'),
             title = '', fullRecord = null;
 
         if (record.get('recordType') == 'L') {
@@ -177,7 +177,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
             url: url,
             params: {
                 'request_id': wnd.record.get('requestId')
-            },
+            }
             // success: function(f, action) {
             //     debugger;
             // },

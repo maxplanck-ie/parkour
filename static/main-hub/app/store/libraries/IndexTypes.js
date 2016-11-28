@@ -23,6 +23,8 @@ Ext.define('MainHub.store.libraries.IndexTypes', {
         }
     },
 
+    autoLoad: true,
+
     listeners: {
         load: function(store, records, success, operation) {
             if (!success) {

@@ -30,7 +30,7 @@ class LibraryProtocol(models.Model):
 class LibraryType(models.Model):
     name = models.CharField('Type', max_length=200)
     library_protocol = models.ManyToManyField(
-        LibraryProtocol, 
+        LibraryProtocol,
         verbose_name='Library Protocol',
     )
 
@@ -53,11 +53,12 @@ class Organism(SimpleField):
 
 
 class IndexType(SimpleField):
-    pass
+    is_index_i7 = models.BooleanField('Is Index I7?', default=False)
+    is_index_i5 = models.BooleanField('Is Index I5?', default=False)
 
 
 class Index(models.Model):
-    index_id = models.CharField('Index ID', max_length=50)
+    index_id = models.CharField('Index ID', max_length=50, unique=True)
     index = models.CharField('Index', max_length=200)
     index_type = models.ForeignKey(IndexType, verbose_name='Index Type')
 
@@ -86,9 +87,9 @@ class SequencingRunCondition(SimpleField):
 
 class NucleicAcidType(SimpleField):
     type = models.CharField(
-        'Type', 
-        max_length=3, 
-        choices=(('DNA', 'DNA'), ('RNA', 'RNA')), 
+        'Type',
+        max_length=3,
+        choices=(('DNA', 'DNA'), ('RNA', 'RNA')),
         default='DNA',
     )
 
@@ -164,7 +165,7 @@ class LibrarySampleAbstract(models.Model):
     organism = models.ForeignKey(Organism, verbose_name='Organism')
     concentration = models.FloatField('Concentration')
     concentration_determined_by = models.ForeignKey(
-        ConcentrationMethod, 
+        ConcentrationMethod,
         verbose_name='Concentration Determined by',
     )
     dna_dissolved_in = models.CharField('DNA Dissolved in', max_length=200)
@@ -173,27 +174,46 @@ class LibrarySampleAbstract(models.Model):
         'Equal Representation of Nucleotides',
     )
     sequencing_run_condition = models.ForeignKey(
-        SequencingRunCondition, 
+        SequencingRunCondition,
         verbose_name='Sequencing Run Condition',
     )
     sequencing_depth = models.IntegerField('Sequencing Depth')
     comments = models.TextField('Comments', null=True, blank=True)
     is_in_request = models.BooleanField(default=False)
+    is_pooled = models.BooleanField('Is pooled?', default=False)
     barcode = models.CharField('Barcode', max_length=9, null=True, blank=True)
+    index_type = models.ForeignKey(
+        IndexType,
+        verbose_name='Index Type',
+        null=True,
+        blank=True,
+    )
+    index_i7 = models.CharField(
+        'Index I7',
+        max_length=200,
+        null=True,
+        blank=True,
+    )
+    index_i5 = models.CharField(
+        'Index I5',
+        max_length=200,
+        null=True,
+        blank=True,
+    )
 
     # Quality Control
     dilution_factor = models.IntegerField(
-        'Dilution Factor', 
-        null=True, 
+        'Dilution Factor',
+        null=True,
         blank=True,
     )
     concentration_facility = models.FloatField(
         'Concentration (facility)',
-        null=True, 
+        null=True,
         blank=True,
     )
     concentration_determined_by_facility = models.ForeignKey(
-        ConcentrationMethod, 
+        ConcentrationMethod,
         verbose_name='Concentration Determined by (facility)',
         related_name='+',
         null=True,
@@ -206,7 +226,7 @@ class LibrarySampleAbstract(models.Model):
     )
     sample_volume_facility = models.IntegerField(
         'Sample Volume (facility)',
-        null=True, 
+        null=True,
         blank=True,
     )
     amount_facility = models.FloatField(
@@ -241,33 +261,20 @@ class LibrarySampleAbstract(models.Model):
 
 class Library(LibrarySampleAbstract):
     library_protocol = models.ForeignKey(
-        LibraryProtocol, 
+        LibraryProtocol,
         verbose_name='Library Protocol',
     )
     library_type = models.ForeignKey(LibraryType, verbose_name='Library Type')
     enrichment_cycles = models.IntegerField('No. of Enrichment Cycles')
-    index_type = models.ForeignKey(IndexType, verbose_name='Index Type')
     index_reads = models.IntegerField('Index Reads')
-    index_i7 = models.CharField(
-        'Index I7', 
-        max_length=200, 
-        null=True, 
-        blank=True,
-    )
-    index_i5 = models.CharField(
-        'Index I5', 
-        max_length=200, 
-        null=True, 
-        blank=True,
-    )
     mean_fragment_size = models.IntegerField('Mean Fragment Size')
     qpcr_result = models.FloatField('qPCR Result', null=True, blank=True)
-    files=models.ManyToManyField(FileLibrary)
+    files = models.ManyToManyField(FileLibrary)
 
     # Quality Control
     qpcr_result_facility = models.FloatField(
-        'qPCR Result (facility)', 
-        null=True, 
+        'qPCR Result (facility)',
+        null=True,
         blank=True,
     )
 
@@ -280,7 +287,7 @@ class LibraryForm(ModelForm):
     class Meta:
         model = Library
         fields = (
-            'name', 
+            'name',
             'library_protocol',
             'library_type',
             'enrichment_cycles',
@@ -303,7 +310,7 @@ class LibraryForm(ModelForm):
 
 
 @receiver(pre_delete, sender=Library)
-def sample_delete(sender, instance, **kwargs):
+def library_delete(sender, instance, **kwargs):
     for file in instance.files.all():
         file.delete()
 
@@ -311,9 +318,9 @@ def sample_delete(sender, instance, **kwargs):
 class SampleProtocol(models.Model):
     name = models.CharField('Name', max_length=200)
     type = models.CharField(
-        'Type', 
-        max_length=3, 
-        choices=(('DNA', 'DNA'), ('RNA', 'RNA')), 
+        'Type',
+        max_length=3,
+        choices=(('DNA', 'DNA'), ('RNA', 'RNA')),
         default='DNA',
     )
     provider = models.CharField('Provider', max_length=150)
@@ -321,7 +328,7 @@ class SampleProtocol(models.Model):
     explanation = models.CharField('Explanation', max_length=250)
     input_requirements = models.CharField('Input Requirements', max_length=150)
     typical_application = models.CharField(
-        'Typical Application', 
+        'Typical Application',
         max_length=100,
     )
     comments = models.TextField('Comments', null=True, blank=True)
@@ -332,41 +339,59 @@ class SampleProtocol(models.Model):
 
 class Sample(LibrarySampleAbstract):
     sample_protocol = models.ForeignKey(
-        SampleProtocol, 
+        SampleProtocol,
         verbose_name='Sample Protocol',
     )
+
     nucleic_acid_type = models.ForeignKey(
-        NucleicAcidType, 
+        NucleicAcidType,
         verbose_name='Nucleic Acid Type',
     )
+
     amplified_cycles = models.IntegerField(
         'Sample Amplified Cycles',
         null=True,
         blank=True,
     )
-    dnase_treatment = models.NullBooleanField('DNase Treatment')
+
+    dnase_treatment = models.NullBooleanField(
+        'DNase Treatment'
+    )
+
     rna_quality = models.ForeignKey(
         RNAQuality,
         verbose_name='RNA Quality',
         null=True,
         blank=True,
     )
-    rna_spike_in = models.NullBooleanField('RNA Spike in')
+
+    rna_spike_in = models.NullBooleanField(
+        'RNA Spike in'
+    )
+
     sample_preparation_protocol = models.CharField(
         'Sample Preparation Protocol',
         max_length=250,
         null=True,
         blank=True,
     )
+
     requested_sample_treatment = models.CharField(
         'Requested Sample Treatment',
         max_length=250,
         null=True,
         blank=True,
     )
-    files=models.ManyToManyField(FileSample)
+
+    files = models.ManyToManyField(FileSample)
+
+    is_converted = models.BooleanField(
+        'Is converted?',
+        default=False
+    )
 
     # Quality Control
+
     rna_quality_facility = models.FloatField(
         'RNA Quality (RIN, RQN) (facility)',
         null=True,
@@ -378,7 +403,7 @@ class SampleForm(ModelForm):
     class Meta:
         model = Sample
         fields = (
-            'name', 
+            'name',
             'nucleic_acid_type',
             'sample_protocol',
             'organism',

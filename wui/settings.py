@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'request',
     'library',
     'qualitycheck',
+    'pooling'
 ]
 
 MIDDLEWARE_CLASSES = [

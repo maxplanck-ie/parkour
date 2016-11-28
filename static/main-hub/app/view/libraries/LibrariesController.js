@@ -90,6 +90,7 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
                 if (obj.success) {
                     var grid = Ext.getCmp('librariesTable');
                     grid.fireEvent('refresh', grid);
+                    Ext.getStore('PoolingTree').reload();
                     Ext.ux.ToastMessage('Record has been deleted!');
 
                 } else {

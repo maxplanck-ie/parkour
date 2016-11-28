@@ -33,24 +33,12 @@ def get_navigation_tree(request):
             #     'viewType': 'dashboard',
             #     'leaf': True
             # },
-            # {
-            #     'text': 'Researchers',
-            #     'iconCls': 'x-fa fa-user',
-            #     'viewType': 'researchers',
-            #     'leaf': True
-            # },
             {
                 'text': 'Submission',
                 'iconCls': 'x-fa fa-tasks',
                 'expanded': True,
                 'selectable': False,
                 'children': [
-                    # {
-                    #     'text': 'Requests',
-                    #     'iconCls': 'x-fa fa-external-link-square',
-                    #     'viewType': 'requests',
-                    #     'leaf': True
-                    # },
                     {
                         'text': 'Libraries/Samples',
                         'iconCls': 'x-fa fa-flask',
@@ -72,6 +60,24 @@ def get_navigation_tree(request):
                         'leaf': True
                     }
                 ]
+            },
+            {
+                'text': 'Index Generator',
+                'iconCls': 'x-fa fa-cogs',
+                'viewType': 'index-generator',
+                'leaf': True
+            },
+            {
+                'text': 'Library Preparation',
+                'iconCls': 'x-fa fa-table',
+                'viewType': 'library-preparation',
+                'leaf': True
+            },
+            {
+                'text': 'Pooling',
+                'iconCls': 'x-fa fa-sort-amount-desc',
+                'viewType': 'pooling',
+                'leaf': True
             }
         ]
     }

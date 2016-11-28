@@ -11,6 +11,7 @@ Ext.application({
     appFolder: '/static/main-hub/app',
 
     requires: [
+        'MainHub.overrides.list.RootTreeItem',
         'MainHub.view.main.Main'
     ],
 
