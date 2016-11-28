@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 
 from pooling.models import Pool, LibraryPreparation, LibraryPreparationForm, \
-    LibraryPreparationFile, Pooling, PoolingForm
+    LibraryPreparationFile, Pooling, PoolingForm, PoolFile
 from pooling.utils import generate
 from request.models import Request
 from library.models import Library, Sample, IndexI7, IndexI5
@@ -458,23 +458,6 @@ def upload_library_preparation_file(request):
     )
 
 
-# def get_pool(record, record_type):
-#     """ Get pool for current library/sample. """
-#
-#     if record_type == 'L':
-#         pools = Pool.objects.all().prefetch_related('libraries')
-#         for pool in pools:
-#             records = pool.libraries.all()
-#             if record in records:
-#                 return pool
-#     else:
-#         pools = Pool.objects.all().prefetch_related('samples')
-#         for pool in pools:
-#             records = pool.samples.all()
-#             if record in records:
-#                 return pool
-
-
 def get_request(record, record_type):
     """ Get request for current library/sample. """
 
@@ -509,6 +492,7 @@ def get_pooling(request):
 
             # Native libraries
             for library in libraries:
+                pooling_obj = Pooling.objects.get(library=library)
                 req = get_request(library, 'L')
                 percentage_library = \
                     library.sequencing_depth / sum_sequencing_depth
@@ -516,6 +500,7 @@ def get_pooling(request):
 
                 data.append({
                     'name': library.name,
+                    'libraryId': library.id,
                     'barcode': library.barcode,
                     'poolId': pool.id,
                     'poolName': pool.name,
@@ -525,12 +510,17 @@ def get_pooling(request):
                     'meanFragmentSize': library.mean_fragment_size,
                     'sequencingDepth': library.sequencing_depth,
                     'percentageLibrary': round(percentage_library * 100),
-                    'volumeToPool': volume_to_pool
+                    'volumeToPool': volume_to_pool,
+                    'file':
+                        settings.MEDIA_URL + pool.file.file.name
+                        if pool.file
+                        else ''
                 })
 
             # Converted samples (sample -> library)
             for sample in samples:
                 lib_prep_obj = LibraryPreparation.objects.get(sample=sample)
+                pooling_obj = Pooling.objects.get(sample=sample)
                 req = get_request(sample, 'S')
                 percentage_library = \
                     sample.sequencing_depth / sum_sequencing_depth
@@ -538,6 +528,7 @@ def get_pooling(request):
 
                 data.append({
                     'name': sample.name,
+                    'sampleId': sample.id,
                     'barcode': sample.barcode,
                     'poolId': pool.id,
                     'poolName': pool.name,
@@ -547,40 +538,12 @@ def get_pooling(request):
                     'meanFragmentSize': lib_prep_obj.mean_fragment_size,
                     'sequencingDepth': sample.sequencing_depth,
                     'percentageLibrary': round(percentage_library * 100),
-                    'volumeToPool': volume_to_pool
+                    'volumeToPool': volume_to_pool,
+                    'file':
+                        settings.MEDIA_URL + pool.file.file.name
+                        if pool.file
+                        else ''
                 })
-
-        # for obj in Pooling.objects.all():
-        #     if obj.library:
-        #         # Native library
-        #         record = obj.library
-        #         pool = get_pool(record, 'L')
-        #         req = get_request(record, 'L')
-        #         concentration = record.concentration
-        #         mean_fragment_size = record.mean_fragment_size
-        #
-        #     else:
-        #         # Converted sample
-        #         record = obj.sample
-        #         pool = get_pool(record, 'S')
-        #         req = get_request(record, 'S')
-        #         lib_prep_obj = LibraryPreparation.objects.get(
-        #             sample_id=record.id
-        #         )
-        #         concentration = lib_prep_obj.concentration_library
-        #         mean_fragment_size = lib_prep_obj.mean_fragment_size
-        #
-        #     data.append({
-        #         'name': record.name,
-        #         'barcode': record.barcode,
-        #         'poolId': pool.id,
-        #         'poolName': pool.name,
-        #         'requestId': req.id,
-        #         'requestName': req.name,
-        #         'concentration': concentration,
-        #         'meanFragmentSize': mean_fragment_size,
-        #         'sequencingDepth': record.sequencing_depth
-        #     })
 
     except Exception as e:
         error = str(e)
@@ -592,6 +555,97 @@ def get_pooling(request):
             'success': not error,
             'error': error,
             'data': data
+        }),
+        content_type='application/json',
+    )
+
+
+@csrf_exempt
+@login_required
+def download_pooling_template_xls(request):
+    response = HttpResponse(content_type='application/ms-excel')
+    libraries = json.loads(request.POST.get('libraries'))
+    samples = json.loads(request.POST.get('samples'))
+
+    filename = 'QC_Normalization_and_Pooling_Template.xls'
+    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet('QC Normalization and Pooling')
+
+    try:
+        columns = (
+            'Library',
+            'Barcode',
+            'ng/µl',
+            'bp',
+            'nM',
+            'Date',
+            'Comments',
+        )
+        row_num = 0
+
+        font_style = xlwt.XFStyle()
+        font_style.font.bold = True
+
+        for i, column in enumerate(columns):
+            ws.write(row_num, i, column, font_style)
+            ws.col(i).width = 6500  # Set column width
+
+        font_style = xlwt.XFStyle()
+        font_style.alignment.wrap = 1
+
+        for library_id in libraries:
+            obj = Pooling.objects.get(library_id=library_id)
+            row_num += 1
+            row = [obj.library.name, obj.library.barcode]
+            for i in range(2):
+                ws.write(row_num, i, row[i], font_style)
+
+        for sample_id in samples:
+            obj = Pooling.objects.get(sample_id=sample_id)
+            row_num += 1
+            row = [obj.sample.name, obj.sample.barcode]
+            for i in range(2):
+                ws.write(row_num, i, row[i], font_style)
+
+    except Exception as e:
+        logger.exception(e)
+
+    wb.save(response)
+
+    return response
+
+
+@csrf_exempt
+@login_required
+def upload_pooling_template(request):
+    """ Upload a file and attach it to a given Pool. """
+    error = ''
+    pool_name = request.POST.get('pool_name')
+
+    if request.method == 'POST' and any(request.FILES):
+        try:
+            pool = Pool.objects.get(name=pool_name)
+
+            uploaded_file = PoolFile(
+                file=request.FILES.get('file')
+            )
+            uploaded_file.save()
+
+            # Attach the uploaded file to the pool
+            pool.file = uploaded_file
+            pool.save()
+
+        except Exception as e:
+            error = str(e)
+            print('[ERROR]: %s' % error)
+            logger.debug(error)
+
+    return HttpResponse(
+        json.dumps({
+            'success': not error,
+            'error': error
         }),
         content_type='application/json',
     )

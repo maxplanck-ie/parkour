@@ -4,6 +4,7 @@ Ext.define('MainHub.model.pooling.Pooling', {
     fields: [
         {  name: 'name',                    type: 'string'  },
         {  name: 'active',                  type: 'bool'    },
+        {  name: 'libraryId',               type: 'int'     },
         {  name: 'sampleId',                type: 'int'     },
         {  name: 'requestId',               type: 'int'     },
         {  name: 'requestName',             type: 'string'  },
@@ -18,6 +19,7 @@ Ext.define('MainHub.model.pooling.Pooling', {
         {  name: 'sampleVolume',            type: 'string'  },
         {  name: 'sampleBuffer',            type: 'string'  },
         {  name: 'percentageLibrary',       type: 'string'  },
-        {  name: 'volumeToPool',            type: 'string'  }
+        {  name: 'volumeToPool',            type: 'string'  },
+        {  name: 'file',                    type: 'string'  }
     ]
 });

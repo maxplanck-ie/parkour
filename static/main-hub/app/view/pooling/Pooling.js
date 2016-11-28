@@ -38,6 +38,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
         ],
         features: [{
             ftype:'grouping',
+            collapsible: false,
             groupHeaderTpl: [
                 '<strong>Pool: {name} | Pool size: {children:this.poolSize} M reads | Pool volume: {children:this.poolVolume} {children:this.renderDownloadBtn}</strong>',
                 {
@@ -52,15 +53,10 @@ Ext.define('MainHub.view.pooling.Pooling', {
                         return children.length * 10;
                     },
                     renderDownloadBtn: function(children) {
-                        var url = '#';
+                        var url = children[0].get('file');
 
-                        // TODO: get link for the QC template
-                        if (url != '#') {
-                            return '<span style="float:right"><a href="' + url + '">' +
-                                '<i class="fa fa-download" aria-hidden="true"></i></a></span>';
-                        } else {
-                            return '';
-                        }
+                        return (url !== '') ? '<span class="download-pooling-template"><a href="' + url +
+                            '">' + '<i class="fa fa-download" aria-hidden="true"></i></a></span>' : '';
                     }
                 }
             ]
@@ -175,11 +171,13 @@ Ext.define('MainHub.view.pooling.Pooling', {
                     xtype: 'button',
                     id: 'downloadBenchtopProtocolPBtn',
                     itemId: 'downloadBenchtopProtocolPBtn',
-                    text: 'Download Benchtop Protocol as XLS',
+                    text: 'Download Benchtop Protocol',
                     disabled: true
                 },
                 {
                     xtype: 'button',
+                    id: 'downloadPoolingTemplateBtn',
+                    itemId: 'downloadPoolingTemplateBtn',
                     text: 'Download Template QC Normalization and Pooling',
                     disabled: true
                 }

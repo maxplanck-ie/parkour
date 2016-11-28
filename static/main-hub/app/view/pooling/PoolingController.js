@@ -11,6 +11,12 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                 refresh: 'onPoolingTableRefresh',
                 groupcontextmenu: 'onGroupContextMenu',
                 edit: 'onPoolingTableEdit'
+            },
+            '#downloadBenchtopProtocolPBtn': {
+                // click: ''
+            },
+            '#downloadPoolingTemplateBtn': {
+                click: 'onDownloadPoolingTemplateBtnClick'
             }
         }
     },
@@ -19,6 +25,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         Ext.getStore('poolingStore').load(function(records, operation, success) {
             if (success && records.length > 0) {
                 Ext.getCmp('downloadBenchtopProtocolPBtn').setDisabled(false);
+                Ext.getCmp('downloadPoolingTemplateBtn').setDisabled(false);
             }
         });
     },
@@ -36,9 +43,9 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             items: [{
                 text: 'Upload Template QC Normalization and Pooling',
                 iconCls: 'x-fa fa-upload',
-                // handler: function() {
-                //     me.uploadFile(group);
-                // }
+                handler: function() {
+                    me.uploadPoolingTemplate(group);
+                }
             }]
         }).showAt(e.getXY());
     },
@@ -68,5 +75,79 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             Object.keys(changes).indexOf('bufferVolume') == -1) {
                 bufferVolume = ((concentrationC1 * sampleVolume) / concentrationC2 - sampleVolume).toFixed(1);
         }
+    },
+
+    onDownloadPoolingTemplateBtnClick: function() {
+        var store = Ext.getStore('poolingStore'),
+            libraries = [],
+            samples = [];
+
+        // Get all checked (selected) samples
+        store.each(function(record) {
+            if (record.get('active')) {
+                if (record.get('libraryId') === 0) {
+                    samples.push(record.get('sampleId'));
+                } else {
+                    libraries.push(record.get('libraryId'));
+                }
+            }
+        });
+
+        if (libraries.length > 0 || samples.length > 0) {
+            var form = Ext.create('Ext.form.Panel', {
+                standardSubmit: true
+            });
+
+            form.submit({
+                url: 'download_pooling_template_xls/',
+                target: '_blank',
+                params: {
+                    samples: Ext.JSON.encode(samples),
+                    libraries: Ext.JSON.encode(libraries)
+                }
+            });
+        } else {
+            Ext.ux.ToastMessage('You did not select any libraries.', 'warning');
+        }
+    },
+
+    uploadPoolingTemplate: function(poolName) {
+        Ext.create('Ext.ux.FileUploadWindow', {
+            onFileUpload: function() {
+                var me = this,
+                    form = this.down('form').getForm(),
+                    url = 'upload_pooling_template/';
+
+                if (form.isValid()) {
+                    form.submit({
+                        url: url,
+                        method: 'POST',
+                        waitMsg: 'Uploading...',
+                        params: {
+                            pool_name: poolName
+                        },
+
+                        success: function(f, action) {
+                            var obj = Ext.JSON.decode(action.response.responseText);
+
+                            if (obj.success) {
+                                Ext.getStore('poolingStore').reload();
+                                me.close();
+                                Ext.ux.ToastMessage('File has been successfully uploaded.', 'info');
+                            } else {
+                                Ext.ux.ToastMessage('There is a problem with the provided file.', 'error');
+                            }
+                        },
+
+                        failure: function(f, action) {
+                            console.error('[ERROR]: ' + url);
+                            console.error(action.response);
+                        }
+                    });
+                } else {
+                    Ext.ux.ToastMessage('You did not select any file.', 'warning');
+                }
+            }
+        });
     }
 });

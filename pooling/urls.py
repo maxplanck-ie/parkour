@@ -18,4 +18,6 @@ urlpatterns = [
 
     # Pooling
     url(r'^get_pooling/$', views.get_pooling, name='get_pooling'),
+    url(r'^download_pooling_template_xls/$', views.download_pooling_template_xls, name='download_pooling_template_xls'),
+    url(r'^upload_pooling_template/$', views.upload_pooling_template, name='upload_pooling_template'),
 ]

@@ -3,10 +3,24 @@ from django.forms import ModelForm
 from library.models import Library, Sample
 
 
+class PoolFile(models.Model):
+    file = models.FileField(upload_to='pooling/%Y/%m/%d/')
+
+    def __str__(self):
+        return self.file.name.split('/')[-1]
+
+
 class Pool(models.Model):
     name = models.CharField('Name', max_length=100)
     libraries = models.ManyToManyField(Library, blank=True)
     samples = models.ManyToManyField(Sample, blank=True)
+
+    file = models.ForeignKey(
+        PoolFile,
+        verbose_name='File',
+        blank=True,
+        null=True,
+    )
 
     def __str__(self):
         return self.name

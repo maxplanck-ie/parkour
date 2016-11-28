@@ -169,6 +169,7 @@ Ext.define('MainHub.view.pooling.LibraryPreparationController', {
                             if (obj.success) {
                                 Ext.getStore('libraryPreparationStore').reload();
                                 me.close();
+                                Ext.ux.ToastMessage('File has been successfully uploaded.', 'info');
                             } else {
                                 Ext.ux.ToastMessage('There is a problem with the provided file.', 'error');
                             }

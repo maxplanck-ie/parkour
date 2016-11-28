@@ -24,5 +24,14 @@ Ext.define('MainHub.store.pooling.Pooling', {
             rootProperty: 'data',
             successProperty: 'success'
         }
+    },
+
+    listeners: {
+        load: function(store, records, success, operation) {
+            if (success) {
+                // Remove 'Click to collapse' tooltip
+                $('.x-grid-group-title').attr('data-qtip', '');
+            }
+        }
     }
 });
