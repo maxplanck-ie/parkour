@@ -665,13 +665,24 @@ def edit_pooling(request):
 
     library_id = int(request.POST.get('library_id'))
     sample_id = int(request.POST.get('sample_id'))
-
-    if library_id == 0:
-        obj = Pooling.objects.get(sample_id=sample_id)
-    else:
-        obj = Pooling.objects.get(library_id=library_id)
+    concentration = float(request.POST.get('concentration'))
 
     try:
+        if library_id == 0:
+            obj = Pooling.objects.get(sample_id=sample_id)
+
+            # Update concentration value
+            lib_prep_obj = LibraryPreparation.objects.get(sample_id=sample_id)
+            lib_prep_obj.concentration_library = concentration
+            lib_prep_obj.save()
+        else:
+            obj = Pooling.objects.get(library_id=library_id)
+
+            # Update concentration value
+            library = Library.objects.get(id=library_id)
+            library.concentration = concentration
+            library.save()
+
         form = PoolingForm(request.POST, instance=obj)
 
         if form.is_valid():
