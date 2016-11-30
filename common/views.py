@@ -78,6 +78,12 @@ def get_navigation_tree(request):
                 'iconCls': 'x-fa fa-sort-amount-desc',
                 'viewType': 'pooling',
                 'leaf': True
+            },
+            {
+                'text': 'Load Flowcells',
+                'iconCls': 'x-fa fa-level-down',
+                'viewType': 'load-flowcells',
+                'leaf': True
             }
         ]
     }
