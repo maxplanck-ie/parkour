@@ -23,12 +23,11 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
 
     onLibrariesTableBoxready: function(grid) {
         // Triggers when the table is shown for the first time
-        // grid.fireEvent('refresh', grid);
+        grid.fireEvent('refresh', grid);
     },
 
     onLibrariesTableRefresh: function(grid) {
         // Reload the table
-        grid.getStore().removeAll();
         grid.getStore().reload();
     },
 
@@ -90,9 +89,14 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
                 if (obj.success) {
                     var grid = Ext.getCmp('librariesTable');
                     grid.fireEvent('refresh', grid);
-                    Ext.getStore('PoolingTree').reload();
                     Ext.ux.ToastMessage('Record has been deleted!');
 
+                    // Reload stores
+                    if (Ext.getStore('requestsStore').isLoaded()) Ext.getStore('requestsStore').reload();
+                    if (Ext.getStore('incomingLibrariesStore').isLoaded()) Ext.getStore('incomingLibrariesStore').reload();
+                    if (Ext.getStore('PoolingTree').isLoaded()) Ext.getStore('PoolingTree').reload();
+                    if (Ext.getStore('libraryPreparationStore')) Ext.getStore('libraryPreparationStore').reload();
+                    if (Ext.getStore('poolingStore').isLoaded()) Ext.getStore('poolingStore').reload();
                 } else {
                     Ext.ux.ToastMessage(obj.error, 'error');
                     console.error('[ERROR]: ' + url.replace('/', '()'));

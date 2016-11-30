@@ -22,7 +22,7 @@ Ext.define('MainHub.store.requests.Requests', {
             successProperty: 'success'
         }
     },
-    
+
     listeners: {
         load: function(store, records, success, operation) {
             if (!success) {

@@ -110,6 +110,10 @@ Ext.define('MainHub.view.pooling.PoolingController', {
 
                 if (obj.success) {
                     grid.fireEvent('refresh', grid);
+
+                    // Reload stores
+                    if (Ext.getStore('librariesStore').isLoaded()) Ext.getStore('librariesStore').reload();
+                    if (Ext.getStore('incomingLibrariesStore').isLoaded()) Ext.getStore('incomingLibrariesStore').reload();
                 } else {
                     Ext.ux.ToastMessage(obj.error, 'error');
                     console.error('[ERROR]: ' + url + ': ' + obj.error);

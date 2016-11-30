@@ -19,8 +19,7 @@ Ext.define('MainHub.view.startpage.RequestsController', {
     },
 
     onRequestsTableRefresh: function(grid) {
-        grid.getStore().removeAll();
-        Ext.getStore('requestsStore').load();
+        Ext.getStore('requestsStore').reload();
     },
 
     onAddRequestBtnClick: function(btn) {
@@ -99,8 +98,14 @@ Ext.define('MainHub.view.startpage.RequestsController', {
                 if (obj.success) {
                     var grid = Ext.getCmp('requestsTable');
                     grid.fireEvent('refresh', grid);
-                    Ext.getStore('PoolingTree').reload();
                     Ext.ux.ToastMessage('Record has been deleted!');
+
+                    // Reload stores
+                    if (Ext.getStore('librariesStore').isLoaded()) Ext.getStore('librariesStore').reload();
+                    if (Ext.getStore('incomingLibrariesStore').isLoaded()) Ext.getStore('incomingLibrariesStore').reload();
+                    if (Ext.getStore('PoolingTree').isLoaded()) Ext.getStore('PoolingTree').reload();
+                    if (Ext.getStore('libraryPreparationStore')) Ext.getStore('libraryPreparationStore').reload();
+                    if (Ext.getStore('poolingStore').isLoaded()) Ext.getStore('poolingStore').reload();
 
                 } else {
                     Ext.ux.ToastMessage(obj.error, 'error');

@@ -88,6 +88,10 @@ Ext.define('MainHub.view.pooling.IndexGeneratorController', {
                 }
             });
         }
+
+        // Reload stores
+        if (Ext.getStore('librariesStore').isLoaded()) Ext.getStore('librariesStore').reload();
+        if (Ext.getStore('incomingLibrariesStore').isLoaded()) Ext.getStore('incomingLibrariesStore').reload();
     },
 
     onPoolingTreePanelCheckchange: function(node, checked) {
@@ -295,10 +299,15 @@ Ext.define('MainHub.view.pooling.IndexGeneratorController', {
                     var obj = Ext.JSON.decode(response.responseText);
 
                     if (obj.success) {
-                        Ext.getStore('PoolingTree').reload();
                         Ext.getCmp('poolGrid').setTitle('Pool');
                         Ext.getCmp('poolingContainer').setLoading(false);
                         Ext.ux.ToastMessage('Pool has been saved!');
+
+                        // Reload stores
+                        if (Ext.getStore('PoolingTree').isLoaded()) Ext.getStore('PoolingTree').reload();
+                        if (Ext.getStore('libraryPreparationStore')) Ext.getStore('libraryPreparationStore').reload();
+                        if (Ext.getStore('poolingStore').isLoaded()) Ext.getStore('poolingStore').reload();
+
                     } else {
                         Ext.getCmp('poolingContainer').setLoading(false);
                         Ext.ux.ToastMessage(obj.error, 'error');

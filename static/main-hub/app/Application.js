@@ -19,10 +19,6 @@ Ext.define('MainHub.Application', {
 
     stores: [
         'NavigationTree',
-        'researchers.Researchers',
-        'researchers.PrincipalInvestigators',
-        'researchers.Organizations',
-        'researchers.CostUnits',
         'requests.Requests',
         'libraries.Libraries',
         'libraries.LibraryProtocols',

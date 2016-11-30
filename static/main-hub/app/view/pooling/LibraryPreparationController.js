@@ -28,8 +28,6 @@ Ext.define('MainHub.view.pooling.LibraryPreparationController', {
 
     onLibraryPreparationTableRefresh: function(grid) {
         // Reload the store
-        // grid.getStore().removeAll();
-        // grid.getStore().reload();
         Ext.getStore('libraryPreparationStore').reload();
     },
 
@@ -99,6 +97,7 @@ Ext.define('MainHub.view.pooling.LibraryPreparationController', {
 
                 if (obj.success) {
                     grid.fireEvent('refresh', grid);
+                    if (Ext.getStore('poolingStore').isLoaded()) Ext.getStore('poolingStore').reload();
                 } else {
                     Ext.ux.ToastMessage(obj.error, 'error');
                     console.error('[ERROR]: ' + url + ': ' + obj.error);
