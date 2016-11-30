@@ -10,6 +10,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                 boxready: 'onPoolingTableBoxready',
                 refresh: 'onPoolingTableRefresh',
                 groupcontextmenu: 'onGroupContextMenu',
+                beforeedit: 'onPoolingTableBeforeedit',
                 edit: 'onPoolingTableEdit'
             },
             '#downloadBenchtopProtocolPBtn': {
@@ -48,6 +49,16 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                 }
             }]
         }).showAt(e.getXY());
+    },
+
+    onPoolingTableBeforeedit: function(editor) {
+        // Hide Update and Cancel buttons
+        editor.getEditor().floatingButtons.items.items[0].hide();
+        editor.getEditor().floatingButtons.items.items[1].hide();
+
+        setTimeout(function() {
+            $('.x-grid-row-editor-buttons').hide();
+        }, 100);
     },
 
     onPoolingTableEdit: function(editor, context) {
