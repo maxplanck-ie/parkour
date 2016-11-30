@@ -506,7 +506,7 @@ def get_pooling(request):
                     'poolName': pool.name,
                     'requestId': req.id,
                     'requestName': req.name,
-                    'concentration': library.concentration_library,
+                    'concentration': library.concentration,
                     'meanFragmentSize': library.mean_fragment_size,
                     'sequencingDepth': library.sequencing_depth,
                     'concentrationC1': pooling_obj.concentration_c1,
