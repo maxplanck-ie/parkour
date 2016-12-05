@@ -134,6 +134,8 @@ def save_pool(request):
         pool.libraries.add(*libraries)
         pool.samples.add(*samples)
         pool.name = str(pool.id) + '_' + name
+        pool.size += sum(l.sequencing_depth for l in libraries) + \
+            sum(s.sequencing_depth for s in samples)
         pool.save()
 
         # Make current libraries not available for repeated pooling

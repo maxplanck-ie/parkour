@@ -35,7 +35,7 @@ Ext.define('MainHub.store.libraries.Libraries', {
                 console.error(response);
             }
         }
-    },
+    }
 
     // autoLoad: true
 });

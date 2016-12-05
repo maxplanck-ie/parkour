@@ -14,6 +14,7 @@ class Pool(models.Model):
     name = models.CharField('Name', max_length=100)
     libraries = models.ManyToManyField(Library, blank=True)
     samples = models.ManyToManyField(Sample, blank=True)
+    size = models.IntegerField('Pool Size', default=0, blank=True)
 
     file = models.ForeignKey(
         PoolFile,

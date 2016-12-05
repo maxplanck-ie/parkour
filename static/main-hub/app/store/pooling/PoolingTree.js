@@ -1,6 +1,5 @@
 Ext.define('MainHub.store.pooling.PoolingTree', {
     extend: 'Ext.data.TreeStore',
-
     storeId: 'PoolingTree',
 
     proxy: {

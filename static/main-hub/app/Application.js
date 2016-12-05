@@ -38,7 +38,9 @@ Ext.define('MainHub.Application', {
         'requests.LibrariesInRequest',
         'pooling.PoolingTree',
         'pooling.LibraryPreparation',
-        'pooling.Pooling'
+        'pooling.Pooling',
+        'flowcell.Sequencer',
+        'flowcell.Pool'
     ],
 
     requires: [
