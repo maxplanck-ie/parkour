@@ -71,10 +71,13 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                             width: 500,
                             height: 275,
                             border: 0,
+                            viewConfig: {
+                                markDirty: false
+                            },
                             style: {
                                 borderLeft: '1px solid #d0d0d0'
                             },
-
+                            store: 'poolsStore',
                             columns: [
                                 {
                                     text: 'Pool',
@@ -93,12 +96,10 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                                 },
                                 {
                                     text: 'Lane',
-                                    dataIndex: 'lane',
+                                    dataIndex: 'laneName',
                                     width: 70
                                 }
-                            ],
-
-                            store: 'poolsStore'
+                            ]
                         }
                     ]
                 },

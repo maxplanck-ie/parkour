@@ -18,7 +18,8 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
 
     onSequencerChange: function(cb, newValue, oldValue) {
         var me = this,
-            lanes = Ext.getCmp('lanes');
+            lanes = Ext.getCmp('lanes'),
+            store = Ext.getStore('poolsStore');
 
         // If HiSeq2500 has been selected, create 8 lanes
         if (newValue == 5) {
@@ -48,6 +49,16 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
                 }
             });
         }
+
+        // Clear all loaded pools
+        store.each(function(pool) {
+            if (pool.get('lane')) {
+                pool.set({
+                    lane: '',
+                    laneName: ''
+                });
+            }
+        });
     },
 
     initializePoolDragZone: function(v) {
@@ -73,27 +84,69 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
     },
 
     initializeLaneDropZone: function(v) {
+        function allowPool(record, store) {
+            var loadedPools = [];
+
+            store.each(function(pool) {
+                if (pool.get('lane')) loadedPools.push(pool);
+            });
+
+            // return loadedPools.length === 0 || (loadedPools.length > 0 && record.get('sequencingRunCondition') === loadedPools[0].get('sequencingRunCondition'));
+            return true;
+        }
+
+        function allowLane(record, laneId, store) {
+            var ids = Ext.Array.pluck(Ext.Array.pluck(store.data.items, 'data'), 'lane');
+            return !ids || (record.get('lane') === '' && Ext.Array.indexOf(ids, laneId) === -1);
+        }
+
         v.dropZone = Ext.create('Ext.dd.DropZone', v.el, {
             getTargetFromEvent: function(e) {
                 return e.getTarget();
             },
 
-            onNodeEnter : function(target, dd, e, data) {
-                Ext.fly(target).addCls('lane-hover');
-            },
-
-            onNodeOut : function(target, dd, e, data) {
-                Ext.fly(target).removeCls('lane-hover');
-            },
-
-            // onNodeOver : function(target, dd, e, data){
-            //     debugger;
+            // onNodeEnter : function(target, dd, e, data) {
+            //     Ext.fly(target).addCls('lane-hover');
+            // },
+            //
+            // onNodeOut : function(target, dd, e, data) {
+            //     Ext.fly(target).removeCls('lane-hover');
             // },
 
-            onNodeDrop : function(target, dd, e, data){
-                var poolData = data.poolData;
+            onNodeOver : function(target, dd, e, data) {
+                var store = Ext.getStore('poolsStore'),
+                    poolRecord = store.findRecord('name', data.poolData.name),
+                    laneId = $(target).attr('id').replace('-innerCt', ''),
+                    proto = Ext.dd.DropZone.prototype;
+                return (allowLane(poolRecord, laneId, store) && allowPool(poolRecord, store)) ? proto.dropAllowed : proto.dropNotAllowed;
+            },
 
-                // debugger;
+            onNodeDrop : function(target, dd, e, data) {
+                var poolData = data.poolData,
+                    store = Ext.getStore('poolsStore'),
+                    poolRecord = store.findRecord('name', poolData.name),
+                    laneId = $(target).attr('id').replace('-innerCt', ''),
+                    laneName = $(target).text(),
+                    ids = Ext.Array.pluck(Ext.Array.pluck(store.data.items, 'data'), 'lane');
+
+                if (allowLane(poolRecord, laneId, store)) {
+                    if (allowPool(poolRecord, store)) {
+                        poolRecord.set({
+                            lane: laneId,
+                            laneName: laneName
+                        });
+
+                        Ext.fly(target).addCls('lane-loaded');
+                    } else {
+                        Ext.ux.ToastMessage('Read Lengths must be the same for all pools in a flowcell.', 'warning');
+                    }
+                } else {
+                    if (poolRecord.get('lane') && poolRecord.get('lane') !== laneId) {
+                        Ext.ux.ToastMessage('Pool ' + poolData.name + ' is already loaded on a lane. Please unload it and try again.', 'warning');
+                    } else if(!poolRecord.get('lane') && Ext.Array.indexOf(ids, laneId) !== -1) {
+                        Ext.ux.ToastMessage(laneName + ' is already loaded. Please unload it and try again.', 'warning')
+                    }
+                }
 
                 return false;
             }
@@ -103,20 +156,40 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
     showContextMenu: function(grid, record, item, index, e) {
         var me = this;
 
+        var items = [{
+            text: 'Show Additional Information',
+            iconCls: 'x-fa fa-info',
+            handler: function() {
+                Ext.create('MainHub.view.flowcell.PoolInfoWindow', {
+                    title: record.get('name'),
+                    poolId: record.get('id')
+                }).show();
+            }
+        }]
+
+        // If a pool is already loaded on a lane
+        if (record.get('lane')) {
+            items.push({
+                text: 'Unload Lane',
+                iconCls: 'x-fa fa-eraser',
+                handler: function() {
+                    me.unloadLane(record)
+                }
+            });
+        }
+
         e.stopEvent();
         Ext.create('Ext.menu.Menu', {
-            items: [
-                {
-                    text: 'Show Additional Information',
-                    iconCls: 'x-fa fa-info',
-                    handler: function() {
-                        Ext.create('MainHub.view.flowcell.PoolInfoWindow', {
-                            title: record.get('name'),
-                            poolId: record.get('id')
-                        }).show();
-                    }
-                }
-            ]
+            items: items
         }).showAt(e.getXY());
+    },
+
+    unloadLane: function(pool) {
+        Ext.fly(record.get('lane') + '-innerCt').removeCls('lane-loaded');
+
+        pool.set({
+            lane: '',
+            laneName: ''
+        });
     }
 });

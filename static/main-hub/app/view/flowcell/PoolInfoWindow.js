@@ -2,7 +2,7 @@ Ext.define('MainHub.view.flowcell.PoolInfoWindow',{
     extend: 'Ext.window.Window',
 
     requires: [
-        'MainHub.view.flowcell.PoolInfoWindowController',
+        'MainHub.view.flowcell.PoolInfoWindowController'
     ],
 
     controller: 'flowcell-poolinfowindow',

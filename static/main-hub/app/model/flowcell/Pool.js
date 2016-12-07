@@ -7,6 +7,7 @@ Ext.define('MainHub.model.flowcell.Pool', {
         {  name: 'sequencingRunCondition',      type: 'int'     },
         {  name: 'sequencingRunConditionName',  type: 'string'  },
         {  name: 'size',                        type: 'int'     },
-        {  name: 'lane',                        type: 'string'  }
+        {  name: 'lane',                        type: 'string'  },
+        {  name: 'laneName',                    type: 'string'  }
     ]
 });
