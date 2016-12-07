@@ -28,7 +28,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
                     cls: 'lane',
                     html: 'Lane ' + i,
                     id: 'lane' + i,
-                    width: 75,
+                    width: 85,
                     listeners: {
                         render: me.initializeLaneDropZone
                     }
@@ -41,7 +41,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
                 cls: 'lane',
                 html: 'Lane 1',
                 id: 'lane1',
-                width: 150,
+                width: 145,
                 listeners: {
                     render: me.initializeLaneDropZone
                 }

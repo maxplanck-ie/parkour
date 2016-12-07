@@ -9,7 +9,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
 
     title: 'Load Flowcell',
     height: 450,
-    width: 750,
+    width: 850,
 
     modal: true,
     resizable: false,
@@ -37,7 +37,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                             defaults: {
                                 submitEmptyText: false,
                                 allowBlank: false,
-                                labelWidth: 120,
+                                labelWidth: 180,
                                 width: 325
                             },
 
@@ -54,18 +54,13 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                                     forceSelection: true
                                 },
                                 {
-                                    queryMode: 'local',
-                                    displayField: 'name',
-                                    valueField: 'id',
-                                    name: 'sequencingRunCondition',
-                                    fieldLabel: 'Read Length',
-                                    emptyText: 'Read Length',
-                                    store: 'sequencingRunConditionsStore',
-                                    forceSelection: true
+                                    xtype: 'textfield',
+                                    fieldLabel: 'Flowcell ID'
                                 },
                                 {
                                     xtype: 'textfield',
-                                    fieldLabel: 'Flowcell ID'
+                                    fieldLabel: 'Loading Concentration (pM)',
+                                    disabled: true
                                 }
                             ]
                         },
@@ -73,7 +68,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                             xtype: 'grid',
                             itemId: 'poolsFlowcell',
                             padding: '0 6px 0 0',
-                            width: 400,
+                            width: 500,
                             height: 275,
                             border: 0,
                             style: {
@@ -87,14 +82,19 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                                     flex: 1
                                 },
                                 {
+                                    text: 'Read Length',
+                                    dataIndex: 'sequencingRunConditionName',
+                                    width: 100
+                                },
+                                {
                                     text: 'Size',
                                     dataIndex: 'size',
-                                    width: 80
+                                    width: 60
                                 },
                                 {
                                     text: 'Lane',
                                     dataIndex: 'lane',
-                                    width: 80
+                                    width: 70
                                 }
                             ],
 
