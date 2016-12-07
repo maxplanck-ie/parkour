@@ -144,7 +144,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
                     if (poolRecord.get('lane') && poolRecord.get('lane') !== laneId) {
                         Ext.ux.ToastMessage('Pool ' + poolData.name + ' is already loaded on a lane. Please unload it and try again.', 'warning');
                     } else if(!poolRecord.get('lane') && Ext.Array.indexOf(ids, laneId) !== -1) {
-                        Ext.ux.ToastMessage(laneName + ' is already loaded. Please unload it and try again.', 'warning')
+                        Ext.ux.ToastMessage(laneName + ' is already loaded. Please unload it and try again.', 'warning');
                     }
                 }
 
@@ -165,7 +165,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
                     poolId: record.get('id')
                 }).show();
             }
-        }]
+        }];
 
         // If a pool is already loaded on a lane
         if (record.get('lane')) {
@@ -173,7 +173,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
                 text: 'Unload Lane',
                 iconCls: 'x-fa fa-eraser',
                 handler: function() {
-                    me.unloadLane(record)
+                    me.unloadLane(record);
                 }
             });
         }
