@@ -23,6 +23,9 @@
     },
     "config.rb.tpl.merge": {
       "33f446bd02c3fd24eb27891582eff6a2e789796b": "eJxLLi2KT8ksUrBVcMvMSdUDMvMSc1M14uPdPH1c4+M1ufJLSwpKS+KLSypzUoGqrPJSi0tSU7gALskTcA\u003d\u003d"
+    },
+    "{modelFileName}.js.tpl.merge": {
+      "31d5356142a167c72422f7902f19df3c583f3249": "eJxlUcFugzAMvfMVVqUq0CLorlC6w7TrfgBxSMG00dKAktAxRfn3GWg7rfMhdvKeX16c99EmDbZCYcjcpWtQfvALmp7X6BOnqPYsBhcABY4WVZMBc0du8E1yYwicoXlpBcrGZFC69byf4srlgCZZICggbAdVW9Epquaz6CZ+j7bTEF65Bo2W+GUVQ8+1nXqXhsT0UtiQxSyKQdDxLqe0X1iJRHWy5xy2W/GsvNjR0FLPTC5FdRfLWJT/I5ODpB/MOXQwDSKDttyRHfvdz/VLBf6pywfBk8Cg1ZTyX8BH4Z+h3CTWfm97OT2/WC3A6vDouRtgjx9ZTDA3Zc/AuxLCUagGRygKGOtuUDaCV2AMiBYzqPw+pQsOgVtDuoGj5OoTJP072I4cNkONcEF9Qqg71UpR08i/0sGgBmwEbTYpeZwdVcH07h/XJaFF"
     }
   },
   "targets": {
@@ -280,6 +283,18 @@
         "viewFileName": "Main",
         "viewName": "Main",
         "viewNamespace": "MainHub.view"
+      }
+    },
+    "app/model/flowcell/PoolInfo.js": {
+      "source": "{modelFileName}.js.tpl.merge",
+      "version": "31d5356142a167c72422f7902f19df3c583f3249",
+      "parameters": {
+        "appName": "MainHub",
+        "baseClass": "Ext.data.Model",
+        "fields": "request:string:null,library:string:null,protocol:string:null,pcrCycles:int:null",
+        "modelFileName": "flowcell/PoolInfo",
+        "modelNamespace": "MainHub.model",
+        "name": "flowcell.PoolInfo"
       }
     }
   }

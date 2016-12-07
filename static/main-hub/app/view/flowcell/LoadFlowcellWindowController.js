@@ -2,7 +2,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.load-flowcell-window',
 
-    requires: [],
+    requires: ['MainHub.view.flowcell.PoolInfoWindow'],
 
     config: {
         control: {
@@ -10,7 +10,8 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
                 change: 'onSequencerChange'
             },
             '#poolsFlowcell': {
-                render: 'initializePoolDragZone'
+                render: 'initializePoolDragZone',
+                itemcontextmenu: 'showContextMenu'
             }
         }
     },
@@ -97,5 +98,25 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
                 return false;
             }
         });
+    },
+
+    showContextMenu: function(grid, record, item, index, e) {
+        var me = this;
+
+        e.stopEvent();
+        Ext.create('Ext.menu.Menu', {
+            items: [
+                {
+                    text: 'Show Additional Information',
+                    iconCls: 'x-fa fa-info',
+                    handler: function() {
+                        Ext.create('MainHub.view.flowcell.PoolInfoWindow', {
+                            title: record.get('name'),
+                            poolId: record.get('id')
+                        }).show();
+                    }
+                }
+            ]
+        }).showAt(e.getXY());
     }
 });
