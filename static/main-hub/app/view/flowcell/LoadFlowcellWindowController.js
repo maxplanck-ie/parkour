@@ -137,6 +137,8 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
                         });
 
                         Ext.fly(target).addCls('lane-loaded');
+
+                        return true;
                     } else {
                         Ext.ux.ToastMessage('Read Lengths must be the same for all pools in a flowcell.', 'warning');
                     }

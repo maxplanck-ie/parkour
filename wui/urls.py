@@ -30,7 +30,7 @@ urlpatterns = [
     url(r'index_generator/', include('index_generator.urls')),
     url(r'library_preparation/', include('library_preparation.urls')),
     url(r'pooling/', include('pooling.urls')),
-    # url(r'flowcell/', include('flowcell.urls')),
+    url(r'flowcell/', include('flowcell.urls')),
 ]
 
 from django.views.defaults import page_not_found, server_error

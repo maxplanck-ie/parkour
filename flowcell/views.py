@@ -1,11 +1,11 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 
-from pooling.models import Pool
+from index_generator.models import Pool
 from library.models import SequencingRunCondition
 from request.models import Request
 from .models import Sequencer
 
-import json
+# import json
 
 
 def sequencer_list(request):
@@ -21,10 +21,7 @@ def sequencer_list(request):
         for sequencer in Sequencer.objects.all()
     ]
 
-    return HttpResponse(
-        json.dumps(data),
-        content_type='application/json',
-    )
+    return JsonResponse(data, safe=False)
 
 
 def pool_list(request):
@@ -50,10 +47,7 @@ def pool_list(request):
             'size': pool.size
         })
 
-    return HttpResponse(
-        json.dumps(data),
-        content_type='application/json',
-    )
+    return JsonResponse(data, safe=False)
 
 
 def pool_info(request):
@@ -84,7 +78,4 @@ def pool_info(request):
                     # 'pcrCycles': 0
                 })
 
-    return HttpResponse(
-        json.dumps(data),
-        content_type='application/json',
-    )
+    return JsonResponse(data, safe=False)

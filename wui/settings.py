@@ -37,15 +37,15 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'authtools',
+
     'common',
-    # 'researcher',
     'request',
     'library',
     'qualitycheck',
     'index_generator',
     'library_preparation',
     'pooling',
-    # 'flowcell',
+    'flowcell',
 ]
 
 MIDDLEWARE_CLASSES = [
