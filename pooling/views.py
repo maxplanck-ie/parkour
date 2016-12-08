@@ -2,6 +2,7 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import F
 
 from pooling.models import Pool, LibraryPreparation, LibraryPreparationForm, \
     LibraryPreparationFile, Pooling, PoolingForm, PoolFile
@@ -110,7 +111,11 @@ def get_pooling_tree(request):
 
 @login_required
 def save_pool(request):
-    """ Save pool. """
+    """
+    Create a pool after generating indices, add libraries and "converted"
+    samples to it, update the pool size, and create a Library Preparation
+    object and a Pooling object for each added library/sample.
+    """
     error = ''
 
     try:
@@ -127,22 +132,23 @@ def save_pool(request):
         name = '_' + request.user.name.replace(' ', '_')
 
         if request.user.pi:
-            name = request.user.pi.name + name
+            name = '_' + request.user.pi.name + name
 
         pool = Pool(name=name)
         pool.save()
         pool.libraries.add(*libraries)
         pool.samples.add(*samples)
-        pool.name = str(pool.id) + '_' + name
-        pool.size += sum(l.sequencing_depth for l in libraries) + \
-            sum(s.sequencing_depth for s in samples)
-        pool.save()
+        pool.name = str(pool.id) + name
 
         # Make current libraries not available for repeated pooling
         for library_id in libraries:
-            library = Library.objects.get(id=library_id)
+            library = Library.objects.get(pk=library_id)
             library.is_pooled = True
-            library.save()
+            library.save(update_fields=['is_pooled'])
+
+            # Update Pool Size
+            pool.size += library.sequencing_depth
+            pool.save(update_fields=['size'])
 
             # Create Pooling object
             pool_obj = Pooling(library=library)
@@ -153,12 +159,20 @@ def save_pool(request):
         # and set their Index I7 and Index I5 indices
         for smpl in json.loads(request.POST.get('samples')):
             sample = Sample.objects.get(id=smpl['sample_id'])
+
+            # Update sample fields
             sample.index_i7 = smpl['index_i7']
             sample.index_i5 = smpl['index_i5']
             sample.is_pooled = True
             sample.is_converted = True
             sample.barcode = sample.barcode.replace('S', 'L')
-            sample.save()
+            sample.save(update_fields=[
+                'index_i7', 'index_i5', 'is_pooled', 'is_converted', 'barcode'
+            ])
+
+            # Update Pool Size
+            pool.size += sample.sequencing_depth
+            pool.save(update_fields=['size'])
 
             # Create Library Preparation object
             lp_obj = LibraryPreparation(sample=sample)
@@ -169,9 +183,10 @@ def save_pool(request):
             #  TODO: update field Concentration C1
             pool_obj.save()
 
+        pool.save()
+
     except Exception as e:
         error = str(e)
-        print(error)
         logger.exception(error)
 
     return HttpResponse(
