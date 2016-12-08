@@ -1,5 +1,7 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
+from library_preparation.models import LibraryPreparation
+from pooling.models import Pooling
 from .models import Pool
 
 
@@ -9,3 +11,14 @@ def update_pool_name(sender, instance, created, **kwargs):
     if created:
         instance.name = str(instance.id) + instance.name
         instance.save()
+
+
+@receiver(pre_delete, sender=Pool)
+def delete_dependent_objects(sender, instance, **kwargs):
+    libraries = instance.libraries.all()
+    samples = instance.samples.all()
+
+    # Delete all dependent Library Preparation and Pooling objects
+    LibraryPreparation.objects.filter(sample__in=samples).delete()
+    Pooling.objects.filter(library__in=libraries).delete()
+    Pooling.objects.filter(sample__in=samples).delete()
