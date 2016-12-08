@@ -2,7 +2,6 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import F
 
 from pooling.models import Pool, LibraryPreparation, LibraryPreparationForm, \
     LibraryPreparationFile, Pooling, PoolingForm, PoolFile
