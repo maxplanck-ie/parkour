@@ -1,10 +1,10 @@
-Ext.define('MainHub.view.pooling.IndexGenerator', {
+Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
     extend: 'Ext.container.Container',
     xtype: 'index-generator',
     id: 'poolingContainer',
 
     requires: [
-        'MainHub.view.pooling.IndexGeneratorController'
+        'MainHub.view.indexgenerator.IndexGeneratorController'
     ],
 
     controller: 'index-generator',

@@ -27,8 +27,9 @@ urlpatterns = [
     url(r'', include('request.urls')),
     url(r'', include('library.urls')),
     url(r'', include('qualitycheck.urls')),
-    url(r'', include('pooling.urls')),
-    url(r'flowcell/', include('flowcell.urls')),
+    url(r'index_generator/', include('index_generator.urls')),
+    # url(r'', include('pooling.urls')),
+    # url(r'flowcell/', include('flowcell.urls')),
 ]
 
 from django.views.defaults import page_not_found, server_error

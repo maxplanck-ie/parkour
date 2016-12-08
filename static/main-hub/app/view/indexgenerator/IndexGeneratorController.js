@@ -1,4 +1,4 @@
-Ext.define('MainHub.view.pooling.IndexGeneratorController', {
+Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.index-generator',
 
@@ -60,7 +60,7 @@ Ext.define('MainHub.view.pooling.IndexGeneratorController', {
 
             // Update record in the database
             Ext.Ajax.request({
-                url: 'update_sequencing_run_condition/',
+                url: 'index_generator/update_sequencing_run_condition/',
                 method: 'POST',
                 scope: this,
                 params: {
@@ -79,7 +79,7 @@ Ext.define('MainHub.view.pooling.IndexGeneratorController', {
 
             // Update record in the database
             Ext.Ajax.request({
-                url: 'update_index_type/',
+                url: 'index_generator/update_index_type/',
                 method: 'POST',
                 scope: this,
                 params: {
@@ -266,7 +266,7 @@ Ext.define('MainHub.view.pooling.IndexGeneratorController', {
 
     savePool: function(btn) {
         var store = Ext.getCmp('poolGrid').getStore(),
-            url = 'save_pool/';
+            url = 'index_generator/save_pool/';
 
         if (this.isPoolValid(store)) {
             // Get all libraries' and samples' ids
@@ -311,7 +311,7 @@ Ext.define('MainHub.view.pooling.IndexGeneratorController', {
                     } else {
                         Ext.getCmp('poolingContainer').setLoading(false);
                         Ext.ux.ToastMessage(obj.error, 'error');
-                        console.error('[ERROR]: ' + url + ': ' + obj.error);
+                        console.error('[ERROR]: ' + url);
                     }
                 },
 
@@ -343,7 +343,7 @@ Ext.define('MainHub.view.pooling.IndexGeneratorController', {
         var poolingTreePanel = Ext.getCmp('poolingTreePanel'),
             grid = Ext.getCmp('poolGrid'),
             store = grid.getStore(),
-            url = 'generate_indices/';
+            url = 'index_generator/generate_indices/';
 
         poolingTreePanel.disable();
         grid.setLoading('Generating...');
@@ -366,18 +366,20 @@ Ext.define('MainHub.view.pooling.IndexGeneratorController', {
                     store.add(obj.data);
                 } else {
                     Ext.ux.ToastMessage(obj.error, 'error');
-                    console.error('[ERROR]: ' + url + ': ' + obj.error);
+                    console.error('[ERROR]: ' + url);
                 }
+
                 poolingTreePanel.enable();
                 grid.setLoading(false);
             },
 
             failure: function(response) {
-                poolingTreePanel.enable();
-                grid.setLoading(false);
                 Ext.ux.ToastMessage(response.statusText, 'error');
                 console.error('[ERROR]: ' + url);
                 console.error(response);
+
+                poolingTreePanel.enable();
+                grid.setLoading(false);
             }
         });
     }
