@@ -1,10 +1,10 @@
-Ext.define('MainHub.view.pooling.LibraryPreparation', {
+Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
     extend: 'Ext.container.Container',
     xtype: 'library-preparation',
 
     requires: [
-        'MainHub.view.pooling.LibraryPreparationController',
-        'MainHub.view.pooling.BenchtopProtocolWindow',
+        'MainHub.view.librarypreparation.LibraryPreparationController',
+        'MainHub.view.librarypreparation.BenchtopProtocolWindow',
         'Ext.ux.FiddleCheckColumn'
     ],
 

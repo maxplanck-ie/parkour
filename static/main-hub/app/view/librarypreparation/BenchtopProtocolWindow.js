@@ -1,8 +1,7 @@
-Ext.define('MainHub.view.pooling.BenchtopProtocolWindow', {
+Ext.define('MainHub.view.librarypreparation.BenchtopProtocolWindow', {
     extend: 'Ext.window.Window',
-    // xtype: 'library-preparation',
 
-    requires: ['MainHub.view.pooling.BenchtopProtocolWindowController'],
+    requires: ['MainHub.view.librarypreparation.BenchtopProtocolWindowController'],
 
     controller: 'benchtop-protocol-window',
 

@@ -1,4 +1,4 @@
-Ext.define('MainHub.view.pooling.BenchtopProtocolWindowController', {
+Ext.define('MainHub.view.librarypreparation.BenchtopProtocolWindowController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.benchtop-protocol-window',
 
@@ -31,7 +31,7 @@ Ext.define('MainHub.view.pooling.BenchtopProtocolWindowController', {
 
         if (Object.keys(data).length > 0) {
             form.submit({
-                url: 'download_benchtop_protocol_xls/',
+                url: 'library_preparation/download_benchtop_protocol/',
                 target: '_blank',
                 params: {
                     'params': data.params,

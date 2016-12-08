@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 
 from request.models import Request
 from library.models import Library, Sample, IndexI7, IndexI5
+from library_preparation.models import LibraryPreparation
 from .models import Pool
 from .generator import generate
 
@@ -12,6 +13,7 @@ import json
 logger = logging.getLogger('db')
 
 
+@login_required
 def pooling_tree(request):
     """ Get libraries ready for pooling. """
     children = []
@@ -161,9 +163,9 @@ def save_pool(request):
             pool.size += sample.sequencing_depth
 
             # # Create Library Preparation object
-            # lp_obj = LibraryPreparation(sample=sample)
-            # lp_obj.save()
-            #
+            lp_obj = LibraryPreparation(sample=sample)
+            lp_obj.save()
+
             # # Create Pooling object
             # pool_obj = Pooling(sample=sample)
             # #  TODO: update field Concentration C1
@@ -217,6 +219,7 @@ def update_index_type(request):
     return HttpResponse()
 
 
+@login_required
 def generate_indices(request):
     """ Generate indices for given libraries and samples. """
     error = ''

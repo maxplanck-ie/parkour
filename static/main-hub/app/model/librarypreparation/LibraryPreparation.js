@@ -1,4 +1,4 @@
-Ext.define('MainHub.model.pooling.LibraryPreparation', {
+Ext.define('MainHub.model.librarypreparation.LibraryPreparation', {
     extend: 'MainHub.model.Base',
 
     fields: [

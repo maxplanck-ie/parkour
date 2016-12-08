@@ -1,8 +1,11 @@
-Ext.define('MainHub.view.pooling.LibraryPreparationController', {
+Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.library-preparation',
 
-    requires: ['Ext.ux.FileUploadWindow'],
+    requires: [
+        'MainHub.view.librarypreparation.BenchtopProtocolWindow',
+        'Ext.ux.FileUploadWindow'
+    ],
 
     config: {
         control: {
@@ -45,7 +48,7 @@ Ext.define('MainHub.view.pooling.LibraryPreparationController', {
             concentrationLibrary = values.concentrationLibrary,
             meanFragmentSize = values.meanFragmentSize,
             nM = values.nM,
-            url = 'edit_library_preparation/';
+            url = 'library_preparation/edit/';
 
         // Set µl Sample
         if (concentrationSample > 0 && startingAmount > 0 &&
@@ -123,7 +126,7 @@ Ext.define('MainHub.view.pooling.LibraryPreparationController', {
         });
 
         if (samples.length > 0) {
-            Ext.create('MainHub.view.pooling.BenchtopProtocolWindow', {
+            Ext.create('MainHub.view.librarypreparation.BenchtopProtocolWindow', {
                 samples: samples
             }).show();
         } else {
@@ -151,7 +154,7 @@ Ext.define('MainHub.view.pooling.LibraryPreparationController', {
             onFileUpload: function() {
                 var me = this,
                     form = this.down('form').getForm(),
-                    url = 'upload_library_preparation_file/';
+                    url = 'library_preparation/upload_benchtop_protocol/';
 
                 if (form.isValid()) {
                     form.submit({
@@ -168,7 +171,7 @@ Ext.define('MainHub.view.pooling.LibraryPreparationController', {
                             if (obj.success) {
                                 Ext.getStore('libraryPreparationStore').reload();
                                 me.close();
-                                Ext.ux.ToastMessage('File has been successfully uploaded.', 'info');
+                                Ext.ux.ToastMessage('File has been successfully uploaded.');
                             } else {
                                 Ext.ux.ToastMessage('There is a problem with the provided file.', 'error');
                             }

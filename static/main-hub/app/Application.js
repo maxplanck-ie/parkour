@@ -37,7 +37,7 @@ Ext.define('MainHub.Application', {
         'qualitycontrol.IncomingLibraries',
         'requests.LibrariesInRequest',
         'indexgenerator.PoolingTree',
-        'pooling.LibraryPreparation',
+        'librarypreparation.LibraryPreparation',
         'pooling.Pooling',
         'flowcell.Sequencer',
         'flowcell.Pool',

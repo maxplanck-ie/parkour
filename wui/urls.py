@@ -28,6 +28,7 @@ urlpatterns = [
     url(r'', include('library.urls')),
     url(r'', include('qualitycheck.urls')),
     url(r'index_generator/', include('index_generator.urls')),
+    url(r'library_preparation/', include('library_preparation.urls')),
     # url(r'', include('pooling.urls')),
     # url(r'flowcell/', include('flowcell.urls')),
 ]
