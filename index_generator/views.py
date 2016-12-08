@@ -121,7 +121,6 @@ def save_pool(request):
         ]
 
         name = '_' + request.user.name.replace(' ', '_')
-
         if request.user.pi:
             name = '_' + request.user.pi.name + name
 
@@ -129,12 +128,11 @@ def save_pool(request):
         pool.save()
         pool.libraries.add(*library_ids)
         pool.samples.add(*samples)
-        pool.name = str(pool.id) + name
 
         # Make current libraries not available for repeated pooling
         for library_id in library_ids:
             library = Library.objects.get(pk=library_id)
-            library.is_pooled = True
+            # library.is_pooled = True
             library.save(update_fields=['is_pooled'])
 
             # Update Pool Size
@@ -153,11 +151,11 @@ def save_pool(request):
             # Update sample fields
             sample.index_i7 = smpl['index_i7']
             sample.index_i5 = smpl['index_i5']
-            sample.is_pooled = True
+            # sample.is_pooled = True
             sample.is_converted = True
             sample.barcode = sample.barcode.replace('S', 'L')
             sample.save(update_fields=[
-                'index_i7', 'index_i5', 'is_pooled', 'is_converted', 'barcode'
+                'index_i7', 'index_i5', 'is_pooled', 'is_converted', 'barcode',
             ])
 
             # Update Pool Size
@@ -172,7 +170,7 @@ def save_pool(request):
             # #  TODO: update field Concentration C1
             pool_obj.save()
 
-        pool.save()
+        pool.save(update_fields=['size'])
 
     except Exception as e:
         error = str(e)
