@@ -13,7 +13,7 @@ Ext.define('MainHub.store.pooling.Pooling', {
 
     proxy: {
         type: 'ajax',
-        url: 'get_pooling/',
+        url: 'pooling/get_all/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"

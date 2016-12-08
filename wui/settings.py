@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'qualitycheck',
     'index_generator',
     'library_preparation',
-    # 'pooling',
+    'pooling',
     # 'flowcell',
 ]
 

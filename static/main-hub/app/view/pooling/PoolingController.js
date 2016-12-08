@@ -72,7 +72,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             concentrationC2 = values.concentrationC2,
             sampleVolume = values.sampleVolume,
             bufferVolume = values.bufferVolume,
-            url = 'edit_pooling/';
+            url = 'pooling/edit/';
 
         // Set Library Concentration C1
         if (concentration > 0 && meanFragmentSize > 0 &&
@@ -149,7 +149,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             });
 
             form.submit({
-                url: 'download_pooling_template_xls/',
+                url: 'pooling/download_pooling_template/',
                 target: '_blank',
                 params: {
                     samples: Ext.JSON.encode(samples),
@@ -166,7 +166,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             onFileUpload: function() {
                 var me = this,
                     form = this.down('form').getForm(),
-                    url = 'upload_pooling_template/';
+                    url = 'pooling/upload_pooling_template/';
 
                 if (form.isValid()) {
                     form.submit({

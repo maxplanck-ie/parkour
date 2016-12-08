@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from request.models import Request
 from library.models import Library, Sample, IndexI7, IndexI5
 from library_preparation.models import LibraryPreparation
+from pooling.models import Pooling
 from .models import Pool
 from .generator import generate
 
@@ -140,9 +141,9 @@ def save_pool(request):
             pool.size += library.sequencing_depth
 
             # Create Pooling object
-            # pool_obj = Pooling(library=library)
+            pool_obj = Pooling(library=library)
             # #  TODO: update field Concentration C1
-            # pool_obj.save()
+            pool_obj.save()
 
         # Make current samples not available for repeated pooling
         # and set their Index I7 and Index I5 indices
@@ -167,9 +168,9 @@ def save_pool(request):
             lp_obj.save()
 
             # # Create Pooling object
-            # pool_obj = Pooling(sample=sample)
+            pool_obj = Pooling(sample=sample)
             # #  TODO: update field Concentration C1
-            # pool_obj.save()
+            pool_obj.save()
 
         pool.save()
 
