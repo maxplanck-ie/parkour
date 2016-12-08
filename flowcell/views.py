@@ -1,15 +1,15 @@
 from django.http import HttpResponse
-from flowcell.models import Sequencer
+
 from pooling.models import Pool
 from library.models import SequencingRunCondition
 from request.models import Request
+from .models import Sequencer
 
 import json
 
 
-def get_sequencers(request):
-    """ Get the list of sequencers. """
-    data = []
+def sequencer_list(request):
+    """ Get the list of all sequencers. """
 
     data = [
         {
@@ -27,7 +27,7 @@ def get_sequencers(request):
     )
 
 
-def get_pools(request):
+def pool_list(request):
     """ Get the list of pools for loading flowcells. """
     data = []
 
@@ -35,7 +35,7 @@ def get_pools(request):
         libraries = pool.libraries.all()
         samples = pool.samples.all()
 
-        # Get Pool's Sequencing Run Condition (Real Length)
+        # Get Pool's Sequencing Run Condition (Read Length)
         if any(libraries):
             src_id = libraries[0].sequencing_run_condition_id
         else:
@@ -56,7 +56,7 @@ def get_pools(request):
     )
 
 
-def get_pool_info(request):
+def pool_info(request):
     """ Get additional information for a given pool. """
     data = []
 

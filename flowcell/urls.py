@@ -1,9 +1,9 @@
 from django.conf.urls import url
-from flowcell import views
+from . import views
 
 
 urlpatterns = [
-    url(r'^get_sequencers/$', views.get_sequencers, name='get_sequencers'),
-    url(r'^get_pools/$', views.get_pools, name='get_pools'),
-    url(r'^get_pool_info/$', views.get_pool_info, name='get_pool_info'),
+    url(r'^sequencer_list/$', views.sequencer_list, name='sequencer_list'),
+    url(r'^pool_list/$', views.pool_list, name='pool_list'),
+    url(r'^pool_info/$', views.pool_info, name='pool_info'),
 ]
