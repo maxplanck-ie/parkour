@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save, pre_delete
+from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
 from library_preparation.models import LibraryPreparation
 from pooling.models import Pooling
@@ -22,3 +22,10 @@ def delete_dependent_objects(sender, instance, **kwargs):
     LibraryPreparation.objects.filter(sample__in=samples).delete()
     Pooling.objects.filter(library__in=libraries).delete()
     Pooling.objects.filter(sample__in=samples).delete()
+
+
+@receiver(post_delete, sender=Pool)
+def delete_file(sender, instance, **kwargs):
+    # Delete uploaded file after deleting a pool
+    if instance.file:
+        instance.file.delete(False)

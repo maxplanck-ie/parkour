@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 
 from request.models import Request
-from index_generator.models import Pool, PoolFile
+from index_generator.models import Pool
 from library_preparation.models import LibraryPreparation
 from library.models import Library
 from .models import Pooling
@@ -76,7 +76,7 @@ def get_all(request):
                     'percentageLibrary': round(percentage_library * 100),
                     'volumeToPool': volume_to_pool,
                     'file':
-                        settings.MEDIA_URL + pool.file.file.name
+                        settings.MEDIA_URL + pool.file.name
                         if pool.file
                         else ''
                 })
@@ -108,7 +108,7 @@ def get_all(request):
                     'percentageLibrary': round(percentage_library * 100),
                     'volumeToPool': volume_to_pool,
                     'file':
-                        settings.MEDIA_URL + pool.file.file.name
+                        settings.MEDIA_URL + pool.file.name
                         if pool.file
                         else ''
                 })
@@ -228,27 +228,14 @@ def download_pooling_template(request):
 @login_required
 def upload_pooling_template(request):
     """ Upload a file and attach it to a given Pool. """
-    error = ''
     pool_name = request.POST.get('pool_name')
 
     if request.method == 'POST' and any(request.FILES):
-        try:
-            pool = Pool.objects.get(name=pool_name)
+        pool = Pool.objects.get(name=pool_name)
+        pool.file = request.FILES.get('file')
+        pool.save()
+        success = True
+    else:
+        success = False
 
-            uploaded_file = PoolFile(
-                file=request.FILES.get('file')
-            )
-            uploaded_file.save()
-
-            # Attach the uploaded file to the pool
-            pool.file = uploaded_file
-            pool.save()
-
-        except Exception as e:
-            error = str(e)
-            logger.debug(error)
-
-    return JsonResponse({
-        'success': not error,
-        'error': error
-    })
+    return JsonResponse({'success': success})

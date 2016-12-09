@@ -178,15 +178,9 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                         },
 
                         success: function(f, action) {
-                            var obj = Ext.JSON.decode(action.response.responseText);
-
-                            if (obj.success) {
-                                Ext.getStore('poolingStore').reload();
-                                me.close();
-                                Ext.ux.ToastMessage('File has been successfully uploaded.');
-                            } else {
-                                Ext.ux.ToastMessage('There is a problem with the provided file.', 'error');
-                            }
+                            Ext.getStore('poolingStore').reload();
+                            me.close();
+                            Ext.ux.ToastMessage('File has been successfully uploaded.');
                         },
 
                         failure: function(f, action) {
