@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
 from library.models import IndexI7, IndexI5
-from .models import LibraryPreparation, LibraryPreparationFile
+from .models import LibraryPreparation
 from .forms import LibraryPreparationForm
 
 import logging
@@ -57,7 +57,7 @@ def get_all(request):
             'meanFragmentSize': obj.mean_fragment_size,
             'nM': obj.nM,
             'file':
-                settings.MEDIA_URL + obj.file.file.name
+                settings.MEDIA_URL + obj.file.name
                 if obj.file
                 else ''
         })
@@ -163,14 +163,10 @@ def upload_benchtop_protocol(request):
     """
     error = ''
 
+    library_protocol = request.POST.get('library_protocol')
+
     if request.method == 'POST' and any(request.FILES):
         try:
-            library_protocol = request.POST.get('library_protocol')
-            uploaded_file = LibraryPreparationFile(
-                file=request.FILES.get('file')
-            )
-            uploaded_file.save()
-
             # Get all Library Preparation objects with a given Library Protocol
             objects = LibraryPreparation.objects.filter(
                 sample__sample_protocol_id=library_protocol
@@ -178,7 +174,7 @@ def upload_benchtop_protocol(request):
 
             # Attach the file to the objects
             for obj in objects:
-                obj.file = uploaded_file
+                obj.file = request.FILES.get('file')
                 obj.save()
 
         except Exception as e:

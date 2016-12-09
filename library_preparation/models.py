@@ -2,13 +2,6 @@ from django.db import models
 from library.models import Sample
 
 
-class LibraryPreparationFile(models.Model):
-    file = models.FileField(upload_to='benchtop_protocols/%Y/%m/%d/')
-
-    def __str__(self):
-        return self.file.name.split('/')[-1]
-
-
 class LibraryPreparation(models.Model):
     sample = models.ForeignKey(Sample, verbose_name='Sample')
 
@@ -72,11 +65,10 @@ class LibraryPreparation(models.Model):
         blank=True,
     )
 
-    file = models.ForeignKey(
-        LibraryPreparationFile,
-        verbose_name='File',
-        blank=True,
+    file = models.FileField(
+        upload_to='benchtop_protocols/%Y/%m/%d/',
         null=True,
+        blank=True,
     )
 
     class Meta:
