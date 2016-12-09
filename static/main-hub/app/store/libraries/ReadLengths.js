@@ -1,6 +1,6 @@
-Ext.define('MainHub.store.libraries.SequencingRunConditions', {
+Ext.define('MainHub.store.libraries.ReadLengths', {
     extend: 'Ext.data.Store',
-    storeId: 'sequencingRunConditionsStore',
+    storeId: 'readLengthsStore',
 
     requires: [
         'MainHub.model.libraries.LibraryField'
@@ -10,7 +10,7 @@ Ext.define('MainHub.store.libraries.SequencingRunConditions', {
 
     proxy: {
         type: 'ajax',
-        url: 'get_sequencing_run_conditions/',
+        url: 'get_read_lengths/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"
@@ -23,16 +23,5 @@ Ext.define('MainHub.store.libraries.SequencingRunConditions', {
         }
     },
 
-    autoLoad: true,
-
-    listeners: {
-        load: function(store, records, success, operation) {
-            if (!success) {
-                var response = operation._response,
-                    obj = Ext.JSON.decode(response.responseText);
-                console.errorerror('[ERROR]: get_sequencing_run_conditions/: ' + obj.error);
-                console.error(response);
-            }
-        }
-    }
+    autoLoad: true
 });

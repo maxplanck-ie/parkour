@@ -3,7 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
-from library.models import IndexI7, IndexI5
+from library_sample_shared.models import IndexI7, IndexI5
 from .models import LibraryPreparation
 from .forms import LibraryPreparationForm
 

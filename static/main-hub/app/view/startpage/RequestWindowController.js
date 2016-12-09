@@ -134,7 +134,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
     },
 
     deleteRecord: function(record) {
-        var url = record.data.recordType == 'L' ? 'delete_library/' : 'delete_sample/';
+        var url = record.data.recordType == 'L' ? 'library/delete/' : 'sample/delete/';
 
         Ext.Ajax.request({
             url: url,
@@ -170,7 +170,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
 
     onGeneratePDFBtnClick: function(btn) {
         var wnd = btn.up('request_wnd'),
-            url = 'generate_pdf/?request_id=' + wnd.record.get('requestId');
+            url = 'request/generate_pdf/';
 
         Ext.getCmp('generatePDFForm').submit({
             target: '_blank',
@@ -178,12 +178,6 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
             params: {
                 'request_id': wnd.record.get('requestId')
             }
-            // success: function(f, action) {
-            //     debugger;
-            // },
-            // failure: function() {
-            //     debugger;
-            // }
         });
     },
 
@@ -241,7 +235,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
 
             wnd.setLoading('Saving...');
             Ext.Ajax.request({
-                url: 'save_request/',
+                url: 'request/save/',
                 method: 'POST',
                 timeout: 1000000,
                 scope: this,

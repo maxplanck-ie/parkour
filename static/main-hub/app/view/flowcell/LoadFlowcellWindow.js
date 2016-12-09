@@ -86,7 +86,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                                 },
                                 {
                                     text: 'Read Length',
-                                    dataIndex: 'sequencingRunConditionName',
+                                    dataIndex: 'readLengthName',
                                     width: 100
                                 },
                                 {

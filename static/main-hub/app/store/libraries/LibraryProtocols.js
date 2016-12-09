@@ -10,7 +10,7 @@ Ext.define('MainHub.store.libraries.LibraryProtocols', {
 
     proxy: {
         type: 'ajax',
-        url: 'get_library_protocols/',
+        url: 'library/library_protocols/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"
@@ -23,14 +23,5 @@ Ext.define('MainHub.store.libraries.LibraryProtocols', {
         }
     },
 
-    listeners: {
-        load: function(store, records, success, operation) {
-            if (!success) {
-                var response = operation._response,
-                    obj = Ext.JSON.decode(response.responseText);
-                console.error('[ERROR]: get_library_protocols/: ' + obj.error);
-                console.error(response);
-            }
-        }
-    }
+    autoLoad: true
 });

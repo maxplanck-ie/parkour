@@ -2,7 +2,9 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 
 from request.models import Request
-from library.models import Library, Sample, IndexI7, IndexI5
+from library_sample_shared.models import IndexI7, IndexI5
+from library.models import Library
+from sample.models import Sample
 from library_preparation.models import LibraryPreparation
 from pooling.models import Pooling
 from .models import Pool
@@ -49,10 +51,10 @@ def pooling_tree(request):
                     'indexI5': library.index_i5,
                     'indexType': library.index_type.id,
                     'indexTypeName': library.index_type.name,
-                    'sequencingRunCondition':
-                        library.sequencing_run_condition.id,
-                    'sequencingRunConditionName':
-                        library.sequencing_run_condition.name,
+                    'readLength':
+                        library.read_length.id,
+                    'readLengthName':
+                        library.read_length.name,
                     'iconCls': 'x-fa fa-flask',
                     'checked': False,
                     'leaf': True
@@ -78,10 +80,10 @@ def pooling_tree(request):
                         sample.index_type.name
                         if sample.index_type is not None
                         else '',
-                    'sequencingRunCondition':
-                        sample.sequencing_run_condition.id,
-                    'sequencingRunConditionName':
-                        sample.sequencing_run_condition.name,
+                    'readLength':
+                        library.read_length.id,
+                    'readLengthName':
+                        library.read_length.name,
                     'iconCls': 'x-fa fa-flask',
                     'checked': False,
                     'leaf': True
@@ -186,20 +188,19 @@ def save_pool(request):
 
 
 @login_required
-def update_sequencing_run_condition(request):
-    """ Update Sequencing Run Condition. """
+def update_read_length(request):
+    """ Update Read Length for a given librray or sample. """
 
     record_type = request.POST.get('record_type')
     record_id = request.POST.get('record_id')
-    sequencing_run_condition_id = \
-        request.POST.get('sequencing_run_condition_id')
+    read_length_id = request.POST.get('read_length_id')
 
     if record_type == 'L':
         record = Library.objects.get(pk=record_id)
     else:
         record = Sample.objects.get(pk=record_id)
-    record.sequencing_run_condition_id = sequencing_run_condition_id
-    record.save(update_fields=['sequencing_run_condition'])
+    record.read_length_id = read_length_id
+    record.save(update_fields=['read_length'])
 
     return HttpResponse()
 
@@ -237,7 +238,7 @@ def generate_indices(request):
             rec = {
                 'name': record['name'],
                 'sequencingDepth': record['depth'],
-                'sequencingRunCondition': record['read_length'],
+                'readLength': record['read_length'],
                 'indexI7': index_i7,
                 'indexI7Id': record['predicted_index_i7']['index_id'],
                 'indexI5': index_i5,

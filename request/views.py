@@ -1,11 +1,14 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+
 from common.utils import get_form_errors
-from request.models import Request, RequestForm, FileDeepSeqRequest
-from library.models import Library, Sample
+from library.models import Library
+from sample.models import Sample
+from .models import Request
+from .forms import RequestForm
 
 import json
 from datetime import datetime
@@ -20,60 +23,74 @@ User = get_user_model()
 
 
 @login_required
-def get_requests(request):
-    """ Get the list of all requests and send it to frontend """
-    error = str()
-    data = []
+def get_all(request):
+    """ Get the list of all requests. """
 
-    try:
-        if request.user.is_staff:
-            requests = Request.objects.select_related()
-        else:
-            requests = Request.objects.filter(
-                researcher_id=request.user.id
-            ).select_related()
+    if request.user.is_staff:
+        requests = Request.objects.prefetch_related(
+            'user', 'libraries', 'samples'
+        )
+    else:
+        requests = Request.objects.filter(
+            user_id=request.user.id
+        ).prefetch_related('user', 'libraries', 'samples')
 
-        data = [
-            {
-                'requestId': req.id,
-                'status': req.status,
-                'name': req.name,
-                'dateCreated': req.date_created.strftime('%d.%m.%Y'),
-                'description': req.description,
-                'researcherId': req.researcher.id,
-                'researcher': req.researcher.name,
-                'deepSeqRequestName':
-                    req.deep_seq_request.name
-                    if req.deep_seq_request is not None else '',
-                'deepSeqRequestPath':
-                    settings.MEDIA_URL + req.deep_seq_request.file.name
-                    if req.deep_seq_request is not None else '',
-                'sumSeqDepth': sum([
-                    l.sequencing_depth
-                    for l in list(req.libraries.all())+list(req.samples.all())
-                ])
-            }
-            for req in requests
-        ]
-        data = sorted(data, key=lambda x: x['status'])
+    data = [
+        {
+            'requestId': req.id,
+            'status': req.status,
+            'name': req.name,
+            'dateCreated': req.date_created.strftime('%d.%m.%Y'),
+            'description': req.description,
+            'researcherId': req.user.id,
+            'researcher': req.user.name,
+            'deepSeqRequestName':
+                req.deep_seq_request.name
+                if req.deep_seq_request else '',
+            'deepSeqRequestPath':
+                settings.MEDIA_URL + req.deep_seq_request.file.name
+                if req.deep_seq_request else '',
+            'sumSeqDepth': sum([
+                l.sequencing_depth
+                for l in list(req.libraries.all()) + list(req.samples.all())
+            ])
+        }
+        for req in requests
+    ]
 
-    except Exception as e:
-        error = str(e)
-        print('[ERROR]: get_requests/: %s' % error)
-        logger.debug(error)
+    return JsonResponse(data, safe=False)
 
-    return HttpResponse(
-        json.dumps({
-            'success': not error,
-            'error': error,
-            'data': sorted(
-                data,
-                key=lambda x: x['requestId'],
-                reverse=True,
-            )
-        }),
-        content_type='application/json',
-    )
+
+@login_required
+def get_libraries_and_samples(request):
+    """ """
+    request_id = request.GET.get('request_id')
+    req = Request.objects.get(id=request_id)
+
+    libraries = [
+        {
+            'name': library.name,
+            'recordType': 'L',
+            'libraryId': library.id,
+            'barcode': library.barcode,
+        }
+        for library in req.libraries.all()
+    ]
+    samples = [
+        {
+            'name': sample.name,
+            'recordType': 'S',
+            'sampleId': sample.id,
+            'barcode': sample.barcode,
+        }
+        for sample in req.samples.all()
+    ]
+    data = sorted(libraries + samples, key=lambda x: x['barcode'])
+
+    return JsonResponse({
+        'success': True,
+        'data': data
+    })
 
 
 @login_required
@@ -94,11 +111,7 @@ def save_request(request):
             if form.is_valid():
                 if mode == 'add':
                     req = form.save(commit=False)
-                    # Set initial values
-                    req.status = 0
-                    req.researcher = User.objects.get(id=request.user.id)
-                    req.save()
-                    req.name = 'Request' + str(req.id)  # ensure uniqueness
+                    req.user = User.objects.get(pk=request.user.id)
                     req.save()
                 else:
                     req = form.save()
@@ -122,86 +135,20 @@ def save_request(request):
 
     except Exception as e:
         error = str(e)
-        print('[ERROR]: edit_request/: %s' % error)
         logger.debug(error)
 
-    return HttpResponse(
-        json.dumps({
-            'success': not error,
-            'error': error,
-        }),
-        content_type='application/json',
-    )
+    return JsonResponse({
+        'success': not error,
+        'error': error,
+    })
 
 
 @login_required
 def delete_request(request):
-    error = str()
-
-    try:
-        request_id = int(request.POST.get('request_id'))
-        req = Request.objects.get(id=request_id)
-        libraries_samples = list(req.libraries.all()) + list(req.samples.all())
-        for obj in libraries_samples:
-            obj.delete()
-        req.delete()
-
-    except Exception as e:
-        error = str(e)
-        print('[ERROR]: delete_request/: %s' % error)
-        logger.debug(error)
-
-    return HttpResponse(
-        json.dumps({
-            'success': not error,
-            'error': error,
-        }),
-        content_type='application/json',
-    )
-
-
-@login_required
-def get_libraries_in_request(request):
-    """ """
-    error = ''
-    data = []
-
-    try:
-        request_id = request.GET.get('request_id')
-        req = Request.objects.get(id=request_id)
-        libraries = [
-            {
-                'name': library.name,
-                'recordType': 'L',
-                'libraryId': library.id,
-                'barcode': library.barcode,
-            }
-            for library in req.libraries.all()
-        ]
-        samples = [
-            {
-                'name': sample.name,
-                'recordType': 'S',
-                'sampleId': sample.id,
-                'barcode': sample.barcode,
-            }
-            for sample in req.samples.all()
-        ]
-        data = sorted(libraries+samples, key=lambda x: x['barcode'])
-
-    except Exception as e:
-        error = str(e)
-        print('[ERROR]: get_libraries_in_request/: %s' % error)
-        logger.debug(error)
-
-    return HttpResponse(
-        json.dumps({
-            'success': not error,
-            'error': error,
-            'data': data,
-        }),
-        content_type='application/json',
-    )
+    request_id = request.POST.get('request_id')
+    req = Request.objects.get(pk=request_id)
+    req.delete()
+    return JsonResponse({'success': True})
 
 
 # Helper functions
@@ -212,7 +159,7 @@ def draw_page_header(p, font, font_size):
     page_height = defaultPageSize[1]
     title = 'Deep Sequencing Request'
     p.setFont(font, font_size)
-    p.drawCentredString(page_width/2.0, page_height-75, title)
+    p.drawCentredString(page_width / 2.0, page_height - 75, title)
 
 
 def draw_string(p, x, _x, y, font, font_bold, font_size, label, string):
@@ -344,14 +291,14 @@ def generate_pdf(request):
 
         # Signature
         signature_y = 1.5 * inch
-        p.setFont(FONT, SMALL_FONT_SIZE-1)
-        p.line(x, signature_y+10, x+125, signature_y+10)
-        p.drawString(x+30, signature_y, '(Date, Signature)')
-        p.line(x+150, signature_y+10, x+300, signature_y+10)
-        p.drawString(x+180, signature_y, '(Principal Investigator)')
+        p.setFont(FONT, SMALL_FONT_SIZE - 1)
+        p.line(x, signature_y + 10, x + 125, signature_y + 10)
+        p.drawString(x + 30, signature_y, '(Date, Signature)')
+        p.line(x + 150, signature_y + 10, x + 300, signature_y + 10)
+        p.drawString(x + 180, signature_y, '(Principal Investigator)')
 
         p.setFont(FONT, SMALL_FONT_SIZE)
-        p.drawString(x*6.5, inch, page_1)   # Page counter
+        p.drawString(x * 6.5, inch, page_1)   # Page counter
         p.showPage()
 
         # Page 2
@@ -360,7 +307,7 @@ def generate_pdf(request):
         p.setFont(FONT_BOLD, DEFAULT_FONT_SIZE)
         p.drawString(x, _y, submitted_libraries_samples)
         p.setFont(FONT_BOLD, SMALL_FONT_SIZE)
-        draw_table_row(p, x, y-10, ('#', 'Name', 'Type', 'Barcode'))
+        draw_table_row(p, x, y - 10, ('#', 'Name', 'Type', 'Barcode'))
         p.setFont(FONT, SMALL_FONT_SIZE)
 
         libraries = [
@@ -379,7 +326,7 @@ def generate_pdf(request):
             }
             for sample in req.samples.all()
         ]
-        data = sorted(libraries+samples, key=lambda x: x['barcode'])
+        data = sorted(libraries + samples, key=lambda x: x['barcode'])
 
         # Only ~55 records fit into the page
         for i, record in enumerate(data):
@@ -387,10 +334,10 @@ def generate_pdf(request):
                 p,
                 x,
                 y - (15 + (i + 1) * 10),
-                (str(i+1), record['name'], record['type'], record['barcode']),
+                (str(i + 1), record['name'], record['type'], record['barcode']),
             )
 
-        p.drawString(x*6.5, inch, page_2)   # Page counter
+        p.drawString(x * 6.5, inch, page_2)   # Page counter
         p.showPage()
 
     except:
@@ -414,25 +361,19 @@ def upload_deep_sequencing_request(request):
     if request.method == 'POST' and any(request.FILES):
         try:
             req = Request.objects.get(id=request.POST.get('request_id'))
-            file = request.FILES.get('file')
-            deep_seq_request = FileDeepSeqRequest(name=file.name, file=file)
-            deep_seq_request.save()
-            req.deep_seq_request = deep_seq_request
+            req.deep_seq_request = request.FILES.get('file')
             req.save()
-            file_name = deep_seq_request.name
-            file_path = settings.MEDIA_URL + deep_seq_request.file.name
+            file_name = req.deep_seq_request.name
+            file_path = settings.MEDIA_URL + req.deep_seq_request.file.name
 
         except Exception as e:
             error = str(e)
             print('[ERROR]: %s' % error)
             logger.debug(error)
 
-    return HttpResponse(
-        json.dumps({
-            'success': not error,
-            'error': error,
-            'name': file_name,
-            'path': file_path,
-        }),
-        content_type='application/json',
-    )
+    return JsonResponse({
+        'success': not error,
+        'error': error,
+        'name': file_name,
+        'path': file_path
+    })

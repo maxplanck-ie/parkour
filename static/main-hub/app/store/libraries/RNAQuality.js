@@ -8,29 +8,17 @@ Ext.define('MainHub.store.libraries.RNAQuality', {
 
     model: 'MainHub.model.libraries.LibraryField',
 
-    proxy: {
-        type: 'ajax',
-        url: 'get_rna_qualities/',
-        timeout: 1000000,
-        pageParam: false,   //to remove param "page"
-        startParam: false,  //to remove param "start"
-        limitParam: false,  //to remove param "limit"
-        noCache: false,     //to remove param "_dc",
-        reader: {
-            type: 'json',
-            rootProperty: 'data',
-            successProperty: 'success'
-        }
-    },
-
-    listeners: {
-        load: function(store, records, success, operation) {
-            if (!success) {
-                var response = operation._response,
-                    obj = Ext.JSON.decode(response.responseText);
-                console.error('[ERROR]: get_organisms/: ' + obj.error);
-                console.error(response);
-            }
-        }
-    }
+    data: [
+        { id: 1, name: '1' },
+        { id: 2, name: '2' },
+        { id: 3, name: '3' },
+        { id: 4, name: '4' },
+        { id: 5, name: '5' },
+        { id: 6, name: '6' },
+        { id: 7, name: '7' },
+        { id: 8, name: '8' },
+        { id: 9, name: '9' },
+        { id: 10, name: '10' },
+        { id: 11, name: 'Determined by Facility' }
+    ]
 });

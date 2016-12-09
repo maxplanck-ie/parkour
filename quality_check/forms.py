@@ -1,9 +1,9 @@
-from django.db import models
-from django.forms import ModelForm
-from library.models import Library, Sample
+from django import forms
+from library.models import Library
+from sample.models import Sample
 
 
-class IncomingLibraryForm(ModelForm):
+class IncomingLibraryForm(forms.ModelForm):
     class Meta:
         model = Library
         fields = (
@@ -15,11 +15,10 @@ class IncomingLibraryForm(ModelForm):
             'qpcr_result_facility',
             'size_distribution_facility',
             'comments_facility',
-            'qc_result',
         )
 
 
-class IncomingSampleForm(ModelForm):
+class IncomingSampleForm(forms.ModelForm):
     class Meta:
         model = Sample
         fields = (
@@ -31,5 +30,4 @@ class IncomingSampleForm(ModelForm):
             'rna_quality_facility',
             'size_distribution_facility',
             'comments_facility',
-            'qc_result',
         )

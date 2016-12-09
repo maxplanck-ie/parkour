@@ -24,13 +24,15 @@ urlpatterns = [
     url(r'^accounts/', include('authtools.urls')),
 
     url(r'', include('common.urls')),
-    # url(r'', include('request.urls')),
-    # url(r'', include('library.urls')),
-    # url(r'', include('qualitycheck.urls')),
-    # url(r'index_generator/', include('index_generator.urls')),
-    # url(r'library_preparation/', include('library_preparation.urls')),
-    # url(r'pooling/', include('pooling.urls')),
-    # url(r'flowcell/', include('flowcell.urls')),
+    url(r'', include('library_sample_shared.urls')),
+    url(r'library/', include('library.urls')),
+    url(r'sample/', include('sample.urls')),
+    url(r'request/', include('request.urls')),
+    url(r'quality_check/', include('quality_check.urls')),
+    url(r'index_generator/', include('index_generator.urls')),
+    url(r'library_preparation/', include('library_preparation.urls')),
+    url(r'pooling/', include('pooling.urls')),
+    url(r'flowcell/', include('flowcell.urls')),
 ]
 
 from django.views.defaults import page_not_found, server_error

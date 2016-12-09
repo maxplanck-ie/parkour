@@ -307,14 +307,14 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                 },
                                 {
                                     xtype: 'combobox',
-                                    id: 'sequencingRunConditionField',
+                                    id: 'readLengthField',
                                     queryMode: 'local',
                                     displayField: 'name',
                                     valueField: 'id',
-                                    name: 'sequencingRunCondition',
-                                    fieldLabel: 'Sequencing Run Condition <sup><strong><span class="field-tooltip" tooltip-text="Select from list with predefined options or select other and specify in the comments field (below)">[?]</span></strong></sup>',
-                                    emptyText: 'Sequencing Run Condition',
-                                    store: 'sequencingRunConditionsStore',
+                                    name: 'readLength',
+                                    fieldLabel: 'Read Length <sup><strong><span class="field-tooltip" tooltip-text="Select from list with predefined options or select other and specify in the comments field (below)">[?]</span></strong></sup>',
+                                    emptyText: 'Read Length',
+                                    store: 'readLengthsStore',
                                     forceSelection: true
                                 },
                                 {
@@ -587,14 +587,14 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                 },
                                 {
                                     xtype: 'combobox',
-                                    id: 'sequencingRunConditionSampleField',
+                                    id: 'readLengthSampleField',
                                     queryMode: 'local',
                                     displayField: 'name',
                                     valueField: 'id',
-                                    name: 'sequencingRunCondition',
-                                    fieldLabel: 'Sequencing Run Condition <sup><strong><span class="field-tooltip" tooltip-text="Select from list with predefined options or select other and specify in the comments field (below)">[?]</span></strong></sup>',
-                                    emptyText: 'Sequencing Run Condition',
-                                    store: 'sequencingRunConditionsStore',
+                                    name: 'readLength',
+                                    fieldLabel: 'Read Length <sup><strong><span class="field-tooltip" tooltip-text="Select from list with predefined options or select other and specify in the comments field (below)">[?]</span></strong></sup>',
+                                    emptyText: 'Read Length',
+                                    store: 'readLengthsStore',
                                     forceSelection: true
                                 },
                                 {

@@ -183,13 +183,13 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
 
         // Load Sequencing Run Conditions
         wnd.setLoading();
-        Ext.getStore('sequencingRunConditionsStore').load(function(records, operation, success) {
+        Ext.getStore('readLengthsStore').load(function(records, operation, success) {
             if (!success) Ext.ux.ToastMessage('Cannot load Sequencing Run Conditions', 'error');
 
             if (wnd.mode == 'edit') {
-                var sequencingRunConditionField = Ext.getCmp('sequencingRunConditionField');
-                sequencingRunConditionField.select(record.sequencingRunConditionId);
-                sequencingRunConditionField.fireEvent('select', sequencingRunConditionField, sequencingRunConditionField.findRecordByValue(record.sequencingRunConditionId));
+                var readLengthField = Ext.getCmp('readLengthField');
+                readLengthField.select(record.readLengthIdId);
+                readLengthField.fireEvent('select', readLengthField, readLengthField.findRecordByValue(record.readLengthId));
             }
 
             wnd.setLoading(false);
@@ -284,28 +284,22 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             wnd.setLoading(false);
         });
 
-        // Load RNA Qualities
-        Ext.getStore('rnaQualityStore').load(function(records, operation, success) {
-            if (!success) Ext.ux.ToastMessage('Cannot load RNA Qualities', 'error');
+        // Set RNA Quality
+        if (wnd.mode == 'edit') {
+            var rnaQualityField = Ext.getCmp('rnaQualityField');
+            rnaQualityField.select(record.rnaQualityId);
+            rnaQualityField.fireEvent('select', rnaQualityField, rnaQualityField.findRecordByValue(record.rnaQualityId));
+        }
 
-            if (wnd.mode == 'edit') {
-                var rnaQualityField = Ext.getCmp('rnaQualityField');
-                rnaQualityField.select(record.rnaQualityId);
-                rnaQualityField.fireEvent('select', rnaQualityField, rnaQualityField.findRecordByValue(record.rnaQualityId));
-            }
-
-            wnd.setLoading(false);
-        });
-
-        // Load Sequencing Run Conditions
+        // Load Read Lengths
         wnd.setLoading();
-        Ext.getStore('sequencingRunConditionsStore').load(function(records, operation, success) {
-            if (!success) Ext.ux.ToastMessage('Cannot load Sequencing Run Conditions', 'error');
+        Ext.getStore('readLengthsStore').load(function(records, operation, success) {
+            if (!success) Ext.ux.ToastMessage('Cannot load Read Lengths.', 'error');
 
             if (wnd.mode == 'edit') {
-                var sequencingRunConditionSampleField = Ext.getCmp('sequencingRunConditionSampleField');
-                sequencingRunConditionSampleField.select(record.sequencingRunConditionId);
-                sequencingRunConditionSampleField.fireEvent('select', sequencingRunConditionSampleField, sequencingRunConditionSampleField.findRecordByValue(record.sequencingRunConditionId));
+                var readLengthSampleField = Ext.getCmp('readLengthSampleField');
+                readLengthSampleField.select(record.readLengthId);
+                readLengthSampleField.fireEvent('select', readLengthSampleField, readLengthSampleField.findRecordByValue(record.readLengthId));
             }
 
             wnd.setLoading(false);
@@ -506,7 +500,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         if (card == 'libraryCard') {
             form = Ext.getCmp('libraryForm');
             data = form.getForm().getFieldValues();
-            url = 'save_library/';
+            url = 'library/save/';
             nameFieldName = 'libraryName';
             fileStoreName = 'fileLibraryStore';
             params = {
@@ -528,7 +522,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                 'sample_volume': data.sampleVolume,
                 'mean_fragment_size': data.meanFragmentSize,
                 'qpcr_result': data.qPCRResult,
-                'sequencing_run_condition': data.sequencingRunCondition,
+                'read_length': data.readLength,
                 'sequencing_depth': data.sequencingDepth,
                 'comments': data.comments,
                 'files': Ext.JSON.encode(form.down('filegridfield').getValue())
@@ -537,7 +531,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         else {
             form = Ext.getCmp('sampleForm');
             data = form.getForm().getFieldValues();
-            url = 'save_sample/';
+            url = 'sample/save/';
             nameFieldName = 'sampleName';
             fileStoreName = 'fileSampleStore';
             params = {
@@ -559,7 +553,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                 'rna_spike_in': data.rnaSpikeIn,
                 'sample_preparation_protocol': data.samplePreparationProtocol,
                 'requested_sample_treatment': data.requestedSampleTreatment,
-                'sequencing_run_condition': data.sequencingRunCondition,
+                'read_length': data.readLength,
                 'sequencing_depth': data.sequencingDepth,
                 'comments': data.comments,
                 'files': Ext.JSON.encode(form.down('filegridfield').getValue())

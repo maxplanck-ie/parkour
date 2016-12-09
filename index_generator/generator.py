@@ -1,4 +1,6 @@
-from library.models import Library, Sample, IndexI7, IndexI5
+from library_sample_shared.models import IndexI7, IndexI5
+from library.models import Library
+from sample.models import Sample
 
 import re
 import random
@@ -93,7 +95,7 @@ def create_result_dict(sample, index_i7, index_i5):
     return {
         'name': sample.name,
         'sample_id': sample.id,
-        'read_length': sample.sequencing_run_condition_id,
+        'read_length': sample.read_length_id,
         'depth': sample.sequencing_depth,
         'predicted_index_i7': index_i7,
         'predicted_index_i5': index_i5
@@ -173,7 +175,7 @@ def generate(library_ids, sample_ids):
             result.append({
                 'name': library.name,
                 'library_id': library.id,
-                'read_length': library.sequencing_run_condition_id,
+                'read_length': library.read_length_id,
                 'depth': library.sequencing_depth,
                 'predicted_index_i7': predicted_index_i7,
                 'predicted_index_i5': predicted_index_i5

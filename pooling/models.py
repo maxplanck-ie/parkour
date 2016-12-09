@@ -1,5 +1,6 @@
 from django.db import models
-from library.models import Library, Sample
+from library.models import Library
+from sample.models import Sample
 
 
 class Pooling(models.Model):
@@ -41,7 +42,7 @@ class Pooling(models.Model):
         blank=True
     )
 
-    percentage_library = models.IntegerField(
+    percentage_library = models.PositiveSmallIntegerField(
         '% library in Pool',
         null=True,
         blank=True,

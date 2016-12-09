@@ -10,7 +10,7 @@ Ext.define('MainHub.store.libraries.SampleProtocols', {
 
     proxy: {
         type: 'ajax',
-        url: 'get_sample_protocols/',
+        url: 'sample/sample_protocols/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"

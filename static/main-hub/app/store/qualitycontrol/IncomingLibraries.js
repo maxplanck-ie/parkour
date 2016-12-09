@@ -13,7 +13,7 @@ Ext.define('MainHub.store.qualitycontrol.IncomingLibraries', {
 
     proxy: {
         type: 'ajax',
-        url: 'get_libraries/',
+        url: 'library/get_all/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"

@@ -83,7 +83,7 @@ Ext.define('MainHub.view.startpage.RequestsController', {
 
     deleteRequest: function(record) {
         Ext.Ajax.request({
-            url: 'delete_request/',
+            url: 'request/delete/',
             method: 'POST',
             timeout: 1000000,
             scope: this,

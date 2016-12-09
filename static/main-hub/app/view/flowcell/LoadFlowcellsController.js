@@ -17,7 +17,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellsController', {
 
     onFlowcellsTableBoxready: function(grid) {
         Ext.getStore('sequencersStore').load();
-        Ext.getStore('sequencingRunConditionsStore').load(function(records, operation, success) {
+        Ext.getStore('readLengthsStore').reload(function(records, operation, success) {
             // Remove record 'Other'
             if (success) this.remove(this.findRecord('name', 'Other'));
         });

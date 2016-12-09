@@ -22,7 +22,6 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
     },
 
     onLibrariesTableBoxready: function(grid) {
-        // Triggers when the table is shown for the first time
         grid.fireEvent('refresh', grid);
     },
 

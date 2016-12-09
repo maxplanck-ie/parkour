@@ -1,5 +1,5 @@
 from django.db import models
-from library.models import Sample
+from sample.models import Sample
 
 
 class LibraryPreparation(models.Model):

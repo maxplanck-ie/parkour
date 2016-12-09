@@ -40,13 +40,14 @@ INSTALLED_APPS = [
 
     'common',
     'library_sample_shared',
-    # 'request',
-    # 'library',
-    # 'qualitycheck',
-    # 'index_generator',
-    # 'library_preparation',
-    # 'pooling',
-    # 'flowcell',
+    'library',
+    'sample',
+    'request',
+    'quality_check',
+    'index_generator',
+    'library_preparation',
+    'pooling',
+    'flowcell',
 ]
 
 MIDDLEWARE_CLASSES = [

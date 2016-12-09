@@ -44,12 +44,12 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
             originalValue = context.originalValue,
             values = context.newValues;
 
-        // Set Read Length (Sequencing Run Condition)
-        if (values.sequencingRunConditionName !== null) {
-            var readLengthRecord = Ext.getStore('sequencingRunConditionsStore')
-                .findRecord('id', values.sequencingRunConditionName);
-            record.set('sequencingRunCondition', readLengthRecord.get('id'));
-            record.set('sequencingRunConditionName', readLengthRecord.get('name'));
+        // Set Read Length
+        if (values.readLengthName !== null) {
+            var readLengthRecord = Ext.getStore('readLengthsStore')
+                .findRecord('id', values.readLengthName);
+            record.set('readLength', readLengthRecord.get('id'));
+            record.set('readLengthName', readLengthRecord.get('name'));
 
             var recordId = null;
             if (record.get('recordType') == 'L') {
@@ -60,13 +60,13 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
 
             // Update record in the database
             Ext.Ajax.request({
-                url: 'index_generator/update_sequencing_run_condition/',
+                url: 'index_generator/update_read_length/',
                 method: 'POST',
                 scope: this,
                 params: {
                     record_type: record.get('recordType'),
                     record_id: recordId,
-                    sequencing_run_condition_id: readLengthRecord.get('id')
+                    read_length_id: readLengthRecord.get('id')
                 }
             });
         }

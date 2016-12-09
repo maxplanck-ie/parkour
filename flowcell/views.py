@@ -1,7 +1,7 @@
 from django.http import HttpResponse, JsonResponse
 
 from index_generator.models import Pool
-from library.models import SequencingRunCondition
+from library_sample_shared.models import ReadLength
 from request.models import Request
 from .models import Sequencer
 
@@ -32,18 +32,18 @@ def pool_list(request):
         libraries = pool.libraries.all()
         samples = pool.samples.all()
 
-        # Get Pool's Sequencing Run Condition (Read Length)
+        # Get Pool's Read Length
         if any(libraries):
-            src_id = libraries[0].sequencing_run_condition_id
+            src_id = libraries[0].read_length_id
         else:
-            src_id = samples[0].sequencing_run_condition_id
-        src = SequencingRunCondition.objects.get(id=src_id)
+            src_id = samples[0].read_length_id
+        src = ReadLength.objects.get(id=src_id)
 
         data.append({
             'name': pool.name,
             'id': pool.id,
-            'sequencingRunCondition': src.id,
-            'sequencingRunConditionName': src.name,
+            'readLength': src.id,
+            'readLengthName': src.name,
             'size': pool.size
         })
 

@@ -10,7 +10,7 @@ Ext.define('MainHub.store.requests.LibrariesInRequest', {
 
     proxy: {
         type: 'ajax',
-        url: 'get_libraries_in_request/',
+        url: 'request/libraries_and_samples/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"

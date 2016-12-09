@@ -107,7 +107,6 @@ class GenericLibrarySample(models.Model):
 
     organism = models.ForeignKey(
         Organism,
-        related_name='organism',
         verbose_name='Organism'
     )
 
@@ -115,7 +114,6 @@ class GenericLibrarySample(models.Model):
 
     concentration_determined_by = models.ForeignKey(
         ConcentrationMethod,
-        related_name='concentration_determined_by',
         verbose_name='Concentration Determined by',
     )
 
@@ -125,12 +123,11 @@ class GenericLibrarySample(models.Model):
 
     equal_representation_nucleotides = models.BooleanField(
         'Equal Representation of Nucleotides',
-        default=False,
+        default=True,
     )
 
     read_length = models.ForeignKey(
         ReadLength,
-        related_name='related_name',
         verbose_name='Read Length',
     )
 
@@ -142,18 +139,10 @@ class GenericLibrarySample(models.Model):
 
     is_pooled = models.BooleanField('Is pooled?', default=False)
 
-    # barcode = models.CharField(
-    #     'Barcode',
-    #     max_length=9,
-    #     null=True,
-    #     blank=True,
-    # )
-
     barcode = models.CharField('Barcode', max_length=9)
 
     index_type = models.ForeignKey(
         IndexType,
-        related_name='index_type',
         verbose_name='Index Type',
         null=True,
         blank=True,
@@ -188,7 +177,7 @@ class GenericLibrarySample(models.Model):
 
     concentration_determined_by_facility = models.ForeignKey(
         ConcentrationMethod,
-        related_name='concentration_determined_by_facility',
+        related_name='+',
         verbose_name='Concentration Determined by (facility)',
         null=True,
         blank=True,
@@ -206,7 +195,11 @@ class GenericLibrarySample(models.Model):
         blank=True,
     )
 
-    amount_facility = models.FloatField('Amount', null=True, blank=True)
+    amount_facility = models.FloatField(
+        'Amount (facility)',
+        null=True,
+        blank=True,
+    )
 
     size_distribution_facility = models.CharField(
         'Size Distribution (facility)',

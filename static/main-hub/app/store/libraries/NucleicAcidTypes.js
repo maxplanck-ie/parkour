@@ -10,7 +10,7 @@ Ext.define('MainHub.store.libraries.NucleicAcidTypes', {
 
     proxy: {
         type: 'ajax',
-        url: 'get_nucleic_acid_types/',
+        url: 'sample/nucleic_acid_types/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"
@@ -20,17 +20,6 @@ Ext.define('MainHub.store.libraries.NucleicAcidTypes', {
             type: 'json',
             rootProperty: 'data',
             successProperty: 'success'
-        }
-    },
-
-    listeners: {
-        load: function(store, records, success, operation) {
-            if (!success) {
-                var response = operation._response,
-                    obj = Ext.JSON.decode(response.responseText);
-                console.error('[ERROR]: get_nucleic_acid_types/: ' + obj.error);
-                console.error(response);
-            }
         }
     }
 });

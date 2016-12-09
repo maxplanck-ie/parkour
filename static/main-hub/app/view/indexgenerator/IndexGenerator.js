@@ -92,14 +92,14 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                     },
                     {
                         text: 'Read Length',
-                        dataIndex: 'sequencingRunConditionName',
+                        dataIndex: 'readLengthName',
                         width: 100,
                         editor: {
                             xtype: 'combobox',
                             queryMode: 'local',
                             displayField: 'name',
                             valueField: 'id',
-                            store: 'sequencingRunConditionsStore',
+                            store: 'readLengthsStore',
                             forceSelection: true
                         }
                     },

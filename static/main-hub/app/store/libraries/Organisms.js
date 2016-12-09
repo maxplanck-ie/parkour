@@ -21,16 +21,5 @@ Ext.define('MainHub.store.libraries.Organisms', {
             rootProperty: 'data',
             successProperty: 'success'
         }
-    },
-
-    listeners: {
-        load: function(store, records, success, operation) {
-            if (!success) {
-                var response = operation._response,
-                    obj = Ext.JSON.decode(response.responseText);
-                console.error('[ERROR]: get_organisms/: ' + obj.error);
-                console.error(response);
-            }
-        }
     }
 });
