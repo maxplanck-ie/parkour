@@ -39,14 +39,14 @@ class User(AbstractNamedUser):
         verbose_name='Organization',
         null=True,
         blank=True,
-        default = None,
+        default=None,
     )
     pi = models.ForeignKey(
         PrincipalInvestigator,
         verbose_name='Principal Investigator',
         null=True,
         blank=True,
-        default = None,
+        default=None,
     )
     cost_unit = models.ManyToManyField(
         CostUnit,

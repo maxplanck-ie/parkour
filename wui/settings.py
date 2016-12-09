@@ -39,13 +39,14 @@ INSTALLED_APPS = [
     'authtools',
 
     'common',
-    'request',
-    'library',
-    'qualitycheck',
-    'index_generator',
-    'library_preparation',
-    'pooling',
-    'flowcell',
+    'library_sample_shared',
+    # 'request',
+    # 'library',
+    # 'qualitycheck',
+    # 'index_generator',
+    # 'library_preparation',
+    # 'pooling',
+    # 'flowcell',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -219,7 +220,7 @@ LOGGING = {
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
-   os.path.join(BASE_DIR, 'static')
+    os.path.join(BASE_DIR, 'static')
 ]
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
