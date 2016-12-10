@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
 from .models import NucleicAcidType, SampleProtocol, Sample, FileSample
@@ -51,24 +52,32 @@ def get_sample_protocols(request):
 def save_sample(request):
     """ Add a new sample or update an existing one. """
     error = ''
-    data = []
+    form = None
+    data = {}
 
-    if request.method == 'POST':
-        mode = request.POST.get('mode')
-        sample_id = request.POST.get('sample_id')
-        files = json.loads(request.POST.get('files'))
+    mode = request.POST.get('mode')
+    sample_id = request.POST.get('sample_id')
+    files = json.loads(request.POST.get('files')) \
+        if request.POST.get('files') else None
 
-        if mode == 'add':
-            form = SampleForm(request.POST)
-        elif mode == 'edit':
+    if mode == 'add':
+        form = SampleForm(request.POST)
+    else:
+        try:
             smpl = Sample.objects.get(pk=sample_id)
             form = SampleForm(request.POST, instance=smpl)
+        except (ValueError, Sample.DoesNotExist) as e:
+            error = str(e)
+            logger.exception(e)
 
+    if form:
         if form.is_valid():
             smpl = form.save()
 
             if mode == 'add':
-                smpl.files.add(*files)
+                if files:
+                    # import pdb; pdb.set_trace()
+                    smpl.files.add(*files)
 
                 data = {
                     'name': smpl.name,
@@ -77,21 +86,21 @@ def save_sample(request):
                     'barcode': smpl.barcode,
                 }
 
-            elif mode == 'edit':
-                # import pdb; pdb.set_trace()
-                old_files = [file for file in smpl.files.all()]
-                smpl.files.clear()
-                smpl.save()
-                smpl.files.add(*files)
-                new_files = [file for file in smpl.files.all()]
+            else:
+                if files:
+                    old_files = [file for file in smpl.files.all()]
+                    smpl.files.clear()
+                    smpl.save()
+                    smpl.files.add(*files)
+                    new_files = [file for file in smpl.files.all()]
 
-                # Delete files
-                files_to_delete = list(set(old_files) - set(new_files))
-                for file in files_to_delete:
-                    file.delete()
+                    # Delete files
+                    files_to_delete = list(set(old_files) - set(new_files))
+                    for file in files_to_delete:
+                        file.delete()
         else:
             error = str(form.errors)
-            logger.debug(form.errors.as_data())
+            logger.debug(form.errors)
 
     return JsonResponse({
         'success': not error,
@@ -102,28 +111,32 @@ def save_sample(request):
 
 @login_required
 def delete_sample(request):
+    """ """
+    error = ''
     record_id = request.POST.get('record_id')
-    sample = Sample.objects.get(pk=record_id)
-    sample.delete()
-    return JsonResponse({'success': True})
+
+    try:
+        sample = Sample.objects.get(pk=record_id)
+        sample.delete()
+    except (ValueError, Sample.DoesNotExist) as e:
+        error = str(e)
+        logger.exception(e)
+
+    return JsonResponse({'success': not error, 'error': error})
 
 
+@csrf_exempt
 @login_required
 def upload_files(request):
     """ """
     error = ''
     file_ids = []
 
-    if request.method == 'POST' and any(request.FILES):
-        try:
-            for file in request.FILES.getlist('files'):
-                f = FileSample(name=file.name, file=file)
-                f.save()
-                file_ids.append(f.id)
-
-        except Exception as e:
-            error = str(e)
-            logger.exception(error)
+    if any(request.FILES):
+        for file in request.FILES.getlist('files'):
+            f = FileSample(name=file.name, file=file)
+            f.save()
+            file_ids.append(f.pk)
 
     return JsonResponse({
         'success': not error,
@@ -138,10 +151,12 @@ def get_files(request):
     error = ''
     data = []
 
-    file_ids = json.loads(request.GET.get('file_ids'))
+    file_ids = request.GET.get('file_ids')
 
-    try:
-        files = [f for f in FileSample.objects.all() if f.id in file_ids]
+    if file_ids:
+        file_ids = json.loads(file_ids)
+
+        files = [f for f in FileSample.objects.all() if f.pk in file_ids]
         data = [
             {
                 'id': file.id,
@@ -151,10 +166,6 @@ def get_files(request):
             }
             for file in files
         ]
-
-    except Exception as e:
-        error = str(e)
-        logger.exception(error)
 
     return JsonResponse({
         'success': not error,

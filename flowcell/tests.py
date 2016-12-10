@@ -31,9 +31,8 @@ class SequencerList(TestCase):
     def test_sequencer_list(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.get(reverse('sequencer_list'))
+        self.assertNotEqual(len(response.content), b'[]')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response['content-type'], 'application/json')
-        self.assertNotEqual(len(response.content), 0)
 
 
 class PoolListLibraries(TestCase):
@@ -54,7 +53,6 @@ class PoolListLibraries(TestCase):
 
         self.assertEqual(library.read_length_id, 1)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response['content-type'], 'application/json')
 
 
 class PoolListSamples(TestCase):
@@ -75,7 +73,6 @@ class PoolListSamples(TestCase):
 
         self.assertEqual(sample.read_length_id, 1)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response['content-type'], 'application/json')
 
 
 class PoolInfo(TestCase):
@@ -108,4 +105,3 @@ class PoolInfo(TestCase):
 
         self.assertNotEqual(response.content, b'[]')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response['content-type'], 'application/json')

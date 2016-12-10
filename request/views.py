@@ -145,6 +145,7 @@ def save_request(request):
                 error = 'Please provide Libraries and/or samples.'
         else:
             error = str(form.errors)
+            logger.debug(form.errors)
 
     return JsonResponse({
         'success': not error,
