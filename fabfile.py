@@ -26,7 +26,7 @@ def deploy():
 
 
 def coverage():
-    local('coverage run --source="." manage.py test')
+    local('coverage run --source="." manage.py test -v 2')
     local('rm -rf htmlcov/')
     local('coverage html')
     local('open htmlcov/index.html')

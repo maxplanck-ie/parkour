@@ -1,9 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-from django.http import HttpResponse
-
-import json
+from django.http import JsonResponse
 
 
 @login_required
@@ -16,6 +14,7 @@ def index(request):
     })
 
 
+@login_required
 def get_navigation_tree(request):
     """ Get main NavigationTree """
     data = {
@@ -88,7 +87,4 @@ def get_navigation_tree(request):
         ]
     }
 
-    return HttpResponse(
-        json.dumps(data),
-        content_type='application/json',
-    )
+    return JsonResponse(data)

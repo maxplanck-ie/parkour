@@ -1,22 +1,75 @@
 from django.test import TestCase
-from django.core.urlresolvers import resolve, reverse
+from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
+from .models import Organization, PrincipalInvestigator, CostUnit
 
 User = get_user_model()
 
 
-# class UrlTestCase(TestCase):
-#     def test(self):
-#         resolver = resolve('/')
-#         self.assertEqual(resolver.view_name, 'index')
+# Models
+
+class OrganizationTest(TestCase):
+    def setUp(self):
+        self.organization = Organization(name='Apple')
+
+    def test_organization_name(self):
+        self.assertTrue(isinstance(self.organization, Organization))
+        self.assertEqual(self.organization.__str__(), self.organization.name)
 
 
-class IndexViewTestCase(TestCase):
+class PrincipalInvestigatorTest(TestCase):
+    def setUp(self):
+        self.org = Organization(name='Apple')
+        self.pi = PrincipalInvestigator(name='Tim Cook', organization=self.org)
+
+    def test_pi_name(self):
+        self.assertTrue(isinstance(self.org, Organization))
+        self.assertTrue(isinstance(self.pi, PrincipalInvestigator))
+        self.assertEqual(
+            self.pi.__str__(),
+            '%s (%s)' % (self.pi.name, self.org.name)
+        )
+
+
+class CostUnitTest(TestCase):
+    def setUp(self):
+        self.org = Organization(name='Apple')
+        self.pi = PrincipalInvestigator(name='Tim Cook', organization=self.org)
+        self.cost_unit = CostUnit(name='K', pi=self.pi)
+
+    def test_cost_unit_name(self):
+        self.assertTrue(isinstance(self.org, Organization))
+        self.assertTrue(isinstance(self.pi, PrincipalInvestigator))
+        self.assertTrue(isinstance(self.cost_unit, CostUnit))
+        self.assertEqual(
+            self.cost_unit.__str__(),
+            '%s (%s: %s)' % (
+                self.cost_unit.name, self.pi.organization.name, self.pi.name
+            )
+        )
+
+
+# Views
+
+class IndexViewTest(TestCase):
     def setUp(self):
         user = User.objects.create_user(email='foo@bar.io', password='foo-foo')
+        user.save()
 
     def test_get(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.get(reverse('index'), follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'index.html')
+
+
+class NavigationTreeTest(TestCase):
+    def setUp(self):
+        user = User.objects.create_user(email='foo@bar.io', password='foo-foo')
+        user.save()
+
+    def test_navigation_tree(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.get(reverse('get_navigation_tree'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['content-type'], 'application/json')
