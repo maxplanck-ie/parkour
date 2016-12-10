@@ -4,7 +4,6 @@ from django.contrib.auth import get_user_model
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
-from common.utils import get_form_errors
 from library.models import Library
 from sample.models import Sample
 from .models import Request
@@ -18,8 +17,8 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
 from reportlab.rl_config import defaultPageSize
 
-logger = logging.getLogger('db')
 User = get_user_model()
+logger = logging.getLogger('db')
 
 
 @login_required
@@ -76,6 +75,7 @@ def get_libraries_and_samples(request):
         }
         for library in req.libraries.all()
     ]
+
     samples = [
         {
             'name': sample.name,
@@ -85,6 +85,7 @@ def get_libraries_and_samples(request):
         }
         for sample in req.samples.all()
     ]
+
     data = sorted(libraries + samples, key=lambda x: x['barcode'])
 
     return JsonResponse({
@@ -97,45 +98,53 @@ def get_libraries_and_samples(request):
 def save_request(request):
     """ Add new or edit an existing request """
     error = str()
+    form = None
+
     mode = request.POST.get('mode')
+    request_id = request.POST.get('request_id')
 
-    try:
-        if request.method == 'POST':
+    if mode == 'add':
+        form = RequestForm(request.POST)
+    else:
+        try:
+            req = Request.objects.get(id=request_id)
+            form = RequestForm(request.POST, instance=req)
+        except (ValueError, Request.DoesNotExist) as e:
+            error = str(e)
+            logger.exception(e)
+
+    if form:
+        if form.is_valid():
             if mode == 'add':
-                form = RequestForm(request.POST)
-            elif mode == 'edit':
-                request_id = request.POST.get('request_id')
-                req = Request.objects.get(id=request_id)
-                form = RequestForm(request.POST, instance=req)
+                req = form.save(commit=False)
+                req.user = User.objects.get(pk=request.user.id)
+                req.save()
+            else:
+                req = form.save()
 
-            if form.is_valid():
-                if mode == 'add':
-                    req = form.save(commit=False)
-                    req.user = User.objects.get(pk=request.user.id)
-                    req.save()
-                else:
-                    req = form.save()
-                libraries = json.loads(request.POST.get('libraries'))
-                samples = json.loads(request.POST.get('samples'))
+            library_ids = request.POST.get('libraries')
+            sample_ids = request.POST.get('samples')
 
+            if library_ids:
+                libraries = json.loads(library_ids)
                 request_libraries = Library.objects.filter(id__in=libraries)
                 for library in request_libraries:
                     library.is_in_request = True
                     library.save()
                 req.libraries.add(*libraries)
 
+            if sample_ids:
+                samples = json.loads(sample_ids)
                 request_samples = Sample.objects.filter(id__in=samples)
                 for sample in request_samples:
                     sample.is_in_request = True
                     sample.save()
                 req.samples.add(*samples)
 
-            else:
-                raise Exception(get_form_errors(form.errors))
-
-    except Exception as e:
-        error = str(e)
-        logger.debug(error)
+            if not library_ids and not sample_ids:
+                error = 'Please provide Libraries and/or samples.'
+        else:
+            error = str(form.errors)
 
     return JsonResponse({
         'success': not error,
@@ -145,10 +154,19 @@ def save_request(request):
 
 @login_required
 def delete_request(request):
+    """ """
+    error = ''
+
     request_id = request.POST.get('request_id')
-    req = Request.objects.get(pk=request_id)
-    req.delete()
-    return JsonResponse({'success': True})
+
+    try:
+        req = Request.objects.get(pk=request_id)
+        req.delete()
+    except (ValueError, Request.DoesNotExist) as e:
+        error = str(e)
+        logger.exception(e)
+
+    return JsonResponse({'success': not error, 'error': error})
 
 
 # Helper functions
@@ -185,7 +203,7 @@ def draw_table_row(p, x, y, string):
 
 @csrf_exempt
 @login_required
-def generate_pdf(request):
+def generate_deep_sequencing_request(request):
     """ """
     request_id = request.GET.get('request_id')
     response = HttpResponse(content_type='application/pdf')
@@ -339,13 +357,11 @@ def generate_pdf(request):
 
         p.drawString(x * 6.5, inch, page_2)   # Page counter
         p.showPage()
+        p.save()
 
     except:
         # TODO: Error handling
         pass
-
-    finally:
-        p.save()
 
     return response
 
@@ -358,18 +374,20 @@ def upload_deep_sequencing_request(request):
     file_name = ''
     file_path = ''
 
-    if request.method == 'POST' and any(request.FILES):
+    request_id = request.POST.get('request_id')
+
+    if any(request.FILES):
         try:
-            req = Request.objects.get(id=request.POST.get('request_id'))
+            req = Request.objects.get(pk=request_id)
             req.deep_seq_request = request.FILES.get('file')
             req.save()
             file_name = req.deep_seq_request.name
             file_path = settings.MEDIA_URL + req.deep_seq_request.file.name
-
-        except Exception as e:
+        except (ValueError, Request.DoesNotExist) as e:
             error = str(e)
-            print('[ERROR]: %s' % error)
-            logger.debug(error)
+            logger.exception(e)
+    else:
+        error = 'File is missing.'
 
     return JsonResponse({
         'success': not error,

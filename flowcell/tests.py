@@ -106,6 +106,6 @@ class PoolInfo(TestCase):
         self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.get(reverse('pool_info'), {'pool_id': 1})
 
-        self.assertNotEqual(len(response.content), 0)
+        self.assertNotEqual(response.content, b'[]')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['content-type'], 'application/json')
