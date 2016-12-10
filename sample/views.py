@@ -1,7 +1,8 @@
-from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
 
-from .models import NucleicAcidType, SampleProtocol, Sample
+from .models import NucleicAcidType, SampleProtocol, Sample, FileSample
 from .forms import SampleForm
 
 import logging
@@ -105,3 +106,58 @@ def delete_sample(request):
     sample = Sample.objects.get(pk=record_id)
     sample.delete()
     return JsonResponse({'success': True})
+
+
+@login_required
+def upload_files(request):
+    """ """
+    error = ''
+    file_ids = []
+
+    if request.method == 'POST' and any(request.FILES):
+        try:
+            for file in request.FILES.getlist('files'):
+                f = FileSample(name=file.name, file=file)
+                f.save()
+                file_ids.append(f.id)
+
+        except Exception as e:
+            error = str(e)
+            logger.exception(error)
+
+    return JsonResponse({
+        'success': not error,
+        'error': error,
+        'fileIds': file_ids
+    })
+
+
+@login_required
+def get_files(request):
+    """ """
+    error = ''
+    data = []
+
+    file_ids = json.loads(request.GET.get('file_ids'))
+
+    try:
+        files = [f for f in FileSample.objects.all() if f.id in file_ids]
+        data = [
+            {
+                'id': file.id,
+                'name': file.name,
+                'size': file.file.size,
+                'path': settings.MEDIA_URL + file.file.name,
+            }
+            for file in files
+        ]
+
+    except Exception as e:
+        error = str(e)
+        logger.exception(error)
+
+    return JsonResponse({
+        'success': not error,
+        'error': error,
+        'data': data
+    })

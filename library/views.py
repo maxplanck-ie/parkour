@@ -1,5 +1,8 @@
 from django.http import JsonResponse
-from .models import LibraryProtocol, LibraryType, Library
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+
+from .models import LibraryProtocol, LibraryType, Library, FileLibrary
 from request.models import Request
 from .forms import LibraryForm
 
@@ -9,6 +12,7 @@ import json
 logger = logging.getLogger('db')
 
 
+@login_required
 def get_all(request):
     """ Get the list of all libraries and samples. """
     data = []
@@ -183,6 +187,7 @@ def get_library_type(request):
     return JsonResponse(data, safe=False)
 
 
+@login_required
 def save_library(request):
     """ Add a new library or update an existing one. """
     error = ''
@@ -234,9 +239,65 @@ def save_library(request):
     })
 
 
+@login_required
 def delete_library(request):
     """ Delete a library with a given id. """
     record_id = request.POST.get('record_id')
     record = Library.objects.get(pk=record_id)
     record.delete()
     return JsonResponse({'success': True})
+
+
+@login_required
+def upload_files(request):
+    """ """
+    error = ''
+    file_ids = []
+
+    if request.method == 'POST' and any(request.FILES):
+        try:
+            for file in request.FILES.getlist('files'):
+                f = FileLibrary(name=file.name, file=file)
+                f.save()
+                file_ids.append(f.id)
+
+        except Exception as e:
+            error = str(e)
+            logger.exception(error)
+
+    return JsonResponse({
+        'success': not error,
+        'error': error,
+        'fileIds': file_ids
+    })
+
+
+@login_required
+def get_files(request):
+    """ """
+    error = ''
+    data = []
+
+    file_ids = json.loads(request.GET.get('file_ids'))
+
+    try:
+        files = [f for f in FileLibrary.objects.all() if f.id in file_ids]
+        data = [
+            {
+                'id': file.id,
+                'name': file.name,
+                'size': file.file.size,
+                'path': settings.MEDIA_URL + file.file.name,
+            }
+            for file in files
+        ]
+
+    except Exception as e:
+        error = str(e)
+        logger.exception(error)
+
+    return JsonResponse({
+        'success': not error,
+        'error': error,
+        'data': data
+    })

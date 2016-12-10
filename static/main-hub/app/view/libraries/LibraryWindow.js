@@ -329,8 +329,8 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                     xtype: 'filegridfield',
                                     fieldLabel: 'Files',
                                     store: 'fileLibraryStore',
-                                    uploadFileUrl: 'upload_file_library/',
-                                    getFileUrl: 'get_file_library/'
+                                    uploadFileUrl: 'library/upload_files/',
+                                    getFileUrl: 'library/get_files/'
                                 },
                                 {
                                     xtype: 'textarea',
@@ -609,8 +609,8 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                     xtype: 'filegridfield',
                                     fieldLabel: 'Files',
                                     store: 'fileSampleStore',
-                                    uploadFileUrl: 'upload_file_sample/',
-                                    getFileUrl: 'get_file_sample/'
+                                    uploadFileUrl: 'sample/upload_files/',
+                                    getFileUrl: 'sample/get_files/'
                                 },
                                 {
                                     xtype: 'textarea',
