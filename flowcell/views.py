@@ -1,13 +1,13 @@
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
 
 from index_generator.models import Pool
 from library_sample_shared.models import ReadLength
 from request.models import Request
 from .models import Sequencer
 
-# import json
 
-
+@login_required
 def sequencer_list(request):
     """ Get the list of all sequencers. """
 
@@ -24,6 +24,7 @@ def sequencer_list(request):
     return JsonResponse(data, safe=False)
 
 
+@login_required
 def pool_list(request):
     """ Get the list of pools for loading flowcells. """
     data = []
@@ -50,6 +51,7 @@ def pool_list(request):
     return JsonResponse(data, safe=False)
 
 
+@login_required
 def pool_info(request):
     """ Get additional information for a given pool. """
     data = []

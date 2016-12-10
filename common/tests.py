@@ -53,8 +53,7 @@ class CostUnitTest(TestCase):
 
 class IndexViewTest(TestCase):
     def setUp(self):
-        user = User.objects.create_user(email='foo@bar.io', password='foo-foo')
-        user.save()
+        User.objects.create_user(email='foo@bar.io', password='foo-foo')
 
     def test_get(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
@@ -65,8 +64,7 @@ class IndexViewTest(TestCase):
 
 class NavigationTreeTest(TestCase):
     def setUp(self):
-        user = User.objects.create_user(email='foo@bar.io', password='foo-foo')
-        user.save()
+        User.objects.create_user(email='foo@bar.io', password='foo-foo')
 
     def test_navigation_tree(self):
         self.client.login(email='foo@bar.io', password='foo-foo')

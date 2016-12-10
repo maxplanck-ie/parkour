@@ -68,6 +68,24 @@ class Library(GenericLibrarySample):
         blank=True,
     )
 
+    @classmethod
+    def get_test_library(cls, name):
+        return cls(
+            name=name,
+            organism_id=1,
+            concentration=1.0,
+            concentration_determined_by_id=1,
+            dna_dissolved_in='dna',
+            sample_volume=1,
+            read_length_id=1,
+            sequencing_depth=1,
+            library_protocol_id=1,
+            library_type_id=1,
+            enrichment_cycles=1,
+            index_reads=0,
+            mean_fragment_size=1,
+        )
+
     class Meta:
         verbose_name = 'Library'
         verbose_name_plural = 'Libraries'

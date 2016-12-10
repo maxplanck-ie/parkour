@@ -122,6 +122,21 @@ class Sample(GenericLibrarySample):
         blank=True,
     )
 
+    @classmethod
+    def get_test_sample(cls, name):
+        return cls(
+            name=name,
+            organism_id=1,
+            concentration=1.0,
+            concentration_determined_by_id=1,
+            dna_dissolved_in='dna',
+            sample_volume=1,
+            read_length_id=1,
+            sequencing_depth=1,
+            sample_protocol_id=1,
+            nucleic_acid_type_id=1,
+        )
+
     class Meta:
         verbose_name = 'Sample'
         verbose_name_plural = 'Samples'
