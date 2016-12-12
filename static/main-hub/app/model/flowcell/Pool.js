@@ -6,8 +6,6 @@ Ext.define('MainHub.model.flowcell.Pool', {
         {  name: 'id',              type: 'int'     },
         {  name: 'readLength',      type: 'int'     },
         {  name: 'readLengthName',  type: 'string'  },
-        {  name: 'size',            type: 'int'     },
-        {  name: 'lane',            type: 'string'  },
-        {  name: 'laneName',        type: 'string'  }
+        {  name: 'size',            type: 'int'     }
     ]
 });

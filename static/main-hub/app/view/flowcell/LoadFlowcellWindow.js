@@ -8,8 +8,8 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
     controller: 'load-flowcell-window',
 
     title: 'Load Flowcell',
-    height: 450,
-    width: 850,
+    height: 550,
+    width: 800,
 
     modal: true,
     resizable: false,
@@ -24,13 +24,13 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
             items: [
                 {
                     layout: 'hbox',
-                    height: 275,
+                    height: 375,
                     border: 0,
                     items: [
                         {
                             xtype: 'form',
-                            padding: 10,
-                            width: 350,
+                            padding: 15,
+                            width: 396,
                             border: 0,
 
                             defaultType: 'combobox',
@@ -38,7 +38,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                                 submitEmptyText: false,
                                 allowBlank: false,
                                 labelWidth: 180,
-                                width: 325
+                                width: 365
                             },
 
                             items: [
@@ -58,18 +58,56 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                                     fieldLabel: 'Flowcell ID'
                                 },
                                 {
-                                    xtype: 'textfield',
+                                    id: 'loadingConcentrationField',
+                                    itemId: 'loadingConcentrationField',
+                                    xtype: 'numberfield',
                                     fieldLabel: 'Loading Concentration (pM)',
-                                    disabled: true
+                                    minValue: 0.1,
+                                    disabled: true,
+                                    activeLane: ''
+                                },
+                                {
+                                    xtype: 'container',
+                                    html: 'Result:',
+                                    padding: '10 0',
+                                    style: {
+                                        borderTop: '1px solid #d0d0d0'
+                                    }
+                                },
+                                {
+                                    xtype: 'grid',
+                                    itemId: 'resultGrid',
+                                    height: 180,
+                                    viewConfig: {
+                                        markDirty: false
+                                    },
+                                    store: 'lanesStore',
+                                    columns: [
+                                        {
+                                            text: 'Pool',
+                                            dataIndex: 'poolName',
+                                            flex: 1
+                                        },
+                                        {
+                                            text: 'Lane',
+                                            dataIndex: 'laneName',
+                                            width: 70
+                                        },
+                                        {
+                                            text: 'Concentration',
+                                            dataIndex: 'loadingConcentration',
+                                            width: 110
+                                        }
+                                    ]
                                 }
                             ]
                         },
                         {
                             xtype: 'grid',
                             itemId: 'poolsFlowcell',
-                            padding: '0 6px 0 0',
-                            width: 500,
-                            height: 275,
+                            padding: '0 3 0 0',
+                            width: 400,
+                            height: 375,
                             border: 0,
                             viewConfig: {
                                 markDirty: false
@@ -93,11 +131,6 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                                     text: 'Size',
                                     dataIndex: 'size',
                                     width: 60
-                                },
-                                {
-                                    text: 'Lane',
-                                    dataIndex: 'laneName',
-                                    width: 70
                                 }
                             ]
                         }

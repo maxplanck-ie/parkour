@@ -40,6 +40,7 @@ Ext.define('MainHub.Application', {
         'librarypreparation.LibraryPreparation',
         'pooling.Pooling',
         'flowcell.Sequencer',
+        'flowcell.Lanes',
         'flowcell.Pool',
         'flowcell.PoolInfo'
     ],

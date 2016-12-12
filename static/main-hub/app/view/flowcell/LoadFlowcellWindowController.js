@@ -7,38 +7,49 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
     config: {
         control: {
             '#sequencer': {
-                change: 'onSequencerChange'
+                change: 'changeSequencer'
             },
             '#poolsFlowcell': {
                 render: 'initializePoolDragZone',
-                itemcontextmenu: 'showContextMenu'
+                itemcontextmenu: 'showAdditionalInformationMenu'
+            },
+            '#loadingConcentrationField': {
+                change: 'changeLoadingConcentration',
+                clear: 'clearLoadingConcentration'
+            },
+            '#resultGrid': {
+                itemcontextmenu: 'showUnloadLaneMenu'
+            },
+            '#saveBtn': {
+                click: 'saveFlowcell'
             }
         }
     },
 
-    onSequencerChange: function(cb, newValue, oldValue) {
+    changeSequencer: function(cb, newValue, oldValue) {
         var me = this,
             lanes = Ext.getCmp('lanes'),
-            store = Ext.getStore('poolsStore');
+            lanesStore = Ext.getStore('lanesStore'),
+            loadingConcentrationField = Ext.getCmp('loadingConcentrationField');
+
+        lanes.removeAll(true);
+        lanesStore.removeAll();
+        loadingConcentrationField.fireEvent('clear', loadingConcentrationField);
 
         // If HiSeq2500 has been selected, create 8 lanes
         if (newValue == 5) {
-            lanes.removeAll(true);
-
             for (var i = 1; i < 9; i++) {
                 lanes.add({
                     cls: 'lane',
                     html: 'Lane ' + i,
                     id: 'lane' + i,
-                    width: 85,
+                    width: 82,
                     listeners: {
                         render: me.initializeLaneDropZone
                     }
                 });
             }
         } else {
-            lanes.removeAll(true);
-
             lanes.add({
                 cls: 'lane',
                 html: 'Lane 1',
@@ -49,16 +60,37 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
                 }
             });
         }
+    },
 
-        // Clear all loaded pools
-        store.each(function(pool) {
-            if (pool.get('lane')) {
-                pool.set({
-                    lane: '',
-                    laneName: ''
-                });
+    changeLoadingConcentration: function(fld, value) {
+        var lane = Ext.get(fld.activeLane),
+            lanesStore = Ext.getStore('lanesStore');
+
+        if (lane) {
+            var record = lanesStore.findRecord('lane', lane.id);
+            record.set('loadingConcentration', value);
+        }
+    },
+
+    clickLane: function(e) {
+        var wnd = this.component.up('window'),
+            laneId = this.id,
+            loadingConcentrationField = Ext.getCmp('loadingConcentrationField'),
+            poolsStore = Ext.getStore('poolsStore'),
+            lanesStore = Ext.getStore('lanesStore');
+
+        if ($(this.dom).find('.lane-loaded').length === 1) {
+            var record = lanesStore.findRecord('lane', laneId);
+
+            loadingConcentrationField.setDisabled(false);
+            loadingConcentrationField.activeLane = laneId;
+
+            if (record.get('loadingConcentration') !== '') {
+                loadingConcentrationField.setValue(record.get('loadingConcentration'));
             }
-        });
+        } else {
+            loadingConcentrationField.fireEvent('clear', loadingConcentrationField);
+        }
     },
 
     initializePoolDragZone: function(v) {
@@ -84,20 +116,33 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
     },
 
     initializeLaneDropZone: function(v) {
-        function allowPool(record, store) {
-            var loadedPools = [];
+        // Initialize 'click' event
+        v.el.on('click', this.up('window').getController().clickLane);
 
-            store.each(function(pool) {
-                if (pool.get('lane')) loadedPools.push(pool);
-            });
+        function isLoaded(lane, store) {
+            return store.findRecord('lane', lane) !== null;
+        }
 
-            // return loadedPools.length === 0 || (loadedPools.length > 0 && record.get('sequencingRunCondition') === loadedPools[0].get('sequencingRunCondition'));
+        function isReadLengthOK(pool, lanesStore, poolsStore) {
+            if (lanesStore.getCount() > 0) {
+                var poolInResultId = lanesStore.getAt(0).get('pool'),
+                    poolInResultRecord = poolsStore.findRecord('id', poolInResultId);
+
+                if (poolInResultRecord.get('readLength') != pool.get('readLength')) {
+                    return false;
+                }
+            }
             return true;
         }
 
-        function allowLane(record, laneId, store) {
-            var ids = Ext.Array.pluck(Ext.Array.pluck(store.data.items, 'data'), 'lane');
-            return !ids || (record.get('lane') === '' && Ext.Array.indexOf(ids, laneId) === -1);
+        function isTargetingSelf(targetLane, pool, store) {
+            var ids = [];
+            store.each(function(record) {
+                if (record.get('pool') == pool.get('id')) {
+                    ids.push(record.get('lane'));
+                }
+            });
+            return ids.indexOf(targetLane) !== -1;
         }
 
         v.dropZone = Ext.create('Ext.dd.DropZone', v.el, {
@@ -105,47 +150,44 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
                 return e.getTarget();
             },
 
-            // onNodeEnter : function(target, dd, e, data) {
-            //     Ext.fly(target).addCls('lane-hover');
-            // },
-            //
-            // onNodeOut : function(target, dd, e, data) {
-            //     Ext.fly(target).removeCls('lane-hover');
-            // },
-
             onNodeOver : function(target, dd, e, data) {
-                var store = Ext.getStore('poolsStore'),
-                    poolRecord = store.findRecord('name', data.poolData.name),
+                var lanesStore = Ext.getStore('lanesStore'),
+                    poolsStore = Ext.getStore('poolsStore'),
+                    pool = poolsStore.findRecord('name', data.poolData.name),
                     laneId = $(target).attr('id').replace('-innerCt', ''),
                     proto = Ext.dd.DropZone.prototype;
-                return (allowLane(poolRecord, laneId, store) && allowPool(poolRecord, store)) ? proto.dropAllowed : proto.dropNotAllowed;
+                return (!isLoaded(laneId, lanesStore) && isReadLengthOK(pool, lanesStore, poolsStore)) ? proto.dropAllowed : proto.dropNotAllowed;
             },
 
             onNodeDrop : function(target, dd, e, data) {
                 var poolData = data.poolData,
-                    store = Ext.getStore('poolsStore'),
-                    poolRecord = store.findRecord('name', poolData.name),
+                    poolsStore = Ext.getStore('poolsStore'),
+                    lanesStore = Ext.getStore('lanesStore'),
+                    pool = poolsStore.findRecord('name', poolData.name),
                     laneId = $(target).attr('id').replace('-innerCt', ''),
-                    laneName = $(target).text(),
-                    ids = Ext.Array.pluck(Ext.Array.pluck(store.data.items, 'data'), 'lane');
+                    laneName = $(target).text();
 
-                if (allowLane(poolRecord, laneId, store)) {
-                    if (allowPool(poolRecord, store)) {
-                        poolRecord.set({
+                // If a target lane is not loaded
+                if (!isLoaded(laneId, lanesStore)) {
+                    // Is the Read Length the same for all pools
+                    if (isReadLengthOK(pool, lanesStore, poolsStore)) {
+                        // Load the pool on a lane
+                        lanesStore.add({
+                            pool: pool.get('id'),
+                            poolName: pool.get('name'),
                             lane: laneId,
                             laneName: laneName
                         });
-
                         Ext.fly(target).addCls('lane-loaded');
-
                         return true;
                     } else {
-                        Ext.ux.ToastMessage('Read Lengths must be the same for all pools in a flowcell.', 'warning');
+                        Ext.ux.ToastMessage('Read Lengths must be the same.', 'warning');
                     }
-                } else {
-                    if (poolRecord.get('lane') && poolRecord.get('lane') !== laneId) {
-                        Ext.ux.ToastMessage('Pool ' + poolData.name + ' is already loaded on a lane. Please unload it and try again.', 'warning');
-                    } else if(!poolRecord.get('lane') && Ext.Array.indexOf(ids, laneId) !== -1) {
+                }
+                // If a target lane is loaded
+                else {
+                    // If a target lane and the loaded pool's lane are not the same
+                    if (!isTargetingSelf(laneId, pool, lanesStore)) {
                         Ext.ux.ToastMessage(laneName + ' is already loaded. Please unload it and try again.', 'warning');
                     }
                 }
@@ -155,43 +197,53 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
         });
     },
 
-    showContextMenu: function(grid, record, item, index, e) {
+    showAdditionalInformationMenu: function(grid, record, item, index, e) {
         var me = this;
-
-        var items = [{
-            text: 'Show Additional Information',
-            iconCls: 'x-fa fa-info',
-            handler: function() {
-                Ext.create('MainHub.view.flowcell.PoolInfoWindow', {
-                    title: record.get('name'),
-                    poolId: record.get('id')
-                }).show();
-            }
-        }];
-
-        // If a pool is already loaded on a lane
-        if (record.get('lane')) {
-            items.push({
-                text: 'Unload Lane',
-                iconCls: 'x-fa fa-eraser',
-                handler: function() {
-                    me.unloadLane(record);
-                }
-            });
-        }
-
         e.stopEvent();
         Ext.create('Ext.menu.Menu', {
-            items: items
+            items: [{
+                text: 'Show Additional Information',
+                iconCls: 'x-fa fa-info',
+                handler: function() {
+                    Ext.create('MainHub.view.flowcell.PoolInfoWindow', {
+                        title: record.get('name'),
+                        poolId: record.get('id')
+                    }).show();
+                }
+            }]
         }).showAt(e.getXY());
     },
 
-    unloadLane: function(pool) {
-        Ext.fly(record.get('lane') + '-innerCt').removeCls('lane-loaded');
+    showUnloadLaneMenu: function(grid, record, item, index, e) {
+        var me = this;
+        e.stopEvent();
+        Ext.create('Ext.menu.Menu', {
+            items: [{
+                text: 'Unload Lane',
+                iconCls: 'x-fa fa-eraser',
+                handler: function() {
+                    me.unloadLane(grid.getStore(), record);
+                }
+            }]
+        }).showAt(e.getXY());
+    },
 
-        pool.set({
-            lane: '',
-            laneName: ''
-        });
+    unloadLane: function(store, record) {
+        var loadingConcentrationField = Ext.getCmp('loadingConcentrationField');
+        loadingConcentrationField.fireEvent('clear', loadingConcentrationField);
+        Ext.fly(record.get('lane') + '-innerCt').removeCls('lane-loaded');
+        store.remove(record);
+    },
+
+    clearLoadingConcentration: function(fld) {
+        fld.setDisabled(true);
+        fld.activeLane = '';
+        fld.suspendEvent('change');
+        fld.setValue('');
+        fld.resumeEvent('change');
+    },
+
+    saveFlowcell: function(btn) {
+        // debugger;
     }
 });
