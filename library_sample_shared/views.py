@@ -1,6 +1,4 @@
 from django.views.generic.list import ListView
-from django.http import JsonResponse
-# from .models import ReadLength
 
 from common.utils import JSONResponseMixin
 
@@ -43,7 +41,3 @@ class IndexStoreView(JSONResponseMixin, ListView):
         ]
         data = sorted(data, key=lambda x: x['id'])
         return self.render_to_json_response(data, **response_kwargs)
-
-
-def get_index_types(request):
-    return JsonResponse({})

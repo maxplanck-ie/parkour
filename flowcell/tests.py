@@ -2,7 +2,8 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 
-from .models import Sequencer
+from .models import Sequencer, Lane, Flowcell
+from library_sample_shared.models import ReadLength
 from index_generator.models import Pool
 from library.models import Library
 from sample.models import Sample
@@ -20,6 +21,29 @@ class SequencerTest(TestCase):
     def test_sequencer_name(self):
         self.assertTrue(isinstance(self.sequencer, Sequencer))
         self.assertEqual(self.sequencer.__str__(), self.sequencer.name)
+
+
+class LaneTest(TestCase):
+    def setUp(self):
+        pool = Pool(name='_Pool')
+        self.lane = Lane(name='lane', pool=pool, loading_concentration=1.0)
+
+    def test_lane_name(self):
+        self.assertTrue(isinstance(self.lane, Lane))
+        self.assertEqual(
+            self.lane.__str__(),
+            '%s: %s' % (self.lane.name, self.lane.pool.name)
+        )
+
+
+class FlowcellTest(TestCase):
+    def setUp(self):
+        read_length = ReadLength(name='1x50')
+        self.flowcell = Flowcell(flowcell_id='fc', read_length=read_length)
+
+    def test_flowcell_name(self):
+        self.assertTrue(isinstance(self.flowcell, Flowcell))
+        self.assertEqual(self.flowcell.__str__(), self.flowcell.flowcell_id)
 
 
 # Views
@@ -58,7 +82,7 @@ class PoolListLibraries(TestCase):
 class PoolListSamples(TestCase):
     def setUp(self):
         User.objects.create_user(email='foo@bar.io', password='foo-foo')
-        pool = Pool(name='_Foo')
+        pool = Pool(name='_Pool')
         pool.save()
 
         sample = Sample.get_test_sample('Sample')
