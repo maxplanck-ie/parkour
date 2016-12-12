@@ -17,7 +17,6 @@ import xlwt
 logger = logging.getLogger('db')
 
 
-@login_required
 def get_request(record, record_type):
     """ Get request for a current library/sample. """
 

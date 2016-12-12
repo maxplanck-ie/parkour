@@ -81,9 +81,9 @@ def pooling_tree(request):
                         if sample.index_type is not None
                         else '',
                     'readLength':
-                        library.read_length.id,
+                        sample.read_length.id,
                     'readLengthName':
-                        library.read_length.name,
+                        sample.read_length.name,
                     'iconCls': 'x-fa fa-flask',
                     'checked': False,
                     'leaf': True
