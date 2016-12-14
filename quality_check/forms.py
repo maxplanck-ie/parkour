@@ -9,7 +9,7 @@ class IncomingLibraryForm(forms.ModelForm):
         fields = (
             'dilution_factor',
             'concentration_facility',
-            'concentration_determined_by_facility',
+            'concentration_method_facility',
             'sample_volume_facility',
             'amount_facility',
             'qpcr_result_facility',
@@ -24,7 +24,7 @@ class IncomingSampleForm(forms.ModelForm):
         fields = (
             'dilution_factor',
             'concentration_facility',
-            'concentration_determined_by_facility',
+            'concentration_method_facility',
             'sample_volume_facility',
             'amount_facility',
             'rna_quality_facility',

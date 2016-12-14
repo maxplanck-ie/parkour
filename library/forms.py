@@ -18,7 +18,7 @@ class LibraryForm(forms.ModelForm):
             'equal_representation_nucleotides',
             'dna_dissolved_in',
             'concentration',
-            'concentration_determined_by',
+            'concentration_method',
             'sample_volume',
             'mean_fragment_size',
             'qpcr_result',
