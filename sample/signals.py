@@ -1,7 +1,9 @@
-from django.db.models.signals import post_save, pre_delete, post_delete
+from django.db.models.signals import (pre_save, post_save,
+                                      pre_delete, post_delete)
 from django.dispatch import receiver
 from library_sample_shared.models import BarcodeCounter
 from .models import Sample, FileSample
+from index_generator.models import Pool
 from common.utils import generate_barcode
 
 
@@ -14,6 +16,23 @@ def create_barcode(sender, instance, created, **kwargs):
 
         instance.barcode = generate_barcode('S', str(counter.counter))
         instance.save()
+
+
+@receiver(pre_save, sender=Sample)
+def update_pool_size(sender, instance, **kwargs):
+    """ If a saving sample in a pool, update the pool size. """
+    if instance.pk is not None:
+        for pool in Pool.objects.prefetch_related('samples'):
+            samples = pool.samples.all()
+            if instance in samples:
+                sample = Sample.objects.get(pk=instance.pk)
+                old_value = sample.sequencing_depth
+                new_value = instance.sequencing_depth
+                diff = new_value - old_value
+                if diff != 0:
+                    pool.size += diff
+                    pool.save()
+                    break
 
 
 @receiver(pre_delete, sender=Sample)
