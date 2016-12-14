@@ -106,7 +106,7 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
         var grid = Ext.getCmp('incomingLibraries'),
             store = grid.getStore(),
 
-            // TODO: update this after merging with feature/libraries-from-file
+            // TODO@me: update this after merging with feature/libraries-from-file
             columns = [
                 'name',
                 'barcode',

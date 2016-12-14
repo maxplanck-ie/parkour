@@ -40,7 +40,6 @@ Ext.define('MainHub.model.libraries.Library', {
         {  name: 'nucleicAcidTypeId',         type: 'int'     },
         {  name: 'DNaseTreatment',            type: 'string'  },
         {  name: 'rnaQuality',                type: 'string'  },
-        {  name: 'rnaQualityId',              type: 'int'     },
         {  name: 'rnaSpikeIn',                type: 'string'  },
         {  name: 'samplePreparationProtocol', type: 'string'  },
         {  name: 'requestedSampleTreatment',  type: 'string'  }

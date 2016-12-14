@@ -79,17 +79,17 @@ class Sample(GenericLibrarySample):
         'RNA Quality',
         max_length=2,
         choices=(
-            (1, '1'),
-            (2, '2'),
-            (3, '3'),
-            (4, '4'),
-            (5, '5'),
-            (6, '6'),
-            (7, '7'),
-            (8, '8'),
-            (9, '9'),
-            (10, '10'),
-            (11, 'Determined by Facility'),
+            ('1', '1'),
+            ('2', '2'),
+            ('3', '3'),
+            ('4', '4'),
+            ('5', '5'),
+            ('6', '6'),
+            ('7', '7'),
+            ('8', '8'),
+            ('9', '9'),
+            ('10', '10'),
+            ('11', 'Determined by Facility'),
         ),
         null=True,
         blank=True,
@@ -111,7 +111,11 @@ class Sample(GenericLibrarySample):
         blank=True,
     )
 
-    files = models.ManyToManyField(FileSample, related_name='files')
+    files = models.ManyToManyField(
+        FileSample,
+        related_name='files',
+        blank=True,
+    )
 
     is_converted = models.BooleanField('Is converted?', default=False)
 
@@ -128,7 +132,7 @@ class Sample(GenericLibrarySample):
             name=name,
             organism_id=1,
             concentration=1.0,
-            concentration_determined_by_id=1,
+            concentration_method_id=1,
             dna_dissolved_in='dna',
             sample_volume=1,
             read_length_id=1,

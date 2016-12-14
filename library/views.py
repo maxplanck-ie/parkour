@@ -45,9 +45,9 @@ def get_all(request):
                 'DNADissolvedIn': library.dna_dissolved_in,
                 'concentration': library.concentration,
                 'concentrationMethod':
-                    library.concentration_determined_by.name,
+                    library.concentration_method.name,
                 'concentrationMethodId':
-                    library.concentration_determined_by.id,
+                    library.concentration_method.id,
                 'sampleVolume': library.sample_volume,
                 'meanFragmentSize': library.mean_fragment_size,
                 'qPCRResult': library.qpcr_result,
@@ -62,12 +62,12 @@ def get_all(request):
                 'dilutionFactor': library.dilution_factor,
                 'concentrationFacility': library.concentration_facility,
                 'concentrationMethodFacility':
-                    library.concentration_determined_by_facility.name
-                    if library.concentration_determined_by_facility is
+                    library.concentration_method_facility.name
+                    if library.concentration_method_facility is
                     not None else '',
                 'concentrationMethodFacilityId':
-                    library.concentration_determined_by_facility.id
-                    if library.concentration_determined_by_facility is
+                    library.concentration_method_facility.id
+                    if library.concentration_method_facility is
                     not None else '',
                 'dateFacility': library.date_facility.strftime('%d.%m.%Y')
                     if library.date_facility is not None else '',
@@ -101,9 +101,9 @@ def get_all(request):
                 'DNADissolvedIn': sample.dna_dissolved_in,
                 'concentration': sample.concentration,
                 'concentrationMethod':
-                    sample.concentration_determined_by.name,
+                    sample.concentration_method.name,
                 'concentrationMethodId':
-                    sample.concentration_determined_by.id,
+                    sample.concentration_method.id,
                 'sampleVolume': sample.sample_volume,
                 'readLength':
                     sample.read_length.name,
@@ -111,9 +111,7 @@ def get_all(request):
                     sample.read_length.id,
                 'sequencingDepth': sample.sequencing_depth,
                 'DNaseTreatment': str(sample.dnase_treatment),
-                'rnaQuality': sample.rna_quality.name
-                    if sample.rna_quality else '',
-                'rnaQualityId': sample.rna_quality_id
+                'rnaQuality': sample.rna_quality
                     if sample.rna_quality else '',
                 'rnaSpikeIn': str(sample.rna_spike_in),
                 'samplePreparationProtocol':
@@ -126,12 +124,12 @@ def get_all(request):
                 'dilutionFactor': sample.dilution_factor,
                 'concentrationFacility': sample.concentration_facility,
                 'concentrationMethodFacility':
-                    sample.concentration_determined_by_facility.name
-                    if sample.concentration_determined_by_facility is
+                    sample.concentration_method_facility.name
+                    if sample.concentration_method_facility is
                     not None else '',
                 'concentrationMethodFacilityId':
-                    sample.concentration_determined_by_facility.id
-                    if sample.concentration_determined_by_facility is
+                    sample.concentration_method_facility.id
+                    if sample.concentration_method_facility is
                     not None else '',
                 'dateFacility': sample.date_facility.strftime('%d.%m.%Y')
                     if sample.date_facility is not None else '',

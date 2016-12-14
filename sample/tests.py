@@ -97,7 +97,7 @@ class SaveSampleTest(TestCase):
             'organism': 1,
             'dna_dissolved_in': 'dna',
             'concentration': 1.0,
-            'concentration_determined_by': 1,
+            'concentration_method': 1,
             'sample_volume': 1,
             'read_length': 1,
             'sequencing_depth': 1,
@@ -127,7 +127,7 @@ class SaveSampleTest(TestCase):
             'organism': 2,
             'dna_dissolved_in': 'dna',
             'concentration': 1.0,
-            'concentration_determined_by': 1,
+            'concentration_method': 1,
             'sample_volume': 1,
             'read_length': 1,
             'sequencing_depth': 1,
@@ -182,7 +182,7 @@ class GetFilesTest(TestCase):
     def setUp(self):
         User.objects.create_user(email='foo@bar.io', password='foo-foo')
 
-        # TODO: fix creating a file, which must be physically located on a disk
+        # TODO@me: fix creating a file, which must be physically located on a disk
         self.f = FileSample(name='File', file=ContentFile(b'file'))
         self.f.save()
 

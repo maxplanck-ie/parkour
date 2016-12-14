@@ -261,7 +261,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
 
         record.set('sequencingDepth', value);
 
-        // TODO: update grid's title and summary
+        // TODO@me: update grid's title and summary
     },
 
     savePool: function(btn) {
