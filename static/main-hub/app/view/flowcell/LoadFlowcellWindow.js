@@ -43,7 +43,8 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
 
                             items: [
                                 {
-                                    itemId: 'sequencer',
+                                    id: 'sequencerField',
+                                    itemId: 'sequencerField',
                                     queryMode: 'local',
                                     displayField: 'name',
                                     valueField: 'id',
@@ -68,7 +69,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                                 },
                                 {
                                     xtype: 'container',
-                                    html: 'Result:',
+                                    html: 'Result: <div id="flowcell-result">Loaded: <span id="flowcell-result-total">0</span> (M)</div>',
                                     padding: '10 0',
                                     style: {
                                         borderTop: '1px solid #d0d0d0'
