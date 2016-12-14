@@ -20,7 +20,7 @@ def create_barcode(sender, instance, created, **kwargs):
 
 @receiver(pre_save, sender=Sample)
 def update_pool_size(sender, instance, **kwargs):
-    """ If a saving sample in a pool, update the pool size. """
+    """ If a saving sample is in a pool, update the pool size. """
     if instance.pk is not None:
         for pool in Pool.objects.prefetch_related('samples'):
             samples = pool.samples.all()
