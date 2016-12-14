@@ -96,7 +96,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             // Show Library barcode
             Ext.getCmp('libraryBarcodeField').show().setHtml(record.barcode);
 
-            // Load field values
+            // Set field values
             form.setValues({
                 name: record.name,
                 enrichmentCycles: record.enrichmentCycles,
@@ -188,7 +188,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
 
             if (wnd.mode == 'edit') {
                 var readLengthField = Ext.getCmp('readLengthField');
-                readLengthField.select(record.readLengthIdId);
+                readLengthField.select(record.readLengthId);
                 readLengthField.fireEvent('select', readLengthField, readLengthField.findRecordByValue(record.readLengthId));
             }
 
@@ -212,6 +212,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             // Show Sample barcode
             Ext.getCmp('sampleBarcodeField').show().setHtml(record.barcode);
 
+            // Set field values
             form.setValues({
                 name: record.name,
                 DNADissolvedIn: record.DNADissolvedIn,
