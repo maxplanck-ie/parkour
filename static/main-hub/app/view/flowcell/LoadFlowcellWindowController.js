@@ -262,6 +262,14 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
     },
 
     saveFlowcell: function(btn) {
-        // debugger;
+        var resultGrid = Ext.getCmp('flowcellResultGrid'),
+            resultStore = resultGrid.getStore(),
+            lanes = Ext.getCmp('lanes').items.items;
+
+        if (resultStore.getCount() == lanes.length) {
+            // debugger;
+        } else {
+            Ext.ux.ToastMessage('All lanes must be loaded.', 'warning');
+        }
     }
 });
