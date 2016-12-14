@@ -18,7 +18,13 @@ def delete_dependent_objects(sender, instance, **kwargs):
     libraries = instance.libraries.all()
     samples = instance.samples.all()
 
-    # TODO@me: set 'is_pooled' to False for the libraries and samples
+    for library in libraries:
+        library.is_pooled = False
+        library.save(update_fields=['is_pooled'])
+
+    for sample in samples:
+        sample.is_pooled = False
+        sample.save(update_fields=['is_pooled'])
 
     # Delete all dependent Library Preparation and Pooling objects
     LibraryPreparation.objects.filter(sample__in=samples).delete()
