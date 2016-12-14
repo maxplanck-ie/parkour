@@ -105,12 +105,14 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                         },
                         {
                             xtype: 'grid',
+                            id: 'poolsFlowcell',
                             itemId: 'poolsFlowcell',
                             padding: '0 3 0 0',
                             width: 400,
                             height: 375,
                             border: 0,
                             viewConfig: {
+                                stripeRows: false,
                                 markDirty: false
                             },
                             style: {

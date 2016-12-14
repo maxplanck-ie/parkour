@@ -6,6 +6,10 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
 
     config: {
         control: {
+            '#': {
+                boxready: 'onWindowReady',
+                beforeclose: 'onWindowClose'
+            },
             '#sequencer': {
                 change: 'changeSequencer'
             },
@@ -25,6 +29,14 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
                 click: 'saveFlowcell'
             }
         }
+    },
+
+    onWindowReady: function () {
+        Ext.getStore('poolsStore').load();
+    },
+
+    onWindowClose: function () {
+        Ext.getCmp('poolsFlowcell').dragZone.destroy();
     },
 
     changeSequencer: function(cb, newValue, oldValue) {
@@ -99,7 +111,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
     },
 
     updateConcentrationField: function (record) {
-        var field = Ext.getCmp('loadingConcentrationField')
+        var field = Ext.getCmp('loadingConcentrationField');
 
         field.setDisabled(false);
         field.activeLane = record.get('lane');
@@ -113,6 +125,11 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
 
     initializePoolDragZone: function(v) {
         v.dragZone = Ext.create('Ext.dd.DragZone', v.getEl(), {
+            onBeforeDrag: function(data, e) {
+                var record = v.getStore().getAt(e.recordIndex);
+                return !record.isDisabled();
+            },
+
             getDragData: function(e) {
                 var sourceEl = $(e.item).find('td div')[0], d;
                 if (sourceEl) {

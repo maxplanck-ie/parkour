@@ -21,7 +21,6 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellsController', {
             // Remove record 'Other'
             if (success) this.remove(this.findRecord('name', 'Other'));
         });
-        Ext.getStore('poolsStore').load();
     },
 
     onLoadBtnClick: function() {

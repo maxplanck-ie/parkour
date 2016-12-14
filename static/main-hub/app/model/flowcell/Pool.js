@@ -7,5 +7,16 @@ Ext.define('MainHub.model.flowcell.Pool', {
         {  name: 'readLength',      type: 'int'     },
         {  name: 'readLengthName',  type: 'string'  },
         {  name: 'size',            type: 'int'     }
-    ]
+    ],
+
+    disabled: false,
+
+    setDisabled: function(state) {
+        this.disabled = state;
+        this.store.fireEvent('disable', this, state);
+    },
+
+    isDisabled: function() {
+        return this.disabled;
+    }
 });
