@@ -90,7 +90,7 @@ Ext.define('MainHub.view.libraries.Libraries', {
                     { text: 'Sample Volume', dataIndex: 'sampleVolume' },
                     { text: 'Mean Fragment Size', dataIndex: 'meanFragmentSize' },
                     { text: 'qPCR Result', dataIndex: 'qPCRResult' },
-                    { text: 'Sequencing Run Condition', dataIndex: 'sequencingRunCondition' },
+                    { text: 'Read Length', dataIndex: 'readLength' },
                     { text: 'Sequencing Depth', dataIndex: 'sequencingDepth' },
                     { text: 'DNase Treatment', dataIndex: 'DNaseTreatment', renderer: function(val) {
                         if (val == 'True') {
