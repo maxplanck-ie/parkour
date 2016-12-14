@@ -216,9 +216,9 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
                         //
                         var diff = poolSize - loadedTotal, loaded;
                         if (diff > laneCapacity) {
-                            loaded = laneCapacity
+                            loaded = laneCapacity;
                         } else {
-                            loaded = diff
+                            loaded = diff;
                         }
 
                         // Load the pool on a lane
