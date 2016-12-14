@@ -181,7 +181,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
                         Ext.fly(target).addCls('lane-loaded');
                         return true;
                     } else {
-                        Ext.ux.ToastMessage('Read Lengths must be the same.', 'warning');
+                        Ext.ux.ToastMessage('Read Length must be the same for all pools on a flowcell.', 'warning');
                     }
                 }
                 // If a target lane is loaded
