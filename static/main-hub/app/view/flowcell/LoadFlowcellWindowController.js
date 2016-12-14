@@ -17,7 +17,8 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
                 change: 'changeLoadingConcentration',
                 clear: 'clearLoadingConcentration'
             },
-            '#resultGrid': {
+            '#flowcellResultGrid': {
+                select: 'selectLane',
                 itemcontextmenu: 'showUnloadLaneMenu'
             },
             '#saveBtn': {
@@ -73,23 +74,40 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
     },
 
     clickLane: function(e) {
-        var wnd = this.component.up('window'),
-            laneId = this.id,
-            loadingConcentrationField = Ext.getCmp('loadingConcentrationField'),
+        var laneId = this.id,
+            wnd = this.component.up('window'),
+            grid = Ext.getCmp('flowcellResultGrid'),
             poolsStore = Ext.getStore('poolsStore'),
             lanesStore = Ext.getStore('lanesStore');
 
         if ($(this.dom).find('.lane-loaded').length === 1) {
             var record = lanesStore.findRecord('lane', laneId);
 
-            loadingConcentrationField.setDisabled(false);
-            loadingConcentrationField.activeLane = laneId;
+            // Highlight an active lane in the result grid
+            grid.getSelectionModel().select(lanesStore.indexOf(record));
 
-            if (record.get('loadingConcentration') !== '') {
-                loadingConcentrationField.setValue(record.get('loadingConcentration'));
-            }
+            // Disable Loading Concentration field and set its value
+            wnd.getController().updateConcentrationField(record);
         } else {
-            loadingConcentrationField.fireEvent('clear', loadingConcentrationField);
+            grid.getSelectionModel().deselectAll();
+            Ext.getCmp('loadingConcentrationField').fireEvent('clear', loadingConcentrationField);
+        }
+    },
+
+    selectLane: function (grid, record) {
+        this.updateConcentrationField(record);
+    },
+
+    updateConcentrationField: function (record) {
+        var field = Ext.getCmp('loadingConcentrationField')
+
+        field.setDisabled(false);
+        field.activeLane = record.get('lane');
+
+        if (record.get('loadingConcentration') !== '') {
+            field.setValue(record.get('loadingConcentration'));
+        } else {
+            field.reset();
         }
     },
 

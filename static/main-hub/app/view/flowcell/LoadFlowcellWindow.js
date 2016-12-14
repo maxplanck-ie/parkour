@@ -76,7 +76,8 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                                 },
                                 {
                                     xtype: 'grid',
-                                    itemId: 'resultGrid',
+                                    id: 'flowcellResultGrid',
+                                    itemId: 'flowcellResultGrid',
                                     height: 180,
                                     viewConfig: {
                                         markDirty: false
