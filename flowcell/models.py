@@ -14,7 +14,7 @@ class Sequencer(models.Model):
 
 class Lane(models.Model):
     name = models.CharField('Name', max_length=5)
-    pool = models.ForeignKey(Pool, related_name='pool', verbose_name='Pool')
+    pool = models.ForeignKey(Pool, verbose_name='Pool')
     loading_concentration = models.FloatField('Loading Concentration')
 
     def __str__(self):
@@ -23,14 +23,8 @@ class Lane(models.Model):
 
 class Flowcell(models.Model):
     flowcell_id = models.CharField('Flowcell ID', max_length=50)
-
-    read_length = models.ForeignKey(
-        ReadLength,
-        related_name='read_length',
-        verbose_name='Read Length',
-    )
-
-    lanes = models.ManyToManyField(Lane, blank=True)
+    read_length = models.ForeignKey(ReadLength, verbose_name='Read Length')
+    lanes = models.ManyToManyField(Lane, related_name='flowcell', blank=True)
 
     def __str__(self):
         return self.flowcell_id
