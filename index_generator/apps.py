@@ -6,5 +6,4 @@ class IndexGeneratorConfig(AppConfig):
     verbose_name = 'Index Generator'
 
     def ready(self):
-        from .signals import update_pool_name, \
-            delete_dependent_objects, delete_file
+        import index_generator.signals

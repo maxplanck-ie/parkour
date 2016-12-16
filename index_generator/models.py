@@ -8,6 +8,11 @@ class Pool(models.Model):
     libraries = models.ManyToManyField(Library, related_name='pool', blank=True)
     samples = models.ManyToManyField(Sample, related_name='pool', blank=True)
     size = models.PositiveSmallIntegerField('Pool Size', default=0, blank=True)
+    # amount_loaded = models.PositiveSmallIntegerField(
+    #     'Amount Loaded',
+    #     default=0,
+    #     blank=True,
+    # )
     file = models.FileField(upload_to='pools/%Y/%m/%d/', blank=True, null=True)
 
     def __str__(self):

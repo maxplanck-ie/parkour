@@ -6,10 +6,19 @@ from .models import Pool
 
 
 @receiver(post_save, sender=Pool)
-def update_pool_name(sender, instance, created, **kwargs):
+def update_pool_name_size(sender, instance, created, **kwargs):
     # Update the name only for a just created pool
     if created:
         instance.name = str(instance.id) + instance.name
+        instance.save()
+
+    # Update Pool Size
+    update_fields = kwargs.pop('update_fields')
+    if update_fields and update_fields == {'size'}:
+        libraries = instance.libraries.all()
+        samples = instance.samples.all()
+        instance.size += sum([l.sequencing_depth for l in libraries])
+        instance.size += sum([s.sequencing_depth for s in samples])
         instance.save()
 
 
