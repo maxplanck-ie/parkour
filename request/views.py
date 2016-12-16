@@ -127,18 +127,10 @@ def save_request(request):
 
             if library_ids:
                 libraries = json.loads(library_ids)
-                request_libraries = Library.objects.filter(id__in=libraries)
-                for library in request_libraries:
-                    library.is_in_request = True
-                    library.save()
                 req.libraries.add(*libraries)
 
             if sample_ids:
                 samples = json.loads(sample_ids)
-                request_samples = Sample.objects.filter(id__in=samples)
-                for sample in request_samples:
-                    sample.is_in_request = True
-                    sample.save()
                 req.samples.add(*samples)
 
             if not library_ids and not sample_ids:
