@@ -25,45 +25,54 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
             height: 375,
             border: 0,
             items: [{
-                xtype: 'form',
-                padding: 15,
-                width: 396,
+                layout: 'vbox',
                 border: 0,
-
-                defaultType: 'combobox',
-                defaults: {
-                    submitEmptyText: false,
-                    allowBlank: false,
-                    labelWidth: 180,
-                    width: 365
-                },
-
                 items: [{
-                    id: 'sequencerField',
-                    itemId: 'sequencerField',
-                    queryMode: 'local',
-                    displayField: 'name',
-                    valueField: 'id',
-                    name: 'sequencer',
-                    fieldLabel: 'Sequencer',
-                    emptyText: 'Sequencer',
-                    store: 'sequencersStore',
-                    forceSelection: true
-                }, {
-                    xtype: 'textfield',
-                    fieldLabel: 'Flowcell ID'
-                }, {
-                    id: 'loadingConcentrationField',
-                    itemId: 'loadingConcentrationField',
-                    xtype: 'numberfield',
-                    fieldLabel: 'Loading Concentration (pM)',
-                    minValue: 0.1,
-                    disabled: true,
-                    activeLane: ''
+                    xtype: 'form',
+                    id: 'flowcellForm',
+                    padding: '15 15 0 15',
+                    width: 396,
+                    border: 0,
+
+                    defaultType: 'combobox',
+                    defaults: {
+                        submitEmptyText: false,
+                        allowBlank: false,
+                        labelWidth: 180,
+                        width: 365
+                    },
+
+                    items: [{
+                        id: 'sequencerField',
+                        itemId: 'sequencerField',
+                        queryMode: 'local',
+                        displayField: 'name',
+                        valueField: 'id',
+                        name: 'sequencer',
+                        fieldLabel: 'Sequencer',
+                        emptyText: 'Sequencer',
+                        store: 'sequencersStore',
+                        forceSelection: true
+                    }, {
+                        xtype: 'textfield',
+                        name: 'flowcell_id',
+                        fieldLabel: 'Flowcell ID'
+                    }, {
+                        id: 'loadingConcentrationField',
+                        itemId: 'loadingConcentrationField',
+                        xtype: 'numberfield',
+                        fieldLabel: 'Loading Concentration (pM)',
+                        minValue: 0.1,
+                        disabled: true,
+                        allowBlank: true,
+                        activeLane: ''
+                    }]
                 }, {
                     xtype: 'container',
                     html: 'Result: <div id="flowcell-result">Loaded: <span id="flowcell-result-total">0</span> (M)</div>',
                     padding: '10 0',
+                    margin: '0 15',
+                    width: 365,
                     style: {
                         borderTop: '1px solid #d0d0d0'
                     }
@@ -71,6 +80,8 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                     xtype: 'grid',
                     id: 'flowcellResultGrid',
                     itemId: 'flowcellResultGrid',
+                    padding: '0 15',
+                    width: 396,
                     height: 180,
                     viewConfig: {
                         markDirty: false

@@ -329,14 +329,56 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
     },
 
     saveFlowcell: function(btn) {
-        var resultGrid = Ext.getCmp('flowcellResultGrid'),
-            resultStore = resultGrid.getStore(),
-            lanes = Ext.getCmp('lanes').items.items;
+        var wnd = btn.up('window'),
+            lanesStore = Ext.getStore('lanesStore'),
+            form = Ext.getCmp('flowcellForm').getForm(),
+            laneContainers = Ext.getCmp('lanes').items.items;
 
-        if (resultStore.getCount() == lanes.length) {
-            // debugger;
+        var isConcentrationOK = function(store) {
+            var concentration = Ext.Array.pluck(Ext.Array.pluck(store.data.items, 'data'), 'loadingConcentration');
+            return concentration.indexOf('') === -1;
+        };
+
+        if (form.isValid()) {
+            // If all lanes are loaded
+            if (lanesStore.getCount() == laneContainers.length) {
+                if (isConcentrationOK(lanesStore)) {
+                    var lanes = [];
+                    lanesStore.each(function(lane) {
+                        lanes.push({
+                            name: lane.get('laneName'),
+                            pool_id: lane.get('pool'),
+                            loaded: lane.get('loaded'),
+                            loading_concentration: lane.get('loadingConcentration')
+                        });
+                    });
+
+                    form.submit({
+                        url: 'flowcell/save/',
+                        params: {
+                            lanes: Ext.JSON.encode(lanes)
+                        },
+                        success: function(f, action) {
+                            if (action.result.success) {
+                                Ext.ux.ToastMessage('Flowcell has been successfully loaded!');
+                                Ext.getStore('flowcellsStore').reload();
+                                wnd.close();
+                            } else {
+                                Ext.ux.ToastMessage(action.result.error, 'error');
+                            }
+                        },
+                        failure: function(f, action) {
+                            Ext.ux.ToastMessage(action.result.error, 'error');
+                        }
+                    });
+                } else {
+                    Ext.ux.ToastMessage('Loading Concentration is empty for some lane(s).', 'warning');
+                }
+            } else {
+                Ext.ux.ToastMessage('All lanes must be loaded.', 'warning');
+            }
         } else {
-            Ext.ux.ToastMessage('All lanes must be loaded.', 'warning');
+            Ext.ux.ToastMessage('Please check whether all the fields are filled in.', 'warning');
         }
     }
 });

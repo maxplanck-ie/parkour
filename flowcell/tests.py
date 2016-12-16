@@ -38,8 +38,8 @@ class LaneTest(TestCase):
 
 class FlowcellTest(TestCase):
     def setUp(self):
-        read_length = ReadLength(name='1x50')
-        self.flowcell = Flowcell(flowcell_id='fc', read_length=read_length)
+        sequencer = Sequencer(name='Seq', lanes=1, lane_capacity=200)
+        self.flowcell = Flowcell(flowcell_id='fc', sequencer=sequencer)
 
     def test_flowcell_name(self):
         self.assertTrue(isinstance(self.flowcell, Flowcell))

@@ -4,7 +4,47 @@ from django.contrib.auth.decorators import login_required
 from index_generator.models import Pool
 from library_sample_shared.models import ReadLength
 from request.models import Request
-from .models import Sequencer
+from .models import Sequencer, Lane, Flowcell
+from .forms import FlowcellForm
+
+import logging
+import json
+
+logger = logging.getLogger('db')
+
+
+@login_required
+def get_all(request):
+    """ Get the list of all Flowcells. """
+    data = []
+
+    for flowcell in Flowcell.objects.prefetch_related('sequencer', 'lanes'):
+        for lane in flowcell.lanes.select_related('pool'):
+            pool = lane.pool
+
+            libraries = pool.libraries.select_related('read_length')
+            samples = pool.samples.select_related('read_length')
+
+            if any(libraries):
+                read_length_name = libraries[0].read_length.name
+            else:
+                read_length_name = samples[0].read_length.name
+
+            data.append({
+                'flowcellId': flowcell.flowcell_id,
+                'laneName': lane.name,
+                'pool': pool.id,
+                'poolName': pool.name,
+                'poolSize': pool.size,
+                'readLengthName': read_length_name,
+                'sequencer': flowcell.sequencer.pk,
+                'sequencerName': flowcell.sequencer.name,
+                'loadingConcentration': lane.loading_concentration
+            })
+
+        data = sorted(data, key=lambda x: (x['flowcellId'], x['laneName']))
+
+    return JsonResponse(data, safe=False)
 
 
 @login_required
@@ -83,3 +123,49 @@ def pool_info(request):
                 })
 
     return JsonResponse(data, safe=False)
+
+
+@login_required
+def save(request):
+    """ Save a new flowcell. """
+    error = ''
+    lanes = json.loads(request.POST.get('lanes'))
+    form = FlowcellForm(request.POST)
+
+    if form.is_valid():
+        flowcell = form.save()
+
+        lane_objects = []
+        loaded_per_pool = {}
+        for lane in lanes:
+            pool_id = lane['pool_id']
+            loaded = lane['loaded']
+
+            # Create a Labe object
+            l = Lane(
+                name=lane['name'],
+                pool_id=pool_id,
+                loading_concentration=lane['loading_concentration'],
+            )
+            l.save()
+            lane_objects.append(l.pk)
+
+            # Count Loaded for each pool on the lanes
+            if pool_id not in loaded_per_pool.keys():
+                loaded_per_pool[pool_id] = 0
+            loaded_per_pool[pool_id] += loaded
+
+        # Update Pool Loaded for each pool
+        for pool_id, loaded in loaded_per_pool.items():
+            pool = Pool.objects.get(pk=pool_id)
+            pool.loaded += loaded
+            pool.save(update_fields=['loaded'])
+
+        # Add lanes to the flowcell
+        flowcell.lanes.add(*lane_objects)
+
+    else:
+        error = str(form.errors)
+        logger.debug(form.errors.as_data())
+
+    return JsonResponse({'success': not error, 'error': error})

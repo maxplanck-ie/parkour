@@ -1,6 +1,5 @@
 from django.db import models
 from index_generator.models import Pool
-from library_sample_shared.models import ReadLength
 
 
 class Sequencer(models.Model):
@@ -13,7 +12,7 @@ class Sequencer(models.Model):
 
 
 class Lane(models.Model):
-    name = models.CharField('Name', max_length=5)
+    name = models.CharField('Name', max_length=6)
     pool = models.ForeignKey(Pool, verbose_name='Pool')
     loading_concentration = models.FloatField('Loading Concentration')
 
@@ -22,8 +21,8 @@ class Lane(models.Model):
 
 
 class Flowcell(models.Model):
+    sequencer = models.ForeignKey(Sequencer, verbose_name='Sequencer')
     flowcell_id = models.CharField('Flowcell ID', max_length=50)
-    read_length = models.ForeignKey(ReadLength, verbose_name='Read Length')
     lanes = models.ManyToManyField(Lane, related_name='flowcell', blank=True)
 
     def __str__(self):
