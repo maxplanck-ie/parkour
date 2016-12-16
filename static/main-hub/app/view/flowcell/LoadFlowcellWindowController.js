@@ -288,13 +288,16 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
         }).showAt(e.getXY());
     },
 
-    unloadLane: function(store, record) {
-        var loadingConcentrationField = Ext.getCmp('loadingConcentrationField');
+    unloadLane: function(lanesStore, record) {
+        var loadingConcentrationField = Ext.getCmp('loadingConcentrationField'),
+            $resultTotalItem = $('#flowcell-result-total');
+
         loadingConcentrationField.fireEvent('clear', loadingConcentrationField);
         Ext.fly(record.get('lane') + '-innerCt').removeCls('lane-loaded');
-        store.remove(record);
+        lanesStore.remove(record);
 
-        // TODO@me: Update Loaded Total
+        // Update Loaded Total
+        $resultTotalItem.text(lanesStore.sum('loaded'));
     },
 
     clearLoadingConcentration: function(fld) {
