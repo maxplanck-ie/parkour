@@ -31,11 +31,11 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
         }
     },
 
-    onWindowReady: function () {
+    onWindowReady: function() {
         Ext.getStore('poolsStore').load();
     },
 
-    onWindowClose: function () {
+    onWindowClose: function() {
         Ext.getCmp('poolsFlowcell').dragZone.destroy();
     },
 
@@ -92,7 +92,8 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
             wnd = this.component.up('window'),
             grid = Ext.getCmp('flowcellResultGrid'),
             poolsStore = Ext.getStore('poolsStore'),
-            lanesStore = Ext.getStore('lanesStore');
+            lanesStore = Ext.getStore('lanesStore'),
+            field = Ext.getCmp('loadingConcentrationField');
 
         if ($(this.dom).find('.lane-loaded').length === 1) {
             var record = lanesStore.findRecord('lane', laneId);
@@ -104,15 +105,15 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
             wnd.getController().updateConcentrationField(record);
         } else {
             grid.getSelectionModel().deselectAll();
-            Ext.getCmp('loadingConcentrationField').fireEvent('clear', loadingConcentrationField);
+            field.fireEvent('clear', field);
         }
     },
 
-    selectLane: function (grid, record) {
+    selectLane: function(grid, record) {
         this.updateConcentrationField(record);
     },
 
-    updateConcentrationField: function (record) {
+    updateConcentrationField: function(record) {
         var field = Ext.getCmp('loadingConcentrationField');
 
         field.setDisabled(false);
@@ -187,7 +188,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
                 return e.getTarget();
             },
 
-            onNodeOver : function(target, dd, e, data) {
+            onNodeOver: function(target, dd, e, data) {
                 var lanesStore = Ext.getStore('lanesStore'),
                     poolsStore = Ext.getStore('poolsStore'),
                     pool = poolsStore.findRecord('name', data.poolData.name),
@@ -196,7 +197,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
                 return (!isLoaded(laneId, lanesStore) && isReadLengthOK(pool, lanesStore, poolsStore)) ? proto.dropAllowed : proto.dropNotAllowed;
             },
 
-            onNodeDrop : function(target, dd, e, data) {
+            onNodeDrop: function(target, dd, e, data) {
                 var poolData = data.poolData,
                     poolsStore = Ext.getStore('poolsStore'),
                     lanesStore = Ext.getStore('lanesStore'),
@@ -214,7 +215,8 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
                     // Is the Read Length the same for all pools
                     if (isReadLengthOK(pool, lanesStore, poolsStore)) {
                         //
-                        var diff = poolSize - loadedTotal, loaded;
+                        var diff = poolSize - loadedTotal,
+                            loaded;
                         if (diff > laneCapacity) {
                             loaded = laneCapacity;
                         } else {
