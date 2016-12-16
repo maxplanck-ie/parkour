@@ -43,7 +43,8 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
         var me = this,
             lanes = Ext.getCmp('lanes'),
             lanesStore = Ext.getStore('lanesStore'),
-            loadingConcentrationField = Ext.getCmp('loadingConcentrationField');
+            loadingConcentrationField = Ext.getCmp('loadingConcentrationField'),
+            $resultTotalItem = $('#flowcell-result-total');
 
         lanes.removeAll(true);
         lanesStore.removeAll();
@@ -74,7 +75,11 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
             });
         }
 
-        // TODO@me: Update Loaded Total
+        // Update Loaded Total
+        $resultTotalItem.text(lanesStore.sum('loaded'));
+
+        // Get original Pool Loaded values
+        if (oldValue) Ext.getStore('poolsStore').reload();
     },
 
     changeLoadingConcentration: function(fld, value) {
@@ -232,11 +237,16 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
                             loaded: loaded
                         });
 
+                        // Update (increase) Pool Loaded amount
+                        pool.set('loaded', pool.get('loaded') + loaded);
+
                         // Update Loaded Total
                         $resultTotalItem.text(lanesStore.sum('loaded'));
 
                         // Disable the pool
-                        if (lanesStore.sum('loaded') == poolSize) pool.setDisabled(true);
+                        if (pool.get('loaded') == poolSize) {
+                            pool.setDisabled(true);
+                        }
 
                         Ext.fly(target).addCls('lane-loaded');
                         return true;
@@ -290,7 +300,12 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
 
     unloadLane: function(lanesStore, record) {
         var loadingConcentrationField = Ext.getCmp('loadingConcentrationField'),
+            poolsStore = Ext.getStore('poolsStore'),
+            pool = poolsStore.findRecord('id', record.get('pool')),
             $resultTotalItem = $('#flowcell-result-total');
+
+        // Update (increase) Pool Loaded amount
+        pool.set('loaded', pool.get('loaded') - record.get('loaded'));
 
         loadingConcentrationField.fireEvent('clear', loadingConcentrationField);
         Ext.fly(record.get('lane') + '-innerCt').removeCls('lane-loaded');
@@ -298,6 +313,11 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
 
         // Update Loaded Total
         $resultTotalItem.text(lanesStore.sum('loaded'));
+
+        // Enable Pool for loading
+        if (pool.get('size') != pool.get('loaded')) {
+            pool.setDisabled(false);
+        }
     },
 
     clearLoadingConcentration: function(fld) {

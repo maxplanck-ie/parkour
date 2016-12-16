@@ -30,23 +30,25 @@ def pool_list(request):
     data = []
 
     for pool in Pool.objects.prefetch_related('libraries', 'samples'):
-        libraries = pool.libraries.all()
-        samples = pool.samples.all()
+        if pool.size > pool.loaded:
+            libraries = pool.libraries.all()
+            samples = pool.samples.all()
 
-        # Get Pool's Read Length
-        if any(libraries):
-            src_id = libraries[0].read_length_id
-        else:
-            src_id = samples[0].read_length_id
-        src = ReadLength.objects.get(id=src_id)
+            # Get Pool's Read Length
+            if any(libraries):
+                src_id = libraries[0].read_length_id
+            else:
+                src_id = samples[0].read_length_id
+            src = ReadLength.objects.get(id=src_id)
 
-        data.append({
-            'name': pool.name,
-            'id': pool.id,
-            'readLength': src.id,
-            'readLengthName': src.name,
-            'size': pool.size
-        })
+            data.append({
+                'name': pool.name,
+                'id': pool.id,
+                'readLength': src.id,
+                'readLengthName': src.name,
+                'size': pool.size - pool.loaded,
+                'loaded': pool.loaded
+            })
 
     return JsonResponse(data, safe=False)
 
