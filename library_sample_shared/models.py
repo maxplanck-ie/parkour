@@ -135,8 +135,6 @@ class GenericLibrarySample(models.Model):
 
     comments = models.TextField('Comments', null=True, blank=True)
 
-    is_in_request = models.BooleanField('Is in request?', default=False)
-
     is_pooled = models.BooleanField('Is pooled?', default=False)
 
     barcode = models.CharField('Barcode', max_length=9)
