@@ -34,6 +34,7 @@ class CostUnit(models.Model):
 
 class User(AbstractNamedUser):
     phone = models.CharField('Phone', max_length=100, null=True, blank=True)
+
     organization = models.ForeignKey(
         Organization,
         verbose_name='Organization',
@@ -41,6 +42,7 @@ class User(AbstractNamedUser):
         blank=True,
         default=None,
     )
+
     pi = models.ForeignKey(
         PrincipalInvestigator,
         verbose_name='Principal Investigator',
@@ -48,6 +50,7 @@ class User(AbstractNamedUser):
         blank=True,
         default=None,
     )
+
     cost_unit = models.ManyToManyField(
         CostUnit,
         verbose_name='Cost Unit',

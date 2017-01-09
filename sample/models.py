@@ -57,13 +57,11 @@ class FileSample(models.Model):
 class Sample(GenericLibrarySample):
     sample_protocol = models.ForeignKey(
         SampleProtocol,
-        related_name='sample_protocol',
         verbose_name='Sample Protocol',
     )
 
     nucleic_acid_type = models.ForeignKey(
         NucleicAcidType,
-        related_name='nucleic_acid_type',
         verbose_name='Nucleic Acid Type',
     )
 

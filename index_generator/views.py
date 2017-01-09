@@ -137,9 +137,6 @@ def save_pool(request):
             library.is_pooled = True
             library.save(update_fields=['is_pooled'])
 
-            # Update Pool Size
-            pool.size += library.sequencing_depth
-
             # Create Pooling object
             pool_obj = Pooling(library=library)
             # #  TODO: update field Concentration C1
@@ -160,9 +157,6 @@ def save_pool(request):
                 'index_i7', 'index_i5', 'is_pooled', 'is_converted', 'barcode',
             ])
 
-            # Update Pool Size
-            pool.size += sample.sequencing_depth
-
             # # Create Library Preparation object
             lp_obj = LibraryPreparation(sample=sample)
             lp_obj.save()
@@ -172,6 +166,7 @@ def save_pool(request):
             # #  TODO: update field Concentration C1
             pool_obj.save()
 
+        # Trigger Pool Size update
         pool.save(update_fields=['size'])
 
     except Exception as e:

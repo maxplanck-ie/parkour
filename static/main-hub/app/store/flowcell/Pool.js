@@ -21,5 +21,17 @@ Ext.define('MainHub.store.flowcell.Pool', {
             rootProperty: 'data',
             successProperty: 'success'
         }
+    },
+
+    listeners: {
+        disable: function(record, state) {
+            var gridView = Ext.getCmp('poolsFlowcell').getView(),
+                rowIndex = this.indexOf(record);
+            if (state) {
+                gridView.addRowCls(rowIndex, 'pool-disabled');
+            } else {
+                gridView.removeRowCls(rowIndex, 'pool-disabled');
+            }
+        }
     }
 });

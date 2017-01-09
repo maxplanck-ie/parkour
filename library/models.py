@@ -19,7 +19,6 @@ class LibraryType(models.Model):
 
     library_protocol = models.ManyToManyField(
         LibraryProtocol,
-        related_name='library_protocol',
         verbose_name='Library Protocol',
     )
 
@@ -47,7 +46,6 @@ class Library(GenericLibrarySample):
 
     library_type = models.ForeignKey(
         LibraryType,
-        related_name='library_type',
         verbose_name='Library Type',
     )
 

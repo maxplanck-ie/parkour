@@ -8,7 +8,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcells', {
 
     controller: 'load-flowcells',
 
-    anchor : '100% -1',
+    anchor: '100% -1',
     layout: 'fit',
 
     items: [{
@@ -29,49 +29,44 @@ Ext.define('MainHub.view.flowcell.LoadFlowcells', {
             trailingBufferZone: 100,
             leadingBufferZone: 100
         }],
-        // store: 'libraryPreparationStore',
+        store: 'flowcellsStore',
 
-        columns: [
-            {
-                text: 'Pool',
-                dataIndex: 'poolName',
-                flex: 1
-            },
-            {
-                text: 'Pool Size',
-                dataIndex: 'poolSize',
-                flex: 1
-            },
-            {
-                text: 'Read Length',
-                dataIndex: 'readLength',
-                flex: 1
-            },
-            {
-                text: 'Index I7',
-                dataIndex: 'indexI7',
-                flex: 1
-            },
-            {
-                text: 'Index I5',
-                dataIndex: 'indexI5',
-                flex: 1
-            },
-            {
-                text: 'Sequencer',
-                dataIndex: 'sequencer',
-                flex: 1
-            },
-            {
-                text: 'Loading Concentration',
-                dataIndex: 'loadingConcentration',
-                flex: 1
-            },
-            {
-                text: 'Flowcell ID',
-                dataIndex: 'flowcellId',
-                flex: 1
-            }
-        ]
+        columns: [{
+            text: 'Flowcell ID',
+            dataIndex: 'flowcellId',
+            flex: 1
+        }, {
+            text: 'Lane',
+            dataIndex: 'laneName',
+            flex: 1
+        }, {
+            text: 'Pool',
+            dataIndex: 'poolName',
+            flex: 1
+        }, {
+            text: 'Pool Size',
+            dataIndex: 'poolSize',
+            flex: 1
+        }, {
+            text: 'Read Length',
+            dataIndex: 'readLengthName',
+            flex: 1
+        }, {
+            text: 'Index I7',
+            dataIndex: 'indexI7Show',
+            flex: 1
+        }, {
+            text: 'Index I5',
+            dataIndex: 'indexI5Show',
+            flex: 1
+        }, {
+            text: 'Sequencer',
+            dataIndex: 'sequencerName',
+            flex: 1
+        }, {
+            text: 'Loading Concentration',
+            dataIndex: 'loadingConcentration',
+            flex: 1
+        }]
     }]
 });
