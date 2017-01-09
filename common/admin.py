@@ -127,24 +127,12 @@ class UserAdmin(NamedUserAdmin):
             reset_form = PasswordResetForm({'email': obj.email})
 
             if reset_form.is_valid():
-                # from django.core.mail import send_mail
-                # send_mail(
-                #     '[Parkour] Email Test',
-                #     'Test message.',
-                #     'parkour_support@ie-freiburg.mpg.de',
-                #     ['evgeny.anatskiy@gmail.com'],
-                #     fail_silently=False,
-                # )
-
-                # import pdb; pdb.set_trace()
-
                 reset_form.save(
                     request=request,
                     from_email=settings.SERVER_EMAIL,
                     use_https=request.is_secure(),
-                    subject_template_name='registration/user_creation_subject.txt',
-                    # email_template_name='registration/user_creation_email.html',
-                    email_template_name='registration/test.html',
+                    subject_template_name='registration/user_creation_subj.txt',
+                    email_template_name='registration/user_creation_email.html',
                 )
 
 admin.site.register(User, UserAdmin)
