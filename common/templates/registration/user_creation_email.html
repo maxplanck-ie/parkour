@@ -4,6 +4,7 @@
 {% blocktrans %}
 You're receiving this email because you requested an access to Parkour at {{ site_name }} for your user account. You've been given a random password, please change it:
 {% endblocktrans %}
+
 {% block reset_link %}
     {{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}
 {% endblock %}
