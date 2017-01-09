@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django import forms
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import PasswordResetForm
 from django.utils.crypto import get_random_string
@@ -7,7 +8,6 @@ from authtools.admin import NamedUserAdmin
 from authtools.forms import UserCreationForm
 
 from common.models import PrincipalInvestigator, Organization, CostUnit
-
 
 User = get_user_model()
 
@@ -32,6 +32,10 @@ class CostUnitAdmin(admin.ModelAdmin):
 
 
 class UserCreationForm(UserCreationForm):
+    """
+    A UserCreationForm with optional password inputs.
+    """
+
     def __init__(self, *args, **kwargs):
         super(UserCreationForm, self).__init__(*args, **kwargs)
         self.fields['password1'].required = False
@@ -42,14 +46,13 @@ class UserCreationForm(UserCreationForm):
         self.fields['password2'].widget.attrs['autocomplete'] = 'off'
 
     def clean_password2(self):
-        password1 = self.cleaned_data.get("password1")
+        password1 = self.cleaned_data.get('password1')
         password2 = super(UserCreationForm, self).clean_password2()
         if bool(password1) ^ bool(password2):
-            raise forms.ValidationError("Fill out both fields")
+            raise forms.ValidationError('Fill out both fields')
         return password2
 
 
-@admin.register(User)
 class UserAdmin(NamedUserAdmin):
     add_form = UserCreationForm
     add_fieldsets = (
@@ -59,10 +62,7 @@ class UserAdmin(NamedUserAdmin):
                 " The user will be emailed a link allowing him/her to login to"
                 " the site and set his/her password."
             ),
-            'fields': (
-                'name',
-                'email',
-            ),
+            'fields': ('name', 'email',),
         }),
         ('Password', {
             'description': "Optionally, you may set the user's password here.",
@@ -95,12 +95,7 @@ class UserAdmin(NamedUserAdmin):
             'fields': ('name', 'email', 'password',),
         }),
         ('Personal info', {
-            'fields': (
-                'phone',
-                'organization',
-                'pi',
-                'cost_unit',
-            ),
+            'fields': ('phone', 'organization', 'pi', 'cost_unit',),
         }),
         ('Permissions', {
             'fields': (
@@ -112,15 +107,13 @@ class UserAdmin(NamedUserAdmin):
             ),
         }),
         ('Other', {
-            'fields': (
-                'last_login',
-            ),
+            'fields': ('last_login',),
         }),
     )
 
     def save_model(self, request, obj, form, change):
-        if not change and (not form.cleaned_data['password1']
-        or not obj.has_usable_password()):
+        if not change and (not form.cleaned_data['password1'] or not
+                           obj.has_usable_password()):
             # Django's PasswordResetForm won't let us reset an unusable
             # password. We set it above super() so we don't have to save twice.
             obj.set_password(get_random_string())
@@ -132,12 +125,26 @@ class UserAdmin(NamedUserAdmin):
 
         if reset_password:
             reset_form = PasswordResetForm({'email': obj.email})
-            assert reset_form.is_valid()
 
-            reset_form.save(
-                request=request,
-                use_https=request.is_secure(),
-                subject_template_name=
-                    'registration/account_creation_subject.txt',
-                email_template_name='registration/account_creation_email.html',
-            )
+            if reset_form.is_valid():
+                # from django.core.mail import send_mail
+                # send_mail(
+                #     '[Parkour] Email Test',
+                #     'Test message.',
+                #     'parkour_support@ie-freiburg.mpg.de',
+                #     ['evgeny.anatskiy@gmail.com'],
+                #     fail_silently=False,
+                # )
+
+                # import pdb; pdb.set_trace()
+
+                reset_form.save(
+                    request=request,
+                    from_email=settings.SERVER_EMAIL,
+                    use_https=request.is_secure(),
+                    subject_template_name='registration/user_creation_subject.txt',
+                    # email_template_name='registration/user_creation_email.html',
+                    email_template_name='registration/test.html',
+                )
+
+admin.site.register(User, UserAdmin)
