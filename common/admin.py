@@ -79,6 +79,7 @@ class UserAdmin(NamedUserAdmin):
         'pi',
         'is_staff',
     )
+
     search_fields = (
         'name',
         'email',
@@ -86,6 +87,7 @@ class UserAdmin(NamedUserAdmin):
         'organization__name',
         'pi__name',
     )
+
     list_filter = ('is_staff', 'organization',)
     list_display_links = ('name', 'email',)
     filter_horizontal = ('cost_unit', 'groups', 'user_permissions',)
