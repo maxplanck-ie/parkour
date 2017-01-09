@@ -11,6 +11,7 @@ from common.models import PrincipalInvestigator, Organization, CostUnit
 
 User = get_user_model()
 
+
 @admin.register(PrincipalInvestigator)
 class PrincipalInvestigatorAdmin(admin.ModelAdmin):
     list_display = ('name', 'organization',)
@@ -48,6 +49,7 @@ class UserCreationForm(UserCreationForm):
         return password2
 
 
+@admin.register(User)
 class UserAdmin(NamedUserAdmin):
     add_form = UserCreationForm
     add_fieldsets = (
@@ -98,7 +100,7 @@ class UserAdmin(NamedUserAdmin):
                 'organization',
                 'pi',
                 'cost_unit',
-            ),    
+            ),
         }),
         ('Permissions', {
             'fields': (
@@ -107,18 +109,18 @@ class UserAdmin(NamedUserAdmin):
                 'is_superuser',
                 'groups',
                 'user_permissions',
-            ),    
+            ),
         }),
         ('Other', {
             'fields': (
                 'last_login',
-            ),    
+            ),
         }),
     )
 
     def save_model(self, request, obj, form, change):
-        if not change and (not form.cleaned_data['password1'] or 
-            not obj.has_usable_password()):
+        if not change and (not form.cleaned_data['password1']
+        or not obj.has_usable_password()):
             # Django's PasswordResetForm won't let us reset an unusable
             # password. We set it above super() so we don't have to save twice.
             obj.set_password(get_random_string())
@@ -131,6 +133,7 @@ class UserAdmin(NamedUserAdmin):
         if reset_password:
             reset_form = PasswordResetForm({'email': obj.email})
             assert reset_form.is_valid()
+
             reset_form.save(
                 request=request,
                 use_https=request.is_secure(),
@@ -138,5 +141,3 @@ class UserAdmin(NamedUserAdmin):
                     'registration/account_creation_subject.txt',
                 email_template_name='registration/account_creation_email.html',
             )
-
-admin.site.register(User, UserAdmin)
