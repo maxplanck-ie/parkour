@@ -8,29 +8,26 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
                 boxready: 'onRequestWindowBoxready'
             },
             '#librariesInRequestTable': {
-                loadstore: 'onLibrariesInRequestTableLoadStore',
-                refresh: 'onLibrariesInRequestTableRefresh',
-                itemcontextmenu: 'onLibrariesInRequestTableItemContextMenu'
+                loadstore: 'reloadLibrariesInRequestStore',
+                refresh: 'refreshLibrariesInRequestTable',
+                itemcontextmenu: 'showContextMenu'
             },
             '#generatePDFBtn': {
-                click: 'onGeneratePDFBtnClick'
+                click: 'generatePDF'
             },
             '#uploadBtn': {
-                click: 'onUploadBtnClick'
+                click: 'uploadPDF'
             },
             '#saveRequestWndBtn': {
-                click: 'onSaveRequestWndBtnClick'
+                click: 'saveRequest'
             },
             '#addLibraryBtn': {
-                click: 'onAddLibraryBtnClick'
-            },
-            '#cancelBtn': {
-                click: 'onCancelBtnClick'
+                click: 'addLibrary'
             }
         }
     },
 
-    onLibrariesInRequestTableLoadStore: function(grid, requestId) {
+    reloadLibrariesInRequestStore: function(grid, requestId) {
         grid.getStore().load({
             params: {
                 'request_id': requestId
@@ -48,18 +45,12 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
                 'You need to save the request to proceed.',
                 'deep-seq-request-mask'
             );
-            Ext.getCmp('deepSeqRequest').body.update('');
         } else {
             var form = Ext.getCmp('requestForm').getForm(),
                 grid = Ext.getCmp('librariesInRequestTable'),
                 record = wnd.record.data;
 
-            // Set form fields with request data
-            form.setValues({
-                name: record.name,
-                description: record.description
-            });
-
+            form.setValues(record);
             Ext.getCmp('requestName').enable();
             Ext.getCmp('deepSeqRequest').enable();
 
@@ -74,17 +65,14 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
         }
     },
 
-    onLibrariesInRequestTableRefresh: function(grid) {
-        var requestId = grid.up('request_wnd').record.get('requestId');
-
-        // Reload the table
+    refreshLibrariesInRequestTable: function(grid) {
+        var requestId = grid.up('window').record.get('requestId');
         grid.getStore().removeAll();
         grid.fireEvent('loadstore', grid, requestId);
     },
 
-    onLibrariesInRequestTableItemContextMenu: function(grid, record, item, index, e) {
+    showContextMenu: function(grid, record, item, index, e) {
         var me = this;
-
         e.stopEvent();
         Ext.create('Ext.menu.Menu', {
             items: [
@@ -116,7 +104,8 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
 
     editRecord: function(record) {
         var store = Ext.getStore('librariesStore'),
-            title = '', fullRecord = null;
+            title = '',
+            fullRecord = null;
 
         if (record.get('recordType') == 'L') {
             title = 'Edit Library';
@@ -141,14 +130,12 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
             method: 'POST',
             timeout: 1000000,
             scope: this,
-
             params: {
                 'record_id': record.data.recordType == 'L' ? record.data.libraryId : record.data.sampleId
             },
 
-            success: function (response) {
+            success: function(response) {
                 var obj = Ext.JSON.decode(response.responseText);
-
                 if (obj.success) {
                     var grid = Ext.getCmp('librariesInRequestTable');
                     grid.fireEvent('refresh', grid);
@@ -168,7 +155,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
         });
     },
 
-    onGeneratePDFBtnClick: function(btn) {
+    generatePDF: function(btn) {
         var wnd = btn.up('request_wnd'),
             url = 'request/generate_pdf/';
 
@@ -181,7 +168,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
         });
     },
 
-    onUploadBtnClick: function(btn) {
+    uploadPDF: function(btn) {
         var wnd = btn.up('request_wnd'),
             form = Ext.getCmp('deepSeqRequestForm'),
             requestId = wnd.record.get('requestId'),
@@ -195,6 +182,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
                 params: {
                     'request_id': requestId
                 },
+
                 success: function(f, action) {
                     var obj = Ext.JSON.decode(action.response.responseText);
                     if (obj.success) {
@@ -203,10 +191,11 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
                         );
                     } else {
                         Ext.ux.ToastMessage(obj.error, 'error');
-                        console.error('[ERROR]: ' + url + ' : ' + obj.error);
+                        console.error('[ERROR]: ' + url);
                         console.error(action.response);
                     }
                 },
+
                 failure: function(f, action) {
                     var errorMsg = (action.failureType == 'server') ? 'Server error.' : 'Error.';
                     Ext.ux.ToastMessage(errorMsg, 'error');
@@ -217,25 +206,28 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
         }
     },
 
-    onSaveRequestWndBtnClick: function(btn) {
-        var wnd = btn.up('request_wnd'),
+    saveRequest: function(btn) {
+        var wnd = btn.up('window'),
             form = Ext.getCmp('requestForm'),
-            records = Ext.getCmp('librariesInRequestTable').getStore().data.items;
+            store = Ext.getStore('librariesInRequestStore'),
+            url = 'request/save/';
 
-        if (form.isValid() && records.length > 0) {
-            var data = form.getForm().getFieldValues();
+        if (form.isValid() && store.getCount() > 0) {
+            var data = form.getForm().getFieldValues(),
+                libraries = [],
+                samples = [];
 
-            var libraries = records.filter(function(item) {
-                return item.get('recordType') === 'L';
-            });
-
-            var samples = records.filter(function(item) {
-                return item.get('recordType') === 'S';
+            store.each(function(item) {
+                if (item.get('recordType') == 'L') {
+                    libraries.push(item);
+                } else {
+                    samples.push(item);
+                }
             });
 
             wnd.setLoading('Saving...');
             Ext.Ajax.request({
-                url: 'request/save/',
+                url: url,
                 method: 'POST',
                 timeout: 1000000,
                 scope: this,
@@ -248,20 +240,15 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
                     'samples': Ext.JSON.encode(Ext.Array.pluck(Ext.Array.pluck(samples, 'data'), 'sampleId'))
                 },
 
-                success: function (response) {
+                success: function(response) {
                     var obj = Ext.JSON.decode(response.responseText);
-
                     if (obj.success) {
-                        var requestsGrid = Ext.getCmp('requestsTable'),
-                            librariesGrid = Ext.getCmp('librariesTable');
-                        requestsGrid.fireEvent('refresh', requestsGrid);
-                        if (typeof librariesGrid != 'undefined') {
-                            librariesGrid.fireEvent('refresh', librariesGrid);
-                        }
+                        var grid = Ext.getCmp('requestsTable');
+                        grid.fireEvent('refresh', grid);
                         Ext.ux.ToastMessage('Request has been saved!');
                     } else {
                         Ext.ux.ToastMessage(obj.error, 'error');
-                        console.error('[ERROR]: save_request/: ' + obj.error);
+                        console.error('[ERROR]: ' + url);
                         console.error(response);
                     }
                     wnd.close();
@@ -269,23 +256,21 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
 
                 failure: function(response) {
                     Ext.ux.ToastMessage(response.statusText, 'error');
-                    console.error('[ERROR]: save_request/');
+                    console.error('[ERROR]: ' + url);
                     console.error(response);
-                    wnd.close();
                 }
             });
-        } else if (records.length === 0) {
+        } else if (store.getCount() === 0) {
             Ext.ux.ToastMessage('You did not add any Libraries/Samples', 'warning');
         } else {
             Ext.ux.ToastMessage('Check the form', 'warning');
         }
     },
 
-    onAddLibraryBtnClick: function(btn) {
-        Ext.create('library_wnd', {title: 'Add Library/Sample', mode: 'add'}).show();
-    },
-
-    onCancelBtnClick: function(btn) {
-        btn.up('request_wnd').close();
+    addLibrary: function(btn) {
+        Ext.create('MainHub.view.libraries.LibraryWindow', {
+            title: 'Add Library/Sample',
+            mode: 'add'
+        }).show();
     }
 });

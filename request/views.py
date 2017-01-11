@@ -54,7 +54,7 @@ def get_all(request):
                 for l in list(req.libraries.all()) + list(req.samples.all())
             ])
         }
-        for req in requests
+        for req in sorted(requests, key=lambda x: x.date_created, reverse=True)
     ]
 
     return JsonResponse(data, safe=False)
@@ -88,10 +88,7 @@ def get_libraries_and_samples(request):
 
     data = sorted(libraries + samples, key=lambda x: x['barcode'])
 
-    return JsonResponse({
-        'success': True,
-        'data': data
-    })
+    return JsonResponse({'success': True, 'data': data})
 
 
 @login_required
@@ -139,17 +136,13 @@ def save_request(request):
             error = str(form.errors)
             logger.debug(form.errors)
 
-    return JsonResponse({
-        'success': not error,
-        'error': error,
-    })
+    return JsonResponse({'success': not error, 'error': error})
 
 
 @login_required
 def delete_request(request):
     """ """
     error = ''
-
     request_id = request.POST.get('request_id')
 
     try:

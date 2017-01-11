@@ -39,14 +39,11 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             },
             '#addWndBtn': {
                 click: 'onAddWndBtnClick'
-            },
-            '#cancelBtn': {
-                click: 'onCancelBtnClick'
             }
         }
     },
 
-    onLibraryWindowBoxready: function (wnd) {
+    onLibraryWindowBoxready: function(wnd) {
         // Bypass Selection (Library/Sample) dialog if editing
         if (wnd.mode == 'edit') {
             if (wnd.record.data.recordType == 'L') {
@@ -60,7 +57,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
     },
 
     onCardBtnClick: function(btn) {
-        var wnd = btn.up('library_wnd'),
+        var wnd = btn.up('window'),
             layout = btn.up('panel').getLayout();
 
         wnd.setSize(670, 700);
@@ -83,7 +80,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
     },
 
     onLibraryCardActivate: function(card) {
-        var wnd = card.up('library_wnd');
+        var wnd = card.up('window');
 
         Ext.getCmp('addWndBtn').show();
         if (wnd.mode == 'add') {
@@ -197,7 +194,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
     },
 
     onSampleCardActivate: function(card) {
-        var wnd = card.up('library_wnd');
+        var wnd = card.up('window');
 
         Ext.getCmp('sampleProtocolInfo').hide();
 
@@ -308,7 +305,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
     },
 
     onLibraryProtocolFieldSelect: function(fld, record, eOpts) {
-        var wnd = fld.up('library_wnd'),
+        var wnd = fld.up('window'),
             libraryTypeStore = Ext.getStore('libraryTypeStore'),
             libraryTypeField = Ext.getCmp('libraryTypeField');
 
@@ -322,7 +319,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             },
             callback: function(records, operation, success) {
                 if (!success) {
-                    Ext.ux.ToastMessage('Cannot load Principal Investigators', 'error');
+                    Ext.ux.ToastMessage('Cannot load Library Types', 'error');
                 } else {
                     libraryTypeField.setDisabled(false);
 
@@ -338,7 +335,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
     },
 
     onIndexTypeSelect: function(fld, record, eOpts) {
-        var wnd = fld.up('library_wnd'),
+        var wnd = fld.up('window'),
             indexReadsField = Ext.getCmp('indexReadsField'),
             indexI7Store = Ext.getStore('indexI7Store'),
             indexI5Store = Ext.getStore('indexI5Store'),
@@ -353,11 +350,26 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         if (record.data.id == 1 || record.data.id == 2) {
             // TruSeq small RNA (I7, RPI1-RPI48) or TruSeq DNA/RNA (I7, A001 - A027):
             // # of index reads: 0,1
-            indexReadsField.getStore().setData( [{id: 1, name: 0}, {id: 2, name: 1}] );
+            indexReadsField.getStore().setData([{
+                id: 1,
+                name: 0
+            }, {
+                id: 2,
+                name: 1
+            }]);
         } else {
             // Nextera (I7, N701-N712; I5 S501-S517):
             // # of index reads: 0,1,2
-            indexReadsField.getStore().setData( [{id: 1, name: 0}, {id: 2, name: 1}, {id: 3, name: 2}] );
+            indexReadsField.getStore().setData([{
+                id: 1,
+                name: 0
+            }, {
+                id: 2,
+                name: 1
+            }, {
+                id: 3,
+                name: 2
+            }]);
         }
 
         if (wnd.mode == 'edit' && eOpts == 'edit') {
@@ -414,7 +426,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
     },
 
     onNucleicAcidTypeFieldSelect: function(fld, record) {
-        var wnd = fld.up('library_wnd'),
+        var wnd = fld.up('window'),
             sampleProtocolField = Ext.getCmp('sampleProtocolField'),
             DNaseTreatmentField = Ext.getCmp('DNaseTreatmentField'),
             rnaQualityField = Ext.getCmp('rnaQualityField'),
@@ -455,7 +467,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
     },
 
     onSampleProtocolFieldSelect: function(fld, record) {
-        var wnd = fld.up('library_wnd'),
+        var wnd = fld.up('window'),
             sampleProtocolInfo = Ext.getCmp('sampleProtocolInfo');
 
         if (record && record.get('name') != 'Other') {
@@ -472,15 +484,15 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         }
     },
 
-    onSaveAndAddWndBtnClick: function() {
-        this.saveLibrary(true);
+    onSaveAndAddWndBtnClick: function(btn) {
+        this.saveLibrary(btn, true);
     },
 
-    onAddWndBtnClick: function() {
-        this.saveLibrary();
+    onAddWndBtnClick: function(btn) {
+        this.saveLibrary(btn);
     },
 
-    initializeTooltips: function () {
+    initializeTooltips: function() {
         $.each($('.field-tooltip'), function(idx, item) {
             Ext.create('Ext.tip.ToolTip', {
                 title: 'Help',
@@ -492,9 +504,14 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         });
     },
 
-    saveLibrary: function(addAnother) {
-        var form = null, url = '', data = {}, params = {}, nameFieldName = '', fileStoreName = '',
-            wnd = Ext.getCmp('library_wnd'),
+    saveLibrary: function(btn, addAnother) {
+        var form = null,
+            url = '',
+            data = {},
+            params = {},
+            nameFieldName = '',
+            fileStoreName = '',
+            wnd = btn.up('window'),
             card = Ext.getCmp('librarySamplePanel').getLayout().getActiveItem().id;
         addAnother = addAnother || false;
 
@@ -528,8 +545,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                 'comments': data.comments,
                 'files': Ext.JSON.encode(form.down('filegridfield').getValue())
             };
-        }
-        else {
+        } else {
             form = Ext.getCmp('sampleForm');
             data = form.getForm().getFieldValues();
             url = 'sample/save/';
@@ -571,8 +587,9 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                 scope: this,
                 params: params,
 
-                success: function (response) {
-                    var obj = Ext.JSON.decode(response.responseText), grid = null;
+                success: function(response) {
+                    var obj = Ext.JSON.decode(response.responseText),
+                        grid = null;
 
                     if (obj.success) {
                         if (wnd.mode == 'add') {
@@ -615,15 +632,10 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                     Ext.ux.ToastMessage(response.statusText, 'error');
                     console.error('[ERROR]: ' + url);
                     console.error(response);
-                    wnd.close();
                 }
             });
         } else {
             Ext.ux.ToastMessage('Check the form', 'warning');
         }
-    },
-
-    onCancelBtnClick: function(btn) {
-        btn.up('library_wnd').close();
     }
 });
