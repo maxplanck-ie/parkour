@@ -17,7 +17,12 @@ def get_all(request):
     """ Get the list of all libraries and samples. """
     data = []
 
-    requests = Request.objects.prefetch_related('libraries', 'samples')
+    if request.user.is_staff:
+        requests = Request.objects.prefetch_related('libraries', 'samples')
+    else:
+        requests = Request.objects.filter(
+            user_id=request.user.id
+        ).prefetch_related('libraries', 'samples')
 
     for req in requests:
         libraries_data = [
@@ -174,7 +179,6 @@ def get_library_type(request):
     types = LibraryType.objects.filter(
         library_protocol__in=[protocol]
     )
-
     data = [
         {
             'id': lib_type.id,
@@ -230,11 +234,7 @@ def save_library(request):
             error = str(form.errors)
             logger.debug(form.errors.as_data())
 
-    return JsonResponse({
-        'success': not error,
-        'error': error,
-        'data': data
-    })
+    return JsonResponse({'success': not error, 'error': error, 'data': data})
 
 
 @login_required
@@ -249,8 +249,8 @@ def delete_library(request):
 @login_required
 def upload_files(request):
     """ """
-    error = ''
     file_ids = []
+    error = ''
 
     if request.method == 'POST' and any(request.FILES):
         try:
@@ -273,10 +273,9 @@ def upload_files(request):
 @login_required
 def get_files(request):
     """ """
+    file_ids = json.loads(request.GET.get('file_ids'))
     error = ''
     data = []
-
-    file_ids = json.loads(request.GET.get('file_ids'))
 
     try:
         files = [f for f in FileLibrary.objects.all() if f.id in file_ids]
@@ -294,8 +293,4 @@ def get_files(request):
         error = str(e)
         logger.exception(error)
 
-    return JsonResponse({
-        'success': not error,
-        'error': error,
-        'data': data
-    })
+    return JsonResponse({'success': not error, 'error': error, 'data': data})

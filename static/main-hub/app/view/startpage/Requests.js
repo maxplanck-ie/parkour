@@ -27,8 +27,7 @@ Ext.define('MainHub.view.startpage.Requests', {
                     itemId: 'searchField',
                     emptyText: 'Search',
                     width: 200,
-                    margin: '0 15px 0 0',
-                    disabled: true
+                    margin: '0 15px 0 0'
                 },
                 {
                     xtype: 'button',

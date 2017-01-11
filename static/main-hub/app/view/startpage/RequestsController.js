@@ -18,7 +18,7 @@ Ext.define('MainHub.view.startpage.RequestsController', {
         }
     },
 
-    refresh: function(grid) {
+    refresh: function() {
         Ext.getStore('requestsStore').reload();
     },
 
@@ -29,7 +29,7 @@ Ext.define('MainHub.view.startpage.RequestsController', {
         }).show();
     },
 
-    search: function(fld, newValue) {
+    search: function(fld, query) {
         var grid = Ext.getCmp('requestsTable'),
             store = grid.getStore(),
             columns = Ext.pluck(grid.getColumns(), 'dataIndex');
@@ -38,14 +38,14 @@ Ext.define('MainHub.view.startpage.RequestsController', {
         store.filterBy(function(record) {
             var res = false;
             Ext.each(columns, function(column) {
-                if (record.data[column].toString().toLowerCase().indexOf(newValue.toLowerCase()) > -1) {
+                if (record.data[column].toString().toLowerCase().indexOf(query.toLowerCase()) > -1) {
                     res = res || true;
                 }
             });
             return res;
         });
 
-        grid.setHeight(Ext.Element.getViewportHeight() - 64);
+        // grid.setHeight(Ext.Element.getViewportHeight() - 64);
     },
 
     showContextMenu: function(grid, record, item, index, e) {
