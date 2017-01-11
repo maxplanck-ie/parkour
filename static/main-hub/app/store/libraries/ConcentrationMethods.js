@@ -23,14 +23,5 @@ Ext.define('MainHub.store.libraries.ConcentrationMethods', {
         }
     },
 
-    listeners: {
-        load: function(store, records, success, operation) {
-            if (!success) {
-                var response = operation._response,
-                    obj = Ext.JSON.decode(response.responseText);
-                console.log('[ERROR]: get_concentration_methods(): ' + obj.error);
-                console.log(response);
-            }
-        }
-    }
+    autoLoad: true
 });
