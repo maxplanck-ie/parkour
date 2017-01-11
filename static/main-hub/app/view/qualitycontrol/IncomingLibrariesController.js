@@ -5,40 +5,28 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
     config: {
         control: {
             '#incomingLibraries': {
-                boxready: 'onIncomingLibrariesTableBoxready',
-                refresh: 'onIncomingLibrariesTableRefresh',
-                edit: 'onIncomingLibrariesTableEdit'
+                refresh: 'refresh',
+                edit: 'editRecord'
             },
             '#showLibrariesCheckbox': {
-                change: 'onFilterChange'
+                change: 'changeFilter'
             },
             '#showSamplesCheckbox': {
-                change: 'onFilterChange'
+                change: 'changeFilter'
             },
             '#searchField': {
-                change: 'onFilterChange'
+                change: 'changeFilter'
             }
         }
     },
 
-    onIncomingLibrariesTableBoxready: function(grid) {
-        // Triggers when the table is shown for the first time
-        Ext.getStore('concentrationMethodsStore').load(function(records, operation, success) {
-            if (!success) {
-                Ext.ux.ToastMessage('Cannot load Concentration Methods', 'error');
-            } else {
-                grid.fireEvent('refresh', grid);
-            }
-        });
-    },
-
-    onIncomingLibrariesTableRefresh: function(grid) {
+    refresh: function(grid) {
         // Reload the table
         grid.getStore().removeAll();
         grid.getStore().reload();
     },
 
-    onIncomingLibrariesTableEdit: function(editor, context) {
+    editRecord: function(editor, context) {
         var grid = this.getView().down('grid'),
             record = context.record,
             changes = record.getChanges(),
@@ -82,7 +70,7 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
                 'qc_result': qcResult
             },
 
-            success: function (response) {
+            success: function(response) {
                 var obj = Ext.JSON.decode(response.responseText);
 
                 if (obj.success) {
@@ -94,7 +82,7 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
                 }
             },
 
-            failure: function (response) {
+            failure: function(response) {
                 Ext.ux.ToastMessage(response.statusText, 'error');
                 console.error('[ERROR]: ' + url);
                 console.error(response);
@@ -102,7 +90,7 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
         });
     },
 
-    onFilterChange: function(el, value) {
+    changeFilter: function(el, value) {
         var grid = Ext.getCmp('incomingLibraries'),
             store = grid.getStore(),
 
