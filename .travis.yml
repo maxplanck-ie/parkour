@@ -8,7 +8,7 @@ services:
   - postgresql
 
 before_script:
-  - psql -c 'create database parkour;' -U parkour
+  - psql -c 'create database parkour;' -U postgres
 
 install: pip install -r requirements.txt
 
