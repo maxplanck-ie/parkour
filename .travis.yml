@@ -3,6 +3,12 @@ os: linux
 python:
   - 3.5
   # - 3.6
+  
+services:
+  - postgresql
+
+before_script:
+  - psql -c 'create database parkour;' -U parkour
 
 install: pip install -r requirements.txt
 
