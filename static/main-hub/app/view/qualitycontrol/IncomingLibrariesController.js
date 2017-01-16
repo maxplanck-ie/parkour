@@ -6,6 +6,7 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
         control: {
             '#incomingLibraries': {
                 refresh: 'refresh',
+                boxready: 'refresh',
                 edit: 'editRecord'
             },
             '#showLibrariesCheckbox': {
@@ -22,7 +23,6 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
 
     refresh: function(grid) {
         // Reload the table
-        grid.getStore().removeAll();
         grid.getStore().reload();
     },
 
@@ -48,13 +48,12 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
             amountFacility = parseFloat(dilutionFactor) * parseFloat(concentrationFacility) * parseFloat(sampleVolumeFacility);
         }
 
-        var url = 'qc_incoming_libraries/';
+        var url = 'quality_check/update/';
         Ext.Ajax.request({
             url: url,
             method: 'POST',
             timeout: 1000000,
             scope: this,
-
             params: {
                 'record_type': record.get('recordType'),
                 'record_id': (record.get('recordType') == 'L') ? record.get('libraryId') : record.get('sampleId'),
@@ -72,12 +71,11 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
 
             success: function(response) {
                 var obj = Ext.JSON.decode(response.responseText);
-
                 if (obj.success) {
                     grid.fireEvent('refresh', grid);
                 } else {
                     Ext.ux.ToastMessage(obj.error, 'error');
-                    console.error('[ERROR]: ' + url + ': ' + obj.error);
+                    console.error('[ERROR]: ' + url);
                     console.error(response);
                 }
             },

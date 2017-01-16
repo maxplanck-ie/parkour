@@ -169,10 +169,10 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
     },
 
     uploadPDF: function(btn) {
-        var wnd = btn.up('request_wnd'),
+        var wnd = btn.up('window'),
             form = Ext.getCmp('deepSeqRequestForm'),
             requestId = wnd.record.get('requestId'),
-            url = 'upload_deep_sequencing_request/';
+            url = 'request/upload_deep_sequencing_request/';
 
         if (form.isValid()) {
             form.submit({

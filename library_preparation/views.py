@@ -20,47 +20,55 @@ def get_all(request):
     error = ''
     data = []
 
-    for obj in LibraryPreparation.objects.select_related('sample'):
-        index_i7 = IndexI7.objects.get(
-            index=obj.sample.index_i7,
-            index_type_id=obj.sample.index_type_id
-        )
-        index_i7_id = index_i7.index_id
+    objects = LibraryPreparation.objects.select_related('sample')
 
-        try:
-            index_i5 = IndexI5.objects.get(
-                index=obj.sample.index_i5,
+    for obj in objects:
+        if not request.user.is_staff:
+            user_id = obj.sample.request.get().user_id
+            if user_id != request.user.id:
+                obj = None
+
+        if obj:
+            index_i7 = IndexI7.objects.get(
+                index=obj.sample.index_i7,
                 index_type_id=obj.sample.index_type_id
             )
-            index_i5_id = index_i5.index_id
-        except IndexI5.DoesNotExist:
-            index_i5_id = ''
+            index_i7_id = index_i7.index_id
 
-        data.append({
-            'active': False,
-            'name': obj.sample.name,
-            'sampleId': obj.sample.id,
-            'barcode': obj.sample.barcode,
-            'libraryProtocol': obj.sample.sample_protocol.id,
-            'libraryProtocolName': obj.sample.sample_protocol.name,
-            'concentrationSample': obj.sample.concentration,
-            'startingAmount': obj.starting_amount,
-            'startingVolume': obj.starting_volume,
-            'spikeInDescription': obj.spike_in_description,
-            'spikeInVolume': obj.spike_in_volume,
-            'ulSample': obj.ul_sample,
-            'ulBuffer': obj.ul_buffer,
-            'indexI7Id': index_i7_id,
-            'indexI5Id': index_i5_id,
-            'pcrCycles': obj.pcr_cycles,
-            'concentrationLibrary': obj.concentration_library,
-            'meanFragmentSize': obj.mean_fragment_size,
-            'nM': obj.nM,
-            'file':
-                settings.MEDIA_URL + obj.file.name
-                if obj.file
-                else ''
-        })
+            try:
+                index_i5 = IndexI5.objects.get(
+                    index=obj.sample.index_i5,
+                    index_type_id=obj.sample.index_type_id
+                )
+                index_i5_id = index_i5.index_id
+            except IndexI5.DoesNotExist:
+                index_i5_id = ''
+
+            data.append({
+                'active': False,
+                'name': obj.sample.name,
+                'sampleId': obj.sample.id,
+                'barcode': obj.sample.barcode,
+                'libraryProtocol': obj.sample.sample_protocol.id,
+                'libraryProtocolName': obj.sample.sample_protocol.name,
+                'concentrationSample': obj.sample.concentration,
+                'startingAmount': obj.starting_amount,
+                'startingVolume': obj.starting_volume,
+                'spikeInDescription': obj.spike_in_description,
+                'spikeInVolume': obj.spike_in_volume,
+                'ulSample': obj.ul_sample,
+                'ulBuffer': obj.ul_buffer,
+                'indexI7Id': index_i7_id,
+                'indexI5Id': index_i5_id,
+                'pcrCycles': obj.pcr_cycles,
+                'concentrationLibrary': obj.concentration_library,
+                'meanFragmentSize': obj.mean_fragment_size,
+                'nM': obj.nM,
+                'file':
+                    settings.MEDIA_URL + obj.file.name
+                    if obj.file
+                    else ''
+            })
 
     return JsonResponse({
         'success': not error,

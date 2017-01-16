@@ -5,7 +5,6 @@ from sample.models import Sample
 
 
 class Request(models.Model):
-    status = models.SmallIntegerField(default=0)
     name = models.CharField('Name', max_length=100, blank=True)
     date_created = models.DateTimeField('Date', auto_now_add=True)
     description = models.TextField()
