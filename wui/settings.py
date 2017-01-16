@@ -1,4 +1,5 @@
 import os
+import dj_database_url
 
 try:
     from wui.dev_settings import *
@@ -87,16 +88,18 @@ WSGI_APPLICATION = 'wui.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ['DB_NAME'],
-        'USER': os.environ['DB_USER'],
-        'PASSWORD': os.environ['DB_PASS'],
-        'HOST': os.environ['DB_SERVICE'],
-        'PORT': os.environ['DB_PORT'],
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': os.environ['DB_NAME'],
+#         'USER': os.environ['DB_USER'],
+#         'PASSWORD': os.environ['DB_PASS'],
+#         'HOST': os.environ['DB_SERVICE'],
+#         'PORT': os.environ['DB_PORT'],
+#     }
+# }
+
+DATABASES = {'default': dj_database_url.config()}
 
 
 # Password validation
