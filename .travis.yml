@@ -8,7 +8,8 @@ services:
   - postgresql
 
 before_script:
-  - psql -c 'create database parkour;' -U parkour
+  - psql -c 'create database parkour;' -U postgres
+  - mkdir /home/travis/build/maxplanck-ie/parkour/logs
 
 install: pip install -r requirements.txt
 
