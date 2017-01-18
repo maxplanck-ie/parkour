@@ -40,49 +40,51 @@ def get_all(request):
     error = ''
     data = []
 
-    try:
-        pools = Pool.objects.prefetch_related('libraries', 'samples')
-        for pool in pools:
-            libraries = pool.libraries.all()
-            samples = pool.samples.all()
+    pools = Pool.objects.prefetch_related('libraries', 'samples')
+    for pool in pools:
+        libraries_in_pool = []
 
-            sum_sequencing_depth = sum([l.sequencing_depth for l in libraries])
-            sum_sequencing_depth += sum([s.sequencing_depth for s in samples])
-            pool_volume = (len(libraries) + len(samples)) * 10
+        libraries = pool.libraries.all()
+        samples = pool.samples.all()
 
-            # Native libraries
-            for library in libraries:
-                pooling_obj = Pooling.objects.get(library=library)
-                req = get_request(library, 'L')
-                percentage_library = \
-                    library.sequencing_depth / sum_sequencing_depth
-                volume_to_pool = percentage_library * pool_volume
+        sum_sequencing_depth = sum([l.sequencing_depth for l in libraries])
+        sum_sequencing_depth += sum([s.sequencing_depth for s in samples])
+        pool_volume = (len(libraries) + len(samples)) * 10
 
-                data.append({
-                    'name': library.name,
-                    'libraryId': library.id,
-                    'barcode': library.barcode,
-                    'poolId': pool.id,
-                    'poolName': pool.name,
-                    'requestId': req.id,
-                    'requestName': req.name,
-                    'concentration': library.concentration,
-                    'meanFragmentSize': library.mean_fragment_size,
-                    'sequencingDepth': library.sequencing_depth,
-                    'concentrationC1': pooling_obj.concentration_c1,
-                    'concentrationC2': pooling_obj.concentration_c2,
-                    'sampleVolume': pooling_obj.sample_volume,
-                    'bufferVolume': pooling_obj.buffer_volume,
-                    'percentageLibrary': round(percentage_library * 100),
-                    'volumeToPool': volume_to_pool,
-                    'file':
-                        settings.MEDIA_URL + pool.file.name
-                        if pool.file
-                        else ''
-                })
+        # Native libraries
+        for library in libraries:
+            pooling_obj = Pooling.objects.get(library=library)
+            req = get_request(library, 'L')
+            percentage_library = \
+                library.sequencing_depth / sum_sequencing_depth
+            volume_to_pool = percentage_library * pool_volume
 
-            # Converted samples (sample -> library)
-            for sample in samples:
+            libraries_in_pool.append({
+                'name': library.name,
+                'libraryId': library.id,
+                'barcode': library.barcode,
+                'poolId': pool.id,
+                'poolName': pool.name,
+                'requestId': req.id,
+                'requestName': req.name,
+                'concentration': library.concentration,
+                'meanFragmentSize': library.mean_fragment_size,
+                'sequencingDepth': library.sequencing_depth,
+                'concentrationC1': pooling_obj.concentration_c1,
+                'concentrationC2': pooling_obj.concentration_c2,
+                'sampleVolume': pooling_obj.sample_volume,
+                'bufferVolume': pooling_obj.buffer_volume,
+                'percentageLibrary': round(percentage_library * 100),
+                'volumeToPool': volume_to_pool,
+                'file':
+                    settings.MEDIA_URL + pool.file.name
+                    if pool.file
+                    else ''
+            })
+
+        # Converted samples (sample -> library)
+        for sample in samples:
+            try:
                 lib_prep_obj = LibraryPreparation.objects.get(sample=sample)
                 pooling_obj = Pooling.objects.get(sample=sample)
                 req = get_request(sample, 'S')
@@ -90,7 +92,7 @@ def get_all(request):
                     sample.sequencing_depth / sum_sequencing_depth
                 volume_to_pool = percentage_library * pool_volume
 
-                data.append({
+                libraries_in_pool.append({
                     'name': sample.name,
                     'sampleId': sample.id,
                     'barcode': sample.barcode,
@@ -113,9 +115,10 @@ def get_all(request):
                         else ''
                 })
 
-    except Exception as e:
-        error = str(e)
-        logger.exception(error)
+            except Pooling.DoesNotExist:
+                libraries_in_pool = []
+
+        data += libraries_in_pool
 
     return JsonResponse({
         'success': not error,
