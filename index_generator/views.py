@@ -156,7 +156,7 @@ def save_pool(request):
 
             # Create Pooling object
             pool_obj = Pooling(library=library)
-            # #  TODO: update field Concentration C1
+            # TODO: update field Concentration C1
             pool_obj.save()
 
         # Make current samples not available for repeated pooling
@@ -179,9 +179,9 @@ def save_pool(request):
             lp_obj.save()
 
             # # Create Pooling object
-            pool_obj = Pooling(sample=sample)
-            # #  TODO: update field Concentration C1
-            pool_obj.save()
+            # pool_obj = Pooling(sample=sample)
+            # # TODO: update field Concentration C1
+            # pool_obj.save()
 
         # Trigger Pool Size update
         pool.save(update_fields=['size'])

@@ -85,10 +85,9 @@ def get_navigation_tree(request):
         }
     ]
 
-    # If a user is not staff, hide Approval and Library Preparation tabs
+    # If a user is not staff, hide Approval, Library Preparation, and Pooling
     if not request.user.is_staff:
-        for index, d in enumerate(data):
-            if d['text'] == 'Approval' or d['text'] == 'Library Preparation':
-                data.pop(index)
+        hidden_tabs = ['Approval', 'Library Preparation', 'Pooling']
+        data = [tab for tab in data if tab['text'] not in hidden_tabs]
 
     return JsonResponse({'text': '.', 'children': data})
