@@ -143,6 +143,7 @@ def save_pool(request):
             name = '_' + request.user.pi.name + name
 
         pool = Pool(name=name)
+        pool.user = request.user
         pool.save()
         pool.libraries.add(*library_ids)
         pool.samples.add(*samples)
