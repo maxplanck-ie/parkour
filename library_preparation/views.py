@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 
 from library_sample_shared.models import IndexI7, IndexI5
 from sample.models import Sample
+from pooling.models import Pooling
 from .models import LibraryPreparation
 from .forms import LibraryPreparationForm
 
@@ -97,6 +98,11 @@ def edit(request):
                 if qc_result == '1':
                     record.status = 3
                     record.save(update_fields=['status'])
+
+                    # Create Pooling object
+                    pooling_obj = Pooling(sample=record)
+                    # TODO: update field Concentration C1
+                    pooling_obj.save()
                 else:
                     record.status = -1
                     record.save(update_fields=['status'])

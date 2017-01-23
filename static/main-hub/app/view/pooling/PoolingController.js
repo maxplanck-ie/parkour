@@ -7,22 +7,22 @@ Ext.define('MainHub.view.pooling.PoolingController', {
     config: {
         control: {
             '#poolingTable': {
-                boxready: 'onPoolingTableBoxready',
-                refresh: 'onPoolingTableRefresh',
-                groupcontextmenu: 'onGroupContextMenu',
-                beforeedit: 'onPoolingTableBeforeedit',
-                edit: 'onPoolingTableEdit'
+                boxready: 'refresh',
+                refresh: 'refresh',
+                groupcontextmenu: 'showGroupContextMenu',
+                beforeedit: 'hideFloatingButtons',
+                edit: 'editRecord'
             },
             '#downloadBenchtopProtocolPBtn': {
                 // click: ''
             },
             '#downloadPoolingTemplateBtn': {
-                click: 'onDownloadPoolingTemplateBtnClick'
+                click: 'downloadPoolingTemplate'
             }
         }
     },
 
-    onPoolingTableBoxready: function() {
+    refresh: function() {
         Ext.getStore('poolingStore').load(function(records, operation, success) {
             if (success && records.length > 0) {
                 Ext.getCmp('downloadBenchtopProtocolPBtn').setDisabled(false);
@@ -31,12 +31,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         });
     },
 
-    onPoolingTableRefresh: function(grid) {
-        // Reload the store
-        Ext.getStore('poolingStore').reload();
-    },
-
-    onGroupContextMenu: function(view, node, group, e) {
+    showGroupContextMenu: function(view, node, group, e) {
         var me = this;
 
         e.stopEvent();
@@ -51,7 +46,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         }).showAt(e.getXY());
     },
 
-    onPoolingTableBeforeedit: function(editor) {
+    hideFloatingButtons: function(editor) {
         // Hide Update and Cancel buttons
         editor.getEditor().floatingButtons.items.items[0].hide();
         editor.getEditor().floatingButtons.items.items[1].hide();
@@ -61,7 +56,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         }, 100);
     },
 
-    onPoolingTableEdit: function(editor, context) {
+    editRecord: function(editor, context) {
         var grid = context.grid,
             record = context.record,
             changes = record.getChanges(),
@@ -72,19 +67,20 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             concentrationC2 = values.concentrationC2,
             sampleVolume = values.sampleVolume,
             bufferVolume = values.bufferVolume,
+            qcResult = (values.qcResult !== null) ? values.qcResult : '',
             url = 'pooling/edit/';
 
         // Set Library Concentration C1
         if (concentration > 0 && meanFragmentSize > 0 &&
             Object.keys(changes).indexOf('concentrationC1') == -1) {
-                concentrationC1 = ((concentration / (meanFragmentSize * 650)) * 1000000).toFixed(1);
+            concentrationC1 = ((concentration / (meanFragmentSize * 650)) * 1000000).toFixed(1);
         }
 
         // Set Buffer Volume V2
         if (concentrationC1 > 0 && sampleVolume > 0 && concentrationC2 > 0 &&
             (parseFloat(concentrationC1) * parseFloat(sampleVolume)) / parseFloat(concentrationC2) > parseFloat(sampleVolume) &&
             Object.keys(changes).indexOf('bufferVolume') == -1) {
-                bufferVolume = ((concentrationC1 * sampleVolume) / concentrationC2 - sampleVolume).toFixed(1);
+            bufferVolume = ((concentrationC1 * sampleVolume) / concentrationC2 - sampleVolume).toFixed(1);
         }
 
         Ext.Ajax.request({
@@ -92,20 +88,20 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             method: 'POST',
             timeout: 1000000,
             scope: this,
-
             params: {
-                library_id          :   record.get('libraryId'),
-                sample_id           :   record.get('sampleId'),
-                concentration       :   concentration,
-                concentration_c1    :   concentrationC1,
-                concentration_c2    :   concentrationC2,
-                sample_volume       :   sampleVolume,
-                buffer_volume       :   bufferVolume,
-                percentage_library  :   record.get('percentageLibrary'),
-                volume_to_pool      :   record.get('volumeToPool')
+                library_id: record.get('libraryId'),
+                sample_id: record.get('sampleId'),
+                concentration: concentration,
+                concentration_c1: concentrationC1,
+                concentration_c2: concentrationC2,
+                sample_volume: sampleVolume,
+                buffer_volume: bufferVolume,
+                percentage_library: record.get('percentageLibrary'),
+                volume_to_pool: record.get('volumeToPool'),
+                qc_result: qcResult
             },
 
-            success: function (response) {
+            success: function(response) {
                 var obj = Ext.JSON.decode(response.responseText);
 
                 if (obj.success) {
@@ -116,18 +112,20 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                     if (Ext.getStore('incomingLibrariesStore').isLoaded()) Ext.getStore('incomingLibrariesStore').reload();
                 } else {
                     Ext.ux.ToastMessage(obj.error, 'error');
-                    console.error('[ERROR]: ' + url + ': ' + obj.error);
+                    console.error('[ERROR]: ' + url);
+                    console.error(response);
                 }
             },
 
-            failure: function (response) {
+            failure: function(response) {
                 Ext.ux.ToastMessage(response.statusText, 'error');
                 console.error('[ERROR]: ' + url);
+                console.error(response);
             }
         });
     },
 
-    onDownloadPoolingTemplateBtnClick: function() {
+    downloadPoolingTemplate: function() {
         var store = Ext.getStore('poolingStore'),
             libraries = [],
             samples = [];

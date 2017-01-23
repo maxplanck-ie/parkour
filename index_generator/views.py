@@ -155,9 +155,9 @@ def save_pool(request):
             library.save(update_fields=['is_pooled'])
 
             # Create Pooling object
-            pool_obj = Pooling(library=library)
+            pooling_obj = Pooling(library=library)
             # TODO: update field Concentration C1
-            pool_obj.save()
+            pooling_obj.save()
 
         # Make current samples not available for repeated pooling
         # and set their Index I7 and Index I5 indices

@@ -81,6 +81,9 @@ Ext.define('MainHub.view.libraries.Libraries', {
                         } else if (value === 3) {
                             statusClass += 'library-prepared';
                             meta.tdAttr = 'data-qtip="Library prepared"';
+                        } else if (value === 4) {
+                            statusClass += 'library-pooled';
+                            meta.tdAttr = 'data-qtip="Library pooled"';
                         }
                         return '<div class="' + statusClass + '"></div>';
                     }

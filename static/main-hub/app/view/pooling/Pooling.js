@@ -9,7 +9,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
 
     controller: 'pooling',
 
-    anchor : '100% -1',
+    anchor: '100% -1',
     layout: 'fit',
 
     items: [{
@@ -24,8 +24,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
         viewConfig: {
             markDirty: false
         },
-        plugins: [
-            {
+        plugins: [{
                 ptype: 'rowediting',
                 clicksToEdit: 1,
                 autoUpdate: true
@@ -37,7 +36,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
             }
         ],
         features: [{
-            ftype:'grouping',
+            ftype: 'grouping',
             collapsible: false,
             groupHeaderTpl: [
                 '<strong>Pool: {name} | Pool size: {children:this.poolSize} M reads | Pool volume: {children:this.poolVolume} {children:this.renderDownloadBtn}</strong>',
@@ -62,11 +61,9 @@ Ext.define('MainHub.view.pooling.Pooling', {
             ]
         }],
         store: 'poolingStore',
-
-        columns: [
-            {
+        columns: [{
                 xtype: 'fiddlecheckcolumn',
-             	text: 'Active',
+                text: 'Active',
                 dataIndex: 'active',
                 width: 40
             },
@@ -158,8 +155,35 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 flex: 1
             },
             {
-                text: 'Library QC',
-                dataIndex: 'libraryQC'
+                text: 'QC Result',
+                dataIndex: 'qcResult',
+                editor: {
+                    xtype: 'combobox',
+                    queryMode: 'local',
+                    displayField: 'name',
+                    valueField: 'id',
+                    store: Ext.create('Ext.data.Store', {
+                        fields: [{
+                                name: 'id',
+                                type: 'int'
+                            },
+                            {
+                                name: 'name',
+                                type: 'string'
+                            }
+                        ],
+                        data: [{
+                                id: 1,
+                                name: 'passed'
+                            },
+                            {
+                                id: 2,
+                                name: 'failed'
+                            }
+                        ]
+                    }),
+                    forceSelection: true
+                }
             }
         ],
         dockedItems: [{

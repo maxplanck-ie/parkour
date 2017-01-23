@@ -7,6 +7,7 @@ from request.models import Request
 from index_generator.models import Pool
 from library_preparation.models import LibraryPreparation
 from library.models import Library
+from sample.models import Sample
 from .models import Pooling
 from .forms import PoolingForm
 
@@ -44,8 +45,8 @@ def get_all(request):
     for pool in pools:
         libraries_in_pool = []
 
-        libraries = pool.libraries.all()
-        samples = pool.samples.all()
+        libraries = pool.libraries.filter(status=2)
+        samples = pool.samples.filter(status=3)
 
         sum_sequencing_depth = sum([l.sequencing_depth for l in libraries])
         sum_sequencing_depth += sum([s.sequencing_depth for s in samples])
@@ -120,25 +121,23 @@ def get_all(request):
 
         data += libraries_in_pool
 
-    return JsonResponse({
-        'success': not error,
-        'error': error,
-        'data': data
-    })
+    return JsonResponse({'success': not error, 'error': error, 'data': data})
 
 
 @login_required
 def edit(request):
-    """ Edit a record. """
+    """ Edit Pooling object. """
     error = ''
 
     library_id = int(request.POST.get('library_id'))
     sample_id = int(request.POST.get('sample_id'))
+    qc_result = request.POST.get('qc_result')
     concentration = float(request.POST.get('concentration'))
 
     try:
         if library_id == 0:
             obj = Pooling.objects.get(sample_id=sample_id)
+            record = Sample.objects.get(pk=sample_id)
 
             # Update concentration value
             lib_prep_obj = LibraryPreparation.objects.get(sample_id=sample_id)
@@ -146,6 +145,7 @@ def edit(request):
             lib_prep_obj.save(update_fields=['concentration_library'])
         else:
             obj = Pooling.objects.get(library_id=library_id)
+            record = Library.objects.get(pk=library_id)
 
             # Update concentration value
             library = Library.objects.get(pk=library_id)
@@ -156,9 +156,21 @@ def edit(request):
 
         if form.is_valid():
             form.save()
+
+            if qc_result:
+                if qc_result == '1':
+                    # TODO@me: use a form to ensure all fields are filled in
+                    # If so, then:
+                    record.status = 4
+                    record.save(update_fields=['status'])
+                else:
+                    record.status = -1
+                    record.save(update_fields=['status'])
+
+                    # TODO@me: send email
         else:
-            for key, value in form.errors.items():
-                error += '%s: %s<br/>' % (key, value)
+            error = str(form.errors)
+            logger.debug(form.errors)
 
     except Exception as e:
         error = str(e)
