@@ -4,6 +4,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
 from library_sample_shared.models import IndexI7, IndexI5
+from sample.models import Sample
+from pooling.models import Pooling
 from .models import LibraryPreparation
 from .forms import LibraryPreparationForm
 
@@ -20,80 +22,97 @@ def get_all(request):
     error = ''
     data = []
 
-    for obj in LibraryPreparation.objects.select_related('sample'):
-        index_i7 = IndexI7.objects.get(
-            index=obj.sample.index_i7,
-            index_type_id=obj.sample.index_type_id
-        )
-        index_i7_id = index_i7.index_id
+    objects = LibraryPreparation.objects.select_related('sample')
 
-        try:
-            index_i5 = IndexI5.objects.get(
-                index=obj.sample.index_i5,
+    for obj in objects:
+        if not request.user.is_staff:
+            user_id = obj.sample.request.get().user_id
+            if user_id != request.user.id:
+                obj = None
+
+        if obj and obj.sample.status == 2:
+            index_i7 = IndexI7.objects.get(
+                index=obj.sample.index_i7,
                 index_type_id=obj.sample.index_type_id
             )
-            index_i5_id = index_i5.index_id
-        except IndexI5.DoesNotExist:
-            index_i5_id = ''
+            index_i7_id = index_i7.index_id
 
-        data.append({
-            'active': False,
-            'name': obj.sample.name,
-            'sampleId': obj.sample.id,
-            'barcode': obj.sample.barcode,
-            'libraryProtocol': obj.sample.sample_protocol.id,
-            'libraryProtocolName': obj.sample.sample_protocol.name,
-            'concentrationSample': obj.sample.concentration,
-            'startingAmount': obj.starting_amount,
-            'startingVolume': obj.starting_volume,
-            'spikeInDescription': obj.spike_in_description,
-            'spikeInVolume': obj.spike_in_volume,
-            'ulSample': obj.ul_sample,
-            'ulBuffer': obj.ul_buffer,
-            'indexI7Id': index_i7_id,
-            'indexI5Id': index_i5_id,
-            'pcrCycles': obj.pcr_cycles,
-            'concentrationLibrary': obj.concentration_library,
-            'meanFragmentSize': obj.mean_fragment_size,
-            'nM': obj.nM,
-            'file':
-                settings.MEDIA_URL + obj.file.name
-                if obj.file
-                else ''
-        })
+            try:
+                index_i5 = IndexI5.objects.get(
+                    index=obj.sample.index_i5,
+                    index_type_id=obj.sample.index_type_id
+                )
+                index_i5_id = index_i5.index_id
+            except IndexI5.DoesNotExist:
+                index_i5_id = ''
 
-    return JsonResponse({
-        'success': not error,
-        'error': error,
-        'data': data
-    })
+            data.append({
+                'active': False,
+                'name': obj.sample.name,
+                'sampleId': obj.sample.id,
+                'barcode': obj.sample.barcode,
+                'libraryProtocol': obj.sample.sample_protocol.id,
+                'libraryProtocolName': obj.sample.sample_protocol.name,
+                'concentrationSample': obj.sample.concentration,
+                'startingAmount': obj.starting_amount,
+                'startingVolume': obj.starting_volume,
+                'spikeInDescription': obj.spike_in_description,
+                'spikeInVolume': obj.spike_in_volume,
+                'ulSample': obj.ul_sample,
+                'ulBuffer': obj.ul_buffer,
+                'indexI7Id': index_i7_id,
+                'indexI5Id': index_i5_id,
+                'pcrCycles': obj.pcr_cycles,
+                'concentrationLibrary': obj.concentration_library,
+                'meanFragmentSize': obj.mean_fragment_size,
+                'nM': obj.nM,
+                'file':
+                    settings.MEDIA_URL + obj.file.name
+                    if obj.file
+                    else ''
+            })
+
+    return JsonResponse({'success': not error, 'error': error, 'data': data})
 
 
 @login_required
 def edit(request):
-    """ Edit sample. """
+    """ Edit Library Preparation object. """
     error = ''
 
-    sample_id = request.POST.get('sample_id')
-    obj = LibraryPreparation.objects.get(sample_id=sample_id)
-
     try:
+        sample_id = request.POST.get('sample_id')
+        qc_result = request.POST.get('qc_result')
+        obj = LibraryPreparation.objects.get(sample_id=sample_id)
         form = LibraryPreparationForm(request.POST, instance=obj)
+    except (ValueError, LibraryPreparation.DoesNotExist) as e:
+         error = str(e)
+         logger.exception(e)
 
+    if form:
         if form.is_valid():
             form.save()
+
+            if qc_result:
+                record = Sample.objects.get(pk=sample_id)
+                if qc_result == '1':
+                    record.status = 3
+                    record.save(update_fields=['status'])
+
+                    # Create Pooling object
+                    pooling_obj = Pooling(sample=record)
+                    # TODO: update field Concentration C1
+                    pooling_obj.save()
+                else:
+                    record.status = -1
+                    record.save(update_fields=['status'])
+
+                    # TODO@me: send email
         else:
-            for key, value in form.errors.items():
-                error += '%s: %s<br/>' % (key, value)
+            error = str(form.errors)
+            logger.debug(form.errors)
 
-    except Exception as e:
-        error = str(e)
-        logger.exception(e)
-
-    return JsonResponse({
-        'success': not error,
-        'error': error
-    })
+    return JsonResponse({'success': not error, 'error': error})
 
 
 @csrf_exempt
@@ -181,7 +200,4 @@ def upload_benchtop_protocol(request):
             error = str(e)
             logger.debug(error)
 
-    return JsonResponse({
-        'success': not error,
-        'error': error
-    })
+    return JsonResponse({'success': not error, 'error': error})

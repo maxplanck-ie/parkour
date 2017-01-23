@@ -57,7 +57,41 @@ Ext.define('MainHub.view.libraries.Libraries', {
         },
         store: 'librariesStore',
         columns: {
-            items: [{
+            items: [
+                {
+                    text: 'Status',
+                    dataIndex: 'status',
+                    width: 60,
+                    renderer: function(value, meta) {
+                        var statusClass = 'status ';
+
+                        // Draw a color circle depending on the status value
+                        if (value === -1) {
+                            statusClass += 'quality-check-failed';
+                            meta.tdAttr = 'data-qtip="Quality failed"';
+                        } else if (value === 0) {
+                            statusClass += 'pending-submission';
+                            meta.tdAttr = 'data-qtip="Pending submission"';
+                        } else if (value === 1) {
+                            statusClass += 'submission-completed';
+                            meta.tdAttr = 'data-qtip="Submission completed"';
+                        } else if (value === 2) {
+                            statusClass += 'quality-check-approved';
+                            meta.tdAttr = 'data-qtip="Quality approved"';
+                        } else if (value === 3) {
+                            statusClass += 'library-prepared';
+                            meta.tdAttr = 'data-qtip="Library prepared"';
+                        } else if (value === 4) {
+                            statusClass += 'library-pooled';
+                            meta.tdAttr = 'data-qtip="Library pooled"';
+                        } else if (value === 5) {
+                            statusClass += 'sequencing';
+                            meta.tdAttr = 'data-qtip="Sequencing"';
+                        }
+                        return '<div class="' + statusClass + '"></div>';
+                    }
+                },
+                {
                     text: 'Name',
                     dataIndex: 'name',
                     width: 150,

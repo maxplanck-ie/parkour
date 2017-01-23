@@ -14,7 +14,10 @@ logger = logging.getLogger('db')
 
 @login_required
 def get_all(request):
-    """ Get the list of all libraries and samples. """
+    """
+    Get the list of all libraries and samples.
+    """
+    quality_check = request.GET.get('quality_check')
     data = []
 
     if request.user.is_staff:
@@ -25,8 +28,16 @@ def get_all(request):
         ).prefetch_related('libraries', 'samples')
 
     for req in requests:
+        libraries = req.libraries.all()
+        samples = req.samples.all()
+
+        if quality_check:
+            libraries = [l for l in libraries if l.status == 1]
+            samples = [s for s in samples if s.status == 1]
+
         libraries_data = [
             {
+                'status': library.status,
                 'requestName': req.name,
                 'requestId': req.id,
                 'libraryId': library.id,
@@ -83,11 +94,12 @@ def get_all(request):
                 'commentsFacility': library.comments_facility,
                 'qPCRResultFacility': library.qpcr_result_facility,
             }
-            for library in req.libraries.all()
+            for library in libraries
         ]
 
         samples_data = [
             {
+                'status': sample.status,
                 'requestName': req.name,
                 'requestId': req.id,
                 'sampleId': sample.id,
@@ -145,7 +157,7 @@ def get_all(request):
                 'commentsFacility': sample.comments_facility,
                 'rnaQualityFacility': sample.rna_quality_facility,
             }
-            for sample in req.samples.all()
+            for sample in samples
         ]
 
         data += libraries_data + samples_data

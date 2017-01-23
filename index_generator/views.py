@@ -1,5 +1,6 @@
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.db.models import Prefetch
 
 from request.models import Request
 from library_sample_shared.models import IndexI7, IndexI5
@@ -21,12 +22,27 @@ def pooling_tree(request):
     """ Get libraries ready for pooling. """
     children = []
 
-    requests = Request.objects.select_related()
-    for req in requests:
-        libraries = []
-        for library in req.libraries.all():
-            if library.index_i7 and library.is_pooled is False:
+    requests = Request.objects.prefetch_related(
+        Prefetch(
+            'libraries',
+            queryset=Library.objects.filter(status=2),
+            to_attr='libraries_all',
+        ),
+        Prefetch(
+            'samples',
+            queryset=Sample.objects.filter(status=2),
+            to_attr='samples_all',
+        ),
+    )
 
+    if not request.user.is_staff:
+        requests = requests.filter(user_id=request.user.id)
+
+    for req in requests:
+        records = []
+
+        for library in req.libraries_all:
+            if library.index_i7 and library.is_pooled is False:
                 index_i7 = IndexI7.objects.filter(
                     index=library.index_i7,
                     index_type=library.index_type
@@ -39,7 +55,7 @@ def pooling_tree(request):
                 )
                 index_i5_id = index_i5[0].index_id if index_i5 else ''
 
-                libraries.append({
+                records.append({
                     'text': library.name,
                     'libraryId': library.id,
                     'recordType': 'L',
@@ -60,9 +76,9 @@ def pooling_tree(request):
                     'leaf': True
                 })
 
-        for sample in req.samples.all():
+        for sample in req.samples_all:
             if sample.is_pooled is False:
-                libraries.append({
+                records.append({
                     'text': sample.name,
                     'sampleId': sample.id,
                     'recordType': 'S',
@@ -89,12 +105,12 @@ def pooling_tree(request):
                     'leaf': True
                 })
 
-        if libraries:
+        if records:
             children.append({
                 'text': req.name,
                 'expanded': True,
                 'iconCls': 'x-fa fa-pencil-square-o',
-                'children': libraries
+                'children': records
             })
 
     data = {
@@ -127,6 +143,7 @@ def save_pool(request):
             name = '_' + request.user.pi.name + name
 
         pool = Pool(name=name)
+        pool.user = request.user
         pool.save()
         pool.libraries.add(*library_ids)
         pool.samples.add(*samples)
@@ -138,9 +155,9 @@ def save_pool(request):
             library.save(update_fields=['is_pooled'])
 
             # Create Pooling object
-            pool_obj = Pooling(library=library)
-            # #  TODO: update field Concentration C1
-            pool_obj.save()
+            pooling_obj = Pooling(library=library)
+            # TODO: update field Concentration C1
+            pooling_obj.save()
 
         # Make current samples not available for repeated pooling
         # and set their Index I7 and Index I5 indices
@@ -162,9 +179,9 @@ def save_pool(request):
             lp_obj.save()
 
             # # Create Pooling object
-            pool_obj = Pooling(sample=sample)
-            # #  TODO: update field Concentration C1
-            pool_obj.save()
+            # pool_obj = Pooling(sample=sample)
+            # # TODO: update field Concentration C1
+            # pool_obj.save()
 
         # Trigger Pool Size update
         pool.save(update_fields=['size'])

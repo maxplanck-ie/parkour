@@ -18,7 +18,6 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
         height: Ext.Element.getViewportHeight() - 64,
         region: 'center',
         padding: 15,
-
         header: {
             title: 'Incoming Libraries and Samples',
             items: [{
@@ -49,9 +48,7 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
                 }
             ]
         },
-
         store: 'incomingLibrariesStore',
-
         columns: {
             items: [{
                     text: 'Name',
@@ -208,7 +205,7 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
                 },
                 {
                     text: 'QC Result',
-                    dataIndex: 'qcResultFacility',
+                    dataIndex: 'qcResult',
                     tdCls: 'facilityEntry',
                     editor: {
                         xtype: 'combobox',
@@ -227,11 +224,11 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
                             ],
                             data: [{
                                     id: 1,
-                                    name: 'QC passed'
+                                    name: 'passed'
                                 },
                                 {
                                     id: 2,
-                                    name: 'QC failed'
+                                    name: 'failed'
                                 }
                             ]
                         }),
@@ -240,12 +237,10 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
                 }
             ]
         },
-
         features: [{
             ftype: 'grouping',
             groupHeaderTpl: '<strong>Request: {name}</strong> (No. of Libraries/Samples: {rows.length})'
         }],
-
         plugins: [{
                 ptype: 'bufferedrenderer',
                 trailingBufferZone: 100,

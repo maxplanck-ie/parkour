@@ -3,7 +3,7 @@ from sample.models import Sample
 
 
 class LibraryPreparation(models.Model):
-    sample = models.ForeignKey(Sample, verbose_name='Sample')
+    sample = models.OneToOneField(Sample, verbose_name='Sample')
 
     starting_amount = models.FloatField(
         'Starting Amount',

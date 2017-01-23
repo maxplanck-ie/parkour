@@ -10,7 +10,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
 
     controller: 'library-preparation',
 
-    anchor : '100% -1',
+    anchor: '100% -1',
     layout: 'fit',
 
     items: [{
@@ -25,8 +25,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
         viewConfig: {
             markDirty: false
         },
-        plugins: [
-            {
+        plugins: [{
                 ptype: 'rowediting',
                 clicksToEdit: 2
             },
@@ -37,15 +36,14 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
             }
         ],
         features: [{
-            ftype:'grouping',
+            ftype: 'grouping',
             groupHeaderTpl: '<strong>Protocol: {name}</strong>'
         }],
         store: 'libraryPreparationStore',
 
-        columns: [
-            {
+        columns: [{
                 xtype: 'fiddlecheckcolumn',
-             	text: 'Active',
+                text: 'Active',
                 dataIndex: 'active',
                 width: 40
             },
@@ -162,16 +160,43 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                 }
             },
             {
-                text: 'Library QC',
-                dataIndex: 'libraryQC'
-            },
-            {
                 text: 'File',
                 dataIndex: 'file',
                 width: 45,
                 renderer: function(value) {
                     return (value !== '') ? '<a class="library-preparation-download" href="' +
                         value + '">' + '<i class="fa fa-download" aria-hidden="true"></i></a>' : '';
+                }
+            },
+            {
+                text: 'QC Result',
+                dataIndex: 'qcResult',
+                editor: {
+                    xtype: 'combobox',
+                    queryMode: 'local',
+                    displayField: 'name',
+                    valueField: 'id',
+                    store: Ext.create('Ext.data.Store', {
+                        fields: [{
+                                name: 'id',
+                                type: 'int'
+                            },
+                            {
+                                name: 'name',
+                                type: 'string'
+                            }
+                        ],
+                        data: [{
+                                id: 1,
+                                name: 'passed'
+                            },
+                            {
+                                id: 2,
+                                name: 'failed'
+                            }
+                        ]
+                    }),
+                    forceSelection: true
                 }
             }
         ],
