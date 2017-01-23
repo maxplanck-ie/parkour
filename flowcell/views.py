@@ -68,12 +68,18 @@ def sequencer_list(request):
 def pool_list(request):
     """ Get the list of pools for loading flowcells. """
     data = []
+    is_ok = False
 
     for pool in Pool.objects.prefetch_related('libraries', 'samples'):
-        if pool.size > pool.loaded:
-            libraries = pool.libraries.all()
-            samples = pool.samples.all()
+        libraries = pool.libraries.all()
+        samples = pool.samples.all()
 
+        # Check if all libraries and samples have status 4
+        if [l.status for l in libraries] >= [4] * pool.libraries.count() and \
+                [s.status for s in samples] >= [4] * pool.samples.count():
+            is_ok = True
+
+        if is_ok and pool.size > pool.loaded:
             # Get Pool's Read Length
             if any(libraries):
                 src_id = libraries[0].read_length_id
@@ -160,6 +166,15 @@ def save(request):
             pool = Pool.objects.get(pk=pool_id)
             pool.loaded += loaded
             pool.save(update_fields=['loaded'])
+
+            # Change native and converted library's status to 5
+            for library in pool.libraries.all():
+                library.status = 5
+                library.save(update_fields=['status'])
+
+            for sample in pool.samples.all():
+                sample.status = 5
+                sample.save(update_fields=['status'])
 
         # Add lanes to the flowcell
         flowcell.lanes.add(*lane_objects)
