@@ -87,3 +87,21 @@ class GenericLibrarySampleTest(TestCase):
     def test_generic_library_sample_name(self):
         self.assertTrue(isinstance(self.library, GenericLibrarySample))
         self.assertEqual(self.library.__str__(), self.library.name)
+
+
+# Fixtures
+
+# class FixturesTestcase(TestCase):
+#     fixtures = [
+#         'organisms.json',
+#         'concentration_methods.json',
+#         'read_lengths.json',
+#         'indices.json',
+#     ]
+#
+#     def setUp(self):
+#         pass
+#
+#     def test_loaded_fixtures(self):
+#         human = Organism.objects.get(pk=1)
+#         self.assertEqual(human.name, 'human')

@@ -186,18 +186,26 @@ def get_library_protocols(request):
 
 def get_library_type(request):
     """ Get the list of all library types for a given library protocol. """
-    library_protocol_id = request.GET.get('library_protocol_id')
-    protocol = LibraryProtocol.objects.get(pk=library_protocol_id)
-    types = LibraryType.objects.filter(
-        library_protocol__in=[protocol]
-    )
-    data = [
-        {
-            'id': lib_type.id,
-            'name': lib_type.name,
-        }
-        for lib_type in types
-    ]
+    data = []
+    library_protocol_id = request.GET.get('library_protocol_id', '')
+
+    try:
+        protocol = LibraryProtocol.objects.get(pk=library_protocol_id)
+        library_types = LibraryType.objects.filter(
+            library_protocol__in=[protocol]
+        )
+
+        data = [
+            {
+                'id': library_type.id,
+                'name': library_type.name,
+            }
+            for library_type in library_types
+        ]
+
+    except (ValueError, LibraryProtocol.DoesNotExist) as e:
+        logger.exception(e)
+
     return JsonResponse(data, safe=False)
 
 
@@ -209,42 +217,53 @@ def save_library(request):
 
     if request.method == 'POST':
         mode = request.POST.get('mode')
-        mode = request.POST.get('mode')
-        library_id = request.POST.get('library_id')
-        files = json.loads(request.POST.get('files'))
+        library_id = request.POST.get('library_id', '')
+        files = json.loads(request.POST.get('files', '[]'))
 
         if mode == 'add':
             form = LibraryForm(request.POST)
         elif mode == 'edit':
-            lib = Library.objects.get(id=library_id)
-            form = LibraryForm(request.POST, instance=lib)
-
-        if form.is_valid():
-            lib = form.save()
-
-            if mode == 'add':
-                lib.files.add(*files)
-                data = {
-                    'name': lib.name,
-                    'recordType': 'L',
-                    'libraryId': lib.id,
-                    'barcode': lib.barcode,
-                }
-
-            elif mode == 'edit':
-                old_files = [file for file in lib.files.all()]
-                lib.files.clear()
-                lib.save()
-                lib.files.add(*files)
-                new_files = [file for file in lib.files.all()]
-
-                # Delete files
-                files_to_delete = list(set(old_files) - set(new_files))
-                for file in files_to_delete:
-                    file.delete()
+            try:
+                lib = Library.objects.get(id=library_id)
+                form = LibraryForm(request.POST, instance=lib)
+            except (ValueError, Library.DoesNotExist) as e:
+                form = None
+                error = str(e)
+                logger.exception(e)
         else:
-            error = str(form.errors)
-            logger.debug(form.errors.as_data())
+            form = None
+
+        if form:
+            if form.is_valid():
+                lib = form.save()
+
+                if mode == 'add':
+                    lib.files.add(*files)
+                    data = {
+                        'name': lib.name,
+                        'recordType': 'L',
+                        'libraryId': lib.id,
+                        'barcode': lib.barcode,
+                    }
+
+                elif mode == 'edit':
+                    old_files = [file for file in lib.files.all()]
+                    lib.files.clear()
+                    lib.save()
+                    lib.files.add(*files)
+                    new_files = [file for file in lib.files.all()]
+
+                    # Delete files
+                    files_to_delete = list(set(old_files) - set(new_files))
+                    for file in files_to_delete:
+                        file.delete()
+            else:
+                error = str(form.errors)
+                logger.debug(form.errors.as_data())
+        else:
+            error = error if error else 'Wrong or missing mode.'
+    else:
+        error = 'Wrong HTTP method.'
 
     return JsonResponse({'success': not error, 'error': error, 'data': data})
 
@@ -252,10 +271,20 @@ def save_library(request):
 @login_required
 def delete_library(request):
     """ Delete a library with a given id. """
-    record_id = request.POST.get('record_id')
-    record = Library.objects.get(pk=record_id)
-    record.delete()
-    return JsonResponse({'success': True})
+    error = ''
+
+    if request.method == 'POST':
+        record_id = request.POST.get('record_id', '')
+        try:
+            record = Library.objects.get(pk=record_id)
+            record.delete()
+        except (ValueError, Library.DoesNotExist) as e:
+            error = str(e)
+            logger.exception(e)
+    else:
+        error = 'Wrong HTTP method.'
+
+    return JsonResponse({'success': not error, 'error': error})
 
 
 @login_required
