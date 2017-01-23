@@ -64,6 +64,8 @@ Ext.define('MainHub.view.libraries.Libraries', {
                     width: 60,
                     renderer: function(value, meta) {
                         var statusClass = 'status ';
+
+                        // Draw a color circle depending on the status value
                         if (value === -1) {
                             statusClass += 'quality-check-failed';
                             meta.tdAttr = 'data-qtip="Quality failed"';
@@ -76,6 +78,9 @@ Ext.define('MainHub.view.libraries.Libraries', {
                         } else if (value === 2) {
                             statusClass += 'quality-check-approved';
                             meta.tdAttr = 'data-qtip="Quality approved"';
+                        } else if (value === 3) {
+                            statusClass += 'library-prepared';
+                            meta.tdAttr = 'data-qtip="Library prepared"';
                         }
                         return '<div class="' + statusClass + '"></div>';
                     }

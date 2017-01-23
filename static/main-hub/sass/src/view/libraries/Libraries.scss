@@ -7,3 +7,38 @@
     background-color: #e8f5e9;
     color: #388e3c;
 }
+
+.status {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin: 3px auto 0;
+}
+
+.status.pending-submission {
+	background-color: #9E9E9E;
+}
+
+.status.submission-completed {
+	background-color: #ffc107;
+}
+
+.status.quality-check-approved {
+	background-color: #66BB6A;
+}
+
+.status.quality-check-failed {
+	background-color: #ef5350;
+}
+
+.status.library-prepared {
+    background-color: #3f51b5;
+}
+
+.status.libraries-pooled {
+    background-color: #f48fb1;
+}
+
+.status.flowcell-loaded {
+    background-color: #ba68c8;
+}

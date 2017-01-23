@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
 from library_sample_shared.models import IndexI7, IndexI5
+from sample.models import Sample
 from .models import LibraryPreparation
 from .forms import LibraryPreparationForm
 
@@ -28,7 +29,7 @@ def get_all(request):
             if user_id != request.user.id:
                 obj = None
 
-        if obj:
+        if obj and obj.sample.status == 2:
             index_i7 = IndexI7.objects.get(
                 index=obj.sample.index_i7,
                 index_type_id=obj.sample.index_type_id
@@ -70,38 +71,42 @@ def get_all(request):
                     else ''
             })
 
-    return JsonResponse({
-        'success': not error,
-        'error': error,
-        'data': data
-    })
+    return JsonResponse({'success': not error, 'error': error, 'data': data})
 
 
 @login_required
 def edit(request):
-    """ Edit sample. """
+    """ Edit Library Preparation object. """
     error = ''
 
-    sample_id = request.POST.get('sample_id')
-    obj = LibraryPreparation.objects.get(sample_id=sample_id)
-
     try:
+        sample_id = request.POST.get('sample_id')
+        qc_result = request.POST.get('qc_result')
+        obj = LibraryPreparation.objects.get(sample_id=sample_id)
         form = LibraryPreparationForm(request.POST, instance=obj)
+    except (ValueError, LibraryPreparation.DoesNotExist) as e:
+         error = str(e)
+         logger.exception(e)
 
+    if form:
         if form.is_valid():
             form.save()
+
+            if qc_result:
+                record = Sample.objects.get(pk=sample_id)
+                if qc_result == '1':
+                    record.status = 3
+                    record.save(update_fields=['status'])
+                else:
+                    record.status = -1
+                    record.save(update_fields=['status'])
+
+                    # TODO@me: send email
         else:
-            for key, value in form.errors.items():
-                error += '%s: %s<br/>' % (key, value)
+            error = str(form.errors)
+            logger.debug(form.errors)
 
-    except Exception as e:
-        error = str(e)
-        logger.exception(e)
-
-    return JsonResponse({
-        'success': not error,
-        'error': error
-    })
+    return JsonResponse({'success': not error, 'error': error})
 
 
 @csrf_exempt
@@ -189,7 +194,4 @@ def upload_benchtop_protocol(request):
             error = str(e)
             logger.debug(error)
 
-    return JsonResponse({
-        'success': not error,
-        'error': error
-    })
+    return JsonResponse({'success': not error, 'error': error})
