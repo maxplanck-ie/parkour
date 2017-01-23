@@ -14,9 +14,7 @@ logger = logging.getLogger('db')
 
 @login_required
 def get_all(request):
-    """
-    Get the list of all libraries and samples.
-    """
+    """ Get the list of all libraries and samples."""
     quality_check = request.GET.get('quality_check')
     data = []
 
@@ -259,7 +257,7 @@ def save_library(request):
                         file.delete()
             else:
                 error = str(form.errors)
-                logger.debug(form.errors.as_data())
+                logger.debug(form.errors)
         else:
             error = error if error else 'Wrong or missing mode.'
     else:

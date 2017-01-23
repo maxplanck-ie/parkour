@@ -4,7 +4,8 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 
 from .models import SampleProtocol, NucleicAcidType, FileSample, Sample
-
+from library_sample_shared.models import (Organism, ConcentrationMethod,
+                                          ReadLength)
 import tempfile
 
 User = get_user_model()
@@ -63,8 +64,8 @@ class GetNucleicAcidTypesTest(TestCase):
     def test_nucleic_acid_types(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.get(reverse('get_nucleic_acid_types'))
-        self.assertNotEqual(len(response.content), b'[]')
         self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(len(response.content), b'[]')
 
 
 class GetSampleProtocolsTest(TestCase):
@@ -76,91 +77,165 @@ class GetSampleProtocolsTest(TestCase):
         response = self.client.get(reverse('get_sample_protocols'), {
             'type': 'DNA'
         })
-        self.assertNotEqual(len(response.content), b'[]')
         self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(response.content, b'[]')
+
+    def test_wrong_http_method(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('get_sample_protocols'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b'[]')
+
+    def test_missing_sample_type(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.get(reverse('get_sample_protocols'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b'[]')
 
 
 class SaveSampleTest(TestCase):
     def setUp(self):
         User.objects.create_user(email='foo@bar.io', password='foo-foo')
 
-    def test_save_sample(self):
-        """ Successfull 'save' test when everything is present. """
-        self.client.login(email='foo@bar.io', password='foo-foo')
+        self.sample_protocol = SampleProtocol(
+            name='Protocol',
+            provider='',
+            catalog='',
+            explanation='',
+            input_requirements='',
+            typical_application='',
+        )
+        self.sample_protocol.save()
 
-        f = FileSample(name='File', file=ContentFile(b'file'))
-        f.save()
+        self.nucleic_acid_type = NucleicAcidType(name='NAT')
+        self.nucleic_acid_type.save()
 
-        response = self.client.post(reverse('save_sample'), {
-            'mode': 'add',
-            'name': 'Sample1',
-            'organism': 1,
-            'dna_dissolved_in': 'dna',
-            'concentration': 1.0,
-            'concentration_method': 1,
-            'sample_volume': 1,
-            'read_length': 1,
-            'sequencing_depth': 1,
-            'nucleic_acid_type': 1,
-            'sample_protocol': 1,
-            'files': '[%s]' % f.pk
-        })
-        self.assertEqual(response.status_code, 200)
+        self.organism = Organism(name='Human')
+        self.organism.save()
 
-    def test_update_sample(self):
-        """ Updated 'name' and 'organism_id'. """
-        self.client.login(email='foo@bar.io', password='foo-foo')
+        self.method = ConcentrationMethod(name='fluorography')
+        self.method.save()
 
-        f_1 = FileSample(name='File', file=ContentFile(b'file1'))
-        f_2 = FileSample(name='File', file=ContentFile(b'file2'))
-        f_1.save()
-        f_2.save()
+        self.read_length = ReadLength(name='1x50')
+        self.read_length.save()
 
-        sample = Sample.get_test_sample('Sample')
-        sample.save()
-        sample.files.add(*[f_1.pk, f_2.pk])
+        self.f_1 = FileSample(name='File1', file=ContentFile(b'file1'))
+        self.f_2 = FileSample(name='File2', file=ContentFile(b'file2'))
+        self.f_1.save()
+        self.f_2.save()
 
-        response = self.client.post(reverse('save_sample'), {
-            'mode': 'edit',
-            'sample_id': sample.pk,
-            'name': 'Sample1',
-            'organism': 2,
-            'dna_dissolved_in': 'dna',
-            'concentration': 1.0,
-            'concentration_method': 1,
-            'sample_volume': 1,
-            'read_length': 1,
-            'sequencing_depth': 1,
-            'nucleic_acid_type': 1,
-            'sample_protocol': 1,
-            'files': '[%s]' % f_1.pk
-        })
-        self.assertEqual(response.status_code, 200)
+        self.test_sample = Sample(
+            name='Sample_edit',
+            organism_id=self.organism.pk,
+            dna_dissolved_in='dna',
+            concentration=1.0,
+            concentration_method_id=self.method.pk,
+            sample_volume=1,
+            read_length_id=self.read_length.pk,
+            sequencing_depth=1,
+            nucleic_acid_type_id=self.nucleic_acid_type.pk,
+            sample_protocol_id=self.sample_protocol.pk,
+        )
+        self.test_sample.save()
+        self.test_sample.files.add(*[self.f_1.pk, self.f_2.pk])
 
-    def test_invalid_form(self):
-        """
-        Invalid form:
-        - name is not unique
-        - organism_id is empty,
-        - sample_protocol = 0 doesn't exist
-        - some fields are missing
-        """
+    def test_save_ok(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.post(reverse('save_sample'), {
             'mode': 'add',
+            'name': 'Sample_add',
+            'organism': self.organism.pk,
+            'dna_dissolved_in': 'dna',
+            'concentration': 1.0,
+            'concentration_method': self.method.pk,
+            'sample_volume': 1,
+            'read_length': self.read_length.pk,
+            'sequencing_depth': 1,
+            'nucleic_acid_type': self.nucleic_acid_type.pk,
+            'sample_protocol': self.sample_protocol.pk,
+            'files': '[%s]' % self.f_1.pk
+        })
+        self.assertEqual(response.status_code, 200)
+        sample = Sample.objects.get(name='Sample_add')
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': True,
+            'error': '',
+            'data': {
+                'name': sample.name,
+                'sampleId': sample.pk,
+                'barcode': sample.barcode,
+                'recordType': 'S',
+            },
+        })
+
+    def test_missing_or_invalid_fields(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('save_sample'), {
+            'mode': 'add',  # works for 'edit' too
             'name': 'Sample',
-            'organism': '',
-            'sample_protocol': 0
         })
         self.assertEqual(response.status_code, 200)
 
-    def test_exception(self):
+    def test_edit_ok(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.post(reverse('save_sample'), {
             'mode': 'edit',
-            'sample_id': 0
+            'sample_id': self.test_sample.pk,
+            'name': 'Sample_edit_new',
+            'organism': self.organism.pk,
+            'equal_representation_nucleotides': 'false',
+            'dna_dissolved_in': '1',
+            'concentration': '1.0',
+            'concentration_method': self.method.pk,
+            'sample_volume': '1',
+            'read_length': self.read_length.pk,
+            'sequencing_depth': '1',
+            'nucleic_acid_type': self.nucleic_acid_type.pk,
+            'sample_protocol': self.sample_protocol.pk,
+            'comments': '',
+            'files': '[%s]' % self.f_1.pk,
         })
         self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': True,
+            'error': '',
+            'data': [],
+        })
+
+    def test_wrong_http_method(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.get(reverse('save_sample'))
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Wrong HTTP method.',
+            'data': [],
+        })
+
+    def test_wrong_or_missing_mode(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('save_sample'))
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Wrong or missing mode.',
+            'data': [],
+        })
+
+    def test_missing_or_empty_sample_id(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('save_sample'), {'mode': 'edit'})
+        self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(response.content, b'[]')
+
+    def test_non_existing_library_id(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('save_sample'), {
+            'mode': 'edit',
+            'sample_id': '-1',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(response.content, b'[]')
 
 
 class UploadFilesTest(TestCase):
@@ -206,11 +281,26 @@ class DeleteSampleTest(TestCase):
             'record_id': self.sample.pk
         })
         self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': True, 'error': '',
+        })
 
-    def test_exception(self):
-        """ Empty or non-existing record_id. """
+    def test_wrong_http_method(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.get(reverse('delete_sample'))
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False, 'error': 'Wrong HTTP method.',
+        })
+
+    def test_missing_or_empty_record_id(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('delete_sample'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_non_existing_record_id(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.post(reverse('delete_sample'), {
-            'record_id': 0
+            'record_id': '-1'
         })
         self.assertEqual(response.status_code, 200)
