@@ -5,38 +5,32 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
     config: {
         control: {
             '#librariesTable': {
-                boxready: 'onLibrariesTableBoxready',
-                refresh: 'onLibrariesTableRefresh',
-                itemcontextmenu: 'onLibrariesTableItemContextMenu'
+                boxready: 'refresh',
+                refresh: 'refresh',
+                itemcontextmenu: 'showContextMenu'
             },
             '#showLibrariesCheckbox': {
-                change: 'onFilterChange'
+                change: 'changeFilter'
             },
             '#showSamplesCheckbox': {
-                change: 'onFilterChange'
+                change: 'changeFilter'
             },
             '#searchField': {
-                change: 'onFilterChange'
+                change: 'changeFilter'
             }
         }
     },
 
-    onLibrariesTableBoxready: function(grid) {
-        grid.fireEvent('refresh', grid);
+    refresh: function(grid) {
+        Ext.getStore('librariesStore').reload();
     },
 
-    onLibrariesTableRefresh: function(grid) {
-        // Reload the table
-        grid.getStore().reload();
-    },
-
-    onLibrariesTableItemContextMenu: function(grid, record, item, index, e) {
+    showContextMenu: function(grid, record, item, index, e) {
         var me = this;
 
         e.stopEvent();
         Ext.create('Ext.menu.Menu', {
-            items: [
-                {
+            items: [{
                     text: 'Edit',
                     iconCls: 'x-fa fa-pencil',
                     handler: function() {
@@ -63,9 +57,10 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
     },
 
     editRecord: function(record) {
-        Ext.create('library_wnd', {
+        Ext.create('MainHub.view.libraries.LibraryWindow', {
             title: record.data.recordType == 'L' ? 'Edit Library' : 'Edit Sample',
-            mode: 'edit', record: record
+            mode: 'edit',
+            record: record
         }).show();
     },
 
@@ -75,43 +70,33 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
         Ext.Ajax.request({
             url: url,
             method: 'POST',
-            timeout: 1000000,
             scope: this,
-
             params: {
                 'record_id': record.data.recordType == 'L' ? record.data.libraryId : record.data.sampleId
             },
 
-            success: function (response) {
+            success: function(response) {
                 var obj = Ext.JSON.decode(response.responseText);
-
                 if (obj.success) {
                     var grid = Ext.getCmp('librariesTable');
                     grid.fireEvent('refresh', grid);
                     Ext.ux.ToastMessage('Record has been deleted!');
-
-                    // Reload stores
-                    if (Ext.getStore('requestsStore').isLoaded()) Ext.getStore('requestsStore').reload();
-                    if (Ext.getStore('incomingLibrariesStore').isLoaded()) Ext.getStore('incomingLibrariesStore').reload();
-                    if (Ext.getStore('PoolingTree').isLoaded()) Ext.getStore('PoolingTree').reload();
-                    if (Ext.getStore('libraryPreparationStore')) Ext.getStore('libraryPreparationStore').reload();
-                    if (Ext.getStore('poolingStore').isLoaded()) Ext.getStore('poolingStore').reload();
                 } else {
                     Ext.ux.ToastMessage(obj.error, 'error');
-                    console.error('[ERROR]: ' + url.replace('/', '()'));
+                    console.error('[ERROR]: ' + url);
                     console.error(response);
                 }
             },
 
             failure: function(response) {
                 Ext.ux.ToastMessage(response.statusText, 'error');
-                console.error('[ERROR]: ' + url.replace('/', '()'));
+                console.error('[ERROR]: ' + url);
                 console.error(response);
             }
         });
     },
 
-    onFilterChange: function(el, value) {
+    changeFilter: function(el, value) {
         var grid = Ext.getCmp('librariesTable'),
             store = grid.getStore(),
             columns = Ext.pluck(grid.getColumns(), 'dataIndex'),

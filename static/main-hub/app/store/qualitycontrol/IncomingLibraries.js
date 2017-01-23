@@ -23,17 +23,9 @@ Ext.define('MainHub.store.qualitycontrol.IncomingLibraries', {
             type: 'json',
             rootProperty: 'data',
             successProperty: 'success'
-        }
-    },
-
-    listeners: {
-        load: function(store, records, success, operation) {
-            if (!success) {
-                var response = operation._response,
-                    obj = Ext.JSON.decode(response.responseText);
-                console.error('[ERROR]: get_libraries/: ' + obj.error);
-                console.error(response);
-            }
+        },
+        extraParams: {
+            'quality_check': true
         }
     }
 });

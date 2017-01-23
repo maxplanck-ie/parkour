@@ -19,7 +19,6 @@ class LibraryType(models.Model):
 
     library_protocol = models.ManyToManyField(
         LibraryProtocol,
-        related_name='library_protocol',
         verbose_name='Library Protocol',
     )
 
@@ -47,7 +46,6 @@ class Library(GenericLibrarySample):
 
     library_type = models.ForeignKey(
         LibraryType,
-        related_name='library_type',
         verbose_name='Library Type',
     )
 
@@ -59,7 +57,11 @@ class Library(GenericLibrarySample):
 
     qpcr_result = models.FloatField('qPCR Result', null=True, blank=True)
 
-    files = models.ManyToManyField(FileLibrary, related_name='files')
+    files = models.ManyToManyField(
+        FileLibrary,
+        related_name='files',
+        blank=True,
+    )
 
     # Quality Control
     qpcr_result_facility = models.FloatField(
@@ -74,7 +76,7 @@ class Library(GenericLibrarySample):
             name=name,
             organism_id=1,
             concentration=1.0,
-            concentration_determined_by_id=1,
+            concentration_method_id=1,
             dna_dissolved_in='dna',
             sample_volume=1,
             read_length_id=1,

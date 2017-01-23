@@ -3,7 +3,7 @@ Ext.define('MainHub.view.startpage.Startpage', {
     xtype: 'startpage',
 
     requires: [
-        'Ext.ux.layout.ResponsiveColumn',
+        // 'Ext.ux.layout.ResponsiveColumn',
         'MainHub.view.startpage.StartpageController',
         'MainHub.view.startpage.Requests',
         'MainHub.view.startpage.RequestsUser'

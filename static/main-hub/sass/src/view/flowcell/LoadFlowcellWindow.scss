@@ -19,3 +19,12 @@
 .lane .x-autocontainer-innerCt.lane-hover {
     background-color: #fff9c4;
 }
+
+tr.pool-disabled,
+tr.pool-disabled > td.x-grid-item-focused {
+    color: #bdbdbd;
+}
+
+#flowcell-result {
+    float: right;
+}

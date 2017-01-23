@@ -112,9 +112,9 @@ class GenericLibrarySample(models.Model):
 
     concentration = models.FloatField('Concentration')
 
-    concentration_determined_by = models.ForeignKey(
+    concentration_method = models.ForeignKey(
         ConcentrationMethod,
-        verbose_name='Concentration Determined by',
+        verbose_name='Concentration Method',
     )
 
     dna_dissolved_in = models.CharField('DNA Dissolved in', max_length=255)
@@ -134,8 +134,6 @@ class GenericLibrarySample(models.Model):
     sequencing_depth = models.PositiveIntegerField('Sequencing Depth')
 
     comments = models.TextField('Comments', null=True, blank=True)
-
-    is_in_request = models.BooleanField('Is in request?', default=False)
 
     is_pooled = models.BooleanField('Is pooled?', default=False)
 
@@ -175,10 +173,10 @@ class GenericLibrarySample(models.Model):
         blank=True,
     )
 
-    concentration_determined_by_facility = models.ForeignKey(
+    concentration_method_facility = models.ForeignKey(
         ConcentrationMethod,
         related_name='+',
-        verbose_name='Concentration Determined by (facility)',
+        verbose_name='Concentration Method (facility)',
         null=True,
         blank=True,
     )

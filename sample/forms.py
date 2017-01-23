@@ -13,7 +13,7 @@ class SampleForm(forms.ModelForm):
             'equal_representation_nucleotides',
             'dna_dissolved_in',
             'concentration',
-            'concentration_determined_by',
+            'concentration_method',
             'sample_volume',
             'amplified_cycles',
             'dnase_treatment',

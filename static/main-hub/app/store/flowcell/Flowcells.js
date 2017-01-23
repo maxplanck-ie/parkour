@@ -1,16 +1,16 @@
-Ext.define('MainHub.store.libraries.ConcentrationMethods', {
+Ext.define('MainHub.store.flowcell.Flowcells', {
     extend: 'Ext.data.Store',
-    storeId: 'concentrationMethodsStore',
+    storeId: 'flowcellsStore',
 
     requires: [
-        'MainHub.model.libraries.LibraryField'
+        'MainHub.model.flowcell.Flowcell'
     ],
 
-    model: 'MainHub.model.libraries.LibraryField',
+    model: 'MainHub.model.flowcell.Flowcell',
 
     proxy: {
         type: 'ajax',
-        url: 'get_concentration_methods/',
+        url: 'flowcell/get_all/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"
@@ -21,7 +21,5 @@ Ext.define('MainHub.store.libraries.ConcentrationMethods', {
             rootProperty: 'data',
             successProperty: 'success'
         }
-    },
-
-    autoLoad: true
+    }
 });

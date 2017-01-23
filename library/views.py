@@ -14,14 +14,30 @@ logger = logging.getLogger('db')
 
 @login_required
 def get_all(request):
-    """ Get the list of all libraries and samples. """
+    """
+    Get the list of all libraries and samples.
+    """
+    quality_check = request.GET.get('quality_check')
     data = []
 
-    requests = Request.objects.prefetch_related('libraries', 'samples')
+    if request.user.is_staff:
+        requests = Request.objects.prefetch_related('libraries', 'samples')
+    else:
+        requests = Request.objects.filter(
+            user_id=request.user.id
+        ).prefetch_related('libraries', 'samples')
 
     for req in requests:
+        libraries = req.libraries.all()
+        samples = req.samples.all()
+
+        if quality_check:
+            libraries = [l for l in libraries if l.status == 1]
+            samples = [s for s in samples if s.status == 1]
+
         libraries_data = [
             {
+                'status': library.status,
                 'requestName': req.name,
                 'requestId': req.id,
                 'libraryId': library.id,
@@ -45,9 +61,9 @@ def get_all(request):
                 'DNADissolvedIn': library.dna_dissolved_in,
                 'concentration': library.concentration,
                 'concentrationMethod':
-                    library.concentration_determined_by.name,
+                    library.concentration_method.name,
                 'concentrationMethodId':
-                    library.concentration_determined_by.id,
+                    library.concentration_method.id,
                 'sampleVolume': library.sample_volume,
                 'meanFragmentSize': library.mean_fragment_size,
                 'qPCRResult': library.qpcr_result,
@@ -62,12 +78,12 @@ def get_all(request):
                 'dilutionFactor': library.dilution_factor,
                 'concentrationFacility': library.concentration_facility,
                 'concentrationMethodFacility':
-                    library.concentration_determined_by_facility.name
-                    if library.concentration_determined_by_facility is
+                    library.concentration_method_facility.name
+                    if library.concentration_method_facility is
                     not None else '',
                 'concentrationMethodFacilityId':
-                    library.concentration_determined_by_facility.id
-                    if library.concentration_determined_by_facility is
+                    library.concentration_method_facility.id
+                    if library.concentration_method_facility is
                     not None else '',
                 'dateFacility': library.date_facility.strftime('%d.%m.%Y')
                     if library.date_facility is not None else '',
@@ -78,11 +94,12 @@ def get_all(request):
                 'commentsFacility': library.comments_facility,
                 'qPCRResultFacility': library.qpcr_result_facility,
             }
-            for library in req.libraries.all()
+            for library in libraries
         ]
 
         samples_data = [
             {
+                'status': sample.status,
                 'requestName': req.name,
                 'requestId': req.id,
                 'sampleId': sample.id,
@@ -101,9 +118,9 @@ def get_all(request):
                 'DNADissolvedIn': sample.dna_dissolved_in,
                 'concentration': sample.concentration,
                 'concentrationMethod':
-                    sample.concentration_determined_by.name,
+                    sample.concentration_method.name,
                 'concentrationMethodId':
-                    sample.concentration_determined_by.id,
+                    sample.concentration_method.id,
                 'sampleVolume': sample.sample_volume,
                 'readLength':
                     sample.read_length.name,
@@ -111,9 +128,7 @@ def get_all(request):
                     sample.read_length.id,
                 'sequencingDepth': sample.sequencing_depth,
                 'DNaseTreatment': str(sample.dnase_treatment),
-                'rnaQuality': sample.rna_quality.name
-                    if sample.rna_quality else '',
-                'rnaQualityId': sample.rna_quality_id
+                'rnaQuality': sample.rna_quality
                     if sample.rna_quality else '',
                 'rnaSpikeIn': str(sample.rna_spike_in),
                 'samplePreparationProtocol':
@@ -126,12 +141,12 @@ def get_all(request):
                 'dilutionFactor': sample.dilution_factor,
                 'concentrationFacility': sample.concentration_facility,
                 'concentrationMethodFacility':
-                    sample.concentration_determined_by_facility.name
-                    if sample.concentration_determined_by_facility is
+                    sample.concentration_method_facility.name
+                    if sample.concentration_method_facility is
                     not None else '',
                 'concentrationMethodFacilityId':
-                    sample.concentration_determined_by_facility.id
-                    if sample.concentration_determined_by_facility is
+                    sample.concentration_method_facility.id
+                    if sample.concentration_method_facility is
                     not None else '',
                 'dateFacility': sample.date_facility.strftime('%d.%m.%Y')
                     if sample.date_facility is not None else '',
@@ -142,7 +157,7 @@ def get_all(request):
                 'commentsFacility': sample.comments_facility,
                 'rnaQualityFacility': sample.rna_quality_facility,
             }
-            for sample in req.samples.all()
+            for sample in samples
         ]
 
         data += libraries_data + samples_data
@@ -176,7 +191,6 @@ def get_library_type(request):
     types = LibraryType.objects.filter(
         library_protocol__in=[protocol]
     )
-
     data = [
         {
             'id': lib_type.id,
@@ -232,11 +246,7 @@ def save_library(request):
             error = str(form.errors)
             logger.debug(form.errors.as_data())
 
-    return JsonResponse({
-        'success': not error,
-        'error': error,
-        'data': data
-    })
+    return JsonResponse({'success': not error, 'error': error, 'data': data})
 
 
 @login_required
@@ -251,8 +261,8 @@ def delete_library(request):
 @login_required
 def upload_files(request):
     """ """
-    error = ''
     file_ids = []
+    error = ''
 
     if request.method == 'POST' and any(request.FILES):
         try:
@@ -275,10 +285,9 @@ def upload_files(request):
 @login_required
 def get_files(request):
     """ """
+    file_ids = json.loads(request.GET.get('file_ids'))
     error = ''
     data = []
-
-    file_ids = json.loads(request.GET.get('file_ids'))
 
     try:
         files = [f for f in FileLibrary.objects.all() if f.id in file_ids]
@@ -296,8 +305,4 @@ def get_files(request):
         error = str(e)
         logger.exception(error)
 
-    return JsonResponse({
-        'success': not error,
-        'error': error,
-        'data': data
-    })
+    return JsonResponse({'success': not error, 'error': error, 'data': data})

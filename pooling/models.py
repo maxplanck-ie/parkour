@@ -4,14 +4,14 @@ from sample.models import Sample
 
 
 class Pooling(models.Model):
-    library = models.ForeignKey(
+    library = models.OneToOneField(
         Library,
         verbose_name='Library',
         null=True,
         blank=True
     )
 
-    sample = models.ForeignKey(
+    sample = models.OneToOneField(
         Sample,
         verbose_name='Sample',
         null=True,

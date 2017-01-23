@@ -21,5 +21,7 @@ Ext.define('MainHub.store.libraries.Organisms', {
             rootProperty: 'data',
             successProperty: 'success'
         }
-    }
+    },
+
+    autoLoad: true
 });

@@ -25,7 +25,8 @@ class SequencerTest(TestCase):
 
 class LaneTest(TestCase):
     def setUp(self):
-        pool = Pool(name='_Pool')
+        user = User.objects.create_user(email='foo@bar.io', password='foo-foo')
+        pool = Pool(name='_Pool', user=user)
         self.lane = Lane(name='lane', pool=pool, loading_concentration=1.0)
 
     def test_lane_name(self):
@@ -38,8 +39,8 @@ class LaneTest(TestCase):
 
 class FlowcellTest(TestCase):
     def setUp(self):
-        read_length = ReadLength(name='1x50')
-        self.flowcell = Flowcell(flowcell_id='fc', read_length=read_length)
+        sequencer = Sequencer(name='Seq', lanes=1, lane_capacity=200)
+        self.flowcell = Flowcell(flowcell_id='fc', sequencer=sequencer)
 
     def test_flowcell_name(self):
         self.assertTrue(isinstance(self.flowcell, Flowcell))
@@ -61,8 +62,8 @@ class SequencerList(TestCase):
 
 class PoolListLibraries(TestCase):
     def setUp(self):
-        User.objects.create_user(email='foo@bar.io', password='foo-foo')
-        pool = Pool(name='_Foo')
+        user = User.objects.create_user(email='foo@bar.io', password='foo-foo')
+        pool = Pool(name='_Foo', user=user)
         pool.save()
 
         library = Library.get_test_library('Library')
@@ -81,8 +82,8 @@ class PoolListLibraries(TestCase):
 
 class PoolListSamples(TestCase):
     def setUp(self):
-        User.objects.create_user(email='foo@bar.io', password='foo-foo')
-        pool = Pool(name='_Pool')
+        user = User.objects.create_user(email='foo@bar.io', password='foo-foo')
+        pool = Pool(name='_Pool', user=user)
         pool.save()
 
         sample = Sample.get_test_sample('Sample')
@@ -102,7 +103,7 @@ class PoolListSamples(TestCase):
 class PoolInfo(TestCase):
     def setUp(self):
         user = User.objects.create_user(email='foo@bar.io', password='foo-foo')
-        pool = Pool(name='_Foo')
+        pool = Pool(name='_Foo', user=user)
         pool.save()
 
         library_1 = Library.get_test_library('Library1')

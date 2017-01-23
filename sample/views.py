@@ -76,7 +76,6 @@ def save_sample(request):
 
             if mode == 'add':
                 if files:
-                    # import pdb; pdb.set_trace()
                     smpl.files.add(*files)
 
                 data = {
