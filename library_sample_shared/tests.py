@@ -70,14 +70,14 @@ class BarcodeCounterTest(TestCase):
 class GenericLibrarySampleTest(TestCase):
     def setUp(self):
         organism = Organism(name='mouse')
-        method = ConcentrationMethod(name='fluorography')
+        concentration_method = ConcentrationMethod(name='fluorography')
         read_length = ReadLength(name='1x50')
 
         self.library = GenericLibrarySample(
             name='Library1',
             organism=organism,
             concentration=1.0,
-            concentration_determined_by=method,
+            concentration_method=concentration_method,
             dna_dissolved_in='dna',
             sample_volume=1,
             read_length=read_length,
