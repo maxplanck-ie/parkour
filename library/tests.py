@@ -75,6 +75,12 @@ class GetAllLibrariesAdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotEqual(response.content, b'[]')
 
+    def test_wrong_http_method(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('library.get_all'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b'[]')
+
 
 class GetAllLibrariesUserTest(GetAllLibrariesAdminTest):
     _is_staff = False
