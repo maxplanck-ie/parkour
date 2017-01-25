@@ -14,6 +14,11 @@ except ImportError:
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG_DIR = os.path.join(BASE_DIR, 'logs')
 
+# Make sure the 'logs' directory exists. If not, create it
+try:
+    os.makedirs(LOG_DIR)
+except OSError:
+    pass
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
