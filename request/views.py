@@ -19,7 +19,13 @@ logger = logging.getLogger('db')
 
 @login_required
 def get_all(request):
-    """ Get the list of all requests. """
+    """
+    GET /request/get_all/
+        Get the list of all requests.
+
+    :returns:   list with requests
+    :rtype:     JSON response
+    """
 
     if request.user.is_staff:
         requests = Request.objects.prefetch_related(
@@ -59,7 +65,16 @@ def get_all(request):
 
 @login_required
 def get_libraries_and_samples(request):
-    """ Get the list of all libraries and samples in a given request. """
+    """
+    GET /request/libraries_and_samples/?request_id={request_id}
+        Get the list of all libraries and samples for a given request.
+
+    :param request_id:  request id
+
+    :returns:   libraries and samples in a given request
+    :rtype:     JSON reponse
+    """
+
     request_id = request.GET.get('request_id')
     req = Request.objects.get(id=request_id)
 
@@ -90,7 +105,19 @@ def get_libraries_and_samples(request):
 
 @login_required
 def save_request(request):
-    """ Add new or edit an existing request """
+    """
+    POST /request/save_request/
+        Add new or edit an existing request.
+
+    :param mode:  add/edit - controles the mode: either add or edit a request
+    :param request_id: request id if mode='edit'; otherwise, ''
+    :param libraries: list of library ids
+    :param samples: list of samples ids
+    :param description: request description
+
+    :returns:   {'success': not error, 'error': error}
+    :rtype:     JSON response
+    """
     error = str()
     form = None
 
@@ -138,7 +165,15 @@ def save_request(request):
 
 @login_required
 def delete_request(request):
-    """ Delete request with all its libraries and samples. """
+    """
+    POST /request/delete_request/
+        Delete a request with a given id and all its libraries and samples.
+
+    :param request_id:  request id
+
+    :returns:   {'success': not error, 'error': error}
+    :rtype:     JSON response
+    """
     error = ''
     request_id = request.POST.get('request_id')
 
