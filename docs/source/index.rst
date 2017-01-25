@@ -1,7 +1,16 @@
 Parkour Code Documentation
 ===================================
 
-test test test
+Parkour is ... short description.
+
+Contents
+========
+.. toctree::
+   :maxdepth: 5
+
+   Installation <installation>
+
+   Parkour API Documentation <api/index>
 
 Indices and tables
 ==================
