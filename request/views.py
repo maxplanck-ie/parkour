@@ -168,7 +168,7 @@ def save_request(request):
 def delete_request(request):
     """
     POST /request/delete_request/
-        Delete a request with a given id and all its libraries and samples.
+        Delete request with a given id and all its libraries and samples.
 
     :param request_id:  request id
 
