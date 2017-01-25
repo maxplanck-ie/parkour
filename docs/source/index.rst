@@ -12,6 +12,8 @@ Contents
 
    Parkour API Documentation <api/index>
 
+   Views: <modules/views>
+
 Indices and tables
 ==================
 
