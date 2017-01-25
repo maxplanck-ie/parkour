@@ -52,7 +52,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Parkour'
-copyright =  str(datetime.datetime.now().year) + ', Evgeny Anatskiy'
+copyright = str(datetime.datetime.now().year) + ', Evgeny Anatskiy'
 author = 'Evgeny Anatskiy'
 
 # The version info for the project you're documenting, acts as replacement for
