@@ -1,11 +1,7 @@
-Welcome to Parkour's documentation!
+Parkour Code Documentation
 ===================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-
+test test test
 
 Indices and tables
 ==================
