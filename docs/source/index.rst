@@ -7,7 +7,7 @@ Welcome to Parkour's documentation!
 
 
 
-Indices and tables !!!
+Indices and tables
 ==================
 
 * :ref:`genindex`
