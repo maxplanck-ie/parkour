@@ -14,7 +14,13 @@ logger = logging.getLogger('db')
 
 @login_required
 def get_all(request):
-    """ Get the list of all libraries and samples."""
+    """
+    GET /library/get_all/
+        Get the list of all libraries and samples.
+
+    :returns:   list with libraries and samples
+    :rtype:     JSON response
+    """
     data = []
 
     if request.method == 'GET':
@@ -172,7 +178,13 @@ def get_all(request):
 
 
 def get_library_protocols(request):
-    """ Get the list of all library protocols. """
+    """
+    GET /library/get_library_protocols/
+        Get the list of all library protocols.
+
+    :returns:   list with library protocols
+    :rtype:     JSON response
+    """
     data = [
         {
             'id': protocol.id,
@@ -185,7 +197,15 @@ def get_library_protocols(request):
 
 
 def get_library_type(request):
-    """ Get the list of all library types for a given library protocol. """
+    """
+    GET /library/get_library_type/?library_protocol_id={library_protocol_id}/
+        Get the list of all library types for a given library protocol.
+
+    :param library_protocol_id: library protocol id
+
+    :returns:   list with library types
+    :rtype:     JSON response
+    """
     data = []
     library_protocol_id = request.GET.get('library_protocol_id', '')
 
@@ -270,7 +290,15 @@ def save_library(request):
 
 @login_required
 def delete_library(request):
-    """ Delete a library with a given id. """
+    """
+    POST /library/delete_library/
+        Delete library with a given id.
+
+    :param record_id:  library id
+
+    :returns:   {'success': not error, 'error': error}
+    :rtype:     JSON response
+    """
     error = ''
 
     if request.method == 'POST':
