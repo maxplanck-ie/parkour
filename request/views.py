@@ -20,7 +20,13 @@ logger = logging.getLogger('db')
 
 @login_required
 def get_all(request):
-    """ Get the list of all requests. """
+    """
+    GET /request/get_all/
+        Get the list of all requests.
+
+    :returns:   list with requests
+    :rtype:     JSON response
+    """
 
     if request.user.is_staff:
         requests = Request.objects.prefetch_related(
@@ -60,7 +66,16 @@ def get_all(request):
 
 @login_required
 def get_libraries_and_samples(request):
-    """ Get the list of all libraries and samples in a given request. """
+    """
+    GET /request/libraries_and_samples/?request_id={request_id}
+        Get the list of all libraries and samples for a given request.
+
+    :param request_id:  request id
+
+    :returns:   libraries and samples in a given request
+    :rtype:     JSON reponse
+    """
+
     request_id = request.GET.get('request_id')
     req = Request.objects.get(id=request_id)
 
@@ -91,7 +106,19 @@ def get_libraries_and_samples(request):
 
 @login_required
 def save_request(request):
-    """ Add new or edit an existing request """
+    """
+    POST /request/save_request/
+        Add new or edit an existing request.
+
+    :param mode:  add/edit - controles the mode: either add or edit a request
+    :param request_id: request id if mode='edit'; otherwise, ''
+    :param libraries: list of library ids
+    :param samples: list of samples ids
+    :param description: request description
+
+    :returns:   {'success': not error, 'error': error}
+    :rtype:     JSON response
+    """
     error = str()
     form = None
 
@@ -139,7 +166,15 @@ def save_request(request):
 
 @login_required
 def delete_request(request):
-    """ Delete request with all its libraries and samples. """
+    """
+    POST /request/delete_request/
+        Delete a request with a given id and all its libraries and samples.
+
+    :param request_id:  request id
+
+    :returns:   {'success': not error, 'error': error}
+    :rtype:     JSON response
+    """
     error = ''
     request_id = request.POST.get('request_id')
 
@@ -153,44 +188,40 @@ def delete_request(request):
     return JsonResponse({'success': not error, 'error': error})
 
 
-# Helper functions
-
-def draw_page_header(p, font, font_size):
-    """ """
-    page_width = defaultPageSize[0]
-    page_height = defaultPageSize[1]
-    title = 'Deep Sequencing Request'
-    p.setFont(font, font_size)
-    p.drawCentredString(page_width / 2.0, page_height - 75, title)
-
-
-def draw_string(p, x, _x, y, font, font_bold, font_size, label, string):
-    """ """
-    p.setFont(font_bold, font_size)
-    p.drawString(x, y, label)
-    p.setFont(font, font_size)
-    p.drawString(_x, y, string)
-
-
-def draw_table_row(p, x, y, string):
-    """ """
-    _x, _y = x, y
-    _y -= 30
-    p.drawString(_x, _y, string[0])
-    _x += 25
-    p.drawString(_x, _y, string[1])
-    _x += 300
-    p.drawString(_x, _y, string[2])
-    _x += 70
-    p.drawString(_x, _y, string[3])
-
-
 @csrf_exempt
 @login_required
 def generate_deep_sequencing_request(request):
     """ """
     request_id = request.GET.get('request_id')
     response = HttpResponse(content_type='application/pdf')
+
+    # Helper functions
+    def _draw_page_header(p, font, font_size):
+        """ """
+        page_width = defaultPageSize[0]
+        page_height = defaultPageSize[1]
+        title = 'Deep Sequencing Request'
+        p.setFont(font, font_size)
+        p.drawCentredString(page_width / 2.0, page_height - 75, title)
+
+    def __draw_string(p, x, _x, y, font, font_bold, font_size, label, string):
+        """ """
+        p.setFont(font_bold, font_size)
+        p.drawString(x, y, label)
+        p.setFont(font, font_size)
+        p.drawString(_x, y, string)
+
+    def _draw_table_row(p, x, y, string):
+        """ """
+        _x, _y = x, y
+        _y -= 30
+        p.drawString(_x, _y, string[0])
+        _x += 25
+        p.drawString(_x, _y, string[1])
+        _x += 300
+        p.drawString(_x, _y, string[2])
+        _x += 70
+        p.drawString(_x, _y, string[3])
 
     try:
         req = Request.objects.get(id=request_id)
@@ -221,71 +252,71 @@ def generate_deep_sequencing_request(request):
         # Page 1
         _x = x + 150
         _y = y - 10
-        draw_page_header(p, FONT_BOLD, HEADER_FONT_SIZE)
+        __draw_page_header(p, FONT_BOLD, HEADER_FONT_SIZE)
 
-        draw_string(
+        _draw_string(
             p, x, _x, _y, FONT, FONT_BOLD, DEFAULT_FONT_SIZE,
             'Request Name:', request_name,
         )
         _y -= LINE_SPACING
 
-        draw_string(
+        _draw_string(
             p, x, _x, _y, FONT, FONT_BOLD, DEFAULT_FONT_SIZE,
             'Date:', datetime.now().strftime('%d.%m.%Y'),
         )
         _y -= LINE_SPACING
 
-        draw_string(
+        _draw_string(
             p, x, _x, _y, FONT, FONT_BOLD, DEFAULT_FONT_SIZE,
             'Request Number:', '',
         )
         _y -= LINE_SPACING
 
-        draw_string(
+        _draw_string(
             p, x, _x, _y, FONT, FONT_BOLD, DEFAULT_FONT_SIZE,
             'Provider:', '',
         )
         _y -= LINE_SPACING * 1.5
 
-        draw_string(
+        _draw_string(
             p, x, _x, _y, FONT, FONT_BOLD, DEFAULT_FONT_SIZE,
             'User:', user.name,
         )
         _y -= LINE_SPACING
 
-        draw_string(
+        _draw_string(
             p, x, _x, _y, FONT, FONT_BOLD, DEFAULT_FONT_SIZE,
             'Phone:', user.phone,
         )
         _y -= LINE_SPACING
 
-        draw_string(
+        _draw_string(
             p, x, _x, _y, FONT, FONT_BOLD, DEFAULT_FONT_SIZE,
             'Email:', user.email
         )
         _y -= LINE_SPACING
 
-        draw_string(
+        _draw_string(
             p, x, _x, _y, FONT, FONT_BOLD, DEFAULT_FONT_SIZE,
             'Organization:', user.organization.name,
         )
         _y -= LINE_SPACING
 
-        draw_string(
+        _draw_string(
             p, x, _x, _y, FONT, FONT_BOLD, DEFAULT_FONT_SIZE,
             'Principal Investigator:',
             user.pi.name if user.pi is not None else '',
         )
         _y -= LINE_SPACING
 
-        draw_string(
+        _draw_string(
             p, x, _x, _y, FONT, FONT_BOLD, DEFAULT_FONT_SIZE,
             'Cost Unit(s):',
             ', '.join(cost_unit) if any(cost_unit) else '',
         )
         _y -= LINE_SPACING * 1.5
 
-        draw_string(
+        _draw_string(
             p, x, _x, _y, FONT, FONT_BOLD, DEFAULT_FONT_SIZE,
             'Description:', description,
         )
@@ -305,11 +336,11 @@ def generate_deep_sequencing_request(request):
 
         # Page 2
         _y = y - 10
-        draw_page_header(p, FONT_BOLD, HEADER_FONT_SIZE)
+        _draw_page_header(p, FONT_BOLD, HEADER_FONT_SIZE)
         p.setFont(FONT_BOLD, DEFAULT_FONT_SIZE)
         p.drawString(x, _y, submitted_libraries_samples)
         p.setFont(FONT_BOLD, SMALL_FONT_SIZE)
-        draw_table_row(p, x, y - 10, ('#', 'Name', 'Type', 'Barcode'))
+        _draw_table_row(p, x, y - 10, ('#', 'Name', 'Type', 'Barcode'))
         p.setFont(FONT, SMALL_FONT_SIZE)
 
         libraries = [
@@ -332,7 +363,7 @@ def generate_deep_sequencing_request(request):
 
         # Only ~55 records fit into the page
         for i, record in enumerate(data):
-            draw_table_row(
+            _draw_table_row(
                 p,
                 x,
                 y - (15 + (i + 1) * 10),
