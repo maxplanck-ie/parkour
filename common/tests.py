@@ -3,6 +3,8 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 from .models import Organization, PrincipalInvestigator, CostUnit
 
+import json
+
 User = get_user_model()
 
 
@@ -64,10 +66,28 @@ class IndexViewTest(TestCase):
 
 class NavigationTreeTest(TestCase):
     def setUp(self):
-        User.objects.create_user(email='foo@bar.io', password='foo-foo')
+        admin = User.objects.create_user(
+            email='admin@bar.io', password='foo-foo', is_staff=True,
+        )
 
-    def test_navigation_tree(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
+        user = User.objects.create_user(
+            email='user@bar.io', password='foo-foo', is_staff=False,
+        )
+
+    def test_navigation_tree_admin(self):
+        self.client.login(email='admin@bar.io', password='foo-foo')
         response = self.client.get(reverse('get_navigation_tree'))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['content-type'], 'application/json')
+
+    def test_navigation_tree_user(self):
+        self.client.login(email='user@bar.io', password='foo-foo')
+        response = self.client.get(reverse('get_navigation_tree'))
+        tabs = [
+            t['text']
+            for t in json.loads(str(response.content, 'utf-8'))['children']
+        ]
+        hidden_tabs = ['Approval', 'Library Preparation', 'Pooling']
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(set(hidden_tabs).intersection(tabs)), 0)
