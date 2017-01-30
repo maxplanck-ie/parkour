@@ -73,10 +73,10 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
 
     showContextMenu: function(grid, record, item, index, e) {
         var me = this;
+
         e.stopEvent();
         Ext.create('Ext.menu.Menu', {
-            items: [
-                {
+            items: [{
                     text: 'Edit',
                     iconCls: 'x-fa fa-pencil',
                     handler: function() {
@@ -156,8 +156,8 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
     },
 
     generatePDF: function(btn) {
-        var wnd = btn.up('request_wnd'),
-            url = 'request/generate_pdf/';
+        var wnd = btn.up('window'),
+            url = 'request/generate_deep_sequencing_request/';
 
         Ext.getCmp('generatePDFForm').submit({
             target: '_blank',

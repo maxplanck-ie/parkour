@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from django.template.loader import render_to_string
 from .models import Request
 from .forms import RequestForm
 
@@ -10,9 +11,7 @@ import json
 from datetime import datetime
 import logging
 
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import inch
-from reportlab.rl_config import defaultPageSize
+import pdfkit
 
 User = get_user_model()
 logger = logging.getLogger('db')
@@ -153,164 +152,16 @@ def delete_request(request):
     return JsonResponse({'success': not error, 'error': error})
 
 
-# Helper functions
-
-def draw_page_header(p, font, font_size):
-    """ """
-    page_width = defaultPageSize[0]
-    page_height = defaultPageSize[1]
-    title = 'Deep Sequencing Request'
-    p.setFont(font, font_size)
-    p.drawCentredString(page_width / 2.0, page_height - 75, title)
-
-
-def draw_string(p, x, _x, y, font, font_bold, font_size, label, string):
-    """ """
-    p.setFont(font_bold, font_size)
-    p.drawString(x, y, label)
-    p.setFont(font, font_size)
-    p.drawString(_x, y, string)
-
-
-def draw_table_row(p, x, y, string):
-    """ """
-    _x, _y = x, y
-    _y -= 30
-    p.drawString(_x, _y, string[0])
-    _x += 25
-    p.drawString(_x, _y, string[1])
-    _x += 300
-    p.drawString(_x, _y, string[2])
-    _x += 70
-    p.drawString(_x, _y, string[3])
-
-
 @csrf_exempt
 @login_required
 def generate_deep_sequencing_request(request):
-    """ """
-    request_id = request.GET.get('request_id')
-    response = HttpResponse(content_type='application/pdf')
+    """ Generate Deep Sequencing Request form in PDF. """
+    request_id = request.POST.get('request_id', '')
 
     try:
-        req = Request.objects.get(id=request_id)
-        user = User.objects.get(id=req.researcher_id)
-        cost_unit = sorted([u.name for u in user.cost_unit.all()])
-        filename = req.name + '_Deep_Sequencing_Request.pdf'
-        response['Content-Disposition'] = 'inline; filename="%s"' % filename
-
-        p = canvas.Canvas(response)
-        FONT_BOLD = 'Helvetica-Bold'
-        FONT = 'Helvetica'
-        HEADER_FONT_SIZE = 14
-        DEFAULT_FONT_SIZE = 12
-        SMALL_FONT_SIZE = 10
-        LINE_SPACING = 20
-
-        x = inch
-        y = 10 * inch + 25
-
-        # Strings
-        request_name = req.name
-        description = req.description
-        submitted_libraries_samples = 'List of samples/libraries to be ' + \
-            'submitted for sequencing:'
-        page_1 = 'Page 1 of 2'
-        page_2 = 'Page 2 of 2'
-
-        # Page 1
-        _x = x + 150
-        _y = y - 10
-        draw_page_header(p, FONT_BOLD, HEADER_FONT_SIZE)
-
-        draw_string(
-            p, x, _x, _y, FONT, FONT_BOLD, DEFAULT_FONT_SIZE,
-            'Request Name:', request_name,
-        )
-        _y -= LINE_SPACING
-
-        draw_string(
-            p, x, _x, _y, FONT, FONT_BOLD, DEFAULT_FONT_SIZE,
-            'Date:', datetime.now().strftime('%d.%m.%Y'),
-        )
-        _y -= LINE_SPACING
-
-        draw_string(
-            p, x, _x, _y, FONT, FONT_BOLD, DEFAULT_FONT_SIZE,
-            'Request Number:', '',
-        )
-        _y -= LINE_SPACING
-
-        draw_string(
-            p, x, _x, _y, FONT, FONT_BOLD, DEFAULT_FONT_SIZE,
-            'Provider:', '',
-        )
-        _y -= LINE_SPACING * 1.5
-
-        draw_string(
-            p, x, _x, _y, FONT, FONT_BOLD, DEFAULT_FONT_SIZE,
-            'User:', user.name,
-        )
-        _y -= LINE_SPACING
-
-        draw_string(
-            p, x, _x, _y, FONT, FONT_BOLD, DEFAULT_FONT_SIZE,
-            'Phone:', user.phone,
-        )
-        _y -= LINE_SPACING
-
-        draw_string(
-            p, x, _x, _y, FONT, FONT_BOLD, DEFAULT_FONT_SIZE,
-            'Email:', user.email
-        )
-        _y -= LINE_SPACING
-
-        draw_string(
-            p, x, _x, _y, FONT, FONT_BOLD, DEFAULT_FONT_SIZE,
-            'Organization:', user.organization.name,
-        )
-        _y -= LINE_SPACING
-
-        draw_string(
-            p, x, _x, _y, FONT, FONT_BOLD, DEFAULT_FONT_SIZE,
-            'Principal Investigator:',
-            user.pi.name if user.pi is not None else '',
-        )
-        _y -= LINE_SPACING
-
-        draw_string(
-            p, x, _x, _y, FONT, FONT_BOLD, DEFAULT_FONT_SIZE,
-            'Cost Unit(s):',
-            ', '.join(cost_unit) if any(cost_unit) else '',
-        )
-        _y -= LINE_SPACING * 1.5
-
-        draw_string(
-            p, x, _x, _y, FONT, FONT_BOLD, DEFAULT_FONT_SIZE,
-            'Description:', description,
-        )
-        _y -= LINE_SPACING
-
-        # Signature
-        signature_y = 1.5 * inch
-        p.setFont(FONT, SMALL_FONT_SIZE - 1)
-        p.line(x, signature_y + 10, x + 125, signature_y + 10)
-        p.drawString(x + 30, signature_y, '(Date, Signature)')
-        p.line(x + 150, signature_y + 10, x + 300, signature_y + 10)
-        p.drawString(x + 180, signature_y, '(Principal Investigator)')
-
-        p.setFont(FONT, SMALL_FONT_SIZE)
-        p.drawString(x * 6.5, inch, page_1)   # Page counter
-        p.showPage()
-
-        # Page 2
-        _y = y - 10
-        draw_page_header(p, FONT_BOLD, HEADER_FONT_SIZE)
-        p.setFont(FONT_BOLD, DEFAULT_FONT_SIZE)
-        p.drawString(x, _y, submitted_libraries_samples)
-        p.setFont(FONT_BOLD, SMALL_FONT_SIZE)
-        draw_table_row(p, x, y - 10, ('#', 'Name', 'Type', 'Barcode'))
-        p.setFont(FONT, SMALL_FONT_SIZE)
+        req = Request.objects.get(pk=request_id)
+        user = User.objects.get(id=req.user.id)
+        cost_unit = ','.join(sorted([u.name for u in user.cost_unit.all()]))
 
         libraries = [
             {
@@ -320,6 +171,7 @@ def generate_deep_sequencing_request(request):
             }
             for library in req.libraries.all()
         ]
+
         samples = [
             {
                 'name': sample.name,
@@ -328,24 +180,32 @@ def generate_deep_sequencing_request(request):
             }
             for sample in req.samples.all()
         ]
-        data = sorted(libraries + samples, key=lambda x: x['barcode'])
 
-        # Only ~55 records fit into the page
-        for i, record in enumerate(data):
-            draw_table_row(
-                p,
-                x,
-                y - (15 + (i + 1) * 10),
-                (str(i + 1), record['name'], record['type'], record['barcode']),
-            )
+        records = sorted(libraries + samples, key=lambda x: x['barcode'])
 
-        p.drawString(x * 6.5, inch, page_2)   # Page counter
-        p.showPage()
-        p.save()
+        html = render_to_string('deepseq_request_pdf.html', {
+            'request_name': req.name,
+            'date': datetime.now().strftime('%d.%m.%Y'),
+            'user': user.name,
+            'phone': user.phone if user.phone else '',
+            'email': user.email,
+            'organization': user.organization.name if user.organization else '',
+            'cost_unit': cost_unit,
+            'description': req.description,
+            'records': records,
+        })
 
-    except:
-        # TODO@me: Error handling
-        pass
+        pdf = pdfkit.from_string(html, False, options=settings.PDF_OPTIONS)
+
+        # Generate response
+        filename = req.name + '_Deep_Sequencing_Request.pdf'
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+
+    except (Request.DoesNotExist, ValueError) as e:
+        error = str(e)
+        logger.exception(e)
+        response = JsonResponse({'success': False, 'error': error})
 
     return response
 
