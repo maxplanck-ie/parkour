@@ -66,11 +66,11 @@ class IndexViewTest(TestCase):
 
 class NavigationTreeTest(TestCase):
     def setUp(self):
-        admin = User.objects.create_user(
+        User.objects.create_user(
             email='admin@bar.io', password='foo-foo', is_staff=True,
         )
 
-        user = User.objects.create_user(
+        User.objects.create_user(
             email='user@bar.io', password='foo-foo', is_staff=False,
         )
 
