@@ -11,12 +11,12 @@ services:
 before_script:
   - psql -c 'create database parkour;' -U postgres
   - mkdir /home/travis/build/maxplanck-ie/parkour/logs
-  
-before_install:
-  - sudo apt-get install -y wkhtmltopdf xvfb
-  - sudo echo -e '#!/bin/bash\nxvfb-run -a --server-args="-screen 0, 1024x768x24" /usr/bin/wkhtmltopdf -q $*' > /usr/bin/wkhtmltopdf.sh
-  - sudo chmod a+x /usr/ , , ;,bin/wkhtmltopdf.sh
-  - sudo ln -s /usr/bin/wkhtmltopdf.sh /usr/local/bin/wkhtmltopdf
+  - sudo apt-get install -y openssl build-essential xorg libssl-dev
+  - wget http://download.gna.org/wkhtmltopdf/0.12/0.12.3/wkhtmltox-0.12.3_linux-generic-amd64.tar.xz
+  - tar -xJf wkhtmltox-0.12.3_linux-generic-amd64.tar.xz
+  - cd wkhtmltox
+  - sudo chown root:root bin/wkhtmltopdf
+  - sudo cp -r * /usr/
 
 install: pip install -r requirements.txt
 
