@@ -165,13 +165,61 @@ class DeleteRequestTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
+class GenerateDeepSeqRequestTest(TestCase):
+    def setUp(self):
+        user = User.objects.create_user(email='foo@bar.io', password='foo-foo')
+        user.save()
+
+        library = Library.get_test_library('Library')
+        sample = Sample.get_test_sample('Sample')
+        library.save()
+        sample.save()
+
+        self.request = Request(user=user)
+        self.request.save()
+
+        self.request.libraries.add(library)
+        self.request.samples.add(sample)
+
+    def test_generate(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(
+            reverse('generate_deep_sequencing_request'), {
+                'request_id': self.request.pk,
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.get('Content-Disposition'),
+            'attachment; filename="%s_Deep_Sequencing_Request.pdf"' %
+            self.request.name,
+        )
+
+    def test_missing_or_empty_request_id(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('generate_deep_sequencing_request'))
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            str(response.content, encoding='utf-8'),
+            {'success': False},
+        )
+
+
 class UploadDeepSeqRequestTest(TestCase):
     def setUp(self):
         user = User.objects.create_user(email='foo@bar.io', password='foo-foo')
         user.save()
 
+        library = Library.get_test_library('Library')
+        sample = Sample.get_test_sample('Sample')
+        library.save()
+        sample.save()
+
         self.request = Request(user=user)
         self.request.save()
+
+        self.request.libraries.add(library)
+        self.request.samples.add(sample)
 
     def test_upload(self):
         self.client.login(email='foo@bar.io', password='foo-foo')

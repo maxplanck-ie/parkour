@@ -203,9 +203,8 @@ def generate_deep_sequencing_request(request):
         response['Content-Disposition'] = 'attachment; filename="%s"' % filename
 
     except (Request.DoesNotExist, ValueError) as e:
-        error = str(e)
         logger.exception(e)
-        response = JsonResponse({'success': False, 'error': error})
+        response = JsonResponse({'success': False})
 
     return response
 
