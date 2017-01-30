@@ -3,6 +3,7 @@ os: linux
 python:
   - 3.5
   # - 3.6
+sudo: true
   
 services:
   - postgresql
@@ -10,9 +11,13 @@ services:
 before_script:
   - psql -c 'create database parkour;' -U postgres
   - mkdir /home/travis/build/maxplanck-ie/parkour/logs
+  
+before_install:
+  - sudo apt-get install -y wkhtmltopdf xvfb
+  - sudo echo -e '#!/bin/bash\nxvfb-run -a --server-args="-screen 0, 1024x768x24" /usr/bin/wkhtmltopdf -q $*' > /usr/bin/wkhtmltopdf.sh
+  - sudo chmod a+x /usr/ , , ;,bin/wkhtmltopdf.sh
+  - sudo ln -s /usr/bin/wkhtmltopdf.sh /usr/local/bin/wkhtmltopdf
 
-install:
-  - apt-get install -y wkhtmltopdf
-  - pip install -r requirements.txt
+install: pip install -r requirements.txt
 
 script: python manage.py test
