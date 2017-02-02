@@ -66,7 +66,7 @@ def get_libraries_and_samples(request):
     libraries = [
         {
             'name': library.name,
-            'recordType': 'L',
+            'recordType': library.get_record_type(),
             'libraryId': library.id,
             'barcode': library.barcode,
         }
@@ -76,7 +76,7 @@ def get_libraries_and_samples(request):
     samples = [
         {
             'name': sample.name,
-            'recordType': 'S',
+            'recordType': sample.get_record_type(),
             'sampleId': sample.id,
             'barcode': sample.barcode,
         }
