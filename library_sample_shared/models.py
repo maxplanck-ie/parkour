@@ -215,5 +215,8 @@ class GenericLibrarySample(models.Model):
     class Meta:
         abstract = True
 
+    def get_record_type(self):
+        return 'L' if 'L' in self.barcode else 'S'
+
     def __str__(self):
         return self.name

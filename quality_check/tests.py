@@ -1,3 +1,5 @@
+import json
+
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
@@ -58,3 +60,121 @@ class GetAllLibraries(TestCase):
         })
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b'[]')
+
+
+class UpdateLibrary(TestCase):
+    def setUp(self):
+        User.objects.create_user(email='foo@bar.io', password='foo-foo')
+
+        self.library = Library.get_test_library('Library_update')
+        self.library.status = 1
+        self.library.save()
+
+        self.sample1 = Sample.get_test_sample('Sample1_update')
+        self.sample1.status = 1
+        self.sample1.save()
+
+        self.sample2 = Sample.get_test_sample('Sample2_update')
+        self.sample2.status = 1
+        self.sample2.save()
+
+    def test_update_library_ok(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('update'), {
+            'record_id': self.library.pk,
+            'record_type': 'L',
+            'concentration_facility': '1.5',
+            'qc_result': '1',
+        })
+
+        self.assertEqual(response.status_code, 200)
+        updated_library = Library.objects.get(pk=self.library.pk)
+        self.assertEqual(updated_library.concentration_facility, 1.5)
+        self.assertEqual(updated_library.status, 2)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': True, 'error': '',
+        })
+
+    def test_update_sample_ok(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('update'), {
+            'record_id': self.sample1.pk,
+            'record_type': 'S',
+            'concentration_facility': '2.0',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            Sample.objects.get(pk=self.sample1.pk).concentration_facility,
+            2.0,
+        )
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': True, 'error': '',
+        })
+
+    def test_update_record_fail(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('update'), {
+            'record_id': self.sample2.pk,
+            'record_type': 'S',
+            'concentration_facility': 'string',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            json.loads(str(response.content, 'utf-8'))['success'],
+            False,
+        )
+
+    def test_update_qc_fail(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('update'), {
+            'record_id': self.sample2.pk,
+            'record_type': 'S',
+            'qc_result': '-1',
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Sample.objects.get(pk=self.sample2.pk).status, -1,)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': True, 'error': '',
+        })
+
+    def test_record_type_missing(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('update'))
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Record type is not L/S or missing.',
+        })
+
+    def test_non_existing_record_id(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('update'), {
+            'record_type': 'L',
+            'record_id': '-1',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Library matching query does not exist.',
+        })
+
+    def test_missing_or_empty_record_id(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('update'), {
+            'record_type': 'L',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'invalid literal for int() with base 10: \'\'',
+        })
+
+    def test_wrong_http_method(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.get(reverse('update'))
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Wrong HTTP method.',
+        })
