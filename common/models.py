@@ -1,5 +1,5 @@
 from django.db import models
-from authtools.models import AbstractNamedUser
+from authtools.models import AbstractEmailUser
 
 
 class Organization(models.Model):
@@ -32,7 +32,9 @@ class CostUnit(models.Model):
         )
 
 
-class User(AbstractNamedUser):
+class User(AbstractEmailUser):
+    first_name = models.CharField('First name', max_length=50)
+    last_name = models.CharField('Last name', max_length=50)
     phone = models.CharField('Phone', max_length=100, null=True, blank=True)
 
     organization = models.ForeignKey(
@@ -59,3 +61,6 @@ class User(AbstractNamedUser):
 
     class Meta:
         db_table = 'auth_user'
+
+    def get_full_name(self):
+        return '%s %s' % (self.first_name, self.last_name)

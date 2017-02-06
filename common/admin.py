@@ -62,7 +62,7 @@ class UserAdmin(NamedUserAdmin):
                 " The user will be emailed a link allowing him/her to login to"
                 " the site and set his/her password."
             ),
-            'fields': ('name', 'email',),
+            'fields': ('first_name', 'last_name', 'email',),
         }),
         ('Password', {
             'description': "Optionally, you may set the user's password here.",
@@ -72,7 +72,8 @@ class UserAdmin(NamedUserAdmin):
     )
 
     list_display = (
-        'name',
+        'first_name',
+        'last_name',
         'email',
         'phone',
         'organization',
@@ -81,7 +82,8 @@ class UserAdmin(NamedUserAdmin):
     )
 
     search_fields = (
-        'name',
+        'first_name',
+        'last_name',
         'email',
         'phone',
         'organization__name',
@@ -89,12 +91,12 @@ class UserAdmin(NamedUserAdmin):
     )
 
     list_filter = ('is_staff', 'organization',)
-    list_display_links = ('name', 'email',)
+    list_display_links = ('first_name', 'last_name', 'email',)
     filter_horizontal = ('cost_unit', 'groups', 'user_permissions',)
 
     fieldsets = (
         (None, {
-            'fields': ('name', 'email', 'password',),
+            'fields': ('first_name', 'last_name', 'email', 'password',),
         }),
         ('Personal info', {
             'fields': ('phone', 'organization', 'pi', 'cost_unit',),

@@ -138,7 +138,7 @@ def save_pool(request):
             for sample in json.loads(request.POST.get('samples'))
         ]
 
-        name = '_' + request.user.name.replace(' ', '_')
+        name = '_' + request.user.last_name
         if request.user.pi:
             name = '_' + request.user.pi.name + name
 

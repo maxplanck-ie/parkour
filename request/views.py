@@ -37,7 +37,7 @@ def get_all(request):
             'dateCreated': req.date_created.strftime('%d.%m.%Y'),
             'description': req.description,
             'researcherId': req.user.id,
-            'researcher': req.user.name,
+            'researcher': req.user.get_full_name(),
             'deepSeqRequestName':
                 req.deep_seq_request.name.split('/')[-1]
                 if req.deep_seq_request else '',
@@ -184,7 +184,7 @@ def generate_deep_sequencing_request(request):
         html = render_to_string('deepseq_request_pdf.html', {
             'request_name': req.name,
             'date': datetime.now().strftime('%d.%m.%Y'),
-            'user': user.name,
+            'user': user.get_full_name(),
             'phone': user.phone if user.phone else '',
             'email': user.email,
             'organization': user.organization.name if user.organization else '',

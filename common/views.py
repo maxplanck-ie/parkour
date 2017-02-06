@@ -9,7 +9,7 @@ def index(request):
     user = request.user
     return render(request, 'index.html', {
         'DEBUG': settings.DEBUG,
-        'USERNAME': '%s' % user.name,
+        'USERNAME': user.get_full_name(),
         'USER_IS_STAFF': user.is_staff
     })
 
