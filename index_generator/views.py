@@ -138,12 +138,7 @@ def save_pool(request):
             for sample in json.loads(request.POST.get('samples'))
         ]
 
-        name = '_' + request.user.last_name
-        if request.user.pi:
-            name = '_' + request.user.pi.name + name
-
-        pool = Pool(name=name)
-        pool.user = request.user
+        pool = Pool(user=request.user)
         pool.save()
         pool.libraries.add(*library_ids)
         pool.samples.add(*samples)

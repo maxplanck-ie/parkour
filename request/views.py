@@ -109,7 +109,7 @@ def save_request(request):
         if form.is_valid():
             if mode == 'add':
                 req = form.save(commit=False)
-                req.user = User.objects.get(pk=request.user.id)
+                req.user = request.user
                 req.save()
             else:
                 req = form.save()
