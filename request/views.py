@@ -30,11 +30,9 @@ def get_all(request):
             user_id=request.user.id
         ).prefetch_related('user', 'libraries', 'samples')
 
-    # TODO@me: define Request status
     data = [
         {
             'requestId': req.id,
-            'status': 0,
             'name': req.name,
             'dateCreated': req.date_created.strftime('%d.%m.%Y'),
             'description': req.description,

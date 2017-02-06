@@ -39,18 +39,6 @@ Ext.define('MainHub.view.startpage.Requests', {
         store: 'requestsStore',
         columns: {
             items: [{
-                    text: 'Status',
-                    dataIndex: 'status',
-                    width: 60,
-                    renderer: function(value, meta) {
-                        var statusClass = 'request-status pending-submission';
-                        if (value === 0) {
-                            meta.tdAttr = 'data-qtip="Pending submission"';
-                        }
-                        return '<div class="' + statusClass + '"></div>';
-                    }
-                },
-                {
                     text: 'Name',
                     dataIndex: 'name',
                     flex: 1
