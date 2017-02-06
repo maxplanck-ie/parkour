@@ -18,8 +18,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
     initComponent: function() {
         var me = this;
 
-        me.items = [
-            {
+        me.items = [{
                 xtype: 'treepanel',
                 id: 'poolingTreePanel',
                 itemId: 'poolingTreePanel',
@@ -28,40 +27,72 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                 flex: 1,
                 header: {
                     title: 'Libraries for Pooling',
-                    items: [
-                        {
-                            xtype: 'combobox',
-                            id: 'poolSize',
-                            itemId: 'poolSize',
-                            queryMode: 'local',
-                            displayField: 'name',
-                            valueField: 'value',
-                            forceSelection: true,
-                            cls: 'panel-header-combobox',
-                            fieldLabel: 'Pool Size',
-                            labelWidth: 65,
-                            width: 170,
+                    items: [{
+                        xtype: 'combobox',
+                        id: 'poolSize',
+                        itemId: 'poolSize',
+                        queryMode: 'local',
+                        displayField: 'name',
+                        valueField: 'value',
+                        forceSelection: true,
+                        cls: 'panel-header-combobox',
+                        fieldLabel: 'Pool Size',
+                        labelWidth: 65,
+                        width: 170,
 
-                            store: Ext.create('Ext.data.Store', {
-                                fields: [
-                                    { name: 'value', type: 'int'    },
-                                    { name: 'name',  type: 'string' }
-                                ],
-                                data: [
-                                    { value: 25,   name: '25 M'   },
-                                    { value: 130,  name: '130 M'  },
-                                    { value: 200,  name: '200 M'  },
-                                    { value: 400,  name: '400 M'  },
-                                    { value: 600,  name: '600 M'  },
-                                    { value: 800,  name: '800 M'  },
-                                    { value: 1000, name: '1000 M' },
-                                    { value: 1200, name: '1200 M' },
-                                    { value: 1400, name: '1400 M' },
-                                    { value: 1600, name: '1600 M' }
-                                ]
-                            })
-                        }
-                    ]
+                        store: Ext.create('Ext.data.Store', {
+                            fields: [{
+                                    name: 'value',
+                                    type: 'int'
+                                },
+                                {
+                                    name: 'name',
+                                    type: 'string'
+                                }
+                            ],
+                            data: [{
+                                    value: 25,
+                                    name: '25 M'
+                                },
+                                {
+                                    value: 130,
+                                    name: '130 M'
+                                },
+                                {
+                                    value: 200,
+                                    name: '200 M'
+                                },
+                                {
+                                    value: 400,
+                                    name: '400 M'
+                                },
+                                {
+                                    value: 600,
+                                    name: '600 M'
+                                },
+                                {
+                                    value: 800,
+                                    name: '800 M'
+                                },
+                                {
+                                    value: 1000,
+                                    name: '1000 M'
+                                },
+                                {
+                                    value: 1200,
+                                    name: '1200 M'
+                                },
+                                {
+                                    value: 1400,
+                                    name: '1400 M'
+                                },
+                                {
+                                    value: 1600,
+                                    name: '1600 M'
+                                }
+                            ]
+                        })
+                    }]
                 },
                 viewConfig: {
                     markDirty: false
@@ -72,8 +103,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                 }],
                 store: 'PoolingTree',
                 rootVisible: false,
-                columns: [
-                    {
+                columns: [{
                         xtype: 'treecolumn',
                         text: 'Library Name',
                         dataIndex: 'text',
@@ -151,8 +181,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                     markDirty: false
                 },
                 problematicCycles: [],
-                columns: [
-                    {
+                columns: [{
                         text: 'Name',
                         dataIndex: 'name',
                         width: 200
@@ -327,8 +356,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                     }
                 ],
                 store: [],
-                bbar: [
-                    {
+                bbar: [{
                         xtype: 'button',
                         id: 'generateIndices',
                         itemId: 'generateIndices',
@@ -361,7 +389,10 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
     },
 
     calculateColorDiversity: function(records, values) {
-        var diversity = {green: 0, red: 0};
+        var diversity = {
+            green: 0,
+            red: 0
+        };
 
         for (var i = 0; i < values.length; i++) {
             var nuc = values[i];

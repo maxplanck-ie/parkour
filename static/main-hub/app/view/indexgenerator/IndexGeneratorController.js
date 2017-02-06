@@ -7,39 +7,39 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
     config: {
         control: {
             '#': {
-                boxready: 'onIndexGeneratorBoxready'
+                boxready: 'boxready'
             },
             '#poolingTreePanel': {
-                edit: 'onPoolingTreePanelEdit',
-                checkchange: 'onPoolingTreePanelCheckchange'
+                edit: 'editRecord',
+                checkchange: 'checkRecord'
             },
             '#poolSize': {
-                boxready: 'onMaxPoolSizeBoxready'
+                boxready: 'poolSizeBoxready'
             },
             '#poolGrid': {
-                edit: 'onSequenceDepthEdit'
+                edit: 'editSequenceDepth'
             },
             '#savePool': {
-                click: 'savePool'
+                click: 'save'
             },
             '#generateIndices': {
-                click: 'generateIndicesBtnClick'
+                click: 'generateIndices'
             }
         }
     },
 
-    onIndexGeneratorBoxready: function() {
+    boxready: function() {
         // Clear Pool after reloading PoolingTree
         Ext.getStore('PoolingTree').on('load', function() {
             Ext.getCmp('poolGrid').getStore().removeAll();
         });
     },
 
-    onMaxPoolSizeBoxready: function(cb) {
+    poolSizeBoxready: function(cb) {
         cb.select(25, true);
     },
 
-    onPoolingTreePanelEdit: function(editor, context) {
+    editRecord: function(editor, context) {
         var record = context.record,
             originalValue = context.originalValue,
             values = context.newValues;
@@ -94,7 +94,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
         if (Ext.getStore('incomingLibrariesStore').isLoaded()) Ext.getStore('incomingLibrariesStore').reload();
     },
 
-    onPoolingTreePanelCheckchange: function(node, checked) {
+    checkRecord: function(node, checked) {
         var grid = Ext.getCmp('poolGrid'),
             store = grid.getStore();
 
@@ -137,7 +137,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
                     sampleId: node.get('sampleId'),
                     recordType: node.get('recordType'),
                     sequencingDepth: node.get('sequencingDepth'),
-                    sequencingRunCondition: node.get('sequencingRunCondition'),
+                    readLength: node.get('readLength'),
                     indexType: node.get('indexType'),
                     indexI7: indexI7Sequence,
                     indexI5: indexI5Sequence,
@@ -214,7 +214,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
         if (store.getCount()) {
             // Same Read Length
             var record = store.getAt(0);
-            if (record.get('sequencingRunCondition') != node.get('sequencingRunCondition')) {
+            if (record.get('readLength') != node.get('readLength')) {
                 Ext.ux.ToastMessage('Read lengths must be the same.', 'warning');
                 return false;
             }
@@ -253,7 +253,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
         return true;
     },
 
-    onSequenceDepthEdit: function(editor, context) {
+    editSequenceDepth: function(editor, context) {
         var grid = this.getView().down('grid'),
             record = context.record,
             changes = record.getChanges(),
@@ -264,13 +264,15 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
         // TODO@me: update grid's title and summary
     },
 
-    savePool: function(btn) {
+    save: function(btn) {
         var store = Ext.getCmp('poolGrid').getStore(),
             url = 'index_generator/save_pool/';
 
         if (this.isPoolValid(store)) {
             // Get all libraries' and samples' ids
-            var libraries = [], samples = [];
+            var libraries = [],
+                samples = [];
+
             store.each(function(record) {
                 if (record.get('recordType') == 'L') {
                     libraries.push(record.get('libraryId'));
@@ -295,7 +297,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
                     samples: Ext.JSON.encode(samples)
                 },
 
-                success: function (response) {
+                success: function(response) {
                     var obj = Ext.JSON.decode(response.responseText);
 
                     if (obj.success) {
@@ -315,7 +317,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
                     }
                 },
 
-                failure: function (response) {
+                failure: function(response) {
                     Ext.getCmp('poolingContainer').setLoading(false);
                     Ext.ux.ToastMessage(response.statusText, 'error');
                     console.error('[ERROR]: ' + url);
@@ -339,7 +341,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
         return result;
     },
 
-    generateIndicesBtnClick: function(btn) {
+    generateIndices: function(btn) {
         var poolingTreePanel = Ext.getCmp('poolingTreePanel'),
             grid = Ext.getCmp('poolGrid'),
             store = grid.getStore(),
