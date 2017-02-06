@@ -138,7 +138,7 @@ def save_request(request):
 def delete_request(request):
     """ Delete request with all its libraries and samples. """
     error = ''
-    request_id = request.POST.get('request_id')
+    request_id = request.POST.get('request_id', '')
 
     try:
         req = Request.objects.get(pk=request_id)

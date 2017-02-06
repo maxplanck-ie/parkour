@@ -6,7 +6,9 @@ from .models import Request
 @receiver(post_save, sender=Request)
 def set_request_name(sender, instance, created, **kwargs):
     if created:
-        instance.name = 'Request' + str(instance.id)
+        instance.name = '%i_%s' % (instance.id, instance.user.last_name)
+        if instance.user.pi:
+            instance.name += '_' + instance.user.pi.name
         instance.save()
 
 

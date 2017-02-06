@@ -38,7 +38,6 @@ class GetAllAdminTest(TestCase):
     def test_get_all(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.get(reverse('request.get_all'))
-        self.assertNotEqual(response.content, b'[]')
         self.assertEqual(response.status_code, 200)
 
 
@@ -53,7 +52,6 @@ class GetAllUserTest(TestCase):
     def test_get_all(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.get(reverse('request.get_all'))
-        self.assertNotEqual(response.content, b'[]')
         self.assertEqual(response.status_code, 200)
 
 
@@ -78,16 +76,23 @@ class GetLibrariesSamplesTest(TestCase):
         response = self.client.get(reverse('get_libraries_and_samples'), {
             'request_id': self.request.pk
         })
-        # self.assertNotEqual(response.content, b'[]')
         self.assertEqual(response.status_code, 200)
+        content = json.loads(str(response.content, 'utf-8'))
+        self.assertEqual(content['success'], True)
+        self.assertNotEqual(len(content['data']), 0)
 
 
 class UpdateRequestTest(TestCase):
     def setUp(self):
-        user = User.objects.create_user(email='foo@bar.io', password='foo-foo')
-        user.save()
+        self.user = User.objects.create_user(
+            first_name='Foo',
+            last_name='Bar',
+            email='foo@bar.io',
+            password='foo-foo',
+        )
+        self.user.save()
 
-        self.request = Request(user=user)
+        self.request = Request(user=self.user)
         self.request.save()
 
         self.library = Library.get_test_library('Library')
@@ -106,6 +111,13 @@ class UpdateRequestTest(TestCase):
         })
         self.assertEqual(response.status_code, 200)
 
+        # Check Request name
+        request = Library.objects.get(pk=self.library.pk).request.get()
+        self.assertEqual(
+            request.name,
+            '%i_%s' % (request.pk, self.user.last_name),
+        )
+
     def test_update_request(self):
         """ Successfull 'update' test when everything is present. """
         self.client.login(email='foo@bar.io', password='foo-foo')
@@ -117,6 +129,10 @@ class UpdateRequestTest(TestCase):
             'description': 'new_description'
         })
         self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': True,
+            'error': '',
+        })
 
     def test_missing_libraries_and_samples(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
@@ -125,6 +141,10 @@ class UpdateRequestTest(TestCase):
             'description': 'description'
         })
         self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Please provide Libraries and/or samples.',
+        })
 
     def test_exception(self):
         """ Empty or non-existing request_id. """
@@ -134,11 +154,19 @@ class UpdateRequestTest(TestCase):
             'request_id': ''
         })
         self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': "invalid literal for int() with base 10: ''",
+        })
 
     def test_invalid_form(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.post(reverse('save_request'), {'mode': 'add'})
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            json.loads(str(response.content, 'utf-8'))['success'],
+            False,
+        )
 
 
 class DeleteRequestTest(TestCase):
@@ -146,8 +174,12 @@ class DeleteRequestTest(TestCase):
         user = User.objects.create_user(email='foo@bar.io', password='foo-foo')
         user.save()
 
+        self.library = Library.get_test_library('Library_delete')
+        self.library.save()
+
         self.request = Request(user=user)
         self.request.save()
+        self.request.libraries.add(self.library)
 
     def test_delete_request(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
@@ -156,13 +188,21 @@ class DeleteRequestTest(TestCase):
         })
         self.assertEqual(response.status_code, 200)
 
+        # Check if the request and its library have been deleted
+        self.assertEqual(Request.objects.filter(pk=self.request.pk).count(), 0)
+        self.assertEqual(Library.objects.filter(pk=self.library.pk).count(), 0)
+
     def test_exception(self):
         """ Empty or non-existing request_id. """
         self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.post(reverse('delete_request'), {
-            'request_id': ''
+            'request_id': '-1'
         })
         self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Request matching query does not exist.',
+        })
 
 
 class GenerateDeepSeqRequestTest(TestCase):
