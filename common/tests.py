@@ -78,7 +78,9 @@ class NavigationTreeTest(TestCase):
         self.client.login(email='admin@bar.io', password='foo-foo')
         response = self.client.get(reverse('get_navigation_tree'))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response['content-type'], 'application/json')
+        self.assertGreater(
+            len(json.loads(str(response.content, 'utf-8'))['children']), 2,
+        )
 
     def test_navigation_tree_user(self):
         self.client.login(email='user@bar.io', password='foo-foo')
@@ -87,7 +89,6 @@ class NavigationTreeTest(TestCase):
             t['text']
             for t in json.loads(str(response.content, 'utf-8'))['children']
         ]
-        hidden_tabs = ['Approval', 'Library Preparation', 'Pooling']
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(set(hidden_tabs).intersection(tabs)), 0)
+        self.assertEqual(tabs, ['Start Page', 'Submission'])
