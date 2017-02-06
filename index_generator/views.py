@@ -190,13 +190,7 @@ def save_pool(request):
         error = str(e)
         logger.exception(error)
 
-    return HttpResponse(
-        json.dumps({
-            'success': not error,
-            'error': error
-        }),
-        content_type='application/json',
-    )
+    return JsonResponse({'success': not error, 'error': error})
 
 
 @login_required
@@ -220,7 +214,6 @@ def update_read_length(request):
 @login_required
 def update_index_type(request):
     """ Update Index Type for a given sample. """
-
     sample_id = request.POST.get('sample_id')
     index_type_id = request.POST.get('index_type_id')
 
@@ -281,8 +274,4 @@ def generate_indices(request):
         error = str(e)
         logger.exception(error)
 
-    return JsonResponse({
-        'success': not error,
-        'error': error,
-        'data': data
-    })
+    return JsonResponse({'success': not error, 'error': error, 'data': data})

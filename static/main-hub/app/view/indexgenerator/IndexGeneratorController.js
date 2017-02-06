@@ -306,10 +306,10 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
                         Ext.ux.ToastMessage('Pool has been saved!');
 
                         // Reload stores
-                        if (Ext.getStore('PoolingTree').isLoaded()) Ext.getStore('PoolingTree').reload();
-                        if (Ext.getStore('libraryPreparationStore')) Ext.getStore('libraryPreparationStore').reload();
-                        if (Ext.getStore('poolingStore').isLoaded()) Ext.getStore('poolingStore').reload();
-
+                        Ext.getStore('PoolingTree').reload();
+                        // if (Ext.getStore('libraryPreparationStore')) Ext.getStore('libraryPreparationStore').reload();
+                        // if (Ext.getStore('poolingStore').isLoaded()) Ext.getStore('poolingStore').reload();
+                        MainHub.Utilities.reloadAllStores();
                     } else {
                         Ext.getCmp('poolingContainer').setLoading(false);
                         Ext.ux.ToastMessage(obj.error, 'error');

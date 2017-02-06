@@ -36,22 +36,22 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
                     handler: function() {
                         me.editRecord(record);
                     }
-                },
-                {
-                    text: 'Delete',
-                    iconCls: 'x-fa fa-trash',
-                    handler: function() {
-                        Ext.Msg.show({
-                            title: 'Delete record',
-                            message: 'Are you sure you want to delete this record?',
-                            buttons: Ext.Msg.YESNO,
-                            icon: Ext.Msg.QUESTION,
-                            fn: function(btn) {
-                                if (btn == 'yes') me.deleteRecord(record);
-                            }
-                        });
-                    }
                 }
+                // ,{
+                //     text: 'Delete',
+                //     iconCls: 'x-fa fa-trash',
+                //     handler: function() {
+                //         Ext.Msg.show({
+                //             title: 'Delete record',
+                //             message: 'Are you sure you want to delete this record?',
+                //             buttons: Ext.Msg.YESNO,
+                //             icon: Ext.Msg.QUESTION,
+                //             fn: function(btn) {
+                //                 if (btn == 'yes') me.deleteRecord(record);
+                //             }
+                //         });
+                //     }
+                // }
             ]
         }).showAt(e.getXY());
     },
@@ -64,37 +64,37 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
         }).show();
     },
 
-    deleteRecord: function(record) {
-        var url = record.data.recordType == 'L' ? 'delete_library/' : 'delete_sample/';
-
-        Ext.Ajax.request({
-            url: url,
-            method: 'POST',
-            scope: this,
-            params: {
-                'record_id': record.data.recordType == 'L' ? record.data.libraryId : record.data.sampleId
-            },
-
-            success: function(response) {
-                var obj = Ext.JSON.decode(response.responseText);
-                if (obj.success) {
-                    var grid = Ext.getCmp('librariesTable');
-                    grid.fireEvent('refresh', grid);
-                    Ext.ux.ToastMessage('Record has been deleted!');
-                } else {
-                    Ext.ux.ToastMessage(obj.error, 'error');
-                    console.error('[ERROR]: ' + url);
-                    console.error(response);
-                }
-            },
-
-            failure: function(response) {
-                Ext.ux.ToastMessage(response.statusText, 'error');
-                console.error('[ERROR]: ' + url);
-                console.error(response);
-            }
-        });
-    },
+    // deleteRecord: function(record) {
+    //     var url = record.data.recordType == 'L' ? 'delete_library/' : 'delete_sample/';
+    //
+    //     Ext.Ajax.request({
+    //         url: url,
+    //         method: 'POST',
+    //         scope: this,
+    //         params: {
+    //             'record_id': record.data.recordType == 'L' ? record.data.libraryId : record.data.sampleId
+    //         },
+    //
+    //         success: function(response) {
+    //             var obj = Ext.JSON.decode(response.responseText);
+    //             if (obj.success) {
+    //                 var grid = Ext.getCmp('librariesTable');
+    //                 grid.fireEvent('refresh', grid);
+    //                 Ext.ux.ToastMessage('Record has been deleted!');
+    //             } else {
+    //                 Ext.ux.ToastMessage(obj.error, 'error');
+    //                 console.error('[ERROR]: ' + url);
+    //                 console.error(response);
+    //             }
+    //         },
+    //
+    //         failure: function(response) {
+    //             Ext.ux.ToastMessage(response.statusText, 'error');
+    //             console.error('[ERROR]: ' + url);
+    //             console.error(response);
+    //         }
+    //     });
+    // },
 
     changeFilter: function(el, value) {
         var grid = Ext.getCmp('librariesTable'),

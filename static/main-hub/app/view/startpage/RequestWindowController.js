@@ -189,6 +189,8 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
                         Ext.getCmp('uploadedDeepSeqRequest').setHtml(
                             'Uploaded File: <a href="' + obj.path + '" target="_blank">' + obj.name + '</a>'
                         );
+                        if (Ext.getStore('librariesStore').isLoaded()) Ext.getStore('librariesStore').reload();
+                        if (Ext.getStore('incomingLibrariesStore').isLoaded()) Ext.getStore('incomingLibrariesStore').reload();
                     } else {
                         Ext.ux.ToastMessage(obj.error, 'error');
                         console.error('[ERROR]: ' + url);
@@ -243,8 +245,9 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
                 success: function(response) {
                     var obj = Ext.JSON.decode(response.responseText);
                     if (obj.success) {
-                        var grid = Ext.getCmp('requestsTable');
-                        grid.fireEvent('refresh', grid);
+                        // var grid = Ext.getCmp('requestsTable');
+                        // grid.fireEvent('refresh', grid);
+                        MainHub.Utilities.reloadAllStores();
                         Ext.ux.ToastMessage('Request has been saved!');
                     } else {
                         Ext.ux.ToastMessage(obj.error, 'error');

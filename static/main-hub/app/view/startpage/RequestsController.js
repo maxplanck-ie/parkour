@@ -102,8 +102,7 @@ Ext.define('MainHub.view.startpage.RequestsController', {
             success: function(response) {
                 var obj = Ext.JSON.decode(response.responseText);
                 if (obj.success) {
-                    var grid = Ext.getCmp('requestsTable');
-                    grid.fireEvent('refresh', grid);
+                    MainHub.Utilities.reloadAllStores();
                     Ext.ux.ToastMessage('Record has been deleted!');
                 } else {
                     Ext.ux.ToastMessage(obj.error, 'error');

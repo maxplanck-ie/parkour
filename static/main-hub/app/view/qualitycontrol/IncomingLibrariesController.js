@@ -73,6 +73,8 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
                 var obj = Ext.JSON.decode(response.responseText);
                 if (obj.success) {
                     grid.fireEvent('refresh', grid);
+                    if (Ext.getStore('librariesStore').isLoaded()) Ext.getStore('librariesStore').reload();
+                    if (Ext.getStore('PoolingTree').isLoaded()) Ext.getStore('PoolingTree').reload();
                 } else {
                     Ext.ux.ToastMessage(obj.error, 'error');
                     console.error('[ERROR]: ' + url);

@@ -485,13 +485,14 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                             grid.getStore().add(obj.data);
                             Ext.ux.ToastMessage('Record has been added!');
                         } else {
-                            Ext.getStore('requestsStore').reload();
-                            Ext.getStore('librariesStore').reload();
                             Ext.getStore('librariesInRequestStore').reload({
                                 params: {
                                     request_id: wnd.record.get('requestId')
                                 }
                             });
+                            // Ext.getStore('requestsStore').reload();
+                            // Ext.getStore('librariesStore').reload();
+                            MainHub.Utilities.reloadAllStores();
                             Ext.ux.ToastMessage('Record has been updated!');
                         }
                         Ext.getStore('PoolingTree').reload();

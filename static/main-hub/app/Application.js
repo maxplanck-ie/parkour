@@ -64,3 +64,25 @@ Ext.define('MainHub.Application', {
         );
     }
 });
+
+Ext.define('MainHub.Utilities', {
+    singleton: true,
+    reloadAllStores: function() {
+        /* Reload all loaded stores. */
+
+        var requestsStore = Ext.getStore('requestsStore');
+        if (requestsStore.isLoaded()) requestsStore.reload();
+
+        var librariesStore = Ext.getStore('librariesStore');
+        if (librariesStore.isLoaded()) librariesStore.reload();
+
+        var poolingTree = Ext.getStore('PoolingTree');
+        if (poolingTree.isLoaded()) poolingTree.reload();
+
+        var libraryPreparationStore = Ext.getStore('libraryPreparationStore');
+        if (libraryPreparationStore.isLoaded()) libraryPreparationStore.reload();
+
+        var poolingStore = Ext.getStore('poolingStore');
+        if (poolingStore.isLoaded()) poolingStore.reload();
+    }
+});

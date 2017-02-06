@@ -992,6 +992,7 @@ $include-ext-window-messagebox: dynamic(true);;
 $include-ext-window-toast: dynamic(false);;
 $include-ext-window-window: dynamic(true);;
 $include-mainhub-application: dynamic(true);;
+$include-mainhub-utilities: dynamic(true);;
 $include-mainhub-model-base: dynamic(true);;
 $include-mainhub-model-flowcell-flowcell: dynamic(true);;
 $include-mainhub-model-flowcell-lane: dynamic(true);;
