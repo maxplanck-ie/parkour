@@ -23,13 +23,12 @@ def build_docs():
 @hosts(os.environ['FAB_HOST'])
 def deploy():
     branch = local('git rev-parse --abbrev-ref HEAD', capture=True)
-    # container_id = local('docker ps -q -f name=parkourdocker_parkour_1', capture=True)
     pyperclip.copy('git checkout %s && git pull && '
                    'pip install -r requirements.txt && '
                    'python manage.py migrate && '
                    'python manage.py collectstatic --noinput && exit' % branch)
-    run('docker exec -it parkourdocker_parkour_1 /bin/bash')
-    run('docker restart parkourdocker_parkour_1')
+    run('docker exec -it dockerparkour_parkour_1 /bin/bash')
+    run('docker restart dockerparkour_parkour_1')
 
 
 def coverage(app=''):
