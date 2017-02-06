@@ -189,6 +189,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
                         Ext.getCmp('uploadedDeepSeqRequest').setHtml(
                             'Uploaded File: <a href="' + obj.path + '" target="_blank">' + obj.name + '</a>'
                         );
+                        Ext.getStore('requestsStore').reload();
                         if (Ext.getStore('librariesStore').isLoaded()) Ext.getStore('librariesStore').reload();
                         if (Ext.getStore('incomingLibrariesStore').isLoaded()) Ext.getStore('incomingLibrariesStore').reload();
                     } else {
