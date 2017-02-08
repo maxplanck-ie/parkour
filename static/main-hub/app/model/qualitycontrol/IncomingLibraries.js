@@ -45,5 +45,9 @@ Ext.define('MainHub.model.qualitycontrol.IncomingLibraries', {
             name: 'rnaQualityFacility',
             type: 'string'
         }
-    ]
+    ],
+
+    getRecordType: function() {
+        return (this.get('sampleId') === 0) ? 'L' : 'S';
+    }
 });

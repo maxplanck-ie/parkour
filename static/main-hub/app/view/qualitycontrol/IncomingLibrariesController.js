@@ -55,8 +55,8 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
             timeout: 1000000,
             scope: this,
             params: {
-                'record_type': record.get('recordType'),
-                'record_id': (record.get('recordType') == 'L') ? record.get('libraryId') : record.get('sampleId'),
+                'record_type': record.getRecordType(),
+                'record_id': (record.getRecordType() === 'L') ? record.get('libraryId') : record.get('sampleId'),
                 'dilution_factor': dilutionFactor,
                 'concentration_facility': concentrationFacility,
                 'concentration_method_facility_id': concentrationMethodFacility,

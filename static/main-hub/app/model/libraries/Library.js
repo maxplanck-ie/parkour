@@ -166,5 +166,9 @@ Ext.define('MainHub.model.libraries.Library', {
             name: 'requestedSampleTreatment',
             type: 'string'
         }
-    ]
+    ],
+
+    getRecordType: function() {
+        return (this.get('sampleId') === 0) ? 'L' : 'S';
+    }
 });
