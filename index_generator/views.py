@@ -9,7 +9,7 @@ from sample.models import Sample
 from library_preparation.models import LibraryPreparation
 from pooling.models import Pooling
 from .models import Pool
-from .generator import generate
+from .index_generator import IndexGenerator
 
 import logging
 import json
@@ -225,48 +225,14 @@ def generate_indices(request):
     error = ''
     data = []
 
-    library_ids = json.loads(request.POST.get('libraries'))
-    sample_ids = json.loads(request.POST.get('samples'))
+    library_ids = json.loads(request.POST.get('libraries', '[]'))
+    sample_ids = json.loads(request.POST.get('samples', '[]'))
 
     try:
-        generated_indices = generate(library_ids, sample_ids)
-
-        for record in sorted(generated_indices, key=lambda x: x['name']):
-            index_i7 = record['predicted_index_i7']['index']
-            index_i5 = record['predicted_index_i5']['index']
-
-            rec = {
-                'name': record['name'],
-                'sequencingDepth': record['depth'],
-                'readLength': record['read_length'],
-                'indexI7': index_i7,
-                'indexI7Id': record['predicted_index_i7']['index_id'],
-                'indexI5': index_i5,
-                'indexI5Id': record['predicted_index_i5']['index_id']
-            }
-
-            if 'sample_id' in record.keys():
-                rec.update({
-                    'recordType': 'S',
-                    'sampleId': record['sample_id']
-                })
-
-            if 'library_id' in record.keys():
-                rec.update({
-                    'recordType': 'L',
-                    'libraryId': record['library_id']
-                })
-
-            for i in range(len(index_i7)):
-                rec.update({'indexI7_' + str(i + 1): rec['indexI7'][i]})
-
-            for i in range(len(index_i5)):
-                rec.update({'indexI5_' + str(i + 1): rec['indexI5'][i]})
-
-            data.append(rec)
-
-    except Exception as e:
+        index_generator = IndexGenerator(library_ids, sample_ids)
+        data = index_generator.generate()
+    except ValueError as e:
         error = str(e)
-        logger.exception(error)
+        logger.debug(e)
 
     return JsonResponse({'success': not error, 'error': error, 'data': data})
