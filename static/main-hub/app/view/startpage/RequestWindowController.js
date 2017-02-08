@@ -221,10 +221,13 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
                 samples = [];
 
             store.each(function(item) {
-                if (item.get('recordType') == 'L') {
-                    libraries.push(item);
+                var libraryId = item.get('libraryId'),
+                    sampleId = item.get('sampleId');
+
+                if (sampleId === 0) {
+                    libraries.push(libraryId);
                 } else {
-                    samples.push(item);
+                    samples.push(sampleId);
                 }
             });
 
@@ -239,8 +242,8 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
                     'mode': wnd.mode,
                     'request_id': (typeof wnd.record != 'undefined') ? wnd.record.get('requestId') : '',
                     'description': data.description,
-                    'libraries': Ext.JSON.encode(Ext.Array.pluck(Ext.Array.pluck(libraries, 'data'), 'libraryId')),
-                    'samples': Ext.JSON.encode(Ext.Array.pluck(Ext.Array.pluck(samples, 'data'), 'sampleId'))
+                    'libraries': Ext.JSON.encode(libraries),
+                    'samples': Ext.JSON.encode(samples)
                 },
 
                 success: function(response) {

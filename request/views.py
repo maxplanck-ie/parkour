@@ -93,7 +93,9 @@ def save_request(request):
     form = None
 
     mode = request.POST.get('mode')
-    request_id = request.POST.get('request_id')
+    request_id = request.POST.get('request_id', '')
+    libraries = json.loads(request.POST.get('libraries', '[]'))
+    samples = json.loads(request.POST.get('samples', '[]'))
 
     if mode == 'add':
         form = RequestForm(request.POST)
@@ -114,19 +116,11 @@ def save_request(request):
             else:
                 req = form.save()
 
-            library_ids = request.POST.get('libraries')
-            sample_ids = request.POST.get('samples')
-
-            if library_ids:
-                libraries = json.loads(library_ids)
-                req.libraries.add(*libraries)
-
-            if sample_ids:
-                samples = json.loads(sample_ids)
-                req.samples.add(*samples)
-
-            if not library_ids and not sample_ids:
+            if not libraries and not samples:
                 error = 'Please provide Libraries and/or samples.'
+            else:
+                req.libraries.add(*libraries)
+                req.samples.add(*samples)
         else:
             error = str(form.errors)
             logger.debug(form.errors)
