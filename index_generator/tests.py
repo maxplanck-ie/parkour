@@ -5,7 +5,9 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 
 from .models import Pool
-from library_sample_shared.models import IndexType, IndexI7, IndexI5
+from request.models import Request
+from library_sample_shared.models import (ReadLength, IndexType,
+                                          IndexI7, IndexI5)
 from library.models import Library
 from sample.models import Sample
 
@@ -31,6 +33,275 @@ class PoolTest(TestCase):
 
 
 # Views
+
+class PoolingTreeTest(TestCase):
+    def setUp(self):
+        user1 = User.objects.create_user(
+            email='foo1@bar.io',
+            password='foo-foo',
+            is_staff=True,
+        )
+        user1.save()
+
+        user2 = User.objects.create_user(
+            email='foo2@bar.io',
+            password='foo-foo',
+            is_staff=False,
+        )
+        user2.save()
+
+        library1 = Library.get_test_library()
+        library2 = Library.get_test_library()
+        library3 = Library.get_test_library()
+        sample1 = Sample.get_test_sample()
+        sample2 = Sample.get_test_sample()
+        sample3 = Sample.get_test_sample()
+        library1.index_i7 = 'ATCACG'
+        library2.index_i7 = 'CGATGT'
+        library1.status = 2
+        library2.status = 2
+        library3.status = 2
+        sample1.status = 2
+        sample2.status = 2
+        sample3.status = 2
+
+        library3.is_pooled = True
+        sample3.is_pooled = True
+
+        library1.save()
+        library2.save()
+        library3.save()
+        sample1.save()
+        sample2.save()
+        sample3.save()
+
+        self.request1 = Request.objects.create(user=user1)
+        self.request2 = Request.objects.create(user=user2)
+        self.request3 = Request.objects.create(user=user1)
+        self.request1.save()
+        self.request2.save()
+        self.request3.save()
+
+        self.request1.libraries.add(library1)
+        self.request2.libraries.add(library2)
+        self.request3.libraries.add(library3)
+        self.request1.samples.add(sample1)
+        self.request2.samples.add(sample2)
+        self.request3.samples.add(sample3)
+
+    def test_get_tree_admin(self):
+        self.client.login(email='foo1@bar.io', password='foo-foo')
+        response = self.client.get(reverse('pooling_tree'))
+        self.assertEqual(response.status_code, 200)
+        result = json.loads(str(response.content, 'utf-8'))['children']
+        self.assertEqual(len(result), 2)
+        self.assertEqual(
+            [req['text'] for req in result],
+            [self.request1.name, self.request2.name],
+        )
+
+    def test_get_tree_user(self):
+        self.client.login(email='foo2@bar.io', password='foo-foo')
+        response = self.client.get(reverse('pooling_tree'))
+        self.assertEqual(response.status_code, 200)
+        result = json.loads(str(response.content, 'utf-8'))['children']
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]['text'], self.request2.name)
+
+    def test_empty_result(self):
+        self.client.login(email='foo1@bar.io', password='foo-foo')
+        Request.objects.get(pk=self.request1.pk).delete()
+        Request.objects.get(pk=self.request2.pk).delete()
+        response = self.client.get(reverse('pooling_tree'))
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'text': '.',
+            'children': [],
+        })
+
+
+class ReadLengthTest(TestCase):
+    def setUp(self):
+        User.objects.create_user(email='foo@bar.io', password='foo-foo')
+
+        self.read_length = ReadLength(name='Read Length')
+        self.read_length.save()
+
+        self.library = Library.get_test_library()
+        self.sample = Sample.get_test_sample()
+        self.library.read_length = self.read_length
+        self.sample.read_length = self.read_length
+        self.library.save()
+        self.sample.save()
+
+    def test_update_read_length_library(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('update_read_length'), {
+            'record_type': 'L',
+            'record_id': self.library.pk,
+            'read_length_id': self.read_length.pk,
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': True,
+            'error': '',
+        })
+
+    def test_update_read_length_sample(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('update_read_length'), {
+            'record_type': 'S',
+            'record_id': self.sample.pk,
+            'read_length_id': self.read_length.pk,
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': True,
+            'error': '',
+        })
+
+    def test_missing_record_type(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('update_read_length'))
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Could not update Read Length.',
+        })
+
+    def test_non_existing_record_id(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('update_read_length'), {
+            'record_type': 'L',
+            'record_id': '-1',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Could not update Read Length.',
+        })
+
+    def test_missing_or_empty_record_id(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('update_read_length'), {
+            'record_type': 'L',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Could not update Read Length.',
+        })
+
+    def test_non_existing_read_length(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('update_read_length'), {
+            'record_type': 'L',
+            'record_id': self.library.pk,
+            'read_length_id': '-1',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Could not update Read Length.',
+        })
+
+    def test_missing_or_empty_read_length_id(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('update_read_length'), {
+            'record_type': 'L',
+            'record_id': self.library.pk,
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Could not update Read Length.',
+        })
+
+    def test_wrong_http_method(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.get(reverse('update_read_length'))
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Wrong HTTP method.',
+        })
+
+
+class IndexTypeTest(TestCase):
+    def setUp(self):
+        User.objects.create_user(email='foo@bar.io', password='foo-foo')
+
+        self.index_type = IndexType(name='Index Type')
+        self.index_type.save()
+
+        self.sample = Sample.get_test_sample()
+        self.sample.index_type = self.index_type
+        self.sample.save()
+
+    def test_update_index_type(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('update_index_type'), {
+            'sample_id': self.sample.pk,
+            'index_type_id': self.index_type.pk,
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': True,
+            'error': '',
+        })
+
+    def test_non_existing_sample_id(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('update_index_type'), {
+            'sample_id': '-1',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Could not update Index Type.',
+        })
+
+    def test_missing_or_empty_sample_id(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('update_index_type'))
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Could not update Index Type.',
+        })
+
+    def test_non_existing_index_type(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('update_index_type'), {
+            'sample_id': self.sample.pk,
+            'index_type_id': '-1',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Could not update Index Type.',
+        })
+
+    def test_missing_or_empty_index_type_id(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('update_index_type'), {
+            'sample_id': self.sample.pk,
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Could not update Index Type.',
+        })
+
+    def test_wrong_http_method(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.get(reverse('update_index_type'))
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Wrong HTTP method.',
+        })
+
 
 class GenerateIndicesTest(TestCase):
     def setUp(self):
@@ -233,4 +504,25 @@ class GenerateIndicesTest(TestCase):
             'success': False,
             'error': 'No samples.',
             'data': [],
+        })
+
+
+class SavePoolTest(TestCase):
+    def setUp(self):
+        User.objects.create_user(email='foo@bar.io', password='foo-foo')
+
+    def test_save_pool(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('save_pool'), {
+
+        })
+        self.assertEqual(response.status_code, 200)
+
+    def test_wrong_http_method(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.get(reverse('save_pool'))
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Wrong HTTP method.',
         })
