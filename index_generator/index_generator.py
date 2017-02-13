@@ -9,11 +9,12 @@ from sample.models import Sample
 class IndexGenerator:
     """ Main IndexGenerator class. """
 
-    def __init__(self, library_ids=[], sample_ids=[]):
+    def __init__(self, library_ids=(), sample_ids=()):
         self._result = []
+        self._indices = {}
 
         self._libraries = Library.objects.filter(id__in=library_ids)
-        self._samples = Sample.objects.filter(id__in=sample_ids)
+        self._samples = Sample.objects.filter(id__in=sample_ids)  # QuerySet
         self._num_libraries = self._libraries.count()
         self._num_samples = self._samples.count()
 
@@ -26,8 +27,6 @@ class IndexGenerator:
         """
         Construct a dictionary with all libraries' and samples' indices.
         """
-        self._indices = {}
-
         # Index types for all libraries and samples
         index_types = list(set(
             [l.index_type for l in self._libraries if l.index_type] +
@@ -63,18 +62,21 @@ class IndexGenerator:
                     )
                 ])
 
-    def update_indices(self, idx_type_id, idx_type, index):
+    def _update_indices(self, idx_type_id, idx_type, index):
         """ Remove a given index from the index registry. """
-        self._indices[idx_type_id][idx_type].pop(
-            self._indices[idx_type_id][idx_type].index(index)
-        )
+        try:
+            self._indices[idx_type_id][idx_type].pop(
+                self._indices[idx_type_id][idx_type].index(index)
+            )
+        except ValueError:
+            pass
 
     @staticmethod
-    def convert_index(index):
+    def _convert_index(index):
         """ Convert A/C into R (red) and T into G (green). """
         return re.sub('T', 'G', re.sub('A|C', 'R', index))
 
-    def best_pair_scores(self, index1, index2, depth1, depth2):
+    def _best_pair_scores(self, index1, index2, depth1, depth2):
         """
         Calculate the score for two given indices.
 
@@ -86,8 +88,8 @@ class IndexGenerator:
 
         If the score > 60%, then the indices are not compatible.
         """
-        index1 = self.convert_index(index1)
-        index2 = self.convert_index(index2)
+        index1 = self._convert_index(index1)
+        index2 = self._convert_index(index2)
         total_depth = depth1 + depth2
         result = []
 
@@ -106,30 +108,32 @@ class IndexGenerator:
 
         return result
 
-    def calculate_scores_n(self, current_record, current_index):
+    def _calculate_scores_n(self, current_record, current_index, index_label,
+                            num_cycle):
         """
-        Calculate score for N given libraries/samples.
+        Calculate the score for N given libraries/samples.
 
-        The scoring principle is the same as in best_pair_scores() but
+        The scoring method is the same as in best_pair_scores() but
         for N libraries and samples.
         """
         result = []
 
         # Calculate color distribution for libraries
         # which are already in the result
-        color_distribution = [{'G': 0, 'R': 0} for _ in range(6)]
+        color_distribution = [{'G': 0, 'R': 0} for _ in range(num_cycle)]
         total_depth = 0
         for record in self._result:
-            for cycle in range(6):
-                index = self.convert_index(record['index_i7']['index'])
-                color = index[cycle]
-                color_distribution[cycle][color] += record['depth']
-            total_depth += record['depth']
+            index = self._convert_index(record[index_label]['index'])
+            if index != '':
+                for cycle in range(num_cycle):
+                    color = index[cycle]
+                    color_distribution[cycle][color] += record['depth']
+                total_depth += record['depth']
         total_depth += current_record.sequencing_depth
 
         # Calculate scores for the libraries in the result with a new library
-        for cycle in range(6):
-            index = self.convert_index(current_index['index'])
+        for cycle in range(num_cycle):
+            index = self._convert_index(current_index['index'])
             color = index[cycle]
             color_distribution[cycle][color] += current_record.sequencing_depth
 
@@ -152,8 +156,7 @@ class IndexGenerator:
         return result
 
     @staticmethod
-    def create_result_dict(sample, index_i7, index_i5):
-        """ Create a dictionary with generated sample indices. """
+    def _create_result_dict(sample, index_i7, index_i5):
         return {
             'name': sample.name,
             'sample_id': sample.pk,
@@ -164,13 +167,13 @@ class IndexGenerator:
         }
 
     @staticmethod
-    def create_index_dict(index='', index_id=''):
+    def _create_index_dict(index='', index_id=''):
         return {
             'index': index,
             'index_id': index_id,
         }
 
-    def find_best_pair(self):
+    def _find_best_pair(self):
         """
         Find a pair of best matching sample indices (I7) and
         add it to the result.
@@ -183,7 +186,7 @@ class IndexGenerator:
         for index1 in self._indices[sample1.index_type.pk]['i7']:
             for index2 in self._indices[sample2.index_type.pk]['i7']:
                 if index1 != index2:
-                    scores = self.best_pair_scores(
+                    scores = self._best_pair_scores(
                         index1['index'],
                         index2['index'],
                         sample1.sequencing_depth,
@@ -203,35 +206,35 @@ class IndexGenerator:
         # If the best pair was found
         if 'index1' in best_pair.keys():
             self._result.extend([
-                self.create_result_dict(
+                self._create_result_dict(
                     sample1,
                     best_pair['index1'],
-                    self.create_index_dict('', ''),  # Index I5
+                    self._create_index_dict('', ''),  # Index I5
                 ),
-                self.create_result_dict(
+                self._create_result_dict(
                     sample2,
                     best_pair['index2'],
-                    self.create_index_dict('', ''),  # Index I5
+                    self._create_index_dict('', ''),  # Index I5
                 ),
             ])
 
-            self.update_indices(
-                sample1.index_type.id, 'i7', best_pair['index1'],
+            self._update_indices(
+                sample1.index_type.pk, 'i7', best_pair['index1'],
             )
 
-            self.update_indices(
-                sample2.index_type.id, 'i7', best_pair['index2'],
+            self._update_indices(
+                sample2.index_type.pk, 'i7', best_pair['index2'],
             )
         else:
             raise ValueError('Could not find the best ' +
                              'matching pair of indices.')
 
-    def generate_index_i7(self, sample, i):
+    def _generate_index_i7(self, sample, i):
         """ Generate index I7 for a given sample. """
         index_i7 = {'avg_score': 100.0}
 
-        for index in self._indices[sample.index_type.id]['i7']:
-            scores = self.calculate_scores_n(sample, index)
+        for index in self._indices[sample.index_type.pk]['i7']:
+            scores = self._calculate_scores_n(sample, index, 'index_i7', 6)
 
             # If indices are compatible
             if scores != -1:
@@ -252,13 +255,13 @@ class IndexGenerator:
 
         # If an index has been generated
         if 'index' in index_i7.keys():
-            self._result.append(self.create_result_dict(
+            self._result.append(self._create_result_dict(
                 sample,
                 index_i7['index'],
-                self.create_index_dict('', ''),  # Index I5
+                self._create_index_dict('', ''),  # Index I5
             ))
 
-            self.update_indices(sample.index_type.id, 'i7', index)
+            self._update_indices(sample.index_type.pk, 'i7', index_i7['index'])
 
         else:
             if i + 1 == self._num_samples:
@@ -269,18 +272,50 @@ class IndexGenerator:
                 # Choose a random index and try to generate indices
                 # for the remaining samples
                 index_i7 = random.choice(
-                    self._indices[sample.index_type.id]['i7'],
+                    self._indices[sample.index_type.pk]['i7'],
                 )
 
-                self._result.append(self.create_result_dict(
+                self._result.append(self._create_result_dict(
                     sample,
                     index_i7,
-                    self.create_index_dict('', ''),  # Index I5
+                    self._create_index_dict('', ''),  # Index I5
                 ))
 
-                self.update_indices(sample.index_type.id, 'i7', index_i7)
+                self._update_indices(sample.index_type.pk, 'i7', index_i7)
 
-    def add_libraries_to_result(self):
+    def _generate_index_i5(self, sample):
+        """ Generate index I5 for a given sample. """
+        index_i5 = {'avg_score': 100.0}
+
+        for index in self._indices[sample.index_type.pk]['i5']:
+            scores = self._calculate_scores_n(sample, index, 'index_i5', 8)
+
+            # If indices are compatible
+            if scores != -1:
+                indices_in_result = [
+                    res['index_i5']['index']
+                    for res in self._result
+                ]
+                avg_score = sum(scores) / 8
+
+                # Choose an index with a better average score
+                # and make sure it's not in the result
+                if avg_score < index_i5['avg_score'] \
+                        and index['index'] not in indices_in_result:
+                    index_i5 = {
+                        'index': index,
+                        'avg_score': avg_score
+                    }
+
+        # If an index has been generated
+        if 'index' in index_i5.keys():
+            for smpl in self._result:
+                if smpl['name'] == sample.name:
+                    smpl['index_i5'] = index_i5['index']
+                    break
+            self._update_indices(sample.index_type.pk, 'i5', index_i5['index'])
+
+    def _add_libraries_to_result(self):
         """ Add all libraries directly to the result. """
         for library in self._libraries:
             # Get Index I7
@@ -290,10 +325,10 @@ class IndexGenerator:
             )
 
             if index_i7:
-                index_i7 = self.create_index_dict(index_i7[0].index,
-                                                  index_i7[0].index_id)
+                index_i7 = self._create_index_dict(index_i7[0].index,
+                                                   index_i7[0].index_id)
             else:
-                index_i7 = self.create_index_dict(library.index_i7, '')
+                index_i7 = self._create_index_dict(library.index_i7, '')
 
             # Get Index I5
             index_i5 = IndexI5.objects.filter(
@@ -302,37 +337,27 @@ class IndexGenerator:
             )
 
             if index_i5:
-                index_i5 = self.create_index_dict(index_i5[0].index,
-                                                  index_i5[0].index_id)
+                index_i5 = self._create_index_dict(index_i5[0].index,
+                                                   index_i5[0].index_id)
             else:
                 idx_i5 = library.index_i5 if library.index_i5 else ''
-                index_i5 = self.create_index_dict(idx_i5, '')
+                index_i5 = self._create_index_dict(idx_i5, '')
 
             self._result.append({
                 'name': library.name,
-                'library_id': library.id,
+                'library_id': library.pk,
                 'read_length': library.read_length_id,
                 'depth': library.sequencing_depth,
                 'index_i7': index_i7,
                 'index_i5': index_i5,
             })
 
-            # If Index I7 isn't in the database, don't raise an exception
-            try:
-                self.update_indices(library.index_type.id, 'i7', index_i7)
-            except ValueError:
-                pass
+            self._update_indices(library.index_type.pk, 'i7', index_i7)
+            self._update_indices(library.index_type.pk, 'i5', index_i5)
 
-            # If Index I5 isn't in the database, don't raise an exception
-            try:
-                self.update_indices(library.index_type.id, 'i5', index_i5)
-            except ValueError:
-                pass
-
-    def prepare_result(self):
-        """
-        Construct the final dictionary with all records and their indices.
-        """
+    @property
+    def result(self):
+        """ Construct a dictionary with all records and their indices. """
         result = []
 
         for record in self._result:
@@ -374,12 +399,12 @@ class IndexGenerator:
         if self._num_libraries > 0:
             # Add all libraries directly to the result
             case = 1
-            self.add_libraries_to_result()
+            self._add_libraries_to_result()
         else:
             # Generate indices only for samples
             case = 2
             if self._num_samples > 1:
-                self.find_best_pair()
+                self._find_best_pair()
             else:
                 raise ValueError('Select at least two samples.')
 
@@ -392,8 +417,8 @@ class IndexGenerator:
             start = 2
 
         for i, sample in enumerate(self._samples[start:self._num_samples]):
-            self.generate_index_i7(sample, i)
-            # self.generate_index_i5(sample, i)
+            self._generate_index_i7(sample, i)
+            if sample.index_type.is_index_i5:
+                self._generate_index_i5(sample)
 
-        result = self.prepare_result()
-        return result
+        return self.result

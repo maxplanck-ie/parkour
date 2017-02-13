@@ -1,4 +1,8 @@
+import string
+import random
+
 from django.db import models
+
 from library_sample_shared.models import GenericLibrarySample
 
 
@@ -35,7 +39,14 @@ class Library(GenericLibrarySample):
     )
 
     @classmethod
-    def get_test_library(cls, name):
+    def get_test_library(cls, name=None):
+        if not name:
+            name = 'Library_' + ''.join(
+                random.SystemRandom().choice(
+                    string.ascii_lowercase + string.digits
+                ) for _ in range(8)
+            )
+
         return cls(
             name=name,
             organism_id=1,
@@ -45,6 +56,8 @@ class Library(GenericLibrarySample):
             sequencing_depth=1,
             library_protocol_id=1,
             library_type_id=1,
+            enrichment_cycles=1,
+            index_type_id=4,  # Other
             amplification_cycles=1,
             index_type_id=1,
             index_reads=0,
