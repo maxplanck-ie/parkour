@@ -1,4 +1,8 @@
+import string
+import random
+
 from django.db import models
+
 from library_sample_shared.models import GenericLibrarySample
 
 
@@ -125,7 +129,14 @@ class Sample(GenericLibrarySample):
     )
 
     @classmethod
-    def get_test_sample(cls, name):
+    def get_test_sample(cls, name=None):
+        if not name:
+            name = 'Sample_' + ''.join(
+                random.SystemRandom().choice(
+                    string.ascii_lowercase + string.digits
+                ) for _ in range(8)
+            )
+
         return cls(
             name=name,
             organism_id=1,
