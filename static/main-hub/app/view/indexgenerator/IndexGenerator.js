@@ -143,6 +143,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                         dataIndex: 'indexTypeName',
                         width: 200,
                         editor: {
+                            id: 'indexTypeEditor',
                             xtype: 'combobox',
                             queryMode: 'local',
                             displayField: 'name',
