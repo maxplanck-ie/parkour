@@ -194,8 +194,8 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
 
             // Set RNA Quality
             var rnaQualityField = Ext.getCmp('rnaQualityField');
-            rnaQualityField.select(record.rnaQualityId);
-            rnaQualityField.fireEvent('select', rnaQualityField, rnaQualityField.findRecordByValue(record.rnaQualityId));
+            rnaQualityField.select(record.rnaQuality);
+            rnaQualityField.fireEvent('select', rnaQualityField, rnaQualityField.findRecordByValue(record.rnaQuality));
 
             // Set read length
             var readLengthSampleField = Ext.getCmp('readLengthSampleField');

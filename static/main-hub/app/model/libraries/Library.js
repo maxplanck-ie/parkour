@@ -152,6 +152,10 @@ Ext.define('MainHub.model.libraries.Library', {
         },
         {
             name: 'rnaQuality',
+            type: 'int'
+        },
+        {
+            name: 'rnaQualityName',
             type: 'string'
         },
         {

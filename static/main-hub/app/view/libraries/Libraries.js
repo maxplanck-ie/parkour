@@ -208,7 +208,7 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 },
                 {
                     text: 'RNA Quality',
-                    dataIndex: 'rnaQuality'
+                    dataIndex: 'rnaQualityName'
                 },
                 {
                     text: 'RNA Spike In',

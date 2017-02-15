@@ -130,6 +130,8 @@ def get_all(request):
                     'DNaseTreatment': str(sample.dnase_treatment),
                     'rnaQuality': sample.rna_quality
                         if sample.rna_quality else '',
+                    'rnaQualityName': sample.get_rna_quality_display()
+                        if sample.rna_quality else '',
                     'rnaSpikeIn': str(sample.rna_spike_in),
                     'samplePreparationProtocol':
                         sample.sample_preparation_protocol,
