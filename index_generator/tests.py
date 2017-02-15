@@ -6,8 +6,11 @@ from django.contrib.auth import get_user_model
 
 from .models import Pool
 from request.models import Request
+from common.models import Organization, PrincipalInvestigator
 from library_sample_shared.models import (ReadLength, IndexType,
                                           IndexI7, IndexI5)
+from library_preparation.models import LibraryPreparation
+from pooling.models import Pooling
 from library.models import Library
 from sample.models import Sample
 
@@ -18,11 +21,19 @@ User = get_user_model()
 
 class PoolTest(TestCase):
     def setUp(self):
+        self.org = Organization(name='Organization')
+        self.org.save()
+
+        self.pi = PrincipalInvestigator(name='PI', organization=self.org)
+        self.pi.save()
+
         self.user = User.objects.create_user(
             first_name='Foo',
             last_name='Bar',
             email='foo@bar.io',
             password='foo-foo',
+            organization=self.org,
+            pi=self.pi,
         )
         self.pool = Pool(user=self.user)
         self.pool.save()
@@ -30,6 +41,9 @@ class PoolTest(TestCase):
     def test_pool_name(self):
         self.assertTrue(isinstance(self.pool, Pool))
         self.assertEqual(self.pool.__str__(), self.pool.name)
+        self.assertEqual(self.pool.name, '%i_%s_%s' % (
+            self.pool.pk, self.user.last_name, self.user.pi.name,
+        ))
 
 
 # Views
@@ -509,14 +523,44 @@ class GenerateIndicesTest(TestCase):
 
 class SavePoolTest(TestCase):
     def setUp(self):
-        User.objects.create_user(email='foo@bar.io', password='foo-foo')
+        self.user = User.objects.create_user(
+            email='foo@bar.io',
+            password='foo-foo',
+        )
+        self.user.save()
+
+        self.library = Library.get_test_library()
+        self.sample = Sample.get_test_sample()
+        self.library.save()
+        self.sample.save()
 
     def test_save_pool(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.post(reverse('save_pool'), {
-
+            'libraries': '[%s]' % self.library.pk,
+            'samples': '[{"sample_id": %s, "index_i7": "", "index_i5": ""}]' %
+            self.sample.pk,
         })
         self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': True,
+            'error': '',
+        })
+
+        pooling_objects = Pooling.objects.filter(library=self.library)
+        self.assertEqual(pooling_objects.count(), 1)
+
+        libprep_objects = LibraryPreparation.objects.filter(sample=self.sample)
+        self.assertEqual(libprep_objects.count(), 1)
+
+    def test_missing_libraries_and_samples(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('save_pool'))
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Neither libraries nor samples have been provided.',
+        })
 
     def test_wrong_http_method(self):
         self.client.login(email='foo@bar.io', password='foo-foo')

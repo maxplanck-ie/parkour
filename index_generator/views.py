@@ -177,16 +177,12 @@ def save_pool(request):
                 lp_obj = LibraryPreparation(sample=smpl)
                 lp_obj.save()
 
-                # # Create Pooling object
-                # pool_obj = Pooling(sample=sample)
-                # # TODO: update field Concentration C1
-                # pool_obj.save()
-
             # Trigger Pool Size update
             pool.save(update_fields=['size'])
 
         except Exception as e:
-            error = 'Could not save Pool.'
+            error = str(e) if e.__class__ == ValueError \
+                else 'Could not save Pool.'
             logger.exception(error)
     else:
         error = 'Wrong HTTP method.'
