@@ -5,6 +5,7 @@ from django.test import TestCase
 from .models import Request
 from library.models import Library
 from sample.models import Sample
+from common.models import Organization, PrincipalInvestigator
 
 import json
 import tempfile
@@ -16,11 +17,30 @@ User = get_user_model()
 
 class RequestTest(TestCase):
     def setUp(self):
-        user = User.objects.create_user(email='foo@bar.io', password='foo-foo')
-        self.request = Request.objects.create(user=user)
+        self.org = Organization(name='Organization')
+        self.org.save()
+
+        self.pi = PrincipalInvestigator(name='PI', organization=self.org)
+        self.pi.save()
+
+        self.user = User.objects.create_user(
+            first_name='Foo',
+            last_name='Bar',
+            email='foo@bar.io',
+            password='foo-foo',
+            organization=self.org,
+            pi=self.pi,
+        )
+
+        self.request = Request.objects.create(user=self.user)
+        self.request.save()
 
     def test_request(self):
+        self.assertTrue(isinstance(self.request, Request))
         self.assertEqual(self.request.__str__(), self.request.name)
+        self.assertEqual(self.request.name, '%i_%s_%s' % (
+            self.request.pk, self.user.last_name, self.user.pi.name,
+        ))
 
 
 # Views
@@ -175,11 +195,15 @@ class DeleteRequestTest(TestCase):
         user.save()
 
         self.library = Library.get_test_library('Library_delete')
+        self.sample = Sample.get_test_sample('Sample_delete')
         self.library.save()
+        self.sample.save()
 
         self.request = Request(user=user)
         self.request.save()
+
         self.request.libraries.add(self.library)
+        self.request.samples.add(self.sample)
 
     def test_delete_request(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
@@ -191,6 +215,7 @@ class DeleteRequestTest(TestCase):
         # Check if the request and its library have been deleted
         self.assertEqual(Request.objects.filter(pk=self.request.pk).count(), 0)
         self.assertEqual(Library.objects.filter(pk=self.library.pk).count(), 0)
+        self.assertEqual(Sample.objects.filter(pk=self.sample.pk).count(), 0)
 
     def test_exception(self):
         """ Empty or non-existing request_id. """
