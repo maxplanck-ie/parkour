@@ -10,6 +10,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
                 boxready: 'boxready'
             },
             '#poolingTreePanel': {
+                beforeedit: 'hideEditor',
                 edit: 'editRecord',
                 checkchange: 'checkRecord'
             },
@@ -37,6 +38,19 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
 
     poolSizeBoxready: function(cb) {
         cb.select(25, true);
+    },
+
+    hideEditor: function(editor, context) {
+        if (context.colIdx !== 3 && context.colIdx !== 5) {
+            return false;
+        } else {
+            // Disable editing of a library's Index Type
+            if (context.record.get('recordType') === 'L') {
+                setInterval(function() {
+                    Ext.getCmp('indexTypeEditor').disable();
+                }, 100);
+            }
+        }
     },
 
     editRecord: function(editor, context) {
