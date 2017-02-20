@@ -30,29 +30,23 @@ class ReadLength(models.Model):
         return self.name
 
 
-class IndexType(models.Model):
-    name = models.CharField('Name', max_length=150)
-    is_index_i7 = models.BooleanField('Is Index I7?', default=False)
-    is_index_i5 = models.BooleanField('Is Index I5?', default=False)
-
-    class Meta:
-        verbose_name = 'Index Type'
-        verbose_name_plural = 'Index Types'
-
-    def __str__(self):
-        return self.name
-
-
 class GenericIndex(models.Model):
-    index_id = models.CharField('Index ID', max_length=50, unique=True)
+    index_id = models.CharField('Index ID', max_length=15, unique=True)
     index = models.CharField('Index', max_length=8)
-    index_type = models.ForeignKey(IndexType, verbose_name='Index Type')
 
     class Meta:
         abstract = True
 
     def __str__(self):
         return self.index_id
+
+    def type(self):
+        try:
+            index_type = self.index_type.get()
+        except AttributeError:
+            return ''
+        else:
+            return index_type.name
 
 
 class IndexI7(GenericIndex):
@@ -65,6 +59,33 @@ class IndexI5(GenericIndex):
     class Meta:
         verbose_name = 'Index I5'
         verbose_name_plural = 'Indices I5'
+
+
+class IndexType(models.Model):
+    name = models.CharField('Name', max_length=100)
+    is_index_i7 = models.BooleanField('Is Index I7?', default=False)
+    is_index_i5 = models.BooleanField('Is Index I5?', default=False)
+
+    indices_i7 = models.ManyToManyField(
+        IndexI7,
+        verbose_name='Indices I7',
+        related_name='index_type',
+        blank=True,
+    )
+
+    indices_i5 = models.ManyToManyField(
+        IndexI5,
+        verbose_name='Indices I5',
+        related_name='index_type',
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = 'Index Type'
+        verbose_name_plural = 'Index Types'
+
+    def __str__(self):
+        return self.name
 
 
 class BarcodeSingletonModel(models.Model):

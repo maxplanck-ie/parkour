@@ -1,7 +1,8 @@
 from django.test import TestCase
 
 from .models import (Organism, ConcentrationMethod, ReadLength, IndexType,
-                     GenericIndex, BarcodeCounter, GenericLibrarySample)
+                     IndexI7, GenericIndex, BarcodeCounter,
+                     GenericLibrarySample)
 
 
 # Models
@@ -44,16 +45,21 @@ class IndexTypeTest(TestCase):
 
 class GenericIndexTest(TestCase):
     def setUp(self):
-        index_type = IndexType(name='Nextera')
-        self.index = GenericIndex(
-            index_id='RPI1',
-            index='ATCACG',
-            index_type=index_type,
-        )
+        self.index1 = IndexI7(index_id='I001', index='ATCACG')
+        self.index2 = GenericIndex(index_id='I002', index='ATCACG')
+        self.index1.save()
+
+        self.index_type = IndexType(name='Index Type', is_index_i7=True)
+        self.index_type.save()
+        self.index_type.indices_i7.add(self.index1)
 
     def test_generic_index_id(self):
-        self.assertTrue(isinstance(self.index, GenericIndex))
-        self.assertEqual(self.index.__str__(), self.index.index_id)
+        self.assertTrue(isinstance(self.index1, GenericIndex))
+        self.assertEqual(self.index1.__str__(), self.index1.index_id)
+        self.assertEqual(self.index1.type(), self.index_type.name)
+
+    def test_no_index_type(self):
+        self.assertEqual(self.index2.type(), '')
 
 
 class BarcodeCounterTest(TestCase):
