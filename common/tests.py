@@ -61,7 +61,6 @@ class IndexViewTest(TestCase):
         self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.get(reverse('index'), follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'index.html')
 
 
 class NavigationTreeTest(TestCase):

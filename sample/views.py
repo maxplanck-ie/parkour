@@ -3,7 +3,7 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
-from .models import NucleicAcidType, SampleProtocol, Sample, FileSample
+from .models import NucleicAcidType, Sample, FileSample
 from .forms import SampleForm
 
 import logging
@@ -25,40 +25,16 @@ def get_nucleic_acid_types(request):
     return JsonResponse(data, safe=False)
 
 
-def get_sample_protocols(request):
-    """ Get the list of all sample protocols. """
-    data = []
-
-    if request.method == 'GET':
-        sample_type = request.GET.get('type', '')
-        sample_protocols = SampleProtocol.objects.filter(type=sample_type)
-
-        data = [
-            {
-                'id': protocol.id,
-                'name': protocol.name,
-                'type': protocol.type,
-                'provider': protocol.provider,
-                'catalog': protocol.catalog,
-                'explanation': protocol.explanation,
-                'inputRequirements': protocol.input_requirements,
-                'typicalApplication': protocol.typical_application,
-                'comments': protocol.comments,
-            }
-            for protocol in sample_protocols
-        ]
-
-    return JsonResponse(data, safe=False)
-
-
 @login_required
 def save_sample(request):
     """ Add a new sample or update an existing one. """
     error = ''
-    form = None
     data = []
 
-    if request.method == 'POST':
+    try:
+        if request.method != 'POST':
+            raise ValueError('Wrong HTTP method.')
+
         mode = request.POST.get('mode')
         sample_id = request.POST.get('sample_id', '')
         files = json.loads(request.POST.get('files', '[]'))
@@ -66,48 +42,40 @@ def save_sample(request):
         if mode == 'add':
             form = SampleForm(request.POST)
         elif mode == 'edit':
-            try:
-                smpl = Sample.objects.get(pk=sample_id)
-                form = SampleForm(request.POST, instance=smpl)
-            except (ValueError, Sample.DoesNotExist) as e:
-                form = None
-                error = str(e)
-                logger.exception(e)
+            smpl = Sample.objects.get(pk=sample_id)
+            form = SampleForm(request.POST, instance=smpl)
         else:
-            form = None
+            raise ValueError('Wrong or missing mode.')
 
-        if form:
-            if form.is_valid():
-                smpl = form.save()
-
-                if mode == 'add':
-                    smpl.files.add(*files)
-                    data = {
-                        'name': smpl.name,
-                        'recordType': 'S',
-                        'sampleId': smpl.id,
-                        'barcode': smpl.barcode,
-                    }
-
-                elif mode == 'edit':
-                    if files:
-                        old_files = [file for file in smpl.files.all()]
-                        smpl.files.clear()
-                        smpl.save()
-                        smpl.files.add(*files)
-                        new_files = [file for file in smpl.files.all()]
-
-                        # Delete files
-                        files_to_delete = list(set(old_files) - set(new_files))
-                        for file in files_to_delete:
-                            file.delete()
+        if form.is_valid():
+            smpl = form.save()
+            if mode == 'add':
+                smpl.files.add(*files)
+                data = {
+                    'name': smpl.name,
+                    'recordType': 'S',
+                    'sampleId': smpl.id,
+                    'barcode': smpl.barcode,
+                }
             else:
-                error = str(form.errors)
-                logger.debug(form.errors)
+                if files:
+                    old_files = [file for file in smpl.files.all()]
+                    smpl.files.clear()
+                    smpl.save()
+                    smpl.files.add(*files)
+                    new_files = [file for file in smpl.files.all()]
+
+                    # Delete files
+                    files_to_delete = list(set(old_files) - set(new_files))
+                    for file in files_to_delete:
+                        file.delete()
         else:
-            error = error if error else 'Wrong or missing mode.'
-    else:
-        error = 'Wrong HTTP method.'
+            error = str(form.errors)
+            logger.debug(form.errors)
+
+    except Exception as e:
+        error = 'Could not save the sample.'
+        logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error, 'data': data})
 
@@ -117,16 +85,15 @@ def delete_sample(request):
     """ Delete sample with a given id. """
     error = ''
 
-    if request.method == 'POST':
+    try:
+        if request.method != 'POST':
+            raise ValueError('Wrong HTTP method.')
         record_id = request.POST.get('record_id', '')
-        try:
-            sample = Sample.objects.get(pk=record_id)
-            sample.delete()
-        except (ValueError, Sample.DoesNotExist) as e:
-            error = str(e)
-            logger.exception(e)
-    else:
-        error = 'Wrong HTTP method.'
+        sample = Sample.objects.get(pk=record_id)
+        sample.delete()
+    except (ValueError, Sample.DoesNotExist) as e:
+        error = 'Could not delete the sample.'
+        logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error})
 

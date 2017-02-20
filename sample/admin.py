@@ -1,10 +1,5 @@
 from django.contrib import admin
-from .models import SampleProtocol, NucleicAcidType, Sample
-
-
-@admin.register(SampleProtocol)
-class SampleProtocolAdmin(admin.ModelAdmin):
-    pass
+from .models import NucleicAcidType, Sample
 
 
 @admin.register(NucleicAcidType)

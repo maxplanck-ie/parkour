@@ -11,6 +11,8 @@ def load_fixtures(apps, schema_editor):
     call_command('loaddata', 'concentration_methods', app_label='library_sample_shared')
     call_command('loaddata', 'read_lengths', app_label='library_sample_shared')
     call_command('loaddata', 'indices', app_label='library_sample_shared')
+    call_command('loaddata', 'library_protocols', app_label='library_sample_shared')
+    call_command('loaddata', 'library_types', app_label='library_sample_shared')
 
 
 def unload_fixtures(apps, schema_editor):
@@ -20,7 +22,11 @@ def unload_fixtures(apps, schema_editor):
     IndexI7 = apps.get_model('library_sample_shared', 'IndexI7')
     IndexI5 = apps.get_model('library_sample_shared', 'IndexI5')
     IndexType = apps.get_model('library_sample_shared', 'IndexType')
+    LibraryProtocol = apps.get_model('library_sample_shared', 'LibraryProtocol')
+    LibraryType = apps.get_model('library_sample_shared', 'LibraryType')
 
+    LibraryType.objects.all().delete()
+    LibraryProtocol.objects.all().delete()
     IndexType.objects.all().delete()
     IndexI5.objects.all().delete()
     IndexI7.objects.all().delete()

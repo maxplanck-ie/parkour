@@ -11,4 +11,7 @@ urlpatterns = [
     url(r'^get_index_types/$', views.SimpleStoreView.as_view(model=IndexType), name='get_index_types'),
     url(r'^get_index_i7/$', views.IndexStoreView.as_view(model=IndexI7), name='get_index_i7'),
     url(r'^get_index_i5/$', views.IndexStoreView.as_view(model=IndexI5), name='get_index_i5'),
+
+    url(r'^get_library_protocols/$', views.get_library_protocols, name='get_library_protocols'),
+    url(r'^get_library_types/$', views.get_library_types, name='get_library_types'),
 ]

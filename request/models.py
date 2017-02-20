@@ -27,6 +27,7 @@ class Request(models.Model):
     )
 
     deep_seq_request = models.FileField(
+        verbose_name='Deep Sequencing Request',
         upload_to='requests/%Y/%m/%d/',
         blank=True,
         null=True,

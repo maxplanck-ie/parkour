@@ -2,32 +2,6 @@ from django.db import models
 from library_sample_shared.models import GenericLibrarySample
 
 
-class SampleProtocol(models.Model):
-    name = models.CharField('Name', max_length=150)
-    type = models.CharField(
-        'Type',
-        max_length=3,
-        choices=(('DNA', 'DNA'), ('RNA', 'RNA')),
-        default='DNA',
-    )
-    provider = models.CharField('Provider', max_length=150)
-    catalog = models.CharField('Catalog', max_length=150)
-    explanation = models.CharField('Explanation', max_length=250)
-    input_requirements = models.CharField('Input Requirements', max_length=150)
-    typical_application = models.CharField(
-        'Typical Application',
-        max_length=200,
-    )
-    comments = models.TextField('Comments', null=True, blank=True)
-
-    class Meta:
-        verbose_name = 'Sample Protocol'
-        verbose_name_plural = 'Sample Protocols'
-
-    def __str__(self):
-        return self.name
-
-
 class NucleicAcidType(models.Model):
     name = models.CharField('Name', max_length=100)
 
@@ -55,24 +29,10 @@ class FileSample(models.Model):
 
 
 class Sample(GenericLibrarySample):
-    sample_protocol = models.ForeignKey(
-        SampleProtocol,
-        verbose_name='Sample Protocol',
-    )
-
     nucleic_acid_type = models.ForeignKey(
         NucleicAcidType,
         verbose_name='Nucleic Acid Type',
     )
-
-    amplified_cycles = models.PositiveIntegerField(
-        'Sample Amplified Cycles',
-        null=True,
-        blank=True,
-    )
-
-    dnase_treatment = models.NullBooleanField('DNase Treatment')
-
     rna_quality = models.CharField(
         'RNA Quality',
         max_length=2,
@@ -92,29 +52,16 @@ class Sample(GenericLibrarySample):
         null=True,
         blank=True,
     )
-
-    rna_spike_in = models.NullBooleanField('RNA Spike in')
-
-    sample_preparation_protocol = models.CharField(
-        'Sample Preparation Protocol',
-        max_length=150,
+    amplification_cycles = models.PositiveIntegerField(
+        'Amplification (cycles)',
         null=True,
         blank=True,
     )
-
-    requested_sample_treatment = models.CharField(
-        'Requested Sample Treatment',
-        max_length=200,
-        null=True,
-        blank=True,
-    )
-
     files = models.ManyToManyField(
         FileSample,
         related_name='files',
         blank=True,
     )
-
     is_converted = models.BooleanField('Is converted?', default=False)
 
     # Quality Control
@@ -131,11 +78,10 @@ class Sample(GenericLibrarySample):
             organism_id=1,
             concentration=1.0,
             concentration_method_id=1,
-            dna_dissolved_in='dna',
-            sample_volume=1,
             read_length_id=1,
             sequencing_depth=1,
-            sample_protocol_id=1,
+            library_protocol_id=1,
+            library_type_id=1,
             nucleic_acid_type_id=1,
         )
 

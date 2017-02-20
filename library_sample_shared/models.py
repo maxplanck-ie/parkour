@@ -115,65 +115,96 @@ class BarcodeCounter(BarcodeSingletonModel):
         return str(self.counter)
 
 
+class LibraryProtocol(models.Model):
+    name = models.CharField('Name', max_length=150)
+    type = models.CharField(
+        'Type',
+        max_length=3,
+        choices=(('DNA', 'DNA'), ('RNA', 'RNA')),
+        default='DNA',
+    )
+    provider = models.CharField('Provider', max_length=150)
+    catalog = models.CharField('Catalog', max_length=150)
+    explanation = models.CharField('Explanation', max_length=250)
+    input_requirements = models.CharField('Input Requirements', max_length=150)
+    typical_application = models.CharField(
+        'Typical Application',
+        max_length=200,
+    )
+    comments = models.TextField('Comments', null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Library Protocol'
+        verbose_name_plural = 'Library Protocols'
+
+    def __str__(self):
+        return self.name
+
+
+class LibraryType(models.Model):
+    name = models.CharField('Type', max_length=200)
+    library_protocol = models.ManyToManyField(
+        LibraryProtocol,
+        verbose_name='Library Protocol',
+    )
+
+    class Meta:
+        verbose_name = 'Library Type'
+        verbose_name_plural = 'Library Types'
+
+    def __str__(self):
+        return self.name
+
+
 class GenericLibrarySample(models.Model):
     name = models.CharField(
         'Name',
         max_length=200,
         unique=True,
     )
-
     date = models.DateTimeField('Date', auto_now_add=True)
-
     status = models.SmallIntegerField(default=0)
-
+    library_protocol = models.ForeignKey(
+        LibraryProtocol,
+        verbose_name='Library Protocol',
+    )
+    library_type = models.ForeignKey(
+        LibraryType,
+        verbose_name='Library Type',
+    )
     organism = models.ForeignKey(
         Organism,
         verbose_name='Organism'
     )
-
     concentration = models.FloatField('Concentration')
-
     concentration_method = models.ForeignKey(
         ConcentrationMethod,
         verbose_name='Concentration Method',
     )
-
-    dna_dissolved_in = models.CharField('DNA Dissolved in', max_length=255)
-
-    sample_volume = models.PositiveIntegerField('Sample Volume')
-
     equal_representation_nucleotides = models.BooleanField(
         'Equal Representation of Nucleotides',
         default=True,
     )
-
     read_length = models.ForeignKey(
         ReadLength,
         verbose_name='Read Length',
     )
-
     sequencing_depth = models.PositiveIntegerField('Sequencing Depth')
-
     comments = models.TextField('Comments', null=True, blank=True)
-
     is_pooled = models.BooleanField('Is pooled?', default=False)
-
     barcode = models.CharField('Barcode', max_length=9)
-
     index_type = models.ForeignKey(
         IndexType,
         verbose_name='Index Type',
         null=True,
         blank=True,
     )
-
     index_i7 = models.CharField(
         'Index I7',
         max_length=8,
         null=True,
         blank=True,
     )
-
     index_i5 = models.CharField(
         'Index I5',
         max_length=8,
@@ -187,13 +218,11 @@ class GenericLibrarySample(models.Model):
         null=True,
         blank=True,
     )
-
     concentration_facility = models.FloatField(
         'Concentration (facility)',
         null=True,
         blank=True,
     )
-
     concentration_method_facility = models.ForeignKey(
         ConcentrationMethod,
         related_name='+',
@@ -201,32 +230,22 @@ class GenericLibrarySample(models.Model):
         null=True,
         blank=True,
     )
-
     date_facility = models.DateTimeField(
         'Date (facility)',
         null=True,
         blank=True,
     )
-
-    sample_volume_facility = models.PositiveIntegerField(
-        'Sample Volume (facility)',
-        null=True,
-        blank=True,
-    )
-
     amount_facility = models.FloatField(
         'Amount (facility)',
         null=True,
         blank=True,
     )
-
     size_distribution_facility = models.CharField(
         'Size Distribution (facility)',
         max_length=200,
         null=True,
         blank=True,
     )
-
     comments_facility = models.TextField(
         'Comments (facility)',
         null=True,

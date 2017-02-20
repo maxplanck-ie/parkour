@@ -62,13 +62,5 @@
          "name":"RNA (small RNA)",
          "type":"RNA"
       }
-   },
-   {
-      "model":"sample.nucleicacidtype",
-      "pk":9,
-      "fields":{
-         "name":"Other",
-         "type":"DNA"
-      }
    }
 ]

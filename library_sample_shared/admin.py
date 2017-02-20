@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import Organism, ConcentrationMethod, ReadLength
-from .models import IndexType, IndexI7, IndexI5
+from .models import (Organism, ConcentrationMethod, ReadLength, IndexType,
+                     IndexI7, IndexI5, LibraryProtocol, LibraryType)
 from .forms import IndexTypeForm
 
 
@@ -52,3 +52,16 @@ class IndexI5Admin(admin.ModelAdmin):
     list_display = ('index_id', 'index', 'type',)
     search_fields = ('index_id', 'index',)
     list_filter = ('index_type',)
+
+
+@admin.register(LibraryProtocol)
+class LibraryProtocolAdmin(admin.ModelAdmin):
+    list_display = ('name', 'type', 'provider', 'catalog',
+                    'typical_application',)
+    search_fields = ('name', 'provider', 'catalog', 'typical_application',)
+    list_filter = ('type', 'provider',)
+
+
+@admin.register(LibraryType)
+class LibraryTypeAdmin(admin.ModelAdmin):
+    pass

@@ -1,8 +1,12 @@
 from django.test import TestCase
+from django.core.urlresolvers import reverse
+from django.contrib.auth import get_user_model
 
 from .models import (Organism, ConcentrationMethod, ReadLength, IndexType,
-                     IndexI7, GenericIndex, BarcodeCounter,
-                     GenericLibrarySample)
+                     IndexI7, GenericIndex, BarcodeCounter, LibraryProtocol,
+                     LibraryType, GenericLibrarySample)
+
+User = get_user_model()
 
 
 # Models
@@ -73,6 +77,34 @@ class BarcodeCounterTest(TestCase):
         self.assertEqual(counter.__str__(), str(counter.counter))
 
 
+class LibraryProtocolTest(TestCase):
+    def setUp(self):
+        self.library_protocol = LibraryProtocol(
+            name='Protocol',
+            provider='',
+            catalog='',
+            explanation='',
+            input_requirements='',
+            typical_application='',
+        )
+
+    def test_library_protocol_name(self):
+        self.assertTrue(isinstance(self.library_protocol, LibraryProtocol))
+        self.assertEqual(
+            self.library_protocol.__str__(),
+            self.library_protocol.name,
+        )
+
+
+class LibraryTypeTest(TestCase):
+    def setUp(self):
+        self.library_type = LibraryType(name='Library Type')
+
+    def test_library_type_name(self):
+        self.assertTrue(isinstance(self.library_type, LibraryType))
+        self.assertEqual(self.library_type.__str__(), self.library_type.name)
+
+
 class GenericLibrarySampleTest(TestCase):
     def setUp(self):
         organism = Organism(name='mouse')
@@ -84,8 +116,6 @@ class GenericLibrarySampleTest(TestCase):
             organism=organism,
             concentration=1.0,
             concentration_method=concentration_method,
-            dna_dissolved_in='dna',
-            sample_volume=1,
             read_length=read_length,
             sequencing_depth=1
         )
@@ -94,6 +124,68 @@ class GenericLibrarySampleTest(TestCase):
         self.assertTrue(isinstance(self.library, GenericLibrarySample))
         self.assertEqual(self.library.__str__(), self.library.name)
 
+
+# Views
+
+class GetLibraryProtocolsTest(TestCase):
+    def setUp(self):
+        User.objects.create_user(email='foo@bar.io', password='foo-foo')
+
+    def test_nucleic_acid_types(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.get(reverse('get_library_protocols'), {
+            'type': 'DNA'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(response.content, b'[]')
+
+    def test_wrong_http_method(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('get_library_protocols'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b'[]')
+
+    def test_missing_sample_type(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.get(reverse('get_library_protocols'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b'[]')
+
+
+class GetLibraryTypes(TestCase):
+    def setUp(self):
+        self.library_protocol = LibraryProtocol(
+            name='Protocol',
+            provider='Provider',
+        )
+        self.library_protocol.save()
+
+        self.library_type = LibraryType(name='Library Type')
+        self.library_type.save()
+        self.library_type.library_protocol.add(self.library_protocol)
+
+    def test_get_library_types_ok(self):
+        response = self.client.get(reverse('get_library_types'), {
+            'library_protocol_id': self.library_protocol.pk
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), [{
+            'id': self.library_type.pk,
+            'name': self.library_type.name,
+        }])
+
+    def test_missing_or_empty_library_protocol_id(self):
+        response = self.client.get(reverse('get_library_types'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b'[]')
+
+    def test_non_existing_library_protocol_id(self):
+        response = self.client.get(reverse('get_library_types'), {
+            'library_protocol_id': '-1'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b'[]')
 
 # Fixtures
 

@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('sample', '0002_load_initial_data'),
-        ('library', '0002_load_initial_data'),
+        ('library', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
