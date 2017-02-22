@@ -107,6 +107,8 @@ def get_all(request):
                     'nucleicAcidTypeId': sample.nucleic_acid_type_id,
                     'libraryProtocol': sample.library_protocol.name,
                     'libraryProtocolId': sample.library_protocol_id,
+                    'libraryType': sample.library_type.name,
+                    'libraryTypeId': sample.library_type.id,
                     'amplificationCycles': sample.amplification_cycles,
                     'organism': sample.organism.name,
                     'organismId': sample.organism.id,

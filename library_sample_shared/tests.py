@@ -145,12 +145,6 @@ class GetLibraryProtocolsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b'[]')
 
-    def test_missing_sample_type(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.get(reverse('get_library_protocols'))
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, b'[]')
-
 
 class GetLibraryTypes(TestCase):
     def setUp(self):

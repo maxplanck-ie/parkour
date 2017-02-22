@@ -50,8 +50,11 @@ def get_library_protocols(request):
     data = []
 
     if request.method == 'GET':
-        sample_type = request.GET.get('type', '')
-        library_protocols = LibraryProtocol.objects.filter(type=sample_type)
+        na_type = request.GET.get('type', '')  # Nucleic Acid Type
+        if na_type:
+            library_protocols = LibraryProtocol.objects.filter(type=na_type)
+        else:
+            library_protocols = LibraryProtocol.objects.all()
 
         data = [
             {
