@@ -24,9 +24,9 @@ def build_docs():
 def deploy():
     branch = local('git rev-parse --abbrev-ref HEAD', capture=True)
     pyperclip.copy('git checkout %s && git pull && '
-                   'pip install -r requirements.txt && '
-                   'python manage.py migrate && '
-                   'python manage.py collectstatic --noinput && exit' % branch)
+                   'pip3 install -r requirements.txt && '
+                   'python3 manage.py migrate && '
+                   'python3 manage.py collectstatic --noinput && exit' % branch)
     run('docker exec -it dockerparkour_parkour_1 /bin/bash')
     run('docker restart dockerparkour_parkour_1')
 
