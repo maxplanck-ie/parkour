@@ -4,8 +4,9 @@ from django.core.files.base import ContentFile
 from django.test import TestCase
 
 from library_sample_shared.models import (Organism, IndexType,
-                                          ConcentrationMethod, ReadLength)
-from .models import LibraryProtocol, LibraryType, FileLibrary, Library
+                                          ConcentrationMethod, ReadLength,
+                                          LibraryProtocol, LibraryType)
+from .models import FileLibrary, Library
 from sample.models import Sample
 from request.models import Request
 
@@ -15,27 +16,6 @@ User = get_user_model()
 
 
 # Models
-
-class LibraryProtocolTest(TestCase):
-    def setUp(self):
-        self.protocol = LibraryProtocol(
-            name='Protocol',
-            provider='Provider',
-        )
-
-    def test_library_protocol_name(self):
-        self.assertTrue(isinstance(self.protocol, LibraryProtocol))
-        self.assertEqual(self.protocol.__str__(), self.protocol.name)
-
-
-class LibraryTypeTest(TestCase):
-    def setUp(self):
-        self.library_type = LibraryType(name='Library Type')
-
-    def test_library_type_name(self):
-        self.assertTrue(isinstance(self.library_type, LibraryType))
-        self.assertEqual(self.library_type.__str__(), self.library_type.name)
-
 
 class FileLibraryTest(TestCase):
     def setUp(self):
@@ -50,12 +30,10 @@ class FileLibraryTest(TestCase):
 
 # Views
 
-class GetAllLibrariesAdminTest(TestCase):
-    _is_staff = True
-
+class GetAllLibrariesTest(TestCase):
     def setUp(self):
         user = User.objects.create_user(
-            email='foo@bar.io', password='foo-foo', is_staff=self._is_staff,
+            email='foo@bar.io', password='foo-foo', is_staff=True,
         )
         user.save()
 
@@ -82,51 +60,20 @@ class GetAllLibrariesAdminTest(TestCase):
         self.assertEqual(response.content, b'[]')
 
 
-class GetAllLibrariesUserTest(GetAllLibrariesAdminTest):
-    _is_staff = False
-
-
-class GetLibraryProtocols(TestCase):
-    def test_get_library_protocols(self):
-        response = self.client.get(reverse('get_library_protocols'))
-        self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(response.content, b'[]')
-
-
-class GetLibraryType(TestCase):
-    def setUp(self):
-        self.library_protocol = LibraryProtocol(
-            name='Protocol',
-            provider='Provider',
-        )
-        self.library_protocol.save()
-
-        self.library_type = LibraryType(name='Library Type')
-        self.library_type.save()
-        self.library_type.library_protocol.add(self.library_protocol)
-
-    def test_get_library_type_ok(self):
-        response = self.client.get(reverse('get_library_type'), {
-            'library_protocol_id': self.library_protocol.pk
-        })
-
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(str(response.content, 'utf-8'), [{
-            'id': self.library_type.pk,
-            'name': self.library_type.name,
-        }])
-
-    def test_missing_or_empty_library_protocol_id(self):
-        response = self.client.get(reverse('get_library_type'))
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, b'[]')
-
-    def test_non_existing_library_protocol_id(self):
-        response = self.client.get(reverse('get_library_type'), {
-            'library_protocol_id': '-1'
-        })
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, b'[]')
+# class GetAllLibrariesUserTest(GetAllLibrariesAdminTest):
+#     _is_staff = False
+#
+#     def test_missing_or_empty_library_protocol_id(self):
+#         response = self.client.get(reverse('get_library_types'))
+#         self.assertEqual(response.status_code, 200)
+#         self.assertEqual(response.content, b'[]')
+#
+#     def test_non_existing_library_protocol_id(self):
+#         response = self.client.get(reverse('get_library_types'), {
+#             'library_protocol_id': '-1'
+#         })
+#         self.assertEqual(response.status_code, 200)
+#         self.assertEqual(response.content, b'[]')
 
 
 class SaveLibraryTest(TestCase):
@@ -165,13 +112,11 @@ class SaveLibraryTest(TestCase):
             organism_id=self.organism.pk,
             concentration=1.0,
             concentration_method_id=self.method.pk,
-            dna_dissolved_in='dna',
-            sample_volume=1,
             read_length_id=self.read_length.pk,
             sequencing_depth=1,
             library_protocol_id=self.library_protocol.pk,
             library_type_id=self.library_type.pk,
-            enrichment_cycles=1,
+            amplification_cycles=1,
             index_type_id=self.index_type.pk,
             index_reads=0,
             mean_fragment_size=1,
@@ -186,17 +131,15 @@ class SaveLibraryTest(TestCase):
             'name': 'Library_add',
             'library_protocol': self.library_protocol.pk,
             'library_type': self.library_type.pk,
-            'enrichment_cycles': '1',
+            'amplification_cycles': '1',
             'organism': self.organism.pk,
             'index_type': self.index_type.pk,
             'index_reads': '0',
             'index_i7': '',
             'index_i5': '',
             'equal_representation_nucleotides': 'false',
-            'dna_dissolved_in': '1',
             'concentration': '1.0',
             'concentration_method': self.method.pk,
-            'sample_volume': '1',
             'mean_fragment_size': '1',
             'qpcr_result': '1',
             'read_length': self.read_length.pk,
@@ -233,17 +176,15 @@ class SaveLibraryTest(TestCase):
             'name': 'Library_edit_new',
             'library_protocol': self.library_protocol.pk,
             'library_type': self.library_type.pk,
-            'enrichment_cycles': '1',
+            'amplification_cycles': '1',
             'organism': self.organism.pk,
             'index_type': self.index_type.pk,
             'index_reads': '0',
             'index_i7': '',
             'index_i5': '',
             'equal_representation_nucleotides': 'false',
-            'dna_dissolved_in': '1',
             'concentration': '1.0',
             'concentration_method': self.method.pk,
-            'sample_volume': '1',
             'mean_fragment_size': '1',
             'qpcr_result': '1',
             'read_length': self.read_length.pk,
@@ -264,7 +205,7 @@ class SaveLibraryTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(str(response.content, 'utf-8'), {
             'success': False,
-            'error': 'Wrong HTTP method.',
+            'error': 'Could not save the library.',
             'data': [],
         })
 
@@ -274,7 +215,7 @@ class SaveLibraryTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(str(response.content, 'utf-8'), {
             'success': False,
-            'error': 'Wrong or missing mode.',
+            'error': 'Could not save the library.',
             'data': [],
         })
 
@@ -291,7 +232,11 @@ class SaveLibraryTest(TestCase):
             'library_id': '-1',
         })
         self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(response.content, b'[]')
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Could not save the library.',
+            'data': [],
+        })
 
 
 class DeleteLibraryTest(TestCase):
@@ -312,6 +257,10 @@ class DeleteLibraryTest(TestCase):
         self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.post(reverse('delete_library'))
         self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Could not delete the library.',
+        })
 
     def test_wrong_http_method(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
@@ -319,5 +268,5 @@ class DeleteLibraryTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(str(response.content, 'utf-8'), {
             'success': False,
-            'error': 'Wrong HTTP method.',
+            'error': 'Could not delete the library.',
         })

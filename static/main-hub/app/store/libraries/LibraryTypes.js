@@ -1,6 +1,6 @@
-Ext.define('MainHub.store.libraries.LibraryType', {
+Ext.define('MainHub.store.libraries.LibraryTypes', {
     extend: 'Ext.data.Store',
-    storeId: 'libraryTypeStore',
+    storeId: 'libraryTypesStore',
 
     requires: [
         'MainHub.model.libraries.LibraryField'
@@ -10,7 +10,7 @@ Ext.define('MainHub.store.libraries.LibraryType', {
 
     proxy: {
         type: 'ajax',
-        url: 'library/library_type/',
+        url: 'get_library_types/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"

@@ -1,8 +1,7 @@
 Ext.define('MainHub.model.libraries.LibraryProtocol', {
     extend: 'MainHub.model.Base',
 
-    fields: [
-        {
+    fields: [{
             type: 'int',
             name: 'id'
         },
@@ -13,6 +12,26 @@ Ext.define('MainHub.model.libraries.LibraryProtocol', {
         {
             type: 'string',
             name: 'provider'
+        },
+        {
+            type: 'string',
+            name: 'catalog'
+        },
+        {
+            type: 'string',
+            name: 'explanation'
+        },
+        {
+            type: 'string',
+            name: 'inputRequirements'
+        },
+        {
+            type: 'string',
+            name: 'typicalApplication'
+        },
+        {
+            type: 'string',
+            name: 'comments'
         }
     ]
 });

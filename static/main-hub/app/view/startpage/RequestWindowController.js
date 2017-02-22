@@ -55,8 +55,10 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
             Ext.getCmp('deepSeqRequest').enable();
 
             if (record.deepSeqRequestName !== '') {
+                // TODO@me: improve the code
                 Ext.getCmp('uploadedDeepSeqRequest').setHtml(
-                    'Uploaded File: <a href="' + record.deepSeqRequestPath + '" target="_blank">' + record.deepSeqRequestName + '</a>'
+                    // 'Uploaded File: <a href="' + record.deepSeqRequestPath + '" target="_blank">' + record.deepSeqRequestName + '</a>'
+                    'Uploaded File: <a href="' + record.deepSeqRequestPath + '" target="_blank">file</a>'
                 );
             }
 

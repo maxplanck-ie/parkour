@@ -50,11 +50,7 @@ Ext.define('MainHub.model.libraries.Library', {
             type: 'int'
         },
         {
-            name: 'enrichmentCycles',
-            type: 'string'
-        },
-        {
-            name: 'amplifiedCycles',
+            name: 'amplificationCycles',
             type: 'string'
         },
         {
@@ -90,10 +86,6 @@ Ext.define('MainHub.model.libraries.Library', {
             type: 'string'
         },
         {
-            name: 'DNADissolvedIn',
-            type: 'string'
-        },
-        {
             name: 'concentration',
             type: 'string'
         },
@@ -104,10 +96,6 @@ Ext.define('MainHub.model.libraries.Library', {
         {
             name: 'concentrationMethodId',
             type: 'int'
-        },
-        {
-            name: 'sampleVolume',
-            type: 'string'
         },
         {
             name: 'meanFragmentSize',
@@ -147,27 +135,11 @@ Ext.define('MainHub.model.libraries.Library', {
             type: 'int'
         },
         {
-            name: 'DNaseTreatment',
-            type: 'string'
-        },
-        {
             name: 'rnaQuality',
             type: 'int'
         },
         {
             name: 'rnaQualityName',
-            type: 'string'
-        },
-        {
-            name: 'rnaSpikeIn',
-            type: 'string'
-        },
-        {
-            name: 'samplePreparationProtocol',
-            type: 'string'
-        },
-        {
-            name: 'requestedSampleTreatment',
             type: 'string'
         }
     ],

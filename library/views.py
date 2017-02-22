@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 
-from .models import LibraryProtocol, LibraryType, Library, FileLibrary
+from .models import Library, FileLibrary
 from request.models import Request
 from .forms import LibraryForm
 
@@ -48,7 +48,7 @@ def get_all(request):
                     'libraryProtocolId': library.library_protocol.id,
                     'libraryType': library.library_type.name,
                     'libraryTypeId': library.library_type.id,
-                    'enrichmentCycles': library.enrichment_cycles,
+                    'amplificationCycles': library.amplification_cycles,
                     'organism': library.organism.name,
                     'organismId': library.organism.id,
                     'indexType': library.index_type.name,
@@ -58,13 +58,11 @@ def get_all(request):
                     'indexI5': library.index_i5,
                     'equalRepresentation':
                         str(library.equal_representation_nucleotides),
-                    'DNADissolvedIn': library.dna_dissolved_in,
                     'concentration': library.concentration,
                     'concentrationMethod':
                         library.concentration_method.name,
                     'concentrationMethodId':
                         library.concentration_method.id,
-                    'sampleVolume': library.sample_volume,
                     'meanFragmentSize': library.mean_fragment_size,
                     'qPCRResult': library.qpcr_result,
                     'readLength':
@@ -87,7 +85,6 @@ def get_all(request):
                         not None else '',
                     'dateFacility': library.date_facility.strftime('%d.%m.%Y')
                         if library.date_facility is not None else '',
-                    'sampleVolumeFacility': library.sample_volume_facility,
                     'amountFacility': library.amount_facility,
                     'sizeDistributionFacility':
                         library.size_distribution_facility,
@@ -108,35 +105,29 @@ def get_all(request):
                     'date': sample.date.strftime('%d.%m.%Y'),
                     'nucleicAcidType': sample.nucleic_acid_type.name,
                     'nucleicAcidTypeId': sample.nucleic_acid_type_id,
-                    'libraryProtocol': sample.sample_protocol.name,
-                    'libraryProtocolId': sample.sample_protocol_id,
-                    'amplifiedCycles': sample.amplified_cycles,
+                    'libraryProtocol': sample.library_protocol.name,
+                    'libraryProtocolId': sample.library_protocol_id,
+                    'libraryType': sample.library_type.name,
+                    'libraryTypeId': sample.library_type.id,
+                    'amplificationCycles': sample.amplification_cycles,
                     'organism': sample.organism.name,
                     'organismId': sample.organism.id,
                     'equalRepresentation':
                         str(sample.equal_representation_nucleotides),
-                    'DNADissolvedIn': sample.dna_dissolved_in,
                     'concentration': sample.concentration,
                     'concentrationMethod':
                         sample.concentration_method.name,
                     'concentrationMethodId':
                         sample.concentration_method.id,
-                    'sampleVolume': sample.sample_volume,
                     'readLength':
                         sample.read_length.name,
                     'readLengthId':
                         sample.read_length.id,
                     'sequencingDepth': sample.sequencing_depth,
-                    'DNaseTreatment': str(sample.dnase_treatment),
                     'rnaQuality': sample.rna_quality
                         if sample.rna_quality else '',
                     'rnaQualityName': sample.get_rna_quality_display()
                         if sample.rna_quality else '',
-                    'rnaSpikeIn': str(sample.rna_spike_in),
-                    'samplePreparationProtocol':
-                        sample.sample_preparation_protocol,
-                    'requestedSampleTreatment':
-                        sample.requested_sample_treatment,
                     'comments': sample.comments,
                     'barcode': sample.barcode,
                     'files': [file.id for file in sample.files.all()],
@@ -152,7 +143,6 @@ def get_all(request):
                         not None else '',
                     'dateFacility': sample.date_facility.strftime('%d.%m.%Y')
                         if sample.date_facility is not None else '',
-                    'sampleVolumeFacility': sample.sample_volume_facility,
                     'amountFacility': sample.amount_facility,
                     'sizeDistributionFacility':
                         sample.size_distribution_facility,
@@ -173,51 +163,16 @@ def get_all(request):
     return JsonResponse(data, safe=False)
 
 
-def get_library_protocols(request):
-    """ Get the list of all library protocols. """
-    data = [
-        {
-            'id': protocol.id,
-            'name': protocol.name,
-            'provider': protocol.provider,
-        }
-        for protocol in LibraryProtocol.objects.all()
-    ]
-    return JsonResponse(data, safe=False)
-
-
-def get_library_type(request):
-    """ Get the list of all library types for a given library protocol. """
-    data = []
-    library_protocol_id = request.GET.get('library_protocol_id', '')
-
-    try:
-        protocol = LibraryProtocol.objects.get(pk=library_protocol_id)
-        library_types = LibraryType.objects.filter(
-            library_protocol__in=[protocol]
-        )
-
-        data = [
-            {
-                'id': library_type.id,
-                'name': library_type.name,
-            }
-            for library_type in library_types
-        ]
-
-    except (ValueError, LibraryProtocol.DoesNotExist) as e:
-        logger.exception(e)
-
-    return JsonResponse(data, safe=False)
-
-
 @login_required
 def save_library(request):
     """ Add a new library or update an existing one. """
     error = ''
     data = []
 
-    if request.method == 'POST':
+    try:
+        if request.method != 'POST':
+            raise ValueError('Wrong HTTP method.')
+
         mode = request.POST.get('mode')
         library_id = request.POST.get('library_id', '')
         files = json.loads(request.POST.get('files', '[]'))
@@ -225,30 +180,24 @@ def save_library(request):
         if mode == 'add':
             form = LibraryForm(request.POST)
         elif mode == 'edit':
-            try:
-                lib = Library.objects.get(id=library_id)
-                form = LibraryForm(request.POST, instance=lib)
-            except (ValueError, Library.DoesNotExist) as e:
-                form = None
-                error = str(e)
-                logger.exception(e)
+            lib = Library.objects.get(id=library_id)
+            form = LibraryForm(request.POST, instance=lib)
         else:
-            form = None
+            raise ValueError('Wrong or missing mode.')
 
-        if form:
-            if form.is_valid():
-                lib = form.save()
+        if form.is_valid():
+            lib = form.save()
 
-                if mode == 'add':
-                    lib.files.add(*files)
-                    data = {
-                        'name': lib.name,
-                        'recordType': 'L',
-                        'libraryId': lib.id,
-                        'barcode': lib.barcode,
-                    }
-
-                elif mode == 'edit':
+            if mode == 'add':
+                lib.files.add(*files)
+                data = {
+                    'name': lib.name,
+                    'recordType': 'L',
+                    'libraryId': lib.id,
+                    'barcode': lib.barcode,
+                }
+            else:
+                if files:
                     old_files = [file for file in lib.files.all()]
                     lib.files.clear()
                     lib.save()
@@ -259,32 +208,31 @@ def save_library(request):
                     files_to_delete = list(set(old_files) - set(new_files))
                     for file in files_to_delete:
                         file.delete()
-            else:
-                error = str(form.errors)
-                logger.debug(form.errors)
         else:
-            error = error if error else 'Wrong or missing mode.'
-    else:
-        error = 'Wrong HTTP method.'
+            error = str(form.errors)
+            logger.debug(form.errors)
+
+    except Exception as e:
+        error = 'Could not save the library.'
+        logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error, 'data': data})
 
 
 @login_required
 def delete_library(request):
-    """ Delete a library with a given id. """
+    """ Delete library with a given id. """
     error = ''
 
-    if request.method == 'POST':
+    try:
+        if request.method != 'POST':
+            raise ValueError('Wrong HTTP method.')
         record_id = request.POST.get('record_id', '')
-        try:
-            record = Library.objects.get(pk=record_id)
-            record.delete()
-        except (ValueError, Library.DoesNotExist) as e:
-            error = str(e)
-            logger.exception(e)
-    else:
-        error = 'Wrong HTTP method.'
+        library = Library.objects.get(pk=record_id)
+        library.delete()
+    except (ValueError, Library.DoesNotExist) as e:
+        error = 'Could not delete the library.'
+        logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error})
 
@@ -303,8 +251,8 @@ def upload_files(request):
                 file_ids.append(f.id)
 
         except Exception as e:
-            error = str(e)
-            logger.exception(error)
+            error = 'Could not upload the file(s).'
+            logger.exception(e)
 
     return JsonResponse({
         'success': not error,
@@ -333,7 +281,7 @@ def get_files(request):
         ]
 
     except Exception as e:
-        error = str(e)
-        logger.exception(error)
+        error = 'Could not get attached files.'
+        logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error, 'data': data})
