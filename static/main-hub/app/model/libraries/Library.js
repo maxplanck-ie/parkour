@@ -50,7 +50,7 @@ Ext.define('MainHub.model.libraries.Library', {
             type: 'int'
         },
         {
-            name: 'amplificationCycles',
+            name: 'amplification_cycles',
             type: 'string'
         },
         {
@@ -70,15 +70,15 @@ Ext.define('MainHub.model.libraries.Library', {
             type: 'int'
         },
         {
-            name: 'indexReads',
+            name: 'index_reads',
             type: 'string'
         },
         {
-            name: 'indexI7',
+            name: 'index_i7',
             type: 'string'
         },
         {
-            name: 'indexI5',
+            name: 'index_i5',
             type: 'string'
         },
         {
@@ -98,11 +98,11 @@ Ext.define('MainHub.model.libraries.Library', {
             type: 'int'
         },
         {
-            name: 'meanFragmentSize',
+            name: 'mean_fragment_size',
             type: 'string'
         },
         {
-            name: 'qPCRResult',
+            name: 'qpcr_result',
             type: 'string'
         },
         {
@@ -114,7 +114,7 @@ Ext.define('MainHub.model.libraries.Library', {
             type: 'int'
         },
         {
-            name: 'sequencingDepth',
+            name: 'sequencing_depth',
             type: 'string'
         },
         {

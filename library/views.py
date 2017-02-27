@@ -48,14 +48,14 @@ def get_all(request):
                     'libraryProtocolId': library.library_protocol.id,
                     'libraryType': library.library_type.name,
                     'libraryTypeId': library.library_type.id,
-                    'amplificationCycles': library.amplification_cycles,
+                    'amplification_cycles': library.amplification_cycles,
                     'organism': library.organism.name,
                     'organismId': library.organism.id,
                     'indexType': library.index_type.name,
                     'indexTypeId': library.index_type.id,
-                    'indexReads': library.index_reads,
-                    'indexI7': library.index_i7,
-                    'indexI5': library.index_i5,
+                    'index_reads': library.index_reads,
+                    'index_i7': library.index_i7,
+                    'index_i5': library.index_i5,
                     'equalRepresentation':
                         str(library.equal_representation_nucleotides),
                     'concentration': library.concentration,
@@ -63,13 +63,13 @@ def get_all(request):
                         library.concentration_method.name,
                     'concentrationMethodId':
                         library.concentration_method.id,
-                    'meanFragmentSize': library.mean_fragment_size,
-                    'qPCRResult': library.qpcr_result,
+                    'mean_fragment_size': library.mean_fragment_size,
+                    'qpcr_result': library.qpcr_result,
                     'readLength':
                         library.read_length.name,
                     'readLengthId':
                         library.read_length.id,
-                    'sequencingDepth': library.sequencing_depth,
+                    'sequencing_depth': library.sequencing_depth,
                     'comments': library.comments,
                     'barcode': library.barcode,
                     'files': [file.id for file in library.files.all()],
@@ -109,7 +109,7 @@ def get_all(request):
                     'libraryProtocolId': sample.library_protocol_id,
                     'libraryType': sample.library_type.name,
                     'libraryTypeId': sample.library_type.id,
-                    'amplificationCycles': sample.amplification_cycles,
+                    'amplification_cycles': sample.amplification_cycles,
                     'organism': sample.organism.name,
                     'organismId': sample.organism.id,
                     'equalRepresentation':
@@ -123,7 +123,7 @@ def get_all(request):
                         sample.read_length.name,
                     'readLengthId':
                         sample.read_length.id,
-                    'sequencingDepth': sample.sequencing_depth,
+                    'sequencing_depth': sample.sequencing_depth,
                     'rnaQuality': sample.rna_quality
                         if sample.rna_quality else '',
                     'rnaQualityName': sample.get_rna_quality_display()

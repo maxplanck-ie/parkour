@@ -138,24 +138,24 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 },
                 {
                     text: 'size (bp)',
-                    dataIndex: 'meanFragmentSize',
+                    dataIndex: 'mean_fragment_size',
                     width: 75
                 },
                 {
                     text: 'Index Type',
-                    dataIndex: 'indexType'
+                    dataIndex: 'index_type'
                 },
                 {
                     text: '# Index Reads',
-                    dataIndex: 'indexReads'
+                    dataIndex: 'index_reads'
                 },
                 {
                     text: 'I7',
-                    dataIndex: 'indexI7'
+                    dataIndex: 'index_i7'
                 },
                 {
                     text: 'I5',
-                    dataIndex: 'indexI5'
+                    dataIndex: 'index_i5'
                 },
                 {
                     text: 'Length',
@@ -164,12 +164,12 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 },
                 {
                     text: 'Depth (M)',
-                    dataIndex: 'sequencingDepth',
+                    dataIndex: 'sequencing_depth',
                     width: 85
                 },
                 {
                     text: 'Amplification',
-                    dataIndex: 'amplificationCycles'
+                    dataIndex: 'amplification_cycles'
                 },
                 {
                     text: 'Equal nucl.',
@@ -180,7 +180,7 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 },
                 {
                     text: 'qPCR Result',
-                    dataIndex: 'qPCRResult'
+                    dataIndex: 'qpcr_result'
                 },
                 {
                     text: 'F/S',
