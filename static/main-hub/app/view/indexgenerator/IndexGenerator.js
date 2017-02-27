@@ -99,7 +99,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                 },
                 plugins: [{
                     ptype: 'rowediting',
-                    clicksToEdit: 2
+                    clicksToEdit: 1
                 }],
                 store: 'PoolingTree',
                 rootVisible: false,

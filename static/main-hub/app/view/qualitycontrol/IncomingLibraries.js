@@ -248,7 +248,7 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
             },
             {
                 ptype: 'rowediting',
-                clicksToEdit: 2
+                clicksToEdit: 1
             }
         ]
     }]

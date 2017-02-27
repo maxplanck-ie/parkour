@@ -83,7 +83,7 @@ def pooling_tree(request):
                     'sampleId': sample.id,
                     'recordType': 'S',
                     'sequencingDepth': sample.sequencing_depth,
-                    'libraryProtocolName': sample.sample_protocol.name,
+                    'libraryProtocolName': sample.library_protocol.name,
                     'indexI7': '',
                     'indexI7Id': '',
                     'indexI5Id': '',
