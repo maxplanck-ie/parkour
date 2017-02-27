@@ -44,11 +44,11 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
         if (context.colIdx !== 3 && context.colIdx !== 5) {
             return false;
         } else {
-            // Disable editing of a library's Index Type
             if (context.record.get('recordType') === 'L') {
-                setInterval(function() {
-                    Ext.getCmp('indexTypeEditor').disable();
-                }, 100);
+                // Disable editing of a library's Index Type
+                setTimeout(function() {Ext.getCmp('indexTypeEditor').disable();}, 50);
+            } else {
+                setTimeout(function() {Ext.getCmp('indexTypeEditor').enable();}, 50);
             }
         }
     },

@@ -8,7 +8,6 @@ from sample.models import Sample
 
 class IndexGenerator:
     """ Main IndexGenerator class. """
-
     def __init__(self, library_ids=(), sample_ids=()):
         self._result = []
         self._indices = {}
@@ -24,9 +23,7 @@ class IndexGenerator:
         self.construct_index_registry()
 
     def construct_index_registry(self):
-        """
-        Construct a dictionary with all libraries' and samples' indices.
-        """
+        """ Construct a dictionary with indices. """
         # Index types for all libraries and samples
         index_types = list(set(
             [l.index_type for l in self._libraries if l.index_type] +
@@ -39,28 +36,20 @@ class IndexGenerator:
 
         for index_type in index_types:
             self._indices[index_type.pk] = {'i7': [], 'i5': []}
-
-            if index_type.is_index_i7:
-                self._indices[index_type.pk]['i7'].extend([
-                    {
-                        'index': idx.index,
-                        'index_id': idx.index_id,
-                    }
-                    for idx in IndexI7.objects.filter(
-                        index_type=index_type.pk,
-                    )
-                ])
-
-            if index_type.is_index_i5:
-                self._indices[index_type.pk]['i5'].extend([
-                    {
-                        'index': idx.index,
-                        'index_id': idx.index_id,
-                    }
-                    for idx in IndexI5.objects.filter(
-                        index_type=index_type.pk,
-                    )
-                ])
+            self._indices[index_type.pk]['i7'].extend([
+                {
+                    'index': idx.index,
+                    'index_id': idx.index_id,
+                }
+                for idx in index_type.indices_i7.all()
+            ])
+            self._indices[index_type.pk]['i5'].extend([
+                {
+                    'index': idx.index,
+                    'index_id': idx.index_id,
+                }
+                for idx in index_type.indices_i5.all()
+            ])
 
     def _update_indices(self, idx_type_id, idx_type, index):
         """ Remove a given index from the index registry. """

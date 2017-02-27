@@ -57,7 +57,6 @@ class Library(GenericLibrarySample):
             library_protocol_id=1,
             library_type_id=1,
             enrichment_cycles=1,
-            index_type_id=4,  # Other
             amplification_cycles=1,
             index_type_id=1,
             index_reads=0,
