@@ -164,10 +164,19 @@ def save_pool(request):
             # and set their Index I7 and Index I5 indices
             for sample in samples:
                 smpl = Sample.objects.get(pk=sample['sample_id'])
+                idx_i7_id = sample['index_i7_id']
+                idx_i5_id = sample['index_i5_id']
+
+                if idx_i7_id == '':
+                    raise ValueError('Index I7 is not set for "%s"' % smpl.name)
+
+                index_i7 = IndexI7.objects.get(index_id=idx_i7_id).index
+                index_i5 = IndexI5.objects.get(index_id=idx_i5_id).index \
+                    if idx_i5_id else ''
 
                 # Update sample fields
-                smpl.index_i7 = sample['index_i7']
-                smpl.index_i5 = sample['index_i5']
+                smpl.index_i7 = index_i7
+                smpl.index_i5 = index_i5
                 smpl.is_pooled = True
                 smpl.is_converted = True
                 smpl.barcode = smpl.barcode.replace('S', 'L')

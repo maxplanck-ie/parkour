@@ -293,8 +293,8 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
                 } else {
                     samples.push({
                         sample_id: record.get('sampleId'),
-                        index_i7: record.get('indexI7') ? record.get('indexI7') : '',
-                        index_i5: record.get('indexI5') ? record.get('indexI5') : ''
+                        index_i7_id: record.get('indexI7Id') ? record.get('indexI7Id') : '',
+                        index_i5_id: record.get('indexI5Id') ? record.get('indexI5Id') : ''
                     });
                 }
             });

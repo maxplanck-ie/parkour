@@ -25,14 +25,14 @@ class IndexGenerator:
     def construct_index_registry(self):
         """ Construct a dictionary with indices. """
         # Index types for all libraries and samples
-        index_types = list(set(
-            [l.index_type for l in self._libraries if l.index_type] +
+        index_types = \
+            [l.index_type for l in self._libraries if l.index_type] + \
             [s.index_type for s in self._samples if s.index_type]
-        ))
 
-        if not index_types:
+        if len(index_types) != self._num_libraries + self._num_samples:
             raise ValueError('Index Type must be set for all ' +
                              'libraries and samples.')
+        index_types = list(set(index_types))
 
         for index_type in index_types:
             self._indices[index_type.pk] = {'i7': [], 'i5': []}

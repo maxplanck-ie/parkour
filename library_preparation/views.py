@@ -3,7 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
-from library_sample_shared.models import IndexI7, IndexI5
+from library_sample_shared.models import IndexType, IndexI7, IndexI5
 from sample.models import Sample
 from pooling.models import Pooling
 from .models import LibraryPreparation
@@ -31,28 +31,29 @@ def get_all(request):
                 obj = None
 
         if obj and obj.sample.status == 2:
-            index_i7 = IndexI7.objects.get(
-                index=obj.sample.index_i7,
-                index_type_id=obj.sample.index_type_id
-            )
-            index_i7_id = index_i7.index_id
+            try:
+                index_type = IndexType.objects.get(pk=obj.sample.index_type.pk)
+                index_i7 = index_type.indices_i7.get(index=obj.sample.index_i7)
+            except Exception:
+                index_i7_id = ''
+            else:
+                index_i7_id = index_i7.index_id
 
             try:
-                index_i5 = IndexI5.objects.get(
-                    index=obj.sample.index_i5,
-                    index_type_id=obj.sample.index_type_id
-                )
-                index_i5_id = index_i5.index_id
-            except IndexI5.DoesNotExist:
+                index_type = IndexType.objects.get(pk=obj.sample.index_type.pk)
+                index_i5 = index_type.indices_i5.get(index=obj.sample.index_i5)
+            except Exception:
                 index_i5_id = ''
+            else:
+                index_i5_id = index_i5.index_id
 
             data.append({
                 'active': False,
                 'name': obj.sample.name,
                 'sampleId': obj.sample.id,
                 'barcode': obj.sample.barcode,
-                'libraryProtocol': obj.sample.sample_protocol.id,
-                'libraryProtocolName': obj.sample.sample_protocol.name,
+                'libraryProtocol': obj.sample.library_protocol.id,
+                'libraryProtocolName': obj.sample.library_protocol.name,
                 'concentrationSample': obj.sample.concentration,
                 'startingAmount': obj.starting_amount,
                 'startingVolume': obj.starting_volume,

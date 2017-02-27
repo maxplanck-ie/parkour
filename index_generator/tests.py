@@ -334,33 +334,33 @@ class GenerateIndicesTest(TestCase):
         idx_type3.save()
 
         # Indices I7
-        idx1 = IndexI7(index_type=idx_type1, index='ATCACG', index_id='A01')
-        idx2 = IndexI7(index_type=idx_type1, index='CGATGT', index_id='A02')
-        idx3 = IndexI7(index_type=idx_type1, index='ACAGTG', index_id='A05')
-        idx4 = IndexI7(index_type=idx_type1, index='GTGGCC', index_id='A20')
-        idx5 = IndexI7(index_type=idx_type1, index='GAGTGG', index_id='A23')
-        idx6 = IndexI7(index_type=idx_type1, index='ATTCCT', index_id='A27')
-        idx7 = IndexI7(index_type=idx_type1, index='ATGTCA', index_id='A15')
-        idx8 = IndexI7(index_type=idx_type1, index='AGTCAA', index_id='A13')
-        idx9 = IndexI7(index_type=idx_type1, index='GTCCGC', index_id='A18')
-        idx10 = IndexI7(index_type=idx_type1, index='GTGAAA', index_id='A19')
-        idx11 = IndexI7(index_type=idx_type2, index='ATCACG', index_id='RP1')
-        idx12 = IndexI7(index_type=idx_type2, index='CAACTA', index_id='RP29')
-        idx13 = IndexI7(index_type=idx_type2, index='TACAGC', index_id='RP43')
-        idx14 = IndexI7(index_type=idx_type2, index='GGTAGC', index_id='RP24')
-        idx15 = IndexI7(index_type=idx_type2, index='GTGAAA', index_id='RP19')
-        idx16 = IndexI7(index_type=idx_type3, index='TAAGGCGA', index_id='N01')
-        idx17 = IndexI7(index_type=idx_type3, index='CGTACTAG', index_id='N02')
-        idx18 = IndexI7(index_type=idx_type3, index='AGGCAGAA', index_id='N03')
-        idx19 = IndexI7(index_type=idx_type3, index='TCCTGAGC', index_id='N04')
-        idx20 = IndexI7(index_type=idx_type3, index='GGACTCCT', index_id='N05')
+        idx1 = IndexI7(index='ATCACG', index_id='A01')
+        idx2 = IndexI7(index='CGATGT', index_id='A02')
+        idx3 = IndexI7(index='ACAGTG', index_id='A05')
+        idx4 = IndexI7(index='GTGGCC', index_id='A20')
+        idx5 = IndexI7(index='GAGTGG', index_id='A23')
+        idx6 = IndexI7(index='ATTCCT', index_id='A27')
+        idx7 = IndexI7(index='ATGTCA', index_id='A15')
+        idx8 = IndexI7(index='AGTCAA', index_id='A13')
+        idx9 = IndexI7(index='GTCCGC', index_id='A18')
+        idx10 = IndexI7(index='GTGAAA', index_id='A19')
+        idx11 = IndexI7(index='ATCACG', index_id='RP1')
+        idx12 = IndexI7(index='CAACTA', index_id='RP29')
+        idx13 = IndexI7(index='TACAGC', index_id='RP43')
+        idx14 = IndexI7(index='GGTAGC', index_id='RP24')
+        idx15 = IndexI7(index='GTGAAA', index_id='RP19')
+        idx16 = IndexI7(index='TAAGGCGA', index_id='N01')
+        idx17 = IndexI7(index='CGTACTAG', index_id='N02')
+        idx18 = IndexI7(index='AGGCAGAA', index_id='N03')
+        idx19 = IndexI7(index='TCCTGAGC', index_id='N04')
+        idx20 = IndexI7(index='GGACTCCT', index_id='N05')
 
         # Indices I5
-        idx21 = IndexI5(index_type=idx_type3, index='TAGATCGC', index_id='S01')
-        idx22 = IndexI5(index_type=idx_type3, index='CTCTCTAT', index_id='S02')
-        idx23 = IndexI5(index_type=idx_type3, index='TATCCTCT', index_id='S03')
-        idx24 = IndexI5(index_type=idx_type3, index='AGAGTAGA', index_id='S04')
-        idx25 = IndexI5(index_type=idx_type3, index='GTAAGGAG', index_id='S05')
+        idx21 = IndexI5(index='TAGATCGC', index_id='S01')
+        idx22 = IndexI5(index='CTCTCTAT', index_id='S02')
+        idx23 = IndexI5(index='TATCCTCT', index_id='S03')
+        idx24 = IndexI5(index='AGAGTAGA', index_id='S04')
+        idx25 = IndexI5(index='GTAAGGAG', index_id='S05')
 
         idx1.save()
         idx2.save()
@@ -387,6 +387,12 @@ class GenerateIndicesTest(TestCase):
         idx23.save()
         idx24.save()
         idx25.save()
+
+        idx_type1.indices_i7.add(*[idx1, idx2, idx3, idx4, idx5, idx6, idx7,
+                                   idx8, idx9, idx10])
+        idx_type2.indices_i7.add(*[idx11, idx12, idx13, idx14, idx15])
+        idx_type3.indices_i7.add(*[idx16, idx17, idx18, idx19, idx20])
+        idx_type3.indices_i5.add(*[idx21, idx22, idx23, idx24, idx25])
 
         # Libraries
         self.library1 = Library.get_test_library()
@@ -489,7 +495,6 @@ class GenerateIndicesTest(TestCase):
         response = self.client.post(reverse('generate_indices'), {
             'samples': '[%s]' % self.sample1.pk,
         })
-
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(str(response.content, 'utf-8'), {
             'success': False,
@@ -529,17 +534,26 @@ class SavePoolTest(TestCase):
         )
         self.user.save()
 
+        self.index_i7 = IndexI7.objects.get(pk=1)
+
         self.library = Library.get_test_library()
-        self.sample = Sample.get_test_sample()
+        self.sample1 = Sample.get_test_sample()
+        self.sample2 = Sample.get_test_sample()
+        self.sample1.index = self.index_i7.index
         self.library.save()
-        self.sample.save()
+        self.sample1.save()
+        self.sample2.save()
 
     def test_save_pool(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
+        samples = [{
+            'sample_id': self.sample1.pk,
+            'index_i7_id': self.index_i7.index_id,
+            'index_i5_id': '',
+        }]
         response = self.client.post(reverse('save_pool'), {
             'libraries': '[%s]' % self.library.pk,
-            'samples': '[{"sample_id": %s, "index_i7": "", "index_i5": ""}]' %
-            self.sample.pk,
+            'samples': json.dumps(samples),
         })
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(str(response.content, 'utf-8'), {
@@ -550,8 +564,25 @@ class SavePoolTest(TestCase):
         pooling_objects = Pooling.objects.filter(library=self.library)
         self.assertEqual(pooling_objects.count(), 1)
 
-        libprep_objects = LibraryPreparation.objects.filter(sample=self.sample)
+        libprep_objects = LibraryPreparation.objects.filter(sample=self.sample1)
         self.assertEqual(libprep_objects.count(), 1)
+
+    def test_missing_index_i7(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        samples = [{
+            'sample_id': self.sample2.pk,
+            'index_i7_id': '',
+            'index_i5_id': '',
+        }]
+        response = self.client.post(reverse('save_pool'), {
+            'libraries': '[%s]' % self.library.pk,
+            'samples': json.dumps(samples),
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Index I7 is not set for "%s"' % self.sample2.name,
+        })
 
     def test_missing_libraries_and_samples(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
