@@ -1,13 +1,12 @@
 Ext.define('MainHub.view.libraries.Libraries', {
     extend: 'Ext.container.Container',
     xtype: 'libraries',
+    controller: 'libraries-libraries',
 
     requires: [
         'MainHub.view.libraries.LibrariesController',
         'MainHub.view.libraries.LibraryWindow'
     ],
-
-    controller: 'libraries-libraries',
 
     anchor: '100% -1',
     layout: 'fit',
@@ -22,37 +21,37 @@ Ext.define('MainHub.view.libraries.Libraries', {
         viewConfig: {
             stripeRows: false,
             getRowClass: function(record) {
-                return record.get('recordType') == 'L' ? 'library-row' : 'sample-row';
+                return record.get('recordType') === 'L' ? 'library-row' : 'sample-row';
             }
         },
         header: {
             title: 'Libraries and Samples',
             items: [{
-                    xtype: 'fieldcontainer',
-                    defaultType: 'checkboxfield',
-                    layout: 'hbox',
-                    margin: '0 20 0 0',
-                    items: [{
-                            boxLabel: 'Show Libraries',
-                            itemId: 'showLibrariesCheckbox',
-                            margin: '0 15 0 0',
-                            cls: 'grid-header-checkbox',
-                            checked: true
-                        },
-                        {
-                            boxLabel: 'Show Samples',
-                            itemId: 'showSamplesCheckbox',
-                            cls: 'grid-header-checkbox',
-                            checked: true
-                        }
-                    ]
+                xtype: 'fieldcontainer',
+                defaultType: 'checkboxfield',
+                layout: 'hbox',
+                margin: '0 20 0 0',
+                items: [{
+                    boxLabel: 'Show Libraries',
+                    itemId: 'showLibrariesCheckbox',
+                    margin: '0 15 0 0',
+                    cls: 'grid-header-checkbox',
+                    checked: true
                 },
                 {
-                    xtype: 'textfield',
-                    itemId: 'searchField',
-                    emptyText: 'Search',
-                    width: 200
+                    boxLabel: 'Show Samples',
+                    itemId: 'showSamplesCheckbox',
+                    cls: 'grid-header-checkbox',
+                    checked: true
                 }
+                ]
+            },
+            {
+                xtype: 'textfield',
+                itemId: 'searchField',
+                emptyText: 'Search',
+                width: 200
+            }
             ]
         },
         store: 'librariesStore',
@@ -175,7 +174,7 @@ Ext.define('MainHub.view.libraries.Libraries', {
                     text: 'Equal nucl.',
                     dataIndex: 'equalRepresentation',
                     renderer: function(val) {
-                        return val == 'True' ? 'Yes' : 'No';
+                        return val === 'True' ? 'Yes' : 'No';
                     }
                 },
                 {

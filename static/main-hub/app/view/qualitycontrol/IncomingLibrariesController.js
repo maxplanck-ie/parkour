@@ -43,7 +43,7 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
             qcResult = (values.qcResult !== null) ? values.qcResult : '';
 
         // Compute Amount
-        if (Object.keys(changes).indexOf('amountFacility') == -1 && dilutionFactor !== '' &&
+        if (Object.keys(changes).indexOf('amountFacility') === -1 && dilutionFactor !== '' &&
             concentrationFacility !== '' && sampleVolumeFacility !== '') {
             amountFacility = parseFloat(dilutionFactor) * parseFloat(concentrationFacility) * parseFloat(sampleVolumeFacility);
         }
@@ -111,15 +111,15 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
             showSamples = null,
             searchQuery = null;
 
-        if (el.itemId == 'showLibrariesCheckbox') {
+        if (el.itemId === 'showLibrariesCheckbox') {
             showLibraries = value;
             showSamples = el.up().items.items[1].getValue();
             searchQuery = el.up('header').down('textfield').getValue();
-        } else if (el.itemId == 'showSamplesCheckbox') {
+        } else if (el.itemId === 'showSamplesCheckbox') {
             showLibraries = el.up().items.items[0].getValue();
             showSamples = value;
             searchQuery = el.up('header').down('textfield').getValue();
-        } else if (el.itemId == 'searchField') {
+        } else if (el.itemId === 'searchField') {
             showLibraries = el.up().down('fieldcontainer').items.items[0].getValue();
             showSamples = el.up().down('fieldcontainer').items.items[1].getValue();
             searchQuery = value;
@@ -128,7 +128,7 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
         var showFilter = Ext.util.Filter({
             filterFn: function(record) {
                 var res = false;
-                if (record.get('recordType') == 'L') {
+                if (record.get('recordType') === 'L') {
                     res = res || showLibraries;
                 } else {
                     res = res || showSamples;

@@ -25,6 +25,9 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
             },
             '#addLibraryBtn': {
                 click: 'addLibrary'
+            },
+            '#batchAddBtn': {
+                click: 'showBatchAddWindow'
             }
         }
     },
@@ -41,7 +44,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
     },
 
     onRequestWindowBoxready: function(wnd) {
-        if (wnd.mode == 'add') {
+        if (wnd.mode === 'add') {
             Ext.getStore('librariesInRequestStore').removeAll();
             Ext.getCmp('downloadRequestBlankBtn').disable();
             Ext.getCmp('uploadSignedBlankBtn').disable();
@@ -78,27 +81,27 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
         e.stopEvent();
         Ext.create('Ext.menu.Menu', {
             items: [{
-                    text: 'Edit',
-                    iconCls: 'x-fa fa-pencil',
-                    handler: function() {
-                        me.editRecord(record);
-                    }
-                },
-                {
-                    text: 'Delete',
-                    iconCls: 'x-fa fa-trash',
-                    handler: function() {
-                        Ext.Msg.show({
-                            title: 'Delete record',
-                            message: 'Are you sure you want to delete this record?',
-                            buttons: Ext.Msg.YESNO,
-                            icon: Ext.Msg.QUESTION,
-                            fn: function(btn) {
-                                if (btn == 'yes') me.deleteRecord(record);
-                            }
-                        });
-                    }
+                text: 'Edit',
+                iconCls: 'x-fa fa-pencil',
+                handler: function() {
+                    me.editRecord(record);
                 }
+            },
+            {
+                text: 'Delete',
+                iconCls: 'x-fa fa-trash',
+                handler: function() {
+                    Ext.Msg.show({
+                        title: 'Delete record',
+                        message: 'Are you sure you want to delete this record?',
+                        buttons: Ext.Msg.YESNO,
+                        icon: Ext.Msg.QUESTION,
+                        fn: function(btn) {
+                            if (btn === 'yes') {me.deleteRecord(record);}
+                        }
+                    });
+                }
+            }
             ]
         }).showAt(e.getXY());
     },
@@ -108,7 +111,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
             title = '',
             fullRecord = null;
 
-        if (record.get('recordType') == 'L') {
+        if (record.get('recordType') === 'L') {
             title = 'Edit Library';
             fullRecord = store.findRecord('libraryId', record.get('libraryId'));
         } else {
@@ -124,7 +127,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
     },
 
     deleteRecord: function(record) {
-        var url = record.data.recordType == 'L' ? 'library/delete/' : 'sample/delete/';
+        var url = record.data.recordType === 'L' ? 'library/delete/' : 'sample/delete/';
 
         Ext.Ajax.request({
             url: url,
@@ -132,7 +135,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
             timeout: 1000000,
             scope: this,
             params: {
-                'record_id': record.data.recordType == 'L' ? record.data.libraryId : record.data.sampleId
+                'record_id': record.data.recordType === 'L' ? record.data.libraryId : record.data.sampleId
             },
 
             success: function(response) {
@@ -173,7 +176,6 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
 
     uploadPDF: function(btn) {
         var wnd = btn.up('window'),
-            // form = Ext.getCmp('deepSeqRequestForm'),
             requestId = wnd.record.get('requestId'),
             url = 'request/upload_deep_sequencing_request/';
 
@@ -256,7 +258,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
 
                 params: {
                     'mode': wnd.mode,
-                    'request_id': (typeof wnd.record != 'undefined') ? wnd.record.get('requestId') : '',
+                    'request_id': (typeof wnd.record !== 'undefined') ? wnd.record.get('requestId') : '',
                     'description': data.description,
                     'libraries': Ext.JSON.encode(libraries),
                     'samples': Ext.JSON.encode(samples)
@@ -307,5 +309,9 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
                 maxWidth: 300
             });
         });
+    },
+
+    showBatchAddWindow: function() {
+        Ext.create('MainHub.view.libraries.BatchAddWindow').show();
     }
 });
