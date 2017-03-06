@@ -23,6 +23,9 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
             },
             '#addLibraryBtn': {
                 click: 'addLibrary'
+            },
+            '#batchAddBtn': {
+                click: 'showBatchAddWindow'
             }
         }
     },
@@ -33,13 +36,15 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
                 'request_id': requestId
             },
             callback: function(records, operation, success) {
-                if (!success) Ext.ux.ToastMessage('Cannot load Libraries/Samples', 'error');
+                if (!success) {
+                    Ext.ux.ToastMessage('Cannot load Libraries/Samples', 'error');
+                }
             }
         });
     },
 
     onRequestWindowBoxready: function(wnd) {
-        if (wnd.mode == 'add') {
+        if (wnd.mode === 'add') {
             Ext.getStore('librariesInRequestStore').removeAll();
             Ext.getCmp('deepSeqRequest').mask(
                 'You need to save the request to proceed.',
@@ -79,27 +84,27 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
         e.stopEvent();
         Ext.create('Ext.menu.Menu', {
             items: [{
-                    text: 'Edit',
-                    iconCls: 'x-fa fa-pencil',
-                    handler: function() {
-                        me.editRecord(record);
-                    }
-                },
-                {
-                    text: 'Delete',
-                    iconCls: 'x-fa fa-trash',
-                    handler: function() {
-                        Ext.Msg.show({
-                            title: 'Delete record',
-                            message: 'Are you sure you want to delete this record?',
-                            buttons: Ext.Msg.YESNO,
-                            icon: Ext.Msg.QUESTION,
-                            fn: function(btn) {
-                                if (btn == 'yes') me.deleteRecord(record);
-                            }
-                        });
-                    }
+                text: 'Edit',
+                iconCls: 'x-fa fa-pencil',
+                handler: function() {
+                    me.editRecord(record);
                 }
+            },
+            {
+                text: 'Delete',
+                iconCls: 'x-fa fa-trash',
+                handler: function() {
+                    Ext.Msg.show({
+                        title: 'Delete record',
+                        message: 'Are you sure you want to delete this record?',
+                        buttons: Ext.Msg.YESNO,
+                        icon: Ext.Msg.QUESTION,
+                        fn: function(btn) {
+                            if (btn === 'yes') {me.deleteRecord(record);}
+                        }
+                    });
+                }
+            }
             ]
         }).showAt(e.getXY());
     },
@@ -109,7 +114,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
             title = '',
             fullRecord = null;
 
-        if (record.get('recordType') == 'L') {
+        if (record.get('recordType') === 'L') {
             title = 'Edit Library';
             fullRecord = store.findRecord('libraryId', record.get('libraryId'));
         } else {
@@ -125,7 +130,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
     },
 
     deleteRecord: function(record) {
-        var url = record.data.recordType == 'L' ? 'library/delete/' : 'sample/delete/';
+        var url = record.data.recordType === 'L' ? 'library/delete/' : 'sample/delete/';
 
         Ext.Ajax.request({
             url: url,
@@ -133,7 +138,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
             timeout: 1000000,
             scope: this,
             params: {
-                'record_id': record.data.recordType == 'L' ? record.data.libraryId : record.data.sampleId
+                'record_id': record.data.recordType === 'L' ? record.data.libraryId : record.data.sampleId
             },
 
             success: function(response) {
@@ -192,8 +197,8 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
                             'Uploaded File: <a href="' + obj.path + '" target="_blank">' + obj.name + '</a>'
                         );
                         Ext.getStore('requestsStore').reload();
-                        if (Ext.getStore('librariesStore').isLoaded()) Ext.getStore('librariesStore').reload();
-                        if (Ext.getStore('incomingLibrariesStore').isLoaded()) Ext.getStore('incomingLibrariesStore').reload();
+                        if (Ext.getStore('librariesStore').isLoaded()) {Ext.getStore('librariesStore').reload();}
+                        if (Ext.getStore('incomingLibrariesStore').isLoaded()) {Ext.getStore('incomingLibrariesStore').reload();}
                     } else {
                         Ext.ux.ToastMessage(obj.error, 'error');
                         console.error('[ERROR]: ' + url);
@@ -202,7 +207,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
                 },
 
                 failure: function(f, action) {
-                    var errorMsg = (action.failureType == 'server') ? 'Server error.' : 'Error.';
+                    var errorMsg = (action.failureType === 'server') ? 'Server error.' : 'Error.';
                     Ext.ux.ToastMessage(errorMsg, 'error');
                     console.error('[ERROR]: ' + url);
                     console.error(action.response.responseText);
@@ -242,7 +247,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
 
                 params: {
                     'mode': wnd.mode,
-                    'request_id': (typeof wnd.record != 'undefined') ? wnd.record.get('requestId') : '',
+                    'request_id': (typeof wnd.record !== 'undefined') ? wnd.record.get('requestId') : '',
                     'description': data.description,
                     'libraries': Ext.JSON.encode(libraries),
                     'samples': Ext.JSON.encode(samples)
@@ -281,5 +286,9 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
             title: 'Add Library/Sample',
             mode: 'add'
         }).show();
+    },
+
+    showBatchAddWindow: function() {
+        Ext.create('MainHub.view.libraries.BatchAddWindow').show();
     }
 });

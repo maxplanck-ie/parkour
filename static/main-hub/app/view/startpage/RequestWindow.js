@@ -190,6 +190,11 @@ Ext.define('MainHub.view.startpage.RequestWindow', {
                     },
                     '->',
                     {
+                        xtype: 'button',
+                        itemId: 'batchAddBtn',
+                        text: 'Batch Add'
+                    },
+                    {
                         text: 'Add',
                         itemId: 'addLibraryBtn'
                     }
