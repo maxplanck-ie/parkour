@@ -50,11 +50,7 @@ Ext.define('MainHub.model.libraries.Library', {
             type: 'int'
         },
         {
-            name: 'enrichmentCycles',
-            type: 'string'
-        },
-        {
-            name: 'amplifiedCycles',
+            name: 'amplification_cycles',
             type: 'string'
         },
         {
@@ -74,23 +70,19 @@ Ext.define('MainHub.model.libraries.Library', {
             type: 'int'
         },
         {
-            name: 'indexReads',
+            name: 'index_reads',
             type: 'string'
         },
         {
-            name: 'indexI7',
+            name: 'index_i7',
             type: 'string'
         },
         {
-            name: 'indexI5',
+            name: 'index_i5',
             type: 'string'
         },
         {
             name: 'equalRepresentation',
-            type: 'string'
-        },
-        {
-            name: 'DNADissolvedIn',
             type: 'string'
         },
         {
@@ -106,15 +98,11 @@ Ext.define('MainHub.model.libraries.Library', {
             type: 'int'
         },
         {
-            name: 'sampleVolume',
+            name: 'mean_fragment_size',
             type: 'string'
         },
         {
-            name: 'meanFragmentSize',
-            type: 'string'
-        },
-        {
-            name: 'qPCRResult',
+            name: 'qpcr_result',
             type: 'string'
         },
         {
@@ -126,7 +114,7 @@ Ext.define('MainHub.model.libraries.Library', {
             type: 'int'
         },
         {
-            name: 'sequencingDepth',
+            name: 'sequencing_depth',
             type: 'string'
         },
         {
@@ -147,27 +135,11 @@ Ext.define('MainHub.model.libraries.Library', {
             type: 'int'
         },
         {
-            name: 'DNaseTreatment',
-            type: 'string'
-        },
-        {
             name: 'rnaQuality',
             type: 'int'
         },
         {
             name: 'rnaQualityName',
-            type: 'string'
-        },
-        {
-            name: 'rnaSpikeIn',
-            type: 'string'
-        },
-        {
-            name: 'samplePreparationProtocol',
-            type: 'string'
-        },
-        {
-            name: 'requestedSampleTreatment',
             type: 'string'
         }
     ],

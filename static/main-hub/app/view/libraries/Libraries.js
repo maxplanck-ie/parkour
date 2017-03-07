@@ -115,7 +115,7 @@ Ext.define('MainHub.view.libraries.Libraries', {
                     dataIndex: 'date'
                 },
                 {
-                    text: 'Nucleic Acid Type',
+                    text: 'Nuc. Type',
                     dataIndex: 'nucleicAcidType'
                 },
                 {
@@ -123,113 +123,76 @@ Ext.define('MainHub.view.libraries.Libraries', {
                     dataIndex: 'libraryProtocol'
                 },
                 {
-                    text: 'Library Type',
+                    text: 'Lib. Type',
                     dataIndex: 'libraryType'
                 },
                 {
-                    text: 'Enrichment Cycles',
-                    dataIndex: 'enrichmentCycles'
+                    text: 'ng/μl',
+                    dataIndex: 'concentration',
+                    width: 70
                 },
                 {
-                    text: 'Amplified Cycles',
-                    dataIndex: 'amplifiedCycles'
+                    text: 'RQN',
+                    dataIndex: 'rnaQualityName',
+                    width: 55
                 },
                 {
-                    text: 'Organism',
-                    dataIndex: 'organism'
+                    text: 'size (bp)',
+                    dataIndex: 'mean_fragment_size',
+                    width: 75
                 },
                 {
                     text: 'Index Type',
-                    dataIndex: 'indexType'
+                    dataIndex: 'index_type'
                 },
                 {
-                    text: 'Index Reads',
-                    dataIndex: 'indexReads'
+                    text: '# Index Reads',
+                    dataIndex: 'index_reads'
                 },
                 {
-                    text: 'Index I7',
-                    dataIndex: 'indexI7'
+                    text: 'I7',
+                    dataIndex: 'index_i7'
                 },
                 {
-                    text: 'Index I5',
-                    dataIndex: 'indexI5'
+                    text: 'I5',
+                    dataIndex: 'index_i5'
                 },
                 {
-                    text: 'Equal Representation',
+                    text: 'Length',
+                    dataIndex: 'readLength',
+                    width: 65
+                },
+                {
+                    text: 'Depth (M)',
+                    dataIndex: 'sequencing_depth',
+                    width: 85
+                },
+                {
+                    text: 'Amplification',
+                    dataIndex: 'amplification_cycles'
+                },
+                {
+                    text: 'Equal nucl.',
                     dataIndex: 'equalRepresentation',
                     renderer: function(val) {
                         return val == 'True' ? 'Yes' : 'No';
                     }
                 },
                 {
-                    text: 'DNA Dissolved In',
-                    dataIndex: 'DNADissolvedIn'
-                },
-                {
-                    text: 'Concentration',
-                    dataIndex: 'concentration'
-                },
-                {
-                    text: 'Concentration Method',
-                    dataIndex: 'concentrationMethod'
-                },
-                {
-                    text: 'Sample Volume',
-                    dataIndex: 'sampleVolume'
-                },
-                {
-                    text: 'Mean Fragment Size',
-                    dataIndex: 'meanFragmentSize'
-                },
-                {
                     text: 'qPCR Result',
-                    dataIndex: 'qPCRResult'
+                    dataIndex: 'qpcr_result'
                 },
                 {
-                    text: 'Read Length',
-                    dataIndex: 'readLength'
-                },
-                {
-                    text: 'Sequencing Depth',
-                    dataIndex: 'sequencingDepth'
-                },
-                {
-                    text: 'DNase Treatment',
-                    dataIndex: 'DNaseTreatment',
+                    text: 'F/S',
+                    dataIndex: 'concentrationMethod',
                     renderer: function(val) {
-                        if (val == 'True') {
-                            return 'Yes';
-                        } else if (val == 'False') {
-                            return 'No';
-                        } else {
-                            return '';
-                        }
-                    }
+                        return val.charAt(0);
+                    },
+                    width: 45
                 },
                 {
-                    text: 'RNA Quality',
-                    dataIndex: 'rnaQualityName'
-                },
-                {
-                    text: 'RNA Spike In',
-                    dataIndex: 'rnaSpikeIn',
-                    renderer: function(val) {
-                        if (val == 'True') {
-                            return 'Yes';
-                        } else if (val == 'False') {
-                            return 'No';
-                        } else {
-                            return '';
-                        }
-                    }
-                },
-                {
-                    text: 'Sample Preparation Protocol',
-                    dataIndex: 'samplePreparationProtocol'
-                },
-                {
-                    text: 'Requested Sample Treatment',
-                    dataIndex: 'requestedSampleTreatment'
+                    text: 'Organism',
+                    dataIndex: 'organism'
                 },
                 {
                     text: 'Comments',

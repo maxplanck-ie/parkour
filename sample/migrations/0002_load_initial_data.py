@@ -7,16 +7,12 @@ from django.core.management import call_command
 
 
 def load_fixtures(apps, schema_editor):
-    call_command('loaddata', 'sample_protocols', app_label='sample')
     call_command('loaddata', 'nucleic_acid_types', app_label='sample')
 
 
 def unload_fixtures(apps, schema_editor):
-    SampleProtocol = apps.get_model('sample', 'SampleProtocol')
     NucleicAcidType = apps.get_model('sample', 'NucleicAcidType')
-
     NucleicAcidType.objects.all().delete()
-    SampleProtocol.objects.all().delete()
 
 
 class Migration(migrations.Migration):

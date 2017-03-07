@@ -124,7 +124,7 @@ def pool_info(request):
                 data.append({
                     'request': req.name,
                     'library': sample.name,
-                    'protocol': sample.sample_protocol.name,
+                    'protocol': sample.library_protocol.name,
                     # 'pcrCycles': 0
                 })
 

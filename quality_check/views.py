@@ -33,8 +33,7 @@ def update(request):
         except (ValueError, Library.DoesNotExist, Sample.DoesNotExist) as e:
             error = str(e)
             logger.exception(e)
-
-        if not error:
+        else:
             if form.is_valid():
                 form.save()
 
@@ -49,14 +48,10 @@ def update(request):
                         record.save(update_fields=['status'])
 
                         # TODO@me: send email
-
             else:
                 error = str(form.errors)
                 logger.debug(form.errors.as_data())
     else:
         error = 'Wrong HTTP method.'
 
-    return JsonResponse({
-        'success': not error,
-        'error': error
-    })
+    return JsonResponse({'success': not error, 'error': error})

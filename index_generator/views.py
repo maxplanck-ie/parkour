@@ -1,15 +1,16 @@
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Prefetch
 
 from request.models import Request
-from library_sample_shared.models import IndexI7, IndexI5
+from library_sample_shared.models import (ReadLength, IndexType,
+                                          IndexI7, IndexI5)
 from library.models import Library
 from sample.models import Sample
 from library_preparation.models import LibraryPreparation
 from pooling.models import Pooling
 from .models import Pool
-from .generator import generate
+from .index_generator import IndexGenerator
 
 import logging
 import json
@@ -83,7 +84,7 @@ def pooling_tree(request):
                     'sampleId': sample.id,
                     'recordType': 'S',
                     'sequencingDepth': sample.sequencing_depth,
-                    'libraryProtocolName': sample.sample_protocol.name,
+                    'libraryProtocolName': sample.library_protocol.name,
                     'indexI7': '',
                     'indexI7Id': '',
                     'indexI5Id': '',
@@ -130,60 +131,70 @@ def save_pool(request):
     """
     error = ''
 
-    try:
-        library_ids = [id for id in json.loads(request.POST.get('libraries'))]
-
-        samples = [
-            sample['sample_id']
-            for sample in json.loads(request.POST.get('samples'))
+    if request.method == 'POST':
+        library_ids = [
+            library_id
+            for library_id in json.loads(request.POST.get('libraries', '[]'))
         ]
+        samples = [s for s in json.loads(request.POST.get('samples', '[]'))]
+        sample_ids = [sample['sample_id'] for sample in samples]
 
-        pool = Pool(user=request.user)
-        pool.save()
-        pool.libraries.add(*library_ids)
-        pool.samples.add(*samples)
+        try:
+            if not any(library_ids) and not any(sample_ids):
+                raise ValueError('Neither libraries nor samples have been ' +
+                                 'provided.')
 
-        # Make current libraries not available for repeated pooling
-        for library_id in library_ids:
-            library = Library.objects.get(pk=library_id)
-            library.is_pooled = True
-            library.save(update_fields=['is_pooled'])
+            pool = Pool(user=request.user)
+            pool.save()
+            pool.libraries.add(*library_ids)
+            pool.samples.add(*sample_ids)
 
-            # Create Pooling object
-            pooling_obj = Pooling(library=library)
-            # TODO: update field Concentration C1
-            pooling_obj.save()
+            # Make current libraries not available for repeated pooling
+            for library_id in library_ids:
+                library = Library.objects.get(pk=library_id)
+                library.is_pooled = True
+                library.save(update_fields=['is_pooled'])
 
-        # Make current samples not available for repeated pooling
-        # and set their Index I7 and Index I5 indices
-        for smpl in json.loads(request.POST.get('samples')):
-            sample = Sample.objects.get(id=smpl['sample_id'])
+                # Create Pooling object
+                pooling_obj = Pooling(library=library)
+                # TODO: update field Concentration C1
+                pooling_obj.save()
 
-            # Update sample fields
-            sample.index_i7 = smpl['index_i7']
-            sample.index_i5 = smpl['index_i5']
-            sample.is_pooled = True
-            sample.is_converted = True
-            sample.barcode = sample.barcode.replace('S', 'L')
-            sample.save(update_fields=[
-                'index_i7', 'index_i5', 'is_pooled', 'is_converted', 'barcode',
-            ])
+            # Make current samples not available for repeated pooling
+            # and set their Index I7 and Index I5 indices
+            for sample in samples:
+                smpl = Sample.objects.get(pk=sample['sample_id'])
+                idx_i7_id = sample['index_i7_id']
+                idx_i5_id = sample['index_i5_id']
 
-            # # Create Library Preparation object
-            lp_obj = LibraryPreparation(sample=sample)
-            lp_obj.save()
+                if idx_i7_id == '':
+                    raise ValueError('Index I7 is not set for "%s"' % smpl.name)
 
-            # # Create Pooling object
-            # pool_obj = Pooling(sample=sample)
-            # # TODO: update field Concentration C1
-            # pool_obj.save()
+                index_i7 = IndexI7.objects.get(index_id=idx_i7_id).index
+                index_i5 = IndexI5.objects.get(index_id=idx_i5_id).index \
+                    if idx_i5_id else ''
 
-        # Trigger Pool Size update
-        pool.save(update_fields=['size'])
+                # Update sample fields
+                smpl.index_i7 = index_i7
+                smpl.index_i5 = index_i5
+                smpl.is_pooled = True
+                smpl.is_converted = True
+                smpl.barcode = smpl.barcode.replace('S', 'L')
+                smpl.save()
 
-    except Exception as e:
-        error = str(e)
-        logger.exception(error)
+                # # Create Library Preparation object
+                lp_obj = LibraryPreparation(sample=smpl)
+                lp_obj.save()
+
+            # Trigger Pool Size update
+            pool.save(update_fields=['size'])
+
+        except Exception as e:
+            error = str(e) if e.__class__ == ValueError \
+                else 'Could not save Pool.'
+            logger.exception(error)
+    else:
+        error = 'Wrong HTTP method.'
 
     return JsonResponse({'success': not error, 'error': error})
 
@@ -191,32 +202,55 @@ def save_pool(request):
 @login_required
 def update_read_length(request):
     """ Update Read Length for a given librray or sample. """
+    error = ''
 
-    record_type = request.POST.get('record_type')
-    record_id = request.POST.get('record_id')
-    read_length_id = request.POST.get('read_length_id')
+    if request.method == 'POST':
+        record_type = request.POST.get('record_type', '')
+        record_id = request.POST.get('record_id', '')
+        read_length_id = request.POST.get('read_length_id', '')
 
-    if record_type == 'L':
-        record = Library.objects.get(pk=record_id)
+        try:
+            if record_type == 'L':
+                record = Library.objects.get(pk=record_id)
+            elif record_type == 'S':
+                record = Sample.objects.get(pk=record_id)
+            else:
+                raise ValueError('Record type is not L/S or missing.')
+            read_length = ReadLength.objects.get(pk=read_length_id)
+        except Exception as e:
+            error = 'Could not update Read Length.'
+            logger.exception(e)
+        else:
+            record.read_length = read_length
+            record.save(update_fields=['read_length'])
     else:
-        record = Sample.objects.get(pk=record_id)
-    record.read_length_id = read_length_id
-    record.save(update_fields=['read_length'])
+        error = 'Wrong HTTP method.'
 
-    return HttpResponse()
+    return JsonResponse({'success': not error, 'error': error})
 
 
 @login_required
 def update_index_type(request):
     """ Update Index Type for a given sample. """
-    sample_id = request.POST.get('sample_id')
-    index_type_id = request.POST.get('index_type_id')
+    error = ''
 
-    sample = Sample.objects.get(pk=sample_id)
-    sample.index_type_id = index_type_id
-    sample.save(update_fields=['index_type_id'])
+    if request.method == 'POST':
+        sample_id = request.POST.get('sample_id', '')
+        index_type_id = request.POST.get('index_type_id', '')
 
-    return HttpResponse()
+        try:
+            sample = Sample.objects.get(pk=sample_id)
+            index_type = IndexType.objects.get(pk=index_type_id)
+        except Exception as e:
+            error = 'Could not update Index Type.'
+            logger.exception(e)
+        else:
+            sample.index_type = index_type
+            sample.save(update_fields=['index_type_id'])
+    else:
+        error = 'Wrong HTTP method.'
+
+    return JsonResponse({'success': not error, 'error': error})
 
 
 @login_required
@@ -225,48 +259,14 @@ def generate_indices(request):
     error = ''
     data = []
 
-    library_ids = json.loads(request.POST.get('libraries'))
-    sample_ids = json.loads(request.POST.get('samples'))
+    library_ids = json.loads(request.POST.get('libraries', '[]'))
+    sample_ids = json.loads(request.POST.get('samples', '[]'))
 
     try:
-        generated_indices = generate(library_ids, sample_ids)
-
-        for record in sorted(generated_indices, key=lambda x: x['name']):
-            index_i7 = record['predicted_index_i7']['index']
-            index_i5 = record['predicted_index_i5']['index']
-
-            rec = {
-                'name': record['name'],
-                'sequencingDepth': record['depth'],
-                'readLength': record['read_length'],
-                'indexI7': index_i7,
-                'indexI7Id': record['predicted_index_i7']['index_id'],
-                'indexI5': index_i5,
-                'indexI5Id': record['predicted_index_i5']['index_id']
-            }
-
-            if 'sample_id' in record.keys():
-                rec.update({
-                    'recordType': 'S',
-                    'sampleId': record['sample_id']
-                })
-
-            if 'library_id' in record.keys():
-                rec.update({
-                    'recordType': 'L',
-                    'libraryId': record['library_id']
-                })
-
-            for i in range(len(index_i7)):
-                rec.update({'indexI7_' + str(i + 1): rec['indexI7'][i]})
-
-            for i in range(len(index_i5)):
-                rec.update({'indexI5_' + str(i + 1): rec['indexI5'][i]})
-
-            data.append(rec)
-
-    except Exception as e:
+        index_generator = IndexGenerator(library_ids, sample_ids)
+        data = index_generator.generate()
+    except ValueError as e:
         error = str(e)
-        logger.exception(error)
+        logger.debug(e)
 
     return JsonResponse({'success': not error, 'error': error, 'data': data})

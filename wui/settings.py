@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'authtools',
+    # 'django_extensions',
 
     'common',
     'library_sample_shared',

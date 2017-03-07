@@ -99,7 +99,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                 },
                 plugins: [{
                     ptype: 'rowediting',
-                    clicksToEdit: 2
+                    clicksToEdit: 1
                 }],
                 store: 'PoolingTree',
                 rootVisible: false,
@@ -143,6 +143,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                         dataIndex: 'indexTypeName',
                         width: 200,
                         editor: {
+                            id: 'indexTypeEditor',
                             xtype: 'combobox',
                             queryMode: 'local',
                             displayField: 'name',

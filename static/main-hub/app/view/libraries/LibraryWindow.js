@@ -108,11 +108,16 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                 queryMode: 'local',
                                 displayField: 'name',
                                 valueField: 'id',
-                                name: 'libraryProtocol',
+                                name: 'library_protocol',
                                 fieldLabel: 'Protocol for Library Preparation <sup><strong><span class="field-tooltip" tooltip-text="Select library construction protocol from predefined list or select other and specify in the comments field (below)">[?]</span></strong></sup>',
                                 emptyText: 'Protocol for Library Preparation',
                                 store: 'libraryProtocolsStore',
                                 forceSelection: true
+                            },
+                            {
+                                xtype: 'container',
+                                id: 'libraryProtocolInfo',
+                                margin: '0 0 15px 15px'
                             },
                             {
                                 xtype: 'combobox',
@@ -121,32 +126,27 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                 queryMode: 'local',
                                 displayField: 'name',
                                 valueField: 'id',
-                                name: 'libraryType',
+                                name: 'library_type',
                                 fieldLabel: 'Library Type <sup><strong><span class="field-tooltip" tooltip-text="Library Type is automatically filled based on library construction protocol, if needed select other and specify in the comments field (below)">[?]</span></strong></sup>',
                                 emptyText: 'Library Type',
-                                store: 'libraryTypeStore',
+                                store: 'libraryTypesStore',
                                 forceSelection: true,
                                 disabled: true
                             },
                             {
                                 xtype: 'numberfield',
-                                name: 'enrichmentCycles',
-                                fieldLabel: 'Number of enrichment cycles <sup><strong><span class="field-tooltip" tooltip-text="Number of PCR cycles done for library enrichment">[?]</span></strong></sup>',
-                                emptyText: 'Number of enrichment cycles',
-                                allowDecimals: false,
-                                minValue: 1
+                                name: 'concentration',
+                                fieldLabel: 'Concentration (ng/µl)',
+                                emptyText: 'Concentration (ng/µl)',
+                                minValue: 0
                             },
                             {
-                                xtype: 'combobox',
-                                id: 'organismField',
-                                queryMode: 'local',
-                                displayField: 'name',
-                                valueField: 'id',
-                                name: 'organism',
-                                fieldLabel: 'Organism <sup><strong><span class="field-tooltip" tooltip-text="Select from list with predefined options or select other and specify in the comments field (below)">[?]</span></strong></sup>',
-                                emptyText: 'Organism',
-                                store: 'organismsStore',
-                                forceSelection: true
+                                xtype: 'numberfield',
+                                name: 'mean_fragment_size',
+                                fieldLabel: 'Mean Fragment Size (bp) <sup><strong><span class="field-tooltip" tooltip-text="Specify mean fragments size of library, upload Bioanalyzer or Fragmentanalyzer files">[?]</span></strong></sup>',
+                                emptyText: 'Mean Fragment Size (bp)',
+                                minValue: 0,
+                                allowDecimals: false
                             },
                             {
                                 xtype: 'combobox',
@@ -155,7 +155,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                 queryMode: 'local',
                                 displayField: 'name',
                                 valueField: 'id',
-                                name: 'indexType',
+                                name: 'index_type',
                                 fieldLabel: 'Index Type <sup><strong><span class="field-tooltip" tooltip-text="Select from list with predefined options or select other and specify in the comments field (below)">[?]</span></strong></sup>',
                                 emptyText: 'Index Type',
                                 store: 'indexTypesStore',
@@ -168,12 +168,11 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                 queryMode: 'local',
                                 displayField: 'name',
                                 valueField: 'name',
-                                name: 'indexReads',
+                                name: 'index_reads',
                                 fieldLabel: 'Number of Index Reads <sup><strong><span class="field-tooltip" tooltip-text="Number of Index Reads = 0: Libraries do not carry any barcode, no barcode will be read during sequencing.<br/><br/>Number of Index Reads = 1: Single-indexed libraries. Index on adapter P7 will be read during sequencing (true for most applications).<br/><br/>Number of Index Reads = 2: Dual-indexed libraries. Index on Adapter P7 and P5 will be read. (i.e Nextera libraries or if a high degree of multiplexing is needed)">[?]</span></strong></sup>',
                                 emptyText: 'Number of Index Reads',
                                 forceSelection: true,
                                 disabled: true,
-
                                 store: Ext.create('Ext.data.Store', {
                                     fields: [{
                                             name: 'name',
@@ -197,7 +196,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                     '</tpl>'
                                 ),
                                 valueField: 'index',
-                                name: 'indexI7',
+                                name: 'index_i7',
                                 id: 'indexI7Field',
                                 itemId: 'indexI7Field',
                                 fieldLabel: 'Index 1 (I7) <sup><strong><span class="field-tooltip" tooltip-text="Select from predefined list; make sure the displayed index is the sequence used for barcoding. Or enter sequence of index used for barcoding (typically 6 nucleotides)">[?]</span></strong></sup>',
@@ -217,7 +216,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                     '</tpl>'
                                 ),
                                 valueField: 'index',
-                                name: 'indexI5',
+                                name: 'index_i5',
                                 id: 'indexI5Field',
                                 itemId: 'indexI5Field',
                                 fieldLabel: 'Index 2 (I5) <sup><strong><span class="field-tooltip" tooltip-text="Select from predefined list; make sure the displayed index is the sequence used for barcoding. Or enter sequence of index used for barcoding (typically 6 nucleotides)">[?]</span></strong></sup>',
@@ -226,6 +225,34 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                 regexText: 'Only A, T, C and G (uppercase) are allowed. Index length must be 6 or 8.',
                                 store: 'indexI5Store',
                                 disabled: true
+                            },
+                            {
+                                xtype: 'combobox',
+                                id: 'readLengthField',
+                                queryMode: 'local',
+                                displayField: 'name',
+                                valueField: 'id',
+                                name: 'read_length',
+                                fieldLabel: 'Read Length <sup><strong><span class="field-tooltip" tooltip-text="Select from list with predefined options or select other and specify in the comments field (below)">[?]</span></strong></sup>',
+                                emptyText: 'Read Length',
+                                store: 'readLengthsStore',
+                                forceSelection: true
+                            },
+                            {
+                                xtype: 'numberfield',
+                                name: 'sequencing_depth',
+                                fieldLabel: 'Sequencing Depth (M)',
+                                emptyText: 'Sequencing Depth (M)',
+                                minValue: 1,
+                                allowDecimals: false
+                            },
+                            {
+                                xtype: 'numberfield',
+                                name: 'amplification_cycles',
+                                fieldLabel: 'Number of amplification cycles <sup><strong><span class="field-tooltip" tooltip-text="Number of PCR cycles done for library amplification">[?]</span></strong></sup>',
+                                emptyText: 'Number of amplification cycles',
+                                allowDecimals: false,
+                                minValue: 1
                             },
                             {
                                 xtype: 'fieldcontainer',
@@ -238,7 +265,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                 layout: 'hbox',
                                 items: [{
                                         boxLabel: 'Yes',
-                                        name: 'equalRepresentationOfNucleotides',
+                                        name: 'equal_representation_nucleotides',
                                         inputValue: true,
                                         id: 'equalRepresentationRadio1',
                                         checked: true,
@@ -246,22 +273,18 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                     },
                                     {
                                         boxLabel: 'No',
-                                        name: 'equalRepresentationOfNucleotides',
+                                        name: 'equal_representation_nucleotides',
                                         inputValue: false,
                                         id: 'equalRepresentationRadio2'
                                     }
                                 ]
                             },
                             {
-                                name: 'DNADissolvedIn',
-                                fieldLabel: 'DNA Dissolved In',
-                                emptyText: 'DNA Dissolved In'
-                            },
-                            {
                                 xtype: 'numberfield',
-                                name: 'concentration',
-                                fieldLabel: 'Concentration (ng/µl)',
-                                emptyText: 'Concentration (ng/µl)',
+                                name: 'qpcr_result',
+                                fieldLabel: 'qPCR Result (nM) <sup><strong><span class="field-tooltip" tooltip-text="Use this field if qPCR was done for library quantification">[?]</span></strong></sup>',
+                                emptyText: 'qPCR Result (nM)',
+                                allowBlank: true,
                                 minValue: 1
                             },
                             {
@@ -270,55 +293,23 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                 queryMode: 'local',
                                 displayField: 'name',
                                 valueField: 'id',
-                                name: 'concentrationMethod',
+                                name: 'concentration_method',
                                 fieldLabel: 'Concentration Determined by',
                                 emptyText: 'Concentration Determined by',
                                 store: 'concentrationMethodsStore',
                                 forceSelection: true
                             },
                             {
-                                xtype: 'numberfield',
-                                name: 'sampleVolume',
-                                fieldLabel: 'Sample Volume (µl)',
-                                emptyText: 'Sample Volume (µl)',
-                                minValue: 1,
-                                allowDecimals: false
-                            },
-                            {
-                                xtype: 'numberfield',
-                                name: 'meanFragmentSize',
-                                fieldLabel: 'Mean Fragment Size (bp) <sup><strong><span class="field-tooltip" tooltip-text="Specify mean fragments size of library, upload Bioanalyzer or Fragmentanalyzer files">[?]</span></strong></sup>',
-                                emptyText: 'Mean Fragment Size (bp)',
-                                minValue: 1,
-                                allowDecimals: false
-                            },
-                            {
-                                xtype: 'numberfield',
-                                name: 'qPCRResult',
-                                fieldLabel: 'qPCR Result (nM) <sup><strong><span class="field-tooltip" tooltip-text="Use this field if qPCR was done for library quantification">[?]</span></strong></sup>',
-                                emptyText: 'qPCR Result (nM)',
-                                allowBlank: true,
-                                minValue: 1
-                            },
-                            {
                                 xtype: 'combobox',
-                                id: 'readLengthField',
+                                id: 'organismField',
                                 queryMode: 'local',
                                 displayField: 'name',
                                 valueField: 'id',
-                                name: 'readLength',
-                                fieldLabel: 'Read Length <sup><strong><span class="field-tooltip" tooltip-text="Select from list with predefined options or select other and specify in the comments field (below)">[?]</span></strong></sup>',
-                                emptyText: 'Read Length',
-                                store: 'readLengthsStore',
+                                name: 'organism',
+                                fieldLabel: 'Organism <sup><strong><span class="field-tooltip" tooltip-text="Select from list with predefined options or select other and specify in the comments field (below)">[?]</span></strong></sup>',
+                                emptyText: 'Organism',
+                                store: 'organismsStore',
                                 forceSelection: true
-                            },
-                            {
-                                xtype: 'numberfield',
-                                name: 'sequencingDepth',
-                                fieldLabel: 'Sequencing Depth (M)',
-                                emptyText: 'Sequencing Depth (M)',
-                                minValue: 1,
-                                allowDecimals: false
                             },
                             {
                                 xtype: 'filegridfield',
@@ -389,7 +380,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                 queryMode: 'local',
                                 displayField: 'name',
                                 valueField: 'id',
-                                name: 'nucleicAcidType',
+                                name: 'nucleic_acid_type',
                                 fieldLabel: 'Nucleic Acid Type <sup><strong><span class="field-tooltip" tooltip-text="Select nucleic acid type of your sample or select other and specify in the comments field (below)">[?]</span></strong></sup>',
                                 emptyText: 'Nucleic Acid Type',
                                 store: 'nucleicAcidTypesStore',
@@ -402,10 +393,10 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                 queryMode: 'local',
                                 displayField: 'name',
                                 valueField: 'id',
-                                name: 'sampleProtocol',
+                                name: 'library_protocol',
                                 fieldLabel: 'Protocol for Library Preparation <sup><strong><span class="field-tooltip" tooltip-text="Select library construction protocol from predefined list or select other and specify in the comments field (below)">[?]</span></strong></sup>',
                                 emptyText: 'Protocol for Library Preparation',
-                                store: 'sampleProtocolsStore',
+                                store: 'libraryProtocolsStore',
                                 forceSelection: true,
                                 disabled: true
                             },
@@ -421,12 +412,96 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                 queryMode: 'local',
                                 displayField: 'name',
                                 valueField: 'id',
-                                name: 'libraryType',
+                                name: 'library_type',
                                 fieldLabel: 'Library Type <sup><strong><span class="field-tooltip" tooltip-text="Library Type is automatically filled based on library construction protocol, if needed select other and specify in the comments field (below)">[?]</span></strong></sup>',
                                 emptyText: 'Library Type',
-                                store: 'libraryTypeStore',
+                                store: 'libraryTypesStore',
                                 forceSelection: true,
                                 disabled: true
+                            },
+                            {
+                                xtype: 'numberfield',
+                                name: 'concentration',
+                                fieldLabel: 'Concentration (ng/µl)',
+                                emptyText: 'Concentration (ng/µl)',
+                                minValue: 0
+                            },
+                            {
+                                xtype: 'combobox',
+                                id: 'rnaQualityField',
+                                itemId: 'rnaQualityField',
+                                queryMode: 'local',
+                                displayField: 'name',
+                                valueField: 'id',
+                                name: 'rna_quality',
+                                fieldLabel: 'RNA Quality (RIN, RQN) <sup><strong><span class="field-tooltip" tooltip-text="Select a number from 1 to 10 or select determined by facility">[?]</span></strong></sup>',
+                                emptyText: 'RNA Quality (RIN, RQN)',
+                                store: 'rnaQualityStore',
+                                forceSelection: true,
+                                disabled: true
+                            },
+                            {
+                                xtype: 'combobox',
+                                id: 'readLengthSampleField',
+                                queryMode: 'local',
+                                displayField: 'name',
+                                valueField: 'id',
+                                name: 'read_length',
+                                fieldLabel: 'Read Length <sup><strong><span class="field-tooltip" tooltip-text="Select from list with predefined options or select other and specify in the comments field (below)">[?]</span></strong></sup>',
+                                emptyText: 'Read Length',
+                                store: 'readLengthsStore',
+                                forceSelection: true
+                            },
+                            {
+                                xtype: 'numberfield',
+                                name: 'sequencing_depth',
+                                fieldLabel: 'Sequencing Depth (M)',
+                                emptyText: 'Sequencing Depth (M)',
+                                minValue: 1,
+                                allowDecimals: false
+                            },
+                            {
+                                xtype: 'numberfield',
+                                name: 'amplification_cycles',
+                                fieldLabel: 'Sample amplification (cycles) <sup><strong><span class="field-tooltip" tooltip-text="If sample has been already amplified, indicate the number of cycles">[?]</span></strong></sup>',
+                                emptyText: 'Sample amplification (cycles)',
+                                allowDecimals: false,
+                                minValue: 1,
+                                allowBlank: true
+                            },
+                            {
+                                xtype: 'fieldcontainer',
+                                id: 'equalRepresentationSample',
+                                fieldLabel: 'Equal Representation of Nucleotides <sup><strong><span class="field-tooltip" tooltip-text="For best sequencing quality all 4 nucleotides should be at each position of the insert (up- and downstream of sequencing adaptors) represented at an equal frequency.<br><br>This is true i.e. for applications like ChIP-Seq, RNA-Seq and WGS (<strong>select Yes</strong>).<br><br>In case your insert has an uneven representation of nucleotides (Amplicon-Seq, internal usage of barcodes) <strong>select No</strong> and specify in the comments field (below).">[?]</span></strong></sup>',
+                                defaultType: 'radiofield',
+                                layout: 'hbox',
+                                items: [{
+                                        boxLabel: 'Yes',
+                                        name: 'equal_representation_nucleotides',
+                                        inputValue: true,
+                                        id: 'equalRepresentationRadio3',
+                                        checked: true,
+                                        margin: '0 15px 0 0'
+                                    },
+                                    {
+                                        boxLabel: 'No',
+                                        name: 'equal_representation_nucleotides',
+                                        inputValue: false,
+                                        id: 'equalRepresentationRadio4'
+                                    }
+                                ]
+                            },
+                            {
+                                xtype: 'combobox',
+                                id: 'concentrationSampleMethodField',
+                                queryMode: 'local',
+                                displayField: 'name',
+                                valueField: 'id',
+                                name: 'concentration_method',
+                                fieldLabel: 'Concentration Determined by',
+                                emptyText: 'Concentration Determined by',
+                                store: 'concentrationMethodsStore',
+                                forceSelection: true
                             },
                             {
                                 xtype: 'combobox',
@@ -439,161 +514,6 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                                 emptyText: 'Organism',
                                 store: 'organismsStore',
                                 forceSelection: true
-                            },
-                            {
-                                xtype: 'fieldcontainer',
-                                id: 'equalRepresentationSample',
-                                fieldLabel: 'Equal Representation of Nucleotides <sup><strong><span class="field-tooltip" tooltip-text="For best sequencing quality all 4 nucleotides should be at each position of the insert (up- and downstream of sequencing adaptors) represented at an equal frequency.<br><br>This is true i.e. for applications like ChIP-Seq, RNA-Seq and WGS (<strong>select Yes</strong>).<br><br>In case your insert has an uneven representation of nucleotides (Amplicon-Seq, internal usage of barcodes) <strong>select No</strong> and specify in the comments field (below).">[?]</span></strong></sup>',
-                                defaultType: 'radiofield',
-                                layout: 'hbox',
-                                items: [{
-                                        boxLabel: 'Yes',
-                                        name: 'equalRepresentationOfNucleotides',
-                                        inputValue: true,
-                                        id: 'equalRepresentationRadio3',
-                                        checked: true,
-                                        margin: '0 15px 0 0'
-                                    },
-                                    {
-                                        boxLabel: 'No',
-                                        name: 'equalRepresentationOfNucleotides',
-                                        inputValue: false,
-                                        id: 'equalRepresentationRadio4'
-                                    }
-                                ]
-                            },
-                            {
-                                name: 'DNADissolvedIn',
-                                fieldLabel: 'DNA/RNA Dissolved In',
-                                emptyText: 'DNA/RNA Dissolved In'
-                            },
-                            {
-                                xtype: 'numberfield',
-                                name: 'concentration',
-                                fieldLabel: 'Concentration (ng/µl)',
-                                emptyText: 'Concentration (ng/µl)',
-                                minValue: 1
-                            },
-                            {
-                                xtype: 'combobox',
-                                id: 'concentrationSampleMethodField',
-                                queryMode: 'local',
-                                displayField: 'name',
-                                valueField: 'id',
-                                name: 'concentrationMethod',
-                                fieldLabel: 'Concentration Determined by',
-                                emptyText: 'Concentration Determined by',
-                                store: 'concentrationMethodsStore',
-                                forceSelection: true
-                            },
-                            {
-                                xtype: 'numberfield',
-                                name: 'sampleVolume',
-                                fieldLabel: 'Sample Volume (µl)',
-                                emptyText: 'Sample Volume (µl)',
-                                minValue: 1,
-                                allowDecimals: false
-                            },
-                            {
-                                xtype: 'numberfield',
-                                name: 'sampleAmplifiedCycles',
-                                fieldLabel: 'Sample amplified (cycles) <sup><strong><span class="field-tooltip" tooltip-text="If sample has been already amplified, indicate the number of cycles">[?]</span></strong></sup>',
-                                emptyText: 'Sample amplified (cycles)',
-                                allowDecimals: false,
-                                minValue: 1,
-                                allowBlank: true
-                            },
-                            {
-                                xtype: 'fieldcontainer',
-                                id: 'DNaseTreatmentField',
-                                fieldLabel: 'DNase Treatment (RNA only)',
-                                defaultType: 'radiofield',
-                                layout: 'hbox',
-                                items: [{
-                                        boxLabel: 'Yes',
-                                        name: 'DNaseTreatment',
-                                        inputValue: true,
-                                        id: 'DNaseTreatmentRadio1',
-                                        checked: true,
-                                        margin: '0 15px 0 0'
-                                    },
-                                    {
-                                        boxLabel: 'No',
-                                        name: 'DNaseTreatment',
-                                        inputValue: false,
-                                        id: 'DNaseTreatmentRadio2'
-                                    }
-                                ],
-                                disabled: true
-                            },
-                            {
-                                xtype: 'combobox',
-                                id: 'rnaQualityField',
-                                itemId: 'rnaQualityField',
-                                queryMode: 'local',
-                                displayField: 'name',
-                                valueField: 'id',
-                                name: 'rnaQuality',
-                                fieldLabel: 'RNA Quality (RIN, RQN) <sup><strong><span class="field-tooltip" tooltip-text="Select a number from 1 to 10 or select determined by facility">[?]</span></strong></sup>',
-                                emptyText: 'RNA Quality (RIN, RQN)',
-                                store: 'rnaQualityStore',
-                                forceSelection: true,
-                                disabled: true
-                            },
-                            {
-                                xtype: 'fieldcontainer',
-                                id: 'rnaSpikeInField',
-                                fieldLabel: 'RNA Spike in',
-                                defaultType: 'radiofield',
-                                layout: 'hbox',
-                                items: [{
-                                        boxLabel: 'Yes',
-                                        name: 'rnaSpikeIn',
-                                        inputValue: true,
-                                        id: 'rnaSpikeInRadio1',
-                                        checked: true,
-                                        margin: '0 15px 0 0'
-                                    },
-                                    {
-                                        boxLabel: 'No',
-                                        name: 'rnaSpikeIn',
-                                        inputValue: false,
-                                        id: 'rnaSpikeInRadio2'
-                                    }
-                                ],
-                                disabled: true
-                            },
-                            {
-                                name: 'samplePreparationProtocol',
-                                fieldLabel: 'Sample Preparation Protocol <sup><strong><span class="field-tooltip" tooltip-text="Which kit was used for RNA/DNA extraction? Did you perform mRNA enrichment, rRNA depletion, sample normalization, size selection or any other treatment?">[?]</span></strong></sup>',
-                                emptyText: 'Sample Preparation Protocol',
-                                allowBlank: true
-                            },
-                            {
-                                name: 'requestedSampleTreatment',
-                                fieldLabel: 'Requested Sample Treatment <sup><strong><span class="field-tooltip" tooltip-text="Please indicate, if we have to perform any any special treatment prior library preparation">[?]</span></strong></sup>',
-                                emptyText: 'Requested Sample Treatment',
-                                allowBlank: true
-                            },
-                            {
-                                xtype: 'combobox',
-                                id: 'readLengthSampleField',
-                                queryMode: 'local',
-                                displayField: 'name',
-                                valueField: 'id',
-                                name: 'readLength',
-                                fieldLabel: 'Read Length <sup><strong><span class="field-tooltip" tooltip-text="Select from list with predefined options or select other and specify in the comments field (below)">[?]</span></strong></sup>',
-                                emptyText: 'Read Length',
-                                store: 'readLengthsStore',
-                                forceSelection: true
-                            },
-                            {
-                                xtype: 'numberfield',
-                                name: 'sequencingDepth',
-                                fieldLabel: 'Sequencing Depth (M)',
-                                emptyText: 'Sequencing Depth (M)',
-                                minValue: 1,
-                                allowDecimals: false
                             },
                             {
                                 xtype: 'filegridfield',

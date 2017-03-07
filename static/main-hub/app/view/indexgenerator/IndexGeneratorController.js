@@ -10,6 +10,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
                 boxready: 'boxready'
             },
             '#poolingTreePanel': {
+                beforeedit: 'hideEditor',
                 edit: 'editRecord',
                 checkchange: 'checkRecord'
             },
@@ -37,6 +38,19 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
 
     poolSizeBoxready: function(cb) {
         cb.select(25, true);
+    },
+
+    hideEditor: function(editor, context) {
+        if (context.colIdx !== 3 && context.colIdx !== 5) {
+            return false;
+        } else {
+            if (context.record.get('recordType') === 'L') {
+                // Disable editing of a library's Index Type
+                setTimeout(function() {Ext.getCmp('indexTypeEditor').disable();}, 50);
+            } else {
+                setTimeout(function() {Ext.getCmp('indexTypeEditor').enable();}, 50);
+            }
+        }
     },
 
     editRecord: function(editor, context) {
@@ -279,8 +293,8 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
                 } else {
                     samples.push({
                         sample_id: record.get('sampleId'),
-                        index_i7: record.get('indexI7') ? record.get('indexI7') : '',
-                        index_i5: record.get('indexI5') ? record.get('indexI5') : ''
+                        index_i7_id: record.get('indexI7Id') ? record.get('indexI7Id') : '',
+                        index_i5_id: record.get('indexI5Id') ? record.get('indexI5Id') : ''
                     });
                 }
             });
