@@ -63,6 +63,7 @@ target/
 .ipynb_checkpoints
 
 .idea/
+.vscode
 .DS_Store
 
 wui/dev_settings.py
