@@ -6,10 +6,13 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         control: {
             '#batchAddGrid': {
                 itemcontextmenu: 'showContextMenu',
-                edit: 'edit'
+                edit: 'editRecord'
             },
-            '#addBtn': {
-                click: 'add'
+            '#createEmptyRecordsBtn': {
+                click: 'createEmptyRecords'
+            },
+            '#saveBtn': {
+                click: 'save'
             }
         }
     },
@@ -18,27 +21,52 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         var me = this;
         e.stopEvent();
         Ext.create('Ext.menu.Menu', {
-            items: [
-                {
-                    text: 'Apply to All',
-                    iconCls: 'x-fa fa-check-circle',
-                    handler: function() {
-                        // TODO@me: get dataIndex
-                        me.applyToAll(record);
-                    }
-                }, {
-                    text: 'Delete',
-                    iconCls: 'x-fa fa-trash',
-                    handler: function() {
-                        me.delete(gridView, record);
-                    }
+            items: [{
+                text: 'Apply to All',
+                iconCls: 'x-fa fa-check-circle',
+                handler: function() {
+                    var dataIndex = me.getDataIndex(e, gridView);
+                    me.applyToAll(record, dataIndex);
                 }
-            ]
+            }, {
+                text: 'Delete',
+                iconCls: 'x-fa fa-trash',
+                handler: function() {
+                    me.delete(record, gridView);
+                }
+            }]
         }).showAt(e.getXY());
     },
 
-    applyToAll: function(record) {
-        var store = record.store;
+    createEmptyRecords: function(btn) {
+        var grid = Ext.getCmp('batchAddGrid'),
+            store = grid.getStore(),
+            numRecords = btn.up().down('#numEmptyRecords').getValue();
+
+        if (numRecords !== null && numRecords > 0) {
+            for (var index = 0; index < numRecords; index++) {
+                store.add({
+                    concentration: 0
+                });
+            }
+        }
+    },
+
+    applyToAll: function(record, dataIndex) {
+        var store = record.store
+        if (typeof dataIndex !== 'undefined') {
+            if (dataIndex === 'name') {
+                Ext.ux.ToastMessage('Names must be unique.', 'warning');
+                return;
+            }
+
+            store.each(function(item) {
+                if (item !== record) {
+                    item.set(dataIndex, record.get(dataIndex));
+                    item.save();
+                }
+            });
+        }
     },
 
     delete: function(record, gridView) {
@@ -47,11 +75,39 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         gridView.refresh();
     },
 
-    edit: function(editor, context) {
+    editRecord: function(editor, context) {
+        var grid = Ext.getCmp('batchAddGrid'),
+            record = context.record,
+            changes = record.getChanges(),
+            values = context.newValues;
+
+        for (var dataIndex in changes) {
+            if (changes.hasOwnProperty(dataIndex)) {
+                record.set(dataIndex, changes[dataIndex]);
+            }
+        }
+        record.save();
+    },
+
+    save: function() {
 
     },
 
-    add: function() {
+    getDataIndex: function(e, view) {
+        var xPos = e.getXY()[0],
+            columns = view.getGridColumns(),
+            dataIndex;
 
+        for(var column in columns) {
+            var leftEdge = columns[column].getPosition()[0],
+                rightEdge = columns[column].getSize().width + leftEdge;
+
+            if(xPos >= leftEdge && xPos <= rightEdge) {
+                dataIndex = columns[column].dataIndex;
+                break;
+            }
+        }
+
+        return dataIndex;
     }
 });

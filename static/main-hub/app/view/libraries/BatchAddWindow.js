@@ -4,7 +4,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
 
     requires: ['MainHub.view.libraries.BatchAddWindowController'],
 
-    title: 'Add Sample',
+    title: 'Add Samples',
     height: 650,
     width: 1000,
     modal: true,
@@ -14,25 +14,17 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
 
     items: [{
         xtype: 'grid',
-        id: 'lol',
+        id: 'batchAddGrid',
         itemId: 'batchAddGrid',
         border: 0,
-        header: {
-            items: [
-                {
-                    xtype: 'container',
-                    html: 'test'
-                }
-            ]
-        },
-        columns: [
-            {
+        columns: [{
                 xtype: 'rownumberer',
                 width: 40
             },
             {
                 text: 'Name',
                 dataIndex: 'name',
+                minWidth: 200,
                 flex: 1,
                 editor: {
                     xtype: 'textfield'
@@ -41,7 +33,15 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
             {
                 text: 'Protocol',
                 dataIndex: 'library_protocol',
-                flex: 1
+                width: 200,
+                editor: {
+                    xtype: 'combobox',
+                    queryMode: 'local',
+                    displayField: 'name',
+                    valueField: 'id',
+                    store: 'libraryProtocolsStore',
+                    forceSelection: true
+                }
             },
             {
                 text: 'Depth (M)',
@@ -56,48 +56,88 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
             {
                 text: 'ng/μl',
                 dataIndex: 'concentration',
-                width: 70
+                width: 70,
+                editor: {
+                    xtype: 'numberfield',
+                    minValue: 0
+                }
             },
             {
                 text: 'Method',
                 dataIndex: 'concentration_method',
-                width: 80
+                width: 80,
+                editor: {
+                    xtype: 'combobox',
+                    queryMode: 'local',
+                    displayField: 'name',
+                    valueField: 'id',
+                    store: 'concentrationMethodsStore',
+                    forceSelection: true
+                }
             },
             {
                 text: 'μg',
                 dataIndex: 'sample_volume',
-                width: 70
+                width: 70,
+                editor: {
+                    xtype: 'numberfield',
+                    minValue: 0
+                }
             }
         ],
         store: Ext.create('Ext.data.Store', {
-            data: [
-                {name: 'Sample 1', 'library_protocol': 'NEBNext'},
-                {name: 'Sample 2', 'library_protocol': 'NEBNext'},
-                {name: 'Sample 3', 'library_protocol': 'NEBNext'},
-                {name: 'Sample 4', 'library_protocol': 'NEBNext'},
-                {name: 'Sample 5', 'library_protocol': 'NEBNext'},
-                {name: 'Sample 6', 'library_protocol': 'NEBNext'},
-                {name: 'Sample 7', 'library_protocol': 'NEBNext'},
-                {name: 'Sample 8', 'library_protocol': 'NEBNext'},
-                {name: 'Sample 9', 'library_protocol': 'NEBNext'},
-                {name: 'Sample 10', 'library_protocol': 'NEBNext'},
-                {name: 'Sample 11', 'library_protocol': 'NEBNext'},
-                {name: 'Sample 12', 'library_protocol': 'NEBNext'},
-                {name: 'Sample 13', 'library_protocol': 'NEBNext'},
-                {name: 'Sample 14', 'library_protocol': 'NEBNext'},
-                {name: 'Sample 15', 'library_protocol': 'NEBNext'},
-                {name: 'Sample 16', 'library_protocol': 'NEBNext'},
-                {name: 'Sample 17', 'library_protocol': 'NEBNext'},
-                {name: 'Sample 18', 'library_protocol': 'NEBNext'},
-                {name: 'Sample 19', 'library_protocol': 'NEBNext'},
-                {name: 'Sample 20', 'library_protocol': 'NEBNext'}
-            ]
+            fields: [{
+                    type: 'string',
+                    name: 'name'
+                },
+                {
+                    type: 'int',
+                    name: 'library_protocol'
+                },
+                {
+                    type: 'int',
+                    name: 'sequencing_depth'
+                },
+                {
+                    type: 'float',
+                    name: 'concentration'
+                },
+                {
+                    type: 'int',
+                    name: 'concentration_method'
+                },
+                {
+                    type: 'int',
+                    name: 'sample_volume'
+                }
+            ],
+            data: []
         }),
+        tbar: [{
+            xtype: 'container',
+            padding: 5,
+            layout: 'hbox',
+            items: [{
+                    xtype: 'numberfield',
+                    itemId: 'numEmptyRecords',
+                    fieldLabel: '# of empty records',
+                    padding: '0 10px 0 0',
+                    labelWidth: 125,
+                    width: 210,
+                    minValue: 0
+                },
+                {
+                    xtype: 'button',
+                    itemId: 'createEmptyRecordsBtn',
+                    text: 'Create'
+                }
+            ]
+        }],
         bbar: [
             '->',
             {
-                text: 'Add',
-                itemId: 'addBtn'
+                text: 'Save',
+                itemId: 'saveBtn'
             }
         ],
         plugins: [{
