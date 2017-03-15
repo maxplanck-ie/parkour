@@ -4,6 +4,10 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
 
     config: {
         control: {
+            '#': {
+                boxready: 'boxready',
+                close: 'clearStore'
+            },
             '#batchAddGrid': {
                 itemcontextmenu: 'showContextMenu',
                 edit: 'editRecord'
@@ -15,6 +19,10 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                 click: 'save'
             }
         }
+    },
+
+    boxready: function() {
+        Ext.getStore('libraryProtocolsStore').reload();
     },
 
     showContextMenu: function(gridView, record, item, index, e) {
@@ -109,5 +117,10 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         }
 
         return dataIndex;
+    },
+
+    clearStore: function() {
+        var store = Ext.getCmp('batchAddGrid').getStore();
+        store.removeAll();
     }
 });

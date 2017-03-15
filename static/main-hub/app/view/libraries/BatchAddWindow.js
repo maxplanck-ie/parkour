@@ -17,74 +17,6 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
         id: 'batchAddGrid',
         itemId: 'batchAddGrid',
         border: 0,
-        columns: [{
-                xtype: 'rownumberer',
-                width: 40
-            },
-            {
-                text: 'Name',
-                dataIndex: 'name',
-                minWidth: 200,
-                flex: 1,
-                editor: {
-                    xtype: 'textfield'
-                }
-            },
-            {
-                text: 'Protocol',
-                dataIndex: 'library_protocol',
-                width: 200,
-                editor: {
-                    xtype: 'combobox',
-                    queryMode: 'local',
-                    displayField: 'name',
-                    valueField: 'id',
-                    store: 'libraryProtocolsStore',
-                    forceSelection: true
-                }
-            },
-            {
-                text: 'Depth (M)',
-                dataIndex: 'sequencing_depth',
-                width: 85,
-                editor: {
-                    xtype: 'numberfield',
-                    minValue: 0,
-                    allowDecimals: false
-                }
-            },
-            {
-                text: 'ng/μl',
-                dataIndex: 'concentration',
-                width: 70,
-                editor: {
-                    xtype: 'numberfield',
-                    minValue: 0
-                }
-            },
-            {
-                text: 'Method',
-                dataIndex: 'concentration_method',
-                width: 80,
-                editor: {
-                    xtype: 'combobox',
-                    queryMode: 'local',
-                    displayField: 'name',
-                    valueField: 'id',
-                    store: 'concentrationMethodsStore',
-                    forceSelection: true
-                }
-            },
-            {
-                text: 'μg',
-                dataIndex: 'sample_volume',
-                width: 70,
-                editor: {
-                    xtype: 'numberfield',
-                    minValue: 0
-                }
-            }
-        ],
         store: Ext.create('Ext.data.Store', {
             fields: [{
                     type: 'string',
@@ -95,11 +27,11 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                     name: 'library_protocol'
                 },
                 {
-                    type: 'int',
+                    type: 'string',
                     name: 'sequencing_depth'
                 },
                 {
-                    type: 'float',
+                    type: 'string',
                     name: 'concentration'
                 },
                 {
@@ -107,12 +39,202 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                     name: 'concentration_method'
                 },
                 {
-                    type: 'int',
+                    type: 'string',
                     name: 'sample_volume'
+                },
+                {
+                    type: 'string',
+                    name: 'amplification_cycles'
+                },
+                {
+                    type: 'int',
+                    name: 'read_length'
+                },
+                {
+                    type: 'int',
+                    name: 'organism'
                 }
             ],
+            // validations: [{
+            //     type: 'presence',
+            //     field: 'name'
+            // }],
             data: []
         }),
+        columns: [{
+                xtype: 'rownumberer',
+                width: 40
+            },
+            {
+                text: 'Name',
+                dataIndex: 'name',
+                tooltip: 'Sample Name',
+                minWidth: 200,
+                flex: 1,
+                editor: {
+                    xtype: 'textfield'
+                }
+            },
+            {
+                text: 'Protocol',
+                dataIndex: 'library_protocol',
+                tooltip: 'Library Protocol',
+                width: 200,
+                editor: {
+                    xtype: 'combobox',
+                    queryMode: 'local',
+                    displayField: 'name',
+                    valueField: 'id',
+                    store: 'libraryProtocolsStore',
+                    forceSelection: true
+                },
+                renderer: function(val, meta) {
+                    var store = Ext.getStore('libraryProtocolsStore'),
+                        record = store.findRecord('id', val);
+                    return (record !== null) ? record.get('name') : '';
+                }
+            },
+            {
+                text: 'Library Type',
+                dataIndex: 'library_type',
+                tooltip: 'Library Type',
+                width: 200,
+                editor: {
+                    xtype: 'combobox',
+                    queryMode: 'local',
+                    displayField: 'name',
+                    valueField: 'id',
+                    store: 'libraryTypesStore',
+                    forceSelection: true,
+                    disabled: true
+                },
+                renderer: function(val, meta) {
+                    var store = Ext.getStore('libraryTypesStore'),
+                        record = store.findRecord('id', val);
+                    return (record !== null) ? record.get('name') : '';
+                }
+            },
+            {
+                text: 'ng/μl',
+                dataIndex: 'concentration',
+                tooltip: 'Concentration',
+                width: 70,
+                editor: {
+                    xtype: 'numberfield',
+                    minValue: 0
+                }
+            },
+            {
+                text: 'RQN',
+                dataIndex: 'rna_quality',
+                tooltip: 'RNA Quality',
+                width: 55,
+                editor: {
+                    xtype: 'combobox',
+                    queryMode: 'local',
+                    valueField: 'id',
+                    displayField: 'name',
+                    store: 'rnaQualityStore',
+                    forceSelection: true,
+                    disabled: true
+                },
+                renderer: function(val, meta) {
+                    var store = Ext.getStore('rnaQualityStore'),
+                        record = store.findRecord('id', val);
+                    return (record !== null) ? record.get('name') : '';
+                }
+            },
+            {
+                text: 'Length',
+                dataIndex: 'read_length',
+                tooltip: 'Read Length',
+                width: 70,
+                editor: {
+                    xtype: 'combobox',
+                    queryMode: 'local',
+                    valueField: 'id',
+                    displayField: 'name',
+                    store: 'readLengthsStore',
+                    forceSelection: true
+                },
+                renderer: function(val, meta) {
+                    var store = Ext.getStore('readLengthsStore'),
+                        record = store.findRecord('id', val);
+                    return (record !== null) ? record.get('name') : '';
+                }
+            },
+            {
+                text: 'Depth (M)',
+                dataIndex: 'sequencing_depth',
+                tooltip: 'Sequencing Depth',
+                width: 85,
+                editor: {
+                    xtype: 'numberfield',
+                    minValue: 0,
+                    allowDecimals: false
+                }
+            },
+            {
+                text: 'Amplification',
+                tooltip: 'Amplification cycles',
+                dataIndex: 'amplification_cycles',
+                width: 105,
+                editor: {
+                    xtype: 'numberfield',
+                    minValue: 1,
+                    allowDecimals: false,
+                    allowBlank: true
+                }
+            },
+            {
+                text: 'μl',
+                dataIndex: 'sample_volume',
+                tooltip: 'Sample Volume',
+                width: 70,
+                editor: {
+                    xtype: 'numberfield',
+                    minValue: 0
+                }
+            },
+            {
+                text: 'Method',
+                dataIndex: 'concentration_method',
+                tooltip: 'Concentration Method',
+                width: 80,
+                editor: {
+                    xtype: 'combobox',
+                    queryMode: 'local',
+                    valueField: 'id',
+                    displayField: 'name',
+                    store: 'concentrationMethodsStore',
+                    forceSelection: true
+                },
+                renderer: function(val, meta) {
+                    var store = Ext.getStore('concentrationMethodsStore'),
+                        record = store.findRecord('id', val);
+                    return (record !== null) ? record.get('name') : '';
+                }
+            },
+            {
+                text: 'Organism',
+                dataIndex: 'organism',
+                tooltip: 'Organism',
+                width: 100,
+                editor: {
+                    xtype: 'combobox',
+                    queryMode: 'local',
+                    valueField: 'id',
+                    displayField: 'name',
+                    store: 'organismsStore',
+                    forceSelection: true
+                },
+                renderer: function(val, meta) {
+                    var store = Ext.getStore('organismsStore'),
+                        record = store.findRecord('id', val);
+                    return (record !== null) ? record.get('name') : '';
+                }
+            }
+        ],
         tbar: [{
             xtype: 'container',
             padding: 5,
