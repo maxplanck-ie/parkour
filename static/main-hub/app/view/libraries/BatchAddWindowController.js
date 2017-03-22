@@ -10,8 +10,18 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             },
             '#batchAddGrid': {
                 itemcontextmenu: 'showContextMenu',
+                beforeedit: 'toggleEditors',
                 edit: 'editRecord'
             },
+            '#nucleicAcidTypeEditor': {
+                select: 'selectNucleicAcidType'
+            },
+            '#libraryProtocolEditor': {
+                select: 'selectLibraryProtocol'
+            },
+            // '#libraryTypeEditor': {
+            //     select: 'selectLibraryType'
+            // },
             '#createEmptyRecordsBtn': {
                 click: 'createEmptyRecords'
             },
@@ -22,7 +32,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
     },
 
     boxready: function() {
-        Ext.getStore('libraryProtocolsStore').reload();
+        // Ext.getStore('libraryProtocolsStore').reload();
     },
 
     showContextMenu: function(gridView, record, item, index, e) {
@@ -71,6 +81,13 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             store.each(function(item) {
                 if (item !== record) {
                     item.set(dataIndex, record.get(dataIndex));
+
+                    // If Library Protocol was selected, apply Librrary Type too
+                    var libraryType = record.get('library_type');
+                    if (dataIndex == 'library_protocol' && libraryType !== 0) {
+                        item.set('library_type', libraryType);
+                    }
+
                     item.save();
                 }
             });
@@ -81,6 +98,58 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         var store = record.store;
         store.remove(record);
         gridView.refresh();
+    },
+
+    toggleEditors: function(editor, context) {
+        var nucleicAcidTypeEditor = Ext.getCmp('nucleicAcidTypeEditor'),
+            nucleicAcidTypesStore = Ext.getStore('nucleicAcidTypesStore'),
+            libraryProtocolEditor = Ext.getCmp('libraryProtocolEditor'),
+            libraryProtocolsStore = Ext.getStore('libraryProtocolsStore'),
+            libraryTypeEditor = Ext.getCmp('libraryTypeEditor'),
+            libraryTypesStore = Ext.getStore('libraryTypesStore'),
+            rnaQualityEditor = Ext.getCmp('rnaQualityEditor'),
+            record = context.record;
+
+        // Toggle Library Protocol
+        if (record.get('nucleic_acid_type') === 0) {
+            libraryProtocolEditor.disable();
+        } else {
+            libraryProtocolEditor.enable();
+
+            // Reload Library Protocols store for currently selected Nucleic Acid Type
+            if (record.get('library_protocol') !== 0) {
+                libraryProtocolsStore.load({
+                    params: {
+                        'type': nucleicAcidTypesStore.findRecord('id',
+                            record.get('nucleic_acid_type')
+                        ).get('type')
+                    }
+                });
+            }
+        }
+
+        // Toggle Library Type
+        if (record.get('library_protocol') === 0) {
+            libraryTypeEditor.disable();
+        } else {
+            libraryTypeEditor.enable();
+
+            // Reload Library Types store for currently selected Library Protocol
+            if (record.get('library_type') !== 0) {
+                libraryTypesStore.load({
+                    params: {
+                        'library_protocol_id': record.get('library_protocol')
+                    }
+                });
+            }
+        }
+
+         // Toggle RNA Quality
+        if (record.get('rna_quality') === 0) {
+            rnaQualityEditor.disable();
+        } else {
+            rnaQualityEditor.enable();
+        }
     },
 
     editRecord: function(editor, context) {
@@ -94,11 +163,68 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                 record.set(dataIndex, changes[dataIndex]);
             }
         }
+
+        // Reset Library Type if Library Protocol is empty
+        if (record.get('library_protocol') === 0 && record.get('library_type') !== 0) {
+            record.set('library_type', 0);
+        }
+
         record.save();
     },
 
-    save: function() {
+    selectNucleicAcidType: function(fld, record) {
+        var libraryProtocolEditor = Ext.getCmp('libraryProtocolEditor'),
+            libraryProtocolsStore = Ext.getStore('libraryProtocolsStore'),
+            libraryTypeEditor = Ext.getCmp('libraryTypeEditor'),
+            rnaQualityEditor = Ext.getCmp('rnaQualityEditor');
 
+        libraryTypeEditor.setValue(null);
+        libraryTypeEditor.disable();
+
+        libraryProtocolsStore.load({
+            params: {
+                'type': record.get('type')
+            },
+            callback: function(records, operation, success) {
+                if (success) {
+                    libraryProtocolEditor.enable();
+                } else {
+                    libraryProtocolEditor.disable();
+                }
+            }
+        });
+
+        if (record.get('type') === 'RNA') {
+            rnaQualityEditor.enable();
+        } else {
+            rnaQualityEditor.disable();
+        }
+    },
+
+    selectLibraryProtocol: function(fld, record) {
+        var libraryTypeEditor = Ext.getCmp('libraryTypeEditor'),
+            libraryTypesStore = Ext.getStore('libraryTypesStore');
+
+        libraryTypesStore.load({
+            params: {
+                'library_protocol_id': record.get('id')
+            },
+            callback: function(records, operation, success) {
+                if (success) {
+                    libraryTypeEditor.enable();
+                } else {
+                    libraryTypeEditor.disable();
+                }
+            }
+        });
+    },
+
+    // selectLibraryType: function(fld, record) {
+
+    // },
+
+    save: function() {
+        // TODO@me: verify all records before saving
     },
 
     getDataIndex: function(e, view) {
@@ -106,11 +232,11 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             columns = view.getGridColumns(),
             dataIndex;
 
-        for(var column in columns) {
+        for (var column in columns) {
             var leftEdge = columns[column].getPosition()[0],
                 rightEdge = columns[column].getSize().width + leftEdge;
 
-            if(xPos >= leftEdge && xPos <= rightEdge) {
+            if (xPos >= leftEdge && xPos <= rightEdge) {
                 dataIndex = columns[column].dataIndex;
                 break;
             }

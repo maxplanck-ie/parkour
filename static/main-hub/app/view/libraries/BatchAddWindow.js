@@ -24,7 +24,15 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                 },
                 {
                     type: 'int',
+                    name: 'nucleic_acid_type'
+                },
+                {
+                    type: 'int',
                     name: 'library_protocol'
+                },
+                {
+                    type: 'int',
+                    name: 'library_type'
                 },
                 {
                     type: 'string',
@@ -37,6 +45,10 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                 {
                     type: 'int',
                     name: 'concentration_method'
+                },
+                {
+                    type: 'int',
+                    name: 'rna_quality'
                 },
                 {
                     type: 'string',
@@ -76,12 +88,35 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                 }
             },
             {
+                text: 'Nuc. Type',
+                dataIndex: 'nucleic_acid_type',
+                tooltip: 'Nucleic Acid Type',
+                width: 200,
+                editor: {
+                    xtype: 'combobox',
+                    id: 'nucleicAcidTypeEditor',
+                    itemId: 'nucleicAcidTypeEditor',
+                    queryMode: 'local',
+                    displayField: 'name',
+                    valueField: 'id',
+                    store: 'nucleicAcidTypesStore',
+                    forceSelection: true
+                },
+                renderer: function(val, meta) {
+                    var store = Ext.getStore('nucleicAcidTypesStore'),
+                        record = store.findRecord('id', val);
+                    return (record !== null) ? record.get('name') : '';
+                }
+            },
+            {
                 text: 'Protocol',
                 dataIndex: 'library_protocol',
                 tooltip: 'Library Protocol',
                 width: 200,
                 editor: {
                     xtype: 'combobox',
+                    id: 'libraryProtocolEditor',
+                    itemId: 'libraryProtocolEditor',
                     queryMode: 'local',
                     displayField: 'name',
                     valueField: 'id',
@@ -101,12 +136,13 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                 width: 200,
                 editor: {
                     xtype: 'combobox',
+                    id: 'libraryTypeEditor',
+                    itemId: 'libraryTypeEditor',
                     queryMode: 'local',
                     displayField: 'name',
                     valueField: 'id',
                     store: 'libraryTypesStore',
-                    forceSelection: true,
-                    disabled: true
+                    forceSelection: true
                 },
                 renderer: function(val, meta) {
                     var store = Ext.getStore('libraryTypesStore'),
@@ -131,12 +167,12 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                 width: 55,
                 editor: {
                     xtype: 'combobox',
+                    id: 'rnaQualityEditor',
                     queryMode: 'local',
                     valueField: 'id',
                     displayField: 'name',
                     store: 'rnaQualityStore',
-                    forceSelection: true,
-                    disabled: true
+                    forceSelection: true
                 },
                 renderer: function(val, meta) {
                     var store = Ext.getStore('rnaQualityStore'),
