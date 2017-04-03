@@ -116,7 +116,7 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
             fullRecord = store.findRecord('sampleId', record.get('sampleId'));
         }
 
-        Ext.create('library_wnd', {
+        Ext.create('MainHub.view.libraries.LibraryWindow', {
             title: title,
             mode: 'edit',
             record: fullRecord
