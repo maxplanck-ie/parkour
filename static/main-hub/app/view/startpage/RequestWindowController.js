@@ -2,6 +2,8 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.startpage-requestwindow',
 
+    requires: ['Ext.ux.FileUploadWindow'],
+
     config: {
         control: {
             '#': {
@@ -12,10 +14,10 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
                 refresh: 'refreshLibrariesInRequestTable',
                 itemcontextmenu: 'showContextMenu'
             },
-            '#generatePDFBtn': {
+            '#downloadRequestBlankBtn': {
                 click: 'generatePDF'
             },
-            '#uploadBtn': {
+            '#uploadSignedBlankBtn': {
                 click: 'uploadPDF'
             },
             '#saveRequestWndBtn': {
@@ -41,10 +43,8 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
     onRequestWindowBoxready: function(wnd) {
         if (wnd.mode == 'add') {
             Ext.getStore('librariesInRequestStore').removeAll();
-            Ext.getCmp('deepSeqRequest').mask(
-                'You need to save the request to proceed.',
-                'deep-seq-request-mask'
-            );
+            Ext.getCmp('downloadRequestBlankBtn').disable();
+            Ext.getCmp('uploadSignedBlankBtn').disable();
         } else {
             var form = Ext.getCmp('requestForm').getForm(),
                 grid = Ext.getCmp('librariesInRequestTable'),
@@ -52,19 +52,18 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
 
             form.setValues(record);
             Ext.getCmp('requestName').enable();
-            Ext.getCmp('deepSeqRequest').enable();
 
-            if (record.deepSeqRequestName !== '') {
-                // TODO@me: improve the code
-                Ext.getCmp('uploadedDeepSeqRequest').setHtml(
-                    // 'Uploaded File: <a href="' + record.deepSeqRequestPath + '" target="_blank">' + record.deepSeqRequestName + '</a>'
-                    'Uploaded File: <a href="' + record.deepSeqRequestPath + '" target="_blank">file</a>'
-                );
+            if (record.deepSeqRequestPath !== '') {
+                $('#uploaded-request-file').html('<a href="' + record.deepSeqRequestPath + '" target="_blank">uploaded</a>');
+                Ext.getCmp('downloadRequestBlankBtn').disable();
+                Ext.getCmp('uploadSignedBlankBtn').disable();
             }
 
             // Load all Libraries/Samples for current Request
             grid.fireEvent('loadstore', grid, record.requestId);
         }
+
+        this.initializeTooltips();
     },
 
     refreshLibrariesInRequestTable: function(grid) {
@@ -158,12 +157,14 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
     },
 
     generatePDF: function(btn) {
-        var wnd = btn.up('window'),
-            url = 'request/generate_deep_sequencing_request/';
+        var wnd = btn.up('window');
+        var form = Ext.create('Ext.form.Panel', {
+            standardSubmit: true
+        });
 
-        Ext.getCmp('generatePDFForm').submit({
+        form.submit({
+            url: 'request/generate_deep_sequencing_request/',
             target: '_blank',
-            url: url,
             params: {
                 'request_id': wnd.record.get('requestId')
             }
@@ -172,43 +173,56 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
 
     uploadPDF: function(btn) {
         var wnd = btn.up('window'),
-            form = Ext.getCmp('deepSeqRequestForm'),
+            // form = Ext.getCmp('deepSeqRequestForm'),
             requestId = wnd.record.get('requestId'),
             url = 'request/upload_deep_sequencing_request/';
 
-        if (form.isValid()) {
-            form.submit({
-                url: url,
-                method: 'POST',
-                waitMsg: 'Uploading...',
-                params: {
-                    'request_id': requestId
-                },
+        Ext.create('Ext.ux.FileUploadWindow', {
+            onFileUpload: function() {
+                var me = this,
+                    form = this.down('form').getForm();
 
-                success: function(f, action) {
-                    var obj = Ext.JSON.decode(action.response.responseText);
-                    if (obj.success) {
-                        Ext.getCmp('uploadedDeepSeqRequest').setHtml(
-                            'Uploaded File: <a href="' + obj.path + '" target="_blank">' + obj.name + '</a>'
-                        );
-                        Ext.getStore('requestsStore').reload();
-                        if (Ext.getStore('librariesStore').isLoaded()) Ext.getStore('librariesStore').reload();
-                        if (Ext.getStore('incomingLibrariesStore').isLoaded()) Ext.getStore('incomingLibrariesStore').reload();
-                    } else {
-                        Ext.ux.ToastMessage(obj.error, 'error');
-                        console.error('[ERROR]: ' + url);
-                        console.error(action.response);
-                    }
-                },
+                if (form.isValid()) {
+                    form.submit({
+                        url: url,
+                        method: 'POST',
+                        waitMsg: 'Uploading...',
+                        params: {
+                            'request_id': requestId
+                        },
 
-                failure: function(f, action) {
-                    var errorMsg = (action.failureType == 'server') ? 'Server error.' : 'Error.';
-                    Ext.ux.ToastMessage(errorMsg, 'error');
-                    console.error('[ERROR]: ' + url);
-                    console.error(action.response.responseText);
+                        success: function(f, action) {
+                            var obj = Ext.JSON.decode(action.response.responseText);
+
+                            if (obj.success) {
+                                Ext.ux.ToastMessage('Deep Sequencing Request has been successfully uploaded.');
+
+                                $('#uploaded-request-file').html('<a href="' + obj.path + '" target="_blank">uploaded</a>');
+                                Ext.getCmp('downloadRequestBlankBtn').disable();
+                                Ext.getCmp('uploadSignedBlankBtn').disable();
+
+                                Ext.getStore('requestsStore').reload();
+                                if (Ext.getStore('librariesStore').isLoaded()) Ext.getStore('librariesStore').reload();
+                                if (Ext.getStore('incomingLibrariesStore').isLoaded()) Ext.getStore('incomingLibrariesStore').reload();
+                            } else {
+                                Ext.ux.ToastMessage('There is a problem with the provided file.', 'error');
+                            }
+
+                            me.close();
+                        },
+
+                        failure: function(f, action) {
+                            var errorMsg = (action.failureType == 'server') ? 'Server error.' : 'Error.';
+                            Ext.ux.ToastMessage(errorMsg, 'error');
+                            console.error('[ERROR]: ' + url);
+                            console.error(action.response.responseText);
+                        }
+                    });
+                } else {
+                    Ext.ux.ToastMessage('You did not select any file.', 'warning');
                 }
-            });
-        }
+            }
+        });
     },
 
     saveRequest: function(btn) {
@@ -281,5 +295,17 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
             title: 'Add Library/Sample',
             mode: 'add'
         }).show();
+    },
+
+    initializeTooltips: function() {
+        $.each($('.request-field-tooltip'), function(idx, item) {
+            Ext.create('Ext.tip.ToolTip', {
+                title: 'Help',
+                target: item,
+                html: $(item).attr('tooltip-text'),
+                dismissDelay: 15000,
+                maxWidth: 300
+            });
+        });
     }
 });

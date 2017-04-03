@@ -8,7 +8,7 @@ Ext.define('MainHub.view.startpage.RequestWindow', {
 
     controller: 'startpage-requestwindow',
 
-    height: 515,
+    height: 445,
     width: 750,
 
     modal: true,
@@ -20,8 +20,7 @@ Ext.define('MainHub.view.startpage.RequestWindow', {
             type: 'table',
             columns: 2
         },
-        items: [
-            {
+        items: [{
                 border: 0,
                 padding: 15,
                 width: 400,
@@ -50,105 +49,22 @@ Ext.define('MainHub.view.startpage.RequestWindow', {
                                 fieldLabel: 'Description',
                                 emptyText: 'Description',
                                 allowBlank: false,
-                                height: 160
+                                height: 250
                             }
                         ]
                     },
                     {
-                        id: 'deepSeqRequest',
-                        itemId: 'deepSeqRequest',
+                        id: 'uploadedDeepSeqRequest',
                         border: 0,
-                        padding: '10px 0 15px 0',
-                        style: {
-                            borderTop: '1px solid #d0d0d0'
-                        },
-                        height: 185,
-                        defaults: {
-                            border: 0,
-                            margin: '5px 0'
-                        },
-
-                        items: [{
-                                html: '<strong>Deep Sequencing Request</strong><br>'
-                            },
-                            {
-                                xtype: 'container',
-                                layout: 'hbox',
-                                margin: '5px 0 0 0',
-                                items: [{
-                                        xtype: 'label',
-                                        html: '1. Download the blank:<br>',
-                                        margin: '7px 15px 0 0'
-                                    },
-                                    {
-                                        xtype: 'button',
-                                        itemId: 'generatePDFBtn',
-                                        text: 'Download'
-                                    },
-                                    {
-                                        xtype: 'form',
-                                        id: 'generatePDFForm',
-                                        standardSubmit: true,
-                                        timeout: 100000,
-                                        hidden: true
-                                    }
-                                ]
-                            },
-                            {
-                                html: '2. Sign it<br>',
-                                margin: '-3px 0px 5px 0'
-                            },
-                            {
-                                html: '3. Upload the signed blank back using the form:<br>'
-                            },
-                            {
-                                layout: 'hbox',
-                                margin: '0 0 0 15px',
-                                items: [{
-                                        xtype: 'form',
-                                        id: 'deepSeqRequestForm',
-                                        border: 0,
-                                        width: 278,
-                                        items: [{
-                                            xtype: 'filefield',
-                                            name: 'file',
-                                            fieldLabel: 'File',
-                                            labelWidth: 30,
-                                            msgTarget: 'side',
-                                            anchor: '100%',
-                                            buttonText: 'Select...',
-                                            allowBlank: false,
-                                            onFileChange: function(button, e, value) {
-                                                var me = this,
-                                                    upload = me.fileInputEl.dom,
-                                                    files = upload.files,
-                                                    names = [];
-
-                                                if (files) {
-                                                    for (var i = 0; i < files.length; i++)
-                                                        names.push(files[i].name);
-                                                    value = names.join(', ');
-                                                }
-
-                                                Ext.form.field.File.superclass.setValue.call(this, value);
-                                            }
-                                        }]
-                                    },
-                                    {
-                                        xtype: 'button',
-                                        itemId: 'uploadBtn',
-                                        text: 'Upload',
-                                        margin: '0 0 0 10px'
-                                    }
-                                ]
-                            },
-                            {
-                                id: 'uploadedDeepSeqRequest',
-                                html: 'Uploaded File: None',
-                                margin: '0 0 0 15px'
-                            }
-                        ]
-                    }
+                        html: 'Signed Deep Sequencing Request ' +
+                                '<sup><strong><span class="request-field-tooltip" tooltip-text="' +
+                                  '1. Save the request.<br/>' +
+                                  '2. Download the Deep Sequencing Request blank using the download button below.<br/>' +
+                                  '3. Print and sign it.<br/>' +
+                                  '4. Scan the blank and upload it back using the upload button below.<br/><br/>' +
+                                '<strong>Note</strong>: if the blank is already uploaded, you cannot update it.' +
+                              '">[?]</span></strong></sup>: <span id="uploaded-request-file">Not uploaded</span>',
+                    },
                 ]
             },
             {
@@ -157,7 +73,7 @@ Ext.define('MainHub.view.startpage.RequestWindow', {
                 itemId: 'librariesInRequestTable',
                 title: 'Libraries/Samples',
                 width: 345,
-                height: 415,
+                height: 347,
                 padding: '12px 15px 15px 0',
                 rowspan: 2,
                 columns: {
@@ -197,7 +113,19 @@ Ext.define('MainHub.view.startpage.RequestWindow', {
             }
         ]
     }],
-    buttons: [
+
+    bbar: [{
+            xtype: 'button',
+            id: 'downloadRequestBlankBtn',
+            itemId: 'downloadRequestBlankBtn',
+            text: 'Download Request Blank'
+        },
+        {
+            xtype: 'button',
+            id: 'uploadSignedBlankBtn',
+            itemId: 'uploadSignedBlankBtn',
+            text: 'Upload Signed Blank'
+        },
         '->',
         {
             xtype: 'button',
