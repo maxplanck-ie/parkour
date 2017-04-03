@@ -164,7 +164,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                 text: 'RQN',
                 dataIndex: 'rna_quality',
                 tooltip: 'RNA Quality',
-                width: 55,
+                width: 70,
                 editor: {
                     xtype: 'combobox',
                     id: 'rnaQualityEditor',

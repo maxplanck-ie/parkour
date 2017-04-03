@@ -80,12 +80,29 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
 
             store.each(function(item) {
                 if (item !== record) {
-                    item.set(dataIndex, record.get(dataIndex));
+                    // Special case: RNA Quality should be applied only when Nuc. Type is RNA
+                    if (dataIndex === 'rna_quality') {
+                        var nat = Ext.getStore('nucleicAcidTypesStore').findRecord('id',
+                            item.get('nucleic_acid_type')
+                        );
+                        if (nat !== null && nat.get('type') === 'RNA') {
+                            item.set(dataIndex, record.get(dataIndex));
+                        }
+                    }
 
-                    // If Library Protocol was selected, apply Librrary Type too
-                    var libraryType = record.get('library_type');
-                    if (dataIndex == 'library_protocol' && libraryType !== 0) {
-                        item.set('library_type', libraryType);
+                    else {
+                        item.set(dataIndex, record.get(dataIndex));
+                    }
+
+                    // If Library Protocol was selected, apply Nuc. Type too
+                    if (dataIndex == 'library_protocol') {
+                        item.set('nucleic_acid_type', record.get('nucleic_acid_type'));
+                    }
+
+                    // If Library Type was selected, apply Library Protocol and Nuc. Type too
+                    if (dataIndex == 'library_type') {
+                        item.set('library_protocol', record.get('library_protocol'));
+                        item.set('nucleic_acid_type', record.get('nucleic_acid_type'));
                     }
 
                     item.save();
@@ -145,10 +162,13 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         }
 
          // Toggle RNA Quality
-        if (record.get('rna_quality') === 0) {
-            rnaQualityEditor.disable();
-        } else {
+        var nat = nucleicAcidTypesStore.findRecord('id',
+            record.get('nucleic_acid_type')
+        );
+        if (nat !== null && nat.get('type') === 'RNA') {
             rnaQualityEditor.enable();
+        } else {
+            rnaQualityEditor.disable();
         }
     },
 
