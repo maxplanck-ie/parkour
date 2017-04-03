@@ -38,7 +38,9 @@ Ext.define('MainHub.view.startpage.RequestWindowController', {
                 'request_id': requestId
             },
             callback: function(records, operation, success) {
-                if (!success) Ext.ux.ToastMessage('Cannot load Libraries/Samples', 'error');
+                if (!success) {
+                    Ext.ux.ToastMessage('Cannot load Libraries/Samples', 'error');
+                }
             }
         });
     },
