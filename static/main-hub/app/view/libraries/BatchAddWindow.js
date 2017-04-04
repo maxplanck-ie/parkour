@@ -72,6 +72,10 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                 {
                     type: 'int',
                     name: 'organism'
+                },
+                {
+                    type: 'string',
+                    name: 'comments'
                 }
             ],
             // validations: [{
@@ -295,6 +299,17 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                     var store = Ext.getStore('organismsStore'),
                         record = store.findRecord('id', val);
                     return (record !== null) ? record.get('name') : '';
+                }
+            },
+            {
+                text: 'Comments',
+                dataIndex: 'comments',
+                tooltip: 'Comments',
+                width: 150,
+                editor: {
+                    // xtype: 'textarea',
+                    xtype: 'textfield',
+                    allowBlank: true
                 }
             }
         ],
