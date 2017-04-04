@@ -201,6 +201,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         if (record.get('type') === 'RNA') {
             rnaQualityEditor.enable();
         } else {
+            rnaQualityEditor.setValue(null);
             rnaQualityEditor.disable();
         }
     },

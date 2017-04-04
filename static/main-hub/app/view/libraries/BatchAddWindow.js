@@ -100,6 +100,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                     displayField: 'name',
                     valueField: 'id',
                     store: 'nucleicAcidTypesStore',
+                    matchFieldWidth: false,
                     forceSelection: true
                 },
                 renderer: function(val, meta) {
@@ -121,6 +122,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                     displayField: 'name',
                     valueField: 'id',
                     store: 'libraryProtocolsStore',
+                    matchFieldWidth: false,
                     forceSelection: true
                 },
                 renderer: function(val, meta) {
@@ -143,6 +145,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                     displayField: 'name',
                     valueField: 'id',
                     store: 'libraryTypesStore',
+                    // matchFieldWidth: false,
                     forceSelection: true
                 },
                 renderer: function(val, meta) {
@@ -174,6 +177,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                     valueField: 'id',
                     displayField: 'name',
                     store: 'rnaQualityStore',
+                    matchFieldWidth: false,
                     forceSelection: true
                 },
                 renderer: function(val, meta) {
@@ -193,6 +197,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                     valueField: 'id',
                     displayField: 'name',
                     store: 'readLengthsStore',
+                    matchFieldWidth: false,
                     forceSelection: true
                 },
                 renderer: function(val, meta) {
@@ -245,6 +250,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                     valueField: 'id',
                     displayField: 'name',
                     store: 'concentrationMethodsStore',
+                    matchFieldWidth: false,
                     forceSelection: true
                 },
                 renderer: function(val, meta) {
@@ -264,6 +270,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                     valueField: 'id',
                     displayField: 'name',
                     store: 'organismsStore',
+                    // matchFieldWidth: false,
                     forceSelection: true
                 },
                 renderer: function(val, meta) {
