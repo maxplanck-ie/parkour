@@ -392,7 +392,19 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                     valueField: 'id',
                     store: 'libraryProtocolsStore',
                     matchFieldWidth: false,
-                    forceSelection: true
+                    forceSelection: true,
+                    listConfig: {
+                        getInnerTpl: function() {
+                            return '<span data-qtip="'+
+                                     '<strong>Provider</strong>: {provider}<br/>' +
+                                     '<strong>Catalog</strong>: {catalog}<br/>' +
+                                     '<strong>Explanation</strong>: {explanation}<br/>' +
+                                     '<strong>Input Requirements</strong>: {inputRequirements}<br/>' +
+                                     '<strong>Typical Application</strong>: {typicalApplication}<br/>' +
+                                     '<strong>Comments</strong>: {comments}' +
+                                   '">{name}</span>'
+                        }
+                    }
                 },
                 renderer: function(val, meta) {
                     var store = Ext.getStore('libraryProtocolsStore');
