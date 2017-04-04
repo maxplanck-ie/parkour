@@ -64,8 +64,8 @@ Ext.define('MainHub.view.startpage.RequestWindow', {
                                   '3. Print and sign it.<br/>' +
                                   '4. Scan the blank and upload it back using the upload button below.<br/><br/>' +
                                 '<strong>Note</strong>: if the blank is already uploaded, you cannot update it.' +
-                              '">[?]</span></strong></sup>: <span id="uploaded-request-file">Not uploaded</span>',
-                    },
+                              '">[?]</span></strong></sup>: <span id="uploaded-request-file">Not uploaded</span>'
+                    }
                 ]
             },
             {

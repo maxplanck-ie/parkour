@@ -8,7 +8,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                 boxready: 'boxready'
             },
             '#libraryCardBtn': {
-                // click: 'selectCard'
+                click: 'selectCard'
             },
             '#sampleCardBtn': {
                 click: 'selectCard'
@@ -51,9 +51,11 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         layout.setActiveItem(1);
 
         if (btn.itemId == 'libraryCardBtn') {
+            wnd.recordType = 'L';
             wnd.setTitle('Add Libraries');
-            // configuration = this.getlibraryGridConfiguration();
+            configuration = this.getLibraryGridConfiguration();
         } else {
+            wnd.recordType = 'S';
             wnd.setTitle('Add Samples');
             configuration = this.getSampleGridConfiguration();
         }
@@ -107,13 +109,30 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
 
             store.each(function(item) {
                 if (item !== record) {
-                    // If Library Protocol was selected, apply Nuc. Type too
-                    if (dataIndex == 'library_protocol') {
+                    if (dataIndex === 'nucleic_acid_type') {
                         item.set('nucleic_acid_type', record.get('nucleic_acid_type'));
+
+                        // If Library Protocol is not set, reset it and Library Type for other records
+                        if (record.get('library_protocol') === 0) {
+                            item.set('library_protocol', 0);
+                            item.set('library_type', 0);
+                        }
+                    }
+
+                    // If Library Protocol was selected, apply Nuc. Type too
+                    else if (dataIndex === 'library_protocol') {
+                        item.set('library_protocol', record.get('library_protocol'));
+                        item.set('nucleic_acid_type', record.get('nucleic_acid_type'));
+
+                        // If Library Type is not set, reset it for other records
+                        if (record.get('library_type') === 0) {
+                            item.set('library_type', 0);
+                        }
                     }
 
                     // If Library Type was selected, apply Library Protocol and Nuc. Type too
-                    else if (dataIndex == 'library_type') {
+                    else if (dataIndex === 'library_type') {
+                        item.set('library_type', record.get('library_type'));
                         item.set('library_protocol', record.get('library_protocol'));
                         item.set('nucleic_acid_type', record.get('nucleic_acid_type'));
                     }
@@ -145,7 +164,8 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
     },
 
     toggleEditors: function(editor, context) {
-        var nucleicAcidTypeEditor = Ext.getCmp('nucleicAcidTypeEditor'),
+        var wnd = this.getView(),
+            nucleicAcidTypeEditor = Ext.getCmp('nucleicAcidTypeEditor'),
             nucleicAcidTypesStore = Ext.getStore('nucleicAcidTypesStore'),
             libraryProtocolEditor = Ext.getCmp('libraryProtocolEditor'),
             libraryProtocolsStore = Ext.getStore('libraryProtocolsStore'),
@@ -154,21 +174,6 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             rnaQualityEditor = Ext.getCmp('rnaQualityEditor'),
             record = context.record;
 
-        // Toggle Library Protocol
-        if (record.get('nucleic_acid_type') === 0) {
-            libraryProtocolEditor.disable();
-        } else {
-            libraryProtocolEditor.enable();
-
-            // Filter Library Protocols store for currently selected Nucleic Acid Type
-            if (record.get('library_protocol') !== 0) {
-                var type = nucleicAcidTypesStore.findRecord('id',
-                    record.get('nucleic_acid_type')
-                ).get('type');
-                this.filterLibraryProtocols(libraryProtocolsStore, type);
-            }
-        }
-
         // Toggle Library Type
         if (record.get('library_protocol') === 0) {
             libraryTypeEditor.disable();
@@ -176,19 +181,34 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             libraryTypeEditor.enable();
 
             // Filter Library Types store for currently selected Library Protocol
-            if (record.get('library_type') !== 0) {
-                this.filterLibraryTypes(libraryTypesStore, record.get('library_protocol'));
-            }
+            this.filterLibraryTypes(libraryTypesStore, record.get('library_protocol'));
         }
 
-         // Toggle RNA Quality
-        var nat = nucleicAcidTypesStore.findRecord('id',
-            record.get('nucleic_acid_type')
-        );
-        if (nat !== null && nat.get('type') === 'RNA') {
-            rnaQualityEditor.enable();
-        } else {
-            rnaQualityEditor.disable();
+        if (wnd.recordType === 'S') {
+            // Toggle Library Protocol
+            if (record.get('nucleic_acid_type') === 0) {
+                libraryProtocolEditor.disable();
+            } else {
+                libraryProtocolEditor.enable();
+
+                // Filter Library Protocols store for currently selected Nucleic Acid Type
+                if (record.get('library_protocol') !== 0) {
+                    var type = nucleicAcidTypesStore.findRecord('id',
+                        record.get('nucleic_acid_type')
+                    ).get('type');
+                    this.filterLibraryProtocols(libraryProtocolsStore, type);
+                }
+            }
+
+            // Toggle RNA Quality
+            var nat = nucleicAcidTypesStore.findRecord('id',
+                record.get('nucleic_acid_type')
+            );
+            if (nat !== null && nat.get('type') === 'RNA') {
+                rnaQualityEditor.enable();
+            } else {
+                rnaQualityEditor.disable();
+            }
         }
     },
 
@@ -275,65 +295,42 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         });
     },
 
-    getSampleGridConfiguration: function(grid) {
+    getLibraryGridConfiguration: function() {
+        var me = this;
+
         var store = Ext.create('Ext.data.Store', {
-            fields: [{
-                    type: 'string',
-                    name: 'name'
-                },
-                {
+            fields: $.merge(me.getCommonFields(), [{}]),
+            data: []
+        });
+
+        // var columns = $.merge(this.getCommonColumns(), [{}]);
+        var columns = this.getCommonColumns();
+
+        // Sort columns
+        var order = ['numberer', 'name',
+            'library_protocol', 'library_type', 'concentration',
+            'read_length', 'sequencing_depth', 'amplification_cycles',
+            'equal_representation_nucleotides', 'sample_volume',
+            'concentration_method', 'organism', 'comments'
+        ];
+        columns = this.sortColumns(columns, order);
+
+        return [store, columns];
+    },
+
+    getSampleGridConfiguration: function() {
+        var me = this;
+
+        var store = Ext.create('Ext.data.Store', {
+            fields: $.merge(me.getCommonFields(), [{
                     type: 'int',
                     name: 'nucleic_acid_type'
                 },
                 {
                     type: 'int',
-                    name: 'library_protocol'
-                },
-                {
-                    type: 'int',
-                    name: 'library_type'
-                },
-                {
-                    type: 'string',
-                    name: 'sequencing_depth'
-                },
-                {
-                    type: 'string',
-                    name: 'concentration'
-                },
-                {
-                    type: 'int',
-                    name: 'concentration_method'
-                },
-                {
-                    type: 'int',
                     name: 'rna_quality'
-                },
-                {
-                    type: 'string',
-                    name: 'sample_volume'
-                },
-                {
-                    type: 'string',
-                    name: 'amplification_cycles'
-                },
-                {
-                    type: 'bool',
-                    name: 'equal_representation_nucleotides'
-                },
-                {
-                    type: 'int',
-                    name: 'read_length'
-                },
-                {
-                    type: 'int',
-                    name: 'organism'
-                },
-                {
-                    type: 'string',
-                    name: 'comments'
                 }
-            ],
+            ]),
             // validations: [{
             //     type: 'presence',
             //     field: 'name'
@@ -341,22 +338,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             data: []
         });
 
-        var columns = [
-            {
-                xtype: 'rownumberer',
-                width: 40
-            },
-            {
-                text: 'Name',
-                dataIndex: 'name',
-                tooltip: 'Sample Name',
-                minWidth: 200,
-                flex: 1,
-                editor: {
-                    xtype: 'textfield'
-                }
-            },
-            {
+        var columns = $.merge(this.getCommonColumns(), [{
                 text: 'Nuc. Type',
                 dataIndex: 'nucleic_acid_type',
                 tooltip: 'Nucleic Acid Type',
@@ -379,6 +361,121 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                 }
             },
             {
+                text: 'RQN',
+                dataIndex: 'rna_quality',
+                tooltip: 'RNA Quality',
+                width: 70,
+                editor: {
+                    xtype: 'combobox',
+                    id: 'rnaQualityEditor',
+                    queryMode: 'local',
+                    valueField: 'id',
+                    displayField: 'name',
+                    store: 'rnaQualityStore',
+                    matchFieldWidth: false,
+                    forceSelection: true
+                },
+                renderer: function(val, meta) {
+                    var store = Ext.getStore('rnaQualityStore'),
+                        record = store.findRecord('id', val);
+                    return (record !== null) ? record.get('name') : '';
+                }
+            }
+        ]);
+
+        // Sort columns
+        var order = ['numberer', 'name', 'nucleic_acid_type',
+            'library_protocol', 'library_type', 'concentration', 'rna_quality',
+            'read_length', 'sequencing_depth', 'amplification_cycles',
+            'equal_representation_nucleotides', 'sample_volume',
+            'concentration_method', 'organism', 'comments'
+        ];
+        columns = this.sortColumns(columns, order);
+
+        return [store, columns];
+    },
+
+    sortColumns: function(columns, order) {
+        var orderMap = {};
+
+        _.each(order, function(i) {
+            orderMap[i] = _.indexOf(order, i);
+        });
+
+        return _.sortBy(columns, function(column) {
+            return orderMap[column.dataIndex];
+        });
+    },
+
+    getCommonFields: function() {
+        return [{
+                type: 'string',
+                name: 'name'
+            },
+            {
+                type: 'int',
+                name: 'library_protocol'
+            },
+            {
+                type: 'int',
+                name: 'library_type'
+            },
+            {
+                type: 'string',
+                name: 'sequencing_depth'
+            },
+            {
+                type: 'string',
+                name: 'concentration'
+            },
+            {
+                type: 'int',
+                name: 'concentration_method'
+            },
+            {
+                type: 'string',
+                name: 'sample_volume'
+            },
+            {
+                type: 'string',
+                name: 'amplification_cycles'
+            },
+            {
+                type: 'bool',
+                name: 'equal_representation_nucleotides'
+            },
+            {
+                type: 'int',
+                name: 'read_length'
+            },
+            {
+                type: 'int',
+                name: 'organism'
+            },
+            {
+                type: 'string',
+                name: 'comments'
+            }
+        ]
+    },
+
+    getCommonColumns: function() {
+        return [{
+                xtype: 'rownumberer',
+                dataIndex: 'numberer',
+                width: 40
+            },
+            {
+                text: 'Name',
+                dataIndex: 'name',
+                tooltip: 'Name',
+                minWidth: 200,
+                flex: 1,
+                editor: {
+                    xtype: 'textfield'
+                }
+            },
+            {
                 text: 'Protocol',
                 dataIndex: 'library_protocol',
                 tooltip: 'Library Protocol',
@@ -395,14 +492,14 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                     forceSelection: true,
                     listConfig: {
                         getInnerTpl: function() {
-                            return '<span data-qtip="'+
-                                     '<strong>Provider</strong>: {provider}<br/>' +
-                                     '<strong>Catalog</strong>: {catalog}<br/>' +
-                                     '<strong>Explanation</strong>: {explanation}<br/>' +
-                                     '<strong>Input Requirements</strong>: {inputRequirements}<br/>' +
-                                     '<strong>Typical Application</strong>: {typicalApplication}<br/>' +
-                                     '<strong>Comments</strong>: {comments}' +
-                                   '">{name}</span>'
+                            return '<span data-qtip="' +
+                                '<strong>Provider</strong>: {provider}<br/>' +
+                                '<strong>Catalog</strong>: {catalog}<br/>' +
+                                '<strong>Explanation</strong>: {explanation}<br/>' +
+                                '<strong>Input Requirements</strong>: {inputRequirements}<br/>' +
+                                '<strong>Typical Application</strong>: {typicalApplication}<br/>' +
+                                '<strong>Comments</strong>: {comments}' +
+                                '">{name}</span>'
                         }
                     }
                 },
@@ -444,27 +541,6 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                 editor: {
                     xtype: 'numberfield',
                     minValue: 0
-                }
-            },
-            {
-                text: 'RQN',
-                dataIndex: 'rna_quality',
-                tooltip: 'RNA Quality',
-                width: 70,
-                editor: {
-                    xtype: 'combobox',
-                    id: 'rnaQualityEditor',
-                    queryMode: 'local',
-                    valueField: 'id',
-                    displayField: 'name',
-                    store: 'rnaQualityStore',
-                    matchFieldWidth: false,
-                    forceSelection: true
-                },
-                renderer: function(val, meta) {
-                    var store = Ext.getStore('rnaQualityStore'),
-                        record = store.findRecord('id', val);
-                    return (record !== null) ? record.get('name') : '';
                 }
             },
             {
@@ -582,8 +658,6 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                     allowBlank: true
                 }
             }
-        ];
-
-        return [store, columns];
+        ]
     }
 });

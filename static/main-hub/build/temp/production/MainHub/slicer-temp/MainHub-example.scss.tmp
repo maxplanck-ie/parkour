@@ -1044,6 +1044,8 @@ $include-mainhub-view-flowcell-poolinfowindow: dynamic(true);;
 $include-mainhub-view-flowcell-poolinfowindowcontroller: dynamic(true);;
 $include-mainhub-view-indexgenerator-indexgenerator: dynamic(true);;
 $include-mainhub-view-indexgenerator-indexgeneratorcontroller: dynamic(true);;
+$include-mainhub-view-libraries-batchaddwindow: dynamic(true);;
+$include-mainhub-view-libraries-batchaddwindowcontroller: dynamic(true);;
 $include-mainhub-view-libraries-libraries: dynamic(true);;
 $include-mainhub-view-libraries-librariescontroller: dynamic(true);;
 $include-mainhub-view-libraries-librarywindow: dynamic(true);;
