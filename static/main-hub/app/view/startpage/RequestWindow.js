@@ -3,7 +3,8 @@ Ext.define('MainHub.view.startpage.RequestWindow', {
 
     requires: [
         'MainHub.view.startpage.RequestWindowController',
-        'MainHub.view.libraries.LibraryWindow'
+        'MainHub.view.libraries.LibraryWindow',
+        'MainHub.view.libraries.BatchAddWindow'
     ],
 
     controller: 'startpage-requestwindow',
