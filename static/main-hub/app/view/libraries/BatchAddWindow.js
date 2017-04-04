@@ -124,8 +124,9 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                     forceSelection: true
                 },
                 renderer: function(val, meta) {
-                    var store = Ext.getStore('libraryProtocolsStore'),
-                        record = store.findRecord('id', val);
+                    var store = Ext.getStore('libraryProtocolsStore');
+                    store.clearFilter();
+                    var record = store.findRecord('id', val);
                     return (record !== null) ? record.get('name') : '';
                 }
             },
@@ -145,8 +146,9 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                     forceSelection: true
                 },
                 renderer: function(val, meta) {
-                    var store = Ext.getStore('libraryTypesStore'),
-                        record = store.findRecord('id', val);
+                    var store = Ext.getStore('libraryTypesStore');
+                    store.clearFilter();
+                    var record = store.findRecord('id', val);
                     return (record !== null) ? record.get('name') : '';
                 }
             },

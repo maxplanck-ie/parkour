@@ -32,7 +32,8 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
     },
 
     boxready: function() {
-        // Ext.getStore('libraryProtocolsStore').reload();
+        Ext.getStore('libraryProtocolsStore').reload();
+        Ext.getStore('libraryTypesStore').reload();
     },
 
     showContextMenu: function(gridView, record, item, index, e) {
@@ -80,8 +81,19 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
 
             store.each(function(item) {
                 if (item !== record) {
+                    // If Library Protocol was selected, apply Nuc. Type too
+                    if (dataIndex == 'library_protocol') {
+                        item.set('nucleic_acid_type', record.get('nucleic_acid_type'));
+                    }
+
+                    // If Library Type was selected, apply Library Protocol and Nuc. Type too
+                    else if (dataIndex == 'library_type') {
+                        item.set('library_protocol', record.get('library_protocol'));
+                        item.set('nucleic_acid_type', record.get('nucleic_acid_type'));
+                    }
+
                     // Special case: RNA Quality should be applied only when Nuc. Type is RNA
-                    if (dataIndex === 'rna_quality') {
+                    else if (dataIndex === 'rna_quality') {
                         var nat = Ext.getStore('nucleicAcidTypesStore').findRecord('id',
                             item.get('nucleic_acid_type')
                         );
@@ -92,17 +104,6 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
 
                     else {
                         item.set(dataIndex, record.get(dataIndex));
-                    }
-
-                    // If Library Protocol was selected, apply Nuc. Type too
-                    if (dataIndex == 'library_protocol') {
-                        item.set('nucleic_acid_type', record.get('nucleic_acid_type'));
-                    }
-
-                    // If Library Type was selected, apply Library Protocol and Nuc. Type too
-                    if (dataIndex == 'library_type') {
-                        item.set('library_protocol', record.get('library_protocol'));
-                        item.set('nucleic_acid_type', record.get('nucleic_acid_type'));
                     }
 
                     item.save();
@@ -133,15 +134,12 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         } else {
             libraryProtocolEditor.enable();
 
-            // Reload Library Protocols store for currently selected Nucleic Acid Type
+            // Filter Library Protocols store for currently selected Nucleic Acid Type
             if (record.get('library_protocol') !== 0) {
-                libraryProtocolsStore.load({
-                    params: {
-                        'type': nucleicAcidTypesStore.findRecord('id',
-                            record.get('nucleic_acid_type')
-                        ).get('type')
-                    }
-                });
+                var type = nucleicAcidTypesStore.findRecord('id',
+                    record.get('nucleic_acid_type')
+                ).get('type');
+                this.filterLibraryProtocols(libraryProtocolsStore, type);
             }
         }
 
@@ -151,13 +149,9 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         } else {
             libraryTypeEditor.enable();
 
-            // Reload Library Types store for currently selected Library Protocol
+            // Filter Library Types store for currently selected Library Protocol
             if (record.get('library_type') !== 0) {
-                libraryTypesStore.load({
-                    params: {
-                        'library_protocol_id': record.get('library_protocol')
-                    }
-                });
+                this.filterLibraryTypes(libraryTypesStore, record.get('library_protocol'));
             }
         }
 
@@ -201,18 +195,8 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         libraryTypeEditor.setValue(null);
         libraryTypeEditor.disable();
 
-        libraryProtocolsStore.load({
-            params: {
-                'type': record.get('type')
-            },
-            callback: function(records, operation, success) {
-                if (success) {
-                    libraryProtocolEditor.enable();
-                } else {
-                    libraryProtocolEditor.disable();
-                }
-            }
-        });
+        this.filterLibraryProtocols(libraryProtocolsStore, record.get('type'));
+        libraryProtocolEditor.enable();
 
         if (record.get('type') === 'RNA') {
             rnaQualityEditor.enable();
@@ -224,19 +208,8 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
     selectLibraryProtocol: function(fld, record) {
         var libraryTypeEditor = Ext.getCmp('libraryTypeEditor'),
             libraryTypesStore = Ext.getStore('libraryTypesStore');
-
-        libraryTypesStore.load({
-            params: {
-                'library_protocol_id': record.get('id')
-            },
-            callback: function(records, operation, success) {
-                if (success) {
-                    libraryTypeEditor.enable();
-                } else {
-                    libraryTypeEditor.disable();
-                }
-            }
-        });
+        this.filterLibraryTypes(libraryTypesStore, record.get('id'));
+        libraryTypeEditor.enable();
     },
 
     // selectLibraryType: function(fld, record) {
@@ -268,5 +241,19 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
     clearStore: function() {
         var store = Ext.getCmp('batchAddGrid').getStore();
         store.removeAll();
+    },
+
+    filterLibraryProtocols: function(store, value) {
+        store.clearFilter();
+        store.filterBy(function(item) {
+            return item.get('type') === value;
+        });
+    },
+
+    filterLibraryTypes: function(store, value) {
+        store.clearFilter();
+        store.filterBy(function(item) {
+            return item.get('protocol').indexOf(value) !== -1;
+        });
     }
 });

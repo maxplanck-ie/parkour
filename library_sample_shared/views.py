@@ -75,24 +75,40 @@ def get_library_protocols(request):
 
 
 def get_library_types(request):
-    """ Get the list of all library types for a given library protocol. """
+    """ Get the list of all library types. """
     data = []
 
-    try:
+    if request.method == 'GET':
         library_protocol_id = request.GET.get('library_protocol_id', '')
-        protocol = LibraryProtocol.objects.get(pk=library_protocol_id)
-        library_types = LibraryType.objects.filter(
-            library_protocol__in=[protocol]
-        )
+
+        if library_protocol_id:
+            lib_protocol = LibraryProtocol.objects.get(pk=library_protocol_id)
+            library_types = LibraryType.objects.filter(
+                library_protocol__in=[lib_protocol]
+            )
+
+            protocol = {}
+            for lib_type in library_types:
+                protocol[lib_type.pk] = [lib_protocol.pk]
+
+        else:
+            library_types = LibraryType.objects.all()
+            protocol = {}
+
+            # Collect all library protocols for each library type
+            for lib_type in library_types:
+                protocol[lib_type.pk] = [
+                    library_protocol.pk
+                    for library_protocol in lib_type.library_protocol.all()
+                ]
+
         data = [
             {
-                'id': library_type.id,
+                'id': library_type.pk,
                 'name': library_type.name,
+                'protocol': protocol[library_type.pk]
             }
             for library_type in library_types
         ]
-
-    except (ValueError, LibraryProtocol.DoesNotExist) as e:
-        logger.exception(e)
 
     return JsonResponse(data, safe=False)

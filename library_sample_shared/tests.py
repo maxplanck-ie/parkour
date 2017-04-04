@@ -167,17 +167,12 @@ class GetLibraryTypes(TestCase):
         self.assertJSONEqual(str(response.content, 'utf-8'), [{
             'id': self.library_type.pk,
             'name': self.library_type.name,
+            'protocol': [self.library_protocol.pk]
         }])
 
-    def test_missing_or_empty_library_protocol_id(self):
-        response = self.client.get(reverse('get_library_types'))
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, b'[]')
-
-    def test_non_existing_library_protocol_id(self):
-        response = self.client.get(reverse('get_library_types'), {
-            'library_protocol_id': '-1'
-        })
+    def test_wrong_http_method(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('get_library_types'))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b'[]')
 
