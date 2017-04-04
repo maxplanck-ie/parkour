@@ -17,6 +17,9 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
         id: 'batchAddGrid',
         itemId: 'batchAddGrid',
         border: 0,
+        viewConfig: {
+            markDirty: false
+        },
         store: Ext.create('Ext.data.Store', {
             fields: [{
                     type: 'string',
@@ -57,6 +60,10 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                 {
                     type: 'string',
                     name: 'amplification_cycles'
+                },
+                {
+                    type: 'bool',
+                    name: 'equal_representation_nucleotides'
                 },
                 {
                     type: 'int',
@@ -227,6 +234,17 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                     minValue: 1,
                     allowDecimals: false,
                     allowBlank: true
+                }
+            },
+            {
+                xtype: 'checkcolumn',
+                text: 'Equal nucl.',
+                tooltip: 'Equal Representation of Nucleotides',
+                dataIndex: 'equal_representation_nucleotides',
+                width: 95,
+                editor: {
+                    xtype: 'checkbox',
+                    cls: 'x-grid-checkheader-editor'
                 }
             },
             {
