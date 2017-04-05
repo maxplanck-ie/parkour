@@ -101,19 +101,13 @@ Ext.define('MainHub.view.startpage.RequestWindow', {
                 },
                 store: 'librariesInRequestStore',
                 bbar: [{
-                        text: 'Load from File',
-                        itemId: 'loadFromFileBtn',
-                        disabled: true
-                    },
-                    '->',
-                    {
-                        xtype: 'button',
                         itemId: 'batchAddBtn',
                         text: 'Batch Add'
                     },
+                    '->',
                     {
-                        text: 'Add',
-                        itemId: 'addLibraryBtn'
+                        itemId: 'addLibraryBtn',
+                        text: 'Add'
                     }
                 ]
             }
