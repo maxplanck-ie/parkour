@@ -166,8 +166,8 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                     id: 'indexReadsField',
                     itemId: 'indexReadsField',
                     queryMode: 'local',
-                    displayField: 'name',
-                    valueField: 'name',
+                    displayField: 'num',
+                    valueField: 'num',
                     name: 'index_reads',
                     fieldLabel: 'Number of Index Reads <sup><strong><span class="field-tooltip" tooltip-text="Number of Index Reads = 0: Libraries do not carry any barcode, no barcode will be read during sequencing.<br/><br/>Number of Index Reads = 1: Single-indexed libraries. Index on adapter P7 will be read during sequencing (true for most applications).<br/><br/>Number of Index Reads = 2: Dual-indexed libraries. Index on Adapter P7 and P5 will be read. (i.e Nextera libraries or if a high degree of multiplexing is needed)">[?]</span></strong></sup>',
                     emptyText: 'Number of Index Reads',
@@ -175,14 +175,9 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                     disabled: true,
                     store: Ext.create('Ext.data.Store', {
                         fields: [{
-                            name: 'name',
+                            name: 'num',
                             type: 'int'
-                        },
-                        {
-                            name: 'id',
-                            type: 'int'
-                        }
-                        ],
+                        }],
                         data: []
                     })
                 },

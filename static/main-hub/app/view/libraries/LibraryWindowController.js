@@ -207,13 +207,10 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         indexI7Field.disable();
         indexI5Field.disable();
 
-        if (record.data.id == 1 || record.data.id == 2) {
-            // TruSeq small RNA (I7, RPI1-RPI48) or TruSeq DNA/RNA (I7, A001 - A027):
-            // # of index reads: 0,1
-            indexReadsField.getStore().setData([{id: 1, name: 0}, {id: 2, name: 1}]);
-        } else {
-            // Nextera (I7, N701-N712; I5 S501-S517): # of index reads: 0,1,2
-            indexReadsField.getStore().setData([{id: 1, name: 0}, {id: 2, name: 1}, {id: 3, name: 2}]);
+        for (var i = 0; i <= record.get('indexReads'); i++) {
+            indexReadsField.getStore().add({
+                num: i
+            })
         }
 
         // Set the number of Index Reads
@@ -254,15 +251,15 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         var indexI7Field = Ext.getCmp('indexI7Field'),
             indexI5Field = Ext.getCmp('indexI5Field');
 
-        if (record.data.id == 1) {
-            indexI7Field.setDisabled(true);
-            indexI5Field.setDisabled(true);
-        } else if (record.data.id == 2) {
-            indexI7Field.setDisabled(false);
-            indexI5Field.setDisabled(true);
+        if (record.get('num') === 2) {
+            indexI7Field.enable();
+            indexI5Field.enable();
+        } else if (record.get('num') === 1) {
+            indexI7Field.enable();
+            indexI5Field.disable();
         } else {
-            indexI7Field.setDisabled(false);
-            indexI5Field.setDisabled(false);
+            indexI7Field.disable();
+            indexI5Field.disable();
         }
     },
 

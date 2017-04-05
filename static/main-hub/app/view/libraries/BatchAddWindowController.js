@@ -252,6 +252,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             this.filterLibraryTypes(libraryTypesStore, record.get('library_protocol'));
         }
 
+        // Libraries
         if (wnd.recordType === 'L') {
             // Toggle Index Reads, IndexI7, and IndexI5
             if (record.get('index_type') !== 0) {
@@ -273,7 +274,10 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                 indexI7Editor.disable();
                 indexI5Editor.disable();
             }
-        } else {
+        }
+
+        // Samples
+        else {
             // Toggle Library Protocol
             if (record.get('nucleic_acid_type') === 0) {
                 libraryProtocolEditor.disable();
