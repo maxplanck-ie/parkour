@@ -27,11 +27,13 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
     },
 
     editRecord: function(editor, context) {
-        var grid = this.getView().down('grid'),
+        var grid = Ext.getCmp('incomingLibraries'),
             record = context.record,
             changes = record.getChanges(),
             values = context.newValues,
-            amountFacility = (values.amountFacility !== null) ? values.amountFacility : '',
+            url = 'quality_check/update/';
+
+        var amountFacility = (values.amountFacility !== null) ? values.amountFacility : '',
             dilutionFactor = (values.dilutionFactor !== null) ? values.dilutionFactor : '',
             concentrationFacility = (values.concentrationFacility !== null) ? values.concentrationFacility : '',
             concentrationMethodFacility = (values.concentrationMethodFacility !== null) ? values.concentrationMethodFacility : '',
@@ -48,7 +50,6 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
             amountFacility = parseFloat(dilutionFactor) * parseFloat(concentrationFacility) * parseFloat(sampleVolumeFacility);
         }
 
-        var url = 'quality_check/update/';
         Ext.Ajax.request({
             url: url,
             method: 'POST',
@@ -59,7 +60,7 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
                 'record_id': (record.getRecordType() === 'L') ? record.get('libraryId') : record.get('sampleId'),
                 'dilution_factor': dilutionFactor,
                 'concentration_facility': concentrationFacility,
-                'concentration_method_facility_id': concentrationMethodFacility,
+                'concentration_method_facility': concentrationMethodFacility,
                 'sample_volume_facility': sampleVolumeFacility,
                 'amount_facility': amountFacility,
                 'qpcr_result_facility': qPCRResultFacility,

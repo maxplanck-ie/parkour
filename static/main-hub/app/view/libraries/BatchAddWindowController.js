@@ -583,10 +583,10 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                 }
             },
             {
-                text: 'qPCR Result',
+                text: 'qPCR (nM)',
                 dataIndex: 'qpcr_result',
                 tooltip: 'qPCR Result (nM)',
-                width: 100,
+                width: 85,
                 editor: {
                     xtype: 'numberfield',
                     allowBlank: true,
@@ -655,7 +655,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                 text: 'RQN',
                 dataIndex: 'rna_quality',
                 tooltip: 'RNA Quality',
-                width: 70,
+                width: 80,
                 editor: {
                     xtype: 'combobox',
                     id: 'rnaQualityEditor',
@@ -663,7 +663,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                     valueField: 'id',
                     displayField: 'name',
                     store: 'rnaQualityStore',
-                    matchFieldWidth: false,
+                    // matchFieldWidth: false,
                     forceSelection: true
                 },
                 renderer: function(val, meta) {

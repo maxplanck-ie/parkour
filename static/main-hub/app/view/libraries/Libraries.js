@@ -115,83 +115,112 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 },
                 {
                     text: 'Nuc. Type',
-                    dataIndex: 'nucleicAcidType'
+                    tooltip: 'Nucleic Acid Type',
+                    dataIndex: 'nucleicAcidType',
+                    width: 100
                 },
                 {
                     text: 'Protocol',
-                    dataIndex: 'libraryProtocol'
+                    tooltip: 'Library Protocol',
+                    dataIndex: 'libraryProtocol',
+                    width: 100
                 },
                 {
                     text: 'Lib. Type',
-                    dataIndex: 'libraryType'
+                    tooltip: 'Library Type',
+                    dataIndex: 'libraryType',
+                    width: 100
                 },
                 {
                     text: 'ng/μl',
+                    tooltip: 'Concentration',
                     dataIndex: 'concentration',
                     width: 70
                 },
                 {
                     text: 'RQN',
+                    tooltip: 'RNA Quality',
                     dataIndex: 'rnaQualityName',
-                    width: 55
+                    width: 55,
+                    renderer: function(val) {
+                        var record = Ext.getStore('rnaQualityStore').findRecord('id', val);
+                        return (record) ? record.get('name') : '';
+                    }
                 },
                 {
-                    text: 'size (bp)',
+                    text: 'bp',
+                    tooltip: 'Mean Fragment Size',
                     dataIndex: 'mean_fragment_size',
-                    width: 75
+                    width: 45
                 },
                 {
                     text: 'Index Type',
-                    dataIndex: 'index_type'
+                    dataIndex: 'index_type',
+                    width: 100
                 },
                 {
                     text: '# Index Reads',
-                    dataIndex: 'index_reads'
+                    dataIndex: 'index_reads',
+                    width: 100
                 },
                 {
                     text: 'I7',
-                    dataIndex: 'index_i7'
+                    tooltip: 'Index I7',
+                    dataIndex: 'index_i7',
+                    width: 100
                 },
                 {
                     text: 'I5',
-                    dataIndex: 'index_i5'
+                    tooltip: 'Index I5',
+                    dataIndex: 'index_i5',
+                    width: 100
                 },
                 {
                     text: 'Length',
+                    tooltip: 'Read Length',
                     dataIndex: 'readLength',
                     width: 65
                 },
                 {
                     text: 'Depth (M)',
+                    tooltip: 'Sequencing Depth',
                     dataIndex: 'sequencing_depth',
                     width: 85
                 },
                 {
                     text: 'Amplification',
-                    dataIndex: 'amplification_cycles'
+                    tooltip: 'Amplification Cycles',
+                    dataIndex: 'amplification_cycles',
+                    width: 85
                 },
                 {
                     text: 'Equal nucl.',
+                    tooltip: 'Equal Representation of Nucleotides',
                     dataIndex: 'equalRepresentation',
+                    width: 90,
                     renderer: function(val) {
                         return val === 'True' ? 'Yes' : 'No';
                     }
                 },
                 {
-                    text: 'qPCR Result',
-                    dataIndex: 'qpcr_result'
+                    text: 'qPCR (nM)',
+                    tooltip: 'qPCR Result',
+                    dataIndex: 'qpcr_result',
+                    width: 85
                 },
                 {
-                    text: 'F/S',
+                    text: 'F/S*',
+                    tooltip: 'Concentration Method',
                     dataIndex: 'concentrationMethod',
+                    width: 50,
                     renderer: function(val) {
                         return val.charAt(0);
-                    },
-                    width: 45
+                    }
                 },
                 {
                     text: 'Organism',
-                    dataIndex: 'organism'
+                    dataIndex: 'organism',
+                    width: 90
                 },
                 {
                     text: 'Comments',
