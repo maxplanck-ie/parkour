@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.views.generic.list import ListView
 
 from common.utils import JSONResponseMixin
-from .models import LibraryProtocol, LibraryType
+from .models import LibraryProtocol, LibraryType, IndexType
 
 logger = logging.getLogger('db')
 
@@ -15,13 +15,28 @@ class SimpleStoreView(JSONResponseMixin, ListView):
         response_kwargs['safe'] = False
         data = [
             {
-                'id': obj.id,
+                'id': obj.pk,
                 'name': obj.name
             }
             for obj in context.pop('object_list')
         ]
 
         return self.render_to_json_response(data, **response_kwargs)
+
+
+def get_index_types(request):
+    """ Get the list of index types. """
+    data = [
+        {
+            'id': index_type.pk,
+            'name': index_type.name,
+            'indexReads': [index_type.is_index_i7,
+                           index_type.is_index_i5].count(True)
+        }
+        for index_type in IndexType.objects.all()
+    ]
+
+    return JsonResponse(data, safe=False)
 
 
 class IndexStoreView(JSONResponseMixin, ListView):

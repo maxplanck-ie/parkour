@@ -25,6 +25,14 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                 click: 'save'
             },
 
+            // Libraries only
+            '#indexTypeEditor': {
+                select: 'selectIndexType'
+            },
+            '#indexReadsEditor': {
+                select: 'selectIndexReads'
+            },
+
             // Samples only
             '#nucleicAcidTypeEditor': {
                 select: 'selectNucleicAcidType'
@@ -91,11 +99,13 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             numRecords = btn.up().down('#numEmptyRecords').getValue();
 
         if (numRecords !== null && numRecords > 0) {
-            for (var index = 0; index < numRecords; index++) {
-                store.add({
+            var data = [];
+            for (var i = 0; i < numRecords; i++) {
+                data.push({
                     concentration: 0
                 });
             }
+            store.add(data);
         }
     },
 
@@ -109,25 +119,81 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
 
             store.each(function(item) {
                 if (item !== record) {
-                    if (dataIndex === 'nucleic_acid_type') {
-                        item.set('nucleic_acid_type', record.get('nucleic_acid_type'));
+                    if (dataIndex === 'index_type') {
+                        // Reset Index reads, Index I7, and Index I5,
+                        // if index types don't match
+                        if (item.get('index_type') !== record.get('index_type')) {
+                            item.set('index_reads', 0);
+                            item.set('index_i7', '');
+                            item.set('index_i5', '');
+                        }
 
-                        // If Library Protocol is not set, reset it and Library Type for other records
-                        if (record.get('library_protocol') === 0) {
+                        item.set('index_type', record.get('index_type'));
+                    }
+
+                    // If the # of Indes Reads was selected, apply Index Type too
+                    else if (dataIndex === 'index_reads') {
+                        item.set('index_reads', record.get('index_reads'));
+                        item.set('index_type', record.get('index_type'));
+
+                        // Reset Index I7 and Index I5 for all other records
+                        item.set('index_i7', '');
+                        item.set('index_i5', '');
+                    }
+
+                    // If Index I7 was selected, apply the # of Index Reads and Index Type too
+                    else if (dataIndex === 'index_i7') {
+                        // Reset Index I5 for records with different Index Type and Index Reads
+                        if ((item.get('index_type') !== record.get('index_type')) &&
+                            (item.get('index_reads') !== record.get('index_reads'))) {
+                            item.set('index_i5', '');
+                        }
+
+                        item.set('index_i7', record.get('index_i7'));
+                        item.set('index_reads', record.get('index_reads'));
+                        item.set('index_type', record.get('index_type'));
+                    }
+
+                    // If Index I5 was selected, apply IndexI7, the # of Index Reads, and Index Type too
+                    else if (dataIndex === 'index_i5') {
+                        item.set('index_i5', record.get('index_i5'));
+                        item.set('index_i7', record.get('index_i7'));
+                        item.set('index_reads', record.get('index_reads'));
+                        item.set('index_type', record.get('index_type'));
+                    }
+
+                    else if (dataIndex === 'nucleic_acid_type') {
+                        // Reset Library Protocol and Library Type for records
+                        // with a different Nucleic Acid Type
+                        if (item.get('nucleic_acid_type') !== record.get('nucleic_acid_type')) {
                             item.set('library_protocol', 0);
                             item.set('library_type', 0);
                         }
+
+                        item.set('nucleic_acid_type', record.get('nucleic_acid_type'));
                     }
 
                     // If Library Protocol was selected, apply Nuc. Type too
                     else if (dataIndex === 'library_protocol') {
-                        item.set('library_protocol', record.get('library_protocol'));
-                        item.set('nucleic_acid_type', record.get('nucleic_acid_type'));
-
-                        // If Library Type is not set, reset it for other records
-                        if (record.get('library_type') === 0) {
-                            item.set('library_type', 0);
+                        // Libraries
+                        if (typeof item.get('nucleic_acid_type') === 'undefined') {
+                            // Reset Library Type for records with a different Library Protocol
+                            if (item.get('library_protocol') !== record.get('library_protocol')) {
+                                item.set('library_type', 0);
+                            }
                         }
+                        // Samples
+                        else {
+                            // Reset Library Type, if Nucleic Acid Types are different or
+                            // Library Protocols are different
+                            if ((item.get('nucleic_acid_type') !== record.get('nucleic_acid_type')) ||
+                                ((item.get('nucleic_acid_type') === record.get('nucleic_acid_type')) &&
+                                (item.get('library_protocol') !== record.get('library_protocol')))) {
+                                item.set('library_type', 0);
+                            }
+                            item.set('nucleic_acid_type', record.get('nucleic_acid_type'));
+                        }
+                        item.set('library_protocol', record.get('library_protocol'));
                     }
 
                     // If Library Type was selected, apply Library Protocol and Nuc. Type too
@@ -137,7 +203,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                         item.set('nucleic_acid_type', record.get('nucleic_acid_type'));
                     }
 
-                    // Special case: RNA Quality should be applied only when Nuc. Type is RNA
+                    // RNA Quality should be applied only when Nuc. Type is RNA
                     else if (dataIndex === 'rna_quality') {
                         var nat = Ext.getStore('nucleicAcidTypesStore').findRecord('id',
                             item.get('nucleic_acid_type')
@@ -145,9 +211,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                         if (nat !== null && nat.get('type') === 'RNA') {
                             item.set(dataIndex, record.get(dataIndex));
                         }
-                    }
-
-                    else {
+                    } else {
                         item.set(dataIndex, record.get(dataIndex));
                     }
 
@@ -165,6 +229,10 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
 
     toggleEditors: function(editor, context) {
         var wnd = this.getView(),
+            indexTypeEditor = Ext.getCmp('indexTypeEditor'),
+            indexReadsEditor = Ext.getCmp('indexReadsEditor'),
+            indexI7Editor = Ext.getCmp('indexI7Editor'),
+            indexI5Editor = Ext.getCmp('indexI5Editor'),
             nucleicAcidTypeEditor = Ext.getCmp('nucleicAcidTypeEditor'),
             nucleicAcidTypesStore = Ext.getStore('nucleicAcidTypesStore'),
             libraryProtocolEditor = Ext.getCmp('libraryProtocolEditor'),
@@ -184,7 +252,28 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             this.filterLibraryTypes(libraryTypesStore, record.get('library_protocol'));
         }
 
-        if (wnd.recordType === 'S') {
+        if (wnd.recordType === 'L') {
+            // Toggle Index Reads, IndexI7, and IndexI5
+            if (record.get('index_type') !== 0) {
+                if (record.get('index_reads') !== null) {
+                    indexTypeEditor.fireEvent('select', indexTypeEditor,
+                        indexTypeEditor.findRecordByValue(record.get('index_type'))
+                    );
+
+                    // Toggle IndexI7 and IndexI5
+                    indexReadsEditor.fireEvent('select', indexReadsEditor,
+                        indexReadsEditor.findRecordByValue(record.get('index_reads'))
+                    );
+                } else {
+                    indexI7Editor.disable();
+                    indexI5Editor.disable();
+                }
+            } else {
+                indexReadsEditor.disable();
+                indexI7Editor.disable();
+                indexI5Editor.disable();
+            }
+        } else {
             // Toggle Library Protocol
             if (record.get('nucleic_acid_type') === 0) {
                 libraryProtocolEditor.disable();
@@ -229,7 +318,78 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             record.set('library_type', 0);
         }
 
+        // Reset Index I7 and Index I5 if # Index reads is 1 or 0
+        if (record.get('index_reads') === 1 && record.get('index_i5') !== '') {
+            record.set('index_i5', '');
+        } else if (record.get('index_reads') === 0 && record.get('index_i7') !== '' &&
+            record.get('index_i5') !== '') {
+            record.set('index_i7', '');
+            record.set('index_i5', '');
+        }
+
         record.save();
+    },
+
+    selectLibraryProtocol: function(fld, record) {
+        var libraryTypeEditor = Ext.getCmp('libraryTypeEditor'),
+            libraryTypesStore = Ext.getStore('libraryTypesStore');
+        this.filterLibraryTypes(libraryTypesStore, record.get('id'));
+        libraryTypeEditor.enable();
+    },
+
+    selectIndexType: function(fld, record) {
+        var indexReadsEditor = Ext.getCmp('indexReadsEditor'),
+            indexI7Editor = Ext.getCmp('indexI7Editor'),
+            indexI5Editor = Ext.getCmp('indexI5Editor'),
+            indexI7Store = Ext.getStore('indexI7Store'),
+            indexI5Store = Ext.getStore('indexI5Store');
+
+        indexReadsEditor.setValue(null);
+        indexReadsEditor.getStore().removeAll();
+        indexReadsEditor.enable();
+
+        for (var i = 0; i <= record.get('indexReads'); i++) {
+            indexReadsEditor.getStore().add({
+                num: i
+            });
+        }
+
+        // Remove values before loading new stores
+        indexI7Editor.setValue(null);
+        indexI5Editor.setValue(null);
+        indexI7Editor.disable();
+        indexI5Editor.disable();
+
+        // Reload stores
+        indexI7Store.reload({
+            params: {
+                'index_type_id': record.get('id')
+            }
+        });
+        indexI5Store.reload({
+            params: {
+                'index_type_id': record.get('id')
+            }
+        });
+    },
+
+    selectIndexReads: function(fld, record) {
+        var indexI7Editor = Ext.getCmp('indexI7Editor'),
+            indexI5Editor = Ext.getCmp('indexI5Editor');
+
+        if (record.get('num') === 1) {
+            indexI7Editor.enable();
+            indexI5Editor.disable();
+            indexI5Editor.setValue(null);
+        } else if (record.get('num') === 2) {
+            indexI7Editor.enable();
+            indexI5Editor.enable();
+        } else {
+            indexI7Editor.disable();
+            indexI5Editor.disable();
+            indexI7Editor.setValue(null);
+            indexI5Editor.setValue(null);
+        }
     },
 
     selectNucleicAcidType: function(fld, record) {
@@ -250,17 +410,6 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             rnaQualityEditor.setValue(null);
             rnaQualityEditor.disable();
         }
-    },
-
-    selectLibraryProtocol: function(fld, record) {
-        var libraryTypeEditor = Ext.getCmp('libraryTypeEditor'),
-            libraryTypesStore = Ext.getStore('libraryTypesStore');
-        this.filterLibraryTypes(libraryTypesStore, record.get('id'));
-        libraryTypeEditor.enable();
-    },
-
-    save: function() {
-        // TODO@me: verify all records before saving
     },
 
     getDataIndex: function(e, view) {
@@ -299,19 +448,157 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         var me = this;
 
         var store = Ext.create('Ext.data.Store', {
-            fields: $.merge(me.getCommonFields(), [{}]),
+            fields: $.merge(me.getCommonFields(), [{
+                    type: 'string',
+                    name: 'mean_fragment_size'
+                },
+                {
+                    type: 'int',
+                    name: 'index_type'
+                },
+                {
+                    type: 'int',
+                    name: 'index_reads',
+                    defaultValue: null
+                },
+                {
+                    type: 'string',
+                    name: 'index_i7'
+                },
+                {
+                    type: 'string',
+                    name: 'index_i5'
+                },
+                {
+                    type: 'string',
+                    name: 'qpcr_result'
+                }
+            ]),
             data: []
         });
 
-        // var columns = $.merge(this.getCommonColumns(), [{}]);
-        var columns = this.getCommonColumns();
+        var columns = $.merge(this.getCommonColumns(), [{
+                text: 'size (bp)',
+                dataIndex: 'mean_fragment_size',
+                tooltip: 'Mean Fragment Size',
+                width: 100,
+                editor: {
+                    xtype: 'numberfield',
+                    allowDecimals: false,
+                    minValue: 0
+                }
+            },
+            {
+                text: 'Index Type',
+                dataIndex: 'index_type',
+                tooltip: 'Index Type',
+                width: 100,
+                editor: {
+                    xtype: 'combobox',
+                    id: 'indexTypeEditor',
+                    itemId: 'indexTypeEditor',
+                    queryMode: 'local',
+                    displayField: 'name',
+                    valueField: 'id',
+                    store: 'indexTypesStore',
+                    matchFieldWidth: false,
+                    forceSelection: true
+                },
+                renderer: function(val, meta) {
+                    var store = Ext.getStore('indexTypesStore'),
+                        record = store.findRecord('id', val);
+                    return (record !== null) ? record.get('name') : '';
+                }
+            },
+            {
+                text: '# of Index Reads',
+                dataIndex: 'index_reads',
+                tooltip: 'Index Type',
+                width: 130,
+                editor: {
+                    xtype: 'combobox',
+                    id: 'indexReadsEditor',
+                    itemId: 'indexReadsEditor',
+                    queryMode: 'local',
+                    displayField: 'num',
+                    valueField: 'num',
+                    store: Ext.create('Ext.data.Store', {
+                        fields: [{
+                            name: 'num',
+                            type: 'int'
+                        }],
+                        data: []
+                    }),
+                    forceSelection: true
+                }
+            },
+            {
+                text: 'Index I7',
+                dataIndex: 'index_i7',
+                tooltip: 'Index I7',
+                width: 120,
+                editor: {
+                    xtype: 'combobox',
+                    id: 'indexI7Editor',
+                    itemId: 'indexI7Editor',
+                    queryMode: 'local',
+                    displayField: 'name',
+                    displayTpl: Ext.create('Ext.XTemplate',
+                        '<tpl for=".">',
+                        '{index}',
+                        '</tpl>'
+                    ),
+                    valueField: 'index',
+                    store: 'indexI7Store',
+                    regex: new RegExp('^(?=(?:.{6}|.{8})$)[ATCG]+$'),
+                    regexText: 'Only A, T, C and G (uppercase) are allowed. Index length must be 6 or 8.',
+                    matchFieldWidth: false
+                }
+            },
+            {
+                text: 'Index I5',
+                dataIndex: 'index_i5',
+                tooltip: 'Index I5',
+                width: 120,
+                editor: {
+                    xtype: 'combobox',
+                    id: 'indexI5Editor',
+                    itemId: 'indexI5Editor',
+                    queryMode: 'local',
+                    displayField: 'name',
+                    displayTpl: Ext.create('Ext.XTemplate',
+                        '<tpl for=".">',
+                        '{index}',
+                        '</tpl>'
+                    ),
+                    valueField: 'index',
+                    store: 'indexI5Store',
+                    regex: new RegExp('^(?=(?:.{6}|.{8})$)[ATCG]+$'),
+                    regexText: 'Only A, T, C and G (uppercase) are allowed. Index length must be 6 or 8.',
+                    matchFieldWidth: false
+                }
+            },
+            {
+                text: 'qPCR Result',
+                dataIndex: 'qpcr_result',
+                tooltip: 'qPCR Result (nM)',
+                width: 100,
+                editor: {
+                    xtype: 'numberfield',
+                    allowBlank: true,
+                    minValue: 0
+                }
+            }
+        ]);
 
         // Sort columns
         var order = ['numberer', 'name',
             'library_protocol', 'library_type', 'concentration',
-            'read_length', 'sequencing_depth', 'amplification_cycles',
-            'equal_representation_nucleotides', 'sample_volume',
-            'concentration_method', 'organism', 'comments'
+            'mean_fragment_size', 'index_type', 'index_reads',
+            'index_i7', 'index_i5', 'read_length', 'sequencing_depth',
+            'amplification_cycles', 'equal_representation_nucleotides',
+            'qpcr_result', 'sample_volume', 'concentration_method',
+            'organism', 'comments'
         ];
         columns = this.sortColumns(columns, order);
 
@@ -431,10 +718,6 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             {
                 type: 'int',
                 name: 'concentration_method'
-            },
-            {
-                type: 'string',
-                name: 'sample_volume'
             },
             {
                 type: 'string',
@@ -598,16 +881,6 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                 }
             },
             {
-                text: 'μl',
-                dataIndex: 'sample_volume',
-                tooltip: 'Sample Volume',
-                width: 70,
-                editor: {
-                    xtype: 'numberfield',
-                    minValue: 0
-                }
-            },
-            {
                 text: 'Method',
                 dataIndex: 'concentration_method',
                 tooltip: 'Concentration Method',
@@ -651,7 +924,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                 text: 'Comments',
                 dataIndex: 'comments',
                 tooltip: 'Comments',
-                width: 150,
+                width: 200,
                 editor: {
                     // xtype: 'textarea',
                     xtype: 'textfield',
@@ -659,5 +932,9 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                 }
             }
         ]
+    },
+
+    save: function() {
+        // TODO@me: verify all records before saving
     }
 });

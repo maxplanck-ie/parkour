@@ -3,10 +3,10 @@ Ext.define('MainHub.store.libraries.IndexTypes', {
     storeId: 'indexTypesStore',
 
     requires: [
-        'MainHub.model.libraries.LibraryField'
+        'MainHub.model.libraries.IndexType'
     ],
 
-    model: 'MainHub.model.libraries.LibraryField',
+    model: 'MainHub.model.libraries.IndexType',
 
     proxy: {
         type: 'ajax',
@@ -23,16 +23,5 @@ Ext.define('MainHub.store.libraries.IndexTypes', {
         }
     },
 
-    autoLoad: true,
-
-    listeners: {
-        load: function(store, records, success, operation) {
-            if (!success) {
-                var response = operation._response,
-                    obj = Ext.JSON.decode(response.responseText);
-                console.error('[ERROR]: get_index_types/: ' + obj.error);
-                console.error(response);
-            }
-        }
-    }
+    autoLoad: true
 });
