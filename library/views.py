@@ -73,23 +73,19 @@ def get_all(request):
                     'comments': library.comments,
                     'barcode': library.barcode,
                     'files': [file.id for file in library.files.all()],
-                    'dilutionFactor': library.dilution_factor,
-                    'concentrationFacility': library.concentration_facility,
-                    'concentrationMethodFacility':
-                        library.concentration_method_facility.name
-                        if library.concentration_method_facility is
-                        not None else '',
-                    'concentrationMethodFacilityId':
-                        library.concentration_method_facility.id
+                    'dilution_factor': library.dilution_factor,
+                    'concentration_facility': library.concentration_facility,
+                    'concentration_method_facility':
+                        library.concentration_method_facility.pk
                         if library.concentration_method_facility is
                         not None else '',
                     'dateFacility': library.date_facility.strftime('%d.%m.%Y')
                         if library.date_facility is not None else '',
-                    'amountFacility': library.amount_facility,
-                    'sizeDistributionFacility':
+                    'amount_facility': library.amount_facility,
+                    'size_distribution_facility':
                         library.size_distribution_facility,
-                    'commentsFacility': library.comments_facility,
-                    'qPCRResultFacility': library.qpcr_result_facility,
+                    'comments_facility': library.comments_facility,
+                    'qpcr_result_facility': library.qpcr_result_facility,
                 }
                 for library in libraries
             ]
@@ -131,23 +127,19 @@ def get_all(request):
                     'comments': sample.comments,
                     'barcode': sample.barcode,
                     'files': [file.id for file in sample.files.all()],
-                    'dilutionFactor': sample.dilution_factor,
-                    'concentrationFacility': sample.concentration_facility,
-                    'concentrationMethodFacility':
-                        sample.concentration_method_facility.name
-                        if sample.concentration_method_facility is
-                        not None else '',
-                    'concentrationMethodFacilityId':
-                        sample.concentration_method_facility.id
+                    'dilution_factor': sample.dilution_factor,
+                    'concentration_facility': sample.concentration_facility,
+                    'concentration_method_facility':
+                        sample.concentration_method_facility.pk
                         if sample.concentration_method_facility is
                         not None else '',
                     'dateFacility': sample.date_facility.strftime('%d.%m.%Y')
                         if sample.date_facility is not None else '',
-                    'amountFacility': sample.amount_facility,
-                    'sizeDistributionFacility':
+                    'amount_facility': sample.amount_facility,
+                    'size_distribution_facility':
                         sample.size_distribution_facility,
-                    'commentsFacility': sample.comments_facility,
-                    'rnaQualityFacility': sample.rna_quality_facility,
+                    'comments_facility': sample.comments_facility,
+                    'rna_quality_facility': sample.rna_quality_facility,
                 }
                 for sample in samples
             ]

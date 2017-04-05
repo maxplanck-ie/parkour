@@ -139,7 +139,7 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
                 {
                     text: 'DF',
                     tooltip: 'Dilution Factor (facility)',
-                    dataIndex: 'dilutionFactor',
+                    dataIndex: 'dilution_factor',
                     tdCls: 'facilityEntry',
                     width: 80,
                     editor: {
@@ -151,7 +151,7 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
                 {
                     text: 'ng/µl',
                     tooltip: 'Concentration (facility)',
-                    dataIndex: 'concentrationFacility',
+                    dataIndex: 'concentration_facility',
                     tdCls: 'facilityEntry',
                     width: 80,
                     editor: {
@@ -162,7 +162,7 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
                 {
                     text: 'F/S*',
                     tooltip: 'Concentration Method (facility)',
-                    dataIndex: 'concentrationMethodFacility',
+                    dataIndex: 'concentration_method_facility',
                     tdCls: 'facilityEntry',
                     width: 80,
                     editor: {
@@ -175,7 +175,9 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
                         forceSelection: true
                     },
                     renderer: function(val) {
-                        return val.charAt(0);
+                        var store = Ext.getStore('concentrationMethodsStore'),
+                            record = store.findRecord('id', val);
+                        return (record) ? record.get('name').charAt(0) : '';
                     }
                 },
                 // {
@@ -186,19 +188,20 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
                 {
                     text: 'µl',
                     tooltip: 'Sample Volume (facility)',
-                    dataIndex: 'sampleVolumeFacility',
+                    dataIndex: 'sample_volume_facility',
                     tdCls: 'facilityEntry',
                     width: 80,
                     editor: {
                         xtype: 'numberfield',
                         minValue: 0,
-                        allowDecimals: false
+                        allowDecimals: false,
+                        disabled: true
                     }
                 },
                 {
                     text: 'ng',
                     tooltip: 'Amount (facility)',
-                    dataIndex: 'amountFacility',
+                    dataIndex: 'amount_facility',
                     tdCls: 'facilityEntry',
                     width: 80,
                     editor: {
@@ -209,18 +212,19 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
                 {
                     text: 'qPCR (nM)',
                     tooltip: 'qPCR Result (facility)',
-                    dataIndex: 'qPCRResultFacility',
+                    dataIndex: 'qpcr_result_facility',
                     tdCls: 'facilityEntry',
                     width: 85,
                     editor: {
                         xtype: 'numberfield',
-                        minValue: 0
+                        minValue: 0,
+                        disabled: true
                     }
                 },
                 {
                     text: 'bp',
                     tooltip: 'Size Distribution (facility)',
-                    dataIndex: 'sizeDistributionFacility',
+                    dataIndex: 'size_distribution_facility',
                     tdCls: 'facilityEntry',
                     width: 80,
                     editor: {
@@ -231,12 +235,11 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
                 {
                     text: 'RQN',
                     tooltip: 'RNA Quality (facility)',
-                    dataIndex: 'rnaQualityFacility',
+                    dataIndex: 'rna_quality_facility',
                     tdCls: 'facilityEntry',
                     width: 80,
                     editor: {
                         xtype: 'combobox',
-                        id: 'rnaQualityEditor',
                         queryMode: 'local',
                         valueField: 'id',
                         displayField: 'name',
@@ -252,7 +255,7 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
                 {
                     text: 'Comments',
                     tooltip: 'Comments (facility)',
-                    dataIndex: 'commentsFacility',
+                    dataIndex: 'comments_facility',
                     tdCls: 'facilityEntry',
                     width: 150,
                     editor: {
@@ -261,7 +264,7 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
                 },
                 {
                     text: 'QC Result',
-                    dataIndex: 'qcResult',
+                    dataIndex: 'qc_result',
                     tdCls: 'facilityEntry',
                     width: 90,
                     editor: {

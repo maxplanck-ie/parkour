@@ -901,7 +901,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                 renderer: function(val, meta) {
                     var store = Ext.getStore('concentrationMethodsStore'),
                         record = store.findRecord('id', val);
-                    return (record !== null) ? record.get('name') : '';
+                    return (record !== null) ? record.get('name').charAt(0) : '';
                 }
             },
             {

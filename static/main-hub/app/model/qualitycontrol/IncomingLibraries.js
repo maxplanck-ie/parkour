@@ -2,19 +2,15 @@ Ext.define('MainHub.model.qualitycontrol.IncomingLibraries', {
     extend: 'MainHub.model.libraries.Library',
 
     fields: [{
-            name: 'dilutionFactor',
+            name: 'dilution_factor',
             type: 'string'
         },
         {
-            name: 'concentrationFacility',
+            name: 'concentration_facility',
             type: 'string'
         },
         {
-            name: 'concentrationMethodFacility',
-            type: 'string'
-        },
-        {
-            name: 'concentrationMethodFacilityId',
+            name: 'concentration_method_facility',
             type: 'int'
         },
         {
@@ -22,27 +18,27 @@ Ext.define('MainHub.model.qualitycontrol.IncomingLibraries', {
             type: 'string'
         },
         {
-            name: 'sampleVolumeFacility',
+            name: 'sample_volume_facility',
             type: 'string'
         },
         {
-            name: 'amountFacility',
+            name: 'amount_facility',
             type: 'string'
         },
         {
-            name: 'sizeDistributionFacility',
+            name: 'size_distribution_facility',
             type: 'string'
         },
         {
-            name: 'commentsFacility',
+            name: 'comments_facility',
             type: 'string'
         },
         {
-            name: 'qPCRResultFacility',
+            name: 'qpcr_result_facility',
             type: 'string'
         },
         {
-            name: 'rnaQualityFacility',
+            name: 'rna_quality_facility',
             type: 'string'
         }
     ],

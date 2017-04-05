@@ -33,21 +33,18 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
             values = context.newValues,
             url = 'quality_check/update/';
 
-        var amountFacility = (values.amountFacility !== null) ? values.amountFacility : '',
-            dilutionFactor = (values.dilutionFactor !== null) ? values.dilutionFactor : '',
-            concentrationFacility = (values.concentrationFacility !== null) ? values.concentrationFacility : '',
-            concentrationMethodFacility = (values.concentrationMethodFacility !== null) ? values.concentrationMethodFacility : '',
-            sampleVolumeFacility = (values.sampleVolumeFacility !== null) ? values.sampleVolumeFacility : '',
-            qPCRResultFacility = (values.qPCRResultFacility !== null) ? values.qPCRResultFacility : '',
-            rnaQualityFacility = (values.rnaQualityFacility !== null) ? values.rnaQualityFacility : '',
-            sizeDistributionFacility = (values.sizeDistributionFacility !== null) ? values.sizeDistributionFacility : '',
-            commentsFacility = (values.commentsFacility !== null) ? values.commentsFacility : '',
-            qcResult = (values.qcResult !== null) ? values.qcResult : '';
+        var params = $.extend({
+            'record_type': record.getRecordType(),
+            'record_id': (record.getRecordType() === 'L') ? record.get('libraryId') : record.get('sampleId')
+        }, values);
 
         // Compute Amount
-        if (Object.keys(changes).indexOf('amountFacility') === -1 && dilutionFactor !== '' &&
-            concentrationFacility !== '' && sampleVolumeFacility !== '') {
-            amountFacility = parseFloat(dilutionFactor) * parseFloat(concentrationFacility) * parseFloat(sampleVolumeFacility);
+        if (Object.keys(changes).indexOf('amount_facility') === -1 && values.dilution_factor &&
+            values.concentration_facility && values.sample_volume_facility) {
+            var amountFacility = parseFloat(values.dilution_factor) *
+                parseFloat(values.concentration_facility) *
+                parseFloat(values.sample_volume_facility);
+            params['amount_facility'] = amountFacility;
         }
 
         Ext.Ajax.request({
@@ -55,20 +52,7 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
             method: 'POST',
             timeout: 1000000,
             scope: this,
-            params: {
-                'record_type': record.getRecordType(),
-                'record_id': (record.getRecordType() === 'L') ? record.get('libraryId') : record.get('sampleId'),
-                'dilution_factor': dilutionFactor,
-                'concentration_facility': concentrationFacility,
-                'concentration_method_facility': concentrationMethodFacility,
-                'sample_volume_facility': sampleVolumeFacility,
-                'amount_facility': amountFacility,
-                'qpcr_result_facility': qPCRResultFacility,
-                'rna_quality_facility': rnaQualityFacility,
-                'size_distribution_facility': sizeDistributionFacility,
-                'comments_facility': commentsFacility,
-                'qc_result': qcResult
-            },
+            params: params,
 
             success: function(response) {
                 var obj = Ext.JSON.decode(response.responseText);
