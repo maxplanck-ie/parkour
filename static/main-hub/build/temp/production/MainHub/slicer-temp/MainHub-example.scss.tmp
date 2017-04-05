@@ -1001,6 +1001,7 @@ $include-mainhub-model-flowcell-poolinfo: dynamic(true);;
 $include-mainhub-model-flowcell-sequencer: dynamic(true);;
 $include-mainhub-model-libraries-filelibrarysample: dynamic(true);;
 $include-mainhub-model-libraries-index: dynamic(true);;
+$include-mainhub-model-libraries-indextype: dynamic(true);;
 $include-mainhub-model-libraries-library: dynamic(true);;
 $include-mainhub-model-libraries-libraryfield: dynamic(true);;
 $include-mainhub-model-libraries-libraryprotocol: dynamic(true);;
