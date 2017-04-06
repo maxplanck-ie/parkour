@@ -153,7 +153,7 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
                     tooltip: 'Concentration (facility)',
                     dataIndex: 'concentration_facility',
                     tdCls: 'facilityEntry',
-                    width: 80,
+                    width: 90,
                     editor: {
                         xtype: 'numberfield',
                         minValue: 0

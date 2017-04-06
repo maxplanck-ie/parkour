@@ -999,6 +999,9 @@ $include-mainhub-model-flowcell-lane: dynamic(true);;
 $include-mainhub-model-flowcell-pool: dynamic(true);;
 $include-mainhub-model-flowcell-poolinfo: dynamic(true);;
 $include-mainhub-model-flowcell-sequencer: dynamic(true);;
+$include-mainhub-model-libraries-batchadd-common: dynamic(true);;
+$include-mainhub-model-libraries-batchadd-library: dynamic(true);;
+$include-mainhub-model-libraries-batchadd-sample: dynamic(true);;
 $include-mainhub-model-libraries-filelibrarysample: dynamic(true);;
 $include-mainhub-model-libraries-index: dynamic(true);;
 $include-mainhub-model-libraries-indextype: dynamic(true);;
@@ -1070,6 +1073,11 @@ $include-mainhub-view-startpage-requestscontroller: dynamic(true);;
 $include-mainhub-view-startpage-requestsuser: dynamic(true);;
 $include-mainhub-view-startpage-startpage: dynamic(true);;
 $include-mainhub-view-startpage-startpagecontroller: dynamic(true);;
+$include-validator-greaterthanzero: dynamic(true);;
+$include-validator-indexi5: dynamic(true);;
+$include-validator-indexi7: dynamic(true);;
+$include-validator-rnaquality: dynamic(true);;
+$include-validator-unique: dynamic(true);;
 $output-paths: ("path": "../resources");
 
 /* ======================== ETC ======================== */

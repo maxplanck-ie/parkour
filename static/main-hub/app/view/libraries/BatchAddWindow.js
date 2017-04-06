@@ -1,6 +1,10 @@
 Ext.define('MainHub.view.libraries.BatchAddWindow', {
     extend: 'Ext.window.Window',
-    requires: ['MainHub.view.libraries.BatchAddWindowController'],
+    requires: [
+        'MainHub.model.libraries.BatchAdd.Library',
+        'MainHub.model.libraries.BatchAdd.Sample',
+        'MainHub.view.libraries.BatchAddWindowController'
+    ],
     controller: 'libraries-batchaddwindow',
 
     title: 'Add Libraries/Samples',
