@@ -64,7 +64,10 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                 itemId: 'batchAddGrid',
                 border: 0,
                 viewConfig: {
-                    markDirty: false
+                    markDirty: false,
+                    getRowClass: function(record) {
+                        return (record.get('invalid')) ? 'invalid' : '';
+                    }
                 },
                 tbar: [{
                     xtype: 'container',

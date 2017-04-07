@@ -81,6 +81,16 @@ Ext.define('MainHub.model.libraries.BatchAdd.Common', {
         {
             type: 'string',
             name: 'comments'
+        },
+        {
+            type: 'bool',
+            name: 'invalid',
+            defaultValue: false
+        },
+        {
+            type: 'auto',
+            name: 'errors',
+            defaultValue: {}
         }
     ],
 

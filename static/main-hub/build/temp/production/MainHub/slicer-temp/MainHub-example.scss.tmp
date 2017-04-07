@@ -1601,6 +1601,7 @@ $current-resource-root: $MainHub-resource-root;
 $relative-image-path-for-uis: $MainHub-resource-path;
 @import '../../../../../sass/src/view/flowcell/LoadFlowcellWindow';
 @import '../../../../../sass/src/view/indexgenerator/IndexGenerator';
+@import '../../../../../sass/src/view/libraries/BatchAddWindow';
 @import '../../../../../sass/src/view/libraries/LibraryWindow';
 @import '../../../../../sass/src/view/libraries/Libraries';
 @import '../../../../../sass/src/view/librarypreparation/LibraryPreparation';
