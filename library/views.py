@@ -157,8 +157,8 @@ def get_all(request):
 
 @login_required
 def save_library(request):
-    """ Add a new library or update an existing one. """
-    error = ''
+    """ Add new library or update an existing one. """
+    error = []
     data = []
 
     try:
@@ -166,46 +166,57 @@ def save_library(request):
             raise ValueError('Wrong HTTP method.')
 
         mode = request.POST.get('mode')
-        library_id = request.POST.get('library_id', '')
-        files = json.loads(request.POST.get('files', '[]'))
+        records = json.loads(request.POST.get('records', '[]'))
+
+        if not records:
+            raise ValueError('No records.')
 
         if mode == 'add':
-            form = LibraryForm(request.POST)
+            forms = [LibraryForm(record) for record in records]
         elif mode == 'edit':
-            lib = Library.objects.get(id=library_id)
-            form = LibraryForm(request.POST, instance=lib)
+            record = records[0]
+            library_id = record.get('library_id', '')
+            library = Library.objects.get(pk=library_id)
+            forms = [LibraryForm(record, instance=library)]
         else:
             raise ValueError('Wrong or missing mode.')
 
-        if form.is_valid():
-            lib = form.save()
+        for i, form in enumerate(forms):
+            if form.is_valid():
+                library = form.save()
+                files = json.loads(records[i].get('files', '[]'))
 
-            if mode == 'add':
-                lib.files.add(*files)
-                data = {
-                    'name': lib.name,
-                    'recordType': 'L',
-                    'libraryId': lib.id,
-                    'barcode': lib.barcode,
-                }
+                if mode == 'add':
+                    library.files.add(*files)
+                    data.append({
+                        'name': library.name,
+                        'recordType': 'L',
+                        'libraryId': library.pk,
+                        'barcode': library.barcode
+                    })
+                else:
+                    if files:
+                        old_files = [file for file in library.files.all()]
+                        library.files.clear()
+                        library.save()
+                        library.files.add(*files)
+                        new_files = [file for file in library.files.all()]
+
+                        # Delete files
+                        files_to_delete = list(set(old_files) - set(new_files))
+                        for file in files_to_delete:
+                            file.delete()
             else:
-                if files:
-                    old_files = [file for file in lib.files.all()]
-                    lib.files.clear()
-                    lib.save()
-                    lib.files.add(*files)
-                    new_files = [file for file in lib.files.all()]
-
-                    # Delete files
-                    files_to_delete = list(set(old_files) - set(new_files))
-                    for file in files_to_delete:
-                        file.delete()
-        else:
-            error = str(form.errors)
-            logger.debug(form.errors)
+                name = form.data['name']
+                if name and 'name' in form.errors.keys():
+                    error_msg = form.errors['name'][0]
+                else:
+                    error_msg = 'Could not save the library.'
+                error.append({'name': name, 'value': error_msg})
+                logger.debug(form.errors)
 
     except Exception as e:
-        error = 'Could not save the library.'
+        error = 'Could not save the library(-ies).'
         logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error, 'data': data})

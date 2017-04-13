@@ -8,6 +8,7 @@ from library_sample_shared.models import (Organism, ConcentrationMethod,
                                           ReadLength, LibraryProtocol,
                                           LibraryType)
 import tempfile
+import json
 
 User = get_user_model()
 
@@ -103,61 +104,30 @@ class SaveSampleTest(TestCase):
         self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.post(reverse('save_sample'), {
             'mode': 'add',
-            'name': 'Sample_add',
-            'organism': self.organism.pk,
-            'concentration': 1.0,
-            'concentration_method': self.method.pk,
-            'read_length': self.read_length.pk,
-            'sequencing_depth': 1,
-            'nucleic_acid_type': self.nucleic_acid_type.pk,
-            'library_protocol': self.library_protocol.pk,
-            'library_type': self.library_type.pk,
-            'files': '[%s]' % self.f_1.pk
+            'records': json.dumps([{
+                'name': 'Sample_add',
+                'organism': self.organism.pk,
+                'concentration': 1.0,
+                'concentration_method': self.method.pk,
+                'read_length': self.read_length.pk,
+                'sequencing_depth': 1,
+                'nucleic_acid_type': self.nucleic_acid_type.pk,
+                'library_protocol': self.library_protocol.pk,
+                'library_type': self.library_type.pk,
+                'files': '[%s]' % self.f_1.pk
+            }])
         })
         self.assertEqual(response.status_code, 200)
         sample = Sample.objects.get(name='Sample_add')
         self.assertJSONEqual(str(response.content, 'utf-8'), {
             'success': True,
-            'error': '',
-            'data': {
+            'error': [],
+            'data': [{
                 'name': sample.name,
+                'recordType': 'S',
                 'sampleId': sample.pk,
                 'barcode': sample.barcode,
-                'recordType': 'S',
-            },
-        })
-
-    def test_missing_or_invalid_fields(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('save_sample'), {
-            'mode': 'add',  # works for 'edit' too
-            'name': 'Sample',
-        })
-        self.assertEqual(response.status_code, 200)
-
-    def test_edit_ok(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('save_sample'), {
-            'mode': 'edit',
-            'sample_id': self.test_sample.pk,
-            'name': 'Sample_edit_new',
-            'organism': self.organism.pk,
-            'equal_representation_nucleotides': 'false',
-            'concentration': '1.0',
-            'concentration_method': self.method.pk,
-            'read_length': self.read_length.pk,
-            'sequencing_depth': '1',
-            'nucleic_acid_type': self.nucleic_acid_type.pk,
-            'library_protocol': self.library_protocol.pk,
-            'library_type': self.library_type.pk,
-            'comments': '',
-            'files': '[%s]' % self.f_1.pk,
-        })
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(str(response.content, 'utf-8'), {
-            'success': True,
-            'error': '',
-            'data': [],
+            }],
         })
 
     def test_wrong_http_method(self):
@@ -166,40 +136,107 @@ class SaveSampleTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(str(response.content, 'utf-8'), {
             'success': False,
-            'error': 'Could not save the sample.',
+            'error': 'Could not save the sample(s).',
+            'data': [],
+        })
+
+    def test_missing_records(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('save_sample'), {'mode': 'add'})
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Could not save the sample(s).',
             'data': [],
         })
 
     def test_wrong_or_missing_mode(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('save_sample'))
+        response = self.client.post(reverse('save_sample'), {
+            'records': '[{}]'
+        })
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(str(response.content, 'utf-8'), {
             'success': False,
-            'error': 'Could not save the sample.',
+            'error': 'Could not save the sample(s).',
+            'data': [],
+        })
+
+    def test_not_unique_name(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('save_sample'), {
+            'mode': 'add',  # works for 'edit' too
+            'records': json.dumps([{
+                'name': 'Sample_edit',
+            }])
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': [{
+                'name': 'Sample_edit',
+                'value': 'Sample with this Name already exists.'
+            }],
+            'data': [],
+        })
+
+    def test_missing_or_invalid_fields(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('save_sample'), {
+            'mode': 'add',  # works for 'edit' too
+            'records': json.dumps([{
+                'name': 'Sample',
+            }])
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': [{
+                'name': 'Sample',
+                'value': 'Could not save the sample.'
+            }],
+            'data': [],
+        })
+
+    def test_edit_ok(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('save_sample'), {
+            'mode': 'edit',
+            'records': json.dumps([{
+                'sample_id': self.test_sample.pk,
+                'name': 'Sample_edit_new',
+                'organism': self.organism.pk,
+                'equal_representation_nucleotides': 'true',
+                'concentration': 1.0,
+                'concentration_method': self.method.pk,
+                'read_length': self.read_length.pk,
+                'sequencing_depth': 1,
+                'nucleic_acid_type': self.nucleic_acid_type.pk,
+                'library_protocol': self.library_protocol.pk,
+                'library_type': self.library_type.pk,
+                'comments': '',
+                'files': '[%s]' % self.f_1.pk,
+            }]),
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': True,
+            'error': [],
             'data': [],
         })
 
     def test_missing_or_empty_sample_id(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('save_sample'), {'mode': 'edit'})
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(str(response.content, 'utf-8'), {
-            'success': False,
-            'error': 'Could not save the sample.',
-            'data': [],
-        })
-
-    def test_non_existing_library_id(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.post(reverse('save_sample'), {
             'mode': 'edit',
-            'sample_id': '-1',
+            'records': json.dumps([{
+                'name': 'Sample'
+            }])
         })
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(str(response.content, 'utf-8'), {
             'success': False,
-            'error': 'Could not save the sample.',
+            'error': 'Could not save the sample(s).',
             'data': [],
         })
 

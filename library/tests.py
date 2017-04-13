@@ -11,6 +11,7 @@ from sample.models import Sample
 from request.models import Request
 
 import tempfile
+import json
 
 User = get_user_model()
 
@@ -128,75 +129,38 @@ class SaveLibraryTest(TestCase):
         self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.post(reverse('save_library'), {
             'mode': 'add',
-            'name': 'Library_add',
-            'library_protocol': self.library_protocol.pk,
-            'library_type': self.library_type.pk,
-            'amplification_cycles': '1',
-            'organism': self.organism.pk,
-            'index_type': self.index_type.pk,
-            'index_reads': '0',
-            'index_i7': '',
-            'index_i5': '',
-            'equal_representation_nucleotides': 'false',
-            'concentration': '1.0',
-            'concentration_method': self.method.pk,
-            'mean_fragment_size': '1',
-            'qpcr_result': '1',
-            'read_length': self.read_length.pk,
-            'sequencing_depth': '1',
-            'comments': '',
-            'files': '[%s]' % self.f_1.pk,
+            'records': json.dumps([{
+                'name': 'Library_add',
+                'library_protocol': self.library_protocol.pk,
+                'library_type': self.library_type.pk,
+                'amplification_cycles': 1,
+                'organism': self.organism.pk,
+                'index_type': self.index_type.pk,
+                'index_reads': 0,
+                'index_i7': '',
+                'index_i5': '',
+                'equal_representation_nucleotides': 'false',
+                'concentration': 1.0,
+                'concentration_method': self.method.pk,
+                'mean_fragment_size': 1,
+                'qpcr_result': 1,
+                'read_length': self.read_length.pk,
+                'sequencing_depth': 1,
+                'comments': '',
+                'files': '[%s]' % self.f_1.pk,
+            }]),
         })
         self.assertEqual(response.status_code, 200)
         library = Library.objects.get(name='Library_add')
         self.assertJSONEqual(str(response.content, 'utf-8'), {
             'success': True,
-            'error': '',
-            'data': {
+            'error': [],
+            'data': [{
                 'name': library.name,
+                'recordType': 'L',
                 'libraryId': library.pk,
                 'barcode': library.barcode,
-                'recordType': 'L',
-            },
-        })
-
-    def test_missing_or_invalid_fields(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('save_library'), {
-            'mode': 'add',  # works for 'edit' too
-            'name': 'Library',
-        })
-        self.assertEqual(response.status_code, 200)
-
-    def test_edit_ok(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('save_library'), {
-            'mode': 'edit',
-            'library_id': self.test_library.pk,
-            'name': 'Library_edit_new',
-            'library_protocol': self.library_protocol.pk,
-            'library_type': self.library_type.pk,
-            'amplification_cycles': '1',
-            'organism': self.organism.pk,
-            'index_type': self.index_type.pk,
-            'index_reads': '0',
-            'index_i7': '',
-            'index_i5': '',
-            'equal_representation_nucleotides': 'false',
-            'concentration': '1.0',
-            'concentration_method': self.method.pk,
-            'mean_fragment_size': '1',
-            'qpcr_result': '1',
-            'read_length': self.read_length.pk,
-            'sequencing_depth': '1',
-            'comments': '',
-            'files': '[%s]' % self.f_1.pk,
-        })
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(str(response.content, 'utf-8'), {
-            'success': True,
-            'error': '',
-            'data': [],
+            }],
         })
 
     def test_wrong_http_method(self):
@@ -205,36 +169,113 @@ class SaveLibraryTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(str(response.content, 'utf-8'), {
             'success': False,
-            'error': 'Could not save the library.',
+            'error': 'Could not save the library(-ies).',
+            'data': [],
+        })
+
+    def test_missing_records(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('save_library'), {'mode': 'add'})
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Could not save the library(-ies).',
             'data': [],
         })
 
     def test_wrong_or_missing_mode(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('save_library'))
+        response = self.client.post(reverse('save_library'), {
+            'records': '[{}]'
+        })
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(str(response.content, 'utf-8'), {
             'success': False,
-            'error': 'Could not save the library.',
+            'error': 'Could not save the library(-ies).',
+            'data': [],
+        })
+
+    def test_not_unique_name(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('save_library'), {
+            'mode': 'add',  # works for 'edit' too
+            'records': json.dumps([{
+                'name': 'Library_edit',
+            }])
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': [{
+                'name': 'Library_edit',
+                'value': 'Library with this Name already exists.'
+            }],
+            'data': [],
+        })
+
+    def test_missing_or_invalid_fields(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('save_library'), {
+            'mode': 'add',  # works for 'edit' too
+            'records': json.dumps([{
+                'name': 'Library',
+            }])
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': [{
+                'name': 'Library',
+                'value': 'Could not save the library.'
+            }],
+            'data': [],
+        })
+
+    def test_edit_ok(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('save_library'), {
+            'mode': 'edit',
+            'records': json.dumps([{
+                'library_id': self.test_library.pk,
+                'name': 'Library_edit_new',
+                'library_protocol': self.library_protocol.pk,
+                'library_type': self.library_type.pk,
+                'amplification_cycles': 1,
+                'organism': self.organism.pk,
+                'index_type': self.index_type.pk,
+                'index_reads': 0,
+                'index_i7': '',
+                'index_i5': '',
+                'equal_representation_nucleotides': 'false',
+                'concentration': 1.0,
+                'concentration_method': self.method.pk,
+                'mean_fragment_size': 1,
+                'qpcr_result': 1,
+                'read_length': self.read_length.pk,
+                'sequencing_depth': 1,
+                'comments': '',
+                'files': '[%s]' % self.f_1.pk,
+            }]),
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': True,
+            'error': [],
             'data': [],
         })
 
     def test_missing_or_empty_library_id(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('save_library'), {'mode': 'edit'})
-        self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(response.content, b'[]')
-
-    def test_non_existing_library_id(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.post(reverse('save_library'), {
             'mode': 'edit',
-            'library_id': '-1',
+            'records': json.dumps([{
+                'name': 'Library'
+            }])
         })
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(str(response.content, 'utf-8'), {
             'success': False,
-            'error': 'Could not save the library.',
+            'error': 'Could not save the library(-ies).',
             'data': [],
         })
 
@@ -242,24 +283,17 @@ class SaveLibraryTest(TestCase):
 class DeleteLibraryTest(TestCase):
     def setUp(self):
         User.objects.create_user(email='foo@bar.io', password='foo-foo')
-
         self.library = Library.get_test_library('Library')
         self.library.save()
 
-    def test_delete_library_ok(self):
+    def test_delete_library(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.post(reverse('delete_library'), {
             'record_id': self.library.pk
         })
         self.assertEqual(response.status_code, 200)
-
-    def test_missing_or_empty_library_id(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('delete_library'))
-        self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(str(response.content, 'utf-8'), {
-            'success': False,
-            'error': 'Could not delete the library.',
+            'success': True, 'error': '',
         })
 
     def test_wrong_http_method(self):
@@ -269,4 +303,22 @@ class DeleteLibraryTest(TestCase):
         self.assertJSONEqual(str(response.content, 'utf-8'), {
             'success': False,
             'error': 'Could not delete the library.',
+        })
+
+    def test_missing_or_empty_record_id(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('delete_library'))
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False, 'error': 'Could not delete the library.',
+        })
+
+    def test_non_existing_record_id(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('delete_library'), {
+            'record_id': '-1'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False, 'error': 'Could not delete the library.',
         })
