@@ -39,30 +39,30 @@ def get_all(request):
                 {
                     'status': library.status,
                     'requestName': req.name,
-                    'requestId': req.id,
-                    'libraryId': library.id,
+                    'requestId': req.pk,
+                    'libraryId': library.pk,
                     'name': library.name,
                     'recordType': library.get_record_type(),
                     'date': library.date.strftime('%d.%m.%Y'),
-                    'libraryProtocol': library.library_protocol.name,
-                    'libraryProtocolId': library.library_protocol.id,
-                    'libraryType': library.library_type.name,
-                    'libraryTypeId': library.library_type.id,
+                    'library_protocol': library.library_protocol.pk,
+                    'library_protocol_name': library.library_protocol.name,
+                    'library_type': library.library_type.pk,
+                    'library_type_name': library.library_type.name,
                     'amplification_cycles': library.amplification_cycles,
-                    'organism': library.organism.name,
-                    'organismId': library.organism.id,
-                    'indexType': library.index_type.name,
-                    'indexTypeId': library.index_type.id,
+                    'organism': library.organism.pk,
+                    'organism_name': library.organism.name,
+                    'index_type': library.index_type.pk,
+                    'index_type_name': library.index_type.name,
                     'index_reads': library.index_reads,
                     'index_i7': library.index_i7,
                     'index_i5': library.index_i5,
                     'equalRepresentation':
                         str(library.equal_representation_nucleotides),
                     'concentration': library.concentration,
-                    'concentrationMethod':
+                    'concentration_method':
+                        library.concentration_method.pk,
+                    'concentration_method_name':
                         library.concentration_method.name,
-                    'concentrationMethodId':
-                        library.concentration_method.id,
                     'mean_fragment_size': library.mean_fragment_size,
                     'qpcr_result': library.qpcr_result,
                     'readLength':
@@ -94,27 +94,27 @@ def get_all(request):
                 {
                     'status': sample.status,
                     'requestName': req.name,
-                    'requestId': req.id,
-                    'sampleId': sample.id,
+                    'requestId': req.pk,
+                    'sampleId': sample.pk,
                     'name': sample.name,
                     'recordType': sample.get_record_type(),
                     'date': sample.date.strftime('%d.%m.%Y'),
                     'nucleicAcidType': sample.nucleic_acid_type.name,
                     'nucleicAcidTypeId': sample.nucleic_acid_type_id,
-                    'libraryProtocol': sample.library_protocol.name,
-                    'libraryProtocolId': sample.library_protocol_id,
-                    'libraryType': sample.library_type.name,
-                    'libraryTypeId': sample.library_type.id,
+                    'library_protocol': sample.library_protocol.pk,
+                    'library_protocol_name': sample.library_protocol.name,
+                    'library_type': sample.library_type.pk,
+                    'library_type_name': sample.library_type.name,
                     'amplification_cycles': sample.amplification_cycles,
-                    'organism': sample.organism.name,
-                    'organismId': sample.organism.id,
+                    'organism': sample.organism.pk,
+                    'organism_name': sample.organism.name,
                     'equalRepresentation':
                         str(sample.equal_representation_nucleotides),
                     'concentration': sample.concentration,
-                    'concentrationMethod':
+                    'concentration_method':
+                        sample.concentration_method.pk,
+                    'concentration_method_name':
                         sample.concentration_method.name,
-                    'concentrationMethodId':
-                        sample.concentration_method.id,
                     'readLength':
                         sample.read_length.name,
                     'readLengthId':

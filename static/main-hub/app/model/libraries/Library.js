@@ -34,20 +34,20 @@ Ext.define('MainHub.model.libraries.Library', {
             type: 'string'
         },
         {
-            name: 'libraryProtocol',
-            type: 'string'
-        },
-        {
-            name: 'libraryProtocolId',
+            name: 'library_protocol',
             type: 'int'
         },
         {
-            name: 'libraryType',
+            name: 'library_protocol_name',
             type: 'string'
         },
         {
-            name: 'libraryTypeId',
+            name: 'library_type',
             type: 'int'
+        },
+        {
+            name: 'library_type_name',
+            type: 'string'
         },
         {
             name: 'amplification_cycles',
@@ -55,23 +55,23 @@ Ext.define('MainHub.model.libraries.Library', {
         },
         {
             name: 'organism',
-            type: 'string'
-        },
-        {
-            name: 'organismId',
             type: 'int'
         },
         {
-            name: 'indexType',
+            name: 'organism_name',
             type: 'string'
         },
         {
-            name: 'indexTypeId',
+            name: 'index_type',
             type: 'int'
+        },
+        {
+            name: 'index_type_name',
+            type: 'string'
         },
         {
             name: 'index_reads',
-            type: 'string'
+            type: 'int'
         },
         {
             name: 'index_i7',
@@ -90,12 +90,12 @@ Ext.define('MainHub.model.libraries.Library', {
             type: 'string'
         },
         {
-            name: 'concentrationMethod',
-            type: 'string'
+            name: 'concentration_method',
+            type: 'int'
         },
         {
-            name: 'concentrationMethodId',
-            type: 'int'
+            name: 'concentration_method_name',
+            type: 'string'
         },
         {
             name: 'mean_fragment_size',

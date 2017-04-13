@@ -90,4 +90,4 @@ class NavigationTreeTest(TestCase):
         ]
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(tabs, ['Start Page', 'Submission'])
+        self.assertEqual(tabs, ['Start Page', 'Libraries & Samples'])

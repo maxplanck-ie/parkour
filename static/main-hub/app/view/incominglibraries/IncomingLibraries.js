@@ -1,12 +1,12 @@
-Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
+Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
     extend: 'Ext.container.Container',
     xtype: 'incoming-libraries',
 
     requires: [
-        'MainHub.view.qualitycontrol.IncomingLibrariesController'
+        'MainHub.view.incominglibraries.IncomingLibrariesController'
     ],
 
-    controller: 'qualitycontrol-incominglibraries',
+    controller: 'incominglibraries-incominglibraries',
 
     anchor: '100% -1',
     layout: 'fit',
@@ -49,6 +49,7 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
             ]
         },
         viewConfig: {
+            loadMask: false,
             markDirty: false
         },
         store: 'incomingLibrariesStore',
@@ -87,7 +88,7 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
                 {
                     text: 'Protocol',
                     tooltip: 'Library Protocol',
-                    dataIndex: 'libraryProtocol',
+                    dataIndex: 'library_protocol_name',
                     tdCls: 'userEntry',
                     minWidth: 100,
                     flex: 1
@@ -102,7 +103,7 @@ Ext.define('MainHub.view.qualitycontrol.IncomingLibraries', {
                 {
                     text: 'F/S*',
                     tooltip: 'Concentration Method (user)',
-                    dataIndex: 'concentrationMethod',
+                    dataIndex: 'concentration_method_name',
                     tdCls: 'userEntry',
                     width: 50,
                     renderer: function(val) {

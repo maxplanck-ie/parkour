@@ -93,10 +93,11 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 {
                     text: 'Name',
                     dataIndex: 'name',
-                    width: 150,
-                    renderer: function(val, meta) {
+                    minWidth: 150,
+                    flex: 1,
+                    renderer: function(value, meta) {
                         meta.tdStyle = 'font-weight:bold';
-                        return val;
+                        return value;
                     }
                 },
                 {
@@ -122,13 +123,13 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 {
                     text: 'Protocol',
                     tooltip: 'Library Protocol',
-                    dataIndex: 'libraryProtocol',
+                    dataIndex: 'library_protocol_name',
                     width: 100
                 },
                 {
                     text: 'Lib. Type',
                     tooltip: 'Library Type',
-                    dataIndex: 'libraryType',
+                    dataIndex: 'library_type_name',
                     width: 100
                 },
                 {
@@ -142,8 +143,8 @@ Ext.define('MainHub.view.libraries.Libraries', {
                     tooltip: 'RNA Quality',
                     dataIndex: 'rnaQualityName',
                     width: 55,
-                    renderer: function(val) {
-                        var record = Ext.getStore('rnaQualityStore').findRecord('id', val);
+                    renderer: function(value) {
+                        var record = Ext.getStore('rnaQualityStore').findRecord('id', value);
                         return (record) ? record.get('name') : '';
                     }
                 },
@@ -155,7 +156,7 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 },
                 {
                     text: 'Index Type',
-                    dataIndex: 'index_type',
+                    dataIndex: 'index_type_name',
                     width: 100
                 },
                 {
@@ -198,8 +199,8 @@ Ext.define('MainHub.view.libraries.Libraries', {
                     tooltip: 'Equal Representation of Nucleotides',
                     dataIndex: 'equalRepresentation',
                     width: 90,
-                    renderer: function(val) {
-                        return val === 'True' ? 'Yes' : 'No';
+                    renderer: function(value) {
+                        return value === 'True' ? 'Yes' : 'No';
                     }
                 },
                 {
@@ -211,15 +212,15 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 {
                     text: 'F/S*',
                     tooltip: 'Concentration Method',
-                    dataIndex: 'concentrationMethod',
+                    dataIndex: 'concentration_method_name',
                     width: 50,
-                    renderer: function(val) {
-                        return val.charAt(0);
+                    renderer: function(value) {
+                        return value.charAt(0);
                     }
                 },
                 {
                     text: 'Organism',
-                    dataIndex: 'organism',
+                    dataIndex: 'organism_name',
                     width: 90
                 },
                 {

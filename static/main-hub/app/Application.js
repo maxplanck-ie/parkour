@@ -33,7 +33,7 @@ Ext.define('MainHub.Application', {
         'libraries.FileLibrary',
         'libraries.FileSample',
         'libraries.RNAQuality',
-        'qualitycontrol.IncomingLibraries',
+        'incominglibraries.IncomingLibraries',
         'requests.LibrariesInRequest',
         'indexgenerator.PoolingTree',
         'librarypreparation.LibraryPreparation',

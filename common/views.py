@@ -26,36 +26,20 @@ def get_navigation_tree(request):
             'leaf': True
         },
         {
-            'text': 'Submission',
-            'iconCls': 'x-fa fa-tasks',
-            'expanded': True,
-            'selectable': False,
-            'children': [
-                {
-                    'text': 'Libraries/Samples',
-                    'iconCls': 'x-fa fa-flask',
-                    'viewType': 'libraries',
-                    'leaf': True
-                }
-            ]
-        },
+            'text': 'Libraries & Samples',
+            'iconCls': 'x-fa fa-flask',
+            'viewType': 'libraries',
+            'leaf': True
+        }
     ]
 
     if request.user.is_staff:
         data += [
             {
-                'text': 'Approval',
-                'iconCls': 'x-fa fa-check-square',
-                'expanded': True,
-                'selectable': False,
-                'children': [
-                    {
-                        'text': 'Incoming Libraries/Samples',
-                        'iconCls': 'x-fa fa-arrow-down',
-                        'viewType': 'incoming-libraries',
-                        'leaf': True
-                    }
-                ]
+                'text': 'Incoming Libraries/Samples',
+                'iconCls': 'x-fa fa-arrow-down',
+                'viewType': 'incoming-libraries',
+                'leaf': True
             },
             {
                 'text': 'Index Generator',

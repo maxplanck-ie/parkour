@@ -1,6 +1,6 @@
-Ext.define('MainHub.view.qualitycontrol.IncomingLibrariesController', {
+Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.qualitycontrol-incominglibraries',
+    alias: 'controller.incominglibraries-incominglibraries',
 
     config: {
         control: {

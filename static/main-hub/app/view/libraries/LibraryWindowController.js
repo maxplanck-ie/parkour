@@ -120,26 +120,26 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                         Ext.ux.ToastMessage('Cannot load Library Protocols', 'error');
                     } else {
                         var libraryProtocolField = Ext.getCmp('libraryProtocolField');
-                        libraryProtocolField.select(record.libraryProtocolId);
-                        libraryProtocolField.fireEvent('select', libraryProtocolField, libraryProtocolField.findRecordByValue(record.libraryProtocolId), true);
+                        libraryProtocolField.select(record.library_protocol);
+                        libraryProtocolField.fireEvent('select', libraryProtocolField, libraryProtocolField.findRecordByValue(record.library_protocol), true);
                     }
                 }
             });
 
             // Set Organism
             var organismField = Ext.getCmp('organismField');
-            organismField.select(record.organismId);
-            organismField.fireEvent('select', organismField, organismField.findRecordByValue(record.organismId));
+            organismField.select(record.organism);
+            organismField.fireEvent('select', organismField, organismField.findRecordByValue(record.organism));
 
             // Set Index Type
             var indexType = Ext.getCmp('indexType');
-            indexType.select(record.indexTypeId);
-            indexType.fireEvent('select', indexType, indexType.findRecordByValue(record.indexTypeId), true);
+            indexType.select(record.index_type);
+            indexType.fireEvent('select', indexType, indexType.findRecordByValue(record.index_type), true);
 
             // Set Concentration Method
             var concentrationMethodField = Ext.getCmp('concentrationMethodField');
-            concentrationMethodField.select(record.concentrationMethodId);
-            concentrationMethodField.fireEvent('select', concentrationMethodField, concentrationMethodField.findRecordByValue(record.concentrationMethodId));
+            concentrationMethodField.select(record.concentration_method);
+            concentrationMethodField.fireEvent('select', concentrationMethodField, concentrationMethodField.findRecordByValue(record.concentration_method));
 
             // Set Read Length
             var readLengthField = Ext.getCmp('readLengthField');
@@ -186,8 +186,8 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                     // Set Library Type
                     if (wnd.mode == 'edit' && setInitialValues === true) {
                         var record = wnd.record.data;
-                        libraryTypeField.select(record.libraryTypeId);
-                        libraryTypeField.fireEvent('select', libraryTypeField, libraryTypeField.findRecordByValue(record.libraryTypeId));
+                        libraryTypeField.select(record.library_type);
+                        libraryTypeField.fireEvent('select', libraryTypeField, libraryTypeField.findRecordByValue(record.library_type));
                     }
                 }
             }
@@ -304,13 +304,13 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
 
             // Set organism
             var organismSampleField = Ext.getCmp('organismSampleField');
-            organismSampleField.select(record.organismId);
-            organismSampleField.fireEvent('select', organismSampleField, organismSampleField.findRecordByValue(record.organismId));
+            organismSampleField.select(record.organism);
+            organismSampleField.fireEvent('select', organismSampleField, organismSampleField.findRecordByValue(record.organism));
 
             // Set concentration method
             var concentrationSampleMethodField = Ext.getCmp('concentrationSampleMethodField');
-            concentrationSampleMethodField.select(record.concentrationMethodId);
-            concentrationSampleMethodField.fireEvent('select', concentrationSampleMethodField, concentrationSampleMethodField.findRecordByValue(record.concentrationMethodId));
+            concentrationSampleMethodField.select(record.concentration_method);
+            concentrationSampleMethodField.fireEvent('select', concentrationSampleMethodField, concentrationSampleMethodField.findRecordByValue(record.concentration_method));
 
             // Set RNA Quality
             var rnaQualityField = Ext.getCmp('rnaQualityField');
@@ -359,7 +359,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
 
                     // Set Sample Protocol
                     if (wnd.mode == 'edit' && setInitialValues === true) {
-                        var libraryProtocolId = wnd.record.data.libraryProtocolId;
+                        var libraryProtocolId = wnd.record.data.library_protocol;
                         sampleProtocolField.select(libraryProtocolId);
                         sampleProtocolField.fireEvent('select', sampleProtocolField, sampleProtocolField.findRecordByValue(libraryProtocolId));
                     }
@@ -402,8 +402,8 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                     // Set Sample Type
                     if (wnd.mode == 'edit') {
                         var record = wnd.record.data;
-                        sampleTypeField.select(record.libraryTypeId);
-                        sampleTypeField.fireEvent('select', sampleTypeField, sampleTypeField.findRecordByValue(record.libraryTypeId));
+                        sampleTypeField.select(record.library_type);
+                        sampleTypeField.fireEvent('select', sampleTypeField, sampleTypeField.findRecordByValue(record.library_type));
                     }
                 }
             }

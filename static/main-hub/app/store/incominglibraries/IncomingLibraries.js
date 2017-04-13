@@ -1,12 +1,12 @@
-Ext.define('MainHub.store.qualitycontrol.IncomingLibraries', {
+Ext.define('MainHub.store.incominglibraries.IncomingLibraries', {
     extend: 'Ext.data.Store',
     storeId: 'incomingLibrariesStore',
 
     requires: [
-        'MainHub.model.qualitycontrol.IncomingLibraries'
+        'MainHub.model.incominglibraries.IncomingLibraries'
     ],
 
-    model: 'MainHub.model.qualitycontrol.IncomingLibraries',
+    model: 'MainHub.model.incominglibraries.IncomingLibraries',
 
     groupField: 'requestName',
     groupDir: 'DESC',
