@@ -231,6 +231,9 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                     item.commit();
                 }
             });
+
+            // Validate all records
+            this.validateAll();
         }
     },
 
@@ -357,9 +360,9 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
 
         record.commit();
 
-        // Validate the record after editing and refresh the corresponding row
+        // Validate the record after editing and refresh the grid
         this.validateRecord(record);
-        grid.getView().refreshNode(grid.getStore().indexOf(record));
+        grid.getView().refresh();
     },
 
     selectLibraryProtocol: function(fld, record) {
@@ -534,8 +537,8 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                         data: []
                     }),
                     forceSelection: true
-                }
-                // renderer: me.comboboxErrorRenderer
+                },
+                renderer: me.comboboxErrorRenderer
             },
             {
                 text: 'Index I7',
@@ -558,7 +561,8 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                     regex: new RegExp('^(?=(?:.{6}|.{8})$)[ATCG]+$'),
                     regexText: 'Only A, T, C and G (uppercase) are allowed. Index length must be 6 or 8.',
                     matchFieldWidth: false
-                }
+                },
+                renderer: me.errorRenderer
             },
             {
                 text: 'Index I5',
@@ -581,7 +585,8 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                     regex: new RegExp('^(?=(?:.{6}|.{8})$)[ATCG]+$'),
                     regexText: 'Only A, T, C and G (uppercase) are allowed. Index length must be 6 or 8.',
                     matchFieldWidth: false
-                }
+                },
+                renderer: me.errorRenderer
             },
             {
                 text: 'qPCR (nM)',
@@ -855,6 +860,10 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
     },
 
     save: function() {
+        this.validateAll();
+    },
+
+    validateAll: function() {
         var me = this,
             grid = Ext.getCmp('batchAddGrid'),
             store = grid.getStore();
