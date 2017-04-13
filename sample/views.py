@@ -27,54 +27,66 @@ def get_nucleic_acid_types(request):
 
 @login_required
 def save_sample(request):
-    """ Add a new sample or update an existing one. """
-    error = ''
+    """ Add new sample or update an existing one. """
+    error = []
     data = []
 
     try:
         if request.method != 'POST':
             raise ValueError('Wrong HTTP method.')
 
-        mode = request.POST.get('mode')
-        sample_id = request.POST.get('sample_id', '')
-        files = json.loads(request.POST.get('files', '[]'))
+        mode = request.POST.get('mode', '')
+        records = json.loads(request.POST.get('records', '[]'))
+
+        if not records:
+            raise ValueError('No records.')
 
         if mode == 'add':
-            form = SampleForm(request.POST)
+            forms = [SampleForm(record) for record in records]
         elif mode == 'edit':
-            smpl = Sample.objects.get(pk=sample_id)
-            form = SampleForm(request.POST, instance=smpl)
+            record = records[0]
+            sample_id = record.get('sample_id', '')
+            sample = Sample.objects.get(pk=sample_id)
+            forms = [SampleForm(record, instance=sample)]
         else:
             raise ValueError('Wrong or missing mode.')
 
-        if form.is_valid():
-            smpl = form.save()
-            if mode == 'add':
-                smpl.files.add(*files)
-                data = {
-                    'name': smpl.name,
-                    'recordType': 'S',
-                    'sampleId': smpl.id,
-                    'barcode': smpl.barcode,
-                }
-            else:
-                if files:
-                    old_files = [file for file in smpl.files.all()]
-                    smpl.files.clear()
-                    smpl.save()
-                    smpl.files.add(*files)
-                    new_files = [file for file in smpl.files.all()]
+        for i, form in enumerate(forms):
+            if form.is_valid():
+                sample = form.save()
+                files = json.loads(records[i].get('files', '[]'))
 
-                    # Delete files
-                    files_to_delete = list(set(old_files) - set(new_files))
-                    for file in files_to_delete:
-                        file.delete()
-        else:
-            error = str(form.errors)
-            logger.debug(form.errors)
+                if mode == 'add':
+                    sample.files.add(*files)
+                    data.append({
+                        'name': sample.name,
+                        'recordType': 'S',
+                        'sampleId': sample.pk,
+                        'barcode': sample.barcode,
+                    })
+                else:
+                    if files:
+                        old_files = [file for file in sample.files.all()]
+                        sample.files.clear()
+                        sample.save()
+                        sample.files.add(*files)
+                        new_files = [file for file in sample.files.all()]
+
+                        # Delete files
+                        files_to_delete = list(set(old_files) - set(new_files))
+                        for file in files_to_delete:
+                            file.delete()
+            else:
+                name = form.data['name']
+                if name and 'name' in form.errors.keys():
+                    error_msg = form.errors['name'][0]
+                else:
+                    error_msg = 'Could not save the sample.'
+                error.append({'name': name, 'value': error_msg})
+                logger.debug(form.errors)
 
     except Exception as e:
-        error = 'Could not save the sample.'
+        error = 'Could not save the sample(s).'
         logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error, 'data': data})

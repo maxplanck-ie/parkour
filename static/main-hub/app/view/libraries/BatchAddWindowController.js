@@ -538,7 +538,17 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                     }),
                     forceSelection: true
                 },
-                renderer: me.comboboxErrorRenderer
+                renderer: function(value, meta, record) {
+                    var store = meta.column.getEditor().getStore();
+
+                    var item = store.findRecord('num', value),
+                        dataIndex = meta.column.dataIndex;
+                    if (record && Object.keys(record.get('errors')).indexOf(dataIndex) !== -1) {
+                        meta.tdCls += ' invalid-record';
+                        meta.tdAttr = 'data-qtip="' + record.get('errors')[dataIndex] + '"';
+                    }
+                    return (item !== null) ? item.get('num') : '';
+                }
             },
             {
                 text: 'Index I7',
@@ -859,8 +869,66 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         ]
     },
 
-    save: function() {
-        this.validateAll();
+    save: function(btn) {
+        var wnd = btn.up('window'),
+            store = Ext.getCmp('batchAddGrid').getStore(),
+            url = (wnd.recordType === 'L') ? 'library/save/' : 'sample/save/';
+
+        if (store.getCount() > 0) {
+            this.validateAll();
+
+            var numInvalidRecords = store.data.items.reduce(function(n, item) {
+                return n + (item.get('invalid') === true);
+            }, 0);
+
+            if (numInvalidRecords === 0) {
+                // wnd.setLoading('Saving...');
+                Ext.Ajax.request({
+                    url: url,
+                    timeout: 1000000,
+                    scope: this,
+                    params: {
+                        mode: 'add',
+                        records: Ext.JSON.encode(Ext.Array.pluck(store.data.items, 'data'))
+                    },
+
+                    success: function(response) {
+                        var obj = Ext.JSON.decode(response.responseText);
+
+                        Ext.getCmp('librariesInRequestTable').getStore().add(obj.data);
+
+                        for (var i = 0; i < obj.data.length; i++) {
+                            var record = store.findRecord('name', obj.data[i].name);
+                            store.remove(record);
+                        }
+
+                        if (obj.error.length === 0) {
+                            Ext.ux.ToastMessage('Records have been added!');
+                            wnd.close()
+                        } else {
+                            var errorMessage = '<ul>';
+                            for (var i = 0; i < obj.error.length; i++) {
+                                errorMessage += '<li>' + obj.error[i].name +
+                                    ': ' + obj.error[i].value + '</li>';
+                            }
+                            errorMessage += '</ul>';
+                            Ext.ux.ToastMessage(errorMessage, 'error');
+                        }
+
+                        // wnd.setLoading(false);
+                    },
+
+                    failure: function(response) {
+                        // wnd.setLoading(false);
+                        Ext.ux.ToastMessage(response.statusText, 'error');
+                        console.error('[ERROR]: ' + url);
+                        console.error(response);
+                    }
+                });
+            } else {
+                Ext.ux.ToastMessage('Check the records.', 'warning');
+            }
+        }
     },
 
     validateAll: function() {

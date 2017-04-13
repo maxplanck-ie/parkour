@@ -428,9 +428,8 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             fileStoreName = 'fileLibraryStore';
             data = form.getForm().getFieldValues();
             params = $.extend(data, {
-                'mode': wnd.mode,
-                'library_id': (typeof wnd.record !== 'undefined') ? wnd.record.data.libraryId : '',
-                'files': Ext.JSON.encode(form.down('filegridfield').getValue())
+                library_id: wnd.record ? wnd.record.data.libraryId : '',
+                files: Ext.JSON.encode(form.down('filegridfield').getValue())
             });
         } else {
             form = Ext.getCmp('sampleForm');
@@ -439,9 +438,8 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             fileStoreName = 'fileSampleStore';
             data = form.getForm().getFieldValues();
             params = $.extend(data, {
-                'mode': wnd.mode,
-                'sample_id': (typeof wnd.record !== 'undefined') ? wnd.record.data.sampleId : '',
-                'files': Ext.JSON.encode(form.down('filegridfield').getValue())
+                sample_id: wnd.record ? wnd.record.data.sampleId : '',
+                files: Ext.JSON.encode(form.down('filegridfield').getValue())
             });
         }
 
@@ -452,7 +450,10 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                 method: 'POST',
                 timeout: 1000000,
                 scope: this,
-                params: params,
+                params: {
+                    mode: wnd.mode,
+                    records: Ext.JSON.encode([params])
+                },
 
                 success: function(response) {
                     var obj = Ext.JSON.decode(response.responseText),
@@ -497,6 +498,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                 },
 
                 failure: function(response) {
+                    wnd.setLoading(false);
                     Ext.ux.ToastMessage(response.statusText, 'error');
                     console.error('[ERROR]: ' + url);
                     console.error(response);
