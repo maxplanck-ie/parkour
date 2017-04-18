@@ -3,10 +3,10 @@ Ext.define('MainHub.store.libraries.ConcentrationMethods', {
     storeId: 'concentrationMethodsStore',
 
     requires: [
-        'MainHub.model.libraries.LibraryField'
+        'MainHub.model.libraries.ConcentrationMethod'
     ],
 
-    model: 'MainHub.model.libraries.LibraryField',
+    model: 'MainHub.model.libraries.ConcentrationMethod',
 
     proxy: {
         type: 'ajax',

@@ -103,11 +103,14 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                 {
                     text: 'F/S',
                     tooltip: 'Concentration Determined by (user)',
-                    dataIndex: 'concentration_method_name',
+                    dataIndex: 'concentration_method',
                     tdCls: 'userEntry',
                     width: 50,
-                    renderer: function(val) {
-                        return val.charAt(0);
+                    renderer: function(value, meta) {
+                        var store = Ext.getStore('concentrationMethodsStore'),
+                            record = store.findRecord('id', value);
+                        meta.tdAttr = 'data-qtip="' + record.get('name') + '"';
+                        return (record) ? record.getShortName() : '';
                     }
                 },
                 {
@@ -174,7 +177,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                 },
                 {
                     text: 'ng',
-                    tooltip: 'Amount (facility)',
+                    tooltip: 'Amount (facility): DF * ng/µl * µl',
                     dataIndex: 'amount_facility',
                     tdCls: 'facilityEntry',
                     width: 80,
@@ -198,10 +201,13 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                         matchFieldWidth: false,
                         forceSelection: true
                     },
-                    renderer: function(val) {
+                    renderer: function(value, meta) {
                         var store = Ext.getStore('concentrationMethodsStore'),
-                            record = store.findRecord('id', val);
-                        return (record) ? record.get('name').charAt(0) : '';
+                            record = store.findRecord('id', value);
+                        if (record) {
+                            meta.tdAttr = 'data-qtip="' + record.get('name') + '"';
+                        }
+                        return (record) ? record.getShortName() : '';
                     }
                 },
                 // {

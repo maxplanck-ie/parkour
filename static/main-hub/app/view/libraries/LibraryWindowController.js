@@ -444,7 +444,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         }
 
         if (form.isValid()) {
-            wnd.setLoading('Adding...');
+            wnd.setLoading('Saving...');
             Ext.Ajax.request({
                 url: url,
                 method: 'POST',

@@ -21,7 +21,14 @@ Ext.define('MainHub.view.libraries.Libraries', {
         viewConfig: {
             stripeRows: false,
             getRowClass: function(record) {
-                return record.get('recordType') === 'L' ? 'library-row' : 'sample-row';
+                var rowClass = '';
+                if (record.get('status') === -1) {
+                    rowClass = 'invalid';
+                } else {
+                    rowClass = record.get('recordType') === 'L' ? 'library-row' : 'sample-row'
+                    // rowClass = record.getRecordType() === 'L' ? 'library-row' : 'sample-row'
+                }
+                return rowClass;
             }
         },
         header: {
@@ -211,10 +218,13 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 {
                     text: 'F/S',
                     tooltip: 'Concentration Determined by',
-                    dataIndex: 'concentration_method_name',
+                    dataIndex: 'concentration_method',
                     width: 50,
-                    renderer: function(value) {
-                        return value.charAt(0);
+                    renderer: function(value, meta) {
+                        var store = Ext.getStore('concentrationMethodsStore'),
+                            record = store.findRecord('id', value);
+                        meta.tdAttr = 'data-qtip="' + record.get('name') + '"';
+                        return record.getShortName();
                     }
                 },
                 {

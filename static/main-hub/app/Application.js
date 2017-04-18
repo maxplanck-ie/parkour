@@ -75,6 +75,9 @@ Ext.define('MainHub.Utilities', {
         var librariesStore = Ext.getStore('librariesStore');
         if (librariesStore.isLoaded()) librariesStore.reload();
 
+        var incomingLibrariesStore = Ext.getStore('incomingLibrariesStore');
+        if (incomingLibrariesStore.isLoaded()) incomingLibrariesStore.reload();
+
         var poolingTree = Ext.getStore('PoolingTree');
         if (poolingTree.isLoaded()) poolingTree.reload();
 
