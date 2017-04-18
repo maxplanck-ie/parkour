@@ -60,10 +60,15 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
 
         // Set Read Length
         if (values.readLengthName !== null) {
-            var readLengthRecord = Ext.getStore('readLengthsStore')
-                .findRecord('id', values.readLengthName);
-            record.set('readLength', readLengthRecord.get('id'));
-            record.set('readLengthName', readLengthRecord.get('name'));
+            var readLengthRecord = Ext.getStore('readLengthsStore').findRecord(
+                'id', values.readLength
+            );
+            if (readLengthRecord) {
+                record.set({
+                    readLength: readLengthRecord.get('id'),
+                    readLengthName: readLengthRecord.get('name')
+                })
+            }
 
             var recordId = null;
             if (record.get('recordType') == 'L') {
@@ -87,9 +92,15 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
 
         // Set Index Type (for samples)
         if (record.get('recordType') == 'S' && values.indexTypeName !== null) {
-            var indexTypeRecord = Ext.getStore('indexTypesStore').findRecord('id', values.indexTypeName);
-            record.set('indexType', indexTypeRecord.get('id'));
-            record.set('indexTypeName', indexTypeRecord.get('name'));
+            var indexTypeRecord = Ext.getStore('indexTypesStore').findRecord(
+                'id', values.indexType
+            );
+            if (indexTypeRecord) {
+                record.set({
+                    indexType: indexTypeRecord.get('id'),
+                    indexTypeName: indexTypeRecord.get('name')
+                })
+            }
 
             // Update record in the database
             Ext.Ajax.request({

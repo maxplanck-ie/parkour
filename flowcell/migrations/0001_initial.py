@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('index_generator', '0001_initial'),
+        ('index_generator', '0002_auto_20170418_1310'),
     ]
 
     operations = [

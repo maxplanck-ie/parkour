@@ -26,7 +26,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                 margin: '0 15px 0 0',
                 flex: 1,
                 header: {
-                    title: 'Libraries for Pooling',
+                    title: 'Libraries and Samples for Pooling',
                     items: [{
                         xtype: 'combobox',
                         id: 'poolSize',
@@ -105,10 +105,11 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                 rootVisible: false,
                 columns: [{
                         xtype: 'treecolumn',
-                        text: 'Library Name',
+                        text: 'Name',
                         dataIndex: 'text',
                         sortable: true,
-                        width: 250
+                        minWidth: 250,
+                        flex: 1
                     },
                     {
                         text: '',
@@ -116,21 +117,28 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                         width: 35
                     },
                     {
-                        text: 'Seq. Depth',
+                        text: 'Depth (M)',
+                        tooltip: 'Sequencing Depth',
                         dataIndex: 'sequencingDepth',
-                        width: 90
+                        width: 85
                     },
                     {
-                        text: 'Read Length',
-                        dataIndex: 'readLengthName',
-                        width: 100,
+                        text: 'Length',
+                        tooltip: 'Read Length',
+                        dataIndex: 'readLength',
+                        width: 70,
                         editor: {
                             xtype: 'combobox',
                             queryMode: 'local',
-                            displayField: 'name',
                             valueField: 'id',
+                            displayField: 'name',
                             store: 'readLengthsStore',
+                            matchFieldWidth: false,
                             forceSelection: true
+                        },
+                        renderer: function(value, meta, record) {
+                            var name = record.get('readLengthName');
+                            return name ? name : '';
                         }
                     },
                     {
@@ -140,8 +148,8 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                     },
                     {
                         text: 'Index Type',
-                        dataIndex: 'indexTypeName',
-                        width: 200,
+                        dataIndex: 'indexType',
+                        width: 150,
                         editor: {
                             id: 'indexTypeEditor',
                             xtype: 'combobox',
@@ -149,7 +157,12 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                             displayField: 'name',
                             valueField: 'id',
                             store: 'indexTypesStore',
+                            matchFieldWidth: false,
                             forceSelection: true
+                        },
+                        renderer: function(value, meta, record) {
+                            var name = record.get('indexTypeName');
+                            return name ? name : '';
                         }
                     },
                     {
@@ -193,9 +206,9 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                         width: 35
                     },
                     {
-                        text: 'Seq. Depth',
+                        text: 'Depth (M)',
                         dataIndex: 'sequencingDepth',
-                        width: 90,
+                        width: 85,
                         summaryType: 'sum',
                         summaryRenderer: function(value) {
                             return (value > 0) ? value : '';

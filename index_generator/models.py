@@ -6,7 +6,7 @@ from sample.models import Sample
 
 class Pool(models.Model):
     name = models.CharField('Name', max_length=100, blank=True)
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name='User',
     )
