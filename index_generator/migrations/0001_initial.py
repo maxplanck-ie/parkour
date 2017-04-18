@@ -12,8 +12,8 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('sample', '0002_load_initial_data'),
-        ('library', '0001_initial'),
+        ('sample', '0003_sample_sample_volume_facility'),
+        ('library', '0002_library_sample_volume_facility'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

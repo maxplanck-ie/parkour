@@ -84,6 +84,8 @@ def get_all(request):
                     'amount_facility': library.amount_facility,
                     'size_distribution_facility':
                         library.size_distribution_facility,
+                    'sample_volume_facility':
+                        library.sample_volume_facility,
                     'comments_facility': library.comments_facility,
                     'qpcr_result_facility': library.qpcr_result_facility,
                 }
@@ -138,6 +140,8 @@ def get_all(request):
                     'amount_facility': sample.amount_facility,
                     'size_distribution_facility':
                         sample.size_distribution_facility,
+                    'sample_volume_facility':
+                        sample.sample_volume_facility,
                     'comments_facility': sample.comments_facility,
                     'rna_quality_facility': sample.rna_quality_facility,
                 }

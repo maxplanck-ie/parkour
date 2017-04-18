@@ -161,6 +161,29 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                     }
                 },
                 {
+                    text: 'µl',
+                    tooltip: 'Sample Volume (facility)',
+                    dataIndex: 'sample_volume_facility',
+                    tdCls: 'facilityEntry',
+                    width: 80,
+                    editor: {
+                        xtype: 'numberfield',
+                        minValue: 0,
+                        allowDecimals: false
+                    }
+                },
+                {
+                    text: 'ng',
+                    tooltip: 'Amount (facility)',
+                    dataIndex: 'amount_facility',
+                    tdCls: 'facilityEntry',
+                    width: 80,
+                    editor: {
+                        xtype: 'numberfield',
+                        minValue: 0
+                    }
+                },
+                {
                     text: 'F/S*',
                     tooltip: 'Concentration Method (facility)',
                     dataIndex: 'concentration_method_facility',
@@ -186,30 +209,6 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                 //     dataIndex: 'dateFacility',
                 //     tdCls: 'facilityEntry'
                 // },
-                {
-                    text: 'µl',
-                    tooltip: 'Sample Volume (facility)',
-                    dataIndex: 'sample_volume_facility',
-                    tdCls: 'facilityEntry',
-                    width: 80,
-                    editor: {
-                        xtype: 'numberfield',
-                        minValue: 0,
-                        allowDecimals: false,
-                        disabled: true
-                    }
-                },
-                {
-                    text: 'ng',
-                    tooltip: 'Amount (facility)',
-                    dataIndex: 'amount_facility',
-                    tdCls: 'facilityEntry',
-                    width: 80,
-                    editor: {
-                        xtype: 'numberfield',
-                        minValue: 0
-                    }
-                },
                 {
                     text: 'qPCR (nM)',
                     tooltip: 'qPCR Result (facility)',

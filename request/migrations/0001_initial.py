@@ -13,8 +13,8 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('library', '0001_initial'),
-        ('sample', '0002_load_initial_data'),
+        ('sample', '0003_sample_sample_volume_facility'),
+        ('library', '0002_library_sample_volume_facility'),
     ]
 
     operations = [

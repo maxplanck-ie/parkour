@@ -46,7 +46,6 @@ def update(request):
                     else:
                         record.status = -1
                         record.save(update_fields=['status'])
-
                         # TODO@me: send email
             else:
                 error = str(form.errors)

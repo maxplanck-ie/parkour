@@ -230,6 +230,11 @@ class GenericLibrarySample(models.Model):
         null=True,
         blank=True,
     )
+    sample_volume_facility = models.PositiveIntegerField(
+        'Sample Volume (facility)',
+        null=True,
+        blank=True,
+    )
     date_facility = models.DateTimeField(
         'Date (facility)',
         null=True,

@@ -11,8 +11,8 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('library', '0001_initial'),
-        ('sample', '0002_load_initial_data'),
+        ('library', '0002_library_sample_volume_facility'),
+        ('sample', '0003_sample_sample_volume_facility'),
     ]
 
     operations = [

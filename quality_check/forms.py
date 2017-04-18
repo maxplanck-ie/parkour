@@ -13,6 +13,7 @@ class IncomingLibraryForm(forms.ModelForm):
             'amount_facility',
             'qpcr_result_facility',
             'size_distribution_facility',
+            'sample_volume_facility',
             'comments_facility',
         )
 
@@ -27,5 +28,6 @@ class IncomingSampleForm(forms.ModelForm):
             'amount_facility',
             'rna_quality_facility',
             'size_distribution_facility',
+            'sample_volume_facility',
             'comments_facility',
         )
