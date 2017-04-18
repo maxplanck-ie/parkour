@@ -24,7 +24,7 @@ Ext.define('MainHub.model.requests.Request', {
         },
         {
             type: 'string',
-            name: 'researcher'
+            name: 'user'
         },
         {
             type: 'string',

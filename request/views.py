@@ -36,8 +36,8 @@ def get_all(request):
             'name': req.name,
             'dateCreated': req.date_created.strftime('%d.%m.%Y'),
             'description': req.description,
-            'researcherId': req.user.id,
-            'researcher': req.user.get_full_name(),
+            'userId': req.user.id,
+            'user': req.user.get_full_name(),
             'deepSeqRequestName':
                 req.deep_seq_request.name.split('/')[-1]
                 if req.deep_seq_request else '',

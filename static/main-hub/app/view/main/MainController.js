@@ -21,7 +21,7 @@ Ext.define('MainHub.view.main.MainController', {
 
         Ext.getStore('NavigationTree').on('load', function() {
             if (!window.location.hash) {
-                me.redirectTo("startpage");
+                me.redirectTo('requests');
             }
         });
     },

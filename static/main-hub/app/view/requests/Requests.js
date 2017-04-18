@@ -1,10 +1,10 @@
-Ext.define('MainHub.view.startpage.RequestsUser', {
+Ext.define('MainHub.view.requests.Requests', {
     extend: 'Ext.container.Container',
-    xtype: 'requests-user',
+    xtype: 'requests',
 
     requires: [
-        'MainHub.view.startpage.RequestsController',
-        'MainHub.view.startpage.RequestWindow',
+        'MainHub.view.requests.RequestsController',
+        'MainHub.view.requests.RequestWindow',
         'MainHub.view.libraries.LibraryWindow'
     ],
 
@@ -27,8 +27,7 @@ Ext.define('MainHub.view.startpage.RequestsUser', {
                     itemId: 'searchField',
                     emptyText: 'Search',
                     width: 200,
-                    margin: '0 15px 0 0',
-                    disabled: true
+                    margin: '0 15px 0 0'
                 },
                 {
                     xtype: 'button',
@@ -45,8 +44,18 @@ Ext.define('MainHub.view.startpage.RequestsUser', {
                     flex: 1
                 },
                 {
+                    text: 'User',
+                    dataIndex: 'user',
+                    flex: 1
+                },
+                {
                     text: 'Date Created',
                     dataIndex: 'dateCreated',
+                    flex: 1
+                },
+                {
+                    text: 'Sum of Sequencing Depth',
+                    dataIndex: 'sumSeqDepth',
                     flex: 1
                 },
                 {

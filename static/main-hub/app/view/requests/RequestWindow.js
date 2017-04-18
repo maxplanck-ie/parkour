@@ -1,13 +1,13 @@
-Ext.define('MainHub.view.startpage.RequestWindow', {
+Ext.define('MainHub.view.requests.RequestWindow', {
     extend: 'Ext.window.Window',
 
     requires: [
-        'MainHub.view.startpage.RequestWindowController',
+        'MainHub.view.requests.RequestWindowController',
         'MainHub.view.libraries.LibraryWindow',
         'MainHub.view.libraries.BatchAddWindow'
     ],
 
-    controller: 'startpage-requestwindow',
+    controller: 'requests-requestwindow',
 
     height: 445,
     width: 750,

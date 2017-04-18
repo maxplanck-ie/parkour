@@ -1,11 +1,11 @@
-Ext.define('MainHub.view.startpage.RequestsController', {
+Ext.define('MainHub.view.requests.RequestsController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.requests',
 
     config: {
         control: {
             '#requestsTable': {
-                boxready: 'refresh',
+                boxready: 'boxready',
                 refresh: 'refresh',
                 itemcontextmenu: 'showContextMenu'
             },
@@ -18,12 +18,20 @@ Ext.define('MainHub.view.startpage.RequestsController', {
         }
     },
 
+    boxready: function() {
+        // Hide the User column for non-administrators
+        if (!USER_IS_STAFF) {
+            Ext.getCmp('requestsTable').down('[dataIndex=user]').setVisible(false);
+        }
+        Ext.getStore('requestsStore').reload();
+    },
+
     refresh: function() {
         Ext.getStore('requestsStore').reload();
     },
 
     addRequest: function(btn) {
-        Ext.create('MainHub.view.startpage.RequestWindow', {
+        Ext.create('MainHub.view.requests.RequestWindow', {
             title: 'Add Request',
             mode: 'add'
         }).show();
@@ -80,7 +88,7 @@ Ext.define('MainHub.view.startpage.RequestsController', {
     },
 
     editRequest: function(record) {
-        Ext.create('MainHub.view.startpage.RequestWindow', {
+        Ext.create('MainHub.view.requests.RequestWindow', {
             title: 'Edit Request',
             mode: 'edit',
             record: record

@@ -20,9 +20,9 @@ def get_navigation_tree(request):
 
     data = [
         {
-            'text': 'Start Page',
-            'iconCls': 'x-fa fa-th-large',
-            'viewType': 'startpage',
+            'text': 'Requests',
+            'iconCls': 'x-fa fa-file-text',
+            'viewType': 'requests',
             'leaf': True
         },
         {
