@@ -101,8 +101,8 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                     width: 70
                 },
                 {
-                    text: 'F/S*',
-                    tooltip: 'Concentration Method (user)',
+                    text: 'F/S',
+                    tooltip: 'Concentration Determined by (user)',
                     dataIndex: 'concentration_method_name',
                     tdCls: 'userEntry',
                     width: 50,
@@ -184,8 +184,8 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                     }
                 },
                 {
-                    text: 'F/S*',
-                    tooltip: 'Concentration Method (facility)',
+                    text: 'F/S',
+                    tooltip: 'Concentration Determined by (facility)',
                     dataIndex: 'concentration_method_facility',
                     tdCls: 'facilityEntry',
                     width: 80,

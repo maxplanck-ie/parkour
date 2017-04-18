@@ -104,10 +104,10 @@ Ext.define('MainHub.model.libraries.BatchAdd.Common', {
         ],
         library_protocol: 'presence',
         library_type: 'presence',
-        concentration: 'greaterthanzero',
+        concentration: 'presence',
         read_length: 'presence',
         sequencing_depth: 'greaterthanzero',
-        amplification_cycles: 'greaterthanzero',
+        amplification_cycles: 'presence',
         concentration_method: 'presence',
         organism: 'presence'
     }

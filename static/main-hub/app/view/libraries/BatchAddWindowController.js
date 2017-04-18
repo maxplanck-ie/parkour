@@ -715,7 +715,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             {
                 text: 'Protocol',
                 dataIndex: 'library_protocol',
-                tooltip: 'Library Protocol',
+                tooltip: 'Library Preparation Protocol',
                 width: 200,
                 editor: {
                     xtype: 'combobox',
@@ -815,7 +815,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             {
                 xtype: 'checkcolumn',
                 text: 'Equal nucl.',
-                tooltip: 'Equal Representation of Nucleotides',
+                tooltip: 'Equal Representation of Nucleotides: check = Yes, no check = No',
                 dataIndex: 'equal_representation_nucleotides',
                 width: 95,
                 editor: {
@@ -824,9 +824,9 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                 }
             },
             {
-                text: 'F/S*',
+                text: 'F/S',
                 dataIndex: 'concentration_method',
-                tooltip: 'Concentration Method',
+                tooltip: 'Concentration Determined by',
                 width: 80,
                 editor: {
                     xtype: 'combobox',

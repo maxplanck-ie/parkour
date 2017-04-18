@@ -122,7 +122,7 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 },
                 {
                     text: 'Protocol',
-                    tooltip: 'Library Protocol',
+                    tooltip: 'Library Preparation Protocol',
                     dataIndex: 'library_protocol_name',
                     width: 100
                 },
@@ -143,9 +143,8 @@ Ext.define('MainHub.view.libraries.Libraries', {
                     tooltip: 'RNA Quality',
                     dataIndex: 'rnaQualityName',
                     width: 55,
-                    renderer: function(value) {
-                        var record = Ext.getStore('rnaQualityStore').findRecord('id', value);
-                        return (record) ? record.get('name') : '';
+                    renderer: function(value, meta, record) {
+                        return record.get('rnaQualityName');
                     }
                 },
                 {
@@ -210,8 +209,8 @@ Ext.define('MainHub.view.libraries.Libraries', {
                     width: 85
                 },
                 {
-                    text: 'F/S*',
-                    tooltip: 'Concentration Method',
+                    text: 'F/S',
+                    tooltip: 'Concentration Determined by',
                     dataIndex: 'concentration_method_name',
                     width: 50,
                     renderer: function(value) {
