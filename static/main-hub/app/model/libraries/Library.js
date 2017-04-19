@@ -51,7 +51,8 @@ Ext.define('MainHub.model.libraries.Library', {
         },
         {
             name: 'amplification_cycles',
-            type: 'string'
+            type: 'int',
+            allowNull: true
         },
         {
             name: 'organism',
@@ -71,7 +72,8 @@ Ext.define('MainHub.model.libraries.Library', {
         },
         {
             name: 'index_reads',
-            type: 'int'
+            type: 'int',
+            allowNull: true
         },
         {
             name: 'index_i7',
@@ -87,7 +89,7 @@ Ext.define('MainHub.model.libraries.Library', {
         },
         {
             name: 'concentration',
-            type: 'string'
+            type: 'float'
         },
         {
             name: 'concentration_method',
@@ -99,11 +101,13 @@ Ext.define('MainHub.model.libraries.Library', {
         },
         {
             name: 'mean_fragment_size',
-            type: 'string'
+            type: 'int',
+            allowNull: true
         },
         {
             name: 'qpcr_result',
-            type: 'string'
+            type: 'float',
+            allowNull: true
         },
         {
             name: 'readLength',
@@ -115,7 +119,7 @@ Ext.define('MainHub.model.libraries.Library', {
         },
         {
             name: 'sequencing_depth',
-            type: 'string'
+            type: 'int'
         },
         {
             name: 'comments',

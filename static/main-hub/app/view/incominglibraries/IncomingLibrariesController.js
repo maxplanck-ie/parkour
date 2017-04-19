@@ -65,11 +65,11 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
         }, values);
 
         // Compute Amount
-        if (Object.keys(changes).indexOf('amount_facility') === -1 && values.dilution_factor &&
+        if (Object.keys(changes).indexOf('amount_facility') === -1 &&
             values.concentration_facility && values.sample_volume_facility) {
-            var amountFacility = parseFloat(values.dilution_factor) *
-                parseFloat(values.concentration_facility) *
+            var amountFacility = parseFloat(values.concentration_facility) *
                 parseFloat(values.sample_volume_facility);
+            if (values.dilution_factor) amountFacility *= parseFloat(values.dilution_factor);
             params['amount_facility'] = amountFacility;
         }
 

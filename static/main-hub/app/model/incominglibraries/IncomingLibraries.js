@@ -3,11 +3,14 @@ Ext.define('MainHub.model.incominglibraries.IncomingLibraries', {
 
     fields: [{
             name: 'dilution_factor',
-            type: 'string'
+            type: 'string',
+            // allowNull: true,
+            defaultValue: 1
         },
         {
             name: 'concentration_facility',
-            type: 'string'
+            type: 'float',
+            allowNull: true
         },
         {
             name: 'concentration_method_facility',
@@ -19,23 +22,27 @@ Ext.define('MainHub.model.incominglibraries.IncomingLibraries', {
         },
         {
             name: 'sample_volume_facility',
-            type: 'string'
+            type: 'int',
+            allowNull: true
         },
         {
             name: 'amount_facility',
-            type: 'string'
+            type: 'float',
+            allowNull: true
         },
         {
             name: 'size_distribution_facility',
-            type: 'string'
+            type: 'float',
+            allowNull: true
         },
         {
             name: 'comments_facility',
             type: 'string'
         },
         {
-            name: 'qpcr_result_facility',
-            type: 'string'
+            name: 'float',
+            type: 'string',
+            allowNull: true
         },
         {
             name: 'rna_quality_facility',

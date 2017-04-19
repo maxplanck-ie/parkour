@@ -148,7 +148,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                     width: 80,
                     editor: {
                         xtype: 'numberfield',
-                        minValue: 0,
+                        minValue: 1,
                         allowDecimals: false
                     }
                 },
