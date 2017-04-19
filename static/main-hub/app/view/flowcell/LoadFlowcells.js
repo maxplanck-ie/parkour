@@ -30,7 +30,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcells', {
             leadingBufferZone: 100
         }],
         store: 'flowcellsStore',
-
+        sortableColumns: false,
         columns: [{
             text: 'Flowcell ID',
             dataIndex: 'flowcellId',

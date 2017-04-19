@@ -103,6 +103,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                 }],
                 store: 'PoolingTree',
                 rootVisible: false,
+                sortableColumns: false,
                 columns: [{
                         xtype: 'treecolumn',
                         text: 'Name',
@@ -195,6 +196,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                     markDirty: false
                 },
                 problematicCycles: [],
+                sortableColumns: false,
                 columns: [{
                         text: 'Name',
                         dataIndex: 'name',

@@ -18,6 +18,7 @@ Ext.define('MainHub.view.libraries.Libraries', {
         height: Ext.Element.getViewportHeight() - 64,
         region: 'center',
         padding: 15,
+        sortableColumns: false,
         viewConfig: {
             stripeRows: false,
             getRowClass: function(record) {

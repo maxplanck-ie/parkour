@@ -53,6 +53,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
             markDirty: false
         },
         store: 'incomingLibrariesStore',
+        sortableColumns: false,
         columns: {
             items: [{
                     text: 'Name',

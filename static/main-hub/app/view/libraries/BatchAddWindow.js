@@ -62,6 +62,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                 xtype: 'grid',
                 id: 'batchAddGrid',
                 itemId: 'batchAddGrid',
+                sortableColumns: false,
                 border: 0,
                 viewConfig: {
                     markDirty: false,

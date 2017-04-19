@@ -61,6 +61,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
             ]
         }],
         store: 'poolingStore',
+        sortableColumns: false,
         columns: [{
                 xtype: 'fiddlecheckcolumn',
                 text: 'Active',

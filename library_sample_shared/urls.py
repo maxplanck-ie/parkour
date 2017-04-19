@@ -1,6 +1,5 @@
 from django.conf.urls import url
-from .models import (Organism, ConcentrationMethod, ReadLength,
-                     IndexI7, IndexI5)
+from .models import ConcentrationMethod, ReadLength, IndexI7, IndexI5
 from . import views
 
 

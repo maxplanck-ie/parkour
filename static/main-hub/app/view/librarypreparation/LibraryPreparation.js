@@ -26,6 +26,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
             markDirty: false
         },
         store: 'libraryPreparationStore',
+        sortableColumns: false,
         columns: [{
                 xtype: 'fiddlecheckcolumn',
                 text: 'Active',
