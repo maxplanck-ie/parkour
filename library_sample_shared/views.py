@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.views.generic.list import ListView
 
 from common.utils import JSONResponseMixin
-from .models import LibraryProtocol, LibraryType, IndexType
+from .models import Organism, LibraryProtocol, LibraryType, IndexType
 
 logger = logging.getLogger('db')
 
@@ -22,6 +22,25 @@ class SimpleStoreView(JSONResponseMixin, ListView):
         ]
 
         return self.render_to_json_response(data, **response_kwargs)
+
+
+def get_organisms(request):
+    """ Get the lost of organisms. """
+    data = [
+        {
+            'id': organism.pk,
+            'name': organism.name
+        }
+        for organism in Organism.objects.all()
+    ]
+
+    # move 'Other' option to the end of the list
+    other = [x for x in data if x['name'] == 'Other']
+    if other:
+        index = data.index(other[0])
+        data.append(data.pop(index))
+
+    return JsonResponse(data, safe=False)
 
 
 def get_index_types(request):
@@ -86,6 +105,12 @@ def get_library_protocols(request):
             for protocol in library_protocols
         ]
 
+        # move 'Other' option to the end of the list
+        other = [x for x in data if x['name'] == 'Other']
+        if other:
+            index = data.index(other[0])
+            data.append(data.pop(index))
+
     return JsonResponse(data, safe=False)
 
 
@@ -125,5 +150,11 @@ def get_library_types(request):
             }
             for library_type in library_types
         ]
+
+        # move 'Other' option to the end of the list
+        other = [x for x in data if x['name'] == 'Other']
+        if other:
+            index = data.index(other[0])
+            data.append(data.pop(index))
 
     return JsonResponse(data, safe=False)

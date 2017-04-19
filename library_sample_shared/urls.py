@@ -5,7 +5,7 @@ from . import views
 
 
 urlpatterns = [
-    url(r'^get_organisms/$', views.SimpleStoreView.as_view(model=Organism), name='get_organisms'),
+    url(r'^get_organisms/$', views.get_organisms, name='get_organisms'),
     url(r'^get_concentration_methods/$', views.SimpleStoreView.as_view(model=ConcentrationMethod), name='get_concentration_methods'),
     url(r'^get_read_lengths/$', views.SimpleStoreView.as_view(model=ReadLength), name='get_read_lengths'),
     url(r'^get_index_types/$', views.get_index_types, name='get_index_types'),

@@ -25,22 +25,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
         viewConfig: {
             markDirty: false
         },
-        plugins: [{
-                ptype: 'rowediting',
-                clicksToEdit: 2
-            },
-            {
-                ptype: 'bufferedrenderer',
-                trailingBufferZone: 100,
-                leadingBufferZone: 100
-            }
-        ],
-        features: [{
-            ftype: 'grouping',
-            groupHeaderTpl: '<strong>Protocol: {name}</strong>'
-        }],
         store: 'libraryPreparationStore',
-
         columns: [{
                 xtype: 'fiddlecheckcolumn',
                 text: 'Active',
@@ -50,7 +35,8 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
             {
                 text: 'Sample',
                 dataIndex: 'name',
-                width: 200
+                minWidth: 200,
+                flex: 1
             },
             {
                 text: 'Barcode',
@@ -75,7 +61,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                 }
             },
             {
-                text: 'Starting Volume (ng)',
+                text: 'Starting Volume (µl)',
                 dataIndex: 'startingVolume',
                 editor: {
                     xtype: 'numberfield',
@@ -101,6 +87,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
             },
             {
                 text: 'µl Sample',
+                tooltip: 'Starting Amount (ng) / Concentration (ng/µl)',
                 dataIndex: 'ulSample',
                 editor: {
                     xtype: 'numberfield',
@@ -110,6 +97,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
             },
             {
                 text: 'µl Buffer',
+                tooltip: 'Starting Volume (µl) - Sample Volume (µl) - Spike-In (µl)',
                 dataIndex: 'ulBuffer',
                 editor: {
                     xtype: 'numberfield',
@@ -153,6 +141,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
             },
             {
                 text: 'nM',
+                tooltip: '(Concentration (ng/µl) / (650 * Size (bp))) * 10^6',
                 dataIndex: 'nM',
                 editor: {
                     xtype: 'numberfield',
@@ -200,6 +189,20 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                 }
             }
         ],
+        plugins: [{
+                ptype: 'rowediting',
+                clicksToEdit: 1
+            },
+            {
+                ptype: 'bufferedrenderer',
+                trailingBufferZone: 100,
+                leadingBufferZone: 100
+            }
+        ],
+        features: [{
+            ftype: 'grouping',
+            groupHeaderTpl: '<strong>Protocol: {name}</strong>'
+        }],
         dockedItems: [{
             xtype: 'toolbar',
             dock: 'bottom',
