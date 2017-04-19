@@ -122,9 +122,7 @@ def get_all(request):
                     'readLengthId':
                         sample.read_length.id,
                     'sequencing_depth': sample.sequencing_depth,
-                    'rnaQuality': sample.rna_quality
-                        if sample.rna_quality else '',
-                    'rnaQualityName': sample.get_rna_quality_display()
+                    'rna_quality': sample.rna_quality
                         if sample.rna_quality else '',
                     'comments': sample.comments,
                     'barcode': sample.barcode,

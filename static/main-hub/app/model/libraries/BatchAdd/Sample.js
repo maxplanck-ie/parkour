@@ -27,7 +27,7 @@ Ext.define('MainHub.model.libraries.BatchAdd.Sample', {
             defaultValue: null
         },
         {
-            type: 'int',
+            type: 'float',
             name: 'rna_quality',
             allowNull: true,
             defaultValue: null

@@ -426,13 +426,15 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                     id: 'rnaQualityField',
                     itemId: 'rnaQualityField',
                     queryMode: 'local',
+                    valueField: 'value',
                     displayField: 'name',
-                    valueField: 'id',
+                    displayTpl: Ext.create('Ext.XTemplate', '<tpl for=".">{value}</tpl>'),
                     name: 'rna_quality',
                     fieldLabel: 'RNA Quality (RIN, RQN) <sup><strong><span class="field-tooltip" tooltip-text="Select a number from 1 to 10 or select determined by facility">[?]</span></strong></sup>',
                     emptyText: 'RNA Quality (RIN, RQN)',
                     store: 'rnaQualityStore',
-                    forceSelection: true,
+                    regex: new RegExp('^(11|10|[1-9]?(\.[0-9]+)?|\.[0-9]+)$'),
+                    regexText: 'Only values between 1 and 10 are allowed.',
                     disabled: true
                 },
                 {

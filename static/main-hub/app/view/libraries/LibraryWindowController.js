@@ -312,11 +312,6 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             concentrationSampleMethodField.select(record.concentration_method);
             concentrationSampleMethodField.fireEvent('select', concentrationSampleMethodField, concentrationSampleMethodField.findRecordByValue(record.concentration_method));
 
-            // Set RNA Quality
-            var rnaQualityField = Ext.getCmp('rnaQualityField');
-            rnaQualityField.select(record.rnaQuality);
-            rnaQualityField.fireEvent('select', rnaQualityField, rnaQualityField.findRecordByValue(record.rnaQuality));
-
             // Set read length
             var readLengthSampleField = Ext.getCmp('readLengthSampleField');
             readLengthSampleField.select(record.readLengthId);

@@ -660,13 +660,14 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                     xtype: 'combobox',
                     id: 'rnaQualityEditor',
                     queryMode: 'local',
-                    valueField: 'id',
+                    valueField: 'value',
                     displayField: 'name',
+                    displayTpl: Ext.create('Ext.XTemplate', '<tpl for=".">{value}</tpl>'),
                     store: 'rnaQualityStore',
-                    // matchFieldWidth: false,
-                    forceSelection: true
+                    regex: new RegExp('^(11|10|[1-9]?(\.[0-9]+)?|\.[0-9]+)$'),
+                    regexText: 'Only values between 1 and 10 are allowed.'
                 },
-                renderer: me.comboboxErrorRenderer
+                renderer: me.errorRenderer
             }
         ]);
 
@@ -977,6 +978,9 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         if (Object.keys(errors).indexOf(dataIndex) !== -1) {
             meta.tdCls += ' invalid-record';
             meta.tdAttr = 'data-qtip="' + errors[dataIndex] + '"';
+        }
+        if (dataIndex === 'rna_quality' && value === 11) {
+            return 'Determined by Facility';
         }
         return value;
     },

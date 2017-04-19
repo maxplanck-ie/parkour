@@ -2,6 +2,7 @@ import string
 import random
 
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 from library_sample_shared.models import GenericLibrarySample
 
@@ -37,22 +38,9 @@ class Sample(GenericLibrarySample):
         NucleicAcidType,
         verbose_name='Nucleic Acid Type',
     )
-    rna_quality = models.CharField(
+    rna_quality = models.FloatField(
         'RNA Quality',
-        max_length=2,
-        choices=(
-            ('1', '1'),
-            ('2', '2'),
-            ('3', '3'),
-            ('4', '4'),
-            ('5', '5'),
-            ('6', '6'),
-            ('7', '7'),
-            ('8', '8'),
-            ('9', '9'),
-            ('10', '10'),
-            ('11', 'Determined by Facility'),
-        ),
+        validators=[MinValueValidator(0.0), MaxValueValidator(11.0)],
         null=True,
         blank=True,
     )
@@ -70,7 +58,8 @@ class Sample(GenericLibrarySample):
 
     # Quality Control
     rna_quality_facility = models.FloatField(
-        'RNA Quality (RIN, RQN) (facility)',
+        'RNA Quality (facility)',
+        validators=[MinValueValidator(0.0), MaxValueValidator(11.0)],
         null=True,
         blank=True,
     )

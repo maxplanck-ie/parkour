@@ -131,12 +131,11 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                 {
                     text: 'RQN',
                     tooltip: 'RNA Quality (user)',
-                    dataIndex: 'rnaQuality',
+                    dataIndex: 'rna_quality',
                     tdCls: 'userEntry',
                     width: 55,
-                    renderer: function(val) {
-                        var record = Ext.getStore('rnaQualityStore').findRecord('id', val);
-                        return (record) ? record.get('name') : '';
+                    renderer: function(value) {
+                        return value === 11 ? 'Determined by Facility' : value;
                     }
                 },
 
@@ -248,15 +247,16 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                     editor: {
                         xtype: 'combobox',
                         queryMode: 'local',
-                        valueField: 'id',
+                        valueField: 'value',
                         displayField: 'name',
+                        displayTpl: Ext.create('Ext.XTemplate', '<tpl for=".">{value}</tpl>'),
                         store: 'rnaQualityStore',
+                        regex: new RegExp('^(11|10|[1-9]?(\.[0-9]+)?|\.[0-9]+)$'),
+                        regexText: 'Only values between 1 and 10 are allowed.'
                         // matchFieldWidth: false,
-                        forceSelection: true
                     },
-                    renderer: function(val) {
-                        var record = Ext.getStore('rnaQualityStore').findRecord('id', val);
-                        return (record) ? record.get('name') : '';
+                    renderer: function(value) {
+                        return value === 11 ? 'Determined by Facility' : value;
                     }
                 },
                 {

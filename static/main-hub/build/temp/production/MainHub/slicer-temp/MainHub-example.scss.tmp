@@ -1010,6 +1010,7 @@ $include-mainhub-model-libraries-indextype: dynamic(true);;
 $include-mainhub-model-libraries-library: dynamic(true);;
 $include-mainhub-model-libraries-libraryfield: dynamic(true);;
 $include-mainhub-model-libraries-libraryprotocol: dynamic(true);;
+$include-mainhub-model-libraries-rnaquality: dynamic(true);;
 $include-mainhub-model-libraries-samplenucleicacidtype: dynamic(true);;
 $include-mainhub-model-librarypreparation-librarypreparation: dynamic(true);;
 $include-mainhub-model-pooling-pooling: dynamic(true);;

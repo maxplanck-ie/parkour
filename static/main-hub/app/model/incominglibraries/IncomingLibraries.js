@@ -39,7 +39,9 @@ Ext.define('MainHub.model.incominglibraries.IncomingLibraries', {
         },
         {
             name: 'rna_quality_facility',
-            type: 'string'
+            type: 'float',
+            allowNull: true,
+            defaultValue: null
         }
     ],
 

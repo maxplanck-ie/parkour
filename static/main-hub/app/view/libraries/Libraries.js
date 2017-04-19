@@ -149,10 +149,10 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 {
                     text: 'RQN',
                     tooltip: 'RNA Quality',
-                    dataIndex: 'rnaQualityName',
+                    dataIndex: 'rna_quality',
                     width: 55,
-                    renderer: function(value, meta, record) {
-                        return record.get('rnaQualityName');
+                    renderer: function(value) {
+                        return value === 11 ? 'Determined by Facility' : value;
                     }
                 },
                 {
