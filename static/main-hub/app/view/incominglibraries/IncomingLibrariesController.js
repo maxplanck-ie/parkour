@@ -7,6 +7,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
             '#incomingLibraries': {
                 refresh: 'refresh',
                 boxready: 'refresh',
+                beforeedit: 'toggleEditors',
                 edit: 'editRecord'
             },
             '#showLibrariesCheckbox': {
@@ -24,6 +25,31 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
     refresh: function(grid) {
         // Reload the table
         grid.getStore().reload();
+    },
+
+    toggleEditors: function(editor, context) {
+        var record = context.record,
+            qPCRResultEditor = Ext.getCmp('qPCRResultEditor'),
+            rnaQualityEditor = Ext.getCmp('rnaQualityEditor'),
+            nucleicAcidTypesStore = Ext.getStore('nucleicAcidTypesStore');
+
+        // Toggle qPCR Result and RNA Quality
+        if (record.get('recordType') === 'L') {
+            qPCRResultEditor.enable();
+            rnaQualityEditor.disable();
+        } else {
+            qPCRResultEditor.disable();
+
+            var nat = nucleicAcidTypesStore.findRecord('id',
+                record.get('nucleicAcidTypeId')
+            );
+
+            if (nat !== null && nat.get('type') === 'RNA') {
+                rnaQualityEditor.enable();
+            } else {
+                rnaQualityEditor.disable();
+            }
+        }
     },
 
     editRecord: function(editor, context) {

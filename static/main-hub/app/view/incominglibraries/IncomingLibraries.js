@@ -223,8 +223,8 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                     width: 85,
                     editor: {
                         xtype: 'numberfield',
-                        minValue: 0,
-                        disabled: true
+                        id: 'qPCRResultEditor',
+                        minValue: 0
                     }
                 },
                 {
@@ -246,6 +246,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                     width: 80,
                     editor: {
                         xtype: 'combobox',
+                        id: 'rnaQualityEditor',
                         queryMode: 'local',
                         valueField: 'value',
                         displayField: 'name',
