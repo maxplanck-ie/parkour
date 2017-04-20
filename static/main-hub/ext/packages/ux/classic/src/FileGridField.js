@@ -8,32 +8,45 @@ Ext.define('Ext.ux.FileGridField', {
     uploadFileUrl: '',
     getFileUrl: '',
 
-    initComponent: function () {
+    initComponent: function() {
         var me = this;
 
         me.items = [{
             xtype: 'grid',
-            height: 180,
+            height: 200,
+            viewConfig: {
+                loadMask: false
+            },
             columns: {
-                items: [
-                    { text: 'File Name', dataIndex: 'name', flex: 1 },
-                    { text: 'Size', dataIndex: 'size', width: 100, renderer: function(val) {
-                        var dim = '', KB = 1000, MB = 1000 * 1000;
-                        val = parseInt(val);
+                items: [{
+                        text: 'Name',
+                        dataIndex: 'name',
+                        flex: 1
+                    },
+                    {
+                        text: 'Size',
+                        dataIndex: 'size',
+                        width: 100,
+                        renderer: function(val) {
+                            var dim = '',
+                                KB = 1000,
+                                MB = 1000 * 1000;
+                            val = parseInt(val);
 
-                        if (val >= KB && val < MB) {
-                            val = (val / KB).toFixed(2);
-                            dim = ' KB';
-                        } else if (val >= MB) {
-                            val = (val / MB).toFixed(2);
-                            dim = ' MB';
-                        } else {
-                            val = val.toString();
-                            dim = ' bytes';
+                            if (val >= KB && val < MB) {
+                                val = (val / KB).toFixed(2);
+                                dim = ' KB';
+                            } else if (val >= MB) {
+                                val = (val / MB).toFixed(2);
+                                dim = ' MB';
+                            } else {
+                                val = val.toString();
+                                dim = ' bytes';
+                            }
+
+                            return val + dim;
                         }
-
-                        return val + dim;
-                    } },
+                    },
                     {
                         width: 36,
                         dataIndex: 'path',
@@ -51,26 +64,27 @@ Ext.define('Ext.ux.FileGridField', {
                         }]
                     }
                 ]
-            },   
+            },
             store: me.store,
             bbar: [
                 '->',
                 {
                     xtype: 'button',
-                    text: 'Add file(s)',
+                    text: 'Add files',
                     handler: function() {
                         Ext.widget({
                             xtype: 'window',
-                            title: 'Upload file(s)',
+                            title: 'Upload files',
                             width: 450,
                             autoShow: true,
+                            modal: true,
 
                             items: [{
                                 xtype: 'form',
                                 items: [{
                                     xtype: 'multifilefield',
                                     name: 'files',
-                                    fieldLabel: 'File(s)',
+                                    fieldLabel: 'Files',
                                     labelWidth: 50,
                                     buttonText: 'Select',
                                     allowBlank: false,
@@ -78,23 +92,18 @@ Ext.define('Ext.ux.FileGridField', {
                                     margin: 15
                                 }]
                             }],
-                            buttons: [
+                            bbar: [
+                                '->',
                                 {
                                     text: 'Upload',
                                     handler: me.uploadFiles,
                                     uploadFileUrl: me.uploadFileUrl,
                                     getFileUrl: me.getFileUrl,
                                     grid: me.down('grid')
-                                },
-                                {
-                                    text: 'Cancel',
-                                    handler: function () {
-                                        this.up('window').close();
-                                    }
                                 }
                             ]
                         });
-                    }     
+                    }
                 }
             ]
         }];
@@ -135,7 +144,7 @@ Ext.define('Ext.ux.FileGridField', {
                                 } else {
                                     Ext.ux.ToastMessage(response.statusText, 'error');
                                     console.error('[ERROR]: ' + getFileUrl);
-                                    console.error(response); 
+                                    console.error(response);
                                 }
                             }
                         });
@@ -155,7 +164,7 @@ Ext.define('Ext.ux.FileGridField', {
                 }
             });
         } else {
-            Ext.ux.ToastMessage('You did not select any file(s)', 'warning');
+            Ext.ux.ToastMessage('You did not select any file(-s)', 'warning');
         }
     },
 

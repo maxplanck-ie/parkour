@@ -1,8 +1,7 @@
 from django.http import JsonResponse
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 
-from .models import Library, FileLibrary
+from .models import Library
 from request.models import Request
 from .forms import LibraryForm
 
@@ -72,7 +71,6 @@ def get_all(request):
                     'sequencing_depth': library.sequencing_depth,
                     'comments': library.comments,
                     'barcode': library.barcode,
-                    'files': [file.id for file in library.files.all()],
                     'dilution_factor': library.dilution_factor,
                     'concentration_facility': library.concentration_facility,
                     'concentration_method_facility':
@@ -126,7 +124,6 @@ def get_all(request):
                         if sample.rna_quality else '',
                     'comments': sample.comments,
                     'barcode': sample.barcode,
-                    'files': [file.id for file in sample.files.all()],
                     'dilution_factor': sample.dilution_factor,
                     'concentration_facility': sample.concentration_facility,
                     'concentration_method_facility':
@@ -186,28 +183,13 @@ def save_library(request):
         for i, form in enumerate(forms):
             if form.is_valid():
                 library = form.save()
-                files = json.loads(records[i].get('files', '[]'))
-
                 if mode == 'add':
-                    library.files.add(*files)
                     data.append({
                         'name': library.name,
                         'recordType': 'L',
                         'libraryId': library.pk,
                         'barcode': library.barcode
                     })
-                else:
-                    if files:
-                        old_files = [file for file in library.files.all()]
-                        library.files.clear()
-                        library.save()
-                        library.files.add(*files)
-                        new_files = [file for file in library.files.all()]
-
-                        # Delete files
-                        files_to_delete = list(set(old_files) - set(new_files))
-                        for file in files_to_delete:
-                            file.delete()
             else:
                 name = form.data['name']
                 if name and 'name' in form.errors.keys():
@@ -240,53 +222,3 @@ def delete_library(request):
         logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error})
-
-
-@login_required
-def upload_files(request):
-    """ """
-    file_ids = []
-    error = ''
-
-    if request.method == 'POST' and any(request.FILES):
-        try:
-            for file in request.FILES.getlist('files'):
-                f = FileLibrary(name=file.name, file=file)
-                f.save()
-                file_ids.append(f.id)
-
-        except Exception as e:
-            error = 'Could not upload the file(s).'
-            logger.exception(e)
-
-    return JsonResponse({
-        'success': not error,
-        'error': error,
-        'fileIds': file_ids
-    })
-
-
-@login_required
-def get_files(request):
-    """ """
-    file_ids = json.loads(request.GET.get('file_ids'))
-    error = ''
-    data = []
-
-    try:
-        files = [f for f in FileLibrary.objects.all() if f.id in file_ids]
-        data = [
-            {
-                'id': file.id,
-                'name': file.name,
-                'size': file.file.size,
-                'path': settings.MEDIA_URL + file.file.name,
-            }
-            for file in files
-        ]
-
-    except Exception as e:
-        error = 'Could not get attached files.'
-        logger.exception(e)
-
-    return JsonResponse({'success': not error, 'error': error, 'data': data})

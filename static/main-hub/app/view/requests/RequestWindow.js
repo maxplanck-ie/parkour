@@ -1,17 +1,15 @@
 Ext.define('MainHub.view.requests.RequestWindow', {
     extend: 'Ext.window.Window',
-
     requires: [
         'MainHub.view.requests.RequestWindowController',
         'MainHub.view.libraries.LibraryWindow',
-        'MainHub.view.libraries.BatchAddWindow'
+        'MainHub.view.libraries.BatchAddWindow',
+        'Ext.ux.FileGridField'
     ],
-
     controller: 'requests-requestwindow',
 
-    height: 445,
-    width: 750,
-
+    height: 530,
+    width: 850,
     modal: true,
     resizable: false,
 
@@ -24,7 +22,7 @@ Ext.define('MainHub.view.requests.RequestWindow', {
         items: [{
                 border: 0,
                 padding: 15,
-                width: 400,
+                width: 500,
                 items: [{
                         xtype: 'form',
                         id: 'requestForm',
@@ -34,6 +32,7 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                         defaultType: 'textfield',
                         defaults: {
                             submitEmptyText: false,
+                            labelWidth: 80,
                             anchor: '100%'
                         },
                         items: [{
@@ -50,7 +49,14 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                                 fieldLabel: 'Description',
                                 emptyText: 'Description',
                                 allowBlank: false,
-                                height: 250
+                                height: 125
+                            },
+                            {
+                                xtype: 'filegridfield',
+                                fieldLabel: 'Files',
+                                store: 'requestFilesStore',
+                                uploadFileUrl: 'request/upload_files/',
+                                getFileUrl: 'request/get_files/'
                             }
                         ]
                     },
@@ -74,9 +80,12 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                 itemId: 'librariesInRequestTable',
                 title: 'Libraries/Samples',
                 width: 345,
-                height: 347,
+                height: 432,
                 padding: '12px 15px 15px 0',
                 rowspan: 2,
+                viewConfig: {
+                    loadMask: false
+                },
                 columns: {
                     items: [{
                             xtype: 'rownumberer',
@@ -113,7 +122,6 @@ Ext.define('MainHub.view.requests.RequestWindow', {
             }
         ]
     }],
-
     bbar: [{
             xtype: 'button',
             id: 'downloadRequestBlankBtn',

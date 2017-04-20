@@ -6,14 +6,6 @@ from django.db import models
 from library_sample_shared.models import GenericLibrarySample
 
 
-class FileLibrary(models.Model):
-    name = models.CharField('Name', max_length=200)
-    file = models.FileField(upload_to='libraries/%Y/%m/%d/')
-
-    def __str__(self):
-        return self.name
-
-
 class Library(GenericLibrarySample):
     index_reads = models.PositiveSmallIntegerField('Index Reads')
     mean_fragment_size = models.PositiveIntegerField(
@@ -24,11 +16,6 @@ class Library(GenericLibrarySample):
     qpcr_result = models.FloatField('qPCR Result', null=True, blank=True)
     amplification_cycles = models.PositiveIntegerField(
         'Amplification (cycles)',
-    )
-    files = models.ManyToManyField(
-        FileLibrary,
-        related_name='files',
-        blank=True,
     )
 
     # Quality Control

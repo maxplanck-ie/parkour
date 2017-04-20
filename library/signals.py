@@ -1,8 +1,8 @@
-from django.db.models.signals import (pre_save, post_save,
-                                      pre_delete, post_delete)
+from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
+
 from library_sample_shared.models import BarcodeCounter
-from .models import Library, FileLibrary
+from .models import Library
 from index_generator.models import Pool
 from common.utils import generate_barcode
 
@@ -35,15 +35,3 @@ def update_pool_size(sender, instance, **kwargs):
 
         except Pool.DoesNotExist:
             pass
-
-
-@receiver(pre_delete, sender=Library)
-def delete_library_file_object(sender, instance, **kwargs):
-    for file in instance.files.all():
-        file.delete()
-
-
-@receiver(post_delete, sender=FileLibrary)
-def delete_library_file(sender, instance, **kwargs):
-    # Pass False so FileField doesn't save the model.
-    instance.file.delete(False)

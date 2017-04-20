@@ -1,15 +1,13 @@
+import json
+
 from django.test import TestCase
-from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 
-from .models import NucleicAcidType, FileSample, Sample
+from .models import NucleicAcidType, Sample
 from library_sample_shared.models import (Organism, ConcentrationMethod,
                                           ReadLength, LibraryProtocol,
                                           LibraryType)
-import tempfile
-import json
-
 User = get_user_model()
 
 
@@ -25,17 +23,6 @@ class NucleicAcidTypeTest(TestCase):
             self.nucleic_acid_type.__str__(),
             self.nucleic_acid_type.name,
         )
-
-
-class FileSampleTest(TestCase):
-    def setUp(self):
-        tmp_file = tempfile.NamedTemporaryFile()
-        self.file = FileSample(name='File', file=tmp_file)
-        tmp_file.close()
-
-    def test_file_sample(self):
-        self.assertTrue(isinstance(self.file, FileSample))
-        self.assertEqual(self.file.__str__(), self.file.name)
 
 
 # Views
@@ -81,11 +68,6 @@ class SaveSampleTest(TestCase):
         self.read_length = ReadLength(name='1x50')
         self.read_length.save()
 
-        self.f_1 = FileSample(name='File1', file=ContentFile(b'file1'))
-        self.f_2 = FileSample(name='File2', file=ContentFile(b'file2'))
-        self.f_1.save()
-        self.f_2.save()
-
         self.test_sample = Sample(
             name='Sample_edit',
             organism_id=self.organism.pk,
@@ -98,7 +80,6 @@ class SaveSampleTest(TestCase):
             library_type_id=self.library_type.pk,
         )
         self.test_sample.save()
-        self.test_sample.files.add(*[self.f_1.pk, self.f_2.pk])
 
     def test_save_ok(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
@@ -114,7 +95,6 @@ class SaveSampleTest(TestCase):
                 'nucleic_acid_type': self.nucleic_acid_type.pk,
                 'library_protocol': self.library_protocol.pk,
                 'library_type': self.library_type.pk,
-                'files': '[%s]' % self.f_1.pk
             }])
         })
         self.assertEqual(response.status_code, 200)
@@ -215,7 +195,6 @@ class SaveSampleTest(TestCase):
                 'library_protocol': self.library_protocol.pk,
                 'library_type': self.library_type.pk,
                 'comments': '',
-                'files': '[%s]' % self.f_1.pk,
             }]),
         })
         self.assertEqual(response.status_code, 200)
@@ -239,37 +218,6 @@ class SaveSampleTest(TestCase):
             'error': 'Could not save the sample(s).',
             'data': [],
         })
-
-
-# class UploadFilesTest(TestCase):
-#     def setUp(self):
-#         User.objects.create_user(email='foo@bar.io', password='foo-foo')
-#
-#     def test_upload_files(self):
-#         self.client.login(email='foo@bar.io', password='foo-foo')
-#         tmp_file = tempfile.NamedTemporaryFile()
-#         with open(tmp_file.name, 'rb') as fp:
-#             response = self.client.post(reverse('sample.upload_files'), {
-#                 'files': [fp]
-#             }, format='miltipart')
-#         tmp_file.close()
-#         self.assertEqual(response.status_code, 200)
-
-
-# class GetFilesTest(TestCase):
-#     def setUp(self):
-#         User.objects.create_user(email='foo@bar.io', password='foo-foo')
-#
-#         # TODO@me: fix creating a file, which must be physically located on a disk
-#         self.f = FileSample(name='File', file=ContentFile(b'file'))
-#         self.f.save()
-#
-#     def test_get_files(self):
-#         self.client.login(email='foo@bar.io', password='foo-foo')
-#         response = self.client.get(reverse('sample.get_files'), {
-#             # 'file_ids': '[%s]' % self.f.pk
-#         })
-#         self.assertEqual(response.status_code, 200)
 
 
 class DeleteSampleTest(TestCase):

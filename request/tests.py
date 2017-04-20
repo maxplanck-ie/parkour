@@ -1,14 +1,15 @@
+import json
+import tempfile
+
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
+from django.core.files.base import ContentFile
 from django.test import TestCase
 
-from .models import Request
+from .models import Request, FileRequest
 from library.models import Library
 from sample.models import Sample
 from common.models import Organization, PrincipalInvestigator
-
-import json
-import tempfile
 
 User = get_user_model()
 
@@ -41,6 +42,17 @@ class RequestTest(TestCase):
         self.assertEqual(self.request.name, '%i_%s_%s' % (
             self.request.pk, self.user.last_name, self.user.pi.name,
         ))
+
+
+class FileRequestTest(TestCase):
+    def setUp(self):
+        tmp_file = tempfile.NamedTemporaryFile()
+        self.file = FileRequest(name='File', file=tmp_file)
+        tmp_file.close()
+
+    def test_file_name(self):
+        self.assertTrue(isinstance(self.file, FileRequest))
+        self.assertEqual(self.file.__str__(), self.file.name)
 
 
 # Views
@@ -102,7 +114,7 @@ class GetLibrariesSamplesTest(TestCase):
         self.assertNotEqual(len(content['data']), 0)
 
 
-class UpdateRequestTest(TestCase):
+class SaveRequestTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
             first_name='Foo',
@@ -120,14 +132,21 @@ class UpdateRequestTest(TestCase):
         self.library.save()
         self.sample.save()
 
+        self.f_1 = FileRequest(name='File1', file=ContentFile(b'file1'))
+        self.f_2 = FileRequest(name='File2', file=ContentFile(b'file2'))
+        self.f_1.save()
+        self.f_2.save()
+
+        self.request.files.add(*[self.f_1.pk, self.f_2.pk])
+
     def test_save_request(self):
-        """ Successfull 'save' test when everything is present. """
         self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.post(reverse('save_request'), {
             'mode': 'add',
             'description': 'description',
             'libraries': json.dumps([self.library.pk]),
-            'samples': json.dumps([self.sample.pk])
+            'samples': json.dumps([self.sample.pk]),
+            'files': '[%s]' % self.f_1.pk,
         })
         self.assertEqual(response.status_code, 200)
 
@@ -139,19 +158,37 @@ class UpdateRequestTest(TestCase):
         )
 
     def test_update_request(self):
-        """ Successfull 'update' test when everything is present. """
         self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.post(reverse('save_request'), {
             'mode': 'edit',
             'request_id': self.request.pk,
             'libraries': json.dumps([self.library.pk]),
             'samples': json.dumps([self.sample.pk]),
-            'description': 'new_description'
+            'description': 'new_description',
+            'files': '[]',
         })
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(str(response.content, 'utf-8'), {
             'success': True,
             'error': '',
+        })
+
+    def test_wrong_http_method(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.get(reverse('save_request'))
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Wrong HTTP method.',
+        })
+
+    def test_wrong_or_missing_mode(self):
+        self.client.login(email='foo@bar.io', password='foo-foo')
+        response = self.client.post(reverse('save_request'))
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(str(response.content, 'utf-8'), {
+            'success': False,
+            'error': 'Wrong or missing mode.',
         })
 
     def test_missing_libraries_and_samples(self):
@@ -163,20 +200,7 @@ class UpdateRequestTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(str(response.content, 'utf-8'), {
             'success': False,
-            'error': 'Please provide Libraries and/or samples.',
-        })
-
-    def test_exception(self):
-        """ Empty or non-existing request_id. """
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('save_request'), {
-            'mode': 'edit',
-            'request_id': ''
-        })
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(str(response.content, 'utf-8'), {
-            'success': False,
-            'error': "invalid literal for int() with base 10: ''",
+            'error': 'Please provide Libraries and/or Samples.',
         })
 
     def test_invalid_form(self):

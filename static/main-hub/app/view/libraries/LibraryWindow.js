@@ -307,13 +307,6 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                     forceSelection: true
                 },
                 {
-                    xtype: 'filegridfield',
-                    fieldLabel: 'Files',
-                    store: 'fileLibraryStore',
-                    uploadFileUrl: 'library/upload_files/',
-                    getFileUrl: 'library/get_files/'
-                },
-                {
                     xtype: 'textarea',
                     name: 'comments',
                     fieldLabel: 'Comments',
@@ -511,13 +504,6 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                     emptyText: 'Organism',
                     store: 'organismsStore',
                     forceSelection: true
-                },
-                {
-                    xtype: 'filegridfield',
-                    fieldLabel: 'Files',
-                    store: 'fileSampleStore',
-                    uploadFileUrl: 'sample/upload_files/',
-                    getFileUrl: 'sample/get_files/'
                 },
                 {
                     xtype: 'textarea',

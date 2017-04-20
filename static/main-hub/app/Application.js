@@ -20,6 +20,7 @@ Ext.define('MainHub.Application', {
     stores: [
         'NavigationTree',
         'requests.Requests',
+        'requests.RequestFiles',
         'libraries.Libraries',
         'libraries.LibraryProtocols',
         'libraries.LibraryTypes',
@@ -30,8 +31,6 @@ Ext.define('MainHub.Application', {
         'libraries.ConcentrationMethods',
         'libraries.ReadLengths',
         'libraries.NucleicAcidTypes',
-        'libraries.FileLibrary',
-        'libraries.FileSample',
         'libraries.RNAQuality',
         'incominglibraries.IncomingLibraries',
         'requests.LibrariesInRequest',

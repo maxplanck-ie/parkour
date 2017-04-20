@@ -4,12 +4,13 @@ from django.contrib.auth import get_user_model
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.template.loader import render_to_string
-from .models import Request
+
+from .models import Request, FileRequest
 from .forms import RequestForm
 
 import json
-from datetime import datetime
 import logging
+from datetime import datetime
 
 import pdfkit
 
@@ -27,17 +28,18 @@ def get_all(request):
         )
     else:
         requests = Request.objects.filter(
-            user_id=request.user.id
+            user_id=request.user.pk
         ).prefetch_related('user', 'libraries', 'samples')
 
     data = [
         {
-            'requestId': req.id,
+            'requestId': req.pk,
             'name': req.name,
             'dateCreated': req.date_created.strftime('%d.%m.%Y'),
             'description': req.description,
-            'userId': req.user.id,
+            'userId': req.user.pk,
             'user': req.user.get_full_name(),
+            'files': [file.pk for file in req.files.all()],
             'deepSeqRequestName':
                 req.deep_seq_request.name.split('/')[-1]
                 if req.deep_seq_request else '',
@@ -65,7 +67,7 @@ def get_libraries_and_samples(request):
         {
             'name': library.name,
             'recordType': library.get_record_type(),
-            'libraryId': library.id,
+            'libraryId': library.pk,
             'barcode': library.barcode,
         }
         for library in req.libraries.all()
@@ -75,7 +77,7 @@ def get_libraries_and_samples(request):
         {
             'name': sample.name,
             'recordType': sample.get_record_type(),
-            'sampleId': sample.id,
+            'sampleId': sample.pk,
             'barcode': sample.barcode,
         }
         for sample in req.samples.all()
@@ -89,41 +91,61 @@ def get_libraries_and_samples(request):
 @login_required
 def save_request(request):
     """ Add new or edit an existing request """
-    error = str()
-    form = None
+    error = ''
 
-    mode = request.POST.get('mode')
     request_id = request.POST.get('request_id', '')
     libraries = json.loads(request.POST.get('libraries', '[]'))
     samples = json.loads(request.POST.get('samples', '[]'))
+    files = json.loads(request.POST.get('files', '[]'))
 
-    if mode == 'add':
-        form = RequestForm(request.POST)
-    else:
-        try:
+    try:
+        if request.method != 'POST':
+            raise ValueError('Wrong HTTP method.')
+
+        mode = request.POST.get('mode')
+        if mode == 'add':
+            form = RequestForm(request.POST)
+        elif mode == 'edit':
             req = Request.objects.get(id=request_id)
             form = RequestForm(request.POST, instance=req)
-        except (ValueError, Request.DoesNotExist) as e:
-            error = str(e)
-            logger.exception(e)
+        else:
+            raise ValueError('Wrong or missing mode.')
 
-    if form:
+        if not libraries and not samples:
+            raise ValueError('Please provide Libraries and/or Samples.')
+
         if form.is_valid():
             if mode == 'add':
                 req = form.save(commit=False)
                 req.user = request.user
                 req.save()
+                req.files.add(*files)
             else:
                 req = form.save()
+                old_files = [file for file in req.files.all()]
+                req.files.clear()
+                req.save()
 
-            if not libraries and not samples:
-                error = 'Please provide Libraries and/or samples.'
-            else:
-                req.libraries.add(*libraries)
-                req.samples.add(*samples)
+                if not files:
+                    files_to_delete = old_files  # delete all files
+                else:
+                    req.files.add(*files)
+                    new_files = [file for file in req.files.all()]
+                    files_to_delete = list(set(old_files) - set(new_files))
+
+                # Delete files
+                for file in files_to_delete:
+                    file.delete()
+
+            req.libraries.add(*libraries)
+            req.samples.add(*samples)
+
         else:
             error = str(form.errors)
-            logger.debug(form.errors)
+
+    except Exception as e:
+        error = str(e)
+        logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error})
 
@@ -247,3 +269,54 @@ def upload_deep_sequencing_request(request):
         'name': file_name,
         'path': file_path
     })
+
+
+@csrf_exempt
+@login_required
+def upload_files(request):
+    """ Upload request files. """
+    file_ids = []
+    error = ''
+
+    if request.method == 'POST' and any(request.FILES):
+        try:
+            for file in request.FILES.getlist('files'):
+                f = FileRequest(name=file.name, file=file)
+                f.save()
+                file_ids.append(f.id)
+
+        except Exception as e:
+            error = 'Could not upload the files.'
+            logger.exception(e)
+
+    return JsonResponse({
+        'success': not error,
+        'error': error,
+        'fileIds': file_ids
+    })
+
+
+@login_required
+def get_files(request):
+    """ Get the list of files for the given request id. """
+    file_ids = json.loads(request.GET.get('file_ids'), '[]')
+    error = ''
+    data = []
+
+    try:
+        files = [f for f in FileRequest.objects.all() if f.id in file_ids]
+        data = [
+            {
+                'id': file.id,
+                'name': file.name,
+                'size': file.file.size,
+                'path': settings.MEDIA_URL + file.file.name,
+            }
+            for file in files
+        ]
+
+    except Exception as e:
+        error = 'Could not get the attached files.'
+        logger.exception(e)
+
+    return JsonResponse({'success': not error, 'error': error, 'data': data})

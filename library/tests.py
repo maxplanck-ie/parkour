@@ -1,32 +1,17 @@
+import json
+
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
-from django.core.files.base import ContentFile
 from django.test import TestCase
 
 from library_sample_shared.models import (Organism, IndexType,
                                           ConcentrationMethod, ReadLength,
                                           LibraryProtocol, LibraryType)
-from .models import FileLibrary, Library
+from .models import Library
 from sample.models import Sample
 from request.models import Request
 
-import tempfile
-import json
-
 User = get_user_model()
-
-
-# Models
-
-class FileLibraryTest(TestCase):
-    def setUp(self):
-        tmp_file = tempfile.NamedTemporaryFile()
-        self.file = FileLibrary(name='File', file=tmp_file)
-        tmp_file.close()
-
-    def test_file_name(self):
-        self.assertTrue(isinstance(self.file, FileLibrary))
-        self.assertEqual(self.file.__str__(), self.file.name)
 
 
 # Views
@@ -103,11 +88,6 @@ class SaveLibraryTest(TestCase):
         self.read_length = ReadLength(name='1x50')
         self.read_length.save()
 
-        self.f_1 = FileLibrary(name='File1', file=ContentFile(b'file1'))
-        self.f_2 = FileLibrary(name='File2', file=ContentFile(b'file2'))
-        self.f_1.save()
-        self.f_2.save()
-
         self.test_library = Library(
             name='Library_edit',
             organism_id=self.organism.pk,
@@ -123,7 +103,6 @@ class SaveLibraryTest(TestCase):
             mean_fragment_size=1,
         )
         self.test_library.save()
-        self.test_library.files.add(*[self.f_1.pk, self.f_2.pk])
 
     def test_save_ok(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
@@ -147,7 +126,6 @@ class SaveLibraryTest(TestCase):
                 'read_length': self.read_length.pk,
                 'sequencing_depth': 1,
                 'comments': '',
-                'files': '[%s]' % self.f_1.pk,
             }]),
         })
         self.assertEqual(response.status_code, 200)
@@ -254,7 +232,6 @@ class SaveLibraryTest(TestCase):
                 'read_length': self.read_length.pk,
                 'sequencing_depth': 1,
                 'comments': '',
-                'files': '[%s]' % self.f_1.pk,
             }]),
         })
         self.assertEqual(response.status_code, 200)

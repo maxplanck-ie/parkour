@@ -86,7 +86,6 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         Ext.getCmp('addWndBtn').show();
 
         if (wnd.mode == 'add') {
-            Ext.getStore('fileSampleStore').removeAll();
             Ext.getCmp('saveAndAddWndBtn').show();
             Ext.getStore('libraryProtocolsStore').reload();
         }
@@ -102,16 +101,6 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             form.setValues(record);
 
             if (record.equalRepresentation == 'False') Ext.getCmp('equalRepresentationRadio2').setValue(true);
-            if (record.files.length > 0) {
-                Ext.getStore('fileLibraryStore').load({
-                    params: {
-                        'file_ids': Ext.JSON.encode(record.files)
-                    },
-                    callback: function(records, operation, success) {
-                        if (!success) Ext.ux.ToastMessage('Cannot load Library files', 'error');
-                    }
-                });
-            }
 
             // Set library protocol
             Ext.getStore('libraryProtocolsStore').reload({
@@ -271,7 +260,6 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         Ext.getStore('libraryProtocolsStore').removeAll();
 
         if (wnd.mode == 'add') {
-            Ext.getStore('fileSampleStore').removeAll();
             Ext.getCmp('saveAndAddWndBtn').show();
         }
 
@@ -286,16 +274,6 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             form.setValues(record);
 
             if (record.equalRepresentation == 'False') Ext.getCmp('equalRepresentationRadio4').setValue(true);
-            if (record.files.length > 0) {
-                Ext.getStore('fileSampleStore').load({
-                    params: {
-                        'file_ids': Ext.JSON.encode(record.files)
-                    },
-                    callback: function(records, operation, success) {
-                        if (!success) Ext.ux.ToastMessage('Cannot load Sample files', 'error');
-                    }
-                });
-            }
 
             // Set nucleic acid type
             var nucleicAcidTypeField = Ext.getCmp('nucleicAcidTypeField');
@@ -411,7 +389,6 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             data = {},
             params = {},
             nameFieldName = '',
-            fileStoreName = '',
             wnd = btn.up('window'),
             card = Ext.getCmp('librarySamplePanel').getLayout().getActiveItem().id;
         addAnother = addAnother || false;
@@ -420,21 +397,17 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
             form = Ext.getCmp('libraryForm');
             url = 'library/save/';
             nameFieldName = 'libraryName';
-            fileStoreName = 'fileLibraryStore';
             data = form.getForm().getFieldValues();
             params = $.extend(data, {
-                library_id: wnd.record ? wnd.record.data.libraryId : '',
-                files: Ext.JSON.encode(form.down('filegridfield').getValue())
+                library_id: wnd.record ? wnd.record.data.libraryId : ''
             });
         } else {
             form = Ext.getCmp('sampleForm');
             url = 'sample/save/';
             nameFieldName = 'sampleName';
-            fileStoreName = 'fileSampleStore';
             data = form.getForm().getFieldValues();
             params = $.extend(data, {
-                sample_id: wnd.record ? wnd.record.data.sampleId : '',
-                files: Ext.JSON.encode(form.down('filegridfield').getValue())
+                sample_id: wnd.record ? wnd.record.data.sampleId : ''
             });
         }
 
@@ -475,7 +448,6 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                         // Preserve all fields except for Name, if 'Save and Add another' button was pressed
                         if (addAnother) {
                             Ext.getCmp(nameFieldName).reset();
-                            Ext.getStore(fileStoreName).removeAll();
                             wnd.setLoading(false);
                         } else {
                             wnd.close();

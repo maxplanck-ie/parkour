@@ -1,9 +1,7 @@
 from django.http import JsonResponse
-from django.conf import settings
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
-from .models import NucleicAcidType, Sample, FileSample
+from .models import NucleicAcidType, Sample
 from .forms import SampleForm
 
 import logging
@@ -54,28 +52,13 @@ def save_sample(request):
         for i, form in enumerate(forms):
             if form.is_valid():
                 sample = form.save()
-                files = json.loads(records[i].get('files', '[]'))
-
                 if mode == 'add':
-                    sample.files.add(*files)
                     data.append({
                         'name': sample.name,
                         'recordType': 'S',
                         'sampleId': sample.pk,
                         'barcode': sample.barcode,
                     })
-                else:
-                    if files:
-                        old_files = [file for file in sample.files.all()]
-                        sample.files.clear()
-                        sample.save()
-                        sample.files.add(*files)
-                        new_files = [file for file in sample.files.all()]
-
-                        # Delete files
-                        files_to_delete = list(set(old_files) - set(new_files))
-                        for file in files_to_delete:
-                            file.delete()
             else:
                 name = form.data['name']
                 if name and 'name' in form.errors.keys():
@@ -108,48 +91,3 @@ def delete_sample(request):
         logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error})
-
-
-@csrf_exempt
-@login_required
-def upload_files(request):
-    """ """
-    error = ''
-    file_ids = []
-
-    if any(request.FILES):
-        for file in request.FILES.getlist('files'):
-            f = FileSample(name=file.name, file=file)
-            f.save()
-            file_ids.append(f.pk)
-
-    return JsonResponse({
-        'success': not error,
-        'error': error,
-        'fileIds': file_ids,
-    })
-
-
-@login_required
-def get_files(request):
-    """ """
-    error = ''
-    data = []
-
-    file_ids = request.GET.get('file_ids')
-
-    if file_ids:
-        file_ids = json.loads(file_ids)
-
-        files = [f for f in FileSample.objects.all() if f.pk in file_ids]
-        data = [
-            {
-                'id': file.id,
-                'name': file.name,
-                'size': file.file.size,
-                'path': settings.MEDIA_URL + file.file.name,
-            }
-            for file in files
-        ]
-
-    return JsonResponse({'success': not error, 'error': error, 'data': data})

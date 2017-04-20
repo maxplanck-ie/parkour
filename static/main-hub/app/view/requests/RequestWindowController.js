@@ -21,7 +21,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                 click: 'uploadPDF'
             },
             '#saveRequestWndBtn': {
-                click: 'saveRequest'
+                click: 'save'
             },
             '#addLibraryBtn': {
                 click: 'addLibrary'
@@ -46,6 +46,8 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
     },
 
     onRequestWindowBoxready: function(wnd) {
+        Ext.getStore('requestFilesStore').removeAll();
+
         if (wnd.mode === 'add') {
             Ext.getStore('librariesInRequestStore').removeAll();
             Ext.getCmp('downloadRequestBlankBtn').disable();
@@ -66,6 +68,18 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
 
             // Load all Libraries/Samples for current Request
             grid.fireEvent('loadstore', grid, record.requestId);
+
+            // Load files
+            if (record.files.length > 0) {
+                Ext.getStore('requestFilesStore').load({
+                    params: {
+                        'file_ids': Ext.JSON.encode(record.files)
+                    },
+                    callback: function(records, operation, success) {
+                        if (!success) Ext.ux.ToastMessage('Cannot load files', 'error');
+                    }
+                });
+            }
         }
 
         this.initializeTooltips();
@@ -83,27 +97,29 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
         e.stopEvent();
         Ext.create('Ext.menu.Menu', {
             items: [{
-                text: 'Edit',
-                iconCls: 'x-fa fa-pencil',
-                handler: function() {
-                    me.editRecord(record);
+                    text: 'Edit',
+                    iconCls: 'x-fa fa-pencil',
+                    handler: function() {
+                        me.editRecord(record);
+                    }
+                },
+                {
+                    text: 'Delete',
+                    iconCls: 'x-fa fa-trash',
+                    handler: function() {
+                        Ext.Msg.show({
+                            title: 'Delete record',
+                            message: 'Are you sure you want to delete this record?',
+                            buttons: Ext.Msg.YESNO,
+                            icon: Ext.Msg.QUESTION,
+                            fn: function(btn) {
+                                if (btn === 'yes') {
+                                    me.deleteRecord(record);
+                                }
+                            }
+                        });
+                    }
                 }
-            },
-            {
-                text: 'Delete',
-                iconCls: 'x-fa fa-trash',
-                handler: function() {
-                    Ext.Msg.show({
-                        title: 'Delete record',
-                        message: 'Are you sure you want to delete this record?',
-                        buttons: Ext.Msg.YESNO,
-                        icon: Ext.Msg.QUESTION,
-                        fn: function(btn) {
-                            if (btn === 'yes') {me.deleteRecord(record);}
-                        }
-                    });
-                }
-            }
             ]
         }).showAt(e.getXY());
     },
@@ -229,7 +245,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
         });
     },
 
-    saveRequest: function(btn) {
+    save: function(btn) {
         var wnd = btn.up('window'),
             form = Ext.getCmp('requestForm'),
             store = Ext.getStore('librariesInRequestStore'),
@@ -259,11 +275,12 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                 scope: this,
 
                 params: {
-                    'mode': wnd.mode,
-                    'request_id': (typeof wnd.record !== 'undefined') ? wnd.record.get('requestId') : '',
-                    'description': data.description,
-                    'libraries': Ext.JSON.encode(libraries),
-                    'samples': Ext.JSON.encode(samples)
+                    mode: wnd.mode,
+                    request_id: (typeof wnd.record !== 'undefined') ? wnd.record.get('requestId') : '',
+                    description: data.description,
+                    libraries: Ext.JSON.encode(libraries),
+                    samples: Ext.JSON.encode(samples),
+                    files: Ext.JSON.encode(form.down('filegridfield').getValue())
                 },
 
                 success: function(response) {

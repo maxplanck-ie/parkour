@@ -25,14 +25,6 @@ class NucleicAcidType(models.Model):
         return self.name
 
 
-class FileSample(models.Model):
-    name = models.CharField('Name', max_length=200)
-    file = models.FileField(upload_to='samples/%Y/%m/%d/')
-
-    def __str__(self):
-        return self.name
-
-
 class Sample(GenericLibrarySample):
     nucleic_acid_type = models.ForeignKey(
         NucleicAcidType,
@@ -47,11 +39,6 @@ class Sample(GenericLibrarySample):
     amplification_cycles = models.PositiveIntegerField(
         'Amplification (cycles)',
         null=True,
-        blank=True,
-    )
-    files = models.ManyToManyField(
-        FileSample,
-        related_name='files',
         blank=True,
     )
     is_converted = models.BooleanField('Is converted?', default=False)
