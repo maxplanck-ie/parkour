@@ -13,7 +13,6 @@ Ext.define('MainHub.store.incominglibraries.IncomingLibraries', {
 
     proxy: {
         type: 'ajax',
-        url: 'library/get_all/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"
@@ -22,10 +21,35 @@ Ext.define('MainHub.store.incominglibraries.IncomingLibraries', {
         reader: {
             type: 'json',
             rootProperty: 'data',
-            successProperty: 'success'
+            successProperty: 'success',
+            messageProperty: 'error'
         },
-        extraParams: {
-            'quality_check': true
+        api: {
+            read: 'library/get_all/?quality_check=true',
+            update: 'quality_check/update_all/'
+        },
+        writer: {
+            type: 'json',
+            transform: {
+                fn: function(data, request) {
+                    var store = Ext.getStore('incomingLibrariesStore');
+                    var newData = _.map(data, function(item) {
+                        var record = store.findRecord('id', item.id),
+                            newItem = $.extend({}, item);
+                        if (record) {
+                            var recordType = record.getRecordType();
+                            newItem = {
+                                record_type: recordType,
+                                record_id: record.getRecordType() === 'L' ? record.get('libraryId') : record.get('sampleId'),
+                                changed_value: record.getChanges()
+                            };
+                        }
+                        return newItem;
+                    });
+                    return newData;
+                },
+                scope: this
+            }
         }
     }
 });

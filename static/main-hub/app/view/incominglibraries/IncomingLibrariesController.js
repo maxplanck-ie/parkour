@@ -7,6 +7,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
             '#incomingLibraries': {
                 refresh: 'refresh',
                 boxready: 'refresh',
+                itemcontextmenu: 'showContextMenu',
                 beforeedit: 'toggleEditors',
                 edit: 'editRecord'
             },
@@ -25,6 +26,47 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
     refresh: function(grid) {
         // Reload the table
         grid.getStore().reload();
+    },
+
+    showContextMenu: function(gridView, record, item, index, e) {
+        var me = this;
+        e.stopEvent();
+        Ext.create('Ext.menu.Menu', {
+            items: [{
+                text: 'Apply to All',
+                iconCls: 'x-fa fa-check-circle',
+                handler: function() {
+                    var dataIndex = me.getDataIndex(e, gridView);
+                    me.applyToAll(record, dataIndex);
+                }
+            }]
+        }).showAt(e.getXY());
+    },
+
+    applyToAll: function(record, dataIndex) {
+        var store = Ext.getStore('incomingLibrariesStore');
+
+        var allowedColumns = ['dilution_factor', 'concentration_facility',
+            'concentration_method_facility', 'sample_volume_facility',
+            'amount_facility', 'size_distribution_facility', 'comments_facility',
+            'qpcr_result_facility', 'rna_quality_facility'
+        ];
+
+        if (typeof dataIndex !== 'undefined' && allowedColumns.indexOf(dataIndex) !== -1) {
+            store.each(function(item) {
+                if (item.get('requestId') === record.get('requestId') && item !== record) {
+                    item.set(dataIndex, record.get(dataIndex));
+                }
+            });
+            store.sync({
+                failure: function(batch, options) {
+                    var error = batch.operations[0].getError();
+                    setTimeout(function() {
+                        Ext.ux.ToastMessage(error, 'error');
+                    }, 100);
+                }
+            });
+        }
     },
 
     toggleEditors: function(editor, context) {
@@ -166,5 +208,23 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
 
         store.clearFilter();
         store.filter([showFilter, searchFilter]);
+    },
+
+    getDataIndex: function(e, view) {
+        var xPos = e.getXY()[0],
+            columns = view.getGridColumns(),
+            dataIndex;
+
+        for (var column in columns) {
+            var leftEdge = columns[column].getPosition()[0],
+                rightEdge = columns[column].getSize().width + leftEdge;
+
+            if (xPos >= leftEdge && xPos <= rightEdge) {
+                dataIndex = columns[column].dataIndex;
+                break;
+            }
+        }
+
+        return dataIndex;
     }
 });

@@ -49,8 +49,8 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
             ]
         },
         viewConfig: {
-            loadMask: false,
-            markDirty: false
+            loadMask: false
+            // markDirty: false
         },
         store: 'incomingLibrariesStore',
         sortableColumns: false,

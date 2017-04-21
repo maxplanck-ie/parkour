@@ -1,11 +1,11 @@
 Ext.define('MainHub.model.incominglibraries.IncomingLibraries', {
     extend: 'MainHub.model.libraries.Library',
-
-    fields: [{
+    fields: [
+        {
             name: 'dilution_factor',
-            type: 'string',
-            // allowNull: true,
-            defaultValue: 1
+            type: 'int',
+            allowNull: true
+            // defaultValue: 1
         },
         {
             name: 'concentration_facility',
@@ -16,10 +16,10 @@ Ext.define('MainHub.model.incominglibraries.IncomingLibraries', {
             name: 'concentration_method_facility',
             type: 'int'
         },
-        {
-            name: 'dateFacility',
-            type: 'string'
-        },
+        // {
+        //     name: 'dateFacility',
+        //     type: 'string'
+        // },
         {
             name: 'sample_volume_facility',
             type: 'int',
@@ -36,12 +36,8 @@ Ext.define('MainHub.model.incominglibraries.IncomingLibraries', {
             allowNull: true
         },
         {
-            name: 'comments_facility',
-            type: 'string'
-        },
-        {
-            name: 'float',
-            type: 'string',
+            name: 'qpcr_result_facility',
+            type: 'float',
             allowNull: true
         },
         {
@@ -49,6 +45,16 @@ Ext.define('MainHub.model.incominglibraries.IncomingLibraries', {
             type: 'float',
             allowNull: true,
             defaultValue: null
+        },
+        {
+            name: 'comments_facility',
+            type: 'string'
+        },
+        {
+            name: 'qc_result',
+            type: 'int',
+            allowNull: true,
+            // defaultValue: null
         }
     ],
 
