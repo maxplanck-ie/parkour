@@ -145,11 +145,8 @@ def get_all(request):
 
             data += libraries_data + samples_data
 
-        data = sorted(
-            data,
-            key=lambda x: (x['date'], x['recordType'], x['name']),
-            reverse=True,
-        )
+        # Sort by the running number
+        data = sorted(data, key=lambda x: x['barcode'][3:])
 
     return JsonResponse(data, safe=False)
 

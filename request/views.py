@@ -299,7 +299,7 @@ def upload_files(request):
 @login_required
 def get_files(request):
     """ Get the list of files for the given request id. """
-    file_ids = json.loads(request.GET.get('file_ids'), '[]')
+    file_ids = json.loads(request.GET.get('file_ids', '[]'))
     error = ''
     data = []
 
