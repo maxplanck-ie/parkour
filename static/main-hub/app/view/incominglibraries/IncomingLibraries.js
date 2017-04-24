@@ -246,7 +246,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                     width: 80,
                     editor: {
                         xtype: 'combobox',
-                        id: 'rnaQualityEditor',
+                        id: 'rnaQualityIncomingEditor',
                         queryMode: 'local',
                         valueField: 'value',
                         displayField: 'name',

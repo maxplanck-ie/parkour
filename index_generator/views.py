@@ -59,6 +59,7 @@ def pooling_tree(request):
                 records.append({
                     'text': library.name,
                     'libraryId': library.id,
+                    'barcode': library.barcode,
                     'recordType': 'L',
                     'sequencingDepth': library.sequencing_depth,
                     'libraryProtocolName': library.library_protocol.name,
@@ -82,6 +83,7 @@ def pooling_tree(request):
                 records.append({
                     'text': sample.name,
                     'sampleId': sample.id,
+                    'barcode': sample.barcode,
                     'recordType': 'S',
                     'sequencingDepth': sample.sequencing_depth,
                     'libraryProtocolName': sample.library_protocol.name,

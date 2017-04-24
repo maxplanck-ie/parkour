@@ -113,6 +113,11 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                         flex: 1
                     },
                     {
+                        text: 'Barcode',
+                        dataIndex: 'barcode',
+                        width: 90
+                    },
+                    {
                         text: '',
                         dataIndex: 'recordType',
                         width: 35
@@ -152,7 +157,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                         dataIndex: 'indexType',
                         width: 150,
                         editor: {
-                            id: 'indexTypeEditor',
+                            id: 'indexTypePoolingEditor',
                             xtype: 'combobox',
                             queryMode: 'local',
                             displayField: 'name',

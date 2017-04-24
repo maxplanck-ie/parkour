@@ -72,7 +72,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
     toggleEditors: function(editor, context) {
         var record = context.record,
             qPCRResultEditor = Ext.getCmp('qPCRResultEditor'),
-            rnaQualityEditor = Ext.getCmp('rnaQualityEditor'),
+            rnaQualityEditor = Ext.getCmp('rnaQualityIncomingEditor'),
             nucleicAcidTypesStore = Ext.getStore('nucleicAcidTypesStore');
 
         // Toggle qPCR Result and RNA Quality
