@@ -73,7 +73,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
 
         var params = $.extend({
             sample_id: record.get('sampleId'),
-            qc_result: values.qc_result !== null ? values.qc_result : '',
+            qc_result: values.qc_result !== null ? values.qc_result : ''
         }, values);
 
         // Set µl Sample

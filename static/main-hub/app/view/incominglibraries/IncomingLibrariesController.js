@@ -195,7 +195,8 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
                 var res = false;
                 if (searchQuery) {
                     Ext.each(columns, function(column) {
-                        if (record.data[column].toLowerCase().indexOf(searchQuery.toLowerCase()) > -1) {
+                        var value = record.get(column);
+                        if (value && value.toString().toLowerCase().indexOf(searchQuery.toLowerCase()) > -1) {
                             res = res || true;
                         }
                     });

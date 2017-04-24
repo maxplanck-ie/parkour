@@ -53,7 +53,7 @@ Ext.define('MainHub.model.incominglibraries.IncomingLibraries', {
         {
             name: 'qc_result',
             type: 'int',
-            allowNull: true,
+            allowNull: true
             // defaultValue: null
         }
     ],
