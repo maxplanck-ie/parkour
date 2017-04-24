@@ -26,32 +26,37 @@ Ext.define('MainHub.model.librarypreparation.LibraryPreparation', {
             type: 'int'
         },
         {
-            name: 'concentrationSample',
+            name: 'concentration_sample',
             type: 'float'
         },
         {
-            name: 'startingAmount',
+            name: 'starting_amount',
+            type: 'float',
+            allowNull: true
+        },
+        {
+            name: 'starting_volume',
+            type: 'float',
+            allowNull: true
+        },
+        {
+            name: 'spike_in_description',
             type: 'string'
         },
         {
-            name: 'startingVolume',
-            type: 'string'
+            name: 'spike_in_volume',
+            type: 'float',
+            allowNull: true
         },
         {
-            name: 'spikeInDescription',
-            type: 'string'
+            name: 'ul_sample',
+            type: 'float',
+            allowNull: true
         },
         {
-            name: 'spikeInVolume',
-            type: 'string'
-        },
-        {
-            name: 'ulSample',
-            type: 'string'
-        },
-        {
-            name: 'ulBuffer',
-            type: 'string'
+            name: 'ul_buffer',
+            type: 'float',
+            allowNull: true
         },
         {
             name: 'indexI7Id',
@@ -62,20 +67,24 @@ Ext.define('MainHub.model.librarypreparation.LibraryPreparation', {
             type: 'string'
         },
         {
-            name: 'pcrCycles',
-            type: 'string'
+            name: 'pcr_cycles',
+            type: 'int',
+            allowNull: true
         },
         {
-            name: 'concentrationLibrary',
-            type: 'string'
+            name: 'concentration_library',
+            type: 'float',
+            allowNull: true
         },
         {
-            name: 'meanFragmentSize',
-            type: 'string'
+            name: 'mean_fragment_size',
+            type: 'int',
+            allowNull: true
         },
         {
             name: 'nM',
-            type: 'string'
+            type: 'float',
+            allowNull: true
         },
         {
             name: 'file',

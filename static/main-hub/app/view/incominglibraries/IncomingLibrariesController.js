@@ -102,8 +102,8 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
             url = 'quality_check/update/';
 
         var params = $.extend({
-            'record_type': record.getRecordType(),
-            'record_id': (record.getRecordType() === 'L') ? record.get('libraryId') : record.get('sampleId')
+            record_type: record.getRecordType(),
+            record_id: (record.getRecordType() === 'L') ? record.get('libraryId') : record.get('sampleId')
         }, values);
 
         // Compute Amount

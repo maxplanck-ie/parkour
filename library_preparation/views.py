@@ -60,18 +60,18 @@ def get_all(request):
                 'barcode': obj.sample.barcode,
                 'libraryProtocol': obj.sample.library_protocol.id,
                 'libraryProtocolName': obj.sample.library_protocol.name,
-                'concentrationSample': obj.sample.concentration,
-                'startingAmount': obj.starting_amount,
-                'startingVolume': obj.starting_volume,
-                'spikeInDescription': obj.spike_in_description,
-                'spikeInVolume': obj.spike_in_volume,
-                'ulSample': obj.ul_sample,
-                'ulBuffer': obj.ul_buffer,
+                'concentration_sample': obj.sample.concentration,
+                'starting_amount': obj.starting_amount,
+                'starting_volume': obj.starting_volume,
+                'spike_in_description': obj.spike_in_description,
+                'spike_in_volume': obj.spike_in_volume,
+                'ul_sample': obj.ul_sample,
+                'ul_buffer': obj.ul_buffer,
                 'indexI7Id': index_i7_id,
                 'indexI5Id': index_i5_id,
-                'pcrCycles': obj.pcr_cycles,
-                'concentrationLibrary': obj.concentration_library,
-                'meanFragmentSize': obj.mean_fragment_size,
+                'pcr_cycles': obj.pcr_cycles,
+                'concentration_library': obj.concentration_library,
+                'mean_fragment_size': obj.mean_fragment_size,
                 'nM': obj.nM,
                 'file':
                     settings.MEDIA_URL + obj.file.name
@@ -83,8 +83,8 @@ def get_all(request):
 
 
 @login_required
-def edit(request):
-    """ Edit Library Preparation object. """
+def update(request):
+    """ Update a Library Preparation object. """
     error = ''
 
     try:
@@ -117,6 +117,30 @@ def edit(request):
         else:
             error = str(form.errors)
             logger.debug(form.errors)
+
+    return JsonResponse({'success': not error, 'error': error})
+
+
+def update_all(request):
+    """ Update a field in all records (apply to all). """
+    error = ''
+
+    if request.is_ajax():
+        data = json.loads(request.body)
+        for item in data:
+            try:
+                sample_id = item['sample_id']
+                obj = LibraryPreparation.objects.get(sample_id=sample_id)
+                changed_value = item['changed_value']
+                if changed_value:
+                    for k, v in changed_value.items():
+                        setattr(obj, k, v)
+                    obj.save(update_fields=list(changed_value.keys()))
+
+            except Exception as e:
+                error = 'Some of the libraries were not updated ' + \
+                    '(see the logs).'
+                logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error})
 

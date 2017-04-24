@@ -18,20 +18,23 @@ Ext.define('MainHub.store.incominglibraries.IncomingLibraries', {
         startParam: false,  //to remove param "start"
         limitParam: false,  //to remove param "limit"
         noCache: false,     //to remove param "_dc",
+        api: {
+            read: 'library/get_all/?quality_check=true',
+            update: 'quality_check/update_all/'
+        },
         reader: {
             type: 'json',
             rootProperty: 'data',
             successProperty: 'success',
             messageProperty: 'error'
         },
-        api: {
-            read: 'library/get_all/?quality_check=true',
-            update: 'quality_check/update_all/'
-        },
         writer: {
             type: 'json',
             transform: {
                 fn: function(data, request) {
+                    if (!(data instanceof Array)) {
+                        data = [data];
+                    }
                     var store = Ext.getStore('incomingLibrariesStore');
                     var newData = _.map(data, function(item) {
                         var record = store.findRecord('id', item.id),

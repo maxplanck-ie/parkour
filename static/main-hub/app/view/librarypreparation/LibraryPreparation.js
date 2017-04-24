@@ -23,7 +23,8 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
         },
         padding: 15,
         viewConfig: {
-            markDirty: false
+            loadMask: false
+            // markDirty: false
         },
         store: 'libraryPreparationStore',
         sortableColumns: false,
@@ -46,7 +47,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
             },
             {
                 text: 'Concentration Sample (ng/µl)',
-                dataIndex: 'concentrationSample'
+                dataIndex: 'concentration_sample'
             },
             {
                 text: 'Protocol',
@@ -54,32 +55,32 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
             },
             {
                 text: 'Starting Amount (ng)',
-                dataIndex: 'startingAmount',
+                dataIndex: 'starting_amount',
                 editor: {
                     xtype: 'numberfield',
                     decimalPrecision: 1,
-                    minValue: 1
+                    minValue: 0
                 }
             },
             {
                 text: 'Starting Volume (µl)',
-                dataIndex: 'startingVolume',
+                dataIndex: 'starting_volume',
                 editor: {
                     xtype: 'numberfield',
                     decimalPrecision: 1,
-                    minValue: 1
+                    minValue: 0
                 }
             },
             {
                 text: 'Spike-in Description',
-                dataIndex: 'spikeInDescription',
+                dataIndex: 'spike_in_description',
                 editor: {
                     xtype: 'textfield'
                 }
             },
             {
                 text: 'Spike-in Volume (µl)',
-                dataIndex: 'spikeInVolume',
+                dataIndex: 'spike_in_volume',
                 editor: {
                     xtype: 'numberfield',
                     decimalPrecision: 1,
@@ -89,21 +90,21 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
             {
                 text: 'µl Sample',
                 tooltip: 'Starting Amount (ng) / Concentration (ng/µl)',
-                dataIndex: 'ulSample',
+                dataIndex: 'ul_sample',
                 editor: {
                     xtype: 'numberfield',
                     decimalPrecision: 1,
-                    minValue: 0.1
+                    minValue: 0
                 }
             },
             {
                 text: 'µl Buffer',
                 tooltip: 'Starting Volume (µl) - Sample Volume (µl) - Spike-In (µl)',
-                dataIndex: 'ulBuffer',
+                dataIndex: 'ul_buffer',
                 editor: {
                     xtype: 'numberfield',
                     decimalPrecision: 1,
-                    minValue: 0.1
+                    minValue: 0
                 }
             },
             {
@@ -116,28 +117,28 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
             },
             {
                 text: 'PCR Cycles',
-                dataIndex: 'pcrCycles',
+                dataIndex: 'pcr_cycles',
                 editor: {
                     xtype: 'numberfield',
                     allowDecimals: false,
-                    minValue: 1
+                    minValue: 0
                 }
             },
             {
                 text: 'Concentration Library (ng/µl)',
-                dataIndex: 'concentrationLibrary',
+                dataIndex: 'concentration_library',
                 editor: {
                     xtype: 'numberfield',
-                    minValue: 1
+                    minValue: 0
                 }
             },
             {
                 text: 'Mean Fragment Size (bp)',
-                dataIndex: 'meanFragmentSize',
+                dataIndex: 'mean_fragment_size',
                 editor: {
                     xtype: 'numberfield',
                     allowDecimals: false,
-                    minValue: 1
+                    minValue: 0.1
                 }
             },
             {
@@ -160,7 +161,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
             },
             {
                 text: 'QC Result',
-                dataIndex: 'qcResult',
+                dataIndex: 'qc_result',
                 editor: {
                     xtype: 'combobox',
                     queryMode: 'local',
