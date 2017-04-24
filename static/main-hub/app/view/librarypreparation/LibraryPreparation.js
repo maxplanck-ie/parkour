@@ -74,7 +74,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                 text: 'Spike-in Description',
                 dataIndex: 'spikeInDescription',
                 editor: {
-                    xtype: 'textarea'
+                    xtype: 'textfield'
                 }
             },
             {

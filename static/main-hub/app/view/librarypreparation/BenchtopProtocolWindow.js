@@ -1,12 +1,10 @@
 Ext.define('MainHub.view.librarypreparation.BenchtopProtocolWindow', {
     extend: 'Ext.window.Window',
-
     requires: ['MainHub.view.librarypreparation.BenchtopProtocolWindowController'],
-
     controller: 'benchtop-protocol-window',
 
     title: 'Download Benchtop Protocol',
-    height: 400,
+    height: 520,
     width: 280,
 
     modal: true,
@@ -37,6 +35,12 @@ Ext.define('MainHub.view.librarypreparation.BenchtopProtocolWindow', {
                     xtype: 'fieldcontainer',
                     defaultType: 'checkbox',
                     items: [
+                        {
+                            boxLabel: 'Barcode',
+                            inputValue: 'Barcode',
+                            name: 'params',
+                            id: 'barcodeCb'
+                        },
                         {
                             boxLabel: 'Concentration Sample (ng/µl)',
                             inputValue: 'Concentration Sample (ng/µl)',
@@ -72,6 +76,18 @@ Ext.define('MainHub.view.librarypreparation.BenchtopProtocolWindow', {
                             inputValue: 'µl Buffer',
                             name: 'params',
                             id: 'ulBufferCb'
+                        },
+                        {
+                            boxLabel: 'Index I7 ID',
+                            inputValue: 'Index I7 ID',
+                            name: 'params',
+                            id: 'indexI7IdCb'
+                        },
+                        {
+                            boxLabel: 'Index I5 ID',
+                            inputValue: 'Index I5 ID',
+                            name: 'params',
+                            id: 'indexI5IdCb'
                         }
                     ]
                 }]

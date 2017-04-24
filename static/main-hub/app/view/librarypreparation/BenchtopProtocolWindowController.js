@@ -1,7 +1,6 @@
 Ext.define('MainHub.view.librarypreparation.BenchtopProtocolWindowController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.benchtop-protocol-window',
-
     requires: [],
 
     config: {
@@ -16,12 +15,15 @@ Ext.define('MainHub.view.librarypreparation.BenchtopProtocolWindowController', {
     },
 
     onSelectAllClick: function() {
+        Ext.getCmp('barcodeCb').setValue(true);
         Ext.getCmp('concentrationSampleCb').setValue(true);
         Ext.getCmp('startingAmountCb').setValue(true);
         Ext.getCmp('startingVolumeCb').setValue(true);
         Ext.getCmp('spikeInVolumeCb').setValue(true);
         Ext.getCmp('ulSampleCb').setValue(true);
         Ext.getCmp('ulBufferCb').setValue(true);
+        Ext.getCmp('indexI7IdCb').setValue(true);
+        Ext.getCmp('indexI5IdCb').setValue(true);
     },
 
     onDownloadBtn: function(btn) {

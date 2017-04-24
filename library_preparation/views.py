@@ -1,19 +1,40 @@
+import logging
+import json
+from xlwt import Workbook, XFStyle, Formula
+
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
-from library_sample_shared.models import IndexType, IndexI7, IndexI5
+from library_sample_shared.models import IndexType
 from sample.models import Sample
 from pooling.models import Pooling
 from .models import LibraryPreparation
 from .forms import LibraryPreparationForm
 
-import logging
-import json
-import xlwt
-
 logger = logging.getLogger('db')
+
+
+def get_indices_ids(sample):
+    """ Get Index I7/I5 ids for a given sample. """
+    try:
+        index_type = IndexType.objects.get(pk=sample.index_type.pk)
+        index_i7 = index_type.indices_i7.get(index=sample.index_i7)
+    except Exception:
+        index_i7_id = ''
+    else:
+        index_i7_id = index_i7.index_id
+
+    try:
+        index_type = IndexType.objects.get(pk=sample.index_type.pk)
+        index_i5 = index_type.indices_i5.get(index=sample.index_i5)
+    except Exception:
+        index_i5_id = ''
+    else:
+        index_i5_id = index_i5.index_id
+
+    return index_i7_id, index_i5_id
 
 
 @login_required
@@ -31,22 +52,7 @@ def get_all(request):
                 obj = None
 
         if obj and obj.sample.status == 2:
-            try:
-                index_type = IndexType.objects.get(pk=obj.sample.index_type.pk)
-                index_i7 = index_type.indices_i7.get(index=obj.sample.index_i7)
-            except Exception:
-                index_i7_id = ''
-            else:
-                index_i7_id = index_i7.index_id
-
-            try:
-                index_type = IndexType.objects.get(pk=obj.sample.index_type.pk)
-                index_i5 = index_type.indices_i5.get(index=obj.sample.index_i5)
-            except Exception:
-                index_i5_id = ''
-            else:
-                index_i5_id = index_i5.index_id
-
+            index_i7_id, index_i5_id = get_indices_ids(obj.sample)
             data.append({
                 'active': False,
                 'name': obj.sample.name,
@@ -72,7 +78,7 @@ def get_all(request):
                     if obj.file
                     else ''
             })
-
+    data = sorted(data, key=lambda x: x['barcode'])
     return JsonResponse({'success': not error, 'error': error, 'data': data})
 
 
@@ -87,10 +93,9 @@ def edit(request):
         obj = LibraryPreparation.objects.get(sample_id=sample_id)
         form = LibraryPreparationForm(request.POST, instance=obj)
     except (ValueError, LibraryPreparation.DoesNotExist) as e:
-         error = str(e)
-         logger.exception(e)
-
-    if form:
+        error = str(e)
+        logger.exception(e)
+    else:
         if form.is_valid():
             form.save()
 
@@ -128,30 +133,45 @@ def download_benchtop_protocol(request):
     filename = 'Benchtop_Protocol.xls'
     response['Content-Disposition'] = 'attachment; filename="%s"' % filename
 
-    wb = xlwt.Workbook(encoding='utf-8')
+    wb = Workbook(encoding='utf-8')
     ws = wb.add_sheet('Benchtop Protocol')
+    col_letters = {
+        0: 'A',
+        1: 'B',
+        2: 'C',
+        3: 'D',
+        4: 'E',
+        5: 'F',
+        6: 'G',
+        7: 'H',
+        8: 'I',
+        9: 'J',
+    }
 
     try:
         params = ['Sample'] + params
         row_num = 0
 
-        font_style = xlwt.XFStyle()
+        font_style = XFStyle()
         font_style.font.bold = True
 
         for i, column in enumerate(params):
             ws.write(row_num, i, column, font_style)
             ws.col(i).width = 6500  # Set column width
 
-        font_style = xlwt.XFStyle()
+        font_style = XFStyle()
         font_style.alignment.wrap = 1
 
         for sample_id in samples:
             obj = LibraryPreparation.objects.get(sample_id=sample_id)
+            index_i7_id, index_i5_id = get_indices_ids(obj.sample)
             row_num += 1
             row = [obj.sample.name]
 
             for param in params:
-                if param == 'Concentration Sample (ng/µl)':
+                if param == 'Barcode':
+                    row.append(obj.sample.barcode)
+                elif param == 'Concentration Sample (ng/µl)':
                     row.append(obj.sample.concentration)
                 elif param == 'Starting Amount (ng)':
                     row.append(obj.starting_amount)
@@ -160,9 +180,56 @@ def download_benchtop_protocol(request):
                 elif param == 'Spike-in Volume (µl)':
                     row.append(obj.spike_in_volume)
                 elif param == 'µl Sample':
-                    row.append(obj.ul_sample)
+                    if 'Concentration Sample (ng/µl)' in params and \
+                       'Starting Amount (ng)' in params and \
+                       obj.sample.concentration and \
+                       obj.starting_amount and \
+                       obj.sample.concentration > 0 and \
+                       obj.ul_sample == obj.starting_amount / \
+                       obj.sample.concentration:
+                        row_idx = str(row_num + 1)
+                        starting_amount_idx = \
+                            params.index('Starting Amount (ng)')
+                        concentration_idx = \
+                            params.index('Concentration Sample (ng/µl)')
+                        col_starting_amount = col_letters[starting_amount_idx]
+                        col_concentration = col_letters[concentration_idx]
+
+                        # Starting Amount / Concentration Sample
+                        formula = col_starting_amount + row_idx + '/' + \
+                            col_concentration + row_idx
+                        row.append(Formula(formula))
+                    else:
+                        row.append(obj.ul_sample)
                 elif param == 'µl Buffer':
-                    row.append(obj.ul_buffer)
+                    if 'Starting Volume (ng)' in params and \
+                       'µl Sample' in params and \
+                       'Spike-in Volume (µl)' in params and \
+                       obj.starting_volume and obj.ul_sample and \
+                       obj.spike_in_volume and \
+                       obj.ul_buffer == obj.starting_volume - obj.ul_sample - \
+                       obj.spike_in_volume:
+                        row_idx = str(row_num + 1)
+                        starting_volume_idx = \
+                            params.index('Starting Volume (ng)')
+                        ul_sample_idx = params.index('µl Sample')
+                        spike_in_volume_idx = \
+                            params.index('Spike-in Volume (µl)')
+                        col_starting_volume = col_letters[starting_volume_idx]
+                        col_ul_sample = col_letters[ul_sample_idx]
+                        col_spike_in_volume = col_letters[spike_in_volume_idx]
+
+                        # Starting Volume - µl Sample - Spike-in Volume
+                        formula = col_starting_volume + row_idx + '-' + \
+                            col_ul_sample + row_idx + '-' + \
+                            col_spike_in_volume + row_idx
+                        row.append(Formula(formula))
+                    else:
+                        row.append(obj.ul_buffer)
+                elif param == 'Index I7 ID':
+                    row.append(index_i7_id)
+                elif param == 'Index I5 ID':
+                    row.append(index_i5_id)
 
             for i, column in enumerate(params):
                 ws.write(row_num, i, row[i], font_style)
@@ -179,7 +246,7 @@ def download_benchtop_protocol(request):
 @login_required
 def upload_benchtop_protocol(request):
     """
-    Upload a file and add it to all samples with a givel Library Protocol.
+    Upload a file and add it to all samples with a given Library Protocol.
     """
     error = ''
 
