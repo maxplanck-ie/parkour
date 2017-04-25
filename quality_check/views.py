@@ -62,7 +62,7 @@ def update_all(request):
     error = ''
 
     if request.is_ajax():
-        data = json.loads(request.body)
+        data = json.loads(request.body.decode('utf-8'))
         for item in data:
             try:
                 if item['record_type'] == 'L':
