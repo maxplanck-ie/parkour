@@ -23,6 +23,10 @@
     right: -24px;
 }
 
+.x-grid-dirty-cell.no-dirty > .x-grid-cell-inner:after {
+    content: '';
+}
+
 // TODO-me: fix `ui: 'header'`
 @include extjs-button-small-ui(
     $ui: 'header',

@@ -6,7 +6,7 @@ Ext.define('MainHub.model.librarypreparation.LibraryPreparation', {
             type: 'string'
         },
         {
-            name: 'active',
+            name: 'selected',
             type: 'bool'
         },
         {

@@ -133,6 +133,10 @@ def update_all(request):
                 obj = LibraryPreparation.objects.get(sample_id=sample_id)
                 changed_value = item['changed_value']
                 if changed_value:
+                    # Delete the 'selected' value (checkbox)
+                    if 'selected' in changed_value.keys():
+                        del changed_value['selected']
+
                     for k, v in changed_value.items():
                         setattr(obj, k, v)
                     obj.save(update_fields=list(changed_value.keys()))

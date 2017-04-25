@@ -30,8 +30,8 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
         sortableColumns: false,
         columns: [{
                 xtype: 'fiddlecheckcolumn',
-                text: 'Active',
-                dataIndex: 'active',
+                text: 'Selected',
+                dataIndex: 'selected',
                 width: 40
             },
             {

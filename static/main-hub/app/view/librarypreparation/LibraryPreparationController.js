@@ -132,7 +132,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
 
         // Get all checked (selected) samples
         store.each(function(record) {
-            if (record.get('active')) {
+            if (record.get('selected')) {
                 samples.push(record.get('sampleId'));
             }
         });

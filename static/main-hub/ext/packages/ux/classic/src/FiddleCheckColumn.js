@@ -31,7 +31,7 @@ Ext.define('Ext.ux.FiddleCheckColumn', {
             resizable: false,
             menuDisabled: true,
             hideable: false,
-            tdCls: 'no-tip',
+            tdCls: 'no-tip no-dirty',
             defaultRenderer: me.defaultRenderer,
             checked: false
         });
