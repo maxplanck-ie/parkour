@@ -1,3 +1,10 @@
+import json
+import logging
+from datetime import datetime
+from unicodedata import normalize
+
+import pdfkit
+
 from django.http import HttpResponse, JsonResponse
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -7,12 +14,6 @@ from django.template.loader import render_to_string
 
 from .models import Request, FileRequest
 from .forms import RequestForm
-
-import json
-import logging
-from datetime import datetime
-
-import pdfkit
 
 User = get_user_model()
 logger = logging.getLogger('db')
@@ -176,6 +177,7 @@ def generate_deep_sequencing_request(request):
         req = Request.objects.get(pk=request_id)
         user = User.objects.get(id=req.user.id)
         cost_unit = ','.join(sorted([u.name for u in user.cost_unit.all()]))
+        organization = user.organization.name if user.organization else ''
 
         libraries = [
             {
@@ -203,7 +205,7 @@ def generate_deep_sequencing_request(request):
             'user': user.get_full_name(),
             'phone': user.phone if user.phone else '',
             'email': user.email,
-            'organization': user.organization.name if user.organization else '',
+            'organization': organization,
             'cost_unit': cost_unit,
             'description': req.description,
             'records': records,
@@ -212,11 +214,13 @@ def generate_deep_sequencing_request(request):
         pdf = pdfkit.from_string(html, False, options=settings.PDF_OPTIONS)
 
         # Generate response
-        filename = req.name + '_Deep_Sequencing_Request.pdf'
+        request_name = normalize('NFKD', req.name).encode('ASCII', 'ignore')
+        request_name = request_name.decode('utf-8')
+        f_name = request_name + '_Deep_Sequencing_Request.pdf'
         response = HttpResponse(pdf, content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+        response['Content-Disposition'] = 'attachment; filename="%s"' % f_name
 
-    except (Request.DoesNotExist, ValueError) as e:
+    except Exception as e:
         logger.exception(e)
         response = JsonResponse({'success': False})
 
