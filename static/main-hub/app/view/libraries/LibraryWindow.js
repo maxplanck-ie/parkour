@@ -96,8 +96,8 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                 items: [{
                     name: 'name',
                     id: 'libraryName',
-                    fieldLabel: 'Library Name <sup><strong><span class="field-tooltip" tooltip-text="Name must be unique for assigned project. Field must contain only A-Za-z0-9 as well as - and _">[?]</span></strong></sup>',
-                    emptyText: 'Library Name',
+                    fieldLabel: 'Name <sup><strong><span class="field-tooltip" tooltip-text="Name must be unique for assigned project. Field must contain only A-Za-z0-9 as well as - and _">[?]</span></strong></sup>',
+                    emptyText: 'Name',
                     regex: new RegExp('^[A-Za-z0-9_\-]+$'),
                     regexText: 'Only A-Za-z0-9 as well as _ and - are allowed'
                 },
@@ -356,8 +356,8 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                 items: [{
                     name: 'name',
                     id: 'sampleName',
-                    fieldLabel: 'Sample Name <sup><strong><span class="field-tooltip" tooltip-text="Name must be unique for assigned project. Field must contain only A-Za-z0-9 as well as - and _">[?]</span></strong></sup>',
-                    emptyText: 'Sample Name',
+                    fieldLabel: 'Name <sup><strong><span class="field-tooltip" tooltip-text="Name must be unique for assigned project. Field must contain only A-Za-z0-9 as well as - and _">[?]</span></strong></sup>',
+                    emptyText: 'Name',
                     regex: new RegExp('^[A-Za-z0-9_\-]+$'),
                     regexText: 'Only A-Za-z0-9 as well as _ and - are allowed'
                 },

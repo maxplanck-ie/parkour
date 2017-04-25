@@ -125,22 +125,11 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
     },
 
     editRecord: function(record) {
-        var store = Ext.getStore('librariesStore'),
-            title = '',
-            fullRecord = null;
-
-        if (record.get('recordType') === 'L') {
-            title = 'Edit Library';
-            fullRecord = store.findRecord('libraryId', record.get('libraryId'));
-        } else {
-            title = 'Edit Sample';
-            fullRecord = store.findRecord('sampleId', record.get('sampleId'));
-        }
-
+        var store = Ext.getStore('librariesStore');
         Ext.create('MainHub.view.libraries.LibraryWindow', {
-            title: title,
+            title: record.get('recordType') === 'L' ? 'Edit Library' : 'Edit Sample',
             mode: 'edit',
-            record: fullRecord
+            record: store.findRecord('barcode', record.get('barcode'))
         }).show();
     },
 
