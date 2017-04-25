@@ -32,7 +32,7 @@ def update(request):
             else:
                 raise ValueError('Record type is not L/S or missing.')
         except (ValueError, Library.DoesNotExist, Sample.DoesNotExist) as e:
-            error = str(e)
+            error = 'Cannot update the record.'
             logger.exception(e)
         else:
             if form.is_valid():
