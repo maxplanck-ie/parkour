@@ -13,7 +13,8 @@ class Sequencer(models.Model):
 
 class Lane(models.Model):
     name = models.CharField('Name', max_length=6)
-    pool = models.OneToOneField(Pool, verbose_name='Pool')
+    # pool = models.OneToOneField(Pool, verbose_name='Pool')
+    pool = models.ForeignKey(Pool, verbose_name='Pool')
     loading_concentration = models.FloatField('Loading Concentration')
 
     def __str__(self):
