@@ -21,7 +21,8 @@ class Lane(models.Model):
 
 
 class Flowcell(models.Model):
-    sequencer = models.OneToOneField(Sequencer, verbose_name='Sequencer')
+    # sequencer = models.OneToOneField(Sequencer, verbose_name='Sequencer')
+    sequencer = models.ForeignKey(Sequencer, verbose_name='Sequencer')
     flowcell_id = models.CharField('Flowcell ID', max_length=50)
     lanes = models.ManyToManyField(Lane, related_name='flowcell', blank=True)
 

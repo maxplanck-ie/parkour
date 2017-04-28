@@ -39,7 +39,7 @@ Ext.define('MainHub.model.pooling.Pooling', {
         },
         {
             name: 'concentration',
-            type: 'int'
+            type: 'float'
         },
         {
             name: 'meanFragmentSize',
