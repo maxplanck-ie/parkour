@@ -45,16 +45,20 @@ def get_all(request):
     objects = LibraryPreparation.objects.select_related('sample')
 
     for obj in objects:
+        req = obj.sample.request.get()
         if not request.user.is_staff:
-            user_id = obj.sample.request.get().user_id
+            user_id = req.user_id
             if user_id != request.user.id:
                 obj = None
 
         if obj and obj.sample.status == 2:
+            pool = obj.sample.pool.get()
             index_i7_id, index_i5_id = get_indices_ids(obj.sample)
             data.append({
                 'active': False,
                 'name': obj.sample.name,
+                'requestName': req.name,
+                'poolName': pool.name,
                 'sampleId': obj.sample.id,
                 'barcode': obj.sample.barcode,
                 'libraryProtocol': obj.sample.library_protocol.id,
@@ -64,8 +68,6 @@ def get_all(request):
                 'starting_volume': obj.starting_volume,
                 'spike_in_description': obj.spike_in_description,
                 'spike_in_volume': obj.spike_in_volume,
-                'ul_sample': obj.ul_sample,
-                'ul_buffer': obj.ul_buffer,
                 'indexI7Id': index_i7_id,
                 'indexI5Id': index_i5_id,
                 'pcr_cycles': obj.pcr_cycles,
@@ -148,111 +150,80 @@ def download_benchtop_protocol(request):
     """ Generate Benchtop Protocol as XLS file for selected samples. """
     # response = HttpResponse(content_type='application/vnd.ms-excel')
     response = HttpResponse(content_type='application/ms-excel')
-    params = request.POST.getlist('params')
     samples = json.loads(request.POST.get('samples'))
 
-    filename = 'Benchtop_Protocol.xls'
+    filename = 'Library_Preparation_Benchtop_Protocol.xls'
     response['Content-Disposition'] = 'attachment; filename="%s"' % filename
 
     wb = Workbook(encoding='utf-8')
     ws = wb.add_sheet('Benchtop Protocol')
     col_letters = {
-        0: 'A',
-        1: 'B',
-        2: 'C',
-        3: 'D',
-        4: 'E',
-        5: 'F',
-        6: 'G',
-        7: 'H',
-        8: 'I',
-        9: 'J',
+        0: 'A',   # Request ID
+        1: 'B',   # Pool ID
+        2: 'C',   # Sample
+        3: 'D',   # Barcode
+        4: 'E',   # Protocol
+        5: 'F',   # Concentration Sample
+        6: 'G',   # Starting Amount
+        7: 'H',   # Starting Volume
+        8: 'I',   # Spike-in Description
+        9: 'J',   # Spike-in Volume
+        10: 'K',  # µl Sample
+        11: 'L',  # µl Buffer
+        12: 'M',  # Index I7 ID
+        13: 'N',  # Index I5 ID
     }
 
     try:
-        params = ['Sample'] + params
+        header = ['Request ID', 'Pool ID', 'Sample', 'Barcode', 'Protocol',
+                  'Concentration Sample (ng/µl)', 'Starting Amount (ng)',
+                  'Starting Volume (µl)', 'Spike-in Description',
+                  'Spike-in Volume (µl)', 'µl Sample', 'µl Buffer',
+                  'Index I7 ID', 'Index I5 ID']
         row_num = 0
 
         font_style = XFStyle()
         font_style.font.bold = True
 
-        for i, column in enumerate(params):
+        for i, column in enumerate(header):
             ws.write(row_num, i, column, font_style)
-            ws.col(i).width = 6500  # Set column width
+            ws.col(i).width = 7000  # Set column width
 
         font_style = XFStyle()
         font_style.alignment.wrap = 1
 
         for sample_id in samples:
             obj = LibraryPreparation.objects.get(sample_id=sample_id)
+            req = obj.sample.request.get()
+            pool = obj.sample.pool.get()
             index_i7_id, index_i5_id = get_indices_ids(obj.sample)
             row_num += 1
-            row = [obj.sample.name]
+            row_idx = str(row_num + 1)
 
-            for param in params:
-                if param == 'Barcode':
-                    row.append(obj.sample.barcode)
-                elif param == 'Concentration Sample (ng/µl)':
-                    row.append(obj.sample.concentration)
-                elif param == 'Starting Amount (ng)':
-                    row.append(obj.starting_amount)
-                elif param == 'Starting Volume (ng)':
-                    row.append(obj.starting_volume)
-                elif param == 'Spike-in Volume (µl)':
-                    row.append(obj.spike_in_volume)
-                elif param == 'µl Sample':
-                    if 'Concentration Sample (ng/µl)' in params and \
-                       'Starting Amount (ng)' in params and \
-                       obj.sample.concentration and \
-                       obj.starting_amount and \
-                       obj.sample.concentration > 0 and \
-                       obj.ul_sample == obj.starting_amount / \
-                       obj.sample.concentration:
-                        row_idx = str(row_num + 1)
-                        starting_amount_idx = \
-                            params.index('Starting Amount (ng)')
-                        concentration_idx = \
-                            params.index('Concentration Sample (ng/µl)')
-                        col_starting_amount = col_letters[starting_amount_idx]
-                        col_concentration = col_letters[concentration_idx]
+            row = [req.name, pool.name, obj.sample.name, obj.sample.barcode,
+                   obj.sample.library_protocol.name, obj.sample.concentration,
+                   obj.starting_amount, obj.starting_volume,
+                   obj.spike_in_description, obj.spike_in_volume]
 
-                        # Starting Amount / Concentration Sample
-                        formula = col_starting_amount + row_idx + '/' + \
-                            col_concentration + row_idx
-                        row.append(Formula(formula))
-                    else:
-                        row.append(obj.ul_sample)
-                elif param == 'µl Buffer':
-                    if 'Starting Volume (ng)' in params and \
-                       'µl Sample' in params and \
-                       'Spike-in Volume (µl)' in params and \
-                       obj.starting_volume and obj.ul_sample and \
-                       obj.spike_in_volume and \
-                       obj.ul_buffer == obj.starting_volume - obj.ul_sample - \
-                       obj.spike_in_volume:
-                        row_idx = str(row_num + 1)
-                        starting_volume_idx = \
-                            params.index('Starting Volume (ng)')
-                        ul_sample_idx = params.index('µl Sample')
-                        spike_in_volume_idx = \
-                            params.index('Spike-in Volume (µl)')
-                        col_starting_volume = col_letters[starting_volume_idx]
-                        col_ul_sample = col_letters[ul_sample_idx]
-                        col_spike_in_volume = col_letters[spike_in_volume_idx]
+            # µl Sample = Starting Amount / Concentration Sample
+            col_starting_amount = col_letters[6]
+            col_concentration = col_letters[5]
+            formula = col_starting_amount + row_idx + '/' + \
+                col_concentration + row_idx
+            row.append(Formula(formula))
 
-                        # Starting Volume - µl Sample - Spike-in Volume
-                        formula = col_starting_volume + row_idx + '-' + \
-                            col_ul_sample + row_idx + '-' + \
-                            col_spike_in_volume + row_idx
-                        row.append(Formula(formula))
-                    else:
-                        row.append(obj.ul_buffer)
-                elif param == 'Index I7 ID':
-                    row.append(index_i7_id)
-                elif param == 'Index I5 ID':
-                    row.append(index_i5_id)
+            # µl Buffer = Starting Volume - Spike-in Volume - µl Sample
+            col_starting_volume = col_letters[7]
+            col_ul_sample = col_letters[10]
+            col_spike_in_volume = col_letters[9]
+            formula = col_starting_volume + row_idx + '-' + \
+                col_spike_in_volume + row_idx + '-' + \
+                col_ul_sample + row_idx
+            row.append(Formula(formula))
 
-            for i, column in enumerate(params):
+            row.extend([index_i7_id, index_i5_id])
+
+            for i in range(len(row)):
                 ws.write(row_num, i, row[i], font_style)
 
     except Exception as e:

@@ -27,6 +27,10 @@
     content: '';
 }
 
+.fa-lg {
+    line-height: 0.9em;
+}
+
 // TODO-me: fix `ui: 'header'`
 @include extjs-button-small-ui(
     $ui: 'header',

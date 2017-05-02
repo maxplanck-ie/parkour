@@ -6,6 +6,14 @@ Ext.define('MainHub.model.librarypreparation.LibraryPreparation', {
             type: 'string'
         },
         {
+            name: 'requestName',
+            type: 'string'
+        },
+        {
+            name: 'poolName',
+            type: 'string'
+        },
+        {
             name: 'selected',
             type: 'bool'
         },
@@ -45,16 +53,6 @@ Ext.define('MainHub.model.librarypreparation.LibraryPreparation', {
         },
         {
             name: 'spike_in_volume',
-            type: 'float',
-            allowNull: true
-        },
-        {
-            name: 'ul_sample',
-            type: 'float',
-            allowNull: true
-        },
-        {
-            name: 'ul_buffer',
             type: 'float',
             allowNull: true
         },

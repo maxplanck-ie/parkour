@@ -29,18 +29,6 @@ class LibraryPreparation(models.Model):
         blank=True,
     )
 
-    ul_sample = models.FloatField(
-        'µl Sample',
-        null=True,
-        blank=True,
-    )
-
-    ul_buffer = models.FloatField(
-        'µl Buffer',
-        null=True,
-        blank=True,
-    )
-
     pcr_cycles = models.IntegerField(
         'PCR Cycles',
         null=True,

@@ -33,9 +33,8 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
         var store = Ext.getStore('libraryPreparationStore');
 
         var allowedColumns = ['starting_amount', 'starting_volume',
-            'spike_in_description', 'spike_in_volume', 'ul_sample',
-            'ul_buffer', 'pcr_cycles', 'concentration_library',
-            'mean_fragment_size', 'nM'
+            'spike_in_description', 'spike_in_volume', 'pcr_cycles',
+            'concentration_library', 'mean_fragment_size', 'nM'
         ];
 
         if (typeof dataIndex !== 'undefined' && allowedColumns.indexOf(dataIndex) !== -1) {
@@ -64,8 +63,6 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
             startingAmount = values.starting_amount,
             startingVolume = values.starting_volume,
             spikeInVolume = values.spike_in_volume,
-            ulSample = values.ul_sample,
-            ulBuffer = values.ul_buffer,
             concentrationLibrary = values.concentration_library,
             meanFragmentSize = values.mean_fragment_size,
             nM = values.nM,
@@ -75,21 +72,6 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
             sample_id: record.get('sampleId'),
             qc_result: values.qc_result !== null ? values.qc_result : ''
         }, values);
-
-        // Set µl Sample
-        if (concentrationSample > 0 && startingAmount > 0 &&
-            Object.keys(changes).indexOf('ulSample') === -1) {
-            ulSample = (startingAmount / concentrationSample).toFixed(2);
-            params['ul_sample'] = ulSample;
-        }
-
-        // Set µl Buffer
-        if (startingVolume > 0 && ulSample > 0 && spikeInVolume > 0 &&
-            startingVolume > (parseFloat(ulSample) + parseFloat(spikeInVolume)) &&
-            Object.keys(changes).indexOf('ulBuffer') === -1) {
-            ulBuffer = (startingVolume - ulSample - spikeInVolume).toFixed(2);
-            params['ul_buffer'] = ulBuffer;
-        }
 
         // Set nM
         if (concentrationLibrary > 0 && meanFragmentSize > 0 &&
@@ -138,9 +120,21 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
         });
 
         if (samples.length > 0) {
-            Ext.create('MainHub.view.librarypreparation.BenchtopProtocolWindow', {
-                samples: samples
-            }).show();
+            var form = Ext.create('Ext.form.Panel', {
+                standardSubmit: true
+            });
+
+            form.submit({
+                url: 'library_preparation/download_benchtop_protocol/',
+                target: '_blank',
+                params: {
+                    'samples': Ext.JSON.encode(samples)
+                }
+            });
+
+            // Ext.create('MainHub.view.librarypreparation.BenchtopProtocolWindow', {
+            //     samples: samples
+            // }).show();
         } else {
             Ext.ux.ToastMessage('You did not select any samples.', 'warning');
         }
