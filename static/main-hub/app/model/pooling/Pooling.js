@@ -39,39 +39,26 @@ Ext.define('MainHub.model.pooling.Pooling', {
         },
         {
             name: 'concentration',
-            type: 'float'
+            type: 'float',
+            allowNull: true
         },
         {
-            name: 'meanFragmentSize',
+            name: 'mean_fragment_size',
+            type: 'int',
+            allowNull: true
+        },
+        {
+            name: 'concentration_c1',
+            type: 'float',
+            allowNull: true
+        },
+        {
+            name: 'sequencing_depth',
             type: 'int'
         },
         {
-            name: 'concentrationC1',
-            type: 'string'
-        },
-        {
-            name: 'concentrationC2',
-            type: 'string'
-        },
-        {
-            name: 'sequencingDepth',
+            name: 'percentage_library',
             type: 'int'
-        },
-        {
-            name: 'sampleVolume',
-            type: 'string'
-        },
-        {
-            name: 'bufferVolume',
-            type: 'string'
-        },
-        {
-            name: 'percentageLibrary',
-            type: 'string'
-        },
-        {
-            name: 'volumeToPool',
-            type: 'string'
         },
         {
             name: 'file',

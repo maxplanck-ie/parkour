@@ -72,7 +72,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     text: 'ng/µl Sample',
                     tooltip: 'Concentration Sample (ng/µl)',
                     dataIndex: 'concentration_sample',
-                    width: 90,
+                    width: 100,
                     editor: {
                         xtype: 'numberfield',
                         minValue: 0
@@ -82,7 +82,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     text: 'ng Start',
                     tooltip: 'Starting Amount (ng)',
                     dataIndex: 'starting_amount',
-                    width: 90,
+                    width: 100,
                     editor: {
                         xtype: 'numberfield',
                         decimalPrecision: 1,
@@ -93,7 +93,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     text: 'µl Start',
                     tooltip: 'Starting Volume (µl)',
                     dataIndex: 'starting_volume',
-                    width: 90,
+                    width: 100,
                     editor: {
                         xtype: 'numberfield',
                         decimalPrecision: 1,
@@ -113,7 +113,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     text: 'µl Spike-in',
                     tooltip: 'Spike-in Volume (µl)',
                     dataIndex: 'spike_in_volume',
-                    width: 90,
+                    width: 100,
                     editor: {
                         xtype: 'numberfield',
                         decimalPrecision: 1,
@@ -144,7 +144,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     text: 'ng/µl Library',
                     tooltip: 'Concentration Library (ng/µl)',
                     dataIndex: 'concentration_library',
-                    width: 90,
+                    width: 100,
                     editor: {
                         xtype: 'numberfield',
                         minValue: 0
@@ -157,7 +157,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     editor: {
                         xtype: 'numberfield',
                         allowDecimals: false,
-                        minValue: 0.1
+                        minValue: 0
                     }
                 },
                 {

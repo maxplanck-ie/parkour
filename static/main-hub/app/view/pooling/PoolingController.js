@@ -10,11 +10,10 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                 boxready: 'refresh',
                 refresh: 'refresh',
                 groupcontextmenu: 'showGroupContextMenu',
-                beforeedit: 'hideFloatingButtons',
                 edit: 'editRecord'
             },
             '#downloadBenchtopProtocolPBtn': {
-                // click: ''
+                click: 'downloadBenchtopProtocol'
             },
             '#downloadPoolingTemplateBtn': {
                 click: 'downloadPoolingTemplate'
@@ -46,41 +45,25 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         }).showAt(e.getXY());
     },
 
-    hideFloatingButtons: function(editor) {
-        // Hide Update and Cancel buttons
-        editor.getEditor().floatingButtons.items.items[0].hide();
-        editor.getEditor().floatingButtons.items.items[1].hide();
-
-        setTimeout(function() {
-            $('.x-grid-row-editor-buttons').hide();
-        }, 100);
-    },
-
     editRecord: function(editor, context) {
         var grid = context.grid,
             record = context.record,
             changes = record.getChanges(),
             values = context.newValues,
-            concentration = values.concentration,
-            meanFragmentSize = values.meanFragmentSize,
-            concentrationC1 = values.concentrationC1,
-            concentrationC2 = values.concentrationC2,
-            sampleVolume = values.sampleVolume,
-            bufferVolume = values.bufferVolume,
-            qcResult = (values.qcResult !== null) ? values.qcResult : '',
+            concentrationC1 = values.concentration_c1,
             url = 'pooling/edit/';
 
-        // Set Library Concentration C1
-        if (concentration > 0 && meanFragmentSize > 0 &&
-            Object.keys(changes).indexOf('concentrationC1') == -1) {
-            concentrationC1 = ((concentration / (meanFragmentSize * 650)) * 1000000).toFixed(1);
-        }
+        var params = $.extend({
+            library_id: record.get('libraryId'),
+            sample_id: record.get('sampleId'),
+            qc_result: values.qc_result !== null ? values.qc_result : ''
+        }, values);
 
-        // Set Buffer Volume V2
-        if (concentrationC1 > 0 && sampleVolume > 0 && concentrationC2 > 0 &&
-            (parseFloat(concentrationC1) * parseFloat(sampleVolume)) / parseFloat(concentrationC2) > parseFloat(sampleVolume) &&
-            Object.keys(changes).indexOf('bufferVolume') == -1) {
-            bufferVolume = ((concentrationC1 * sampleVolume) / concentrationC2 - sampleVolume).toFixed(1);
+        // Set Library Concentration C1
+        if (values.concentration > 0 && values.mean_fragment_size > 0 &&
+            Object.keys(changes).indexOf('concentration_c1') == -1) {
+            concentrationC1 = ((values.concentration / (values.mean_fragment_size * 650)) * 10**6).toFixed(1);
+            params['concentration_c1'] = concentrationC1;
         }
 
         Ext.Ajax.request({
@@ -88,18 +71,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             method: 'POST',
             timeout: 1000000,
             scope: this,
-            params: {
-                library_id: record.get('libraryId'),
-                sample_id: record.get('sampleId'),
-                concentration: concentration,
-                concentration_c1: concentrationC1,
-                concentration_c2: concentrationC2,
-                sample_volume: sampleVolume,
-                buffer_volume: bufferVolume,
-                percentage_library: record.get('percentageLibrary'),
-                volume_to_pool: record.get('volumeToPool'),
-                qc_result: qcResult
-            },
+            params: params,
 
             success: function(response) {
                 var obj = Ext.JSON.decode(response.responseText);
@@ -126,12 +98,46 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         });
     },
 
+    downloadBenchtopProtocol: function() {
+        var store = Ext.getStore('poolingStore'),
+            libraries = [],
+            samples = [];
+
+        // Get all checked (selected) records
+        store.each(function(record) {
+            if (record.get('active')) {
+                if (record.get('libraryId') === 0) {
+                    samples.push(record.get('sampleId'));
+                } else {
+                    libraries.push(record.get('libraryId'));
+                }
+            }
+        });
+
+        if (libraries.length > 0 || samples.length > 0) {
+            var form = Ext.create('Ext.form.Panel', {
+                standardSubmit: true
+            });
+
+            form.submit({
+                url: 'pooling/download_benchtop_protocol/',
+                target: '_blank',
+                params: {
+                    samples: Ext.JSON.encode(samples),
+                    libraries: Ext.JSON.encode(libraries)
+                }
+            });
+        } else {
+            Ext.ux.ToastMessage('You did not select any libraries.', 'warning');
+        }
+    },
+
     downloadPoolingTemplate: function() {
         var store = Ext.getStore('poolingStore'),
             libraries = [],
             samples = [];
 
-        // Get all checked (selected) samples
+        // Get all checked (selected) records
         store.each(function(record) {
             if (record.get('active')) {
                 if (record.get('libraryId') === 0) {

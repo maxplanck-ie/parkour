@@ -148,9 +148,8 @@ def update_all(request):
 @login_required
 def download_benchtop_protocol(request):
     """ Generate Benchtop Protocol as XLS file for selected samples. """
-    # response = HttpResponse(content_type='application/vnd.ms-excel')
     response = HttpResponse(content_type='application/ms-excel')
-    samples = json.loads(request.POST.get('samples'))
+    samples = json.loads(request.POST.get('samples', '[]'))
 
     filename = 'Library_Preparation_Benchtop_Protocol.xls'
     response['Content-Disposition'] = 'attachment; filename="%s"' % filename

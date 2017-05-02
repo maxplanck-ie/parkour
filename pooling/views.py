@@ -1,3 +1,7 @@
+import json
+import logging
+from xlwt import Workbook, XFStyle, Formula
+
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -10,10 +14,6 @@ from library.models import Library
 from sample.models import Sample
 from .models import Pooling
 from .forms import PoolingForm
-
-import json
-import logging
-import xlwt
 
 logger = logging.getLogger('db')
 
@@ -50,7 +50,6 @@ def get_all(request):
 
         sum_sequencing_depth = sum([l.sequencing_depth for l in libraries])
         sum_sequencing_depth += sum([s.sequencing_depth for s in samples])
-        pool_volume = (len(libraries) + len(samples)) * 10
 
         # Native libraries
         for library in libraries:
@@ -58,7 +57,6 @@ def get_all(request):
             req = get_request(library, 'L')
             percentage_library = \
                 library.sequencing_depth / sum_sequencing_depth
-            volume_to_pool = percentage_library * pool_volume
 
             libraries_in_pool.append({
                 'name': library.name,
@@ -69,14 +67,10 @@ def get_all(request):
                 'requestId': req.id,
                 'requestName': req.name,
                 'concentration': library.concentration,
-                'meanFragmentSize': library.mean_fragment_size,
-                'sequencingDepth': library.sequencing_depth,
-                'concentrationC1': pooling_obj.concentration_c1,
-                'concentrationC2': pooling_obj.concentration_c2,
-                'sampleVolume': pooling_obj.sample_volume,
-                'bufferVolume': pooling_obj.buffer_volume,
-                'percentageLibrary': round(percentage_library * 100),
-                'volumeToPool': volume_to_pool,
+                'mean_fragment_size': library.mean_fragment_size,
+                'sequencing_depth': library.sequencing_depth,
+                'concentration_c1': pooling_obj.concentration_c1,
+                'percentage_library': round(percentage_library * 100),
                 'file':
                     settings.MEDIA_URL + pool.file.name
                     if pool.file
@@ -91,7 +85,6 @@ def get_all(request):
                 req = get_request(sample, 'S')
                 percentage_library = \
                     sample.sequencing_depth / sum_sequencing_depth
-                volume_to_pool = percentage_library * pool_volume
 
                 libraries_in_pool.append({
                     'name': sample.name,
@@ -102,14 +95,10 @@ def get_all(request):
                     'requestId': req.id,
                     'requestName': req.name,
                     'concentration': lib_prep_obj.concentration_library,
-                    'meanFragmentSize': lib_prep_obj.mean_fragment_size,
-                    'sequencingDepth': sample.sequencing_depth,
-                    'concentrationC1': pooling_obj.concentration_c1,
-                    'concentrationC2': pooling_obj.concentration_c2,
-                    'sampleVolume': pooling_obj.sample_volume,
-                    'bufferVolume': pooling_obj.buffer_volume,
-                    'percentageLibrary': round(percentage_library * 100),
-                    'volumeToPool': volume_to_pool,
+                    'mean_fragment_size': lib_prep_obj.mean_fragment_size,
+                    'sequencing_depth': sample.sequencing_depth,
+                    'concentration_c1': pooling_obj.concentration_c1,
+                    'percentage_library': round(percentage_library * 100),
                     'file':
                         settings.MEDIA_URL + pool.file.name
                         if pool.file
@@ -184,15 +173,144 @@ def edit(request):
 
 @csrf_exempt
 @login_required
+def download_benchtop_protocol(request):
+    """ Generate Benchtop Protocol as XLS file for selected records. """
+    response = HttpResponse(content_type='application/ms-excel')
+    libraries = json.loads(request.POST.get('libraries', '[]'))
+    samples = json.loads(request.POST.get('samples', '[]'))
+
+    filename = 'Pooling_Benchtop_Protocol.xls'
+    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+
+    wb = Workbook(encoding='utf-8')
+    ws = wb.add_sheet('Benchtop Protocol')
+    col_letters = {
+        0: 'A',   # Request ID
+        1: 'B',   # Library
+        2: 'C',   # Barcode
+        3: 'D',   # Concentration Library
+        4: 'E',   # Mean Fragment Size
+        5: 'F',   # Library Concentration C1
+        6: 'G',   # Sequencing Depth
+        7: 'H',   # % library in Pool
+        8: 'I',   # Normalized Library Concentration C2
+        9: 'J',   # Sample Volume V1
+        10: 'K',  # Buffer Volume V2
+        11: 'L',  # Volume to Pool
+    }
+
+    try:
+        records = [Library.objects.get(pk=lib_id) for lib_id in libraries] + \
+            [Sample.objects.get(pk=smpl_id) for smpl_id in samples]
+        records = sorted(records, key=lambda x: x.barcode)
+
+        header = ['Request ID', 'Library', 'Barcode',
+                  'Concentration Library (ng/µl)', 'Mean Fragment Size (bp)',
+                  'Library Concentration C1 (nM)', 'Sequencing Depth (M)',
+                  '% library in Pool',
+                  'Normalized Library Concentration C2 (nM)',
+                  'Sample Volume V1 (µl)', 'Buffer Volume V2 (µl)',
+                  'Volume to Pool (µl)']
+
+        font_style = XFStyle()
+        font_style.alignment.wrap = 1
+        font_style_bold = XFStyle()
+        font_style_bold.font.bold = True
+
+        ws.write(0, 0, 'Pool ID', font_style_bold)
+        ws.write(1, 0, 'Pool Volume', font_style_bold)  # B2
+        ws.write(2, 0, 'Sum Sequencing Depth', font_style_bold)  # B3
+        ws.write(3, 0, '', font_style)
+
+        row_num = 4
+
+        for i, column in enumerate(header):
+            ws.write(row_num, i, column, font_style_bold)
+            ws.col(i).width = 7000  # Set column width
+
+        for record in records:
+            row_num += 1
+            row_idx = str(row_num + 1)
+            req = record.request.get()
+
+            if isinstance(record, Library):
+                concentration = record.concentration
+                mean_fragment_size = record.mean_fragment_size
+            else:
+                obj = LibraryPreparation.objects.get(sample=record)
+                concentration = obj.concentration_library
+                mean_fragment_size = obj.mean_fragment_size
+
+            row = [req.name, record.name, record.barcode, concentration,
+                   mean_fragment_size]
+
+            # Library Concentration C1 =
+            # (Library Concentration / Mean Fragment Size * 650) * 10^6
+            col_library_concentration = col_letters[3]
+            col_mean_fragment_size = col_letters[4]
+            formula = '%s%s/(%s%s*650)*1000000' % (
+                col_library_concentration, row_idx,
+                col_mean_fragment_size, row_idx
+            )
+            row.append(Formula(formula))
+
+            row.append(record.sequencing_depth)
+
+            # % library in Pool
+            col_sequencing_depth = col_letters[6]
+            formula = '%s%s/$B$3*100' % (col_sequencing_depth, row_idx)
+            row.append(Formula(formula))
+
+            row.extend(['', ''])  # Concentration C2 and Sample Volume V1
+
+            # Buffer Volume V2 =
+            # ((Concentration C1 * Sample Volume V1) / Concentration C2) -
+            # Sample Volume V1
+            col_concentration_c1 = col_letters[5]
+            col_concentration_c2 = col_letters[8]
+            col_sample_volume = col_letters[9]
+            formula = '((%s%s*%s%s)/%s%s)-%s%s' % (
+                col_concentration_c1, row_idx,
+                col_sample_volume, row_idx,
+                col_concentration_c2, row_idx,
+                col_sample_volume, row_idx,
+            )
+            row.append(Formula(formula))
+
+            # Volume to Pool
+            col_percentage = col_letters[7]
+            formula = '$B$2*%s%s/100' % (col_percentage, row_idx)
+            row.append(Formula(formula))
+
+            for i in range(len(row)):
+                ws.write(row_num, i, row[i], font_style)
+
+        # Write Sum Sequencing Depth
+        formula = 'SUM(%s%s:%s%s)' % (
+            col_sequencing_depth, 6,
+            col_sequencing_depth, str(row_num + 1)
+        )
+        ws.write(2, 1, Formula(formula), font_style)
+
+    except Exception as e:
+        logger.exception(e)
+
+    wb.save(response)
+
+    return response
+
+
+@csrf_exempt
+@login_required
 def download_pooling_template(request):
     response = HttpResponse(content_type='application/ms-excel')
-    libraries = json.loads(request.POST.get('libraries'))
-    samples = json.loads(request.POST.get('samples'))
+    libraries = json.loads(request.POST.get('libraries', '[]'))
+    samples = json.loads(request.POST.get('samples', '[]'))
 
     filename = 'QC_Normalization_and_Pooling_Template.xls'
     response['Content-Disposition'] = 'attachment; filename="%s"' % filename
 
-    wb = xlwt.Workbook(encoding='utf-8')
+    wb = Workbook(encoding='utf-8')
     ws = wb.add_sheet('QC Normalization and Pooling')
 
     try:
@@ -207,14 +325,14 @@ def download_pooling_template(request):
         )
         row_num = 0
 
-        font_style = xlwt.XFStyle()
+        font_style = XFStyle()
         font_style.font.bold = True
 
         for i, column in enumerate(columns):
             ws.write(row_num, i, column, font_style)
             ws.col(i).width = 6500  # Set column width
 
-        font_style = xlwt.XFStyle()
+        font_style = XFStyle()
         font_style.alignment.wrap = 1
 
         for library_id in libraries:

@@ -16,7 +16,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
                 itemcontextmenu: 'showContextMenu'
             },
             '#downloadBenchtopProtocolLPBtn': {
-                click: 'downloadBenchtopProtocolLP'
+                click: 'downloadBenchtopProtocol'
             }
         }
     },
@@ -108,7 +108,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
         });
     },
 
-    downloadBenchtopProtocolLP: function(btn) {
+    downloadBenchtopProtocol: function(btn) {
         var store = Ext.getStore('libraryPreparationStore'),
             samples = [];
 

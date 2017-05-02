@@ -22,12 +22,12 @@ Ext.define('MainHub.view.pooling.Pooling', {
         },
         padding: 15,
         viewConfig: {
-            markDirty: false
+            loadMask: false
+            // markDirty: false
         },
         plugins: [{
                 ptype: 'rowediting',
-                clicksToEdit: 1,
-                autoUpdate: true
+                clicksToEdit: 1
             },
             {
                 ptype: 'bufferedrenderer',
@@ -39,21 +39,13 @@ Ext.define('MainHub.view.pooling.Pooling', {
             ftype: 'grouping',
             collapsible: false,
             groupHeaderTpl: [
-                '<strong>Pool: {name} | Pool size: {children:this.poolSize} M reads | Pool volume: {children:this.poolVolume} {children:this.renderDownloadBtn}</strong>',
+                '<strong>Pool: {name} | Pool Size: {children:this.poolSize} M reads {children:this.renderDownloadBtn}</strong>',
                 {
                     poolSize: function(children) {
-                        return Ext.sum(
-                            Ext.pluck(
-                                Ext.pluck(children, 'data'), 'sequencingDepth'
-                            )
-                        );
-                    },
-                    poolVolume: function(children) {
-                        return children.length * 10;
+                        return Ext.sum(Ext.pluck(Ext.pluck(children, 'data'), 'sequencingDepth'));
                     },
                     renderDownloadBtn: function(children) {
                         var url = children[0].get('file');
-
                         return (url !== '') ? '<span class="download-pooling-template"><a href="' + url +
                             '">' + '<i class="fa fa-download" aria-hidden="true"></i></a></span>' : '';
                     }
@@ -70,12 +62,16 @@ Ext.define('MainHub.view.pooling.Pooling', {
             },
             {
                 text: 'Request',
+                tooltip: 'Request ID',
                 dataIndex: 'requestName',
+                minWidth: 200,
                 flex: 1
             },
             {
                 text: 'Library',
+                tooltip: 'Library Name',
                 dataIndex: 'name',
+                minWidth: 200,
                 flex: 1
             },
             {
@@ -84,80 +80,52 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 width: 90
             },
             {
-                text: 'Library Concentration (ng/µl)',
+                text: 'ng/µl',
+                tooltip: 'Library Concentration (ng/µl)',
                 dataIndex: 'concentration',
-                editor: {
-                    xtype: 'numberfield',
-                    hideTrigger: true,
-                    minValue: 1
-                },
-                flex: 1
+                // editor: {
+                //     xtype: 'numberfield',
+                //     // hideTrigger: true,
+                //     decimalPrecision: 1,
+                //     minValue: 0
+                // },
+                width: 100
             },
             {
-                text: 'Mean Fragment Size (bp)',
-                dataIndex: 'meanFragmentSize',
-                flex: 1
+                text: 'bp',
+                tooltip: 'Mean Fragment Size (bp)',
+                dataIndex: 'mean_fragment_size',
+                width: 75
             },
             {
-                text: 'Library Concentration C1 (nM)',
-                dataIndex: 'concentrationC1',
-                editor: {
-                    xtype: 'numberfield',
-                    minValue: 1
-                },
-                flex: 1
-            },
-            {
-                text: 'Sequencing Depth (M)',
-                dataIndex: 'sequencingDepth',
-                flex: 1
-            },
-            {
-                text: 'Normalized Library Concentration C2 (nM)',
-                dataIndex: 'concentrationC2',
+                text: 'nM C1',
+                tooltip: 'Library Concentration C1 (nM)',
+                dataIndex: 'concentration_c1',
                 editor: {
                     xtype: 'numberfield',
                     decimalPrecision: 1,
-                    minValue: 1
+                    minValue: 0
                 },
-                flex: 1
+                width: 100
             },
             {
-                text: 'Sample Volume V1 (µl)',
-                dataIndex: 'sampleVolume',
-                editor: {
-                    xtype: 'numberfield',
-                    decimalPrecision: 1,
-                    minValue: 0.1
-                },
-                flex: 1
+                text: 'Depth (M)',
+                tooltip: 'Sequencing Depth (M)',
+                dataIndex: 'sequencing_depth',
+                width: 90
             },
             {
-                text: 'Buffer Volume V2 (µl)',
-                dataIndex: 'bufferVolume',
-                editor: {
-                    xtype: 'numberfield',
-                    decimalPrecision: 1,
-                    minValue: 0.1
-                },
-                flex: 1
-            },
-            {
-                text: '% library in Pool',
-                dataIndex: 'percentageLibrary',
+                text: '%',
+                tooltip: '% library in Pool',
+                dataIndex: 'percentage_library',
                 renderer: function(val) {
                     return val + '%';
                 },
-                flex: 1
-            },
-            {
-                text: 'Volume to Pool',
-                dataIndex: 'volumeToPool',
-                flex: 1
+                width: 55
             },
             {
                 text: 'QC Result',
-                dataIndex: 'qcResult',
+                dataIndex: 'qc_result',
                 editor: {
                     xtype: 'combobox',
                     queryMode: 'local',
