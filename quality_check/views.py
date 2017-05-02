@@ -65,18 +65,20 @@ def update_all(request):
         data = json.loads(request.body.decode('utf-8'))
         for item in data:
             try:
+                changed_value = item['changed_value']
                 if item['record_type'] == 'L':
                     record = Library.objects.get(pk=item['record_id'])
+                    form = IncomingLibraryForm(changed_value, instance=record)
                 elif item['record_type'] == 'S':
                     record = Sample.objects.get(pk=item['record_id'])
+                    form = IncomingSampleForm(changed_value, instance=record)
                 else:
                     raise ValueError('Record type is not L/S or missing.')
 
-                changed_value = item['changed_value']
-                if changed_value:
-                    for k, v in changed_value.items():
-                        setattr(record, k, v)
-                    record.save(update_fields=list(changed_value.keys()))
+                if form.is_valid():
+                    form.save()
+                else:
+                    raise ValueError(form.errors)
 
             except Exception as e:
                 error = 'Some of the records were not updated (see the logs).'

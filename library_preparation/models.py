@@ -65,12 +65,6 @@ class LibraryPreparation(models.Model):
         blank=True,
     )
 
-    file = models.FileField(
-        upload_to='benchtop_protocols/%Y/%m/%d/',
-        null=True,
-        blank=True,
-    )
-
     class Meta:
         verbose_name = 'Library Preparation'
         verbose_name_plural = 'Library Preparation'

@@ -157,54 +157,8 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
                     var dataIndex = me.getDataIndex(e, gridView);
                     me.applyToAll(record, dataIndex);
                 }
-            },{
-                text: 'Upload File',
-                iconCls: 'x-fa fa-upload',
-                handler: function() {
-                    me.uploadFile(record);
-                }
             }]
         }).showAt(e.getXY());
-    },
-
-    uploadFile: function(record) {
-        Ext.create('Ext.ux.FileUploadWindow', {
-            onFileUpload: function() {
-                var me = this,
-                    form = this.down('form').getForm(),
-                    url = 'library_preparation/upload_benchtop_protocol/';
-
-                if (form.isValid()) {
-                    form.submit({
-                        url: url,
-                        method: 'POST',
-                        waitMsg: 'Uploading...',
-                        params: {
-                            library_protocol: record.get('libraryProtocol')
-                        },
-
-                        success: function(f, action) {
-                            var obj = Ext.JSON.decode(action.response.responseText);
-
-                            if (obj.success) {
-                                Ext.getStore('libraryPreparationStore').reload();
-                                me.close();
-                                Ext.ux.ToastMessage('File has been successfully uploaded.');
-                            } else {
-                                Ext.ux.ToastMessage('There is a problem with the provided file.', 'error');
-                            }
-                        },
-
-                        failure: function(f, action) {
-                            console.error('[ERROR]: ' + url);
-                            console.error(action.response);
-                        }
-                    });
-                } else {
-                    Ext.ux.ToastMessage('You did not select any file.', 'warning');
-                }
-            }
-        });
     },
 
     getDataIndex: function(e, view) {

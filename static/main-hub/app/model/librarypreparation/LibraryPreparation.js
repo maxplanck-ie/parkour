@@ -85,10 +85,6 @@ Ext.define('MainHub.model.librarypreparation.LibraryPreparation', {
             name: 'nM',
             type: 'float',
             allowNull: true
-        },
-        {
-            name: 'file',
-            type: 'string'
         }
     ]
 });

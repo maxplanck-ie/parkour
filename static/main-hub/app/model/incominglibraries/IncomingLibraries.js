@@ -4,8 +4,6 @@ Ext.define('MainHub.model.incominglibraries.IncomingLibraries', {
         {
             name: 'dilution_factor',
             type: 'int',
-            allowNull: true
-            // defaultValue: 1
         },
         {
             name: 'concentration_facility',

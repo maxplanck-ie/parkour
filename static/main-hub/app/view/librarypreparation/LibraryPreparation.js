@@ -151,15 +151,6 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                 }
             },
             {
-                text: 'File',
-                dataIndex: 'file',
-                width: 45,
-                renderer: function(value) {
-                    return (value !== '') ? '<a class="library-preparation-download" href="' +
-                        value + '">' + '<i class="fa fa-download" aria-hidden="true"></i></a>' : '';
-                }
-            },
-            {
                 text: 'QC Result',
                 dataIndex: 'qc_result',
                 editor: {

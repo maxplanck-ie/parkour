@@ -2,7 +2,6 @@ import logging
 import json
 from xlwt import Workbook, XFStyle, Formula
 
-from django.conf import settings
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
@@ -73,10 +72,6 @@ def get_all(request):
                 'concentration_library': obj.concentration_library,
                 'mean_fragment_size': obj.mean_fragment_size,
                 'nM': obj.nM,
-                'file':
-                    settings.MEDIA_URL + obj.file.name
-                    if obj.file
-                    else ''
             })
     data = sorted(data, key=lambda x: x['barcode'])
     return JsonResponse({'success': not error, 'error': error, 'data': data})
@@ -132,14 +127,12 @@ def update_all(request):
                 sample_id = item['sample_id']
                 obj = LibraryPreparation.objects.get(sample_id=sample_id)
                 changed_value = item['changed_value']
-                if changed_value:
-                    # Delete the 'selected' value (checkbox)
-                    if 'selected' in changed_value.keys():
-                        del changed_value['selected']
+                form = LibraryPreparationForm(changed_value, instance=obj)
 
-                    for k, v in changed_value.items():
-                        setattr(obj, k, v)
-                    obj.save(update_fields=list(changed_value.keys()))
+                if form.is_valid():
+                    form.save()
+                else:
+                    raise ValueError(form.errors)
 
             except Exception as e:
                 error = 'Some of the libraries were not updated ' + \
@@ -268,32 +261,3 @@ def download_benchtop_protocol(request):
     wb.save(response)
 
     return response
-
-
-@csrf_exempt
-@login_required
-def upload_benchtop_protocol(request):
-    """
-    Upload a file and add it to all samples with a given Library Protocol.
-    """
-    error = ''
-
-    library_protocol = request.POST.get('library_protocol')
-
-    if request.method == 'POST' and any(request.FILES):
-        try:
-            # Get all Library Preparation objects with a given Library Protocol
-            objects = LibraryPreparation.objects.filter(
-                sample__sample_protocol_id=library_protocol
-            )
-
-            # Attach the file to the objects
-            for obj in objects:
-                obj.file = request.FILES.get('file')
-                obj.save()
-
-        except Exception as e:
-            error = str(e)
-            logger.debug(error)
-
-    return JsonResponse({'success': not error, 'error': error})

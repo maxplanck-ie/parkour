@@ -215,7 +215,7 @@ class GenericLibrarySample(models.Model):
     # Quality Control
     dilution_factor = models.PositiveIntegerField(
         'Dilution Factor (facility)',
-        null=True,
+        default=1,
         blank=True,
     )
     concentration_facility = models.FloatField(
