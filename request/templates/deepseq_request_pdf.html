@@ -6,7 +6,7 @@
         <style type="text/css">
             body {
                 font-family: Helvetica, Arial, sans-serif;
-                font-size: 0.9em;
+                font-size: 0.7em;
             }
 
             h2 {
@@ -69,17 +69,19 @@
         <h3>List of libraries/samples to be submitted for sequencing</h3>
         <table class="libraries">
             <tr>
-                <th style="width:10%">#</th>
-                <th style="width:50%">Name</th>
-                <th style="width:20%">Type</th>
+                <th style="width:5%">#</th>
+                <th style="width:30%">Name</th>
                 <th style="width:20%">Barcode</th>
+                <th style="width:15%">Type</th>
+                <th style="width:30%">Sequencing Depth (M)</th>
             </tr>
             {% for record in records %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
                     <td>{{ record.name }}</td>
-                    <td>{{ record.type }}</td>
                     <td>{{ record.barcode }}</td>
+                    <td>{{ record.type }}</td>
+                    <td>{{ record.sequencing_depth }}</td>
                 </tr>
             {% endfor %}
         </table>
@@ -92,7 +94,7 @@
                 <td style="width:50%">____________________</td>
             </tr>
             <tr>
-                <td>(Date, Signature)</td>
+                <td>(Date)</td>
                 <td>(Principal Investigator)</td>
             </tr>
         </table>

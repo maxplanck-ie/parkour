@@ -184,6 +184,7 @@ def generate_deep_sequencing_request(request):
                 'name': library.name,
                 'type': 'Library',
                 'barcode': library.barcode,
+                'sequencing_depth': library.sequencing_depth,
             }
             for library in req.libraries.all()
         ]
@@ -193,6 +194,7 @@ def generate_deep_sequencing_request(request):
                 'name': sample.name,
                 'type': 'Sample',
                 'barcode': sample.barcode,
+                'sequencing_depth': sample.sequencing_depth,
             }
             for sample in req.samples.all()
         ]
