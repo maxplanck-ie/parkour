@@ -3,7 +3,7 @@ Ext.define('MainHub.model.incominglibraries.IncomingLibraries', {
     fields: [
         {
             name: 'dilution_factor',
-            type: 'int',
+            type: 'int'
         },
         {
             name: 'concentration_facility',

@@ -25,6 +25,8 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 var rowClass = '';
                 if (record.get('status') === -1) {
                     rowClass = 'invalid';
+                } else if (record.get('status') === -2) {
+                    rowClass = 'compromised';
                 } else {
                     rowClass = record.get('recordType') === 'L' ? 'library-row' : 'sample-row'
                     // rowClass = record.getRecordType() === 'L' ? 'library-row' : 'sample-row'
@@ -75,16 +77,19 @@ Ext.define('MainHub.view.libraries.Libraries', {
                         // Draw a color circle depending on the status value
                         if (value === -1) {
                             statusClass += 'quality-check-failed';
-                            meta.tdAttr = 'data-qtip="Quality failed"';
+                            meta.tdAttr = 'data-qtip="Quality check failed"';
+                        } else if (value === -2) {
+                            statusClass += 'quality-check-compromised';
+                            meta.tdAttr = 'data-qtip="Quality check compromised"';
+                        } else if (value === 2) {
+                            statusClass += 'quality-check-approved';
+                            meta.tdAttr = 'data-qtip="Quality check approved"';
                         } else if (value === 0) {
                             statusClass += 'pending-submission';
                             meta.tdAttr = 'data-qtip="Pending submission"';
                         } else if (value === 1) {
                             statusClass += 'submission-completed';
                             meta.tdAttr = 'data-qtip="Submission completed"';
-                        } else if (value === 2) {
-                            statusClass += 'quality-check-approved';
-                            meta.tdAttr = 'data-qtip="Quality approved"';
                         } else if (value === 3) {
                             statusClass += 'library-prepared';
                             meta.tdAttr = 'data-qtip="Library prepared"';

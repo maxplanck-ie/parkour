@@ -39,10 +39,13 @@ def update(request):
                 form.save()
 
                 if qc_result:
-                    if qc_result == '1':
+                    if int(qc_result) == 1:
                         # TODO@me: use another form to make sure
                         # all Facility fields are not empty
                         record.status = 2
+                        record.save(update_fields=['status'])
+                    elif int(qc_result) == -2:
+                        record.status = -2
                         record.save(update_fields=['status'])
                     else:
                         record.status = -1

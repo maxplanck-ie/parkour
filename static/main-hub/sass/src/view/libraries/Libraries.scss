@@ -8,6 +8,11 @@
     color: #388e3c;
 }
 
+.compromised .x-grid-cell {
+    background-color: #fff8e1;
+    color: #ff8f00;
+}
+
 .status {
     width: 12px;
     height: 12px;
@@ -16,19 +21,23 @@
 }
 
 .status.pending-submission {
-	background-color: #9E9E9E;
+    background-color: #9E9E9E;
 }
 
 .status.submission-completed {
-	background-color: #ffc107;
+    background-color: #8d6e63;
 }
 
 .status.quality-check-approved {
-	background-color: #66BB6A;
+    background-color: #66BB6A;
 }
 
 .status.quality-check-failed {
-	background-color: #ef5350;
+    background-color: #ef5350;
+}
+
+.status.quality-check-compromised {
+    background-color: #ffc107;
 }
 
 .status.library-prepared {

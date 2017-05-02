@@ -279,7 +279,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                         xtype: 'combobox',
                         queryMode: 'local',
                         displayField: 'name',
-                        valueField: 'id',
+                        valueField: 'value',
                         store: Ext.create('Ext.data.Store', {
                             fields: [{
                                     name: 'id',
@@ -291,12 +291,16 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                                 }
                             ],
                             data: [{
-                                    id: 1,
-                                    name: 'passed'
+                                    name: 'passed',
+                                    value: 1
                                 },
                                 {
-                                    id: 2,
-                                    name: 'failed'
+                                    name: 'failed',
+                                    value: -1
+                                },
+                                {
+                                    name: 'compromised',
+                                    value: -2
                                 }
                             ]
                         }),

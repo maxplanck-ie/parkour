@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 
 from request.models import Request
 from library_sample_shared.models import (ReadLength, IndexType,
@@ -26,12 +26,12 @@ def pooling_tree(request):
     requests = Request.objects.prefetch_related(
         Prefetch(
             'libraries',
-            queryset=Library.objects.filter(status=2),
+            queryset=Library.objects.filter(Q(status=2) | Q(status=-2)),
             to_attr='libraries_all',
         ),
         Prefetch(
             'samples',
-            queryset=Sample.objects.filter(status=2),
+            queryset=Sample.objects.filter(Q(status=2) | Q(status=-2)),
             to_attr='samples_all',
         ),
     )
