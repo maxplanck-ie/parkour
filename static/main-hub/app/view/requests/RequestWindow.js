@@ -126,18 +126,21 @@ Ext.define('MainHub.view.requests.RequestWindow', {
             xtype: 'button',
             id: 'downloadRequestBlankBtn',
             itemId: 'downloadRequestBlankBtn',
+            iconCls: 'fa fa-download fa-lg',
             text: 'Download Request Blank'
         },
         {
             xtype: 'button',
             id: 'uploadSignedBlankBtn',
             itemId: 'uploadSignedBlankBtn',
+            iconCls: 'fa fa-upload fa-lg',
             text: 'Upload Signed Blank'
         },
         '->',
         {
             xtype: 'button',
             itemId: 'saveRequestWndBtn',
+            iconCls: 'fa fa-floppy-o fa-lg',
             text: 'Save'
         }
     ]

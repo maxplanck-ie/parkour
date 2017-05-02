@@ -530,6 +530,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                 itemId: 'saveAndAddWndBtn',
                 id: 'saveAndAddWndBtn',
                 text: 'Save and Add another',
+                iconCls: 'fa fa-floppy-o fa-lg',
                 hidden: true
             },
             {
@@ -537,6 +538,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                 itemId: 'addWndBtn',
                 id: 'addWndBtn',
                 text: 'Save and Close',
+                iconCls: 'fa fa-floppy-o fa-lg',
                 hidden: true
             }
         ],

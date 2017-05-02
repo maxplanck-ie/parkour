@@ -381,6 +381,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                         xtype: 'button',
                         id: 'generateIndices',
                         itemId: 'generateIndices',
+                        iconCls: 'fa fa-cogs fa-lg',
                         text: 'Generate Indices',
                         disabled: true
                     },
@@ -389,6 +390,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                         xtype: 'button',
                         id: 'savePool',
                         itemId: 'savePool',
+                        iconCls: 'fa fa-floppy-o fa-lg',
                         text: 'Save Pool',
                         disabled: true
                     }

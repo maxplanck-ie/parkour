@@ -39,17 +39,20 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     width: 40
                 },
                 {
-                    text: 'Request ID',
+                    text: 'Request',
+                    tooltip: 'Request ID',
                     dataIndex: 'requestName',
                     width: 150
                 },
                 {
-                    text: 'Pool ID',
+                    text: 'Pool',
+                    tooltip: 'Pool ID',
                     dataIndex: 'poolName',
                     width: 120
                 },
                 {
                     text: 'Sample',
+                    tooltip: 'Sample Name',
                     dataIndex: 'name',
                     minWidth: 200,
                     flex: 1
@@ -61,6 +64,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                 },
                 {
                     text: 'Protocol',
+                    tooltip: 'Library Protocol',
                     dataIndex: 'libraryProtocolName',
                     minWidth: 150
                 },
@@ -220,10 +224,10 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                 '->',
                 {
                     xtype: 'button',
-                    iconCls: 'fa fa-file-excel-o fa-lg',
                     id: 'downloadBenchtopProtocolLPBtn',
                     itemId: 'downloadBenchtopProtocolLPBtn',
                     text: 'Download Benchtop Protocol',
+                    iconCls: 'fa fa-file-excel-o fa-lg',
                     disabled: true
                 }
             ]
