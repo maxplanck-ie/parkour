@@ -9,9 +9,7 @@ from .models import Pool
 @receiver(post_save, sender=Pool)
 def update_pool_name_or_size(sender, instance, created, **kwargs):
     if created:
-        instance.name = '%i_%s' % (instance.id, instance.user.last_name)
-        if instance.user.pi:
-            instance.name += '_' + instance.user.pi.name
+        instance.name = 'Pool_%i' % instance.pk
         instance.save()
 
     # Update Pool Size

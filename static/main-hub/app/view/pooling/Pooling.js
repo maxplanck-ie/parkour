@@ -48,7 +48,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
             ftype: 'grouping',
             collapsible: false,
             groupHeaderTpl: [
-                '<strong>Pool: {name} | Pool Size: {children:this.poolSize} M reads {children:this.renderDownloadBtn}</strong>',
+                '<strong>{name} | Pool Size: {children:this.poolSize} M reads {children:this.renderDownloadBtn}</strong>',
                 {
                     poolSize: function(children) {
                         return Ext.sum(Ext.pluck(Ext.pluck(children, 'data'), 'sequencing_depth'));
