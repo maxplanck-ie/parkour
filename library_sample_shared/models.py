@@ -160,7 +160,6 @@ class GenericLibrarySample(models.Model):
     name = models.CharField(
         'Name',
         max_length=200,
-        unique=True,
     )
     date = models.DateTimeField('Date', auto_now_add=True)
     status = models.SmallIntegerField(default=0)
