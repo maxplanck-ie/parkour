@@ -51,7 +51,7 @@ def get_all(request):
             if user_id != request.user.id:
                 obj = None
 
-        if obj and obj.sample.status == 2:
+        if obj and (obj.sample.status == 2 or obj.sample.status == -2):
             pool = obj.sample.pool.get()
             index_i7_id, index_i5_id = get_indices_ids(obj.sample)
             data.append({

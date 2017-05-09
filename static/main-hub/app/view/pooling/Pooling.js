@@ -22,8 +22,17 @@ Ext.define('MainHub.view.pooling.Pooling', {
         },
         padding: 15,
         viewConfig: {
-            loadMask: false
-            // markDirty: false
+            loadMask: false,
+            // markDirty: false,
+            stripeRows: false,
+            getRowClass: function(record) {
+                var rowClass = '';
+                if (record.get('sampleId') !== 0 && (
+                    record.get('status') === 2 || record.get('status') === -2)) {
+                    rowClass = 'library-not-prepared';
+                }
+                return rowClass;
+            }
         },
         plugins: [{
                 ptype: 'rowediting',
@@ -42,7 +51,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 '<strong>Pool: {name} | Pool Size: {children:this.poolSize} M reads {children:this.renderDownloadBtn}</strong>',
                 {
                     poolSize: function(children) {
-                        return Ext.sum(Ext.pluck(Ext.pluck(children, 'data'), 'sequencingDepth'));
+                        return Ext.sum(Ext.pluck(Ext.pluck(children, 'data'), 'sequencing_depth'));
                     },
                     renderDownloadBtn: function(children) {
                         var url = children[0].get('file');
@@ -55,9 +64,10 @@ Ext.define('MainHub.view.pooling.Pooling', {
         store: 'poolingStore',
         sortableColumns: false,
         columns: [{
-                xtype: 'fiddlecheckcolumn',
-                text: 'Active',
-                dataIndex: 'active',
+                xtype: 'checkcolumn',
+                itemId: 'checkColumn',
+                dataIndex: 'selected',
+                tdCls: 'no-dirty',
                 width: 40
             },
             {

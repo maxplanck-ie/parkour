@@ -6,6 +6,10 @@ Ext.define('MainHub.model.pooling.Pooling', {
             type: 'string'
         },
         {
+            name: 'status',
+            type: 'int'
+        },
+        {
             name: 'active',
             type: 'bool'
         },

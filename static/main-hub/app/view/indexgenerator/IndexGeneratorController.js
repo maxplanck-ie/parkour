@@ -44,6 +44,9 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
         var record = context.record,
             indexTypeEditor = Ext.getCmp('indexTypePoolingEditor');
 
+        // Don't show the editors when a selection checkbox was clicked
+        if (context.colIdx === 0) return false;
+
         if (record.get('recordType') === 'L') {
             indexTypeEditor.disable();
         } else {

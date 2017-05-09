@@ -10,7 +10,11 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                 boxready: 'refresh',
                 refresh: 'refresh',
                 groupcontextmenu: 'showGroupContextMenu',
+                beforeEdit: 'toggleEditors',
                 edit: 'editRecord'
+            },
+            '#checkColumn': {
+                beforecheckchange: 'selectRecord'
             },
             '#downloadBenchtopProtocolPBtn': {
                 click: 'downloadBenchtopProtocol'
@@ -43,6 +47,14 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                 }
             }]
         }).showAt(e.getXY());
+    },
+
+    toggleEditors: function(editor, context) {
+        var record = context.record;
+        if (record.get('sampleId') !== 0 && (
+            record.get('status') === 2 || record.get('status') === -2)) {
+            return false
+        }
     },
 
     editRecord: function(editor, context) {
@@ -98,6 +110,23 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         });
     },
 
+    selectRecord: function(cb, rowIndex, checked, record) {
+        // Don't select samples which aren't prepared yet
+        if (record.get('sampleId') !== 0 && (
+            record.get('status') === 2 || record.get('status') === -2)) {
+            return false;
+        } else {
+            // Don't select records from a different pool
+            var selectedRecord = Ext.getStore('poolingStore').findRecord('selected', true);
+            if (selectedRecord) {
+                if (record.get('poolId') !== selectedRecord.get('poolId')) {
+                    Ext.ux.ToastMessage('You can select records only from the same pool.', 'warning');
+                    return false;
+                }
+            }
+        }
+    },
+
     downloadBenchtopProtocol: function() {
         var store = Ext.getStore('poolingStore'),
             libraries = [],
@@ -105,7 +134,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
 
         // Get all checked (selected) records
         store.each(function(record) {
-            if (record.get('active')) {
+            if (record.get('selected')) {
                 if (record.get('libraryId') === 0) {
                     samples.push(record.get('sampleId'));
                 } else {
@@ -139,7 +168,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
 
         // Get all checked (selected) records
         store.each(function(record) {
-            if (record.get('active')) {
+            if (record.get('selected')) {
                 if (record.get('libraryId') === 0) {
                     samples.push(record.get('sampleId'));
                 } else {

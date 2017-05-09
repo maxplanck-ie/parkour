@@ -6,6 +6,7 @@ from django.conf import settings
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
 
 from request.models import Request
 from index_generator.models import Pool
@@ -46,7 +47,7 @@ def get_all(request):
         libraries_in_pool = []
 
         libraries = pool.libraries.filter(status=2)
-        samples = pool.samples.filter(status=3)
+        samples = pool.samples.filter(Q(status=3) | Q(status=2) | Q(status=-2))
 
         sum_sequencing_depth = sum([l.sequencing_depth for l in libraries])
         sum_sequencing_depth += sum([s.sequencing_depth for s in samples])
@@ -60,6 +61,7 @@ def get_all(request):
 
             libraries_in_pool.append({
                 'name': library.name,
+                'status': library.status,
                 'libraryId': library.id,
                 'barcode': library.barcode,
                 'poolId': pool.id,
@@ -79,34 +81,36 @@ def get_all(request):
 
         # Converted samples (sample -> library)
         for sample in samples:
+            lib_prep_obj = LibraryPreparation.objects.get(sample=sample)
+            req = get_request(sample, 'S')
+            percentage_library = \
+                sample.sequencing_depth / sum_sequencing_depth
+
             try:
-                lib_prep_obj = LibraryPreparation.objects.get(sample=sample)
-                pooling_obj = Pooling.objects.get(sample=sample)
-                req = get_request(sample, 'S')
-                percentage_library = \
-                    sample.sequencing_depth / sum_sequencing_depth
-
-                libraries_in_pool.append({
-                    'name': sample.name,
-                    'sampleId': sample.id,
-                    'barcode': sample.barcode,
-                    'poolId': pool.id,
-                    'poolName': pool.name,
-                    'requestId': req.id,
-                    'requestName': req.name,
-                    'concentration': lib_prep_obj.concentration_library,
-                    'mean_fragment_size': lib_prep_obj.mean_fragment_size,
-                    'sequencing_depth': sample.sequencing_depth,
-                    'concentration_c1': pooling_obj.concentration_c1,
-                    'percentage_library': round(percentage_library * 100),
-                    'file':
-                        settings.MEDIA_URL + pool.file.name
-                        if pool.file
-                        else ''
-                })
-
+                concentration_c1 = \
+                    Pooling.objects.get(sample=sample).concentration_c1
             except Pooling.DoesNotExist:
-                libraries_in_pool = []
+                concentration_c1 = None
+
+            libraries_in_pool.append({
+                'name': sample.name,
+                'status': sample.status,
+                'sampleId': sample.pk,
+                'barcode': sample.barcode,
+                'poolId': pool.pk,
+                'poolName': pool.name,
+                'requestId': req.pk,
+                'requestName': req.name,
+                'concentration': lib_prep_obj.concentration_library,
+                'mean_fragment_size': lib_prep_obj.mean_fragment_size,
+                'sequencing_depth': sample.sequencing_depth,
+                'concentration_c1': concentration_c1,
+                'percentage_library': round(percentage_library * 100),
+                'file':
+                    settings.MEDIA_URL + pool.file.name
+                    if pool.file
+                    else ''
+            })
 
         data += libraries_in_pool
 
