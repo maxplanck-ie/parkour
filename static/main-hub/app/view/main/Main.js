@@ -33,6 +33,7 @@ Ext.define('MainHub.view.main.Main', {
     items: [
         {
             xtype: 'toolbar',
+            id: 'headerBar',
             itemId: 'headerBar',
             cls: 'sencha-dash-dash-headerbar shadow',
             height: 64,
@@ -57,6 +58,14 @@ Ext.define('MainHub.view.main.Main', {
                     xtype: 'tbtext',
                     cls: 'top-user-name',
                     text: USERNAME      // from 'globals.html'
+                },
+                {
+                    xtype: 'button',
+                    ui: 'header',
+                    id: 'adminSiteBtn',
+                    iconCls: 'x-fa fa-cog',
+                    href: 'admin',
+                    tooltip: 'Site administration'
                 },
                 {
                     xtype: 'button',

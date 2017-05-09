@@ -24,6 +24,10 @@ Ext.define('MainHub.view.main.MainController', {
                 me.redirectTo('requests');
             }
         });
+
+        if (!USER_IS_STAFF) {
+            Ext.getCmp('adminSiteBtn').hide();
+        }
     },
 
     onNavigationTreeSelectionChange: function (tree, node) {
