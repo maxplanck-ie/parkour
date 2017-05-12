@@ -42,9 +42,18 @@
     border-bottom-right-radius: 0;
 }
 .form-signin input[type="password"] {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
+}
+
+.form-signin .link-forgot-password {
+    margin-bottom: 10px;
+}
+
+.form-signin .link-forgot-password a {
+    color: #35baf6;
+    font-size: 13px;
 }
 
 #login-form input[type="submit"] {
