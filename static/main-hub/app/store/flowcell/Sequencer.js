@@ -21,5 +21,7 @@ Ext.define('MainHub.store.flowcell.Sequencer', {
             rootProperty: 'data',
             successProperty: 'success'
         }
-    }
+    },
+
+    autoLoad: true
 });

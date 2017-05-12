@@ -384,7 +384,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         });
     },
 
-    saveLibrary: function(btn, addAnother) {
+    save: function(btn, addAnother) {
         var form = null,
             url = '',
             data = {},
@@ -425,12 +425,11 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                 },
 
                 success: function(response) {
-                    var obj = Ext.JSON.decode(response.responseText),
-                        grid = null;
+                    var obj = Ext.JSON.decode(response.responseText);
 
                     if (obj.success) {
                         if (wnd.mode == 'add') {
-                            grid = Ext.getCmp('librariesInRequestTable');
+                            var grid = Ext.getCmp('librariesInRequestTable');
                             grid.getStore().add(obj.data);
                             Ext.ux.ToastMessage('Record has been added!');
                         } else {
@@ -440,11 +439,11 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                                 }
                             });
                             // Ext.getStore('requestsStore').reload();
-                            // Ext.getStore('librariesStore').reload();
-                            MainHub.Utilities.reloadAllStores();
+                            Ext.getStore('librariesStore').reload();
+                            // MainHub.Utilities.reloadAllStores();
                             Ext.ux.ToastMessage('Record has been updated!');
                         }
-                        Ext.getStore('PoolingTree').reload();
+                        // Ext.getStore('PoolingTree').reload();
 
                         // Preserve all fields except for Name, if 'Save and Add another' button was pressed
                         if (addAnother) {
@@ -454,11 +453,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
                             wnd.close();
                         }
                     } else {
-                        if (obj.error.indexOf('duplicate key value') > -1) {
-                            Ext.ux.ToastMessage('Record with name "' + data.name + '" already exists. Enter a different name.', 'error');
-                        } else {
-                            Ext.ux.ToastMessage(obj.error, 'error');
-                        }
+                        Ext.ux.ToastMessage(obj.error, 'error');
                         console.error('[ERROR]: ' + url);
                         console.error(response);
                         wnd.setLoading(false);
@@ -478,11 +473,11 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
     },
 
     saveAndAdd: function(btn) {
-        this.saveLibrary(btn, true);
+        this.save(btn, true);
     },
 
     saveAndClose: function(btn) {
-        this.saveLibrary(btn);
+        this.save(btn);
     },
 
     initializeTooltips: function() {

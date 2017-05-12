@@ -4,6 +4,9 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
 
     config: {
         control: {
+            '#': {
+                activate: 'activateView'
+            },
             '#librariesTable': {
                 boxready: 'refresh',
                 refresh: 'refresh',
@@ -19,6 +22,10 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
                 change: 'changeFilter'
             }
         }
+    },
+
+    activateView: function() {
+        Ext.getStore('librariesStore').reload();
     },
 
     refresh: function(grid) {

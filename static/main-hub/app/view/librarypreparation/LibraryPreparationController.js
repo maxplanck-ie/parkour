@@ -9,8 +9,11 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
 
     config: {
         control: {
+            '#': {
+                activate: 'activateView'
+            },
             '#libraryPreparationTable': {
-                boxready: 'refresh',
+                // boxready: 'refresh',
                 refresh: 'refresh',
                 edit: 'editRecord',
                 itemcontextmenu: 'showContextMenu'
@@ -19,6 +22,10 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
                 click: 'downloadBenchtopProtocol'
             }
         }
+    },
+
+    activateView: function() {
+        Ext.getStore('libraryPreparationStore').reload();
     },
 
     refresh: function(grid) {
@@ -55,8 +62,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
     },
 
     editRecord: function(editor, context) {
-        var grid = context.grid,
-            record = context.record,
+        var record = context.record,
             changes = record.getChanges(),
             values = context.newValues,
             concentrationSample = values.concentration_sample,
@@ -91,8 +97,8 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
                 var obj = Ext.JSON.decode(response.responseText);
 
                 if (obj.success) {
-                    grid.fireEvent('refresh', grid);
-                    if (Ext.getStore('poolingStore').isLoaded()) Ext.getStore('poolingStore').reload();
+                    Ext.getStore('libraryPreparationStore').reload();
+                    // if (Ext.getStore('poolingStore').isLoaded()) Ext.getStore('poolingStore').reload();
                 } else {
                     Ext.ux.ToastMessage(obj.error, 'error');
                     console.error('[ERROR]: ' + url);

@@ -227,8 +227,8 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     id: 'downloadBenchtopProtocolLPBtn',
                     itemId: 'downloadBenchtopProtocolLPBtn',
                     text: 'Download Benchtop Protocol',
-                    iconCls: 'fa fa-file-excel-o fa-lg',
-                    disabled: true
+                    iconCls: 'fa fa-file-excel-o fa-lg'
+                    // disabled: true
                 }
             ]
         }]

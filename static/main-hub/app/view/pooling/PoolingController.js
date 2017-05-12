@@ -6,8 +6,11 @@ Ext.define('MainHub.view.pooling.PoolingController', {
 
     config: {
         control: {
+            '#': {
+                activate: 'activateView'
+            },
             '#poolingTable': {
-                boxready: 'refresh',
+                // boxready: 'refresh',
                 refresh: 'refresh',
                 groupcontextmenu: 'showGroupContextMenu',
                 beforeEdit: 'toggleEditors',
@@ -23,6 +26,10 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                 click: 'downloadPoolingTemplate'
             }
         }
+    },
+
+    activateView: function() {
+        Ext.getStore('poolingStore').reload();
     },
 
     refresh: function() {

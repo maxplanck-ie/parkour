@@ -4,6 +4,9 @@ Ext.define('MainHub.view.requests.RequestsController', {
 
     config: {
         control: {
+            '#': {
+                activate: 'activateView'
+            },
             '#requestsTable': {
                 boxready: 'boxready',
                 refresh: 'refresh',
@@ -18,12 +21,16 @@ Ext.define('MainHub.view.requests.RequestsController', {
         }
     },
 
+    activateView: function() {
+        Ext.getStore('requestsStore').reload();
+    },
+
     boxready: function() {
         // Hide the User column for non-administrators
         if (!USER_IS_STAFF) {
             Ext.getCmp('requestsTable').down('[dataIndex=user]').setVisible(false);
         }
-        Ext.getStore('requestsStore').reload();
+        // Ext.getStore('requestsStore').reload();
     },
 
     refresh: function() {

@@ -6,8 +6,8 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellsController', {
 
     config: {
         control: {
-            '#flowcellsTable': {
-                boxready: 'onFlowcellsTableBoxready'
+            '#': {
+                activate: 'activateView'
             },
             '#loadBtn': {
                 click: 'onLoadBtnClick'
@@ -15,13 +15,8 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellsController', {
         }
     },
 
-    onFlowcellsTableBoxready: function(grid) {
-        Ext.getStore('sequencersStore').load();
-        // Ext.getStore('readLengthsStore').reload(function(records, operation, success) {
-        //     // Remove record 'Other'
-        //     if (success) this.remove(this.findRecord('name', 'Other'));
-        // });
-        Ext.getStore('flowcellsStore').load();
+    activateView: function() {
+        Ext.getStore('flowcellsStore').reload();
     },
 
     onLoadBtnClick: function() {

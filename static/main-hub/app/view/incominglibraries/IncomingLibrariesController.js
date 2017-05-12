@@ -4,9 +4,11 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
 
     config: {
         control: {
+            '#': {
+                activate: 'activateView'
+            },
             '#incomingLibraries': {
                 refresh: 'refresh',
-                boxready: 'refresh',
                 itemcontextmenu: 'showContextMenu',
                 beforeedit: 'toggleEditors',
                 edit: 'editRecord'
@@ -23,9 +25,12 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
         }
     },
 
-    refresh: function(grid) {
-        // Reload the table
-        grid.getStore().reload();
+    activateView: function() {
+        Ext.getStore('incomingLibrariesStore').reload();
+    },
+
+    refresh: function() {
+        Ext.getStore('incomingLibrariesStore').reload();
     },
 
     showContextMenu: function(gridView, record, item, index, e) {
@@ -95,8 +100,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
     },
 
     editRecord: function(editor, context) {
-        var grid = Ext.getCmp('incomingLibraries'),
-            record = context.record,
+        var record = context.record,
             changes = record.getChanges(),
             values = context.newValues,
             url = 'quality_check/update/';
@@ -125,9 +129,9 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
             success: function(response) {
                 var obj = Ext.JSON.decode(response.responseText);
                 if (obj.success) {
-                    grid.fireEvent('refresh', grid);
-                    if (Ext.getStore('librariesStore').isLoaded()) Ext.getStore('librariesStore').reload();
-                    if (Ext.getStore('PoolingTree').isLoaded()) Ext.getStore('PoolingTree').reload();
+                    Ext.getStore('incomingLibrariesStore').reload();
+                    // if (Ext.getStore('librariesStore').isLoaded()) Ext.getStore('librariesStore').reload();
+                    // if (Ext.getStore('PoolingTree').isLoaded()) Ext.getStore('PoolingTree').reload();
                 } else {
                     Ext.ux.ToastMessage(obj.error, 'error');
                     console.error('[ERROR]: ' + url);

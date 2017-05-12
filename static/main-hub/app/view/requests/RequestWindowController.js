@@ -275,9 +275,8 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                 success: function(response) {
                     var obj = Ext.JSON.decode(response.responseText);
                     if (obj.success) {
-                        // var grid = Ext.getCmp('requestsTable');
-                        // grid.fireEvent('refresh', grid);
-                        MainHub.Utilities.reloadAllStores();
+                        Ext.getStore('requestsStore').reload();
+                        // MainHub.Utilities.reloadAllStores();
                         Ext.ux.ToastMessage('Request has been saved!');
                     } else {
                         Ext.ux.ToastMessage(obj.error, 'error');

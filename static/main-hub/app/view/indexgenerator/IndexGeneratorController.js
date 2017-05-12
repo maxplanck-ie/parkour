@@ -7,6 +7,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
     config: {
         control: {
             '#': {
+                activate: 'activateView',
                 boxready: 'boxready'
             },
             '#poolingTreePanel': {
@@ -27,6 +28,10 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
                 click: 'generateIndices'
             }
         }
+    },
+
+    activateView: function() {
+        Ext.getStore('PoolingTree').reload();
     },
 
     boxready: function() {
@@ -335,7 +340,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
                         Ext.getStore('PoolingTree').reload();
                         // if (Ext.getStore('libraryPreparationStore')) Ext.getStore('libraryPreparationStore').reload();
                         // if (Ext.getStore('poolingStore').isLoaded()) Ext.getStore('poolingStore').reload();
-                        MainHub.Utilities.reloadAllStores();
+                        // MainHub.Utilities.reloadAllStores();
                     } else {
                         Ext.getCmp('poolingContainer').setLoading(false);
                         Ext.ux.ToastMessage(obj.error, 'error');

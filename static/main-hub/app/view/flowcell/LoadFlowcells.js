@@ -29,6 +29,9 @@ Ext.define('MainHub.view.flowcell.LoadFlowcells', {
             trailingBufferZone: 100,
             leadingBufferZone: 100
         }],
+        viewConfig: {
+            loadMask: false
+        },
         store: 'flowcellsStore',
         sortableColumns: false,
         columns: [{
