@@ -86,6 +86,7 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                 viewConfig: {
                     loadMask: false
                 },
+                sortableColumns: false,
                 columns: {
                     items: [{
                             xtype: 'rownumberer',

@@ -5,6 +5,7 @@ from xlwt import Workbook, XFStyle, Formula
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 
@@ -37,6 +38,7 @@ def get_request(record, record_type):
 
 
 @login_required
+@staff_member_required
 def get_all(request):
     """ Get the list of all libraries. """
     error = ''
@@ -119,6 +121,7 @@ def get_all(request):
 
 
 @login_required
+@staff_member_required
 def edit(request):
     """ Edit Pooling object. """
     error = ''
@@ -178,6 +181,7 @@ def edit(request):
 
 @csrf_exempt
 @login_required
+@staff_member_required
 def download_benchtop_protocol(request):
     """ Generate Benchtop Protocol as XLS file for selected records. """
     response = HttpResponse(content_type='application/ms-excel')
@@ -307,6 +311,7 @@ def download_benchtop_protocol(request):
 
 @csrf_exempt
 @login_required
+@staff_member_required
 def download_pooling_template(request):
     response = HttpResponse(content_type='application/ms-excel')
     libraries = json.loads(request.POST.get('libraries', '[]'))
@@ -364,6 +369,7 @@ def download_pooling_template(request):
 
 @csrf_exempt
 @login_required
+@staff_member_required
 def upload_pooling_template(request):
     """ Upload a file and attach it to a given Pool. """
     pool_name = request.POST.get('pool_name')

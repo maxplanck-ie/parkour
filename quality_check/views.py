@@ -2,6 +2,9 @@ import json
 import logging
 
 from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
+
 from library.models import Library
 from sample.models import Sample
 from .forms import IncomingLibraryForm, IncomingSampleForm
@@ -9,6 +12,8 @@ from .forms import IncomingLibraryForm, IncomingSampleForm
 logger = logging.getLogger('db')
 
 
+@login_required
+@staff_member_required
 def update(request):
     """
     Update library or sample field(s). If a library/sample passes the quality
@@ -60,6 +65,8 @@ def update(request):
     return JsonResponse({'success': not error, 'error': error})
 
 
+@login_required
+@staff_member_required
 def update_all(request):
     """ Update a field in all records (apply to all). """
     error = ''

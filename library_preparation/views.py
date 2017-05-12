@@ -5,6 +5,7 @@ from xlwt import Workbook, XFStyle, Formula
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 
 from library_sample_shared.models import IndexType
 from sample.models import Sample
@@ -37,6 +38,7 @@ def get_indices_ids(sample):
 
 
 @login_required
+@staff_member_required
 def get_all(request):
     """ Get the list of all samples for Library Preparation. """
     error = ''
@@ -80,6 +82,7 @@ def get_all(request):
 
 
 @login_required
+@staff_member_required
 def update(request):
     """ Update a Library Preparation object. """
     error = ''
@@ -118,6 +121,8 @@ def update(request):
     return JsonResponse({'success': not error, 'error': error})
 
 
+@login_required
+@staff_member_required
 def update_all(request):
     """ Update a field in all records (apply to all). """
     error = ''
@@ -146,6 +151,7 @@ def update_all(request):
 
 @csrf_exempt
 @login_required
+@staff_member_required
 def download_benchtop_protocol(request):
     """ Generate Benchtop Protocol as XLS file for selected samples. """
     response = HttpResponse(content_type='application/ms-excel')

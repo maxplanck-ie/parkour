@@ -2,6 +2,7 @@ import logging
 
 from django.http import JsonResponse
 from django.views.generic.list import ListView
+from django.contrib.auth.decorators import login_required
 
 from common.utils import JSONResponseMixin
 from .models import Organism, LibraryProtocol, LibraryType, IndexType
@@ -24,6 +25,7 @@ class SimpleStoreView(JSONResponseMixin, ListView):
         return self.render_to_json_response(data, **response_kwargs)
 
 
+@login_required
 def get_organisms(request):
     """ Get the lost of organisms. """
     data = [
@@ -43,6 +45,7 @@ def get_organisms(request):
     return JsonResponse(data, safe=False)
 
 
+@login_required
 def get_index_types(request):
     """ Get the list of index types. """
     data = [
@@ -79,6 +82,7 @@ class IndexStoreView(JSONResponseMixin, ListView):
         return self.render_to_json_response(data, **response_kwargs)
 
 
+@login_required
 def get_library_protocols(request):
     """ Get the list of all library protocols. """
     data = []
@@ -114,6 +118,7 @@ def get_library_protocols(request):
     return JsonResponse(data, safe=False)
 
 
+@login_required
 def get_library_types(request):
     """ Get the list of all library types. """
     data = []

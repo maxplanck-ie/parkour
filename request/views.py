@@ -60,7 +60,7 @@ def get_all(request):
 
 @login_required
 def get_libraries_and_samples(request):
-    """ Get the list of all libraries and samples in a given request. """
+    """ Get the list of all libraries and samples for a given request. """
     request_id = request.GET.get('request_id')
     req = Request.objects.get(id=request_id)
 
@@ -84,7 +84,7 @@ def get_libraries_and_samples(request):
         for sample in req.samples.all()
     ]
 
-    data = sorted(libraries + samples, key=lambda x: x['barcode'])
+    data = sorted(libraries + samples, key=lambda x: x['barcode'][:3])
 
     return JsonResponse({'success': True, 'data': data})
 

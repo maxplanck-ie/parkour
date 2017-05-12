@@ -1,12 +1,13 @@
+import logging
+import json
+
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 
 from .models import Library
 from request.models import Request
 from .forms import LibraryForm
-
-import logging
-import json
 
 logger = logging.getLogger('db')
 
@@ -27,8 +28,11 @@ def get_all(request):
             ).prefetch_related('libraries', 'samples')
 
         for req in requests:
-            libraries = req.libraries.all()
-            samples = req.samples.all()
+            if quality_check and not request.user.is_staff:
+                libraries = samples = []
+            else:
+                libraries = req.libraries.all()
+                samples = req.samples.all()
 
             if quality_check:
                 libraries = [l for l in libraries if l.status == 1]
@@ -152,6 +156,7 @@ def get_all(request):
 
 
 @login_required
+@staff_member_required
 def save_library(request):
     """ Add new library or update an existing one. """
     error = []
@@ -204,6 +209,7 @@ def save_library(request):
 
 
 @login_required
+@staff_member_required
 def delete_library(request):
     """ Delete library with a given id. """
     error = ''

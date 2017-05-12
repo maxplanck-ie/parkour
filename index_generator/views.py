@@ -1,5 +1,9 @@
+import logging
+import json
+
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Prefetch, Q
 
 from request.models import Request
@@ -12,13 +16,11 @@ from pooling.models import Pooling
 from .models import Pool
 from .index_generator import IndexGenerator
 
-import logging
-import json
-
 logger = logging.getLogger('db')
 
 
 @login_required
+@staff_member_required
 def pooling_tree(request):
     """ Get libraries ready for pooling. """
     children = []
@@ -108,6 +110,8 @@ def pooling_tree(request):
                     'leaf': True
                 })
 
+        records = sorted(records, key=lambda x: x['barcode'][3:])
+
         if records:
             children.append({
                 'text': req.name,
@@ -115,6 +119,8 @@ def pooling_tree(request):
                 'iconCls': 'x-fa fa-pencil-square-o',
                 'children': records
             })
+
+    children = sorted(children, key=lambda x: x['text'])
 
     data = {
         'text': '.',
@@ -125,6 +131,7 @@ def pooling_tree(request):
 
 
 @login_required
+@staff_member_required
 def save_pool(request):
     """
     Create a pool after generating indices, add libraries and "converted"
@@ -202,6 +209,7 @@ def save_pool(request):
 
 
 @login_required
+@staff_member_required
 def update_read_length(request):
     """ Update Read Length for a given librray or sample. """
     error = ''
@@ -232,6 +240,7 @@ def update_read_length(request):
 
 
 @login_required
+@staff_member_required
 def update_index_type(request):
     """ Update Index Type for a given sample. """
     error = ''
@@ -256,6 +265,7 @@ def update_index_type(request):
 
 
 @login_required
+@staff_member_required
 def generate_indices(request):
     """ Generate indices for given libraries and samples. """
     error = ''

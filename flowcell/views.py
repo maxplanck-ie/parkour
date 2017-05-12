@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 
 from index_generator.models import Pool
 from library_sample_shared.models import ReadLength
@@ -14,6 +15,7 @@ logger = logging.getLogger('db')
 
 
 @login_required
+@staff_member_required
 def get_all(request):
     """ Get the list of all Flowcells. """
     data = []
@@ -48,6 +50,7 @@ def get_all(request):
 
 
 @login_required
+@staff_member_required
 def sequencer_list(request):
     """ Get the list of all sequencers. """
 
@@ -65,6 +68,7 @@ def sequencer_list(request):
 
 
 @login_required
+@staff_member_required
 def pool_list(request):
     """ Get the list of pools for loading flowcells. """
     data = []
@@ -100,6 +104,7 @@ def pool_list(request):
 
 
 @login_required
+@staff_member_required
 def pool_info(request):
     """ Get additional information for a given pool. """
     data = []
@@ -132,6 +137,7 @@ def pool_info(request):
 
 
 @login_required
+@staff_member_required
 def save(request):
     """ Save a new flowcell. """
     error = ''
