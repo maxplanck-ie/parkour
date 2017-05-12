@@ -48,8 +48,17 @@ Ext.define('MainHub.view.pooling.Pooling', {
             ftype: 'grouping',
             collapsible: false,
             groupHeaderTpl: [
-                '<strong>{name} | Pool Size: {children:this.poolSize} M reads {children:this.renderDownloadBtn}</strong>',
+                '<strong class="{children:this.getHeaderClass}">{name} | Pool Size: {children:this.poolSize} M reads {children:this.renderDownloadBtn}</strong>',
                 {
+                    getHeaderClass: function(children) {
+                        var cls = 'pool-header-green',
+                            missingSamples = 0;
+                        $.each(children, function(index, item) {
+                            if (item.get('status') < 3) missingSamples++;
+                        });
+                        if (missingSamples > 0) cls = 'pool-header-red';
+                        return cls;
+                    },
                     poolSize: function(children) {
                         return Ext.sum(Ext.pluck(Ext.pluck(children, 'data'), 'sequencing_depth'));
                     },

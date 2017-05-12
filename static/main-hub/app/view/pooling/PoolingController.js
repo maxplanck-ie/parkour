@@ -80,8 +80,8 @@ Ext.define('MainHub.view.pooling.PoolingController', {
 
         // Set Library Concentration C1
         if (values.concentration > 0 && values.mean_fragment_size > 0 &&
-            Object.keys(changes).indexOf('concentration_c1') == -1) {
-            concentrationC1 = ((values.concentration / (values.mean_fragment_size * 650)) * 10**6).toFixed(1);
+            Object.keys(changes).indexOf('concentration_c1') === -1) {
+            concentrationC1 = ((values.concentration / (values.mean_fragment_size * 650)) * Math.pow(10, 6)).toFixed(1);
             params['concentration_c1'] = concentrationC1;
         }
 

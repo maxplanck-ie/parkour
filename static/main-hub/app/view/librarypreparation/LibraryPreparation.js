@@ -23,7 +23,8 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
         },
         padding: 15,
         viewConfig: {
-            loadMask: false
+            loadMask: false,
+            stripeRows: false
             // markDirty: false
         },
         store: 'libraryPreparationStore',
@@ -33,9 +34,10 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                 width: 80
             },
             items: [{
-                    xtype: 'fiddlecheckcolumn',
-                    text: 'Selected',
+                    xtype: 'checkcolumn',
+                    itemId: 'checkColumn',
                     dataIndex: 'selected',
+                    tdCls: 'no-dirty',
                     width: 40
                 },
                 {
