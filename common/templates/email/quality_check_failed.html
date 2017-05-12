@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}
+{% trans "You're receiving this email because the Quality check has failed for the following record:" %}
+{% blocktrans %}
+Name: {{ record_name }}
+Barcode: {{ record_barcode }}
+{% endblocktrans %}
+--
+{% trans "Parkour Support" %}
+{% endautoescape %}

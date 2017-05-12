@@ -4,6 +4,9 @@ import logging
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from django.template.loader import render_to_string
+from django.conf import settings
+from django.core.mail import send_mail
 
 from library.models import Library
 from sample.models import Sample
@@ -47,15 +50,26 @@ def update(request):
                     if int(qc_result) == 1:
                         # TODO@me: use another form to make sure
                         # all Facility fields are not empty
-                        record.status = 2
+                        record.status = 2   # passed
                         record.save(update_fields=['status'])
                     elif int(qc_result) == -2:
-                        record.status = -2
+                        record.status = -2  # compromised
                         record.save(update_fields=['status'])
                     else:
-                        record.status = -1
+                        record.status = -1  # failed
                         record.save(update_fields=['status'])
-                        # TODO@me: send email
+
+                        # Send a notification email
+                        send_mail(
+                            subject='[Parkour] Quality check failed',
+                            message=render_to_string(
+                                'email/quality_check_failed.html', {
+                                    'record_name': record.name,
+                                    'record_barcode': record.barcode,
+                                }),
+                            from_email=settings.SERVER_EMAIL,
+                            recipient_list=[request.user.email],
+                        )
             else:
                 error = str(form.errors)
                 logger.debug(form.errors.as_data())
