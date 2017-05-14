@@ -12,6 +12,14 @@ Ext.define('MainHub.model.libraries.IndexType', {
         {
             name: 'indexReads',
             type: 'int'
+        },
+        {
+            name: 'isDual',
+            type: 'bool'
+        },
+        {
+            name: 'indexLength',
+            type: 'int'
         }
     ]
 });

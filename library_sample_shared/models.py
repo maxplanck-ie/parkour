@@ -65,6 +65,15 @@ class IndexType(models.Model):
     name = models.CharField('Name', max_length=100)
     is_index_i7 = models.BooleanField('Is Index I7?', default=False)
     is_index_i5 = models.BooleanField('Is Index I5?', default=False)
+    index_length = models.CharField(
+        'Index Length',
+        max_length=1,
+        choices=(
+            ('6', '6'),
+            ('8', '8'),
+        ),
+        default='8',
+    )
 
     indices_i7 = models.ManyToManyField(
         IndexI7,

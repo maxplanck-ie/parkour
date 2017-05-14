@@ -403,9 +403,9 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
     },
 
     renderCell: function(val, meta) {
-        if (val == 'G' || val == 'T') {
+        if (val === 'G' || val === 'T') {
             meta.tdStyle = 'background-color:#dcedc8';
-        } else if (val == 'A' || val == 'C') {
+        } else if (val === 'A' || val === 'C') {
             meta.tdStyle = 'background-color:#ef9a9a';
         }
         meta.tdCls = 'nucleotide';
@@ -420,10 +420,10 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
 
         for (var i = 0; i < values.length; i++) {
             var nuc = values[i];
-            if (nuc != ' ' && typeof nuc != 'undefined') {
-                if (nuc == 'G' || nuc == 'T') {
+            if (nuc !== ' ' && typeof nuc !== 'undefined') {
+                if (nuc === 'G' || nuc === 'T') {
                     diversity.green += records[i].get('sequencingDepth');
-                } else if (nuc == 'A' || nuc == 'C') {
+                } else if (nuc === 'A' || nuc === 'C') {
                     diversity.red += records[i].get('sequencingDepth');
                 }
             }
@@ -438,7 +438,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             totalSequencingDepth = 0;
 
         if (value.green > 0 || value.red > 0) {
-            if (dataIndex.split('_')[0] == 'indexI7') {
+            if (dataIndex.split('_')[0] === 'indexI7') {
                 // Consider only non empty Index I7 indices
                 grid.getStore().each(function(record) {
                     if (record.get('indexI7') !== '') {
@@ -463,7 +463,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                 result += '<br>!';
 
                 // Remember the cell in order to highlight it after summary refresh
-                if (grid.problematicCycles.indexOf(this.id) == -1) {
+                if (grid.problematicCycles.indexOf(this.id) === -1) {
                     grid.problematicCycles.push(this.id);
                 }
             }

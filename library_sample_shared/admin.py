@@ -29,6 +29,7 @@ class IndexTypeAdmin(admin.ModelAdmin):
         (None, {
             'fields': (
                 'name',
+                'index_length',
                 'is_index_i7',
                 'is_index_i5',
                 'indices_i7',

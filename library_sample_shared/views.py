@@ -53,7 +53,9 @@ def get_index_types(request):
             'id': index_type.pk,
             'name': index_type.name,
             'indexReads': [index_type.is_index_i7,
-                           index_type.is_index_i5].count(True)
+                           index_type.is_index_i5].count(True),
+            'isDual': index_type.is_index_i7 and index_type.is_index_i5,
+            'indexLength': int(index_type.get_index_length_display()),
         }
         for index_type in IndexType.objects.all()
     ]
