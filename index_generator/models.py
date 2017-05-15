@@ -12,9 +12,16 @@ class Pool(models.Model):
     )
     libraries = models.ManyToManyField(Library, related_name='pool', blank=True)
     samples = models.ManyToManyField(Sample, related_name='pool', blank=True)
-    size = models.PositiveSmallIntegerField('Pool Size', default=0, blank=True)
     loaded = models.PositiveSmallIntegerField('Loaded', default=0, blank=True)
     file = models.FileField(upload_to='pools/%Y/%m/%d/', blank=True, null=True)
+
+    def get_size(self):
+        size = 0
+        for library in self.libraries.all():
+            size += library.sequencing_depth
+        for sample in self.samples.all():
+            size += sample.sequencing_depth
+        return size
 
     def __str__(self):
         return self.name

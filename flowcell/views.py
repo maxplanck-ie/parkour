@@ -37,7 +37,7 @@ def get_all(request):
                 'laneName': lane.name,
                 'pool': pool.id,
                 'poolName': pool.name,
-                'poolSize': pool.size,
+                'poolSize': pool.get_size(),
                 'readLengthName': read_length_name,
                 'sequencer': flowcell.sequencer.pk,
                 'sequencerName': flowcell.sequencer.name,
@@ -83,7 +83,7 @@ def pool_list(request):
                 [s.status for s in samples] >= [4] * pool.samples.count():
             is_ok = True
 
-        if is_ok and pool.size > pool.loaded:
+        if is_ok and pool.get_size() > pool.loaded:
             # Get Pool's Read Length
             if any(libraries):
                 src_id = libraries[0].read_length_id
@@ -96,7 +96,7 @@ def pool_list(request):
                 'id': pool.id,
                 'readLength': src.id,
                 'readLengthName': src.name,
-                'size': pool.size - pool.loaded,
+                'size': pool.get_size() - pool.loaded,
                 'loaded': pool.loaded
             })
 
