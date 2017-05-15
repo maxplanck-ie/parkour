@@ -126,13 +126,17 @@ def edit(request):
     """ Edit Pooling object. """
     error = ''
 
-    library_id = int(request.POST.get('library_id'))
-    sample_id = int(request.POST.get('sample_id'))
-    qc_result = request.POST.get('qc_result')
-    concentration = float(request.POST.get('concentration'))
+    library_id = request.POST.get('library_id', '')
+    sample_id = request.POST.get('sample_id', '')
+    qc_result = request.POST.get('qc_result', None)
 
     try:
-        if library_id == 0:
+        try:
+            concentration = float(request.POST.get('concentration'))
+        except ValueError:
+            raise ValueError('Library Concentartion is not set.')
+
+        if library_id == '0' or library_id == 0:
             obj = Pooling.objects.get(sample_id=sample_id)
             record = Sample.objects.get(pk=sample_id)
 

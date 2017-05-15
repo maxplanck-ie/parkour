@@ -59,4 +59,5 @@ class Pooling(models.Model):
         verbose_name_plural = 'Pooling'
 
     def __str__(self):
-        return self.library.name if self.library else self.sample.name
+        obj = self.library if self.library else self.sample
+        return '%s (%s)' % (obj.name, obj.pool.get())

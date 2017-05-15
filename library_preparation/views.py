@@ -87,21 +87,22 @@ def update(request):
     """ Update a Library Preparation object. """
     error = ''
 
+    sample_id = request.POST.get('sample_id', '')
+    qc_result = request.POST.get('qc_result', None)
+
     try:
-        sample_id = request.POST.get('sample_id')
-        qc_result = request.POST.get('qc_result')
         obj = LibraryPreparation.objects.get(sample_id=sample_id)
         form = LibraryPreparationForm(request.POST, instance=obj)
-    except (ValueError, LibraryPreparation.DoesNotExist) as e:
-        error = str(e)
-        logger.exception(e)
-    else:
+
         if form.is_valid():
             form.save()
 
             if qc_result:
                 record = Sample.objects.get(pk=sample_id)
                 if qc_result == '1':
+                    if not obj.concentration_library:
+                        raise ValueError('Library Concentartion is not set.')
+
                     record.status = 3
                     record.save(update_fields=['status'])
 
@@ -117,6 +118,10 @@ def update(request):
         else:
             error = str(form.errors)
             logger.debug(form.errors)
+
+    except Exception as e:
+        logger.exception(e)
+        error = str(e)
 
     return JsonResponse({'success': not error, 'error': error})
 

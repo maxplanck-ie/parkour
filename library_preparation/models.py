@@ -58,4 +58,5 @@ class LibraryPreparation(models.Model):
         verbose_name_plural = 'Library Preparation'
 
     def __str__(self):
-        return self.sample.name
+        return '%s (Request: %s)' % (self.sample.name,
+                                     self.sample.request.get())
