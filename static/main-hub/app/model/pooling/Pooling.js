@@ -38,6 +38,10 @@ Ext.define('MainHub.model.pooling.Pooling', {
             type: 'string'
         },
         {
+            name: 'poolSize',
+            type: 'string'
+        },
+        {
             name: 'barcode',
             type: 'string'
         },

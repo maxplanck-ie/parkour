@@ -1,4 +1,4 @@
-Ext.define('MainHub.model.libraries.Index', {
+Ext.define('MainHub.model.indexgenerator.PoolSize', {
     extend: 'MainHub.model.Base',
 
     fields: [{
@@ -10,8 +10,12 @@ Ext.define('MainHub.model.libraries.Index', {
             type: 'string'
         },
         {
-            name: 'index',
-            type: 'string'
+            name: 'multiplier',
+            type: 'int'
+        },
+        {
+            name: 'size',
+            type: 'int'
         }
     ]
 });

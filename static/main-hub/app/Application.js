@@ -33,6 +33,7 @@ Ext.define('MainHub.Application', {
         'libraries.NucleicAcidTypes',
         'libraries.RNAQuality',
         'incominglibraries.IncomingLibraries',
+        'indexgenerator.PoolSizes',
         'requests.LibrariesInRequest',
         'indexgenerator.PoolingTree',
         'librarypreparation.LibraryPreparation',

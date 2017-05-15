@@ -29,69 +29,17 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                     title: 'Libraries and Samples for Pooling',
                     items: [{
                         xtype: 'combobox',
-                        id: 'poolSize',
-                        itemId: 'poolSize',
+                        id: 'poolSizeCb',
+                        itemId: 'poolSizeCb',
                         queryMode: 'local',
                         displayField: 'name',
-                        valueField: 'value',
+                        valueField: 'id',
                         forceSelection: true,
                         cls: 'panel-header-combobox',
                         fieldLabel: 'Pool Size',
                         labelWidth: 65,
                         width: 170,
-
-                        store: Ext.create('Ext.data.Store', {
-                            fields: [{
-                                    name: 'value',
-                                    type: 'int'
-                                },
-                                {
-                                    name: 'name',
-                                    type: 'string'
-                                }
-                            ],
-                            data: [{
-                                    value: 25,
-                                    name: '25 M'
-                                },
-                                {
-                                    value: 130,
-                                    name: '130 M'
-                                },
-                                {
-                                    value: 200,
-                                    name: '200 M'
-                                },
-                                {
-                                    value: 400,
-                                    name: '400 M'
-                                },
-                                {
-                                    value: 600,
-                                    name: '600 M'
-                                },
-                                {
-                                    value: 800,
-                                    name: '800 M'
-                                },
-                                {
-                                    value: 1000,
-                                    name: '1000 M'
-                                },
-                                {
-                                    value: 1200,
-                                    name: '1200 M'
-                                },
-                                {
-                                    value: 1400,
-                                    name: '1400 M'
-                                },
-                                {
-                                    value: 1600,
-                                    name: '1600 M'
-                                }
-                            ]
-                        })
+                        store: 'poolSizesStore'
                     }]
                 },
                 viewConfig: {

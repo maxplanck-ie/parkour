@@ -21,18 +21,16 @@ def get_indices_ids(sample):
     try:
         index_type = IndexType.objects.get(pk=sample.index_type.pk)
         index_i7 = index_type.indices_i7.get(index=sample.index_i7)
+        index_i7_id = index_i7.index_id
     except Exception:
         index_i7_id = ''
-    else:
-        index_i7_id = index_i7.index_id
 
     try:
         index_type = IndexType.objects.get(pk=sample.index_type.pk)
         index_i5 = index_type.indices_i5.get(index=sample.index_i5)
+        index_i5_id = index_i5.index_id
     except Exception:
         index_i5_id = ''
-    else:
-        index_i5_id = index_i5.index_id
 
     return index_i7_id, index_i5_id
 
@@ -48,22 +46,19 @@ def get_all(request):
 
     for obj in objects:
         req = obj.sample.request.get()
-        if not request.user.is_staff:
-            user_id = req.user_id
-            if user_id != request.user.id:
-                obj = None
 
         if obj and (obj.sample.status == 2 or obj.sample.status == -2):
-            pool = obj.sample.pool.get()
+            # pool = obj.sample.pool.get()
+            pool = obj.sample.pool.filter()[0]
             index_i7_id, index_i5_id = get_indices_ids(obj.sample)
             data.append({
                 'active': False,
                 'name': obj.sample.name,
                 'requestName': req.name,
                 'poolName': pool.name,
-                'sampleId': obj.sample.id,
+                'sampleId': obj.sample.pk,
                 'barcode': obj.sample.barcode,
-                'libraryProtocol': obj.sample.library_protocol.id,
+                'libraryProtocol': obj.sample.library_protocol.pk,
                 'libraryProtocolName': obj.sample.library_protocol.name,
                 'concentration_sample': obj.sample.concentration,
                 'starting_amount': obj.starting_amount,

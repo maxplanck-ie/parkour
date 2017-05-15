@@ -13,7 +13,7 @@ from library.models import Library
 from sample.models import Sample
 from library_preparation.models import LibraryPreparation
 from pooling.models import Pooling
-from .models import Pool
+from .models import Pool, PoolSize
 from .index_generator import IndexGenerator
 
 logger = logging.getLogger('db')
@@ -132,6 +132,23 @@ def pooling_tree(request):
 
 @login_required
 @staff_member_required
+def get_pool_sizes(request):
+    """ Get a list of all pool sizes. """
+    data = [
+        {
+            'id': pool_size.pk,
+            'name': '%ix%i' % (pool_size.multiplier, pool_size.size),
+            'multiplier': pool_size.multiplier,
+            'size': pool_size.size,
+        }
+        for pool_size in PoolSize.objects.all()
+    ]
+    data = sorted(data, key=lambda x: x['size'] * x['multiplier'])
+    return JsonResponse(data, safe=False)
+
+
+@login_required
+@staff_member_required
 def save_pool(request):
     """
     Create a pool after generating indices, add libraries and "converted"
@@ -141,6 +158,7 @@ def save_pool(request):
     error = ''
 
     if request.method == 'POST':
+        pool_size_id = request.POST.get('pool_size_id', None)
         library_ids = [
             library_id
             for library_id in json.loads(request.POST.get('libraries', '[]'))
@@ -153,7 +171,7 @@ def save_pool(request):
                 raise ValueError('Neither libraries nor samples have been ' +
                                  'provided.')
 
-            pool = Pool(user=request.user)
+            pool = Pool(user=request.user, size_id=pool_size_id)
             pool.save()
             pool.libraries.add(*library_ids)
             pool.samples.add(*sample_ids)

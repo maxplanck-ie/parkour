@@ -20,23 +20,6 @@ from .forms import PoolingForm
 logger = logging.getLogger('db')
 
 
-def get_request(record, record_type):
-    """ Get request for a current library/sample. """
-
-    if record_type == 'L':
-        requests = Request.objects.all().prefetch_related('libraries')
-        for request in requests:
-            records = request.libraries.all()
-            if record in records:
-                return request
-    else:
-        requests = Request.objects.all().prefetch_related('samples')
-        for request in requests:
-            records = request.samples.all()
-            if record in records:
-                return request
-
-
 @login_required
 @staff_member_required
 def get_all(request):
@@ -47,6 +30,7 @@ def get_all(request):
     pools = Pool.objects.prefetch_related('libraries', 'samples')
     for pool in pools:
         libraries_in_pool = []
+        pool_size = '%ix%i' % (pool.size.multiplier, pool.size.size)
 
         libraries = pool.libraries.filter(status=2)
         samples = pool.samples.filter(Q(status=3) | Q(status=2) | Q(status=-2))
@@ -57,7 +41,7 @@ def get_all(request):
         # Native libraries
         for library in libraries:
             pooling_obj = Pooling.objects.get(library=library)
-            req = get_request(library, 'L')
+            req = library.request.get()
             percentage_library = \
                 library.sequencing_depth / sum_sequencing_depth
 
@@ -68,6 +52,7 @@ def get_all(request):
                 'barcode': library.barcode,
                 'poolId': pool.id,
                 'poolName': pool.name,
+                'poolSize': pool_size,
                 'requestId': req.id,
                 'requestName': req.name,
                 'concentration': library.concentration,
@@ -84,7 +69,7 @@ def get_all(request):
         # Converted samples (sample -> library)
         for sample in samples:
             lib_prep_obj = LibraryPreparation.objects.get(sample=sample)
-            req = get_request(sample, 'S')
+            req = sample.request.get()
             percentage_library = \
                 sample.sequencing_depth / sum_sequencing_depth
 
@@ -101,6 +86,7 @@ def get_all(request):
                 'barcode': sample.barcode,
                 'poolId': pool.pk,
                 'poolName': pool.name,
+                'poolSize': pool_size,
                 'requestId': req.pk,
                 'requestName': req.name,
                 'concentration': lib_prep_obj.concentration_library,
