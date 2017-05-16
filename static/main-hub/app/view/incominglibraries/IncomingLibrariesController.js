@@ -74,20 +74,37 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
     },
 
     applyToAll: function(record, dataIndex) {
+        var me = this;
         var store = Ext.getStore('incomingLibrariesStore');
-
         var allowedColumns = ['dilution_factor', 'concentration_facility',
             'concentration_method_facility', 'sample_volume_facility',
             'amount_facility', 'size_distribution_facility', 'comments_facility',
             'qpcr_result_facility', 'rna_quality_facility'
         ];
+        var ngFormulaDataIndices = ['dilution_factor',
+            'concentration_facility', 'sample_volume_facility'];
 
         if (typeof dataIndex !== 'undefined' && allowedColumns.indexOf(dataIndex) !== -1) {
             store.each(function(item) {
                 if (item.get('requestId') === record.get('requestId') && item !== record) {
                     item.set(dataIndex, record.get(dataIndex));
+
+                    // Calculate Amount (facility)
+                    if (ngFormulaDataIndices.indexOf(dataIndex) !== -1) {
+                        var dilutionFactor = item.get('dilution_factor');
+                        var concentrationFacility = item.get('concentration_facility');
+                        var sampleVolumeFacility = item.get('sample_volume_facility');
+                        if (dilutionFactor && concentrationFacility && sampleVolumeFacility) {
+                            var amountFacility = parseFloat(dilutionFactor) *
+                                parseFloat(concentrationFacility) *
+                                parseFloat(sampleVolumeFacility);
+                            item.set('amount_facility', amountFacility);
+                        }
+                    }
                 }
             });
+
+            // Send the changes to the server
             store.sync({
                 failure: function(batch, options) {
                     var error = batch.operations[0].getError();
@@ -112,10 +129,11 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
 
         // Compute Amount
         if (Object.keys(changes).indexOf('amount_facility') === -1 &&
-            values.concentration_facility && values.sample_volume_facility) {
-            var amountFacility = parseFloat(values.concentration_facility) *
+            values.dilution_factor && values.concentration_facility &&
+            values.sample_volume_facility) {
+            var amountFacility = parseFloat(values.dilution_factor) *
+                parseFloat(values.concentration_facility) *
                 parseFloat(values.sample_volume_facility);
-            if (values.dilution_factor) amountFacility *= parseFloat(values.dilution_factor);
             params['amount_facility'] = amountFacility;
         }
 
