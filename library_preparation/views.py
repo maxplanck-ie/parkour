@@ -134,12 +134,10 @@ def update_all(request):
                 sample_id = item['sample_id']
                 obj = LibraryPreparation.objects.get(sample_id=sample_id)
                 changed_value = item['changed_value']
-                form = LibraryPreparationForm(changed_value, instance=obj)
-
-                if form.is_valid():
-                    form.save()
-                else:
-                    raise ValueError(form.errors)
+                for key, value in changed_value.items():
+                    if hasattr(obj, key):
+                        setattr(obj, key, value)
+                obj.save()
 
             except Exception as e:
                 error = 'Some of the libraries were not updated ' + \

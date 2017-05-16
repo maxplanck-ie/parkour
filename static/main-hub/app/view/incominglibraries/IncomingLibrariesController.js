@@ -48,6 +48,31 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
         }).showAt(e.getXY());
     },
 
+    toggleEditors: function(editor, context) {
+        var record = context.record,
+            qPCRResultEditor = Ext.getCmp('qPCRResultEditor'),
+            rnaQualityEditor = Ext.getCmp('rnaQualityIncomingEditor'),
+            nucleicAcidTypesStore = Ext.getStore('nucleicAcidTypesStore');
+
+        // Toggle qPCR Result and RNA Quality
+        if (record.get('recordType') === 'L') {
+            qPCRResultEditor.enable();
+            rnaQualityEditor.disable();
+        } else {
+            qPCRResultEditor.disable();
+
+            var nat = nucleicAcidTypesStore.findRecord('id',
+                record.get('nucleicAcidTypeId')
+            );
+
+            if (nat !== null && nat.get('type') === 'RNA') {
+                rnaQualityEditor.enable();
+            } else {
+                rnaQualityEditor.disable();
+            }
+        }
+    },
+
     applyToAll: function(record, dataIndex) {
         var store = Ext.getStore('incomingLibrariesStore');
 
@@ -71,31 +96,6 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
                     }, 100);
                 }
             });
-        }
-    },
-
-    toggleEditors: function(editor, context) {
-        var record = context.record,
-            qPCRResultEditor = Ext.getCmp('qPCRResultEditor'),
-            rnaQualityEditor = Ext.getCmp('rnaQualityIncomingEditor'),
-            nucleicAcidTypesStore = Ext.getStore('nucleicAcidTypesStore');
-
-        // Toggle qPCR Result and RNA Quality
-        if (record.get('recordType') === 'L') {
-            qPCRResultEditor.enable();
-            rnaQualityEditor.disable();
-        } else {
-            qPCRResultEditor.disable();
-
-            var nat = nucleicAcidTypesStore.findRecord('id',
-                record.get('nucleicAcidTypeId')
-            );
-
-            if (nat !== null && nat.get('type') === 'RNA') {
-                rnaQualityEditor.enable();
-            } else {
-                rnaQualityEditor.disable();
-            }
         }
     },
 

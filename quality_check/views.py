@@ -8,6 +8,7 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from django.core.mail import send_mail
 
+from library_sample_shared.models import ConcentrationMethod
 from library.models import Library
 from sample.models import Sample
 from .forms import IncomingLibraryForm, IncomingSampleForm
@@ -60,16 +61,16 @@ def update(request):
                         record.save(update_fields=['status'])
 
                         # Send a notification email
-                        send_mail(
-                            subject='[Parkour] Quality check failed',
-                            message=render_to_string(
-                                'email/quality_check_failed.html', {
-                                    'record_name': record.name,
-                                    'record_barcode': record.barcode,
-                                }),
-                            from_email=settings.SERVER_EMAIL,
-                            recipient_list=[request.user.email],
-                        )
+                        # send_mail(
+                        #     subject='[Parkour] Quality check failed',
+                        #     message=render_to_string(
+                        #         'email/quality_check_failed.html', {
+                        #             'record_name': record.name,
+                        #             'record_barcode': record.barcode,
+                        #         }),
+                        #     from_email=settings.SERVER_EMAIL,
+                        #     recipient_list=[request.user.email],
+                        # )
             else:
                 error = str(form.errors)
                 logger.debug(form.errors.as_data())
@@ -92,17 +93,19 @@ def update_all(request):
                 changed_value = item['changed_value']
                 if item['record_type'] == 'L':
                     record = Library.objects.get(pk=item['record_id'])
-                    form = IncomingLibraryForm(changed_value, instance=record)
                 elif item['record_type'] == 'S':
                     record = Sample.objects.get(pk=item['record_id'])
-                    form = IncomingSampleForm(changed_value, instance=record)
                 else:
                     raise ValueError('Record type is not L/S or missing.')
 
-                if form.is_valid():
-                    form.save()
-                else:
-                    raise ValueError(form.errors)
+                for key, value in changed_value.items():
+                    if hasattr(record, key):
+                        if key == 'concentration_method_facility':
+                            m = ConcentrationMethod.objects.get(pk=value)
+                            setattr(record, key, m)
+                        else:
+                            setattr(record, key, value)
+                record.save()
 
             except Exception as e:
                 error = 'Some of the records were not updated (see the logs).'
