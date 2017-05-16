@@ -57,7 +57,9 @@ Ext.define('MainHub.view.pooling.Pooling', {
                         var cls = 'pool-header-green',
                             missingSamples = 0;
                         $.each(children, function(index, item) {
-                            if (item.get('status') < 3) missingSamples++;
+                            if (item.get('sampleId') !== 0 && item.get('status') < 3) {
+                                missingSamples++;
+                            }
                         });
                         if (missingSamples > 0) cls = 'pool-header-red';
                         return cls;

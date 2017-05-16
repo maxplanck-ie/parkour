@@ -4,7 +4,7 @@ from flowcell.models import Sequencer, Flowcell
 
 @admin.register(Sequencer)
 class SequencerAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('name', 'lanes', 'lane_capacity',)
 
 
 @admin.register(Flowcell)

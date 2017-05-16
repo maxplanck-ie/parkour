@@ -1,13 +1,38 @@
 Ext.define('MainHub.model.flowcell.Pool', {
     extend: 'MainHub.model.Base',
 
-    fields: [
-        {  name: 'name',            type: 'string'  },
-        {  name: 'id',              type: 'int'     },
-        {  name: 'readLength',      type: 'int'     },
-        {  name: 'readLengthName',  type: 'string'  },
-        {  name: 'size',            type: 'int'     },
-        {  name: 'loaded',          type: 'int'     }
+    fields: [{
+            name: 'name',
+            type: 'string'
+        },
+        {
+            name: 'id',
+            type: 'int'
+        },
+        {
+            name: 'readLength',
+            type: 'int'
+        },
+        {
+            name: 'readLengthName',
+            type: 'string'
+        },
+        {
+            name: 'size',
+            type: 'int'
+        },
+        {
+            name: 'poolSize',
+            type: 'int'
+        },
+        {
+            name: 'poolSizeName',
+            type: 'string'
+        },
+        {
+            name: 'loaded',
+            type: 'int'
+        }
     ],
 
     disabled: false,

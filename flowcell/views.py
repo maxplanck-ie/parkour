@@ -83,22 +83,27 @@ def pool_list(request):
                 [s.status for s in samples] >= [4] * pool.samples.count():
             is_ok = True
 
-        if is_ok and pool.get_size() > pool.loaded:
-            # Get Pool's Read Length
-            if any(libraries):
-                src_id = libraries[0].read_length_id
-            else:
-                src_id = samples[0].read_length_id
-            src = ReadLength.objects.get(id=src_id)
+        # if is_ok and pool.get_size() > pool.loaded:
+        if is_ok and pool.size.multiplier > pool.loaded:
+            # Get Read Length
+            read_length_id = libraries[0].read_length_id if any(libraries) \
+                else samples[0].read_length_id
+            read_length = ReadLength.objects.get(pk=read_length_id)
+
+            pool_size = pool.size.multiplier - pool.loaded
 
             data.append({
                 'name': pool.name,
-                'id': pool.id,
-                'readLength': src.id,
-                'readLengthName': src.name,
-                'size': pool.get_size() - pool.loaded,
+                'id': pool.pk,
+                'readLength': read_length.pk,
+                'readLengthName': read_length.name,
+                'poolSize': pool.size.pk,
+                'poolSizeName': '%ix%i' % (pool_size, pool.size.size),
+                'size': pool_size,
                 'loaded': pool.loaded
             })
+
+    data = sorted(data, key=lambda x: x['id'])
 
     return JsonResponse(data, safe=False)
 
@@ -120,6 +125,7 @@ def pool_info(request):
                 data.append({
                     'request': req.name,
                     'library': library.name,
+                    'barcode': library.barcode,
                     'protocol': library.library_protocol.name,
                     # 'pcrCycles': 0
                 })
@@ -129,9 +135,12 @@ def pool_info(request):
                 data.append({
                     'request': req.name,
                     'library': sample.name,
+                    'barcode': sample.barcode,
                     'protocol': sample.library_protocol.name,
                     # 'pcrCycles': 0
                 })
+
+    data = sorted(data, key=lambda x: x['barcode'][3:])
 
     return JsonResponse(data, safe=False)
 
