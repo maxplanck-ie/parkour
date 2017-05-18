@@ -50,7 +50,6 @@ def get_all(request):
 
 
 @login_required
-@staff_member_required
 def sequencer_list(request):
     """ Get the list of all sequencers. """
 

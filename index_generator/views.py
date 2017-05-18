@@ -131,7 +131,6 @@ def pooling_tree(request):
 
 
 @login_required
-@staff_member_required
 def get_pool_sizes(request):
     """ Get a list of all pool sizes. """
     data = [
