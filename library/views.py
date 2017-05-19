@@ -156,7 +156,6 @@ def get_all(request):
 
 
 @login_required
-@staff_member_required
 def save_library(request):
     """ Add new library or update an existing one. """
     error = []
