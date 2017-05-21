@@ -9,4 +9,7 @@ class NucleicAcidTypeAdmin(admin.ModelAdmin):
 
 @admin.register(Sample)
 class SampleAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('name', 'barcode', 'library_protocol', 'library_type',
+                    'read_length', 'organism',)
+    search_fields = ('name', 'barcode',)
+    list_filter = ('read_length', 'organism',)

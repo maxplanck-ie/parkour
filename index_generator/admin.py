@@ -4,7 +4,9 @@ from .models import Pool, PoolSize
 
 @admin.register(Pool)
 class PoolAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('name', 'size',)
+    search_fields = ('name', 'size',)
+    list_filter = ('size',)
 
 
 @admin.register(PoolSize)
