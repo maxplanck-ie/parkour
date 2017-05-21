@@ -6,7 +6,6 @@ Ext.define('MainHub.view.main.Main', {
         'Ext.tab.Panel',
         'MainHub.view.main.MainController',
         'MainHub.view.main.MainContainerWrap',
-        'MainHub.view.reports.BlankReport',
         'MainHub.view.requests.Requests',
         'MainHub.view.libraries.Libraries',
         'MainHub.view.incominglibraries.IncomingLibraries',

@@ -22,12 +22,8 @@ Ext.define('MainHub.model.flowcell.Pool', {
             type: 'int'
         },
         {
-            name: 'poolSize',
+            name: 'poolSizeId',
             type: 'int'
-        },
-        {
-            name: 'poolSizeName',
-            type: 'string'
         },
         {
             name: 'loaded',

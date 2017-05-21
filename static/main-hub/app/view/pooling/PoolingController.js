@@ -101,11 +101,9 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                     // Reload stores
                     // if (Ext.getStore('librariesStore').isLoaded()) Ext.getStore('librariesStore').reload();
                     // if (Ext.getStore('incomingLibrariesStore').isLoaded()) Ext.getStore('incomingLibrariesStore').reload();
-                    MainHub.Utilities.reloadAllStores();
+                    // MainHub.Utilities.reloadAllStores();
                 } else {
                     Ext.ux.ToastMessage(obj.error, 'error');
-                    console.error('[ERROR]: ' + url);
-                    console.error(response);
                 }
             },
 

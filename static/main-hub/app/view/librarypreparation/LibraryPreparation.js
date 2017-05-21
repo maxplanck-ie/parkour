@@ -23,7 +23,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
         },
         padding: 15,
         viewConfig: {
-            loadMask: false,
+            // loadMask: false,
             stripeRows: false
             // markDirty: false
         },

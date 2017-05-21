@@ -9,7 +9,6 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 
-from request.models import Request
 from index_generator.models import Pool
 from library_preparation.models import LibraryPreparation
 from library.models import Library
@@ -163,10 +162,7 @@ def edit(request):
         error = str(e)
         logger.exception(e)
 
-    return JsonResponse({
-        'success': not error,
-        'error': error
-    })
+    return JsonResponse({'success': not error, 'error': error})
 
 
 @csrf_exempt

@@ -18,10 +18,6 @@ Ext.define('MainHub.model.flowcell.Lane', {
             type: 'string'
         },
         {
-            name: 'loadingConcentration',
-            type: 'string'
-        },
-        {
             name: 'loaded',
             type: 'int'
         }

@@ -57,34 +57,14 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                         xtype: 'textfield',
                         name: 'flowcell_id',
                         fieldLabel: 'Flowcell ID'
-                    },
-                    // {
-                    //     id: 'loadingConcentrationField',
-                    //     itemId: 'loadingConcentrationField',
-                    //     xtype: 'numberfield',
-                    //     fieldLabel: 'Loading Concentration (pM)',
-                    //     minValue: 0.1,
-                    //     disabled: true,
-                    //     allowBlank: true,
-                    //     activeLane: ''
-                    // }
-                    ]
-                }, {
-                    xtype: 'container',
-                    html: 'Result: <div id="flowcell-result">Loaded: <span id="flowcell-result-total">0</span> (M)</div>',
-                    padding: '10 0',
-                    margin: '0 15',
-                    width: 365,
-                    style: {
-                        borderTop: '1px solid #d0d0d0'
-                    }
+                    }]
                 }, {
                     xtype: 'grid',
                     id: 'flowcellResultGrid',
                     itemId: 'flowcellResultGrid',
                     padding: '0 15',
                     width: 396,
-                    height: 220,
+                    height: 260,
                     viewConfig: {
                         markDirty: false
                     },
@@ -97,15 +77,6 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                         text: 'Lane',
                         dataIndex: 'laneName',
                         width: 70
-                    }, {
-                        text: 'Concentration',
-                        dataIndex: 'loadingConcentration',
-                        width: 110,
-                        editor: {
-                            xtype: 'numberfield',
-                            minValue: 0,
-                            allowBlank: true
-                        }
                     }],
                     plugins: [{
                         ptype: 'rowediting',
@@ -123,7 +94,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                 viewConfig: {
                     stripeRows: false,
                     markDirty: false,
-                    loadMask: false
+                    // loadMask: false
                 },
                 style: {
                     borderLeft: '1px solid #d0d0d0'
@@ -140,8 +111,14 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                     width: 100
                 }, {
                     text: 'Size',
-                    dataIndex: 'poolSizeName',
-                    width: 90
+                    dataIndex: 'poolSizeId',
+                    width: 90,
+                    renderer: function(value, meta) {
+                        var pool = meta.record;
+                        var poolSize = Ext.getStore('poolSizesStore').findRecord('id', value);
+                        var size = pool.get('size') - pool.get('loaded');
+                        return size === 0 ? size : size + 'x' + poolSize.get('size');
+                    }
                 }]
             }]
         }, {

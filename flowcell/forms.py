@@ -1,5 +1,5 @@
 from django import forms
-from .models import Flowcell
+from .models import Flowcell, Lane
 
 
 class FlowcellForm(forms.ModelForm):
@@ -9,3 +9,9 @@ class FlowcellForm(forms.ModelForm):
             'sequencer',
             'flowcell_id',
         )
+
+
+class LaneForm(forms.ModelForm):
+    class Meta:
+        model = Lane
+        fields = '__all__'

@@ -43,7 +43,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                     }]
                 },
                 viewConfig: {
-                    loadMask: false,
+                    // loadMask: false,
                     markDirty: false
                 },
                 plugins: [{

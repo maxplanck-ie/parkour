@@ -37,7 +37,7 @@ Ext.define('MainHub.view.requests.Requests', {
             ]
         },
         viewConfig: {
-            loadMask: false
+            // loadMask: false
         },
         store: 'requestsStore',
         columns: {

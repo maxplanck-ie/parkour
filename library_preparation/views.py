@@ -1,11 +1,11 @@
 import logging
 import json
-from xlwt import Workbook, XFStyle, Formula
 
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from xlwt import Workbook, XFStyle, Formula
 
 from library_sample_shared.models import IndexType
 from sample.models import Sample

@@ -22,7 +22,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
         },
         padding: 15,
         viewConfig: {
-            loadMask: false,
+            // loadMask: false,
             // markDirty: false,
             stripeRows: false,
             getRowClass: function(record) {

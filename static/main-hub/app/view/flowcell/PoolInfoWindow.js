@@ -39,11 +39,6 @@ Ext.define('MainHub.view.flowcell.PoolInfoWindow', {
                 dataIndex: 'protocol',
                 flex: 1
             }
-            // {
-            //     text: 'PCR Cycles',
-            //     dataIndex: 'pcrCycles',
-            //     width: 100
-            // }
         ]
     }]
 });
