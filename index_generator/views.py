@@ -113,8 +113,10 @@ def pooling_tree(request):
         records = sorted(records, key=lambda x: x['barcode'][3:])
 
         if records:
+            request_name = '%s (Depth: %i)' % \
+                (req.name, sum([x['sequencingDepth'] for x in records]))
             children.append({
-                'text': req.name,
+                'text': request_name,
                 'expanded': True,
                 'iconCls': 'x-fa fa-pencil-square-o',
                 'children': records
