@@ -7,5 +7,4 @@ urlpatterns = [
     url(r'^edit/$', views.edit, name='edit'),
     url(r'^download_benchtop_protocol/$', views.download_benchtop_protocol, name='download_benchtop_protocol'),
     url(r'^download_pooling_template/$', views.download_pooling_template, name='download_pooling_template'),
-    url(r'^upload_pooling_template/$', views.upload_pooling_template, name='upload_pooling_template'),
 ]

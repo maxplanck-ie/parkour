@@ -12,7 +12,6 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             '#poolingTable': {
                 // boxready: 'refresh',
                 refresh: 'refresh',
-                groupcontextmenu: 'showGroupContextMenu',
                 beforeEdit: 'toggleEditors',
                 edit: 'editRecord'
             },
@@ -39,21 +38,6 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                 Ext.getCmp('downloadPoolingTemplateBtn').setDisabled(false);
             }
         });
-    },
-
-    showGroupContextMenu: function(view, node, group, e) {
-        var me = this;
-
-        e.stopEvent();
-        Ext.create('Ext.menu.Menu', {
-            items: [{
-                text: 'Upload Template QC Normalization and Pooling',
-                iconCls: 'x-fa fa-upload',
-                handler: function() {
-                    me.uploadPoolingTemplate(group);
-                }
-            }]
-        }).showAt(e.getXY());
     },
 
     toggleEditors: function(editor, context) {

@@ -2,7 +2,6 @@ import json
 import logging
 from xlwt import Workbook, XFStyle, Formula
 
-from django.conf import settings
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
@@ -59,10 +58,6 @@ def get_all(request):
                 'sequencing_depth': library.sequencing_depth,
                 'concentration_c1': pooling_obj.concentration_c1,
                 'percentage_library': round(percentage_library * 100),
-                'file':
-                    settings.MEDIA_URL + pool.file.name
-                    if pool.file
-                    else ''
             })
 
         # Converted samples (sample -> library)
@@ -93,10 +88,6 @@ def get_all(request):
                 'sequencing_depth': sample.sequencing_depth,
                 'concentration_c1': concentration_c1,
                 'percentage_library': round(percentage_library * 100),
-                'file':
-                    settings.MEDIA_URL + pool.file.name
-                    if pool.file
-                    else ''
             })
 
         data += libraries_in_pool
@@ -351,21 +342,3 @@ def download_pooling_template(request):
     wb.save(response)
 
     return response
-
-
-@csrf_exempt
-@login_required
-@staff_member_required
-def upload_pooling_template(request):
-    """ Upload a file and attach it to a given Pool. """
-    pool_name = request.POST.get('pool_name')
-
-    if request.method == 'POST' and any(request.FILES):
-        pool = Pool.objects.get(name=pool_name)
-        pool.file = request.FILES.get('file')
-        pool.save()
-        success = True
-    else:
-        success = False
-
-    return JsonResponse({'success': success})

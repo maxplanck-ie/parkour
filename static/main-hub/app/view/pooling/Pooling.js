@@ -50,7 +50,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
             groupHeaderTpl: [
                 '<strong class="{children:this.getHeaderClass}">' +
                     '{name} | Pool Size: {children:this.getRealPoolSize} M reads ' +
-                    '{children:this.getPoolSize}{children:this.renderDownloadBtn}' +
+                    '{children:this.getPoolSize}' +
                 '</strong>',
                 {
                     getHeaderClass: function(children) {
@@ -69,11 +69,6 @@ Ext.define('MainHub.view.pooling.Pooling', {
                     },
                     getPoolSize: function(children) {
                         return '(' + children[0].get('poolSize') + ')';
-                    },
-                    renderDownloadBtn: function(children) {
-                        var url = children[0].get('file');
-                        return (url !== '') ? '<span class="download-pooling-template"><a href="' + url +
-                            '">' + '<i class="fa fa-download" aria-hidden="true"></i></a></span>' : '';
                     }
                 }
             ]

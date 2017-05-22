@@ -21,7 +21,6 @@ class Pool(models.Model):
                                        blank=True)
     samples = models.ManyToManyField(Sample, related_name='pool', blank=True)
     loaded = models.PositiveSmallIntegerField('Loaded', default=0, blank=True)
-    file = models.FileField(upload_to='pools/%Y/%m/%d/', blank=True, null=True)
 
     def get_size(self):
         size = 0
