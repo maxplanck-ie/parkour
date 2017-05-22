@@ -118,6 +118,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
 
     downloadBenchtopProtocol: function() {
         var store = Ext.getStore('poolingStore'),
+            poolName = '',
             libraries = [],
             samples = [];
 
@@ -126,8 +127,10 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             if (record.get('selected')) {
                 if (record.get('libraryId') === 0) {
                     samples.push(record.get('sampleId'));
+                    poolName = record.get('poolName');
                 } else {
                     libraries.push(record.get('libraryId'));
+                    poolName = record.get('poolName');
                 }
             }
         });
@@ -141,6 +144,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                 url: 'pooling/download_benchtop_protocol/',
                 target: '_blank',
                 params: {
+                    pool_name: poolName,
                     samples: Ext.JSON.encode(samples),
                     libraries: Ext.JSON.encode(libraries)
                 }
@@ -182,39 +186,5 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         } else {
             Ext.ux.ToastMessage('You did not select any libraries.', 'warning');
         }
-    },
-
-    uploadPoolingTemplate: function(poolName) {
-        Ext.create('Ext.ux.FileUploadWindow', {
-            onFileUpload: function() {
-                var me = this,
-                    form = this.down('form').getForm(),
-                    url = 'pooling/upload_pooling_template/';
-
-                if (form.isValid()) {
-                    form.submit({
-                        url: url,
-                        method: 'POST',
-                        waitMsg: 'Uploading...',
-                        params: {
-                            pool_name: poolName
-                        },
-
-                        success: function(f, action) {
-                            Ext.getStore('poolingStore').reload();
-                            me.close();
-                            Ext.ux.ToastMessage('File has been successfully uploaded.');
-                        },
-
-                        failure: function(f, action) {
-                            console.error('[ERROR]: ' + url);
-                            console.error(action.response);
-                        }
-                    });
-                } else {
-                    Ext.ux.ToastMessage('You did not select any file.', 'warning');
-                }
-            }
-        });
     }
 });

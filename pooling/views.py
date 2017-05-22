@@ -164,6 +164,7 @@ def download_benchtop_protocol(request):
     response = HttpResponse(content_type='application/ms-excel')
     libraries = json.loads(request.POST.get('libraries', '[]'))
     samples = json.loads(request.POST.get('samples', '[]'))
+    pool_name = request.POST.get('pool_name', '')
 
     filename = 'Pooling_Benchtop_Protocol.xls'
     response['Content-Disposition'] = 'attachment; filename="%s"' % filename
@@ -204,6 +205,7 @@ def download_benchtop_protocol(request):
         font_style_bold.font.bold = True
 
         ws.write(0, 0, 'Pool ID', font_style_bold)
+        ws.write(0, 1, pool_name, font_style_bold)
         ws.write(1, 0, 'Pool Volume', font_style_bold)  # B2
         ws.write(2, 0, 'Sum Sequencing Depth', font_style_bold)  # B3
         ws.write(3, 0, '', font_style)
