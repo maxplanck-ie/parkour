@@ -1068,7 +1068,6 @@ $include-mainhub-view-main-maincontainerwrap: dynamic(true);;
 $include-mainhub-view-main-maincontroller: dynamic(true);;
 $include-mainhub-view-pooling-pooling: dynamic(true);;
 $include-mainhub-view-pooling-poolingcontroller: dynamic(true);;
-$include-mainhub-view-reports-blankreport: dynamic(true);;
 $include-mainhub-view-requests-requestwindow: dynamic(true);;
 $include-mainhub-view-requests-requestwindowcontroller: dynamic(true);;
 $include-mainhub-view-requests-requests: dynamic(true);;
@@ -1354,7 +1353,6 @@ $MainHub-resource-path: 'images' !default;
 $current-package: false;
 $current-resource-root: $MainHub-resource-root;
 $relative-image-path-for-uis: $MainHub-resource-path;
-@import '../../../../../sass/var/view/reports/BlankReport';
 @import '../../../../../sass/var/view/main/Main';
 
 
@@ -1606,7 +1604,6 @@ $relative-image-path-for-uis: $MainHub-resource-path;
 @import '../../../../../sass/src/view/libraries/LibraryWindow';
 @import '../../../../../sass/src/view/libraries/Libraries';
 @import '../../../../../sass/src/view/librarypreparation/LibraryPreparation';
-@import '../../../../../sass/src/view/reports/BlankReport';
 @import '../../../../../sass/src/view/requests/Requests';
 @import '../../../../../sass/src/view/pooling/Pooling';
 @import '../../../../../sass/src/view/main/Main';

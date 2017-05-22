@@ -93,7 +93,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                 border: 0,
                 viewConfig: {
                     stripeRows: false,
-                    markDirty: false,
+                    markDirty: false
                     // loadMask: false
                 },
                 style: {
