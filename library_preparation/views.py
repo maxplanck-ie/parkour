@@ -96,7 +96,6 @@ def update(request):
             sample.save()
 
             if qc_result:
-
                 if qc_result == '1':
                     if not obj.concentration_library:
                         raise ValueError('Library Concentartion is not set.')
@@ -105,13 +104,21 @@ def update(request):
 
                     # Create Pooling object
                     pooling_obj = Pooling(sample=sample)
-                    # TODO: update field Concentration C1
+
+                    # Update Concentration C1
+                    library_concentration = obj.concentration_library
+                    mean_fragment_size = obj.mean_fragment_size
+                    if mean_fragment_size > 0:
+                        concentration_c1 = \
+                            round((library_concentration /
+                                  (mean_fragment_size * 650)) * 10**6, 2)
+                        pooling_obj.concentration_c1 = concentration_c1
+
                     pooling_obj.save()
+
                 else:
                     sample.status = -1
                     sample.save(update_fields=['status'])
-
-                    # TODO@me: send email
         else:
             error = str(form.errors)
             logger.debug(form.errors)

@@ -183,7 +183,16 @@ def save_pool(request):
 
                 # Create Pooling object
                 pooling_obj = Pooling(library=library)
-                # TODO: update field Concentration C1
+
+                # Update Concentration C1
+                library_concentration = library.concentration
+                mean_fragment_size = library.mean_fragment_size
+                if mean_fragment_size > 0:
+                    concentration_c1 = \
+                        round((library_concentration /
+                              (mean_fragment_size * 650)) * 10**6, 2)
+                    pooling_obj.concentration_c1 = concentration_c1
+
                 pooling_obj.save()
 
             # Make current samples not available for repeated pooling

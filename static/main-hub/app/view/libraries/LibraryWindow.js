@@ -247,7 +247,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                     fieldLabel: 'Number of amplification cycles <sup><strong><span class="field-tooltip" tooltip-text="Number of PCR cycles done for library amplification">[?]</span></strong></sup>',
                     emptyText: 'Number of amplification cycles',
                     allowDecimals: false,
-                    minValue: 1
+                    minValue: 0
                 },
                 {
                     xtype: 'fieldcontainer',
@@ -456,7 +456,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                     fieldLabel: 'Sample amplification (cycles) <sup><strong><span class="field-tooltip" tooltip-text="If sample has been already amplified, indicate the number of cycles">[?]</span></strong></sup>',
                     emptyText: 'Sample amplification (cycles)',
                     allowDecimals: false,
-                    minValue: 1,
+                    minValue: 0,
                     allowBlank: true
                 },
                 {
