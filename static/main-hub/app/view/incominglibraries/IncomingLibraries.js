@@ -124,7 +124,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                 {
                     text: 'bp',
                     tooltip: 'Mean Fragment Size (user)',
-                    dataIndex: 'meanFragmentSize',
+                    dataIndex: 'mean_fragment_size',
                     tdCls: 'userEntry',
                     width: 45
                 },
@@ -311,7 +311,15 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
         },
         features: [{
             ftype: 'grouping',
-            groupHeaderTpl: '<strong>Request: {name}</strong> (No. of Libraries/Samples: {rows.length})'
+            // groupHeaderTpl: '<strong>Request: {name}</strong> (No. of Libraries/Samples: {rows.length})'
+            groupHeaderTpl: [
+                '<strong>Request: {children:this.getName}</strong>',
+                {
+                    getName: function(children) {
+                        return children[0].get('requestName');
+                    }
+                }
+            ]
         }],
         plugins: [{
                 ptype: 'bufferedrenderer',

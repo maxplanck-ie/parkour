@@ -8,7 +8,8 @@ Ext.define('MainHub.store.incominglibraries.IncomingLibraries', {
 
     model: 'MainHub.model.incominglibraries.IncomingLibraries',
 
-    groupField: 'requestName',
+    // groupField: 'requestName',
+    groupField: 'requestId',
     groupDir: 'DESC',
 
     proxy: {

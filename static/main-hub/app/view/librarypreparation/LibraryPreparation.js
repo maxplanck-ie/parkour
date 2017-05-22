@@ -77,6 +77,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     width: 100,
                     editor: {
                         xtype: 'numberfield',
+                        decimalPrecision: 2,
                         minValue: 0
                     }
                 },
@@ -164,7 +165,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                 },
                 {
                     text: 'nM',
-                    tooltip: '(Concentration (ng/µl) / (650 * Size (bp))) * 10^6',
+                    tooltip: '(Concentration Library (ng/µl) / (650 * Size (bp))) * 10^6',
                     dataIndex: 'nM',
                     editor: {
                         xtype: 'numberfield',

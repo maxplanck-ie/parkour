@@ -199,7 +199,7 @@ def generate_deep_sequencing_request(request):
             for sample in req.samples.all()
         ]
 
-        records = sorted(libraries + samples, key=lambda x: x['barcode'])
+        records = sorted(libraries + samples, key=lambda x: x['barcode'][3:])
 
         html = render_to_string('deepseq_request_pdf.html', {
             'request_name': req.name,

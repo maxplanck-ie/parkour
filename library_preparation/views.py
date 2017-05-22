@@ -80,34 +80,36 @@ def get_all(request):
 @staff_member_required
 def update(request):
     """ Update a Library Preparation object. """
-    error = ''
-
     sample_id = request.POST.get('sample_id', '')
     qc_result = request.POST.get('qc_result', None)
+    error = ''
 
     try:
-        obj = LibraryPreparation.objects.get(sample_id=sample_id)
+        sample = Sample.objects.get(pk=sample_id)
+        obj = LibraryPreparation.objects.get(sample=sample)
         form = LibraryPreparationForm(request.POST, instance=obj)
 
         if form.is_valid():
             form.save()
+            concentration_sample = request.POST.get('concentration_sample', 0)
+            sample.concentration = concentration_sample
+            sample.save()
 
             if qc_result:
-                record = Sample.objects.get(pk=sample_id)
+
                 if qc_result == '1':
                     if not obj.concentration_library:
                         raise ValueError('Library Concentartion is not set.')
-
-                    record.status = 3
-                    record.save(update_fields=['status'])
+                    sample.status = 3
+                    sample.save(update_fields=['status'])
 
                     # Create Pooling object
-                    pooling_obj = Pooling(sample=record)
+                    pooling_obj = Pooling(sample=sample)
                     # TODO: update field Concentration C1
                     pooling_obj.save()
                 else:
-                    record.status = -1
-                    record.save(update_fields=['status'])
+                    sample.status = -1
+                    sample.save(update_fields=['status'])
 
                     # TODO@me: send email
         else:

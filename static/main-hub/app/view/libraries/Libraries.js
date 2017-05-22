@@ -246,7 +246,15 @@ Ext.define('MainHub.view.libraries.Libraries', {
         },
         features: [{
             ftype: 'grouping',
-            groupHeaderTpl: '<strong>Request: {name}</strong> (No. of Libraries/Samples: {rows.length})'
+            // groupHeaderTpl: '<strong>Request: {name}</strong> (No. of Libraries/Samples: {rows.length})'
+            groupHeaderTpl: [
+                '<strong>Request: {children:this.getName}</strong>',
+                {
+                    getName: function(children) {
+                        return children[0].get('requestName');
+                    }
+                }
+            ]
         }],
         plugins: [{
             ptype: 'bufferedrenderer',

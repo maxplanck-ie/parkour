@@ -60,34 +60,42 @@ def get_all(request):
     """ Get the list of all Flowcells. """
     data = []
 
-    for flowcell in Flowcell.objects.prefetch_related('sequencer', 'lanes'):
-        for lane in flowcell.lanes.select_related('pool'):
-            pool = lane.pool
+    try:
+        for flowcell in Flowcell.objects.prefetch_related('sequencer', 'lanes'):
+            for lane in flowcell.lanes.select_related('pool'):
+                pool = lane.pool
 
-            libraries = pool.libraries.select_related('read_length')
-            samples = pool.samples.select_related('read_length')
-            index_i7_show, index_i5_show, equal_representation = \
-                indices_present(libraries, samples)
+                libraries = pool.libraries.select_related('read_length')
+                samples = pool.samples.select_related('read_length')
+                index_i7_show, index_i5_show, equal_representation = \
+                    indices_present(libraries, samples)
 
-            read_length_name = samples[0].read_length.name if any(samples) \
-                else libraries[0].read_length.name
+                if libraries.count() == 0 and samples.count() == 0:
+                    logger.debug('No libraries and samples in %s' % pool.name)
+                    continue
 
-            data.append({
-                'flowcellId': flowcell.flowcell_id,
-                'flowcell': flowcell.pk,
-                'laneId': lane.pk,
-                'laneName': lane.name,
-                'pool': pool.pk,
-                'poolName': pool.name,
-                'readLengthName': read_length_name,
-                'indexI7Show': index_i7_show,
-                'indexI5Show': index_i5_show,
-                'sequencer': flowcell.sequencer.pk,
-                'sequencerName': flowcell.sequencer.name,
-                'equalRepresentation': equal_representation,
-                'loading_concentration': lane.loading_concentration,
-                'phix': lane.phix,
-            })
+                read_length_name = samples[0].read_length.name \
+                    if any(samples) else libraries[0].read_length.name
+
+                data.append({
+                    'flowcellId': flowcell.flowcell_id,
+                    'flowcell': flowcell.pk,
+                    'laneId': lane.pk,
+                    'laneName': lane.name,
+                    'pool': pool.pk,
+                    'poolName': pool.name,
+                    'readLengthName': read_length_name,
+                    'indexI7Show': index_i7_show,
+                    'indexI5Show': index_i5_show,
+                    'sequencer': flowcell.sequencer.pk,
+                    'sequencerName': flowcell.sequencer.name,
+                    'equalRepresentation': equal_representation,
+                    'loading_concentration': lane.loading_concentration,
+                    'phix': lane.phix,
+                })
+
+    except Exception as e:
+        logger.exception(e)
 
     data = sorted(data, key=lambda x: (x['flowcellId'], x['laneName']))
 

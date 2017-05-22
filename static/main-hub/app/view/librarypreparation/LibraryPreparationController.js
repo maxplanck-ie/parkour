@@ -38,16 +38,26 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
 
     applyToAll: function(record, dataIndex) {
         var store = Ext.getStore('libraryPreparationStore');
-
         var allowedColumns = ['starting_amount', 'starting_volume',
             'spike_in_description', 'spike_in_volume', 'pcr_cycles',
-            'concentration_library', 'mean_fragment_size', 'nM'
-        ];
+            'concentration_library', 'mean_fragment_size', 'nM'];
+        var nMFormulaDataIndices = ['concentration_library',
+                                    'mean_fragment_size'];
 
         if (typeof dataIndex !== 'undefined' && allowedColumns.indexOf(dataIndex) !== -1) {
             store.each(function(item) {
                 if (item.get('libraryProtocol') === record.get('libraryProtocol') && item !== record) {
                     item.set(dataIndex, record.get(dataIndex));
+
+                    // Calculate nM
+                    if (nMFormulaDataIndices.indexOf(dataIndex) !== -1) {
+                        var concentrationLibrary = item.get('concentration_library');
+                        var meanFragmentSize = item.get('mean_fragment_size');
+                        if (concentrationLibrary && meanFragmentSize) {
+                            var nM = ((concentrationLibrary / (meanFragmentSize * 650)) * 1000000).toFixed(2);;
+                            item.set('nM', nM);
+                        }
+                    }
                 }
             });
             store.sync({
