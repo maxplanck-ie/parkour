@@ -248,7 +248,7 @@ Ext.define('MainHub.view.libraries.Libraries', {
             ftype: 'grouping',
             // groupHeaderTpl: '<strong>Request: {name}</strong> (No. of Libraries/Samples: {rows.length})'
             groupHeaderTpl: [
-                '<strong>Request: {children:this.getName}</strong>',
+                '<strong>Request: {children:this.getName}</strong> (No. of Libraries/Samples: {rows.length})',
                 {
                     getName: function(children) {
                         return children[0].get('requestName');
