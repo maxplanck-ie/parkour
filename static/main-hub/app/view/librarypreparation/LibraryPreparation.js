@@ -65,6 +65,11 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     width: 90
                 },
                 {
+                    text: 'Comments',
+                    dataIndex: 'comments',
+                    width: 150
+                },
+                {
                     text: 'Protocol',
                     tooltip: 'Library Protocol',
                     dataIndex: 'libraryProtocolName',

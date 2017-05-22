@@ -26,6 +26,10 @@ Ext.define('MainHub.model.librarypreparation.LibraryPreparation', {
             type: 'string'
         },
         {
+            name: 'comments',
+            type: 'string'
+        },
+        {
             name: 'libraryProtocolName',
             type: 'string'
         },
