@@ -13,7 +13,8 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                 // boxready: 'refresh',
                 refresh: 'refresh',
                 beforeEdit: 'toggleEditors',
-                edit: 'editRecord'
+                edit: 'editRecord',
+                groupcontextmenu: 'showGroupContextMenu'
             },
             '#checkColumn': {
                 beforecheckchange: 'selectRecord'
@@ -99,6 +100,20 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         });
     },
 
+    showGroupContextMenu: function(view, node, group, e) {
+        var me = this;
+        e.stopEvent();
+        Ext.create('Ext.menu.Menu', {
+            items: [{
+                text: 'Select All',
+                iconCls: 'x-fa fa-check-square-o',
+                handler: function() {
+                    me.selectAll(group);
+                }
+            }]
+        }).showAt(e.getXY());
+    },
+
     selectRecord: function(cb, rowIndex, checked, record) {
         // Don't select samples which aren't prepared yet
         if (record.get('sampleId') !== 0 && (
@@ -109,10 +124,24 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             var selectedRecord = Ext.getStore('poolingStore').findRecord('selected', true);
             if (selectedRecord) {
                 if (record.get('poolId') !== selectedRecord.get('poolId')) {
-                    Ext.ux.ToastMessage('You can select records only from the same pool.', 'warning');
+                    Ext.ux.ToastMessage('You can only select records from the same pool.', 'warning');
                     return false;
                 }
             }
+        }
+    },
+
+    selectAll: function(poolName) {
+        var store = Ext.getStore('poolingStore');
+        var selectedRecord = store.findRecord('selected', true);
+        if (!selectedRecord) {
+            store.each(function(item) {
+                if (item.get('poolName') === poolName) {
+                    item.set('selected', true);
+                }
+            });
+        } else {
+            Ext.ux.ToastMessage('You can only select records from the same pool.', 'warning');
         }
     },
 

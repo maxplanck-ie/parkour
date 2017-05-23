@@ -34,45 +34,6 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 return rowClass;
             }
         },
-        plugins: [{
-                ptype: 'rowediting',
-                clicksToEdit: 1
-            },
-            {
-                ptype: 'bufferedrenderer',
-                trailingBufferZone: 100,
-                leadingBufferZone: 100
-            }
-        ],
-        features: [{
-            ftype: 'grouping',
-            collapsible: false,
-            groupHeaderTpl: [
-                '<strong class="{children:this.getHeaderClass}">' +
-                    '{name} | Pool Size: {children:this.getRealPoolSize} M reads ' +
-                    '{children:this.getPoolSize}' +
-                '</strong>',
-                {
-                    getHeaderClass: function(children) {
-                        var cls = 'pool-header-green',
-                            missingSamples = 0;
-                        $.each(children, function(index, item) {
-                            if (item.get('sampleId') !== 0 && item.get('status') < 3) {
-                                missingSamples++;
-                            }
-                        });
-                        if (missingSamples > 0) cls = 'pool-header-red';
-                        return cls;
-                    },
-                    getRealPoolSize: function(children) {
-                        return Ext.sum(Ext.pluck(Ext.pluck(children, 'data'), 'sequencing_depth'));
-                    },
-                    getPoolSize: function(children) {
-                        return '(' + children[0].get('poolSize') + ')';
-                    }
-                }
-            ]
-        }],
         store: 'poolingStore',
         sortableColumns: false,
         columns: [{
@@ -199,6 +160,44 @@ Ext.define('MainHub.view.pooling.Pooling', {
                     // disabled: true
                 }
             ]
-        }]
+        }],
+        plugins: [{
+                ptype: 'rowediting',
+                clicksToEdit: 1
+            },
+            {
+                ptype: 'bufferedrenderer',
+                trailingBufferZone: 100,
+                leadingBufferZone: 100
+            }
+        ],
+        features: [{
+            ftype: 'grouping',
+            groupHeaderTpl: [
+                '<strong class="{children:this.getHeaderClass}">' +
+                    '{name} | Pool Size: {children:this.getRealPoolSize} M reads ' +
+                    '{children:this.getPoolSize}' +
+                '</strong>',
+                {
+                    getHeaderClass: function(children) {
+                        var cls = 'pool-header-green',
+                            missingSamples = 0;
+                        $.each(children, function(index, item) {
+                            if (item.get('sampleId') !== 0 && item.get('status') < 3) {
+                                missingSamples++;
+                            }
+                        });
+                        if (missingSamples > 0) cls = 'pool-header-red';
+                        return cls;
+                    },
+                    getRealPoolSize: function(children) {
+                        return Ext.sum(Ext.pluck(Ext.pluck(children, 'data'), 'sequencing_depth'));
+                    },
+                    getPoolSize: function(children) {
+                        return '(' + children[0].get('poolSize') + ')';
+                    }
+                }
+            ]
+        }],
     }]
 });

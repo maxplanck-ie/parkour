@@ -16,7 +16,8 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
                 // boxready: 'refresh',
                 refresh: 'refresh',
                 edit: 'editRecord',
-                itemcontextmenu: 'showContextMenu'
+                itemcontextmenu: 'showContextMenu',
+                groupcontextmenu: 'showGroupContextMenu'
             },
             '#downloadBenchtopProtocolLPBtn': {
                 click: 'downloadBenchtopProtocol'
@@ -120,6 +121,30 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
                 Ext.ux.ToastMessage(response.statusText, 'error');
                 console.error('[ERROR]: ' + url);
                 console.error(response);
+            }
+        });
+    },
+
+    showGroupContextMenu: function(view, node, group, e) {
+        var me = this;
+        e.stopEvent();
+        Ext.create('Ext.menu.Menu', {
+            items: [{
+                text: 'Select All',
+                iconCls: 'x-fa fa-check-square-o',
+                handler: function() {
+                    me.selectAll(group);
+                }
+            }]
+        }).showAt(e.getXY());
+    },
+
+    selectAll: function(protocolName) {
+        var store = Ext.getStore('libraryPreparationStore');
+
+        store.each(function(item) {
+            if (item.get('libraryProtocolName') === protocolName) {
+                item.set('selected', true);
             }
         });
     },

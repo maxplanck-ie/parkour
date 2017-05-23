@@ -9,7 +9,7 @@ Ext.define('MainHub.store.librarypreparation.LibraryPreparation', {
     model: 'MainHub.model.librarypreparation.LibraryPreparation',
 
     groupField: 'libraryProtocolName',
-    groupDir: 'DESC',
+    // groupDir: 'DESC',
 
     proxy: {
         type: 'ajax',

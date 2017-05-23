@@ -17,7 +17,11 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellsController', {
             },
             '#flowcellsTable': {
                 itemcontextmenu: 'showContextMenu',
+                groupcontextmenu: 'showGroupContextMenu',
                 edit: 'editRecord'
+            },
+            '#checkColumn': {
+                beforecheckchange: 'selectRecord'
             },
             '#downloadBenchtopProtocolFCBtn': {
                 click: 'downloadBenchtopProtocol'
@@ -58,6 +62,45 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellsController', {
                 }
             }]
         }).showAt(e.getXY());
+    },
+
+    showGroupContextMenu: function(view, node, group, e) {
+        var me = this;
+        e.stopEvent();
+        Ext.create('Ext.menu.Menu', {
+            items: [{
+                text: 'Select All',
+                iconCls: 'x-fa fa-check-square-o',
+                handler: function() {
+                    me.selectAll(group);
+                }
+            }]
+        }).showAt(e.getXY());
+    },
+
+    selectRecord: function(cb, rowIndex, checked, record) {
+        // Don't select lanes from a different flowcell
+        var selectedLane = Ext.getStore('flowcellsStore').findRecord('selected', true);
+        if (selectedLane) {
+            if (record.get('flowcellId') !== selectedLane.get('flowcellId')) {
+                Ext.ux.ToastMessage('You can only select lanes from the same flowcell.', 'warning');
+                return false;
+            }
+        }
+    },
+
+    selectAll: function(flowcellId) {
+        var store = Ext.getStore('flowcellsStore');
+        var selectedRecord = store.findRecord('selected', true);
+        if (!selectedRecord) {
+            store.each(function(item) {
+                if (item.get('flowcellId') === flowcellId) {
+                    item.set('selected', true);
+                }
+            });
+        } else {
+            Ext.ux.ToastMessage('You can only select lanes from the same flowcell.', 'warning');
+        }
     },
 
     editRecord: function(editor, context) {
