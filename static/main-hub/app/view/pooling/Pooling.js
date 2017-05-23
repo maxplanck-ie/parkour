@@ -198,6 +198,6 @@ Ext.define('MainHub.view.pooling.Pooling', {
                     }
                 }
             ]
-        }],
+        }]
     }]
 });

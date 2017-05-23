@@ -43,7 +43,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                 },
                 viewConfig: {
                     // loadMask: false,
-                    stripeRows: false,
+                    stripeRows: false
                     // markDirty: false
                 },
                 store: 'indexGeneratorStore',
@@ -152,7 +152,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                             }
                         }
                     ]
-                }],
+                }]
             },
             {
                 xtype: 'grid',
