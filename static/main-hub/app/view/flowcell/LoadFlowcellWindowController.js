@@ -12,7 +12,8 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
                 change: 'changeSequencer'
             },
             '#poolsFlowcell': {
-                render: 'initializePoolDragZone'
+                render: 'initializePoolDragZone',
+                itemcontextmenu: 'showAdditionalInformationMenu'
             },
             '#flowcellResultGrid': {
                 // select: 'selectLane',
@@ -25,6 +26,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
     },
 
     onWindowReady: function() {
+        Ext.getStore('lanesStore').removeAll();
         Ext.getStore('poolsStore').load();
     },
 
@@ -60,6 +62,23 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindowController', {
 
         // Get original Pool Loaded values
         if (oldValue) Ext.getStore('poolsStore').reload();
+    },
+
+    showAdditionalInformationMenu: function(grid, record, item, index, e) {
+        var me = this;
+        e.stopEvent();
+        Ext.create('Ext.menu.Menu', {
+            items: [{
+                text: 'Show Additional Information',
+                iconCls: 'x-fa fa-info',
+                handler: function() {
+                    Ext.create('MainHub.view.flowcell.PoolInfoWindow', {
+                        title: record.get('name'),
+                        poolId: record.get('id')
+                    }).show();
+                }
+            }]
+        }).showAt(e.getXY());
     },
 
     clickLane: function(e) {

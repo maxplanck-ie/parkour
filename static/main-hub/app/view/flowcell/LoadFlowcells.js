@@ -41,7 +41,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcells', {
             {
                 text: 'Lane',
                 dataIndex: 'laneName',
-                width: 70
+                flex: 1
             }, {
                 text: 'Pool',
                 dataIndex: 'poolName',
@@ -50,29 +50,29 @@ Ext.define('MainHub.view.flowcell.LoadFlowcells', {
                 text: 'Length',
                 tooltip: 'Read Length',
                 dataIndex: 'readLengthName',
-                width: 70
+                flex: 1
             }, {
                 text: 'Index I7',
                 dataIndex: 'indexI7Show',
-                width: 75
+                flex: 1
             }, {
                 text: 'Index I5',
                 dataIndex: 'indexI5Show',
-                width: 75
+                flex: 1
             }, {
                 text: 'Sequencer',
                 dataIndex: 'sequencerName',
-                width: 90
+                flex: 1
             }, {
                 text: 'Equal nucl.',
                 tooltip: 'Equal Representation of Nucleotides',
                 dataIndex: 'equalRepresentation',
-                width: 90
+                flex: 1
             }, {
-                text: 'ng/μl',
+                text: 'Loading Conc.',
                 tooltip: 'Loading Concentration',
                 dataIndex: 'loading_concentration',
-                width: 100,
+                flex: 1,
                 editor: {
                     xtype: 'numberfield',
                     decimalPrecision: 1,
@@ -81,7 +81,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcells', {
             }, {
                 text: 'PhiX %',
                 dataIndex: 'phix',
-                width: 100,
+                flex: 1,
                 editor: {
                     xtype: 'numberfield',
                     decimalPrecision: 1,

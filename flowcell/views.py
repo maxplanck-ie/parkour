@@ -1,6 +1,7 @@
 import logging
 import json
 import csv
+import unicodedata
 
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -381,10 +382,8 @@ def download_benchtop_protocol(request):
 def download_sample_sheet(request):
     """ Generate Benchtop Protocol as XLS file for selected lanes. """
     response = HttpResponse(content_type='text/csv')
-    lanes = json.loads(request.POST.get('lanes', '{}'))
-
-    filename = 'FC_Sample_Sheet.csv'
-    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+    lanes = json.loads(request.POST.get('lanes', '[]'))
+    flowcell_id = json.loads(request.POST.get('flowcell_id', ''))
 
     writer = csv.writer(response)
     writer.writerow(['[Header]', '', '', '', '', '', '', '', '', '', ''])
@@ -430,9 +429,13 @@ def download_sample_sheet(request):
         )
         index_i5_id = index_i5[0].index_id if index_i5 else ''
 
-        library_protocol = str(record.library_protocol.name.encode(
-            'ascii', errors='ignore'), 'utf-8')
+        request_name = unicodedata.normalize('NFKD', record.request.get().name)
+        request_name = str(request_name.encode('ASCII', 'ignore'), 'utf-8')
 
+        library_protocol = \
+            unicodedata.normalize('NFKD', record.library_protocol.name)
+        library_protocol = str(library_protocol.encode('ASCII', 'ignore'),
+                               'utf-8')
         return [
             lane.name.split()[1],  # Lane
             record.barcode,        # Sample_ID
@@ -443,35 +446,34 @@ def download_sample_sheet(request):
             record.index_i7,       # index
             index_i5_id,           # I5_Index_ID
             record.index_i5,       # index2
-            record.request.get(),  # Sample_Project / Request ID
+            request_name,          # Sample_Project / Request ID
             library_protocol,      # Description / Library Protocol
         ]
 
-    try:
-        if not any(lanes):
-            raise ValueError('No lanes are selected.')
+    flowcell = Flowcell.objects.get(pk=flowcell_id)
+    filename = '%s_SampleSheet.csv' % flowcell.flowcell_id
+    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
 
-        for lane_id, flowcell_id in lanes.items():
-            lane = Lane.objects.get(pk=lane_id)
-            pool = lane.pool
-            # flowcell = Flowcell.objects.get(pk=flowcell_id)
-            libraries = pool.libraries.all()
-            samples = pool.samples.all()
-            rows = []
+    if not any(lanes):
+        raise ValueError('No lanes are selected.')
 
-            for library in libraries:
-                row = create_row(lane, library)
-                rows.append(row)
+    rows = []
+    for lane_id in lanes:
+        lane = Lane.objects.get(pk=lane_id)
+        pool = lane.pool
+        libraries = pool.libraries.all()
+        samples = pool.samples.all()
 
-            for sample in samples:
-                row = create_row(lane, sample)
-                rows.append(row)
+        for library in libraries:
+            row = create_row(lane, library)
+            rows.append(row)
 
-            rows = sorted(rows, key=lambda x: x[1])
-            for row in rows:
-                writer.writerow(row)
+        for sample in samples:
+            row = create_row(lane, sample)
+            rows.append(row)
 
-    except Exception as e:
-        logger.exception(e)
+    rows = sorted(rows, key=lambda x: (x[0], x[1][3:]))
+    for row in rows:
+        writer.writerow(row)
 
     return response

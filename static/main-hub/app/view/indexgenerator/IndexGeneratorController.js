@@ -447,7 +447,6 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
             Ext.Ajax.request({
                 url: url,
                 method: 'POST',
-                timeout: 1000000,
                 scope: this,
 
                 params: {

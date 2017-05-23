@@ -185,12 +185,14 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellsController', {
 
     downloadSampleSheet: function() {
         var store = Ext.getStore('flowcellsStore'),
-            lanes = {};
+            flowcellId = '',
+            lanes = [];
 
         // Get all checked (selected) samples
         store.each(function(record) {
             if (record.get('selected')) {
-                lanes[record.get('laneId')] = record.get('flowcell');
+                lanes.push(record.get('laneId'));
+                flowcellId = record.get('flowcell');
             }
         });
 
@@ -202,7 +204,10 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellsController', {
             form.submit({
                 url: 'flowcell/download_sample_sheet/',
                 target: '_blank',
-                params: { lanes: Ext.JSON.encode(lanes) }
+                params: {
+                    flowcell_id: flowcellId,
+                    lanes: Ext.JSON.encode(lanes)
+                }
             });
         } else {
             Ext.ux.ToastMessage('You did not select any lanes.', 'warning');
