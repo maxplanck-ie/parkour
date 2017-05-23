@@ -17,11 +17,10 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
 
     initComponent: function() {
         var me = this;
-
         me.items = [{
-                xtype: 'treepanel',
-                id: 'poolingTreePanel',
-                itemId: 'poolingTreePanel',
+                xtype: 'grid',
+                id: 'indexGeneratorTable',
+                itemId: 'indexGeneratorTable',
                 height: Ext.Element.getViewportHeight() - 94,
                 margin: '0 15px 0 0',
                 flex: 1,
@@ -44,21 +43,23 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                 },
                 viewConfig: {
                     // loadMask: false,
-                    markDirty: false
+                    stripeRows: false,
+                    // markDirty: false
                 },
-                plugins: [{
-                    ptype: 'rowediting',
-                    clicksToEdit: 1
-                }],
-                store: 'PoolingTree',
+                store: 'indexGeneratorStore',
                 rootVisible: false,
                 sortableColumns: false,
                 columns: [{
-                        xtype: 'treecolumn',
+                        xtype: 'checkcolumn',
+                        itemId: 'checkColumn',
+                        dataIndex: 'selected',
+                        tdCls: 'no-dirty',
+                        width: 40
+                    },
+                    {
                         text: 'Name',
-                        dataIndex: 'text',
-                        sortable: true,
-                        minWidth: 250,
+                        dataIndex: 'name',
+                        minWidth: 200,
                         flex: 1
                     },
                     {
@@ -80,7 +81,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                     {
                         text: 'Length',
                         tooltip: 'Read Length',
-                        dataIndex: 'readLength',
+                        dataIndex: 'read_length',
                         width: 70,
                         editor: {
                             xtype: 'combobox',
@@ -91,19 +92,21 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                             matchFieldWidth: false,
                             forceSelection: true
                         },
-                        renderer: function(value, meta, record) {
-                            var name = record.get('readLengthName');
-                            return name ? name : '';
+                        renderer: function(value) {
+                            var store = Ext.getStore('readLengthsStore');
+                            var record = store.findRecord('id', value)
+                            return (record) ? record.get('name') : '';
                         }
                     },
                     {
                         text: 'Protocol',
+                        tooltip: 'Library Preparation Protocol',
                         dataIndex: 'libraryProtocolName',
                         width: 150
                     },
                     {
                         text: 'Index Type',
-                        dataIndex: 'indexType',
+                        dataIndex: 'index_type',
                         width: 150,
                         editor: {
                             id: 'indexTypePoolingEditor',
@@ -115,9 +118,10 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                             matchFieldWidth: false,
                             forceSelection: true
                         },
-                        renderer: function(value, meta, record) {
-                            var name = record.get('indexTypeName');
-                            return name ? name : '';
+                        renderer: function(value) {
+                            var store = Ext.getStore('indexTypesStore');
+                            var record = store.findRecord('id', value)
+                            return (record) ? record.get('name') : '';
                         }
                     },
                     {
@@ -130,7 +134,25 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                         dataIndex: 'indexI5',
                         width: 100
                     }
-                ]
+                ],
+                plugins: [{
+                    ptype: 'rowediting',
+                    clicksToEdit: 1
+                }],
+                features: [{
+                    ftype: 'grouping',
+                    groupHeaderTpl: [
+                        '<strong>Request: {children:this.getName}</strong> (Depth: {children:this.getTotalDepth})',
+                        {
+                            getName: function(children) {
+                                return children[0].get('requestName');
+                            },
+                            getTotalDepth: function(children) {
+                                return Ext.sum(Ext.pluck(Ext.pluck(children, 'data'), 'sequencingDepth'));;
+                            }
+                        }
+                    ]
+                }],
             },
             {
                 xtype: 'grid',

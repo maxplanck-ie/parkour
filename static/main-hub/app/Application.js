@@ -35,7 +35,7 @@ Ext.define('MainHub.Application', {
         'incominglibraries.IncomingLibraries',
         'indexgenerator.PoolSizes',
         'requests.LibrariesInRequest',
-        'indexgenerator.PoolingTree',
+        'indexgenerator.IndexGenerator',
         'librarypreparation.LibraryPreparation',
         'pooling.Pooling',
         'flowcell.Flowcells',

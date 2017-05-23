@@ -7,8 +7,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Prefetch, Q
 
 from request.models import Request
-from library_sample_shared.models import (ReadLength, IndexType,
-                                          IndexI7, IndexI5)
+from library_sample_shared.models import IndexI7, IndexI5
 from library.models import Library
 from sample.models import Sample
 from library_preparation.models import LibraryPreparation
@@ -21,9 +20,9 @@ logger = logging.getLogger('db')
 
 @login_required
 @staff_member_required
-def pooling_tree(request):
-    """ Get libraries ready for pooling. """
-    children = []
+def get_all(request):
+    """ Get libraries and sample, which are ready for pooling. """
+    data = []
 
     requests = Request.objects.prefetch_related(
         Prefetch(
@@ -38,12 +37,7 @@ def pooling_tree(request):
         ),
     )
 
-    if not request.user.is_staff:
-        requests = requests.filter(user_id=request.user.id)
-
     for req in requests:
-        records = []
-
         for library in req.libraries_all:
             if library.index_i7 and library.is_pooled is False:
                 index_i7 = IndexI7.objects.filter(
@@ -58,9 +52,11 @@ def pooling_tree(request):
                 )
                 index_i5_id = index_i5[0].index_id if index_i5 else ''
 
-                records.append({
-                    'text': library.name,
-                    'libraryId': library.id,
+                data.append({
+                    'name': library.name,
+                    'requestId': req.pk,
+                    'requestName': req.name,
+                    'libraryId': library.pk,
                     'barcode': library.barcode,
                     'recordType': 'L',
                     'sequencingDepth': library.sequencing_depth,
@@ -69,21 +65,15 @@ def pooling_tree(request):
                     'indexI7Id': index_i7_id,
                     'indexI5Id': index_i5_id,
                     'indexI5': library.index_i5,
-                    'indexType': library.index_type.id,
-                    'indexTypeName': library.index_type.name,
-                    'readLength':
-                        library.read_length.id,
-                    'readLengthName':
-                        library.read_length.name,
-                    'iconCls': 'x-fa fa-flask',
-                    'checked': False,
-                    'leaf': True
+                    'index_type': library.index_type.pk,
+                    'read_length': library.read_length.pk,
                 })
-
         for sample in req.samples_all:
             if sample.is_pooled is False:
-                records.append({
-                    'text': sample.name,
+                data.append({
+                    'name': sample.name,
+                    'requestId': req.pk,
+                    'requestName': req.name,
                     'sampleId': sample.id,
                     'barcode': sample.barcode,
                     'recordType': 'S',
@@ -93,43 +83,16 @@ def pooling_tree(request):
                     'indexI7Id': '',
                     'indexI5Id': '',
                     'indexI5': '',
-                    'indexType':
-                        sample.index_type.id
+                    'index_type':
+                        sample.index_type.pk
                         if sample.index_type is not None
                         else '',
-                    'indexTypeName':
-                        sample.index_type.name
-                        if sample.index_type is not None
-                        else '',
-                    'readLength':
-                        sample.read_length.id,
-                    'readLengthName':
-                        sample.read_length.name,
-                    'iconCls': 'x-fa fa-flask',
-                    'checked': False,
-                    'leaf': True
+                    'read_length': sample.read_length.pk,
                 })
 
-        records = sorted(records, key=lambda x: x['barcode'][3:])
+    data = sorted(data, key=lambda x: x['barcode'][3:])
 
-        if records:
-            request_name = '%s (Depth: %i)' % \
-                (req.name, sum([x['sequencingDepth'] for x in records]))
-            children.append({
-                'text': request_name,
-                'expanded': True,
-                'iconCls': 'x-fa fa-pencil-square-o',
-                'children': records
-            })
-
-    children = sorted(children, key=lambda x: x['text'])
-
-    data = {
-        'text': '.',
-        'children': children
-    }
-
-    return JsonResponse(data)
+    return JsonResponse(data, safe=False)
 
 
 @login_required
@@ -238,56 +201,69 @@ def save_pool(request):
 
 @login_required
 @staff_member_required
-def update_read_length(request):
-    """ Update Read Length for a given librray or sample. """
+def update(request):
+    """ Update Read Length and Index Type (in samples only). """
     error = ''
 
-    if request.method == 'POST':
-        record_type = request.POST.get('record_type', '')
-        record_id = request.POST.get('record_id', '')
-        read_length_id = request.POST.get('read_length_id', '')
+    library_id = request.POST.get('library_id', '')
+    sample_id = request.POST.get('sample_id', '')
+    record_type = request.POST.get('recordType', '')
+    read_length_id = request.POST.get('readLength', '')
+    index_type_id = request.POST.get('indexType', '')
 
-        try:
-            if record_type == 'L':
-                record = Library.objects.get(pk=record_id)
-            elif record_type == 'S':
-                record = Sample.objects.get(pk=record_id)
-            else:
-                raise ValueError('Record type is not L/S or missing.')
-            read_length = ReadLength.objects.get(pk=read_length_id)
-        except Exception as e:
-            error = 'Could not update Read Length.'
-            logger.exception(e)
+    try:
+        if record_type == 'L':
+            library = Library.objects.get(pk=library_id)
+            library.read_length_id = read_length_id
+            library.save()
+        elif record_type == 'S':
+            sample = Sample.objects.get(pk=sample_id)
+            sample.read_length_id = read_length_id
+            sample.index_type_id = index_type_id
+            sample.save()
         else:
-            record.read_length = read_length
-            record.save(update_fields=['read_length'])
-    else:
-        error = 'Wrong HTTP method.'
+            raise ValueError('No Record Type is provided.')
+
+    except Exception as e:
+        error = str(e)
+        logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error})
 
 
 @login_required
 @staff_member_required
-def update_index_type(request):
-    """ Update Index Type for a given sample. """
+def update_all(request):
+    """ Update Read Length or Index Type in all records (apply to all). """
     error = ''
 
-    if request.method == 'POST':
-        sample_id = request.POST.get('sample_id', '')
-        index_type_id = request.POST.get('index_type_id', '')
+    if request.is_ajax():
+        data = json.loads(request.body.decode('utf-8'))
+        for item in data:
+            try:
+                record_type = item['record_type']
+                library_id = item['library_id']
+                sample_id = item['sample_id']
+                changed_value = item['changed_value']
+                if record_type == 'L':
+                    library = Library.objects.get(pk=library_id)
+                    for key, value in changed_value.items():
+                        if key == 'read_length':
+                            setattr(library, key + '_id', value)
+                    library.save()
+                elif record_type == 'S':
+                    sample = Sample.objects.get(pk=sample_id)
+                    for key, value in changed_value.items():
+                        if hasattr(sample, key):
+                            setattr(sample, key + '_id', value)
+                    sample.save()
+                else:
+                    raise ValueError('No Record Type is provided.')
 
-        try:
-            sample = Sample.objects.get(pk=sample_id)
-            index_type = IndexType.objects.get(pk=index_type_id)
-        except Exception as e:
-            error = 'Could not update Index Type.'
-            logger.exception(e)
-        else:
-            sample.index_type = index_type
-            sample.save(update_fields=['index_type_id'])
-    else:
-        error = 'Wrong HTTP method.'
+            except Exception as e:
+                error = 'Some of the records were not updated ' + \
+                    '(see the logs).'
+                logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error})
 

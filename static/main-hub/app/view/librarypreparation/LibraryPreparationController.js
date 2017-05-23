@@ -45,7 +45,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
         var nMFormulaDataIndices = ['concentration_library',
                                     'mean_fragment_size'];
 
-        if (typeof dataIndex !== 'undefined' && allowedColumns.indexOf(dataIndex) !== -1) {
+        if (typeof dataIndex !== undefined && allowedColumns.indexOf(dataIndex) !== -1) {
             store.each(function(item) {
                 if (item.get('libraryProtocol') === record.get('libraryProtocol') && item !== record) {
                     item.set(dataIndex, record.get(dataIndex));
@@ -64,8 +64,9 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
             store.sync({
                 failure: function(batch, options) {
                     var error = batch.operations[0].getError();
+                    console.error(error);
                     setTimeout(function() {
-                        Ext.ux.ToastMessage(error, 'error');
+                        Ext.ux.ToastMessage(error.statusText, 'error');
                     }, 100);
                 }
             });
@@ -82,8 +83,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
             spikeInVolume = values.spike_in_volume,
             concentrationLibrary = values.concentration_library,
             meanFragmentSize = values.mean_fragment_size,
-            nM = values.nM,
-            url = 'library_preparation/update/';
+            nM = values.nM;
 
         var params = $.extend({
             sample_id: record.get('sampleId'),
@@ -98,28 +98,20 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
         }
 
         Ext.Ajax.request({
-            url: url,
+            url: 'library_preparation/update/',
             method: 'POST',
-            timeout: 1000000,
             scope: this,
             params: params,
-
             success: function(response) {
                 var obj = Ext.JSON.decode(response.responseText);
-
                 if (obj.success) {
                     Ext.getStore('libraryPreparationStore').reload();
-                    // if (Ext.getStore('poolingStore').isLoaded()) Ext.getStore('poolingStore').reload();
                 } else {
                     Ext.ux.ToastMessage(obj.error, 'error');
-                    console.error('[ERROR]: ' + url);
-                    console.error(response);
                 }
             },
-
             failure: function(response) {
                 Ext.ux.ToastMessage(response.statusText, 'error');
-                console.error('[ERROR]: ' + url);
                 console.error(response);
             }
         });
