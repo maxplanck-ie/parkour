@@ -94,16 +94,19 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellsController', {
 
     selectAll: function(flowcellId) {
         var store = Ext.getStore('flowcellsStore');
-        var selectedRecord = store.findRecord('selected', true);
-        if (!selectedRecord) {
-            store.each(function(item) {
-                if (item.get('flowcellId') === flowcellId) {
-                    item.set('selected', true);
+        store.each(function(item) {
+            var selectedRecordIndex = store.findBy(function(record) {
+                if (record.get('selected') && record.get('flowcellId') !== flowcellId) {
+                    return true;
                 }
             });
-        } else {
-            Ext.ux.ToastMessage('You can only select lanes from the same flowcell.', 'warning');
-        }
+
+            if (selectedRecordIndex !== -1) return;
+
+            if (item.get('flowcellId') === flowcellId) {
+                    item.set('selected', true);
+                }
+        });
     },
 
     editRecord: function(editor, context) {

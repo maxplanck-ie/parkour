@@ -136,16 +136,22 @@ Ext.define('MainHub.view.pooling.PoolingController', {
 
     selectAll: function(poolName) {
         var store = Ext.getStore('poolingStore');
-        var selectedRecord = store.findRecord('selected', true);
-        if (!selectedRecord) {
-            store.each(function(item) {
-                if (item.get('poolName') === poolName) {
-                    item.set('selected', true);
+        store.each(function(item) {
+            var isNotPrepared = item.get('sampleId') !== 0 && (
+                item.get('status') === 2 || item.get('status') === -2);
+
+            var selectedRecordIndex = store.findBy(function(record) {
+                if (record.get('selected') && record.get('poolName') !== poolName) {
+                    return true;
                 }
             });
-        } else {
-            Ext.ux.ToastMessage('You can only select records from the same pool.', 'warning');
-        }
+
+            if (selectedRecordIndex !== -1) return;
+
+            if (item.get('poolName') === poolName && !isNotPrepared) {
+                item.set('selected', true);
+            }
+        });
     },
 
     downloadBenchtopProtocol: function() {

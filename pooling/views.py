@@ -1,5 +1,7 @@
 import json
 import logging
+import time
+
 from xlwt import Workbook, XFStyle, Formula
 
 from django.http import HttpResponse, JsonResponse
@@ -301,40 +303,83 @@ def download_pooling_template(request):
 
     wb = Workbook(encoding='utf-8')
     ws = wb.add_sheet('QC Normalization and Pooling')
+    col_letters = {
+        0: 'A',   # Library
+        1: 'B',   # Barcode
+        2: 'C',   # ng/µl
+        3: 'D',   # bp
+        4: 'E',   # nM
+        5: 'F',   # Date
+        6: 'G',   # Comments
+    }
 
     try:
-        columns = (
-            'Library',
-            'Barcode',
-            'ng/µl',
-            'bp',
-            'nM',
-            'Date',
-            'Comments',
-        )
+        header = ['Library', 'Barcode', 'ng/µl', 'bp', 'nM', 'Date',
+                  'Comments']
         row_num = 0
 
         font_style = XFStyle()
         font_style.font.bold = True
 
-        for i, column in enumerate(columns):
+        for i, column in enumerate(header):
             ws.write(row_num, i, column, font_style)
-            ws.col(i).width = 6500  # Set column width
+            ws.col(i).width = 7000  # Set column width
 
         font_style = XFStyle()
         font_style.alignment.wrap = 1
 
         for library_id in libraries:
-            obj = Pooling.objects.get(library_id=library_id)
             row_num += 1
-            row = [obj.library.name, obj.library.barcode]
+            row_idx = str(row_num + 1)
+
+            obj = Pooling.objects.get(library_id=library_id)
+            row = [
+                obj.library.name,
+                obj.library.barcode,
+                obj.library.concentration,
+                obj.library.mean_fragment_size
+            ]
+
+            # nM = Library Concentration / ( Mean Fragment Size * 650 ) * 10^6
+            col_concentration = col_letters[2]
+            col_mean_fragment_size = col_letters[3]
+            formula = col_concentration + row_idx + '/ (' + \
+                col_mean_fragment_size + row_idx + ') * 1000000'
+            row.append(Formula(formula))
+
+            row.extend([
+                time.strftime('%d.%m.%Y'),
+                obj.library.comments
+            ])
+
             for i in range(2):
                 ws.write(row_num, i, row[i], font_style)
 
         for sample_id in samples:
-            obj = Pooling.objects.get(sample_id=sample_id)
             row_num += 1
-            row = [obj.sample.name, obj.sample.barcode]
+            row_idx = str(row_num + 1)
+
+            obj = Pooling.objects.get(sample_id=sample_id)
+            lib_prep_obj = LibraryPreparation.objects.get(sample=obj.sample)
+            row = [
+                obj.sample.name,
+                obj.sample.barcode,
+                lib_prep_obj.concentration_library,
+                lib_prep_obj.mean_fragment_size
+            ]
+
+            # nM = Library Concentration / ( Mean Fragment Size * 650 ) * 10^6
+            col_concentration = col_letters[2]
+            col_mean_fragment_size = col_letters[3]
+            formula = col_concentration + row_idx + '/ (' + \
+                col_mean_fragment_size + row_idx + ') * 1000000'
+            row.append(Formula(formula))
+
+            row.extend([
+                time.strftime('%d.%m.%Y'),
+                obj.library.comments
+            ])
+
             for i in range(2):
                 ws.write(row_num, i, row[i], font_style)
 
