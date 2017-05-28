@@ -403,11 +403,12 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
     },
 
     renderSummary: function(value, summaryData, dataIndex) {
-        var result = '',
-            grid = Ext.getCmp('poolGrid'),
-            totalSequencingDepth = 0;
+        var store = Ext.getCmp('poolGrid').getStore();
+        var result = '';
+        var grid = Ext.getCmp('poolGrid');
+        var totalSequencingDepth = 0;
 
-        if (value.green > 0 || value.red > 0) {
+        if (store.getCount() > 1 && (value.green > 0 || value.red > 0)) {
             if (dataIndex.split('_')[0] === 'indexI7') {
                 // Consider only non empty Index I7 indices
                 grid.getStore().each(function(record) {

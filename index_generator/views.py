@@ -208,8 +208,8 @@ def update(request):
     library_id = request.POST.get('library_id', '')
     sample_id = request.POST.get('sample_id', '')
     record_type = request.POST.get('recordType', '')
-    read_length_id = request.POST.get('readLength', '')
-    index_type_id = request.POST.get('indexType', '')
+    read_length_id = request.POST.get('read_length', '')
+    index_type_id = request.POST.get('index_type', '')
 
     try:
         if record_type == 'L':

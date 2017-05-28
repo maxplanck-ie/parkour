@@ -272,22 +272,22 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
         $.each(grid.problematicCycles, function(idx, id) {
             $('.x-grid-row-summary .x-grid-cell-' + id).addClass('problematic-cycle');
         });
-        grid.problematicCycles = [];
+        // grid.problematicCycles = [];
 
         // Update grid's header and enable/disable 'Pool' button
-        if (store.getCount() > 1) {
+        if (store.getCount() > 0) {
             var totalPoolSize = grid.getStore().sum('sequencingDepth');
             grid.setTitle('Pool (total size: ' + totalPoolSize + ' M)');
-            Ext.getCmp('savePool').setDisabled(false);
+            Ext.getCmp('savePool').enable();
 
             var recordTypes = Ext.pluck(Ext.Array.pluck(store.data.items, 'data'), 'recordType');
             if (recordTypes.indexOf('S') > -1) {
-                Ext.getCmp('generateIndices').setDisabled(false);
+                Ext.getCmp('generateIndices').enable();
             }
         } else {
             grid.setTitle('Pool');
-            Ext.getCmp('savePool').setDisabled(true);
-            Ext.getCmp('generateIndices').setDisabled(true);
+            Ext.getCmp('savePool').disable();
+            Ext.getCmp('generateIndices').disable();
         }
     },
 
@@ -376,8 +376,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
     generateIndices: function() {
         var indexGeneratorTable = Ext.getCmp('indexGeneratorTable'),
             grid = Ext.getCmp('poolGrid'),
-            store = grid.getStore(),
-            url = 'index_generator/generate_indices/';
+            store = grid.getStore();
 
         // Reset all samples' indices
         this.resetGeneratedIndices();
@@ -385,7 +384,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
         indexGeneratorTable.disable();
         grid.setLoading('Generating...');
         Ext.Ajax.request({
-            url: url,
+            url: 'index_generator/generate_indices/',
             method: 'POST',
             timeout: 60000,
             scope: this,
@@ -397,13 +396,11 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
 
             success: function(response) {
                 var obj = Ext.JSON.decode(response.responseText);
-
                 if (obj.success) {
                     store.removeAll();
                     store.add(obj.data);
                 } else {
                     Ext.ux.ToastMessage(obj.error, 'error');
-                    console.error('[ERROR]: ' + url);
                 }
 
                 indexGeneratorTable.enable();
@@ -412,7 +409,6 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
 
             failure: function(response) {
                 Ext.ux.ToastMessage(response.statusText, 'error');
-                console.error('[ERROR]: ' + url);
                 console.error(response);
 
                 indexGeneratorTable.enable();
@@ -423,8 +419,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
 
     save: function() {
         var store = Ext.getCmp('poolGrid').getStore(),
-            poolSizeId = Ext.getCmp('poolSizeCb').getValue(),
-            url = 'index_generator/save_pool/';
+            poolSizeId = Ext.getCmp('poolSizeCb').getValue();
 
         if (this.isPoolValid(store)) {
             // Get all libraries' and samples' ids
@@ -445,16 +440,14 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
 
             Ext.getCmp('poolingContainer').setLoading('Saving...');
             Ext.Ajax.request({
-                url: url,
+                url: 'index_generator/save_pool/',
                 method: 'POST',
                 scope: this,
-
                 params: {
                     pool_size_id: poolSizeId,
                     libraries: Ext.JSON.encode(libraries),
                     samples: Ext.JSON.encode(samples)
                 },
-
                 success: function(response) {
                     var obj = Ext.JSON.decode(response.responseText);
 
@@ -465,20 +458,14 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
 
                         // Reload stores
                         Ext.getStore('indexGeneratorStore').reload();
-                        // if (Ext.getStore('libraryPreparationStore')) Ext.getStore('libraryPreparationStore').reload();
-                        // if (Ext.getStore('poolingStore').isLoaded()) Ext.getStore('poolingStore').reload();
-                        // MainHub.Utilities.reloadAllStores();
                     } else {
                         Ext.getCmp('poolingContainer').setLoading(false);
                         Ext.ux.ToastMessage(obj.error, 'error');
-                        console.error('[ERROR]: ' + url);
                     }
                 },
-
                 failure: function(response) {
                     Ext.getCmp('poolingContainer').setLoading(false);
                     Ext.ux.ToastMessage(response.statusText, 'error');
-                    console.error('[ERROR]: ' + url);
                     console.error(response);
                 }
             });
