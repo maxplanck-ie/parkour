@@ -24,36 +24,6 @@ class Pooling(models.Model):
         blank=True
     )
 
-    concentration_c2 = models.FloatField(
-        'Concentration C2',
-        null=True,
-        blank=True
-    )
-
-    sample_volume = models.FloatField(
-        'Sample Volume V1',
-        null=True,
-        blank=True
-    )
-
-    buffer_volume = models.FloatField(
-        'Buffer Volume V2',
-        null=True,
-        blank=True
-    )
-
-    percentage_library = models.PositiveSmallIntegerField(
-        '% library in Pool',
-        null=True,
-        blank=True,
-    )
-
-    volume_to_pool = models.FloatField(
-        'Volume to Pool',
-        null=True,
-        blank=True
-    )
-
     class Meta:
         verbose_name = 'Pooling'
         verbose_name_plural = 'Pooling'
