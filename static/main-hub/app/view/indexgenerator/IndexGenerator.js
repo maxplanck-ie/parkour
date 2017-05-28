@@ -136,11 +136,16 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                     }
                 ],
                 plugins: [{
+                    ptype: 'bufferedrenderer',
+                    trailingBufferZone: 100,
+                    leadingBufferZone: 100
+                }, {
                     ptype: 'rowediting',
                     clicksToEdit: 1
                 }],
                 features: [{
                     ftype: 'grouping',
+                    startCollapsed: true,
                     groupHeaderTpl: [
                         '<strong>Request: {children:this.getName}</strong> (Depth: {children:this.getTotalDepth})',
                         {

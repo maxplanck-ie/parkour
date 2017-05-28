@@ -122,6 +122,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcells', {
         ],
         features: [{
             ftype: 'grouping',
+            startCollapsed: true,
             groupHeaderTpl: '<strong>Flowcell ID: {name}</strong>'
         }],
         plugins: [{

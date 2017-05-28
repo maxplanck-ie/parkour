@@ -223,6 +223,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
         ],
         features: [{
             ftype: 'grouping',
+            startCollapsed: true,
             groupHeaderTpl: '<strong>Protocol: {name}</strong>'
         }],
         dockedItems: [{

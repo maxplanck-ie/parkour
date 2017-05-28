@@ -313,6 +313,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
         },
         features: [{
             ftype: 'grouping',
+            startCollapsed: true,
             groupHeaderTpl: [
                 '<strong>Request: {children:this.getName}</strong> (No. of Libraries/Samples: {rows.length})',
                 {

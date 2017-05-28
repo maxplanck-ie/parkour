@@ -246,7 +246,7 @@ Ext.define('MainHub.view.libraries.Libraries', {
         },
         features: [{
             ftype: 'grouping',
-            // groupHeaderTpl: '<strong>Request: {name}</strong> (No. of Libraries/Samples: {rows.length})'
+            startCollapsed: true,
             groupHeaderTpl: [
                 '<strong>Request: {children:this.getName}</strong> (No. of Libraries/Samples: {rows.length})',
                 {
