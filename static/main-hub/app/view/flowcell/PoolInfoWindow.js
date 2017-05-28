@@ -5,8 +5,8 @@ Ext.define('MainHub.view.flowcell.PoolInfoWindow', {
     ],
     controller: 'flowcell-poolinfowindow',
 
-    width: 800,
-    height: 600,
+    width: 550,
+    height: 650,
     modal: true,
     resizable: false,
     layout: 'fit',
