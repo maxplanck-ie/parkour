@@ -6,6 +6,10 @@ Ext.define('MainHub.model.incominglibraries.IncomingLibraries', {
             type: 'int'
         },
         {
+            name: 'selected',
+            type: 'bool'
+        },
+        {
             name: 'concentration_facility',
             type: 'float',
             allowNull: true

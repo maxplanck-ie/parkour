@@ -97,3 +97,33 @@ def update_all(request):
                 logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error})
+
+
+@login_required
+@staff_member_required
+def qc_update_all(request):
+    """ Update QC Result for the given libraries/samples. """
+    error = ''
+
+    libraries = json.loads(request.POST.get('libraries', '[]'))
+    samples = json.loads(request.POST.get('samples', '[]'))
+    result = json.loads(request.POST.get('result', ''))
+
+    try:
+        qc_result = 2 if result is True else -1
+
+        for library_id in libraries:
+            library = Library.objects.get(pk=library_id)
+            library.status = qc_result
+            library.save(update_fields=['status'])
+
+        for sample_id in samples:
+            sample = Sample.objects.get(pk=sample_id)
+            sample.status = qc_result
+            sample.save(update_fields=['status'])
+
+    except Exception as e:
+        error = str(e)
+        logger.exception(e)
+
+    return JsonResponse({'success': not error, 'error': error})

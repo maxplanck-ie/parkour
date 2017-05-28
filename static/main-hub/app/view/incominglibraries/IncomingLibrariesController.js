@@ -10,6 +10,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
             '#incomingLibraries': {
                 refresh: 'refresh',
                 itemcontextmenu: 'showContextMenu',
+                groupcontextmenu: 'showGroupContextMenu',
                 beforeedit: 'toggleEditors',
                 edit: 'editRecord'
             },
@@ -46,6 +47,44 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
                 }
             }]
         }).showAt(e.getXY());
+    },
+
+    showGroupContextMenu: function(view, node, group, e) {
+        var me = this;
+        e.stopEvent();
+        Ext.create('Ext.menu.Menu', {
+            items: [{
+                text: 'Select All',
+                iconCls: 'x-fa fa-check-square-o',
+                handler: function() {
+                    me.selectAll(parseInt(group));
+                }
+            },
+            '-',
+            {
+                text: 'QC: All selected passed',
+                iconCls: 'x-fa fa-check',
+                handler: function() {
+                    me.qualityCheckAll(parseInt(group), true);
+                }
+            },
+            {
+                text: 'QC: All selected failed',
+                iconCls: 'x-fa fa-times',
+                handler: function() {
+                    me.qualityCheckAll(parseInt(group), false);
+                }
+            }]
+        }).showAt(e.getXY());
+    },
+
+    selectAll: function(requestId) {
+        var store = Ext.getStore('incomingLibrariesStore');
+        store.each(function(item) {
+            if (item.get('requestId') === requestId) {
+                item.set('selected', true);
+            }
+        });
     },
 
     toggleEditors: function(editor, context) {
@@ -119,8 +158,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
     editRecord: function(editor, context) {
         var record = context.record,
             changes = record.getChanges(),
-            values = context.newValues,
-            url = 'quality_check/update/';
+            values = context.newValues;
 
         var params = $.extend({
             record_type: record.getRecordType(),
@@ -138,7 +176,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
         }
 
         Ext.Ajax.request({
-            url: url,
+            url: 'quality_check/update/',
             method: 'POST',
             timeout: 1000000,
             scope: this,
@@ -152,17 +190,57 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
                     // if (Ext.getStore('PoolingTree').isLoaded()) Ext.getStore('PoolingTree').reload();
                 } else {
                     Ext.ux.ToastMessage(obj.error, 'error');
-                    console.error('[ERROR]: ' + url);
-                    console.error(response);
                 }
             },
 
             failure: function(response) {
                 Ext.ux.ToastMessage(response.statusText, 'error');
-                console.error('[ERROR]: ' + url);
                 console.error(response);
             }
         });
+    },
+
+    qualityCheckAll: function(requestId, result) {
+        var store = Ext.getStore('incomingLibrariesStore');
+        var libraries = [];
+        var samples = [];
+
+        store.each(function(item) {
+            if (item.get('requestId') === requestId && item.get('selected')) {
+                if (item.get('sampleId') === 0) {
+                    libraries.push(item.get('libraryId'));
+                } else {
+                    samples.push(item.get('sampleId'));
+                }
+            }
+        });
+
+        if (libraries.length !== 0 || samples.length !== 0) {
+            Ext.Ajax.request({
+                url: 'quality_check/qc_update_all/',
+                method: 'POST',
+                scope: this,
+                params: {
+                    libraries: Ext.JSON.encode(libraries),
+                    samples: Ext.JSON.encode(samples),
+                    result: result
+                },
+                success: function(response) {
+                    var obj = Ext.JSON.decode(response.responseText);
+                    if (obj.success) {
+                        Ext.getStore('incomingLibrariesStore').reload();
+                    } else {
+                        Ext.ux.ToastMessage(obj.error, 'error');
+                    }
+                },
+                failure: function(response) {
+                    Ext.ux.ToastMessage(response.statusText, 'error');
+                    console.error(response);
+                }
+            });
+        } else {
+            Ext.ux.ToastMessage('You did not select any libraries/samples.', 'warning');
+        }
     },
 
     changeFilter: function(el, value) {

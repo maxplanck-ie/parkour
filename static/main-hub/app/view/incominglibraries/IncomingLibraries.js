@@ -56,6 +56,13 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
         sortableColumns: false,
         columns: {
             items: [{
+                    xtype: 'checkcolumn',
+                    itemId: 'checkColumn',
+                    dataIndex: 'selected',
+                    tdCls: 'no-dirty userEntry',
+                    width: 40
+                },
+                {
                     text: 'Name',
                     dataIndex: 'name',
                     minWidth: 150,
@@ -210,11 +217,6 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                         return (record) ? record.getShortName() : '';
                     }
                 },
-                // {
-                //     text: 'Date',
-                //     dataIndex: 'dateFacility',
-                //     tdCls: 'facilityEntry'
-                // },
                 {
                     text: 'qPCR (nM)',
                     tooltip: 'qPCR Result (facility)',
@@ -311,7 +313,6 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
         },
         features: [{
             ftype: 'grouping',
-            // groupHeaderTpl: '<strong>Request: {name}</strong> (No. of Libraries/Samples: {rows.length})'
             groupHeaderTpl: [
                 '<strong>Request: {children:this.getName}</strong> (No. of Libraries/Samples: {rows.length})',
                 {
