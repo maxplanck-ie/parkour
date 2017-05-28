@@ -65,37 +65,37 @@ Ext.define('MainHub.view.requests.RequestsController', {
 
     showContextMenu: function(grid, record, item, index, e) {
         var me = this;
-        e.stopEvent();
-        Ext.create('Ext.menu.Menu', {
-            items: [{
-                    text: 'Edit',
-                    iconCls: 'x-fa fa-pencil',
-                    handler: function() {
-                        Ext.create('MainHub.view.requests.RequestWindow', {
-                            title: 'Edit Request',
-                            mode: 'edit',
-                            record: record
-                        }).show();
+        var items = [{
+            text: 'Edit',
+            iconCls: 'x-fa fa-pencil',
+            handler: function() {
+                Ext.create('MainHub.view.requests.RequestWindow', {
+                    title: 'Edit Request',
+                    mode: 'edit',
+                    record: record
+                }).show();
+            }
+        },
+        {
+            text: 'Delete',
+            iconCls: 'x-fa fa-trash',
+            handler: function() {
+                Ext.Msg.show({
+                    title: 'Delete request',
+                    message: 'Are you sure you want to delete the request?',
+                    buttons: Ext.Msg.YESNO,
+                    icon: Ext.Msg.QUESTION,
+                    fn: function(btn) {
+                        if (btn == 'yes') me.deleteRequest(record);
                     }
-                },
-                {
-                    text: 'Delete',
-                    iconCls: 'x-fa fa-trash',
-                    handler: function() {
-                        Ext.Msg.show({
-                            title: 'Delete request',
-                            message: 'Are you sure you want to delete the request?',
-                            buttons: Ext.Msg.YESNO,
-                            icon: Ext.Msg.QUESTION,
-                            fn: function(btn) {
-                                if (btn == 'yes') me.deleteRequest(record);
-                            }
-                        });
-                    }
-                },
-                '-',
-                {
-                    text: 'Compose an Email',
+                });
+            }
+        }];
+
+        if (USER_IS_STAFF) {
+            items.push('-');
+            items.push({
+                text: 'Compose an Email',
                     iconCls: 'x-fa fa-envelope-o',
                     handler: function() {
                         Ext.create('MainHub.view.requests.EmailWindow', {
@@ -103,9 +103,11 @@ Ext.define('MainHub.view.requests.RequestsController', {
                             record: record
                         });
                     }
-                }
-            ]
-        }).showAt(e.getXY());
+            });
+        }
+
+        e.stopEvent();
+        Ext.create('Ext.menu.Menu', { items: items }).showAt(e.getXY());
     },
 
     deleteRequest: function(record) {
