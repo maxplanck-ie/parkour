@@ -35,6 +35,9 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
     showContextMenu: function(grid, record, item, index, e) {
         var me = this;
 
+        // Don't edit records which have reached status 1 and higher
+        if (!USER_IS_STAFF && record.get('status') !== 0) return false;
+
         e.stopEvent();
         Ext.create('Ext.menu.Menu', {
             items: [{
@@ -70,38 +73,6 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
             record: record
         }).show();
     },
-
-    // deleteRecord: function(record) {
-    //     var url = record.data.recordType == 'L' ? 'delete_library/' : 'delete_sample/';
-    //
-    //     Ext.Ajax.request({
-    //         url: url,
-    //         method: 'POST',
-    //         scope: this,
-    //         params: {
-    //             'record_id': record.data.recordType == 'L' ? record.data.libraryId : record.data.sampleId
-    //         },
-    //
-    //         success: function(response) {
-    //             var obj = Ext.JSON.decode(response.responseText);
-    //             if (obj.success) {
-    //                 var grid = Ext.getCmp('librariesTable');
-    //                 grid.fireEvent('refresh', grid);
-    //                 Ext.ux.ToastMessage('Record has been deleted!');
-    //             } else {
-    //                 Ext.ux.ToastMessage(obj.error, 'error');
-    //                 console.error('[ERROR]: ' + url);
-    //                 console.error(response);
-    //             }
-    //         },
-    //
-    //         failure: function(response) {
-    //             Ext.ux.ToastMessage(response.statusText, 'error');
-    //             console.error('[ERROR]: ' + url);
-    //             console.error(response);
-    //         }
-    //     });
-    // },
 
     changeFilter: function(el, value) {
         var grid = Ext.getCmp('librariesTable'),
