@@ -24,6 +24,9 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             },
             '#downloadPoolingTemplateBtn': {
                 click: 'downloadPoolingTemplate'
+            },
+            '#searchField': {
+                change: 'search'
             }
         }
     },
@@ -215,5 +218,22 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         } else {
             Ext.ux.ToastMessage('You did not select any libraries.', 'warning');
         }
-    }
+    },
+
+    search: function(fld, query) {
+        var grid = Ext.getCmp('poolingTable'),
+            store = grid.getStore(),
+            columns = Ext.pluck(grid.getColumns(), 'dataIndex');
+
+        store.clearFilter();
+        store.filterBy(function(record) {
+            var res = false;
+            Ext.each(columns, function(column) {
+                if (record.data[column] && record.data[column].toString().toLowerCase().indexOf(query.toLowerCase()) > -1) {
+                    res = res || true;
+                }
+            });
+            return res;
+        });
+    },
 });

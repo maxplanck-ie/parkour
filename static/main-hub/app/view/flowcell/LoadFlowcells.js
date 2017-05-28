@@ -9,11 +9,17 @@ Ext.define('MainHub.view.flowcell.LoadFlowcells', {
 
     items: [{
         xtype: 'grid',
+        id: 'flowcellsTable',
         itemId: 'flowcellsTable',
         height: Ext.Element.getViewportHeight() - 64,
         header: {
             title: 'Load Flowcells',
             items: [{
+                xtype: 'textfield',
+                itemId: 'searchField',
+                emptyText: 'Search',
+                width: 200
+            }, {
                 xtype: 'button',
                 itemId: 'loadBtn',
                 text: 'Load'

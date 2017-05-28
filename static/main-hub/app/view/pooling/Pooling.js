@@ -18,7 +18,13 @@ Ext.define('MainHub.view.pooling.Pooling', {
         itemId: 'poolingTable',
         height: Ext.Element.getViewportHeight() - 64,
         header: {
-            title: 'Pooling'
+            title: 'Pooling',
+            items: [{
+                xtype: 'textfield',
+                itemId: 'searchField',
+                emptyText: 'Search',
+                width: 200
+            }]
         },
         padding: 15,
         viewConfig: {

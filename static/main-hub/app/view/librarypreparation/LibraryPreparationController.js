@@ -1,11 +1,7 @@
 Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.library-preparation',
-
-    requires: [
-        'MainHub.view.librarypreparation.BenchtopProtocolWindow',
-        'Ext.ux.FileUploadWindow'
-    ],
+    requires: [ 'Ext.ux.FileUploadWindow' ],
 
     config: {
         control: {
@@ -13,7 +9,6 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
                 activate: 'activateView'
             },
             '#libraryPreparationTable': {
-                // boxready: 'refresh',
                 refresh: 'refresh',
                 edit: 'editRecord',
                 itemcontextmenu: 'showContextMenu',
@@ -21,6 +16,9 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
             },
             '#downloadBenchtopProtocolLPBtn': {
                 click: 'downloadBenchtopProtocol'
+            },
+            '#searchField': {
+                change: 'search'
             }
         }
     },
@@ -164,10 +162,6 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
                     'samples': Ext.JSON.encode(samples)
                 }
             });
-
-            // Ext.create('MainHub.view.librarypreparation.BenchtopProtocolWindow', {
-            //     samples: samples
-            // }).show();
         } else {
             Ext.ux.ToastMessage('You did not select any samples.', 'warning');
         }
@@ -186,6 +180,23 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
                 }
             }]
         }).showAt(e.getXY());
+    },
+
+    search: function(fld, query) {
+        var grid = Ext.getCmp('libraryPreparationTable'),
+            store = grid.getStore(),
+            columns = Ext.pluck(grid.getColumns(), 'dataIndex');
+
+        store.clearFilter();
+        store.filterBy(function(record) {
+            var res = false;
+            Ext.each(columns, function(column) {
+                if (record.data[column] && record.data[column].toString().toLowerCase().indexOf(query.toLowerCase()) > -1) {
+                    res = res || true;
+                }
+            });
+            return res;
+        });
     },
 
     getDataIndex: function(e, view) {

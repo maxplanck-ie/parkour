@@ -4,7 +4,6 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
 
     requires: [
         'MainHub.view.librarypreparation.LibraryPreparationController',
-        'MainHub.view.librarypreparation.BenchtopProtocolWindow',
         'Ext.ux.FiddleCheckColumn'
     ],
 
@@ -19,7 +18,13 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
         itemId: 'libraryPreparationTable',
         height: Ext.Element.getViewportHeight() - 64,
         header: {
-            title: 'Library Preparation'
+            title: 'Library Preparation',
+            items: [{
+                xtype: 'textfield',
+                itemId: 'searchField',
+                emptyText: 'Search',
+                width: 200
+            }]
         },
         padding: 15,
         viewConfig: {

@@ -28,6 +28,9 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellsController', {
             },
             '#downloadSampleSheetBtn': {
                 click: 'downloadSampleSheet'
+            },
+            '#searchField': {
+                change: 'search'
             }
         }
     },
@@ -212,6 +215,23 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellsController', {
         } else {
             Ext.ux.ToastMessage('You did not select any lanes.', 'warning');
         }
+    },
+
+    search: function(fld, query) {
+        var grid = Ext.getCmp('flowcellsTable'),
+            store = grid.getStore(),
+            columns = Ext.pluck(grid.getColumns(), 'dataIndex');
+
+        store.clearFilter();
+        store.filterBy(function(record) {
+            var res = false;
+            Ext.each(columns, function(column) {
+                if (record.data[column] && record.data[column].toString().toLowerCase().indexOf(query.toLowerCase()) > -1) {
+                    res = res || true;
+                }
+            });
+            return res;
+        });
     },
 
     getDataIndex: function(e, view) {
