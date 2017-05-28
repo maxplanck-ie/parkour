@@ -73,7 +73,7 @@ def get_all(request):
                 'mean_fragment_size': obj.mean_fragment_size,
                 'nM': obj.nM,
             })
-    data = sorted(data, key=lambda x: x['barcode'])
+    data = sorted(data, key=lambda x: x['barcode'][3:])
     return JsonResponse({'success': not error, 'error': error, 'data': data})
 
 

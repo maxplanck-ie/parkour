@@ -84,7 +84,7 @@ def get_libraries_and_samples(request):
         for sample in req.samples.all()
     ]
 
-    data = sorted(libraries + samples, key=lambda x: x['barcode'][:3])
+    data = sorted(libraries + samples, key=lambda x: x['barcode'][3:])
 
     return JsonResponse({'success': True, 'data': data})
 

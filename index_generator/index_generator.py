@@ -394,7 +394,7 @@ class IndexGenerator:
 
     def _sort_indices(self):
         """ Sort generated indices in ascending order. """
-        result = sorted(self._result, key=lambda x: (x['barcode'],
+        result = sorted(self._result, key=lambda x: (x['barcode'][3:],
                                                      x['index_type']))
 
         # Create a dictionary with index types in indices I7/I5

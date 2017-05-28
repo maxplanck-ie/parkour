@@ -91,7 +91,7 @@ def get_all(request):
             })
 
         data += libraries_in_pool
-        data = sorted(data, key=lambda x: x['barcode'])
+        data = sorted(data, key=lambda x: x['barcode'][3:])
 
     return JsonResponse({'success': not error, 'error': error, 'data': data})
 
