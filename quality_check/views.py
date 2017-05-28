@@ -4,9 +4,6 @@ import logging
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from django.template.loader import render_to_string
-from django.conf import settings
-from django.core.mail import send_mail
 
 from library_sample_shared.models import ConcentrationMethod
 from library.models import Library
@@ -59,18 +56,6 @@ def update(request):
                     else:
                         record.status = -1  # failed
                         record.save(update_fields=['status'])
-
-                        # Send a notification email
-                        # send_mail(
-                        #     subject='[Parkour] Quality check failed',
-                        #     message=render_to_string(
-                        #         'email/quality_check_failed.html', {
-                        #             'record_name': record.name,
-                        #             'record_barcode': record.barcode,
-                        #         }),
-                        #     from_email=settings.SERVER_EMAIL,
-                        #     recipient_list=[request.user.email],
-                        # )
             else:
                 error = str(form.errors)
                 logger.debug(form.errors.as_data())

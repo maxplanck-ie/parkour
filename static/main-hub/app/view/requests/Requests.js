@@ -5,6 +5,7 @@ Ext.define('MainHub.view.requests.Requests', {
     requires: [
         'MainHub.view.requests.RequestsController',
         'MainHub.view.requests.RequestWindow',
+        'MainHub.view.requests.EmailWindow',
         'MainHub.view.libraries.LibraryWindow'
     ],
 

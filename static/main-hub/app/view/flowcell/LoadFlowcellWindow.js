@@ -56,7 +56,8 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                     }, {
                         xtype: 'textfield',
                         name: 'flowcell_id',
-                        fieldLabel: 'Flowcell ID'
+                        fieldLabel: 'Flowcell ID',
+                        emptyText: 'Flowcell ID'
                     }]
                 }, {
                     xtype: 'grid',

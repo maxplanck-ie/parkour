@@ -10,7 +10,9 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.template.loader import render_to_string
+from django.core.mail import send_mail
 
 from .models import Request, FileRequest
 from .forms import RequestForm
@@ -326,3 +328,55 @@ def get_files(request):
         logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error, 'data': data})
+
+
+@login_required
+@staff_member_required
+def send_email(request):
+    """ Send an email to the user. """
+    error = ''
+
+    request_id = request.POST.get('request_id', '')
+    subject = request.POST.get('subject', '')
+    message = request.POST.get('message', '')
+    include_failed_records = json.loads(request.POST.get(
+        'include_failed_records', 'false'))
+    records = []
+
+    try:
+        if subject == '' or message == '':
+            raise ValueError('Email subject and/or message is missing.')
+
+        req = Request.objects.get(pk=request_id)
+        if include_failed_records:
+            records += [{
+                    'name': library.name,
+                    'barcode': library.barcode,
+                    'comment': library.comment_facility,
+                }
+                for library in req.libraries.all()
+            ]
+            records += [{
+                    'name': sample.name,
+                    'barcode': sample.barcode,
+                    'comment': sample.comment_facility,
+                }
+                for sample in req.samples.all()
+            ]
+            records = sorted(records, key=lambda x: x['barcode'][3:])
+
+        send_mail(
+            subject='[Parkour] ' + subject,
+            message=render_to_string('email.html', {
+                'email_message': message,
+                'records': records,
+            }),
+            from_email=settings.SERVER_EMAIL,
+            recipient_list=[request.user.email],
+        )
+
+    except Exception as e:
+        error = str(e)
+        logger.exception(e)
+
+    return JsonResponse({'success': not error, 'error': error})

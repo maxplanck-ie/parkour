@@ -65,14 +65,17 @@ Ext.define('MainHub.view.requests.RequestsController', {
 
     showContextMenu: function(grid, record, item, index, e) {
         var me = this;
-
         e.stopEvent();
         Ext.create('Ext.menu.Menu', {
             items: [{
                     text: 'Edit',
                     iconCls: 'x-fa fa-pencil',
                     handler: function() {
-                        me.editRequest(record);
+                        Ext.create('MainHub.view.requests.RequestWindow', {
+                            title: 'Edit Request',
+                            mode: 'edit',
+                            record: record
+                        }).show();
                     }
                 },
                 {
@@ -89,24 +92,25 @@ Ext.define('MainHub.view.requests.RequestsController', {
                             }
                         });
                     }
+                },
+                '-',
+                {
+                    text: 'Compose an Email',
+                    iconCls: 'x-fa fa-envelope-o',
+                    handler: function() {
+                        Ext.create('MainHub.view.requests.EmailWindow', {
+                            title: 'New Email: ' + record.get('name'),
+                            record: record
+                        });
+                    }
                 }
             ]
         }).showAt(e.getXY());
     },
 
-    editRequest: function(record) {
-        Ext.create('MainHub.view.requests.RequestWindow', {
-            title: 'Edit Request',
-            mode: 'edit',
-            record: record
-        }).show();
-    },
-
     deleteRequest: function(record) {
-        var url = 'request/delete/';
-
         Ext.Ajax.request({
-            url: url,
+            url: 'request/delete/',
             method: 'POST',
             timeout: 1000000,
             scope: this,
@@ -121,14 +125,11 @@ Ext.define('MainHub.view.requests.RequestsController', {
                     Ext.ux.ToastMessage('Record has been deleted!');
                 } else {
                     Ext.ux.ToastMessage(obj.error, 'error');
-                    console.error('[ERROR]: ' + url);
-                    console.error(response);
                 }
             },
 
             failure: function(response) {
                 Ext.ux.ToastMessage(response.statusText, 'error');
-                console.error('[ERROR]: ' + url);
                 console.error(response);
             }
         });
