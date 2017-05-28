@@ -27,16 +27,5 @@ Ext.define('MainHub.store.libraries.Libraries', {
         }
     },
 
-    listeners: {
-        load: function(store, records, success, operation) {
-            if (!success) {
-                var response = operation._response,
-                    obj = Ext.JSON.decode(response.responseText);
-                console.error('[ERROR]: get_libraries/: ' + obj.error);
-                console.error(response);
-            }
-        }
-    },
-
     autoLoad: true
 });

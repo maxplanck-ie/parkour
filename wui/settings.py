@@ -44,18 +44,17 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'authtools',
-    # 'django_extensions',
 
     'common',
     'library_sample_shared',
     'library',
     'sample',
-    'request',
-    'quality_check',
-    'index_generator',
-    'library_preparation',
-    'pooling',
-    'flowcell',
+    # 'request',
+    # 'quality_check',
+    # 'index_generator',
+    # 'library_preparation',
+    # 'pooling',
+    # 'flowcell',
 ]
 
 MIDDLEWARE_CLASSES = [
