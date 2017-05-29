@@ -11,4 +11,5 @@ urlpatterns = [
 
     url(r'^generate_indices/$', views.generate_indices, name='generate_indices'),
     url(r'^save_pool/$', views.save_pool, name='save_pool'),
+    url(r'^reset/$', views.reset, name='reset'),
 ]

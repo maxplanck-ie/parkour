@@ -14,6 +14,7 @@ from library_preparation.models import LibraryPreparation
 from pooling.models import Pooling
 from .models import Pool, PoolSize
 from .index_generator import IndexGenerator
+from .forms import LibraryResetForm, SampleResetForm
 
 logger = logging.getLogger('db')
 
@@ -37,58 +38,63 @@ def get_all(request):
         ),
     )
 
-    for req in requests:
-        for library in req.libraries_all:
-            if library.index_i7 and library.is_pooled is False:
-                index_i7 = IndexI7.objects.filter(
-                    index=library.index_i7,
-                    index_type=library.index_type
-                )
-                index_i7_id = index_i7[0].index_id if index_i7 else ''
+    try:
+        for req in requests:
+            for library in req.libraries_all:
+                if library.index_i7 and library.is_pooled is False:
+                    index_i7 = IndexI7.objects.filter(
+                        index=library.index_i7,
+                        index_type=library.index_type
+                    )
+                    index_i7_id = index_i7[0].index_id if index_i7 else ''
 
-                index_i5 = IndexI5.objects.filter(
-                    index=library.index_i5,
-                    index_type=library.index_type
-                )
-                index_i5_id = index_i5[0].index_id if index_i5 else ''
+                    index_i5 = IndexI5.objects.filter(
+                        index=library.index_i5,
+                        index_type=library.index_type
+                    )
+                    index_i5_id = index_i5[0].index_id if index_i5 else ''
 
-                data.append({
-                    'name': library.name,
-                    'requestId': req.pk,
-                    'requestName': req.name,
-                    'libraryId': library.pk,
-                    'barcode': library.barcode,
-                    'recordType': 'L',
-                    'sequencingDepth': library.sequencing_depth,
-                    'libraryProtocolName': library.library_protocol.name,
-                    'indexI7': library.index_i7,
-                    'indexI7Id': index_i7_id,
-                    'indexI5Id': index_i5_id,
-                    'indexI5': library.index_i5,
-                    'index_type': library.index_type.pk,
-                    'read_length': library.read_length.pk,
-                })
-        for sample in req.samples_all:
-            if sample.is_pooled is False:
-                data.append({
-                    'name': sample.name,
-                    'requestId': req.pk,
-                    'requestName': req.name,
-                    'sampleId': sample.id,
-                    'barcode': sample.barcode,
-                    'recordType': 'S',
-                    'sequencingDepth': sample.sequencing_depth,
-                    'libraryProtocolName': sample.library_protocol.name,
-                    'indexI7': '',
-                    'indexI7Id': '',
-                    'indexI5Id': '',
-                    'indexI5': '',
-                    'index_type':
-                        sample.index_type.pk
-                        if sample.index_type is not None
-                        else '',
-                    'read_length': sample.read_length.pk,
-                })
+                    data.append({
+                        'name': library.name,
+                        'requestId': req.pk,
+                        'requestName': req.name,
+                        'libraryId': library.pk,
+                        'barcode': library.barcode,
+                        'recordType': 'L',
+                        'sequencingDepth': library.sequencing_depth,
+                        'libraryProtocolName': library.library_protocol.name,
+                        'indexI7': library.index_i7,
+                        'indexI7Id': index_i7_id,
+                        'indexI5Id': index_i5_id,
+                        'indexI5': library.index_i5,
+                        'index_type': library.index_type.pk,
+                        'read_length': library.read_length.pk,
+                    })
+
+            for sample in req.samples_all:
+                if sample.is_pooled is False:
+                    data.append({
+                        'name': sample.name,
+                        'requestId': req.pk,
+                        'requestName': req.name,
+                        'sampleId': sample.id,
+                        'barcode': sample.barcode,
+                        'recordType': 'S',
+                        'sequencingDepth': sample.sequencing_depth,
+                        'libraryProtocolName': sample.library_protocol.name,
+                        'indexI7': '',
+                        'indexI7Id': '',
+                        'indexI5Id': '',
+                        'indexI5': '',
+                        'index_type':
+                            sample.index_type.pk
+                            if sample.index_type is not None
+                            else '',
+                        'read_length': sample.read_length.pk,
+                    })
+
+    except Exception as e:
+        logger.exception(e)
 
     data = sorted(data, key=lambda x: x['barcode'][3:])
 
@@ -286,3 +292,38 @@ def generate_indices(request):
         logger.debug(e)
 
     return JsonResponse({'success': not error, 'error': error, 'data': data})
+
+
+@login_required
+@staff_member_required
+def reset(request):
+    """ Reset all record's values. """
+    error = ''
+    record_type = request.POST.get('record_type', '')
+    record_id = request.POST.get('record_id', '')
+
+    try:
+        if record_type == 'L':
+            library = Library.objects.get(pk=record_id)
+            form = LibraryResetForm(request.POST, instance=library)
+            if form.is_valid():
+                form.save()
+            else:
+                error = str(form.errors)
+
+        elif record_type == 'S':
+            sample = Sample.objects.get(pk=record_id)
+            form = SampleResetForm(request.POST, instance=sample)
+            if form.is_valid():
+                form.save()
+            else:
+                error = str(form.errors)
+
+        else:
+            raise ValueError('No Record Type is provided.')
+
+    except Exception as e:
+        error = str(e)
+        logger.exception(e)
+
+    return JsonResponse({'success': not error, 'error': error})

@@ -18,7 +18,7 @@ def get_all(request):
     """ Get the list of all libraries and samples."""
     data = []
 
-    if request.method == 'GET':
+    try:
         quality_check = request.GET.get('quality_check')
 
         if request.user.is_staff:
@@ -154,8 +154,11 @@ def get_all(request):
 
             data += libraries_data + samples_data
 
-        # Sort by the running number
-        data = sorted(data, key=lambda x: x['barcode'][3:])
+    except Exception as e:
+        logger.exception(e)
+
+    # Sort by the running number
+    data = sorted(data, key=lambda x: x['barcode'][3:])
 
     return JsonResponse(data, safe=False)
 

@@ -139,6 +139,22 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
                     var dataIndex = me.getDataIndex(e, gridView);
                     me.applyToAll(record, dataIndex);
                 }
+            }, {
+                text: 'Reset',
+                iconCls: 'x-fa fa-eraser',
+                handler: function() {
+                    Ext.Msg.show({
+                        title: 'Reset',
+                        message: 'Are you sure you want to reset the record\'s values?',
+                        buttons: Ext.Msg.YESNO,
+                        icon: Ext.Msg.QUESTION,
+                        fn: function(btn) {
+                            if (btn === 'yes') {
+                                me.reset(record);
+                            }
+                        }
+                    });
+                }
             }]
         }).showAt(e.getXY());
     },
@@ -388,12 +404,10 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
             method: 'POST',
             timeout: 60000,
             scope: this,
-
             params: {
                 libraries: Ext.JSON.encode(Ext.Array.pluck(Ext.Array.pluck(store.data.items, 'data'), 'libraryId')),
                 samples: Ext.JSON.encode(Ext.Array.pluck(Ext.Array.pluck(store.data.items, 'data'), 'sampleId'))
             },
-
             success: function(response) {
                 var obj = Ext.JSON.decode(response.responseText);
                 if (obj.success) {
@@ -406,7 +420,6 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
                 indexGeneratorTable.enable();
                 grid.setLoading(false);
             },
-
             failure: function(response) {
                 Ext.ux.ToastMessage(response.statusText, 'error');
                 console.error(response);
@@ -472,6 +485,36 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
         } else {
             Ext.ux.ToastMessage('Some of the indices are empty. The pool cannot be saved.', 'warning');
         }
+    },
+
+    reset: function(record) {
+        Ext.Ajax.request({
+            url: 'index_generator/reset/',
+            method: 'POST',
+            timeout: 60000,
+            scope: this,
+            params: {
+                status: 1,
+                dilution_factor: 1,
+                record_type: record.get('recordType'),
+                record_id: record.get('recordType') === 'L' ? record.get('libraryId') : record.get('sampleId')
+            },
+            success: function(response) {
+                var obj = Ext.JSON.decode(response.responseText);
+
+                if (obj.success) {
+                    Ext.getCmp('poolGrid').setTitle('Pool');
+                    Ext.ux.ToastMessage('Record has been reset!');
+                    Ext.getStore('indexGeneratorStore').reload();
+                } else {
+                    Ext.ux.ToastMessage(obj.error, 'error');
+                }
+            },
+            failure: function(response) {
+                Ext.ux.ToastMessage(response.statusText, 'error');
+                console.error(response);
+            }
+        });
     },
 
     getDataIndex: function(e, view) {
