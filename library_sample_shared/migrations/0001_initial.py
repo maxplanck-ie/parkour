@@ -96,7 +96,7 @@ class Migration(migrations.Migration):
             name='LibraryType',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200, verbose_name='Type')),
+                ('name', models.CharField(max_length=200, verbose_name='Name')),
                 ('library_protocol', models.ManyToManyField(to='library_sample_shared.LibraryProtocol', verbose_name='Library Protocol')),
             ],
             options={

@@ -151,7 +151,7 @@ class LibraryProtocol(models.Model):
 
 
 class LibraryType(models.Model):
-    name = models.CharField('Type', max_length=200)
+    name = models.CharField('Name', max_length=200)
     library_protocol = models.ManyToManyField(
         LibraryProtocol,
         verbose_name='Library Protocol',
