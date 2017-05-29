@@ -356,30 +356,35 @@ def send_email(request):
 
         req = Request.objects.get(pk=request_id)
         if include_failed_records:
-            records += [{
-                    'name': library.name,
-                    'barcode': library.barcode,
-                    'comment': library.comment_facility,
-                }
-                for library in req.libraries.all()
-            ]
-            records += [{
-                    'name': sample.name,
-                    'barcode': sample.barcode,
-                    'comment': sample.comment_facility,
-                }
-                for sample in req.samples.all()
-            ]
-            records = sorted(records, key=lambda x: x['barcode'][3:])
+            records = list(req.libraries.filter(status=-1)) + \
+                      list(req.samples.filter(status=-1))
+
+            # records += [{
+            #         'name': library.name,
+            #         'barcode': library.barcode,
+            #         'comment': library.comment_facility,
+            #     }
+            #     for library in req.libraries.all()
+            # ]
+            # records += [{
+            #         'name': sample.name,
+            #         'barcode': sample.barcode,
+            #         'comment': sample.comments_facility,
+            #     }
+            #     for sample in req.samples.all()
+            # ]
+            records = sorted(records, key=lambda x: x.barcode[3:])
 
         send_mail(
             subject='[Parkour] ' + subject,
-            message=render_to_string('email.html', {
-                'email_message': message,
+            message='',
+            html_message=render_to_string('email.html', {
+                'full_name': req.user.get_full_name(),
+                'message': message,
                 'records': records,
             }),
             from_email=settings.SERVER_EMAIL,
-            recipient_list=[request.user.email],
+            recipient_list=[req.user.email],
         )
 
     except Exception as e:

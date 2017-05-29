@@ -1,9 +1,37 @@
 {% load i18n %}{% autoescape off %}
-{% trans "You're receiving this email because the Quality check has failed for the following record:" %}
-{% blocktrans %}
-Name: {{ record_name }}
-Barcode: {{ record_barcode }}
-{% endblocktrans %}
---
-{% trans "Parkour Support" %}
+<p>Dear {{ full_name }},</p>
+
+<p>{{ message }}</p>
+
+{% if records %}
+<hr/>
+<p>The list of failed libraries/samples:</p>
+<table style="width:100%;">
+    <thead>
+        <tr style="font-weight:bold;">
+            <td>Name</td>
+            <td>Barcode</td>
+            <td>Comment</td>
+        </tr>
+    </thead>
+    <tbody>
+        {% for record in records %}
+            <tr>
+                <td>{{ record.name }}</td>
+                <td>{{ record.barcode }}</td>
+                {% if record.comments_facility %}
+                    <td>{{ record.comments_facility }}</td>
+                {% else %}
+                    <td></td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+<p>
+--<br/>
+Parkour Support
+</p>
 {% endautoescape %}
