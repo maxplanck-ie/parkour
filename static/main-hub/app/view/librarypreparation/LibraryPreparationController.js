@@ -39,7 +39,8 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
         var store = Ext.getStore('libraryPreparationStore');
         var allowedColumns = ['starting_amount', 'starting_volume',
             'spike_in_description', 'spike_in_volume', 'pcr_cycles',
-            'concentration_library', 'mean_fragment_size', 'nM'];
+            'concentration_library', 'mean_fragment_size', 'nM',
+            'concentration_sample'];
         var nMFormulaDataIndices = ['concentration_library',
                                     'mean_fragment_size'];
 

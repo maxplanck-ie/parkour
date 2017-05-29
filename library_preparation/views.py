@@ -145,7 +145,10 @@ def update_all(request):
                 obj = LibraryPreparation.objects.get(sample_id=sample_id)
                 changed_value = item['changed_value']
                 for key, value in changed_value.items():
-                    if hasattr(obj, key):
+                    if key == 'concentration_sample':
+                        obj.sample.concentration = value
+                        obj.sample.save(update_fields=['concentration'])
+                    elif hasattr(obj, key):
                         setattr(obj, key, value)
                 obj.save()
 
