@@ -358,21 +358,6 @@ def send_email(request):
         if include_failed_records:
             records = list(req.libraries.filter(status=-1)) + \
                       list(req.samples.filter(status=-1))
-
-            # records += [{
-            #         'name': library.name,
-            #         'barcode': library.barcode,
-            #         'comment': library.comment_facility,
-            #     }
-            #     for library in req.libraries.all()
-            # ]
-            # records += [{
-            #         'name': sample.name,
-            #         'barcode': sample.barcode,
-            #         'comment': sample.comments_facility,
-            #     }
-            #     for sample in req.samples.all()
-            # ]
             records = sorted(records, key=lambda x: x.barcode[3:])
 
         send_mail(
