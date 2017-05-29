@@ -41,6 +41,7 @@ Ext.define('MainHub.view.requests.Requests', {
             // loadMask: false
         },
         store: 'requestsStore',
+        sortableColumns: false,
         columns: {
             items: [{
                     text: 'Name',

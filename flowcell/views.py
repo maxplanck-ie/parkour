@@ -40,10 +40,6 @@ def indices_present(libraries, samples):
         if sample.equal_representation_nucleotides:
             equal_representation_count += 1
 
-    # If all Indices I7/I5 are set
-    # index_i7_show = 'Yes' if index_i7_count == count_total else 'No'
-    # index_i5_show = 'Yes' if index_i5_count == count_total else 'No'
-
     # If at least one Index I7/I5 is set
     index_i7_show = 'Yes' if index_i7_count > 0 else 'No'
     index_i5_show = 'Yes' if index_i5_count > 0 else 'No'
@@ -62,8 +58,8 @@ def get_all(request):
     data = []
 
     try:
-        for flowcell in Flowcell.objects.prefetch_related('sequencer', 'lanes'):
-            for lane in flowcell.lanes.select_related('pool'):
+        for flowcell in Flowcell.objects.prefetch_related('lanes'):
+            for lane in flowcell.lanes.filter(completed=False):
                 pool = lane.pool
 
                 libraries = pool.libraries.select_related('read_length')
@@ -258,23 +254,26 @@ def update(request):
     """ Edit a flowcell. """
     error = ''
     lane_id = request.POST.get('lane_id', '')
-    qc_result = request.POST.get('qc_result', None)
+    qc_result = json.loads(request.POST.get('qc_result', 'false'))
 
     try:
         lane = Lane.objects.get(pk=lane_id)
         form = LaneForm(request.POST, instance=lane)
 
         if form.is_valid():
-            form.save()
+            lane = form.save()
+
             if qc_result:
+                lane.completed = True
+                lane.save(update_fields=['completed'])
+
                 pool = lane.pool
-                status = 6 if qc_result in ['1', 1] else 4
                 for library in pool.libraries.all():
-                    library.status = status
+                    library.status = 6
                     library.save(update_fields=['status'])
 
                 for sample in pool.samples.all():
-                    sample.status = status
+                    sample.status = 6
                     sample.save(update_fields=['status'])
         else:
             error = str(form.errors)

@@ -17,6 +17,7 @@ class Lane(models.Model):
     loading_concentration = models.FloatField('Loading Concentration',
                                               blank=True, null=True)
     phix = models.FloatField('PhiX %', blank=True, null=True)
+    completed = models.BooleanField('Completed', default=False)
 
     def __str__(self):
         return '%s: %s' % (self.name, self.pool.name)

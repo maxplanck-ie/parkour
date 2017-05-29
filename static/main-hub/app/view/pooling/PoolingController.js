@@ -241,5 +241,5 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             });
             return res;
         });
-    },
+    }
 });

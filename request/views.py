@@ -24,6 +24,7 @@ logger = logging.getLogger('db')
 @login_required
 def get_all(request):
     """ Get the list of all requests. """
+    data = []
 
     if request.user.is_staff:
         requests = Request.objects.prefetch_related(
@@ -34,8 +35,17 @@ def get_all(request):
             user_id=request.user.pk
         ).prefetch_related('user', 'libraries', 'samples')
 
-    data = [
-        {
+    for req in requests:
+        records = list(req.libraries.values('status', 'sequencing_depth')) + \
+                  list(req.samples.values('status', 'sequencing_depth'))
+        statuses = [r['status'] for r in records]
+
+        # Hide those Requests, whose libraries/samples
+        # have reached status 6 (for admins only)
+        if request.user.is_staff and statuses.count(6) > 0:
+            continue
+
+        data.append({
             'requestId': req.pk,
             'name': req.name,
             'dateCreated': req.date_created.strftime('%d.%m.%Y'),
@@ -49,13 +59,10 @@ def get_all(request):
             'deepSeqRequestPath':
                 settings.MEDIA_URL + req.deep_seq_request.name
                 if req.deep_seq_request else '',
-            'sumSeqDepth': sum([
-                l.sequencing_depth
-                for l in list(req.libraries.all()) + list(req.samples.all())
-            ])
-        }
-        for req in sorted(requests, key=lambda x: x.date_created, reverse=True)
-    ]
+            'sumSeqDepth': sum([r['sequencing_depth'] for r in records])
+        })
+
+    data = sorted(data, key=lambda x: x['requestId'], reverse=True)
 
     return JsonResponse(data, safe=False)
 

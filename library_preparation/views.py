@@ -109,7 +109,7 @@ def update(request):
                     # Update Concentration C1
                     library_concentration = obj.concentration_library
                     mean_fragment_size = obj.mean_fragment_size
-                    if mean_fragment_size > 0:
+                    if mean_fragment_size and mean_fragment_size > 0:
                         concentration_c1 = \
                             round((library_concentration /
                                   (mean_fragment_size * 650)) * 10**6, 2)

@@ -99,6 +99,9 @@ Ext.define('MainHub.view.libraries.Libraries', {
                         } else if (value === 5) {
                             statusClass += 'sequencing';
                             meta.tdAttr = 'data-qtip="Sequencing"';
+                        } else if (value === 6) {
+                            statusClass += 'completed';
+                            meta.tdAttr = 'data-qtip="Completed"';
                         }
                         return '<div class="' + statusClass + '"></div>';
                     }

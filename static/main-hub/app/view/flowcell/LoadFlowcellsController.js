@@ -125,7 +125,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellsController', {
                 pool: record.get('pool'),
                 loading_concentration: record.get('loading_concentration'),
                 phix: record.get('phix'),
-                qc_result: values.qc_result !== null ? values.qc_result : ''
+                qc_result: values.qc_result !== null
             },
             success: function(response) {
                 var obj = Ext.JSON.decode(response.responseText);

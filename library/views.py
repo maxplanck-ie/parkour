@@ -4,6 +4,7 @@ import json
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from django.db.models import Q
 
 from .models import Library
 from request.models import Request
@@ -28,12 +29,16 @@ def get_all(request):
             ).prefetch_related('libraries', 'samples')
 
         for req in requests:
+            # User shouldn't see any libraries/samples in the Incoming table
             if quality_check and not request.user.is_staff:
-                libraries = samples = []
+                libraries = []
+                samples = []
             else:
-                libraries = req.libraries.all()
-                samples = req.samples.all()
+                # Don't return completed libraries/samples
+                libraries = req.libraries.filter(~Q(status=6))
+                samples = req.samples.filter(~Q(status=6))
 
+            # In the Incoming table, show libraries/samples with status 1 only
             if quality_check:
                 libraries = [l for l in libraries if l.status == 1]
                 samples = [s for s in samples if s.status == 1]

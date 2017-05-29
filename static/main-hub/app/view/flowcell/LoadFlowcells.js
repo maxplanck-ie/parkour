@@ -93,38 +93,33 @@ Ext.define('MainHub.view.flowcell.LoadFlowcells', {
                     decimalPrecision: 1,
                     minValue: 0
                 }
+            },
+            {
+                text: 'QC Result',
+                dataIndex: 'qc_result',
+                editor: {
+                    xtype: 'combobox',
+                    queryMode: 'local',
+                    displayField: 'name',
+                    valueField: 'id',
+                    store: Ext.create('Ext.data.Store', {
+                        fields: [{
+                                name: 'name',
+                                type: 'string'
+                            },
+                            {
+                                name: 'value',
+                                type: 'bool'
+                            }
+                        ],
+                        data: [{
+                            name: 'completed',
+                            value: true
+                        }]
+                    }),
+                    forceSelection: true
+                }
             }
-            // {
-            //     text: 'QC Result',
-            //     dataIndex: 'qc_result',
-            //     editor: {
-            //         xtype: 'combobox',
-            //         queryMode: 'local',
-            //         displayField: 'name',
-            //         valueField: 'id',
-            //         store: Ext.create('Ext.data.Store', {
-            //             fields: [{
-            //                     name: 'id',
-            //                     type: 'int'
-            //                 },
-            //                 {
-            //                     name: 'name',
-            //                     type: 'string'
-            //                 }
-            //             ],
-            //             data: [{
-            //                     id: 1,
-            //                     name: 'passed'
-            //                 },
-            //                 {
-            //                     id: 2,
-            //                     name: 'resequencing'
-            //                 }
-            //             ]
-            //         }),
-            //         forceSelection: true
-            //     }
-            // }
         ],
         features: [{
             ftype: 'grouping',
