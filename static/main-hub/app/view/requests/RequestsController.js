@@ -99,7 +99,8 @@ Ext.define('MainHub.view.requests.RequestsController', {
                     iconCls: 'x-fa fa-envelope-o',
                     handler: function() {
                         Ext.create('MainHub.view.requests.EmailWindow', {
-                            title: 'New Email: ' + record.get('name'),
+                            // title: 'New Email: ' + record.get('name'),
+                            title: 'New Email',
                             record: record
                         });
                     }

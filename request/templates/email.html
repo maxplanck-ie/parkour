@@ -1,5 +1,5 @@
 {% load i18n %}{% autoescape off %}
-<p>Dear {{ full_name }},</p>
+<p><i>Dear {{ full_name }},</i></p>
 
 <p>{{ message }}</p>
 
@@ -11,7 +11,8 @@
         <tr style="font-weight:bold;">
             <td>Name</td>
             <td>Barcode</td>
-            <td>Comment</td>
+            <td>Protocol</td>
+            <td>Facility Comment</td>
         </tr>
     </thead>
     <tbody>
@@ -19,6 +20,7 @@
             <tr>
                 <td>{{ record.name }}</td>
                 <td>{{ record.barcode }}</td>
+                <td>{{ record.library_protocol.name }}</td>
                 {% if record.comments_facility %}
                     <td>{{ record.comments_facility }}</td>
                 {% else %}
@@ -28,10 +30,16 @@
         {% endfor %}
     </tbody>
 </table>
+<hr/>
 {% endif %}
 
+<p><strong>Reply to: </strong> <a href="mailto:deepseq@ie-freiburg.mpg.de">deepseq@ie-freiburg.mpg.de</a></p>
+
 <p>
---<br/>
-Parkour Support
+    <i>
+        --<br/>
+        Kind Regards,<br/>
+        Deep Sequencing Team
+    </i>
 </p>
 {% endautoescape %}

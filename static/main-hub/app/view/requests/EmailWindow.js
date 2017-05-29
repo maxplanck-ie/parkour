@@ -3,8 +3,8 @@ Ext.define('MainHub.view.requests.EmailWindow', {
     requires: ['MainHub.view.requests.EmailWindowController'],
     controller: 'requests-emailwindow',
 
-    height: 320,
-    width: 400,
+    height: 370,
+    width: 450,
     modal: true,
     resizable: false,
     autoShow: true,
@@ -26,6 +26,7 @@ Ext.define('MainHub.view.requests.EmailWindow', {
         },
         items: [{
                 xtype: 'textfield',
+                itemId: 'subjectField',
                 name: 'subject',
                 fieldLabel: 'Subject',
                 emptyText: 'Subject'
@@ -35,7 +36,7 @@ Ext.define('MainHub.view.requests.EmailWindow', {
                 name: 'message',
                 fieldLabel: 'Message',
                 emptyText: 'Message',
-                height: 125
+                height: 175
             },
             {
                 xtype: 'fieldcontainer',

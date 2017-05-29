@@ -5,10 +5,18 @@ Ext.define('MainHub.view.requests.EmailWindowController', {
 
     config: {
         control: {
+            '#': {
+                boxready: 'boxready'
+            },
             '#sendEmail': {
                 click: 'send'
             }
         }
+    },
+
+    boxready: function(wnd) {
+        var subjectField = wnd.down('#subjectField');
+        subjectField.setValue(wnd.record.get('name'));
     },
 
     send: function(btn) {
