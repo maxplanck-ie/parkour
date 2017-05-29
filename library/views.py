@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 
 from .models import Library
-# from request.models import Request
+from request.models import Request
 from .forms import LibraryForm
 
 logger = logging.getLogger('db')
