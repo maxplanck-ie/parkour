@@ -368,7 +368,8 @@ def send_email(request):
                 'message': message,
                 'records': records,
             }),
-            from_email=settings.SERVER_EMAIL,
+            # from_email=settings.SERVER_EMAIL,
+            from_email='deepseq@ie-freiburg.mpg.de',
             recipient_list=[req.user.email],
         )
 
