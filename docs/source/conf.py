@@ -28,6 +28,9 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'wui.settings'
 os.environ['SECRET_KEY'] = 'trc$bd^dss_pkerrb$i6cc^pu%89(hx^7*okapubn+96!90sw%'
 django.setup()
 
+# from django.conf import settings
+# settings.configure()
+
 
 # -- General configuration ------------------------------------------------
 

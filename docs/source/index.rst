@@ -10,9 +10,7 @@ Contents
 
    Installation <installation>
 
-   Parkour API Documentation <api/index>
-
-   Views: <modules/views>
+   Parkour API Documentation <api_doc>
 
 Indices and tables
 ==================

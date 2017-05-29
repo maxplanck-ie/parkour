@@ -15,7 +15,13 @@ logger = logging.getLogger('db')
 
 @login_required
 def get_all(request):
-    """ Get the list of all libraries and samples."""
+    """
+    GET /library/get_all/
+        Get the list of all libraries and samples.
+
+    :returns:   list with libraries and samples
+    :rtype:     JSON response
+    """
     data = []
 
     try:
@@ -218,7 +224,15 @@ def save_library(request):
 @login_required
 @staff_member_required
 def delete_library(request):
-    """ Delete library with a given id. """
+    """
+    POST /library/delete_library/
+        Delete library with a given id.
+
+    :param record_id:  library id
+
+    :returns:   {'success': not error, 'error': error}
+    :rtype:     JSON response
+    """
     error = ''
 
     try:

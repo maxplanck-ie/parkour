@@ -1,4 +1,0 @@
-Parkour API Documentation
-=========================
-
-test
