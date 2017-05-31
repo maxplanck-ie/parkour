@@ -318,7 +318,7 @@ def update_all(request):
 def download_benchtop_protocol(request):
     """ Generate Benchtop Protocol as XLS file for selected lanes. """
     response = HttpResponse(content_type='application/ms-excel')
-    lanes = json.loads(request.POST.get('lanes', '{}'))
+    lanes_dict = json.loads(request.POST.get('lanes', '{}'))
 
     filename = 'FC_Loading_Benchtop_Protocol.xls'
     response['Content-Disposition'] = 'attachment; filename="%s"' % filename
@@ -327,8 +327,10 @@ def download_benchtop_protocol(request):
     ws = wb.add_sheet('FC_Loading_Benchtop_Protocol')
 
     try:
-        if not any(lanes):
+        if not any(lanes_dict):
             raise ValueError('No lanes are selected.')
+
+        lanes = Lane.objects.filter(pk__in=lanes_dict.keys()).order_by('name')
 
         header = ['Pool ID', 'Flowcell ID', 'Sequencer', 'Lane', 'I7 present',
                   'I5 present', 'Equal Representation of Nucleotides',
@@ -345,9 +347,10 @@ def download_benchtop_protocol(request):
         font_style = XFStyle()
         font_style.alignment.wrap = 1
 
-        for lane_id, flowcell_id in lanes.items():
-            lane = Lane.objects.get(pk=lane_id)
+        # for lane_id, flowcell_id in lanes.items():
+        for lane in lanes:
             pool = lane.pool
+            flowcell_id = lanes_dict[str(lane.pk)]
             flowcell = Flowcell.objects.get(pk=flowcell_id)
             row_num += 1
 
