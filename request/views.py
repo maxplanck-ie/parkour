@@ -361,7 +361,7 @@ def send_email(request):
             records = sorted(records, key=lambda x: x.barcode[3:])
 
         send_mail(
-            subject='[Parkour] ' + subject,
+            subject=subject,
             message='',
             html_message=render_to_string('email.html', {
                 'full_name': req.user.get_full_name(),
