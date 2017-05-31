@@ -219,8 +219,10 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
         this.resetGeneratedIndices();
 
         if (checked) {
-            if (this.isIndexTypeSet(store, record) && this.isUnique(store, record) &&
-                this.isCompatible(store, record) && this.isPoolSizeOk(store, record)) {
+            // if (this.isIndexTypeSet(store, record) && this.isUnique(store, record) &&
+            //     this.isCompatible(store, record) && this.isPoolSizeOk(store, record)) {
+            if (this.isIndexTypeSet(store, record) && this.isCompatible(store, record) &&
+                this.isPoolSizeOk(store, record)) {
 
                 var indexI7Sequence = record.get('indexI7'),
                     indexI7 = indexI7Sequence.split('');
