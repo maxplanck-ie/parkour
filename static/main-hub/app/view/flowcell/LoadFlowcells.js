@@ -33,98 +33,95 @@ Ext.define('MainHub.view.flowcell.LoadFlowcells', {
         store: 'flowcellsStore',
         sortableColumns: false,
         columns: [{
-                xtype: 'checkcolumn',
-                itemId: 'checkColumn',
-                dataIndex: 'selected',
-                tdCls: 'no-dirty',
-                width: 40
-            },
-            // {
-            //     text: 'Flowcell ID',
-            //     dataIndex: 'flowcellId',
-            //     flex: 1
-            // },
-            {
-                text: 'Lane',
-                dataIndex: 'laneName',
-                flex: 1
-            }, {
-                text: 'Pool',
-                dataIndex: 'poolName',
-                flex: 1
-            }, {
-                text: 'Length',
-                tooltip: 'Read Length',
-                dataIndex: 'readLengthName',
-                flex: 1
-            }, {
-                text: 'Index I7',
-                dataIndex: 'indexI7Show',
-                flex: 1
-            }, {
-                text: 'Index I5',
-                dataIndex: 'indexI5Show',
-                flex: 1
-            }, {
-                text: 'Sequencer',
-                dataIndex: 'sequencerName',
-                flex: 1
-            }, {
-                text: 'Equal nucl.',
-                tooltip: 'Equal Representation of Nucleotides',
-                dataIndex: 'equalRepresentation',
-                flex: 1
-            }, {
-                text: 'Loading Conc.',
-                tooltip: 'Loading Concentration',
-                dataIndex: 'loading_concentration',
-                flex: 1,
-                editor: {
-                    xtype: 'numberfield',
-                    decimalPrecision: 1,
-                    minValue: 0
-                }
-            }, {
-                text: 'PhiX %',
-                dataIndex: 'phix',
-                flex: 1,
-                editor: {
-                    xtype: 'numberfield',
-                    decimalPrecision: 1,
-                    minValue: 0
-                }
-            },
-            {
-                text: 'QC Result',
-                dataIndex: 'qc_result',
-                editor: {
-                    xtype: 'combobox',
-                    queryMode: 'local',
-                    displayField: 'name',
-                    valueField: 'id',
-                    store: Ext.create('Ext.data.Store', {
-                        fields: [{
-                                name: 'name',
-                                type: 'string'
-                            },
-                            {
-                                name: 'value',
-                                type: 'bool'
-                            }
-                        ],
-                        data: [{
-                            name: 'completed',
-                            value: true
-                        }]
-                    }),
-                    forceSelection: true
-                }
+            xtype: 'checkcolumn',
+            itemId: 'checkColumn',
+            dataIndex: 'selected',
+            tdCls: 'no-dirty',
+            width: 40
+        }, {
+            text: 'Lane',
+            dataIndex: 'laneName',
+            flex: 1
+        }, {
+            text: 'Pool',
+            dataIndex: 'poolName',
+            flex: 1
+        }, {
+            text: 'Length',
+            tooltip: 'Read Length',
+            dataIndex: 'readLengthName',
+            flex: 1
+        }, {
+            text: 'Index I7',
+            dataIndex: 'indexI7Show',
+            flex: 1
+        }, {
+            text: 'Index I5',
+            dataIndex: 'indexI5Show',
+            flex: 1
+        }, {
+            text: 'Sequencer',
+            dataIndex: 'sequencerName',
+            flex: 1
+        }, {
+            text: 'Equal nucl.',
+            tooltip: 'Equal Representation of Nucleotides',
+            dataIndex: 'equalRepresentation',
+            flex: 1
+        }, {
+            text: 'Loading Conc.',
+            tooltip: 'Loading Concentration',
+            dataIndex: 'loading_concentration',
+            flex: 1,
+            editor: {
+                xtype: 'numberfield',
+                decimalPrecision: 1,
+                minValue: 0
             }
-        ],
+        }, {
+            text: 'PhiX %',
+            dataIndex: 'phix',
+            flex: 1,
+            editor: {
+                xtype: 'numberfield',
+                decimalPrecision: 1,
+                minValue: 0
+            }
+        }, {
+            text: 'QC Result',
+            dataIndex: 'qc_result',
+            editor: {
+                xtype: 'combobox',
+                queryMode: 'local',
+                displayField: 'name',
+                valueField: 'id',
+                store: Ext.create('Ext.data.Store', {
+                    fields: [{
+                        name: 'name',
+                        type: 'string'
+                    }, {
+                        name: 'value',
+                        type: 'bool'
+                    }],
+                    data: [{
+                        name: 'completed',
+                        value: true
+                    }]
+                }),
+                forceSelection: true
+            }
+        }],
         features: [{
             ftype: 'grouping',
             startCollapsed: true,
-            groupHeaderTpl: '<strong>Flowcell ID: {name}</strong>'
+            groupHeaderTpl: [
+                '<strong>Flowcell ID: {children:this.getFlowcellId}</strong>',
+                {
+                    getFlowcellId: function(children) {
+                        return children[0].get('flowcellId')
+                    }
+                }
+            ]
         }],
         plugins: [{
             ptype: 'bufferedrenderer',

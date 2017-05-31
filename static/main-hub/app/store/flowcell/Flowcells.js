@@ -1,10 +1,11 @@
 Ext.define('MainHub.store.flowcell.Flowcells', {
     extend: 'Ext.data.Store',
     storeId: 'flowcellsStore',
-    requires: [ 'MainHub.model.flowcell.Flowcell' ],
+    requires: ['MainHub.model.flowcell.Flowcell'],
     model: 'MainHub.model.flowcell.Flowcell',
 
-    groupField: 'flowcellId',
+    groupField: 'flowcell',
+    groupDir: 'DESC',
 
     proxy: {
         type: 'ajax',
@@ -31,8 +32,8 @@ Ext.define('MainHub.store.flowcell.Flowcells', {
                     }
                     var store = Ext.getStore('flowcellsStore');
                     var newData = _.map(data, function(item) {
-                        var record = store.findRecord('id', item.id),
-                            newItem = $.extend({}, item);
+                        var record = store.findRecord('id', item.id);
+                        var newItem = $.extend({}, item);
                         if (record) {
                             newItem = {
                                 lane_id: record.get('laneId'),

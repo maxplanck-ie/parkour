@@ -75,7 +75,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellsController', {
                 text: 'Select All',
                 iconCls: 'x-fa fa-check-square-o',
                 handler: function() {
-                    me.selectAll(group);
+                    me.selectAll(parseInt(group));
                 }
             }]
         }).showAt(e.getXY());
@@ -92,27 +92,27 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellsController', {
         }
     },
 
-    selectAll: function(flowcellId) {
+    selectAll: function(flowcell) {
         var store = Ext.getStore('flowcellsStore');
         store.each(function(item) {
             var selectedRecordIndex = store.findBy(function(record) {
-                if (record.get('selected') && record.get('flowcellId') !== flowcellId) {
+                if (record.get('selected') && record.get('flowcell') !== flowcell) {
                     return true;
                 }
             });
 
             if (selectedRecordIndex !== -1) return;
 
-            if (item.get('flowcellId') === flowcellId) {
-                    item.set('selected', true);
-                }
+            if (item.get('flowcell') === flowcell) {
+                item.set('selected', true);
+            }
         });
     },
 
     editRecord: function(editor, context) {
-        var record = context.record,
-            values = context.newValues,
-            url = 'flowcell/update/';
+        var record = context.record;
+        var values = context.newValues;
+        var url = 'flowcell/update/';
 
         Ext.Ajax.request({
             url: url,

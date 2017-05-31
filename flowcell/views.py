@@ -456,9 +456,10 @@ def download_sample_sheet(request):
     if not any(lanes):
         raise ValueError('No lanes are selected.')
 
+    lanes = Lane.objects.filter(pk__in=lanes).order_by('name')
+
     rows = []
-    for lane_id in lanes:
-        lane = Lane.objects.get(pk=lane_id)
+    for lane in lanes:
         pool = lane.pool
         libraries = pool.libraries.all()
         samples = pool.samples.all()
