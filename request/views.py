@@ -25,6 +25,7 @@ logger = logging.getLogger('db')
 def get_all(request):
     """ Get the list of all requests. """
     data = []
+    restrict_permissions = False
 
     if request.user.is_staff:
         requests = Request.objects.prefetch_related(
@@ -37,8 +38,13 @@ def get_all(request):
 
     for req in requests:
         records = list(req.libraries.values('status', 'sequencing_depth')) + \
-                  list(req.samples.values('status', 'sequencing_depth'))
+            list(req.samples.values('status', 'sequencing_depth'))
         statuses = [r['status'] for r in records]
+
+        # Don't allow the user to modify the requests and libraries/samples
+        # if they reached status 1 or higher (or failed)
+        if not request.user.is_staff and statuses.count(0) == 0:
+            restrict_permissions = True
 
         # Hide those Requests, whose libraries/samples
         # have reached status 6 (for admins only)
@@ -48,6 +54,7 @@ def get_all(request):
         data.append({
             'requestId': req.pk,
             'name': req.name,
+            'restrictPermissions': restrict_permissions,
             'dateCreated': req.date_created.strftime('%d.%m.%Y'),
             'description': req.description,
             'userId': req.user.pk,

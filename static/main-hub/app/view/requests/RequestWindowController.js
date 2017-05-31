@@ -66,6 +66,11 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                 Ext.getCmp('downloadRequestBlankBtn').disable();
                 Ext.getCmp('uploadSignedBlankBtn').disable();
 
+                // this.disableButtonsAndMenus();
+            }
+
+            // Disable Request editing
+            if (!USER_IS_STAFF && record.restrictPermissions) {
                 this.disableButtonsAndMenus();
             }
 

@@ -45,9 +45,9 @@ Ext.define('MainHub.view.requests.RequestsController', {
     },
 
     search: function(fld, query) {
-        var grid = Ext.getCmp('requestsTable'),
-            store = grid.getStore(),
-            columns = Ext.pluck(grid.getColumns(), 'dataIndex');
+        var grid = Ext.getCmp('requestsTable');
+        var store = grid.getStore();
+        var columns = Ext.pluck(grid.getColumns(), 'dataIndex');
 
         store.clearFilter();
         store.filterBy(function(record) {
@@ -76,34 +76,37 @@ Ext.define('MainHub.view.requests.RequestsController', {
                 }).show();
             }
         }];
+        var deleteRequestOption = {
+            text: 'Delete',
+            iconCls: 'x-fa fa-trash',
+            handler: function() {
+                Ext.Msg.show({
+                    title: 'Delete request',
+                    message: 'Are you sure you want to delete the request?',
+                    buttons: Ext.Msg.YESNO,
+                    icon: Ext.Msg.QUESTION,
+                    fn: function(btn) {
+                        if (btn === 'yes') {me.deleteRequest(record);}
+                    }
+                });
+            }
+        };
 
-        if (USER_IS_STAFF) {
-            items.push({
-                text: 'Delete',
-                iconCls: 'x-fa fa-trash',
-                handler: function() {
-                    Ext.Msg.show({
-                        title: 'Delete request',
-                        message: 'Are you sure you want to delete the request?',
-                        buttons: Ext.Msg.YESNO,
-                        icon: Ext.Msg.QUESTION,
-                        fn: function(btn) {
-                            if (btn == 'yes') me.deleteRequest(record);
-                        }
-                    });
-                }
-            });
+        if (!USER_IS_STAFF && !record.get('restrictPermissions')) {
+            items.push(deleteRequestOption);
+        } else if (USER_IS_STAFF) {
+            items.push(deleteRequestOption);
             items.push('-');
             items.push({
                 text: 'Compose an Email',
-                    iconCls: 'x-fa fa-envelope-o',
-                    handler: function() {
-                        Ext.create('MainHub.view.requests.EmailWindow', {
+                iconCls: 'x-fa fa-envelope-o',
+                handler: function() {
+                    Ext.create('MainHub.view.requests.EmailWindow', {
                             // title: 'New Email: ' + record.get('name'),
-                            title: 'New Email',
-                            record: record
-                        });
-                    }
+                        title: 'New Email',
+                        record: record
+                    });
+                }
             });
         }
 

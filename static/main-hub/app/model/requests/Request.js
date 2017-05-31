@@ -7,8 +7,8 @@ Ext.define('MainHub.model.requests.Request', {
             name: 'requestId'
         },
         {
-            type: 'int',
-            name: 'status'
+            type: 'bool',
+            name: 'restrictPermissions'
         },
         {
             type: 'string',
