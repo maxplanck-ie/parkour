@@ -242,25 +242,12 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
     },
 
     changeFilter: function(el, value) {
-        var grid = Ext.getCmp('incomingLibraries'),
-            store = grid.getStore(),
-
-            // TODO@me: update this after merging with feature/libraries-from-file
-            columns = [
-                'name',
-                'barcode',
-                'nucleicAcidType',
-                'libraryProtocol',
-                'concentration',
-                'concentrationMethod',
-                'sampleVolume',
-                'qPCRResult',
-                'meanFragmentSize',
-                'rnaQuality'
-            ],
-            showLibraries = null,
-            showSamples = null,
-            searchQuery = null;
+        var grid = Ext.getCmp('incomingLibraries');
+        var store = grid.getStore();
+        var columns = Ext.pluck(grid.getColumns(), 'dataIndex');
+        var showLibraries = null;
+        var showSamples = null;
+        var searchQuery = null;
 
         if (el.itemId === 'showLibrariesCheckbox') {
             showLibraries = value;
