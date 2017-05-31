@@ -75,24 +75,24 @@ Ext.define('MainHub.view.requests.RequestsController', {
                     record: record
                 }).show();
             }
-        },
-        {
-            text: 'Delete',
-            iconCls: 'x-fa fa-trash',
-            handler: function() {
-                Ext.Msg.show({
-                    title: 'Delete request',
-                    message: 'Are you sure you want to delete the request?',
-                    buttons: Ext.Msg.YESNO,
-                    icon: Ext.Msg.QUESTION,
-                    fn: function(btn) {
-                        if (btn == 'yes') me.deleteRequest(record);
-                    }
-                });
-            }
         }];
 
         if (USER_IS_STAFF) {
+            items.push({
+                text: 'Delete',
+                iconCls: 'x-fa fa-trash',
+                handler: function() {
+                    Ext.Msg.show({
+                        title: 'Delete request',
+                        message: 'Are you sure you want to delete the request?',
+                        buttons: Ext.Msg.YESNO,
+                        icon: Ext.Msg.QUESTION,
+                        fn: function(btn) {
+                            if (btn == 'yes') me.deleteRequest(record);
+                        }
+                    });
+                }
+            });
             items.push('-');
             items.push({
                 text: 'Compose an Email',
