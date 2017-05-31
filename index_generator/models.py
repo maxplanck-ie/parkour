@@ -16,11 +16,11 @@ class Pool(models.Model):
     name = models.CharField('Name', max_length=100, blank=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name='User')
     size = models.ForeignKey(PoolSize, verbose_name='Size')
+    loaded = models.PositiveSmallIntegerField('Loaded', default=0, blank=True)
 
     libraries = models.ManyToManyField(Library, related_name='pool',
                                        blank=True)
     samples = models.ManyToManyField(Sample, related_name='pool', blank=True)
-    loaded = models.PositiveSmallIntegerField('Loaded', default=0, blank=True)
 
     def get_size(self):
         size = 0

@@ -20,6 +20,7 @@ def get_nucleic_acid_types(request):
         }
         for nat in NucleicAcidType.objects.all()
     ]
+    data = sorted(data, key=lambda x: (x['type'], x['name']))
     return JsonResponse(data, safe=False)
 
 

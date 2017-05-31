@@ -110,11 +110,18 @@ def get_library_protocols(request):
             }
             for protocol in library_protocols
         ]
+        data = sorted(data, key=lambda x: x['name'])
 
-        # move 'Other' option to the end of the list
-        other = [x for x in data if x['name'] == 'Other']
-        if other:
-            index = data.index(other[0])
+        # Move the 'Other' option to the end of the list
+        # other = [x for x in data if 'Other' in x['name']]
+        other_options = sorted([
+            x for x in data
+            if x['name'] == 'Other - DNA Methods' or
+            x['name'] == 'Other - RNA Methods'
+        ], key=lambda x: x['name'])
+
+        for other in other_options:
+            index = data.index(other)
             data.append(data.pop(index))
 
     return JsonResponse(data, safe=False)
