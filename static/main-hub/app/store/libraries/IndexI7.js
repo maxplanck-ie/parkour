@@ -21,16 +21,5 @@ Ext.define('MainHub.store.libraries.IndexI7', {
             rootProperty: 'data',
             successProperty: 'success'
         }
-    },
-
-    listeners: {
-        load: function(store, records, success, operation) {
-            if (!success) {
-                var response = operation._response,
-                    obj = Ext.JSON.decode(response.responseText);
-                console.log('[ERROR]: get_index_i7(): ' + obj.error);
-                console.log(response);
-            }
-        }
     }
 });

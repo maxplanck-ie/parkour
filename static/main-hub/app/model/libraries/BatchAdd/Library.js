@@ -24,35 +24,35 @@ Ext.define('MainHub.model.libraries.BatchAdd.Library', {
     extend: 'MainHub.model.libraries.BatchAdd.Common',
 
     fields: [{
-            type: 'int',
-            name: 'mean_fragment_size'
-        },
-        {
-            type: 'int',
-            name: 'index_type',
-            allowNull: true,
-            defaultValue: null
-        },
-        {
-            type: 'int',
-            name: 'index_reads',
-            allowNull: true,
-            defaultValue: null
-        },
-        {
-            type: 'string',
-            name: 'index_i7'
-        },
-        {
-            type: 'string',
-            name: 'index_i5'
-        },
-        {
-            type: 'int',
-            name: 'qpcr_result',
-            allowNull: true,
-            defaultValue: null
-        }
+        type: 'int',
+        name: 'mean_fragment_size'
+    },
+    {
+        type: 'int',
+        name: 'index_type',
+        allowNull: true,
+        defaultValue: null
+    },
+    {
+        type: 'int',
+        name: 'index_reads',
+        allowNull: true,
+        defaultValue: null
+    },
+    {
+        type: 'string',
+        name: 'index_i7'
+    },
+    {
+        type: 'string',
+        name: 'index_i5'
+    },
+    {
+        type: 'int',
+        name: 'qpcr_result',
+        allowNull: true,
+        defaultValue: null
+    }
     ],
 
     validators: {

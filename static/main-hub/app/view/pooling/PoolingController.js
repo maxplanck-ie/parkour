@@ -76,20 +76,13 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         Ext.Ajax.request({
             url: url,
             method: 'POST',
-            timeout: 1000000,
             scope: this,
             params: params,
 
             success: function(response) {
                 var obj = Ext.JSON.decode(response.responseText);
-
                 if (obj.success) {
                     grid.fireEvent('refresh', grid);
-
-                    // Reload stores
-                    // if (Ext.getStore('librariesStore').isLoaded()) Ext.getStore('librariesStore').reload();
-                    // if (Ext.getStore('incomingLibrariesStore').isLoaded()) Ext.getStore('incomingLibrariesStore').reload();
-                    // MainHub.Utilities.reloadAllStores();
                 } else {
                     Ext.ux.ToastMessage(obj.error, 'error');
                 }

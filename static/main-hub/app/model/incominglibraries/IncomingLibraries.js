@@ -18,10 +18,6 @@ Ext.define('MainHub.model.incominglibraries.IncomingLibraries', {
             name: 'concentration_method_facility',
             type: 'int'
         },
-        // {
-        //     name: 'dateFacility',
-        //     type: 'string'
-        // },
         {
             name: 'sample_volume_facility',
             type: 'int',
@@ -56,7 +52,6 @@ Ext.define('MainHub.model.incominglibraries.IncomingLibraries', {
             name: 'qc_result',
             type: 'int',
             allowNull: true
-            // defaultValue: null
         }
     ],
 

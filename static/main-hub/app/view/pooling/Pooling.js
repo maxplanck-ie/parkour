@@ -72,12 +72,6 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 text: 'ng/µl',
                 tooltip: 'Library Concentration (ng/µl)',
                 dataIndex: 'concentration',
-                // editor: {
-                //     xtype: 'numberfield',
-                //     // hideTrigger: true,
-                //     decimalPrecision: 1,
-                //     minValue: 0
-                // },
                 width: 100
             },
             {
@@ -155,7 +149,6 @@ Ext.define('MainHub.view.pooling.Pooling', {
                     itemId: 'downloadBenchtopProtocolPBtn',
                     text: 'Download Benchtop Protocol',
                     iconCls: 'fa fa-file-excel-o fa-lg'
-                    // disabled: true
                 },
                 {
                     xtype: 'button',
@@ -163,7 +156,6 @@ Ext.define('MainHub.view.pooling.Pooling', {
                     itemId: 'downloadPoolingTemplateBtn',
                     text: 'Download Template QC Normalization and Pooling',
                     iconCls: 'fa fa-file-excel-o fa-lg'
-                    // disabled: true
                 }
             ]
         }],

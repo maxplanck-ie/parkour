@@ -8,7 +8,6 @@ Ext.define('MainHub.store.libraries.Libraries', {
 
     model: 'MainHub.model.libraries.Library',
 
-    // groupField: 'requestName',
     groupField: 'requestId',
     groupDir: 'DESC',
 

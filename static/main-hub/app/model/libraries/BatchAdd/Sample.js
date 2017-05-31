@@ -21,17 +21,17 @@ Ext.define('MainHub.model.libraries.BatchAdd.Sample', {
     extend: 'MainHub.model.libraries.BatchAdd.Common',
 
     fields: [{
-            type: 'int',
-            name: 'nucleic_acid_type',
-            allowNull: true,
-            defaultValue: null
-        },
-        {
-            type: 'float',
-            name: 'rna_quality',
-            allowNull: true,
-            defaultValue: null
-        }
+        type: 'int',
+        name: 'nucleic_acid_type',
+        allowNull: true,
+        defaultValue: null
+    },
+    {
+        type: 'float',
+        name: 'rna_quality',
+        allowNull: true,
+        defaultValue: null
+    }
     ],
 
     validators: {

@@ -47,21 +47,6 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
                         me.editRecord(record);
                     }
                 }
-                // ,{
-                //     text: 'Delete',
-                //     iconCls: 'x-fa fa-trash',
-                //     handler: function() {
-                //         Ext.Msg.show({
-                //             title: 'Delete record',
-                //             message: 'Are you sure you want to delete this record?',
-                //             buttons: Ext.Msg.YESNO,
-                //             icon: Ext.Msg.QUESTION,
-                //             fn: function(btn) {
-                //                 if (btn == 'yes') me.deleteRecord(record);
-                //             }
-                //         });
-                //     }
-                // }
             ]
         }).showAt(e.getXY());
     },

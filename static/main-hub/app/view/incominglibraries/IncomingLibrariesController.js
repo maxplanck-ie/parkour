@@ -186,8 +186,6 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
                 var obj = Ext.JSON.decode(response.responseText);
                 if (obj.success) {
                     Ext.getStore('incomingLibrariesStore').reload();
-                    // if (Ext.getStore('librariesStore').isLoaded()) Ext.getStore('librariesStore').reload();
-                    // if (Ext.getStore('PoolingTree').isLoaded()) Ext.getStore('PoolingTree').reload();
                 } else {
                     Ext.ux.ToastMessage(obj.error, 'error');
                 }

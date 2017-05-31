@@ -9,8 +9,8 @@ Ext.define('MainHub.model.libraries.ConcentrationMethod', {
     getShortName: function() {
         var name = this.get('name');
         var abbr = name.split(' ').map(function(item) {
-            return item.charAt(0);}
-        );
+            return item.charAt(0);
+        });
         return abbr.join('');
     }
 });

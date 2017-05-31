@@ -175,20 +175,3 @@ class GetLibraryTypes(TestCase):
         response = self.client.post(reverse('get_library_types'))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b'[]')
-
-# Fixtures
-
-# class FixturesTestcase(TestCase):
-#     fixtures = [
-#         'organisms.json',
-#         'concentration_methods.json',
-#         'read_lengths.json',
-#         'indices.json',
-#     ]
-#
-#     def setUp(self):
-#         pass
-#
-#     def test_loaded_fixtures(self):
-#         human = Organism.objects.get(pk=1)
-#         self.assertEqual(human.name, 'human')

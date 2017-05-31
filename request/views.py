@@ -42,7 +42,7 @@ def get_all(request):
         statuses = [r['status'] for r in records]
 
         # Don't allow the user to modify the requests and libraries/samples
-        # if they reached status 1 or higher (or failed)
+        # if they have reached status 1 or higher (or failed)
         if not request.user.is_staff and statuses.count(0) == 0:
             restrict_permissions = True
 
@@ -364,7 +364,7 @@ def send_email(request):
         req = Request.objects.get(pk=request_id)
         if include_failed_records:
             records = list(req.libraries.filter(status=-1)) + \
-                      list(req.samples.filter(status=-1))
+                list(req.samples.filter(status=-1))
             records = sorted(records, key=lambda x: x.barcode[3:])
 
         send_mail(
