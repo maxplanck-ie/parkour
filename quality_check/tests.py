@@ -64,7 +64,9 @@ class GetAllLibraries(TestCase):
 
 class UpdateTest(TestCase):
     def setUp(self):
-        User.objects.create_user(email='foo@bar.io', password='foo-foo')
+        user = User.objects.create_user(
+            email='foo@bar.io', password='foo-foo', is_staff=True,
+        )
 
         self.library = Library.get_test_library('Library_update')
         self.library.status = 1

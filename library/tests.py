@@ -39,28 +39,6 @@ class GetAllLibrariesTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotEqual(response.content, b'[]')
 
-    def test_wrong_http_method(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('library.get_all'))
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, b'[]')
-
-
-# class GetAllLibrariesUserTest(GetAllLibrariesAdminTest):
-#     _is_staff = False
-#
-#     def test_missing_or_empty_library_protocol_id(self):
-#         response = self.client.get(reverse('get_library_types'))
-#         self.assertEqual(response.status_code, 200)
-#         self.assertEqual(response.content, b'[]')
-#
-#     def test_non_existing_library_protocol_id(self):
-#         response = self.client.get(reverse('get_library_types'), {
-#             'library_protocol_id': '-1'
-#         })
-#         self.assertEqual(response.status_code, 200)
-#         self.assertEqual(response.content, b'[]')
-
 
 class SaveLibraryTest(TestCase):
     def setUp(self):
@@ -170,24 +148,6 @@ class SaveLibraryTest(TestCase):
         self.assertJSONEqual(str(response.content, 'utf-8'), {
             'success': False,
             'error': 'Could not save the library(-ies).',
-            'data': [],
-        })
-
-    def test_not_unique_name(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('save_library'), {
-            'mode': 'add',  # works for 'edit' too
-            'records': json.dumps([{
-                'name': 'Library_edit',
-            }])
-        })
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(str(response.content, 'utf-8'), {
-            'success': False,
-            'error': [{
-                'name': 'Library_edit',
-                'value': 'Library with this Name already exists.'
-            }],
             'data': [],
         })
 

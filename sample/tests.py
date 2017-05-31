@@ -142,24 +142,6 @@ class SaveSampleTest(TestCase):
             'data': [],
         })
 
-    def test_not_unique_name(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('save_sample'), {
-            'mode': 'add',  # works for 'edit' too
-            'records': json.dumps([{
-                'name': 'Sample_edit',
-            }])
-        })
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(str(response.content, 'utf-8'), {
-            'success': False,
-            'error': [{
-                'name': 'Sample_edit',
-                'value': 'Sample with this Name already exists.'
-            }],
-            'data': [],
-        })
-
     def test_missing_or_invalid_fields(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.post(reverse('save_sample'), {

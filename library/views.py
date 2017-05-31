@@ -222,7 +222,6 @@ def save_library(request):
 
 
 @login_required
-@staff_member_required
 def delete_library(request):
     """
     POST /library/delete_library/
