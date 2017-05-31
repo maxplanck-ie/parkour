@@ -45,9 +45,9 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
 
     boxready: function(wnd) {
         // Bypass Selection (Library/Sample) dialog if editing
-        if (wnd.mode == 'edit') {
+        if (wnd.mode === 'edit') {
             // if (wnd.record.get('recordType') == 'L') {
-            if (wnd.record.getRecordType() == 'L') {
+            if (wnd.record.getRecordType() === 'L') {
                 var libraryCardBtn = Ext.getCmp('libraryCardBtn');
                 libraryCardBtn.fireEvent('click', libraryCardBtn);
             } else {
