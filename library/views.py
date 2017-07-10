@@ -238,8 +238,6 @@ def delete_library(request):
         if request.method != 'POST':
             raise ValueError('Wrong HTTP method.')
         record_id = request.POST.get('record_id', '')
-        if record_id == '':
-            raise ValueError('No specified library record_id!')
         library = Library.objects.get(pk=record_id)
         library.delete()
     except (ValueError, Library.DoesNotExist) as e:
