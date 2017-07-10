@@ -141,6 +141,32 @@ def save_pool(request):
                 raise ValueError('Neither libraries nor samples have been ' +
                                  'provided.')
 
+            # Check for unique barcode combinations
+            indices = set()
+            for lib_id in library_ids:
+                library = Library.objects.get(pk=lib_id)
+                t = (library.index_i7, library.index_i5)
+                if t in indices:
+                    _ = t[1]
+                    if _ == '':
+                        _ = 'NA'
+                    raise ValueError('The following barcodes are not unique: I7 {} I5 {}!'.format(t[0], _))
+                indices.add(t)
+            for sample in samples:
+                idx_i7_id = sample['index_i7_id']
+                idx_i5_id = sample['index_i5_id']
+                index_i7 = IndexI7.objects.get(index_id=idx_i7_id).index \
+                    if idx_i7_id else ''
+                index_i5 = IndexI5.objects.get(index_id=idx_i5_id).index \
+                    if idx_i5_id else ''
+                t = (index_i7, index_i5)
+                if t in indices:
+                    _ = t[1]
+                    if _ == '':
+                        _ = 'NA'
+                    raise ValueError('The following barcodes are not unique I7 {} I5 {}!'.format(t[0], _))
+                indices.add(t)
+
             pool = Pool(user=request.user, size_id=pool_size_id)
             pool.save()
             pool.libraries.add(*library_ids)
