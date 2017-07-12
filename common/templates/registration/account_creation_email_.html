@@ -196,7 +196,7 @@
                       <tr>
                         <td align="center">
                           <div>
-                            <a href="{% block reset_link %}{{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}{% endblock %}" class="button button--blue">Reset Password</a>
+                            <a href="{% block reset_link %}https://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}{% endblock %}" class="button button--blue">Reset Password</a>
                           </div>
                         </td>
                       </tr>
