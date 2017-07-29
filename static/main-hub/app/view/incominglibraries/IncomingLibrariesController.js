@@ -22,6 +22,12 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
             },
             '#searchField': {
                 change: 'changeFilter'
+            },
+            '#cancelBtn': {
+                click: 'cancel'
+            },
+            '#saveBtn': {
+                click: 'save'
             }
         }
     },
@@ -239,6 +245,16 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
         } else {
             Ext.ux.ToastMessage('You did not select any libraries/samples.', 'warning');
         }
+    },
+
+    cancel: function(btn) {
+        Ext.getStore('incomingLibrariesStore').rejectChanges();
+    },
+
+    save: function(btn) {
+        var store = Ext.getStore('incomingLibrariesStore');
+        store.save();
+        store.reload();
     },
 
     changeFilter: function(el, value) {

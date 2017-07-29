@@ -52,6 +52,10 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
             // loadMask: false
             // markDirty: false
         },
+        selModel: {
+            type: 'spreadsheet',
+            rowSelect: false
+        },
         store: 'incomingLibrariesStore',
         sortableColumns: false,
         columns: {
@@ -331,7 +335,29 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
             {
                 ptype: 'rowediting',
                 clicksToEdit: 1
+            },
+            {
+                ptype: 'clipboard'
             }
-        ]
+        ],
+        dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            items: [
+                '->',
+                {
+                    xtype: 'button',
+                    itemId: 'cancelBtn',
+                    iconCls: 'fa fa-ban fa-lg',
+                    text: 'Cancel'
+                },
+                {
+                    xtype: 'button',
+                    itemId: 'saveBtn',
+                    iconCls: 'fa fa-floppy-o fa-lg',
+                    text: 'Save'
+                }
+            ]
+        }]
     }]
 });
