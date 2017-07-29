@@ -100,15 +100,15 @@ def update_all(request):
                             else:
                                 setattr(record, key, value)
 
-                        # Calculate Amount
-                        if 'amount_facility' not in changed_value.keys():
-                            df = record.dilution_factor
-                            conc_f = record.concentration_facility
-                            sv_f = record.sample_volume_facility
-                            # am_f = record.amount_facility
-                            if df > 0.0 and conc_f > 0.0 and sv_f > 0.0:
-                                    # am_f is None:
-                                record.amount_facility = df * conc_f * sv_f
+                # Calculate Amount
+                if 'amount_facility' not in changed_value.keys():
+                    df = record.dilution_factor
+                    conc_f = record.concentration_facility
+                    sv_f = record.sample_volume_facility
+                    if all([df, conc_f, sv_f]) and df > 0.0 and \
+                            conc_f > 0.0 and sv_f > 0.0:
+                        record.amount_facility = df * conc_f * sv_f
+
                 record.save()
 
             except Exception as e:

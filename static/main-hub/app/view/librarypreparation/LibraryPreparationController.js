@@ -19,6 +19,12 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
             },
             '#searchField': {
                 change: 'search'
+            },
+            '#cancelBtn': {
+                click: 'cancel'
+            },
+            '#saveBtn': {
+                click: 'save'
             }
         }
     },
@@ -181,6 +187,16 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
                 }
             }]
         }).showAt(e.getXY());
+    },
+
+    cancel: function(btn) {
+        Ext.getStore('libraryPreparationStore').rejectChanges();
+    },
+
+    save: function(btn) {
+        var store = Ext.getStore('libraryPreparationStore');
+        store.save();
+        store.reload();
     },
 
     search: function(fld, query) {
