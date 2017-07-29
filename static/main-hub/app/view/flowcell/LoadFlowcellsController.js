@@ -31,6 +31,12 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellsController', {
             },
             '#searchField': {
                 change: 'search'
+            },
+            '#cancelBtn': {
+                click: 'cancel'
+            },
+            '#saveBtn': {
+                click: 'save'
             }
         }
     },
@@ -218,6 +224,16 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellsController', {
         } else {
             Ext.ux.ToastMessage('You did not select any lanes.', 'warning');
         }
+    },
+
+    cancel: function() {
+        Ext.getStore('flowcellsStore').rejectChanges();
+    },
+
+    save: function() {
+        var store = Ext.getStore('flowcellsStore');
+        store.save();
+        store.reload();
     },
 
     search: function(fld, query) {

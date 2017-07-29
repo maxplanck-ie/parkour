@@ -30,6 +30,10 @@ Ext.define('MainHub.view.flowcell.LoadFlowcells', {
             // loadMask: false,
             stripeRows: false
         },
+        selModel: {
+            type: 'spreadsheet',
+            rowSelect: false
+        },
         store: 'flowcellsStore',
         sortableColumns: false,
         columns: [{
@@ -130,12 +134,13 @@ Ext.define('MainHub.view.flowcell.LoadFlowcells', {
         }, {
             ptype: 'rowediting',
             clicksToEdit: 1
+        }, {
+            ptype: 'clipboard'
         }],
         dockedItems: [{
             xtype: 'toolbar',
             dock: 'bottom',
             items: [
-                '->',
                 {
                     xtype: 'button',
                     itemId: 'downloadBenchtopProtocolFCBtn',
@@ -147,6 +152,19 @@ Ext.define('MainHub.view.flowcell.LoadFlowcells', {
                     itemId: 'downloadSampleSheetBtn',
                     text: 'Download Sample Sheet',
                     iconCls: 'fa fa-file-text-o fa-lg'
+                },
+                '->',
+                {
+                    xtype: 'button',
+                    itemId: 'cancelBtn',
+                    iconCls: 'fa fa-ban fa-lg',
+                    text: 'Cancel'
+                },
+                {
+                    xtype: 'button',
+                    itemId: 'saveBtn',
+                    iconCls: 'fa fa-floppy-o fa-lg',
+                    text: 'Save'
                 }
             ]
         }]
