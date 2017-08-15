@@ -247,14 +247,13 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
         }
     },
 
-    cancel: function(btn) {
+    cancel: function() {
         Ext.getStore('incomingLibrariesStore').rejectChanges();
     },
 
-    save: function(btn) {
-        var store = Ext.getStore('incomingLibrariesStore');
-        store.save();
-        store.reload();
+    save: function() {
+        Ext.getStore('incomingLibrariesStore').save();
+        Ext.getStore('incomingLibrariesStore').reload();
     },
 
     changeFilter: function(el, value) {

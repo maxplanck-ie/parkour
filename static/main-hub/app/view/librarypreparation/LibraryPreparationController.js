@@ -189,14 +189,13 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
         }).showAt(e.getXY());
     },
 
-    cancel: function(btn) {
+    cancel: function() {
         Ext.getStore('libraryPreparationStore').rejectChanges();
     },
 
-    save: function(btn) {
-        var store = Ext.getStore('libraryPreparationStore');
-        store.save();
-        store.reload();
+    save: function() {
+        Ext.getStore('libraryPreparationStore').save();
+        Ext.getStore('libraryPreparationStore').reload();
     },
 
     search: function(fld, query) {

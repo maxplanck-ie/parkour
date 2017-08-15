@@ -1018,6 +1018,8 @@ $include-mainhub-model-pooling-pooling: dynamic(true);;
 $include-mainhub-model-requests-librariesinrequest: dynamic(true);;
 $include-mainhub-model-requests-request: dynamic(true);;
 $include-mainhub-model-requests-requestfile: dynamic(true);;
+$include-mainhub-overrides-grid-plugin-clipboard: dynamic(true);;
+$include-mainhub-overrides-grid-selection-spreadsheetmodel: dynamic(true);;
 $include-mainhub-overrides-list-roottreeitem: dynamic(true);;
 $include-mainhub-store-navigationtree: dynamic(true);;
 $include-mainhub-store-flowcell-flowcells: dynamic(true);;

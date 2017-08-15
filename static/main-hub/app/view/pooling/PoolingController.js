@@ -224,14 +224,13 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         }
     },
 
-    cancel: function(btn) {
+    cancel: function() {
         Ext.getStore('poolingStore').rejectChanges();
     },
 
-    save: function(btn) {
-        var store = Ext.getStore('poolingStore');
-        store.save();
-        store.reload();
+    save: function() {
+        Ext.getStore('poolingStore').save();
+        Ext.getStore('poolingStore').reload();
     },
 
     search: function(fld, query) {
