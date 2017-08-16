@@ -1,7 +1,7 @@
 Ext.define('MainHub.overrides.grid.plugin.Clipboard', {
     override: 'Ext.grid.plugin.Clipboard',
 
-    putCellData: function (data, format) {
+    putCellData: function(data, format) {
         var values = Ext.util.TSV.decode(data),
             row,
             recCount = values.length,
@@ -17,7 +17,7 @@ Ext.define('MainHub.overrides.grid.plugin.Clipboard', {
 
         // If the view is not focused, use the first cell of the selection as the destination.
         if (!destination) {
-            view.getSelectionModel().getSelected().eachCell(function(c){
+            view.getSelectionModel().getSelected().eachCell(function(c) {
                 destination = c;
                 return false;
             });
@@ -31,18 +31,28 @@ Ext.define('MainHub.overrides.grid.plugin.Clipboard', {
         }
         destinationStartColumn = destination.colIdx;
 
-        // Don't allow pasting into read-only and combobox fields
-        var destinationColumnEditor = destination.column.config.editor;
-        if (!destinationColumnEditor || (destinationColumnEditor && destinationColumnEditor.xtype === 'combobox')) {
-            return false;
-        }
-
         for (sourceRowIdx = 0; sourceRowIdx < recCount; sourceRowIdx++) {
             row = values[sourceRowIdx];
 
             // Collect new values in dataObject
             for (sourceColIdx = 0; sourceColIdx < colCount; sourceColIdx++) {
                 dataIndex = destination.column.dataIndex;
+
+                var destinationColumnEditor = destination.column.config.editor;
+                if (destinationColumnEditor) {
+                    if (destinationColumnEditor.xtype === 'combobox') {
+                        var indexType = destination.record.get('index_type');
+                        var indexReads = destination.record.get('index_reads');
+                        if (indexType !== 1) { break; }  // Index Type != 'Other'
+                        if ((indexReads === 1 && dataIndex !== 'index_i7') ||
+                            (indexReads === 2 && dataIndex !== 'index_i7' && dataIndex !== 'index_i5')) {
+                            break;  // Don't allow pasting into combobox fields except for Index I7/I5
+                        }
+                    }
+                } else {
+                    break;  // Don't allow pasting into read-only fields
+                }
+
                 if (dataIndex) {
                     switch (format) {
                         // Raw field values
@@ -69,6 +79,7 @@ Ext.define('MainHub.overrides.grid.plugin.Clipboard', {
 
             // Update the record in one go.
             destination.record.set(dataObject);
+            dataObject = {};
 
             // If we are at the end of the destination store, break the row loop.
             if (destination.rowIdx === maxRowIdx) {
