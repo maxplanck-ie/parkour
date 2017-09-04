@@ -13,8 +13,5 @@ sphinx-autobuild
 sphinx-rtd-theme
 
 # Miscellaneous
-Fabric3
-pyperclip
-coverage
 xlwt
 pdfkit
