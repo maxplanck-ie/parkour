@@ -21,7 +21,7 @@ before_install:
   - sudo cp -r * /usr/
   - cd ..
 
-install: pip install -r requirements.txt
+install: pip install -r requirements/prod.txt
 
 script: python manage.py test
 

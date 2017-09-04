@@ -1,0 +1,6 @@
+-r base.txt
+
+django-debug-toolbar
+Fabric3
+pyperclip
+coverage

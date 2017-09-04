@@ -1,17 +1,11 @@
 import os
 import dj_database_url
 
-try:
-    from wui.dev_settings import *
-    DEBUG = True
-except ImportError:
-    from wui.prod_settings import *
-    DEBUG = False
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__),
+)))
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG_DIR = os.path.join(BASE_DIR, 'logs')
 
 # Make sure the 'logs' directory exists. If not, create it
@@ -194,27 +188,6 @@ LOGGING = {
             'formatter': 'custom',
             'maxBytes': 15 * 1024 * 1024,
             'backupCount': 2,
-        },
-    },
-    'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-        'django': {
-            'handlers': ['console'] if DEBUG else ['console', 'logfile'],
-            'level': 'DEBUG' if DEBUG else 'ERROR',
-            'propagate': False,
-        },
-        'django.db.backends': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-        'db': {
-            'handlers': ['console', 'dblogfile'],
-            'level': 'DEBUG',
         },
     },
 }
