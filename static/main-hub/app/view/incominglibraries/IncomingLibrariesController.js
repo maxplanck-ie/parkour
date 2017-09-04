@@ -252,8 +252,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
     },
 
     save: function() {
-        Ext.getStore('incomingLibrariesStore').save();
-        Ext.getStore('incomingLibrariesStore').reload();
+        MainHub.Store.save('incomingLibrariesStore');
     },
 
     changeFilter: function(el, value) {

@@ -231,8 +231,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellsController', {
     },
 
     save: function() {
-        Ext.getStore('flowcellsStore').save();
-        Ext.getStore('flowcellsStore').reload();
+        MainHub.Store.save('flowcellsStore');
     },
 
     search: function(fld, query) {

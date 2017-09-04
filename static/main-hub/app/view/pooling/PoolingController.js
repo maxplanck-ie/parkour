@@ -229,8 +229,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
     },
 
     save: function() {
-        Ext.getStore('poolingStore').save();
-        Ext.getStore('poolingStore').reload();
+        MainHub.Store.save('poolingStore');
     },
 
     search: function(fld, query) {

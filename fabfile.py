@@ -27,8 +27,8 @@ def deploy():
                    'pip3 install -r requirements.txt && '
                    'python3 manage.py migrate && '
                    'python3 manage.py collectstatic --noinput && exit' % branch)
-    run('docker exec -it dockerparkour_parkour_1 /bin/bash')
-    run('docker restart dockerparkour_parkour_1')
+    run('docker exec -it dockerparkour_web_1 /bin/bash')
+    run('docker-compose restart web')
 
 
 def coverage(app=''):
