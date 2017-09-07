@@ -17,7 +17,7 @@ def build_docs():
     with lcd('docs/'):
         local('make clean')
         local('make html')
-        local('open build/html/index.html')
+        local('open _build/html/index.html')
 
 
 @hosts(os.environ['FAB_HOST'])

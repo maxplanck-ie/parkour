@@ -10,7 +10,7 @@ Contents
 
    Installation <installation>
 
-   Parkour API Documentation <api_doc>
+   API Documentation <api_doc>
 
 Indices and tables
 ==================
