@@ -7,6 +7,7 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core.exceptions import ValidationError
 from xlwt import Workbook, XFStyle
 
 from index_generator.models import Pool
@@ -301,7 +302,14 @@ def update_all(request):
                 changed_value = item['changed_value']
                 for key, value in changed_value.items():
                     if hasattr(lane, key):
-                        setattr(lane, key, value)
+                        try:
+                            val = lane._meta.get_field(key).to_python(value)
+                            if val is None:
+                                raise ValidationError('Wrong value.')
+                        except ValidationError:
+                            pass
+                        else:
+                            setattr(lane, key, value)
                 lane.save()
 
             except Exception as e:

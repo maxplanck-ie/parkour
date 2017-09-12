@@ -88,3 +88,21 @@ Ext.define('MainHub.Utilities', {
         if (poolingStore.isLoaded()) poolingStore.reload();
     }
 });
+
+Ext.define('MainHub.Store', {
+    singleton: true,
+    save: function(storeName) {
+        Ext.getStore(storeName).sync({
+            success: function() {
+                Ext.getStore(storeName).reload();
+            },
+            failure: function(batch, options) {
+                var error = batch.operations[0].getError();
+                // console.error(error);
+                setTimeout(function() {
+                    Ext.ux.ToastMessage(error, 'error');
+                }, 100);
+            }
+        });
+    }
+});

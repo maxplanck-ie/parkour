@@ -5,6 +5,7 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core.exceptions import ValidationError
 from xlwt import Workbook, XFStyle, Formula
 
 from library_sample_shared.models import IndexType
@@ -149,7 +150,22 @@ def update_all(request):
                         obj.sample.concentration = value
                         obj.sample.save(update_fields=['concentration'])
                     elif hasattr(obj, key):
-                        setattr(obj, key, value)
+                        try:
+                            val = obj._meta.get_field(key).to_python(value)
+                            if val is None:
+                                raise ValidationError('Wrong value.')
+                        except ValidationError:
+                            pass
+                        else:
+                            setattr(obj, key, value)
+
+                # Calculate nM
+                if 'nM' not in changed_value.keys():
+                    cl = obj.concentration_library
+                    mfs = obj.mean_fragment_size
+                    if all([cl, mfs]) and cl > 0.0 and mfs > 0.0:
+                        obj.nM = round((cl / (650 * mfs)) * 10**6, 2)
+
                 obj.save()
 
             except Exception as e:

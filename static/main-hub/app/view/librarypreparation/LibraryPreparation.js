@@ -32,6 +32,10 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
             stripeRows: false
             // markDirty: false
         },
+        selModel: {
+            type: 'spreadsheet',
+            rowSelect: false
+        },
         store: 'libraryPreparationStore',
         sortableColumns: false,
         columns: {
@@ -224,6 +228,9 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                 ptype: 'bufferedrenderer',
                 trailingBufferZone: 100,
                 leadingBufferZone: 100
+            },
+            {
+                ptype: 'clipboard'
             }
         ],
         features: [{
@@ -235,7 +242,6 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
             xtype: 'toolbar',
             dock: 'bottom',
             items: [
-                '->',
                 {
                     xtype: 'button',
                     id: 'downloadBenchtopProtocolLPBtn',
@@ -243,6 +249,19 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     text: 'Download Benchtop Protocol',
                     iconCls: 'fa fa-file-excel-o fa-lg'
                     // disabled: true
+                },
+                '->',
+                {
+                    xtype: 'button',
+                    itemId: 'cancelBtn',
+                    iconCls: 'fa fa-ban fa-lg',
+                    text: 'Cancel'
+                },
+                {
+                    xtype: 'button',
+                    itemId: 'saveBtn',
+                    iconCls: 'fa fa-floppy-o fa-lg',
+                    text: 'Save'
                 }
             ]
         }]

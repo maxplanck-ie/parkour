@@ -40,6 +40,10 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 return rowClass;
             }
         },
+        selModel: {
+            type: 'spreadsheet',
+            rowSelect: false
+        },
         store: 'poolingStore',
         sortableColumns: false,
         columns: [{
@@ -142,7 +146,6 @@ Ext.define('MainHub.view.pooling.Pooling', {
             xtype: 'toolbar',
             dock: 'bottom',
             items: [
-                '->',
                 {
                     xtype: 'button',
                     id: 'downloadBenchtopProtocolPBtn',
@@ -156,6 +159,19 @@ Ext.define('MainHub.view.pooling.Pooling', {
                     itemId: 'downloadPoolingTemplateBtn',
                     text: 'Download Template QC Normalization and Pooling',
                     iconCls: 'fa fa-file-excel-o fa-lg'
+                },
+                '->',
+                {
+                    xtype: 'button',
+                    itemId: 'cancelBtn',
+                    iconCls: 'fa fa-ban fa-lg',
+                    text: 'Cancel'
+                },
+                {
+                    xtype: 'button',
+                    itemId: 'saveBtn',
+                    iconCls: 'fa fa-floppy-o fa-lg',
+                    text: 'Save'
                 }
             ]
         }],
@@ -167,6 +183,9 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 ptype: 'bufferedrenderer',
                 trailingBufferZone: 100,
                 leadingBufferZone: 100
+            },
+            {
+                ptype: 'clipboard'
             }
         ],
         features: [{

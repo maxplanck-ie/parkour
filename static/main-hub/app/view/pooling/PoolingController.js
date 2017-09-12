@@ -27,6 +27,12 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             },
             '#searchField': {
                 change: 'search'
+            },
+            '#cancelBtn': {
+                click: 'cancel'
+            },
+            '#saveBtn': {
+                click: 'save'
             }
         }
     },
@@ -58,7 +64,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             changes = record.getChanges(),
             values = context.newValues,
             concentrationC1 = values.concentration_c1,
-            url = 'pooling/edit/';
+            url = 'pooling/update/';
 
         var params = $.extend({
             library_id: record.get('libraryId'),
@@ -90,7 +96,6 @@ Ext.define('MainHub.view.pooling.PoolingController', {
 
             failure: function(response) {
                 Ext.ux.ToastMessage(response.statusText, 'error');
-                console.error('[ERROR]: ' + url);
                 console.error(response);
             }
         });
@@ -217,6 +222,14 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         } else {
             Ext.ux.ToastMessage('You did not select any libraries.', 'warning');
         }
+    },
+
+    cancel: function() {
+        Ext.getStore('poolingStore').rejectChanges();
+    },
+
+    save: function() {
+        MainHub.Store.save('poolingStore');
     },
 
     search: function(fld, query) {

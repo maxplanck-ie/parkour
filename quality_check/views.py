@@ -4,6 +4,7 @@ import logging
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core.exceptions import ValidationError
 
 from library_sample_shared.models import ConcentrationMethod
 from library.models import Library
@@ -89,7 +90,25 @@ def update_all(request):
                             m = ConcentrationMethod.objects.get(pk=value)
                             setattr(record, key, m)
                         else:
-                            setattr(record, key, value)
+                            try:
+                                val = record._meta.get_field(key) \
+                                                  .to_python(value)
+                                if val is None:
+                                    raise ValidationError('Wrong value.')
+                            except ValidationError:
+                                pass
+                            else:
+                                setattr(record, key, value)
+
+                # Calculate Amount
+                if 'amount_facility' not in changed_value.keys():
+                    df = record.dilution_factor
+                    conc_f = record.concentration_facility
+                    sv_f = record.sample_volume_facility
+                    if all([df, conc_f, sv_f]) and df > 0.0 and \
+                            conc_f > 0.0 and sv_f > 0.0:
+                        record.amount_facility = df * conc_f * sv_f
+
                 record.save()
 
             except Exception as e:

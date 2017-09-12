@@ -60,9 +60,15 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
             },
             {
                 xtype: 'grid',
+                selModel: {
+                    type: 'spreadsheet',
+                    // rowNumbererHeaderWidth: 40,
+                    rowSelect: false
+                },
                 id: 'batchAddGrid',
                 itemId: 'batchAddGrid',
                 sortableColumns: false,
+                multiSelect: true,
                 border: 0,
                 viewConfig: {
                     markDirty: false,
@@ -93,6 +99,8 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                 plugins: [{
                     ptype: 'rowediting',
                     clicksToEdit: 1
+                }, {
+                    ptype: 'clipboard'
                 }]
             }
         ]

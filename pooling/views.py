@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
+from django.core.exceptions import ValidationError
 
 from index_generator.models import Pool
 from library_preparation.models import LibraryPreparation
@@ -100,8 +101,8 @@ def get_all(request):
 
 @login_required
 @staff_member_required
-def edit(request):
-    """ Edit Pooling object. """
+def update(request):
+    """ Update a Pooling object. """
     error = ''
 
     library_id = request.POST.get('library_id', '')
@@ -154,6 +155,43 @@ def edit(request):
     except Exception as e:
         error = str(e)
         logger.exception(e)
+
+    return JsonResponse({'success': not error, 'error': error})
+
+
+@login_required
+@staff_member_required
+def update_all(request):
+    """ Update a field in all records. """
+    error = ''
+
+    if request.is_ajax():
+        data = json.loads(request.body.decode('utf-8'))
+        for item in data:
+            try:
+                if item['sample_id'] == 0 or item['sample_id'] == '0':
+                    library = Library.objects.get(pk=item['library_id'])
+                    obj = Pooling.objects.get(library=library)
+                else:
+                    sample = Sample.objects.get(pk=item['sample_id'])
+                    obj = Pooling.objects.get(sample=sample)
+                changed_value = item['changed_value']
+                for key, value in changed_value.items():
+                    if hasattr(obj, key):
+                        try:
+                            val = obj._meta.get_field(key).to_python(value)
+                            if val is None:
+                                raise ValidationError('Wrong value.')
+                        except ValidationError:
+                            pass
+                        else:
+                            setattr(obj, key, value)
+                obj.save()
+
+            except Exception as e:
+                error = 'Some of the records were not updated ' + \
+                    '(see the logs).'
+                logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error})
 

@@ -1,7 +1,6 @@
 Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.library-preparation',
-    requires: [ 'Ext.ux.FileUploadWindow' ],
 
     config: {
         control: {
@@ -19,6 +18,12 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
             },
             '#searchField': {
                 change: 'search'
+            },
+            '#cancelBtn': {
+                click: 'cancel'
+            },
+            '#saveBtn': {
+                click: 'save'
             }
         }
     },
@@ -28,11 +33,12 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
     },
 
     refresh: function(grid) {
-        Ext.getStore('libraryPreparationStore').load(function(records, operation, success) {
-            if (success && records.length > 0) {
-                Ext.getCmp('downloadBenchtopProtocolLPBtn').setDisabled(false);
-            }
-        });
+        // Ext.getStore('libraryPreparationStore').load(function(records, operation, success) {
+        //     if (success && records.length > 0) {
+        //         Ext.getCmp('downloadBenchtopProtocolLPBtn').setDisabled(false);
+        //     }
+        // });
+        Ext.getStore('libraryPreparationStore').reload();
     },
 
     applyToAll: function(record, dataIndex) {
@@ -41,8 +47,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
             'spike_in_description', 'spike_in_volume', 'pcr_cycles',
             'concentration_library', 'mean_fragment_size', 'nM',
             'concentration_sample'];
-        var nMFormulaDataIndices = ['concentration_library',
-                                    'mean_fragment_size'];
+        var nMFormulaDataIndices = ['concentration_library', 'mean_fragment_size'];
 
         if (typeof dataIndex !== undefined && allowedColumns.indexOf(dataIndex) !== -1) {
             store.each(function(item) {
@@ -181,6 +186,14 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
                 }
             }]
         }).showAt(e.getXY());
+    },
+
+    cancel: function() {
+        Ext.getStore('libraryPreparationStore').rejectChanges();
+    },
+
+    save: function() {
+        MainHub.Store.save('libraryPreparationStore');
     },
 
     search: function(fld, query) {
