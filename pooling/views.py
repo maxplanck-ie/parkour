@@ -56,7 +56,8 @@ def get_all(request):
                 'poolSize': pool_size,
                 'requestId': req.id,
                 'requestName': req.name,
-                'concentration': library.concentration,
+                # 'concentration': library.concentration,
+                'concentration_facility': library.concentration_facility,
                 'mean_fragment_size': library.mean_fragment_size,
                 'sequencing_depth': library.sequencing_depth,
                 'concentration_c1': pooling_obj.concentration_c1,
@@ -86,7 +87,8 @@ def get_all(request):
                 'poolSize': pool_size,
                 'requestId': req.pk,
                 'requestName': req.name,
-                'concentration': lib_prep_obj.concentration_library,
+                # 'concentration': lib_prep_obj.concentration_library,
+                'concentration_facility': sample.concentration_facility,
                 'mean_fragment_size': lib_prep_obj.mean_fragment_size,
                 'sequencing_depth': sample.sequencing_depth,
                 'concentration_c1': concentration_c1,
@@ -112,8 +114,8 @@ def update(request):
     try:
         try:
             concentration = float(request.POST.get('concentration'))
-        except ValueError:
-            raise ValueError('Library Concentartion is not set.')
+        except Exception:
+            raise ValueError('Library Concentration is not set.')
 
         if library_id == '0' or library_id == 0:
             obj = Pooling.objects.get(sample_id=sample_id)
@@ -146,8 +148,6 @@ def update(request):
                 else:
                     record.status = -1
                     record.save(update_fields=['status'])
-
-                    # TODO@me: send email
         else:
             error = str(form.errors)
             logger.debug(form.errors)

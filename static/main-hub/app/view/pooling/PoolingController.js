@@ -59,12 +59,12 @@ Ext.define('MainHub.view.pooling.PoolingController', {
     },
 
     editRecord: function(editor, context) {
-        var grid = context.grid,
-            record = context.record,
-            changes = record.getChanges(),
-            values = context.newValues,
-            concentrationC1 = values.concentration_c1,
-            url = 'pooling/update/';
+        var grid = context.grid;
+        var record = context.record;
+        var changes = record.getChanges();
+        var values = context.newValues;
+        var concentrationC1 = values.concentration_c1;
+        var url = 'pooling/update/';
 
         var params = $.extend({
             library_id: record.get('libraryId'),
@@ -76,7 +76,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         if (values.concentration > 0 && values.mean_fragment_size > 0 &&
             Object.keys(changes).indexOf('concentration_c1') === -1) {
             concentrationC1 = ((values.concentration / (values.mean_fragment_size * 650)) * Math.pow(10, 6)).toFixed(1);
-            params['concentration_c1'] = concentrationC1;
+            params.concentration_c1 = concentrationC1;
         }
 
         Ext.Ajax.request({
@@ -153,10 +153,10 @@ Ext.define('MainHub.view.pooling.PoolingController', {
     },
 
     downloadBenchtopProtocol: function() {
-        var store = Ext.getStore('poolingStore'),
-            poolName = '',
-            libraries = [],
-            samples = [];
+        var store = Ext.getStore('poolingStore');
+        var poolName = '';
+        var libraries = [];
+        var samples = [];
 
         // Get all checked (selected) records
         store.each(function(record) {
@@ -191,9 +191,9 @@ Ext.define('MainHub.view.pooling.PoolingController', {
     },
 
     downloadPoolingTemplate: function() {
-        var store = Ext.getStore('poolingStore'),
-            libraries = [],
-            samples = [];
+        var store = Ext.getStore('poolingStore');
+        var libraries = [];
+        var samples = [];
 
         // Get all checked (selected) records
         store.each(function(record) {
@@ -233,9 +233,9 @@ Ext.define('MainHub.view.pooling.PoolingController', {
     },
 
     search: function(fld, query) {
-        var grid = Ext.getCmp('poolingTable'),
-            store = grid.getStore(),
-            columns = Ext.pluck(grid.getColumns(), 'dataIndex');
+        var grid = Ext.getCmp('poolingTable');
+        var store = grid.getStore();
+        var columns = Ext.pluck(grid.getColumns(), 'dataIndex');
 
         store.clearFilter();
         store.filterBy(function(record) {

@@ -46,7 +46,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
         },
         store: 'poolingStore',
         sortableColumns: false,
-        columns: [{
+        columns: [
+            {
                 xtype: 'checkcolumn',
                 itemId: 'checkColumn',
                 dataIndex: 'selected',
@@ -75,7 +76,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
             {
                 text: 'ng/µl',
                 tooltip: 'Library Concentration (ng/µl)',
-                dataIndex: 'concentration',
+                dataIndex: 'concentration_facility',
                 width: 100
             },
             {
@@ -119,7 +120,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
                     displayField: 'name',
                     valueField: 'id',
                     store: Ext.create('Ext.data.Store', {
-                        fields: [{
+                        fields: [
+                            {
                                 name: 'id',
                                 type: 'int'
                             },
@@ -128,7 +130,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
                                 type: 'string'
                             }
                         ],
-                        data: [{
+                        data: [
+                            {
                                 id: 1,
                                 name: 'passed'
                             },
@@ -175,7 +178,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 }
             ]
         }],
-        plugins: [{
+        plugins: [
+            {
                 ptype: 'rowediting',
                 clicksToEdit: 1
             },
@@ -198,14 +202,17 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 '</strong>',
                 {
                     getHeaderClass: function(children) {
-                        var cls = 'pool-header-green',
-                            missingSamples = 0;
+                        var cls = 'pool-header-green';
+                        var missingSamples = 0;
+
                         $.each(children, function(index, item) {
                             if (item.get('sampleId') !== 0 && item.get('status') < 3) {
                                 missingSamples++;
                             }
                         });
+
                         if (missingSamples > 0) cls = 'pool-header-red';
+
                         return cls;
                     },
                     getRealPoolSize: function(children) {
