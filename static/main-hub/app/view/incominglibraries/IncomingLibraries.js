@@ -319,10 +319,14 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
             ftype: 'grouping',
             startCollapsed: true,
             groupHeaderTpl: [
-                '<strong>Request: {children:this.getName}</strong> (No. of Libraries/Samples: {rows.length})',
+                '<strong>Request: {children:this.getName}</strong> (# of Libraries/Samples: {rows.length}, Total Sequencing Depth: {children:this.getTotalDepth} M)',
                 {
                     getName: function(children) {
                         return children[0].get('requestName');
+                    },
+                    getTotalDepth: function(children) {
+                        var sequencingDepths = Ext.Array.pluck(Ext.Array.pluck(children, 'data'), 'sequencing_depth');
+                        return Ext.Array.sum(sequencingDepths);
                     }
                 }
             ]
