@@ -304,7 +304,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         }
 
         // Samples
-        else {
+        else if (wnd.recordType === 'S') {
             // Toggle Library Protocol
             if (record.get('nucleic_acid_type') === null) {
                 libraryProtocolEditor.disable();
@@ -566,7 +566,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             text: 'Index I7',
             dataIndex: 'index_i7',
             tooltip: 'Index I7',
-            width: 120,
+            width: 140,
             editor: {
                 xtype: 'combobox',
                 id: 'indexI7Editor',
@@ -590,7 +590,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             text: 'Index I5',
             dataIndex: 'index_i5',
             tooltip: 'Index I5',
-            width: 120,
+            width: 140,
             editor: {
                 xtype: 'combobox',
                 id: 'indexI5Editor',
@@ -992,6 +992,15 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         if (Object.keys(errors).indexOf(dataIndex) !== -1) {
             meta.tdCls += ' invalid-record';
             meta.tdAttr = 'data-qtip="' + errors[dataIndex] + '"';
+        }
+
+        // Render indices as '{Index ID} - {Index}'
+        if ((dataIndex === 'index_i7' || dataIndex === 'index_i5') && value !== '') {
+            var store = meta.column.getEditor().getStore();
+            var index = store.findRecord('index', value);
+            if (index) {
+                value = index.get('indexId') + ' - ' + value;
+            }
         }
 
         if (dataIndex === 'rna_quality' && value === 11) {
