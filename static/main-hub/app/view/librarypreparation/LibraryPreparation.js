@@ -42,7 +42,8 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
             defaults: {
                 width: 80
             },
-            items: [{
+            items: [
+                {
                     xtype: 'checkcolumn',
                     itemId: 'checkColumn',
                     dataIndex: 'selected',
@@ -83,6 +84,12 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     tooltip: 'Library Protocol',
                     dataIndex: 'libraryProtocolName',
                     minWidth: 150
+                },
+                {
+                    text: 'DF',
+                    tooltip: 'Dilution Factor',
+                    dataIndex: 'dilution_factor',
+                    width: 60
                 },
                 {
                     text: 'ng/µl Sample',
@@ -196,7 +203,8 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                         displayField: 'name',
                         valueField: 'id',
                         store: Ext.create('Ext.data.Store', {
-                            fields: [{
+                            fields: [
+                                {
                                     name: 'id',
                                     type: 'int'
                                 },
@@ -205,7 +213,8 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                                     type: 'string'
                                 }
                             ],
-                            data: [{
+                            data: [
+                                {
                                     id: 1,
                                     name: 'passed'
                                 },
@@ -220,7 +229,8 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                 }
             ]
         },
-        plugins: [{
+        plugins: [
+            {
                 ptype: 'rowediting',
                 clicksToEdit: 1
             },

@@ -72,6 +72,7 @@ def get_all(request):
                 'pcr_cycles': obj.pcr_cycles,
                 'concentration_library': obj.concentration_library,
                 'mean_fragment_size': obj.mean_fragment_size,
+                'dilution_factor': obj.sample.dilution_factor,
                 'nM': obj.nM,
             })
     data = sorted(data, key=lambda x: x['barcode'][3:])
