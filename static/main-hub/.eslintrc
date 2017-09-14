@@ -5,7 +5,8 @@
     "globals": {
         "$": true,
         "_": true,
-        "Ext": true
+        "Ext": true,
+        "MainHub": true
     },
     "parserOptions": {
         "sourceType": "module"
@@ -34,7 +35,7 @@
             }
         ],
         "keyword-spacing": [2],
-        "new-cap": 2,
+        // "new-cap": 2,
         "no-bitwise": 2,
         "no-caller": 2,
         "no-cond-assign": [2, "except-parens"],

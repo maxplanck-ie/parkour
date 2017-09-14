@@ -181,7 +181,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
                 text: 'Apply to All',
                 iconCls: 'x-fa fa-check-circle',
                 handler: function() {
-                    var dataIndex = me.getDataIndex(e, gridView);
+                    var dataIndex = MainHub.Utilities.getDataIndex(e, gridView);
                     me.applyToAll(record, dataIndex);
                 }
             }]
@@ -211,23 +211,5 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
             });
             return res;
         });
-    },
-
-    getDataIndex: function(e, view) {
-        var xPos = e.getXY()[0],
-            columns = view.getGridColumns(),
-            dataIndex;
-
-        for (var column in columns) {
-            var leftEdge = columns[column].getPosition()[0],
-                rightEdge = columns[column].getSize().width + leftEdge;
-
-            if (xPos >= leftEdge && xPos <= rightEdge) {
-                dataIndex = columns[column].dataIndex;
-                break;
-            }
-        }
-
-        return dataIndex;
     }
 });

@@ -90,7 +90,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                 text: 'Apply to All',
                 iconCls: 'x-fa fa-check-circle',
                 handler: function() {
-                    var dataIndex = me.getDataIndex(e, gridView);
+                    var dataIndex = MainHub.Utilities.getDataIndex(e, gridView);
                     me.applyToAll(record, dataIndex);
                 }
             }, {
@@ -1005,23 +1005,5 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         var item = store.findRecord('id', value, 0, false, false, true);
 
         return item ? item.get('name') : '';
-    },
-
-    getDataIndex: function(e, view) {
-        var xPos = e.getXY()[0];
-        var columns = view.getGridColumns();
-        var dataIndex;
-
-        for (var column in columns) {
-            var leftEdge = columns[column].getPosition()[0];
-            var rightEdge = columns[column].getSize().width + leftEdge;
-
-            if (xPos >= leftEdge && xPos <= rightEdge) {
-                dataIndex = columns[column].dataIndex;
-                break;
-            }
-        }
-
-        return dataIndex;
     }
 });

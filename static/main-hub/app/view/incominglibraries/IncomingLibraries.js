@@ -20,12 +20,14 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
         padding: 15,
         header: {
             title: 'Incoming Libraries and Samples',
-            items: [{
+            items: [
+                {
                     xtype: 'fieldcontainer',
                     defaultType: 'checkboxfield',
                     layout: 'hbox',
                     margin: '0 20 0 0',
-                    items: [{
+                    items: [
+                        {
                             boxLabel: 'Show Libraries',
                             itemId: 'showLibrariesCheckbox',
                             margin: '0 15 0 0',
@@ -59,7 +61,8 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
         store: 'incomingLibrariesStore',
         sortableColumns: false,
         columns: {
-            items: [{
+            items: [
+                {
                     xtype: 'checkcolumn',
                     itemId: 'checkColumn',
                     dataIndex: 'selected',
@@ -119,8 +122,8 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                     tdCls: 'userEntry',
                     width: 50,
                     renderer: function(value, meta) {
-                        var store = Ext.getStore('concentrationMethodsStore'),
-                            record = store.findRecord('id', value);
+                        var store = Ext.getStore('concentrationMethodsStore');
+                        var record = store.findRecord('id', value);
                         meta.tdAttr = 'data-qtip="' + record.get('name') + '"';
                         return (record) ? record.getShortName() : '';
                     }
@@ -213,11 +216,13 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                         forceSelection: true
                     },
                     renderer: function(value, meta) {
-                        var store = Ext.getStore('concentrationMethodsStore'),
-                            record = store.findRecord('id', value);
+                        var store = Ext.getStore('concentrationMethodsStore');
+                        var record = store.findRecord('id', value);
+
                         if (record) {
                             meta.tdAttr = 'data-qtip="' + record.get('name') + '"';
                         }
+
                         return (record) ? record.getShortName() : '';
                     }
                 },
@@ -287,7 +292,8 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                         displayField: 'name',
                         valueField: 'value',
                         store: Ext.create('Ext.data.Store', {
-                            fields: [{
+                            fields: [
+                                {
                                     name: 'id',
                                     type: 'int'
                                 },
@@ -296,7 +302,8 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                                     type: 'string'
                                 }
                             ],
-                            data: [{
+                            data: [
+                                {
                                     name: 'passed',
                                     value: 1
                                 },
@@ -331,7 +338,8 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                 }
             ]
         }],
-        plugins: [{
+        plugins: [
+            {
                 ptype: 'bufferedrenderer',
                 trailingBufferZone: 100,
                 leadingBufferZone: 100

@@ -48,7 +48,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
                 text: 'Apply to All',
                 iconCls: 'x-fa fa-check-circle',
                 handler: function() {
-                    var dataIndex = me.getDataIndex(e, gridView);
+                    var dataIndex = MainHub.Utilities.getDataIndex(e, gridView);
                     me.applyToAll(record, dataIndex);
                 }
             }]
@@ -94,10 +94,10 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
     },
 
     toggleEditors: function(editor, context) {
-        var record = context.record,
-            qPCRResultEditor = Ext.getCmp('qPCRResultEditor'),
-            rnaQualityEditor = Ext.getCmp('rnaQualityIncomingEditor'),
-            nucleicAcidTypesStore = Ext.getStore('nucleicAcidTypesStore');
+        var record = context.record;
+        var qPCRResultEditor = Ext.getCmp('qPCRResultEditor');
+        var rnaQualityEditor = Ext.getCmp('rnaQualityIncomingEditor');
+        var nucleicAcidTypesStore = Ext.getStore('nucleicAcidTypesStore');
 
         // Toggle qPCR Result and RNA Quality
         if (record.get('recordType') === 'L') {
@@ -162,9 +162,9 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
     },
 
     editRecord: function(editor, context) {
-        var record = context.record,
-            changes = record.getChanges(),
-            values = context.newValues;
+        var record = context.record;
+        var changes = record.getChanges();
+        var values = context.newValues;
 
         var params = $.extend({
             record_type: record.getRecordType(),
@@ -178,7 +178,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
             var amountFacility = parseFloat(values.dilution_factor) *
                 parseFloat(values.concentration_facility) *
                 parseFloat(values.sample_volume_facility);
-            params['amount_facility'] = amountFacility;
+            params.amount_facility = amountFacility;
         }
 
         Ext.Ajax.request({
@@ -308,23 +308,5 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
 
         store.clearFilter();
         store.filter([showFilter, searchFilter]);
-    },
-
-    getDataIndex: function(e, view) {
-        var xPos = e.getXY()[0],
-            columns = view.getGridColumns(),
-            dataIndex;
-
-        for (var column in columns) {
-            var leftEdge = columns[column].getPosition()[0],
-                rightEdge = columns[column].getSize().width + leftEdge;
-
-            if (xPos >= leftEdge && xPos <= rightEdge) {
-                dataIndex = columns[column].dataIndex;
-                break;
-            }
-        }
-
-        return dataIndex;
     }
 });
