@@ -265,7 +265,6 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         var libraryProtocolEditor = Ext.getCmp('libraryProtocolEditor');
         var libraryProtocolsStore = Ext.getStore('libraryProtocolsStore');
         var libraryTypeEditor = Ext.getCmp('libraryTypeEditor');
-        var libraryTypesStore = Ext.getStore('libraryTypesStore');
         var rnaQualityEditor = Ext.getCmp('rnaQualityEditor');
         var record = context.record;
 
@@ -276,7 +275,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             libraryTypeEditor.enable();
 
             // Filter Library Types store for currently selected Library Protocol
-            this.filterLibraryTypes(libraryTypesStore, record.get('library_protocol'));
+            this.filterLibraryTypes(record.get('library_protocol'));
         }
 
         // Libraries
@@ -378,10 +377,9 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
 
     selectLibraryProtocol: function(fld, record) {
         var libraryTypeEditor = Ext.getCmp('libraryTypeEditor');
-        var libraryTypesStore = Ext.getStore('libraryTypesStore');
-
-        this.filterLibraryTypes(libraryTypesStore, record.get('id'));
+        libraryTypeEditor.setValue(null);
         libraryTypeEditor.enable();
+        this.filterLibraryTypes(record.get('id'));
     },
 
     selectIndexType: function(fld, record) {
@@ -459,24 +457,6 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         }
     },
 
-    getDataIndex: function(e, view) {
-        var xPos = e.getXY()[0];
-        var columns = view.getGridColumns();
-        var dataIndex;
-
-        for (var column in columns) {
-            var leftEdge = columns[column].getPosition()[0];
-            var rightEdge = columns[column].getSize().width + leftEdge;
-
-            if (xPos >= leftEdge && xPos <= rightEdge) {
-                dataIndex = columns[column].dataIndex;
-                break;
-            }
-        }
-
-        return dataIndex;
-    },
-
     filterLibraryProtocols: function(store, value) {
         store.clearFilter();
         store.filterBy(function(item) {
@@ -484,10 +464,12 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         });
     },
 
-    filterLibraryTypes: function(store, value) {
+    filterLibraryTypes: function(libraryProtocolId) {
+        var store = Ext.getStore('libraryTypesStore');
+
         store.clearFilter();
         store.filterBy(function(item) {
-            return item.get('protocol').indexOf(value) !== -1;
+            return item.get('protocol').indexOf(libraryProtocolId) !== -1;
         });
     },
 
@@ -1011,18 +993,35 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
     },
 
     comboboxErrorRenderer: function(value, meta, record) {
-        var store = meta.column.getEditor().getStore();
-
-        store.clearFilter();
-
-        var item = store.findRecord('id', value);
         var dataIndex = meta.column.dataIndex;
+        var store = meta.column.getEditor().getStore();
 
         if (record && Object.keys(record.get('errors')).indexOf(dataIndex) !== -1) {
             meta.tdCls += ' invalid-record';
             meta.tdAttr = 'data-qtip="' + record.get('errors')[dataIndex] + '"';
         }
 
-        return (item !== null) ? item.get('name') : '';
+        store.clearFilter();
+        var item = store.findRecord('id', value, 0, false, false, true);
+
+        return item ? item.get('name') : '';
+    },
+
+    getDataIndex: function(e, view) {
+        var xPos = e.getXY()[0];
+        var columns = view.getGridColumns();
+        var dataIndex;
+
+        for (var column in columns) {
+            var leftEdge = columns[column].getPosition()[0];
+            var rightEdge = columns[column].getSize().width + leftEdge;
+
+            if (xPos >= leftEdge && xPos <= rightEdge) {
+                dataIndex = columns[column].dataIndex;
+                break;
+            }
+        }
+
+        return dataIndex;
     }
 });
