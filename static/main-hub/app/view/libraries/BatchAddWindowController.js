@@ -21,9 +21,6 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             '#createEmptyRecordsBtn': {
                 click: 'createEmptyRecords'
             },
-            '#saveBtn': {
-                click: 'save'
-            },
 
             // Libraries only
             '#indexTypeEditor': {
@@ -39,7 +36,11 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             },
             '#libraryProtocolEditor': {
                 select: 'selectLibraryProtocol'
-            }
+            },
+
+            '#saveBtn': {
+                click: 'save'
+            },
         }
     },
 
@@ -49,6 +50,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
     },
 
     selectCard: function(btn) {
+        var me = this;
         var wnd = btn.up('window');
         var layout = btn.up('panel').getLayout();
         var configuration;
@@ -70,6 +72,14 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
 
         var grid = Ext.getCmp('batchAddGrid');
         grid.reconfigure(configuration[0], configuration[1]);
+
+        // Add empty records on enter
+        var numEmptyRecords = wnd.down('#numEmptyRecords');
+        numEmptyRecords.getEl().on('keypress', function(e, fld) {
+            if (e.getKey() === e.ENTER) {
+                me.createEmptyRecords(numEmptyRecords);
+            }
+        });
     },
 
     showContextMenu: function(gridView, record, item, index, e) {
