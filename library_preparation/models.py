@@ -1,8 +1,10 @@
 from django.db import models
+
+from common.models import DateTimeMixin
 from sample.models import Sample
 
 
-class LibraryPreparation(models.Model):
+class LibraryPreparation(DateTimeMixin):
     sample = models.OneToOneField(Sample, verbose_name='Sample')
 
     starting_amount = models.FloatField(
