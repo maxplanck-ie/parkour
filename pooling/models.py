@@ -1,9 +1,11 @@
 from django.db import models
+
+from common.models import DateTimeMixin
 from library.models import Library
 from sample.models import Sample
 
 
-class Pooling(models.Model):
+class Pooling(DateTimeMixin):
     library = models.OneToOneField(
         Library,
         verbose_name='Library',

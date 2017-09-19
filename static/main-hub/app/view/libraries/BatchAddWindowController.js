@@ -16,7 +16,8 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             '#batchAddGrid': {
                 itemcontextmenu: 'showContextMenu',
                 beforeedit: 'toggleEditors',
-                edit: 'editRecord'
+                edit: 'editRecord',
+                validate: 'validateAll'
             },
             '#createEmptyRecordsBtn': {
                 click: 'createEmptyRecords'

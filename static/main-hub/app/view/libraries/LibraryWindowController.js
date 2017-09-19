@@ -278,8 +278,8 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
 
             // Set nucleic acid type
             var nucleicAcidTypeField = Ext.getCmp('nucleicAcidTypeField');
-            nucleicAcidTypeField.select(record.nucleicAcidTypeId);
-            nucleicAcidTypeField.fireEvent('select', nucleicAcidTypeField, nucleicAcidTypeField.findRecordByValue(record.nucleicAcidTypeId), true);
+            nucleicAcidTypeField.select(record.nucleic_acid_type);
+            nucleicAcidTypeField.fireEvent('select', nucleicAcidTypeField, nucleicAcidTypeField.findRecordByValue(record.nucleic_acid_type), true);
 
             // Set organism
             var organismSampleField = Ext.getCmp('organismSampleField');

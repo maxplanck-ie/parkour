@@ -1,4 +1,6 @@
 from django.db import models
+
+from common.models import DateTimeMixin
 from index_generator.models import Pool
 
 
@@ -23,7 +25,7 @@ class Lane(models.Model):
         return '%s: %s' % (self.name, self.pool.name)
 
 
-class Flowcell(models.Model):
+class Flowcell(DateTimeMixin):
     sequencer = models.ForeignKey(Sequencer, verbose_name='Sequencer')
     flowcell_id = models.CharField('Flowcell ID', max_length=50)
     lanes = models.ManyToManyField(Lane, related_name='flowcell', blank=True)

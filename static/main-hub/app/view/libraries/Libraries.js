@@ -136,7 +136,7 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 {
                     text: 'Nuc. Type',
                     tooltip: 'Nucleic Acid Type',
-                    dataIndex: 'nucleicAcidType',
+                    dataIndex: 'nucleic_acid_type_name',
                     width: 100
                 },
                 {

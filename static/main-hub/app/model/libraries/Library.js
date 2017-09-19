@@ -119,11 +119,11 @@ Ext.define('MainHub.model.libraries.Library', {
         type: 'string'
     },
     {
-        name: 'nucleicAcidType',
+        name: 'nucleic_acid_type_name',
         type: 'string'
     },
     {
-        name: 'nucleicAcidTypeId',
+        name: 'nucleic_acid_type',
         type: 'int'
     },
     {

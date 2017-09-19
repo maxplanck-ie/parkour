@@ -55,7 +55,7 @@ def get_all(request):
             'requestId': req.pk,
             'name': req.name,
             'restrictPermissions': restrict_permissions,
-            'dateCreated': req.date_created.strftime('%d.%m.%Y'),
+            'dateCreated': req.create_time.strftime('%d.%m.%Y'),
             'description': req.description,
             'userId': req.user.pk,
             'user': req.user.get_full_name(),

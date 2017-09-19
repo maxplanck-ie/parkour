@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+
+from common.models import DateTimeMixin
 from library.models import Library
 from sample.models import Sample
 
@@ -12,7 +14,7 @@ class PoolSize(models.Model):
         return '%ix%i' % (self.multiplier, self.size)
 
 
-class Pool(models.Model):
+class Pool(DateTimeMixin):
     name = models.CharField('Name', max_length=100, blank=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name='User')
     size = models.ForeignKey(PoolSize, verbose_name='Size')
