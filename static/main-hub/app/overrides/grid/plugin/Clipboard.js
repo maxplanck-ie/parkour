@@ -108,5 +108,10 @@ Ext.define('MainHub.overrides.grid.plugin.Clipboard', {
             // Jump to next row in destination
             destination.setPosition(destination.rowIdx + 1, destinationStartColumn);
         }
+
+        // BatchAdd: Trigger grid validation after pasting
+        if (this.cmp.id === 'batchAddGrid') {
+            this.cmp.fireEvent('validate');
+        }
     }
 });
