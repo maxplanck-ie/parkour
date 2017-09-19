@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+
+from common.models import DateTimeMixin
 from library.models import Library
 from sample.models import Sample
 
@@ -12,9 +14,8 @@ class FileRequest(models.Model):
         return self.name
 
 
-class Request(models.Model):
+class Request(DateTimeMixin):
     name = models.CharField('Name', max_length=100, blank=True)
-    date_created = models.DateTimeField('Date', auto_now_add=True)
     description = models.TextField()
 
     user = models.ForeignKey(

@@ -1,5 +1,7 @@
 from django.db import models
 
+from common.models import DateTimeMixin
+
 
 class Organism(models.Model):
     name = models.CharField('Name', max_length=100)
@@ -165,12 +167,11 @@ class LibraryType(models.Model):
         return self.name
 
 
-class GenericLibrarySample(models.Model):
+class GenericLibrarySample(DateTimeMixin):
     name = models.CharField(
         'Name',
         max_length=200,
     )
-    date = models.DateTimeField('Date', auto_now_add=True)
     status = models.SmallIntegerField(default=0)
     library_protocol = models.ForeignKey(
         LibraryProtocol,

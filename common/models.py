@@ -64,3 +64,11 @@ class User(AbstractEmailUser):
 
     def get_full_name(self):
         return '%s %s' % (self.first_name, self.last_name)
+
+
+class DateTimeMixin(models.Model):
+    create_time = models.DateTimeField('Create Time', auto_now_add=True)
+    update_time = models.DateTimeField('Update Time', auto_now=True)
+
+    class Meta:
+        abstract = True
