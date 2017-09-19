@@ -26,13 +26,17 @@ Ext.define('MainHub.view.flowcell.PoolInfoWindow', {
             },
             {
                 text: 'Library',
-                dataIndex: 'library',
+                dataIndex: 'name',
                 flex: 1
             },
             {
                 text: 'Barcode',
                 dataIndex: 'barcode',
-                width: 90
+                width: 95,
+                renderer: function(value) {
+                    var record = this.getStore().findRecord('barcode', value);
+                    return record ? record.getBarcode() : value;
+                }
             },
             {
                 text: 'Library Preparation Protocol',

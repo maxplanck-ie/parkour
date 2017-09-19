@@ -59,6 +59,7 @@ def get_all(request):
                 'poolName': pool.name,
                 'sampleId': obj.sample.pk,
                 'barcode': obj.sample.barcode,
+                'is_converted': obj.sample.is_converted,
                 'comments': obj.sample.comments_facility,
                 'libraryProtocol': obj.sample.library_protocol.pk,
                 'libraryProtocolName': obj.sample.library_protocol.name,

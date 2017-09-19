@@ -154,6 +154,7 @@ def get_all(request):
                         sample.sample_volume_facility,
                     'comments_facility': sample.comments_facility,
                     'rna_quality_facility': sample.rna_quality_facility,
+                    'is_converted': sample.is_converted,
                 }
                 for sample in samples
             ]

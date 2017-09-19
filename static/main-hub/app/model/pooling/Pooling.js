@@ -1,15 +1,7 @@
 Ext.define('MainHub.model.pooling.Pooling', {
-    extend: 'MainHub.model.Base',
+    extend: 'MainHub.model.Record',
 
     fields: [{
-        name: 'name',
-        type: 'string'
-    },
-    {
-        name: 'status',
-        type: 'int'
-    },
-    {
         name: 'active',
         type: 'bool'
     },
@@ -39,10 +31,6 @@ Ext.define('MainHub.model.pooling.Pooling', {
     },
     {
         name: 'poolSize',
-        type: 'string'
-    },
-    {
-        name: 'barcode',
         type: 'string'
     },
     {

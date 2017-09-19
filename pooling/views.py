@@ -82,6 +82,7 @@ def get_all(request):
                 'status': sample.status,
                 'sampleId': sample.pk,
                 'barcode': sample.barcode,
+                'is_converted': sample.is_converted,
                 'poolId': pool.pk,
                 'poolName': pool.name,
                 'poolSize': pool_size,

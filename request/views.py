@@ -96,6 +96,7 @@ def get_libraries_and_samples(request):
             'recordType': sample.get_record_type(),
             'sampleId': sample.pk,
             'barcode': sample.barcode,
+            'is_converted': sample.is_converted,
         }
         for sample in req.samples.all()
     ]

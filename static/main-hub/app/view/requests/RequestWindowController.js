@@ -52,8 +52,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
             Ext.getStore('librariesInRequestStore').removeAll();
             Ext.getCmp('downloadRequestBlankBtn').disable();
             Ext.getCmp('uploadSignedBlankBtn').disable();
-        }
-        else {
+        } else {
             var form = Ext.getCmp('requestForm').getForm();
             var grid = Ext.getCmp('librariesInRequestTable');
             var record = wnd.record.data;

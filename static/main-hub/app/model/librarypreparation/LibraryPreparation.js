@@ -1,11 +1,7 @@
 Ext.define('MainHub.model.librarypreparation.LibraryPreparation', {
-    extend: 'MainHub.model.Base',
+    extend: 'MainHub.model.Record',
 
     fields: [
-        {
-            name: 'name',
-            type: 'string'
-        },
         {
             name: 'requestName',
             type: 'string'
@@ -21,10 +17,6 @@ Ext.define('MainHub.model.librarypreparation.LibraryPreparation', {
         {
             name: 'sampleId',
             type: 'int'
-        },
-        {
-            name: 'barcode',
-            type: 'string'
         },
         {
             name: 'comments',

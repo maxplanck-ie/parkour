@@ -72,7 +72,11 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                 {
                     text: 'Barcode',
                     dataIndex: 'barcode',
-                    width: 90
+                    width: 95,
+                    renderer: function(value) {
+                        var record = this.getStore().findRecord('barcode', value);
+                        return record ? record.getBarcode() : value;
+                    }
                 },
                 {
                     text: 'Comments',

@@ -1,14 +1,11 @@
 Ext.define('MainHub.model.flowcell.PoolInfo', {
-    extend: 'Ext.data.Model',
+    extend: 'Ext.data.Record',
 
     fields: [{
         name: 'request',
         type: 'string'
     }, {
-        name: 'library',
-        type: 'string'
-    }, {
-        name: 'barcode',
+        name: 'name',
         type: 'string'
     }, {
         name: 'protocol',

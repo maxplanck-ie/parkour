@@ -71,7 +71,11 @@ Ext.define('MainHub.view.pooling.Pooling', {
             {
                 text: 'Barcode',
                 dataIndex: 'barcode',
-                width: 90
+                width: 95,
+                renderer: function(value) {
+                    var record = this.getStore().findRecord('barcode', value);
+                    return record ? record.getBarcode() : value;
+                }
             },
             {
                 text: 'ng/µl',

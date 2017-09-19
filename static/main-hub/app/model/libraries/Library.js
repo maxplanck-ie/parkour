@@ -1,10 +1,7 @@
 Ext.define('MainHub.model.libraries.Library', {
-    extend: 'MainHub.model.Base',
+    extend: 'MainHub.model.Record',
 
-    fields: [{
-        name: 'status',
-        type: 'int'
-    },
+    fields: [
     {
         name: 'requestName',
         type: 'string'
@@ -20,10 +17,6 @@ Ext.define('MainHub.model.libraries.Library', {
     {
         name: 'sampleId',
         type: 'int'
-    },
-    {
-        name: 'name',
-        type: 'string'
     },
     {
         name: 'recordType',
@@ -125,11 +118,6 @@ Ext.define('MainHub.model.libraries.Library', {
         name: 'comments',
         type: 'string'
     },
-    {
-        name: 'barcode',
-        type: 'string'
-    },
-
     {
         name: 'nucleicAcidType',
         type: 'string'

@@ -124,7 +124,10 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 {
                     text: 'Barcode',
                     dataIndex: 'barcode',
-                    width: 90
+                    width: 95,
+                    renderer: function(value, meta) {
+                        return meta.record.getBarcode();
+                    }
                 },
                 {
                     text: 'Date',
