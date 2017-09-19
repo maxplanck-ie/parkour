@@ -12,9 +12,9 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('library', '0001_initial'),
+        ('library', '0002_add_timestamps'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('sample', '0002_load_nucleic_acid_types'),
+        ('sample', '0003_add_timestamps'),
     ]
 
     operations = [

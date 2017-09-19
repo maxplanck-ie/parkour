@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('index_generator', '0002_load_pool_sizes'),
+        ('index_generator', '0003_add_timestamps'),
     ]
 
     operations = [
