@@ -52,8 +52,8 @@ Ext.define('MainHub.view.requests.Requests', {
                 dataIndex: 'user',
                 flex: 1
             }, {
-                text: 'Date Created',
-                dataIndex: 'dateCreated',
+                text: 'Date',
+                dataIndex: 'date',
                 flex: 1
             }, {
                 text: 'Sum of Sequencing Depth',
