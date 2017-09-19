@@ -107,7 +107,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
             qPCRResultEditor.disable();
 
             var nat = nucleicAcidTypesStore.findRecord('id',
-                record.get('nucleicAcidTypeId')
+                record.get('nucleic_acid_type')
             );
 
             if (nat !== null && nat.get('type') === 'RNA') {

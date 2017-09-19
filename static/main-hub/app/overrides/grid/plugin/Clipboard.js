@@ -41,12 +41,31 @@ Ext.define('MainHub.overrides.grid.plugin.Clipboard', {
                 var destinationColumnEditor = destination.column.config.editor;
                 if (destinationColumnEditor) {
                     if (destinationColumnEditor.xtype === 'combobox') {
-                        var indexType = destination.record.get('index_type');
-                        var indexReads = destination.record.get('index_reads');
-                        if (indexType !== 1) { break; }  // Index Type != 'Other'
-                        if ((indexReads === 1 && dataIndex !== 'index_i7') ||
-                            (indexReads === 2 && dataIndex !== 'index_i7' && dataIndex !== 'index_i5')) {
-                            break;  // Don't allow pasting into combobox fields except for Index I7/I5
+                        if (dataIndex === 'index_i7' || dataIndex === 'index_i5') {
+                            var indexType = destination.record.get('index_type');
+                            var indexReads = destination.record.get('index_reads');
+
+                            if (indexType !== 1) { break; }  // Index Type != 'Other'
+
+                            if ((indexReads === 1 && dataIndex !== 'index_i7') ||
+                                (indexReads === 2 && dataIndex !== 'index_i7' && dataIndex !== 'index_i5')) {
+                                break;  // Don't allow pasting into combobox fields except for Index I7/I5
+                            }
+                        } else if (dataIndex === 'rna_quality' || dataIndex === 'rna_quality_facility') {
+                            var nucleicAcidType = destination.record.get('nucleic_acid_type');
+
+                            if (!nucleicAcidType) { break; }  // NAT is not set
+
+                            var nucleicAcidTypeRecord = Ext.getStore('nucleicAcidTypesStore').findRecord(
+                                'id', nucleicAcidType
+                            );
+
+                            if (!nucleicAcidTypeRecord ||
+                                (nucleicAcidTypeRecord && nucleicAcidTypeRecord.get('type') === 'DNA')) {
+                                break;  // NAT is not RNA
+                            }
+                        } else {
+                            break;  // // Don't allow pasting into combobox fields
                         }
                     }
                 } else {
