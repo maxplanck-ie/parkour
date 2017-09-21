@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'library',
     'sample',
     'request',
-    'quality_check',
+    'incoming_libraries',
     'index_generator',
     'library_preparation',
     'pooling',

@@ -38,7 +38,7 @@ class GetAllLibraries(TestCase):
         self.request.samples.add(sample)
 
         response = self.client.get(reverse('library.get_all'), {
-            'quality_check': 'true'
+            'incoming_libraries': 'true'
         })
         self.assertEqual(response.status_code, 200)
         self.assertNotEqual(response.content, b'[]')
@@ -56,7 +56,7 @@ class GetAllLibraries(TestCase):
         self.request.samples.add(sample)
 
         response = self.client.get(reverse('library.get_all'), {
-            'quality_check': 'true'
+            'incoming_libraries': 'true'
         })
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b'[]')
@@ -82,7 +82,7 @@ class UpdateTest(TestCase):
 
     def test_update_library_ok(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('quality_check.update'), {
+        response = self.client.post(reverse('incoming_libraries.update'), {
             'record_id': self.library.pk,
             'record_type': 'L',
             'concentration_facility': '1.5',
@@ -99,7 +99,7 @@ class UpdateTest(TestCase):
 
     def test_update_sample_ok(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('quality_check.update'), {
+        response = self.client.post(reverse('incoming_libraries.update'), {
             'record_id': self.sample1.pk,
             'record_type': 'S',
             'concentration_facility': '2.0',
@@ -115,7 +115,7 @@ class UpdateTest(TestCase):
 
     def test_update_record_fail(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('quality_check.update'), {
+        response = self.client.post(reverse('incoming_libraries.update'), {
             'record_id': self.sample2.pk,
             'record_type': 'S',
             'concentration_facility': 'string',
@@ -128,7 +128,7 @@ class UpdateTest(TestCase):
 
     def test_update_qc_fail(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('quality_check.update'), {
+        response = self.client.post(reverse('incoming_libraries.update'), {
             'record_id': self.sample2.pk,
             'record_type': 'S',
             'qc_result': '-1',
@@ -142,7 +142,7 @@ class UpdateTest(TestCase):
 
     def test_record_type_missing(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('quality_check.update'))
+        response = self.client.post(reverse('incoming_libraries.update'))
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(str(response.content, 'utf-8'), {
             'success': False,
@@ -151,7 +151,7 @@ class UpdateTest(TestCase):
 
     def test_non_existing_record_id(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('quality_check.update'), {
+        response = self.client.post(reverse('incoming_libraries.update'), {
             'record_type': 'L',
             'record_id': '-1',
         })
@@ -163,7 +163,7 @@ class UpdateTest(TestCase):
 
     def test_missing_or_empty_record_id(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('quality_check.update'), {
+        response = self.client.post(reverse('incoming_libraries.update'), {
             'record_type': 'L',
         })
         self.assertEqual(response.status_code, 200)
@@ -174,7 +174,7 @@ class UpdateTest(TestCase):
 
     def test_wrong_http_method(self):
         self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.get(reverse('quality_check.update'))
+        response = self.client.get(reverse('incoming_libraries.update'))
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(str(response.content, 'utf-8'), {
             'success': False,

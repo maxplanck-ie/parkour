@@ -189,7 +189,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
         }
 
         Ext.Ajax.request({
-            url: 'quality_check/update/',
+            url: 'incoming_libraries/update/',
             method: 'POST',
             timeout: 1000000,
             scope: this,
@@ -228,7 +228,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
 
         if (libraries.length !== 0 || samples.length !== 0) {
             Ext.Ajax.request({
-                url: 'quality_check/qc_update_all/',
+                url: 'incoming_libraries/qc_update_all/',
                 method: 'POST',
                 scope: this,
                 params: {
