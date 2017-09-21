@@ -34,7 +34,7 @@ Ext.define('MainHub.view.flowcell.PoolInfoWindow', {
                 dataIndex: 'barcode',
                 width: 95,
                 renderer: function(value) {
-                    var record = this.getStore().findRecord('barcode', value);
+                    var record = Ext.getStore('poolInfoStore').findRecord('barcode', value);
                     return record ? record.getBarcode() : value;
                 }
             },
