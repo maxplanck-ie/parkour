@@ -13,12 +13,6 @@ class LibraryPreparation(DateTimeMixin):
         blank=True,
     )
 
-    starting_volume = models.FloatField(
-        'Starting Amount',
-        null=True,
-        blank=True,
-    )
-
     spike_in_description = models.TextField(
         'Spike-in Description',
         null=True,
@@ -51,6 +45,12 @@ class LibraryPreparation(DateTimeMixin):
 
     nM = models.FloatField(
         'nM',
+        null=True,
+        blank=True,
+    )
+
+    qpcr_result = models.FloatField(
+        'qPCR Result',
         null=True,
         blank=True,
     )

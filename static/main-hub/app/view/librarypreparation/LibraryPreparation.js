@@ -113,17 +113,6 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     }
                 },
                 {
-                    text: 'µl Start',
-                    tooltip: 'Starting Volume (µl)',
-                    dataIndex: 'starting_volume',
-                    width: 100,
-                    editor: {
-                        xtype: 'numberfield',
-                        decimalPrecision: 1,
-                        minValue: 0
-                    }
-                },
-                {
                     text: 'Spike-in',
                     tooltip: 'Spike-in Description',
                     dataIndex: 'spike_in_description',
@@ -169,6 +158,16 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     text: 'ng/µl Library',
                     tooltip: 'Concentration Library (ng/µl)',
                     dataIndex: 'concentration_library',
+                    width: 100,
+                    editor: {
+                        xtype: 'numberfield',
+                        minValue: 0
+                    }
+                },
+                {
+                    text: 'qPCR (nM)',
+                    tooltip: 'qPCR Result (nM)',
+                    dataIndex: 'qpcr_result',
                     width: 100,
                     editor: {
                         xtype: 'numberfield',

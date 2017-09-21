@@ -46,7 +46,6 @@ def get_all(request):
                 'libraryProtocolName': obj.sample.library_protocol.name,
                 'concentration_sample': obj.sample.concentration,
                 'starting_amount': obj.starting_amount,
-                'starting_volume': obj.starting_volume,
                 'spike_in_description': obj.spike_in_description,
                 'spike_in_volume': obj.spike_in_volume,
                 'indexI7Id': index_i7_id,
@@ -56,6 +55,7 @@ def get_all(request):
                 'mean_fragment_size': obj.mean_fragment_size,
                 'dilution_factor': obj.sample.dilution_factor,
                 'comments': obj.comments,
+                'qpcr_result': obj.qpcr_result,
                 'nM': obj.nM,
             })
     data = sorted(data, key=lambda x: x['barcode'][3:])
@@ -193,6 +193,7 @@ def qc_update_all(request):
 
     return JsonResponse({'success': not error, 'error': error})
 
+
 @csrf_exempt
 @login_required
 @staff_member_required
@@ -251,8 +252,7 @@ def download_benchtop_protocol(request):
 
             row = [req.name, pool.name, obj.sample.name, obj.sample.barcode,
                    obj.sample.library_protocol.name, obj.sample.concentration,
-                   obj.starting_amount, obj.starting_volume,
-                   obj.spike_in_description, obj.spike_in_volume]
+                   obj.starting_amount, '', obj.spike_in_description, '']
 
             # µl Sample = Starting Amount / Concentration Sample
             col_starting_amount = col_letters[6]

@@ -44,11 +44,6 @@ Ext.define('MainHub.model.librarypreparation.LibraryPreparation', {
             allowNull: true
         },
         {
-            name: 'starting_volume',
-            type: 'float',
-            allowNull: true
-        },
-        {
             name: 'spike_in_description',
             type: 'string'
         },
@@ -82,6 +77,11 @@ Ext.define('MainHub.model.librarypreparation.LibraryPreparation', {
         },
         {
             name: 'nM',
+            type: 'float',
+            allowNull: true
+        },
+        {
+            name: 'qpcr_result',
             type: 'float',
             allowNull: true
         },

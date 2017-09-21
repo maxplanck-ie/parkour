@@ -46,7 +46,8 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
         var allowedColumns = ['starting_amount', 'starting_volume',
             'spike_in_description', 'spike_in_volume', 'pcr_cycles',
             'concentration_library', 'mean_fragment_size', 'nM',
-            'concentration_sample', 'comments_facility', 'comments'];
+            'concentration_sample', 'comments_facility', 'comments',
+            'qpcr_result'];
         var nMFormulaDataIndices = ['concentration_library', 'mean_fragment_size'];
 
         if (typeof dataIndex !== undefined && allowedColumns.indexOf(dataIndex) !== -1) {
