@@ -201,10 +201,13 @@ Ext.define('MainHub.view.pooling.Pooling', {
             startCollapsed: true,
             groupHeaderTpl: [
                 '<strong class="{children:this.getHeaderClass}">' +
-                    '{name} | Pool Size: {children:this.getRealPoolSize} M reads ' +
+                    '{children:this.getName} | Pool Size: {children:this.getRealPoolSize} M reads ' +
                     '{children:this.getPoolSize}' +
                 '</strong>',
                 {
+                    getName: function(children) {
+                        return children[0].get('poolName');
+                    },
                     getHeaderClass: function(children) {
                         var cls = 'pool-header-green';
                         var missingSamples = 0;

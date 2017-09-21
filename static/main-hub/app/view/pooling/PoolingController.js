@@ -101,7 +101,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         });
     },
 
-    showGroupContextMenu: function(view, node, group, e) {
+    showGroupContextMenu: function(view, node, poolId, e) {
         var me = this;
         e.stopEvent();
         Ext.create('Ext.menu.Menu', {
@@ -109,7 +109,14 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                 text: 'Select All',
                 iconCls: 'x-fa fa-check-square-o',
                 handler: function() {
-                    me.selectAll(group);
+                    me.selectUnselectAll(parseInt(poolId), true);
+                }
+            },
+            {
+                text: 'Unselect All',
+                iconCls: 'x-fa fa-square-o',
+                handler: function() {
+                    me.selectUnselectAll(parseInt(poolId), false);
                 }
             }]
         }).showAt(e.getXY());
@@ -132,22 +139,13 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         }
     },
 
-    selectAll: function(poolName) {
+    selectUnselectAll: function(poolId, selected) {
+        var me = this;
         var store = Ext.getStore('poolingStore');
+
         store.each(function(item) {
-            var isNotPrepared = item.get('sampleId') !== 0 && (
-                item.get('status') === 2 || item.get('status') === -2);
-
-            var selectedRecordIndex = store.findBy(function(record) {
-                if (record.get('selected') && record.get('poolName') !== poolName) {
-                    return true;
-                }
-            });
-
-            if (selectedRecordIndex !== -1) return;
-
-            if (item.get('poolName') === poolName && !isNotPrepared) {
-                item.set('selected', true);
+            if (item.get('poolId') === poolId && me.isPrepared(item)) {
+                item.set('selected', selected);
             }
         });
     },
@@ -247,5 +245,9 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             });
             return res;
         });
+    },
+
+    isPrepared: function(item) {
+        return item.get('libraryId') !== 0 || (item.get('sampleId') !== 0 && item.get('status') === 3);
     }
 });
