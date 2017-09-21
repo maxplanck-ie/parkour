@@ -118,14 +118,28 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                 handler: function() {
                     me.selectUnselectAll(parseInt(poolId), false);
                 }
+            },
+            '-',
+            {
+                text: 'QC: All selected passed',
+                iconCls: 'x-fa fa-check',
+                handler: function() {
+                    me.qualityCheckAll(parseInt(poolId), true);
+                }
+            },
+            {
+                text: 'QC: All selected failed',
+                iconCls: 'x-fa fa-times',
+                handler: function() {
+                    me.qualityCheckAll(parseInt(poolId), false);
+                }
             }]
         }).showAt(e.getXY());
     },
 
     selectRecord: function(cb, rowIndex, checked, record) {
         // Don't select samples which aren't prepared yet
-        if (record.get('sampleId') !== 0 && (
-            record.get('status') === 2 || record.get('status') === -2)) {
+        if (!this.isPrepared(record)) {
             return false;
         } else {
             // Don't select records from a different pool
@@ -148,6 +162,49 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                 item.set('selected', selected);
             }
         });
+    },
+
+    qualityCheckAll: function(poolId, result) {
+        var store = Ext.getStore('poolingStore');
+        var libraries = [];
+        var samples = [];
+
+        store.each(function(item) {
+            if (item.get('poolId') === poolId && item.get('selected')) {
+                if (item.get('sampleId') === 0) {
+                    libraries.push(item.get('libraryId'));
+                } else {
+                    samples.push(item.get('sampleId'));
+                }
+            }
+        });
+
+        if (libraries.length !== 0 || samples.length !== 0) {
+            Ext.Ajax.request({
+                url: 'pooling/qc_update_all/',
+                method: 'POST',
+                scope: this,
+                params: {
+                    libraries: Ext.JSON.encode(libraries),
+                    samples: Ext.JSON.encode(samples),
+                    result: result
+                },
+                success: function(response) {
+                    var obj = Ext.JSON.decode(response.responseText);
+                    if (obj.success) {
+                        Ext.getStore('poolingStore').reload();
+                    } else {
+                        Ext.ux.ToastMessage(obj.error, 'error');
+                    }
+                },
+                failure: function(response) {
+                    Ext.ux.ToastMessage(response.statusText, 'error');
+                    console.error(response);
+                }
+            });
+        } else {
+            Ext.ux.ToastMessage('You did not select any libraries.', 'warning');
+        }
     },
 
     downloadBenchtopProtocol: function() {
