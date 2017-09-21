@@ -55,6 +55,12 @@ class LibraryPreparation(DateTimeMixin):
         blank=True,
     )
 
+    comments = models.TextField(
+        'Comments',
+        null=True,
+        blank=True,
+    )
+
     class Meta:
         verbose_name = 'Library Preparation'
         verbose_name_plural = 'Library Preparation'

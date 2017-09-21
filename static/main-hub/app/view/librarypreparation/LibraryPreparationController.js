@@ -46,7 +46,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
         var allowedColumns = ['starting_amount', 'starting_volume',
             'spike_in_description', 'spike_in_volume', 'pcr_cycles',
             'concentration_library', 'mean_fragment_size', 'nM',
-            'concentration_sample'];
+            'concentration_sample', 'comments_facility', 'comments'];
         var nMFormulaDataIndices = ['concentration_library', 'mean_fragment_size'];
 
         if (typeof dataIndex !== undefined && allowedColumns.indexOf(dataIndex) !== -1) {
@@ -78,16 +78,16 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
     },
 
     editRecord: function(editor, context) {
-        var record = context.record,
-            changes = record.getChanges(),
-            values = context.newValues,
-            concentrationSample = values.concentration_sample,
-            startingAmount = values.starting_amount,
-            startingVolume = values.starting_volume,
-            spikeInVolume = values.spike_in_volume,
-            concentrationLibrary = values.concentration_library,
-            meanFragmentSize = values.mean_fragment_size,
-            nM = values.nM;
+        var record = context.record;
+        var changes = record.getChanges();
+        var values = context.newValues;
+        // var concentrationSample = values.concentration_sample;
+        // var startingAmount = values.starting_amount;
+        // var startingVolume = values.starting_volume;
+        // var spikeInVolume = values.spike_in_volume;
+        var concentrationLibrary = values.concentration_library;
+        var meanFragmentSize = values.mean_fragment_size;
+        var nM = values.nM;
 
         var params = $.extend({
             sample_id: record.get('sampleId'),
@@ -98,7 +98,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
         if (concentrationLibrary > 0 && meanFragmentSize > 0 &&
             Object.keys(changes).indexOf('nM') === -1) {
             nM = ((concentrationLibrary / (meanFragmentSize * 650)) * 1000000).toFixed(2);
-            params['nM'] = nM;
+            params.nM = nM;
         }
 
         Ext.Ajax.request({
@@ -146,8 +146,8 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
     },
 
     downloadBenchtopProtocol: function(btn) {
-        var store = Ext.getStore('libraryPreparationStore'),
-            samples = [];
+        var store = Ext.getStore('libraryPreparationStore');
+        var samples = [];
 
         // Get all checked (selected) samples
         store.each(function(record) {
@@ -197,9 +197,9 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
     },
 
     search: function(fld, query) {
-        var grid = Ext.getCmp('libraryPreparationTable'),
-            store = grid.getStore(),
-            columns = Ext.pluck(grid.getColumns(), 'dataIndex');
+        var grid = Ext.getCmp('libraryPreparationTable');
+        var store = grid.getStore();
+        var columns = Ext.pluck(grid.getColumns(), 'dataIndex');
 
         store.clearFilter();
         store.filterBy(function(record) {

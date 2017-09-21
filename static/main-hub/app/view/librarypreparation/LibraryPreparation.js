@@ -74,14 +74,9 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     dataIndex: 'barcode',
                     width: 95,
                     renderer: function(value) {
-                        var record = this.getStore().findRecord('barcode', value);
+                        var record = Ext.getStore('libraryPreparationStore').findRecord('barcode', value);
                         return record ? record.getBarcode() : value;
                     }
-                },
-                {
-                    text: 'Comments',
-                    dataIndex: 'comments',
-                    width: 150
                 },
                 {
                     text: 'Protocol',
@@ -195,6 +190,23 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     editor: {
                         xtype: 'numberfield',
                         minValue: 0
+                    }
+                },
+                {
+                    text: 'QC Comments',
+                    tooltip: 'Incoming Libraries/Samples QC Comments',
+                    dataIndex: 'comments_facility',
+                    width: 150,
+                    editor: {
+                        xtype: 'textfield'
+                    }
+                },
+                {
+                    text: 'Comments',
+                    dataIndex: 'comments',
+                    width: 150,
+                    editor: {
+                        xtype: 'textfield'
                     }
                 },
                 {

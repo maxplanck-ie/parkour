@@ -19,6 +19,10 @@ Ext.define('MainHub.model.librarypreparation.LibraryPreparation', {
             type: 'int'
         },
         {
+            name: 'comments_facility',
+            type: 'string'
+        },
+        {
             name: 'comments',
             type: 'string'
         },

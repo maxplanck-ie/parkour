@@ -60,7 +60,7 @@ def get_all(request):
                 'sampleId': obj.sample.pk,
                 'barcode': obj.sample.barcode,
                 'is_converted': obj.sample.is_converted,
-                'comments': obj.sample.comments_facility,
+                'comments_facility': obj.sample.comments_facility,
                 'libraryProtocol': obj.sample.library_protocol.pk,
                 'libraryProtocolName': obj.sample.library_protocol.name,
                 'concentration_sample': obj.sample.concentration,
@@ -74,6 +74,7 @@ def get_all(request):
                 'concentration_library': obj.concentration_library,
                 'mean_fragment_size': obj.mean_fragment_size,
                 'dilution_factor': obj.sample.dilution_factor,
+                'comments': obj.comments,
                 'nM': obj.nM,
             })
     data = sorted(data, key=lambda x: x['barcode'][3:])
@@ -95,9 +96,17 @@ def update(request):
 
         if form.is_valid():
             form.save()
-            concentration_sample = request.POST.get('concentration_sample', 0)
-            sample.concentration = concentration_sample
-            sample.save()
+
+            concentration_smpl = request.POST.get('concentration_sample', None)
+            comments_facility = request.POST.get('comments_facility', None)
+
+            if concentration_smpl:
+                sample.concentration = concentration_smpl
+
+            if comments_facility:
+                sample.comments_facility = comments_facility
+
+            sample.save(update_fields=['concentration', 'comments_facility'])
 
             if qc_result:
                 if qc_result == '1':
@@ -151,6 +160,9 @@ def update_all(request):
                     if key == 'concentration_sample':
                         obj.sample.concentration = value
                         obj.sample.save(update_fields=['concentration'])
+                    elif key == 'comments_facility':
+                        obj.sample.comments_facility = value
+                        obj.sample.save(update_fields=['comments_facility'])
                     elif hasattr(obj, key):
                         try:
                             val = obj._meta.get_field(key).to_python(value)
