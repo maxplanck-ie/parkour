@@ -55,7 +55,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
         }).showAt(e.getXY());
     },
 
-    showGroupContextMenu: function(view, node, group, e) {
+    showGroupContextMenu: function(view, node, requestId, e) {
         var me = this;
         e.stopEvent();
         Ext.create('Ext.menu.Menu', {
@@ -63,7 +63,14 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
                 text: 'Select All',
                 iconCls: 'x-fa fa-check-square-o',
                 handler: function() {
-                    me.selectAll(parseInt(group));
+                    me.selectUnselectAll(parseInt(requestId), true);
+                }
+            },
+            {
+                text: 'Unselect All',
+                iconCls: 'x-fa fa-square-o',
+                handler: function() {
+                    me.selectUnselectAll(parseInt(requestId), false);
                 }
             },
             '-',
@@ -71,24 +78,24 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
                 text: 'QC: All selected passed',
                 iconCls: 'x-fa fa-check',
                 handler: function() {
-                    me.qualityCheckAll(parseInt(group), true);
+                    me.qualityCheckAll(parseInt(requestId), true);
                 }
             },
             {
                 text: 'QC: All selected failed',
                 iconCls: 'x-fa fa-times',
                 handler: function() {
-                    me.qualityCheckAll(parseInt(group), false);
+                    me.qualityCheckAll(parseInt(requestId), false);
                 }
             }]
         }).showAt(e.getXY());
     },
 
-    selectAll: function(requestId) {
+    selectUnselectAll: function(requestId, selected) {
         var store = Ext.getStore('incomingLibrariesStore');
         store.each(function(item) {
             if (item.get('requestId') === requestId) {
-                item.set('selected', true);
+                item.set('selected', selected);
             }
         });
     },

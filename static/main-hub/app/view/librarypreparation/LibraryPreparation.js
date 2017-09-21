@@ -262,7 +262,14 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
         features: [{
             ftype: 'grouping',
             startCollapsed: true,
-            groupHeaderTpl: '<strong>Protocol: {name}</strong>'
+            groupHeaderTpl: [
+                '<strong>Protocol: {children:this.getName}</strong>',
+                {
+                    getName: function(children) {
+                        return children[0].get('libraryProtocolName');
+                    }
+                }
+            ]
         }],
         dockedItems: [{
             xtype: 'toolbar',

@@ -121,7 +121,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
         });
     },
 
-    showGroupContextMenu: function(view, node, group, e) {
+    showGroupContextMenu: function(view, node, libraryProtocolId, e) {
         var me = this;
         e.stopEvent();
         Ext.create('Ext.menu.Menu', {
@@ -129,20 +129,79 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
                 text: 'Select All',
                 iconCls: 'x-fa fa-check-square-o',
                 handler: function() {
-                    me.selectAll(group);
+                    me.selectUnselectAll(parseInt(libraryProtocolId), true);
+                }
+            },
+            {
+                text: 'Unselect All',
+                iconCls: 'x-fa fa-square-o',
+                handler: function() {
+                    me.selectUnselectAll(parseInt(libraryProtocolId), false);
+                }
+            },
+            '-',
+            {
+                text: 'QC: All selected passed',
+                iconCls: 'x-fa fa-check',
+                handler: function() {
+                    me.qualityCheckAll(parseInt(libraryProtocolId), true);
+                }
+            },
+            {
+                text: 'QC: All selected failed',
+                iconCls: 'x-fa fa-times',
+                handler: function() {
+                    me.qualityCheckAll(parseInt(libraryProtocolId), false);
                 }
             }]
         }).showAt(e.getXY());
     },
 
-    selectAll: function(protocolName) {
+    selectUnselectAll: function(libraryProtocolId, selected) {
         var store = Ext.getStore('libraryPreparationStore');
 
         store.each(function(item) {
-            if (item.get('libraryProtocolName') === protocolName) {
-                item.set('selected', true);
+            if (item.get('libraryProtocol') === libraryProtocolId) {
+                item.set('selected', selected);
             }
         });
+    },
+
+    qualityCheckAll: function(libraryProtocolId, result) {
+        var store = Ext.getStore('libraryPreparationStore');
+        var samples = [];
+
+        store.each(function(item) {
+            if (item.get('libraryProtocol') === libraryProtocolId && item.get('selected')) {
+                samples.push(item.get('sampleId'));
+            }
+        });
+
+        if (samples.length !== 0) {
+            Ext.Ajax.request({
+                url: 'library_preparation/qc_update_all/',
+                method: 'POST',
+                scope: this,
+                params: {
+                    samples: Ext.JSON.encode(samples),
+                    result: result
+                },
+                success: function(response) {
+                    var obj = Ext.JSON.decode(response.responseText);
+                    if (obj.success) {
+                        Ext.getStore('libraryPreparationStore').reload();
+                    } else {
+                        Ext.ux.ToastMessage(obj.error, 'error');
+                    }
+                },
+                failure: function(response) {
+                    Ext.ux.ToastMessage(response.statusText, 'error');
+                    console.error(response);
+                }
+            });
+        } else {
+            Ext.ux.ToastMessage('You did not select any samples.', 'warning');
+        }
     },
 
     downloadBenchtopProtocol: function(btn) {
