@@ -144,14 +144,16 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     }
                 },
                 {
-                    text: 'Index I7',
+                    text: 'I7 ID',
                     tooltip: 'Index I7 ID',
-                    dataIndex: 'indexI7Id'
+                    dataIndex: 'indexI7Id',
+                    width: 60
                 },
                 {
-                    text: 'Index I5',
+                    text: 'I5 ID',
                     tooltip: 'Index I5 ID',
-                    dataIndex: 'indexI5Id'
+                    dataIndex: 'indexI5Id',
+                    width: 60
                 },
                 {
                     text: 'Cycles',

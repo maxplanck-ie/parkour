@@ -11,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from django.core.exceptions import ValidationError
 
+from library_sample_shared.utils import get_indices_ids
 from index_generator.models import Pool
 from library_preparation.models import LibraryPreparation
 from library.models import Library
@@ -45,6 +46,7 @@ def get_all(request):
             req = library.request.get()
             percentage_library = \
                 library.sequencing_depth / sum_sequencing_depth
+            index_i7_id, index_i5_id = get_indices_ids(library)
 
             libraries_in_pool.append({
                 'name': library.name,
@@ -62,6 +64,10 @@ def get_all(request):
                 'sequencing_depth': library.sequencing_depth,
                 'concentration_c1': pooling_obj.concentration_c1,
                 'percentage_library': round(percentage_library * 100),
+                'index_i7_id': index_i7_id,
+                'index_i7': library.index_i7,
+                'index_i5_id': index_i5_id,
+                'index_i5': library.index_i5,
             })
 
         # Converted samples (sample -> library)
@@ -70,6 +76,7 @@ def get_all(request):
             req = sample.request.get()
             percentage_library = \
                 sample.sequencing_depth / sum_sequencing_depth
+            index_i7_id, index_i5_id = get_indices_ids(sample)
 
             try:
                 concentration_c1 = \
@@ -94,6 +101,10 @@ def get_all(request):
                 'sequencing_depth': sample.sequencing_depth,
                 'concentration_c1': concentration_c1,
                 'percentage_library': round(percentage_library * 100),
+                'index_i7_id': index_i7_id,
+                'index_i7': sample.index_i7,
+                'index_i5_id': index_i5_id,
+                'index_i5': sample.index_i5,
             })
 
         data += libraries_in_pool

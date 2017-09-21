@@ -8,32 +8,13 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.core.exceptions import ValidationError
 from xlwt import Workbook, XFStyle, Formula
 
-from library_sample_shared.models import IndexType
+from library_sample_shared.utils import get_indices_ids
 from sample.models import Sample
 from pooling.models import Pooling
 from .models import LibraryPreparation
 from .forms import LibraryPreparationForm
 
 logger = logging.getLogger('db')
-
-
-def get_indices_ids(sample):
-    """ Get Index I7/I5 ids for a given sample. """
-    try:
-        index_type = IndexType.objects.get(pk=sample.index_type.pk)
-        index_i7 = index_type.indices_i7.get(index=sample.index_i7)
-        index_i7_id = index_i7.index_id
-    except Exception:
-        index_i7_id = ''
-
-    try:
-        index_type = IndexType.objects.get(pk=sample.index_type.pk)
-        index_i5 = index_type.indices_i5.get(index=sample.index_i5)
-        index_i5_id = index_i5.index_id
-    except Exception:
-        index_i5_id = ''
-
-    return index_i7_id, index_i5_id
 
 
 @login_required

@@ -90,6 +90,28 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 width: 75
             },
             {
+                text: 'I7 ID',
+                tooltip: 'Index I7 ID',
+                dataIndex: 'index_i7_id',
+                width: 60
+            },
+            {
+                text: 'Index I7',
+                dataIndex: 'index_i7',
+                width: 90
+            },
+            {
+                text: 'I5 ID',
+                tooltip: 'Index I5 ID',
+                dataIndex: 'index_i5_id',
+                width: 60
+            },
+            {
+                text: 'Index I5',
+                dataIndex: 'index_i5',
+                width: 90
+            },
+            {
                 text: 'nM C1',
                 tooltip: 'Library Concentration C1 (nM)',
                 dataIndex: 'concentration_c1',
