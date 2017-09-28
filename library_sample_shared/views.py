@@ -3,9 +3,15 @@ import logging
 from django.http import JsonResponse
 from django.views.generic.list import ListView
 from django.contrib.auth.decorators import login_required
+from rest_framework import viewsets
+from rest_framework.response import Response
+# from rest_framework.permissions import IsAdminUser
 
 from common.utils import JSONResponseMixin
 from .models import Organism, LibraryProtocol, LibraryType, IndexType
+from .serializers import (OrganismSerializer, IndexTypeSerializer,
+                          LibraryProtocolSerializer, LibraryTypeSerializer)
+from .utils import move_other_to_end
 
 logger = logging.getLogger('db')
 
@@ -27,7 +33,7 @@ class SimpleStoreView(JSONResponseMixin, ListView):
 
 @login_required
 def get_organisms(request):
-    """ Get the lost of organisms. """
+    """ Get the list of organisms. """
     data = [
         {
             'id': organism.pk,
@@ -172,3 +178,45 @@ def get_library_types(request):
             data.append(data.pop(index))
 
     return JsonResponse(data, safe=False)
+
+
+class OrganismViewSet(viewsets.ViewSet):
+    """ Get the list of organisms. """
+
+    def list(self, request):
+        queryset = Organism.objects.all()
+        serializer = OrganismSerializer(queryset, many=True)
+        data = move_other_to_end(serializer.data)
+        return Response(data)
+
+
+class IndexTypeViewSet(viewsets.ReadOnlyModelViewSet):
+    """ Get the list of index types. """
+    queryset = IndexType.objects.all()
+    serializer_class = IndexTypeSerializer
+
+
+class LibraryProtocolViewSet(viewsets.ReadOnlyModelViewSet):
+    """ Get the list of library protocols. """
+    serializer_class = LibraryProtocolSerializer
+    # permission_classes = [IsAdminUser]
+
+    def get_queryset(self):
+        queryset = LibraryProtocol.objects.all()
+        na_type = self.request.query_params.get('type', None)
+        if na_type is not None:
+            queryset = queryset.filter(type=na_type)
+        return queryset
+
+
+class LibraryTypeViewSet(viewsets.ReadOnlyModelViewSet):
+    """ Get the list of library types. """
+    serializer_class = LibraryTypeSerializer
+
+    def get_queryset(self):
+        queryset = LibraryType.objects.all()
+        library_protocol = self.request.query_params.get(
+            'library_protocol_id', None)
+        if library_protocol is not None:
+            queryset = queryset.filter(library_protocol__in=[library_protocol])
+        return queryset

@@ -1,3 +1,5 @@
+from itertools import chain
+
 from django.db import models
 from django.conf import settings
 
@@ -50,3 +52,11 @@ class Request(DateTimeMixin):
 
     def __str__(self):
         return '%s' % self.name
+
+    @property
+    def records(self):
+        return list(chain(self.samples.all(), self.libraries.all()))
+
+    @property
+    def statuses(self):
+        return [x.status for x in self.records]

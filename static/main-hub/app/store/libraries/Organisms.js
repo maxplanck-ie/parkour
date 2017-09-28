@@ -10,7 +10,8 @@ Ext.define('MainHub.store.libraries.Organisms', {
 
     proxy: {
         type: 'ajax',
-        url: 'get_organisms/',
+        // url: 'get_organisms/',
+        url: 'api/organisms/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"

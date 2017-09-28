@@ -13,8 +13,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
+from rest_framework import viewsets
+# from rest_framework.response import Response
 
 from .models import Request, FileRequest
+from .serializers import RequestSerializer
 from .forms import RequestForm
 
 User = get_user_model()
@@ -385,3 +388,18 @@ def send_email(request):
         logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error})
+
+
+class RequestViewSet(viewsets.ModelViewSet):
+    """ Get the list of requests. """
+    serializer_class = RequestSerializer
+
+    def get_queryset(self):
+        queryset = Request.objects.all().order_by('-create_time')
+        if self.request.user.is_staff:
+            # Show only those Requests, whose libraries and samples
+            # haven't reached status 6 yet
+            queryset = [x for x in queryset if x.statuses.count(6) == 0]
+        else:
+            queryset = queryset.filter(user=self.request.user)
+        return queryset

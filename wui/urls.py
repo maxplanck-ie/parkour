@@ -18,11 +18,27 @@ from django.conf import settings
 from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.views.defaults import page_not_found, server_error
+from rest_framework import routers
+
+from request.views import RequestViewSet
+from library_sample_shared.views import (OrganismViewSet, IndexTypeViewSet,
+                                         LibraryProtocolViewSet,
+                                         LibraryTypeViewSet)
+
+
+router = routers.DefaultRouter()
+router.register(r'requests', RequestViewSet, base_name='request')
+router.register(r'organisms', OrganismViewSet, base_name='organism')
+router.register(r'index_types', IndexTypeViewSet, base_name='index_type')
+router.register(r'library_protocols', LibraryProtocolViewSet, base_name='library_protocol')
+router.register(r'library_types', LibraryTypeViewSet, base_name='library_type')
 
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^accounts/', include('authtools.urls')),
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'^api/', include(router.urls)),
 
     url(r'', include('common.urls')),
     url(r'', include('library_sample_shared.urls')),
