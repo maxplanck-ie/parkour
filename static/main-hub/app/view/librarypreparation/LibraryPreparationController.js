@@ -46,7 +46,8 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
         var allowedColumns = ['starting_amount', 'starting_volume',
             'spike_in_description', 'spike_in_volume', 'pcr_cycles',
             'concentration_library', 'mean_fragment_size', 'nM',
-            'concentration_sample'];
+            'concentration_sample', 'comments_facility', 'comments',
+            'qpcr_result'];
         var nMFormulaDataIndices = ['concentration_library', 'mean_fragment_size'];
 
         if (typeof dataIndex !== undefined && allowedColumns.indexOf(dataIndex) !== -1) {
@@ -78,16 +79,16 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
     },
 
     editRecord: function(editor, context) {
-        var record = context.record,
-            changes = record.getChanges(),
-            values = context.newValues,
-            concentrationSample = values.concentration_sample,
-            startingAmount = values.starting_amount,
-            startingVolume = values.starting_volume,
-            spikeInVolume = values.spike_in_volume,
-            concentrationLibrary = values.concentration_library,
-            meanFragmentSize = values.mean_fragment_size,
-            nM = values.nM;
+        var record = context.record;
+        var changes = record.getChanges();
+        var values = context.newValues;
+        // var concentrationSample = values.concentration_sample;
+        // var startingAmount = values.starting_amount;
+        // var startingVolume = values.starting_volume;
+        // var spikeInVolume = values.spike_in_volume;
+        var concentrationLibrary = values.concentration_library;
+        var meanFragmentSize = values.mean_fragment_size;
+        var nM = values.nM;
 
         var params = $.extend({
             sample_id: record.get('sampleId'),
@@ -98,7 +99,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
         if (concentrationLibrary > 0 && meanFragmentSize > 0 &&
             Object.keys(changes).indexOf('nM') === -1) {
             nM = ((concentrationLibrary / (meanFragmentSize * 650)) * 1000000).toFixed(2);
-            params['nM'] = nM;
+            params.nM = nM;
         }
 
         Ext.Ajax.request({
@@ -121,7 +122,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
         });
     },
 
-    showGroupContextMenu: function(view, node, group, e) {
+    showGroupContextMenu: function(view, node, libraryProtocolId, e) {
         var me = this;
         e.stopEvent();
         Ext.create('Ext.menu.Menu', {
@@ -129,25 +130,84 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
                 text: 'Select All',
                 iconCls: 'x-fa fa-check-square-o',
                 handler: function() {
-                    me.selectAll(group);
+                    me.selectUnselectAll(parseInt(libraryProtocolId), true);
+                }
+            },
+            {
+                text: 'Unselect All',
+                iconCls: 'x-fa fa-square-o',
+                handler: function() {
+                    me.selectUnselectAll(parseInt(libraryProtocolId), false);
+                }
+            },
+            '-',
+            {
+                text: 'QC: All selected passed',
+                iconCls: 'x-fa fa-check',
+                handler: function() {
+                    me.qualityCheckAll(parseInt(libraryProtocolId), true);
+                }
+            },
+            {
+                text: 'QC: All selected failed',
+                iconCls: 'x-fa fa-times',
+                handler: function() {
+                    me.qualityCheckAll(parseInt(libraryProtocolId), false);
                 }
             }]
         }).showAt(e.getXY());
     },
 
-    selectAll: function(protocolName) {
+    selectUnselectAll: function(libraryProtocolId, selected) {
         var store = Ext.getStore('libraryPreparationStore');
 
         store.each(function(item) {
-            if (item.get('libraryProtocolName') === protocolName) {
-                item.set('selected', true);
+            if (item.get('libraryProtocol') === libraryProtocolId) {
+                item.set('selected', selected);
             }
         });
     },
 
+    qualityCheckAll: function(libraryProtocolId, result) {
+        var store = Ext.getStore('libraryPreparationStore');
+        var samples = [];
+
+        store.each(function(item) {
+            if (item.get('libraryProtocol') === libraryProtocolId && item.get('selected')) {
+                samples.push(item.get('sampleId'));
+            }
+        });
+
+        if (samples.length !== 0) {
+            Ext.Ajax.request({
+                url: 'library_preparation/qc_update_all/',
+                method: 'POST',
+                scope: this,
+                params: {
+                    samples: Ext.JSON.encode(samples),
+                    result: result
+                },
+                success: function(response) {
+                    var obj = Ext.JSON.decode(response.responseText);
+                    if (obj.success) {
+                        Ext.getStore('libraryPreparationStore').reload();
+                    } else {
+                        Ext.ux.ToastMessage(obj.error, 'error');
+                    }
+                },
+                failure: function(response) {
+                    Ext.ux.ToastMessage(response.statusText, 'error');
+                    console.error(response);
+                }
+            });
+        } else {
+            Ext.ux.ToastMessage('You did not select any samples.', 'warning');
+        }
+    },
+
     downloadBenchtopProtocol: function(btn) {
-        var store = Ext.getStore('libraryPreparationStore'),
-            samples = [];
+        var store = Ext.getStore('libraryPreparationStore');
+        var samples = [];
 
         // Get all checked (selected) samples
         store.each(function(record) {
@@ -181,7 +241,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
                 text: 'Apply to All',
                 iconCls: 'x-fa fa-check-circle',
                 handler: function() {
-                    var dataIndex = me.getDataIndex(e, gridView);
+                    var dataIndex = MainHub.Utilities.getDataIndex(e, gridView);
                     me.applyToAll(record, dataIndex);
                 }
             }]
@@ -197,9 +257,9 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
     },
 
     search: function(fld, query) {
-        var grid = Ext.getCmp('libraryPreparationTable'),
-            store = grid.getStore(),
-            columns = Ext.pluck(grid.getColumns(), 'dataIndex');
+        var grid = Ext.getCmp('libraryPreparationTable');
+        var store = grid.getStore();
+        var columns = Ext.pluck(grid.getColumns(), 'dataIndex');
 
         store.clearFilter();
         store.filterBy(function(record) {
@@ -211,23 +271,5 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
             });
             return res;
         });
-    },
-
-    getDataIndex: function(e, view) {
-        var xPos = e.getXY()[0],
-            columns = view.getGridColumns(),
-            dataIndex;
-
-        for (var column in columns) {
-            var leftEdge = columns[column].getPosition()[0],
-                rightEdge = columns[column].getSize().width + leftEdge;
-
-            if (xPos >= leftEdge && xPos <= rightEdge) {
-                dataIndex = columns[column].dataIndex;
-                break;
-            }
-        }
-
-        return dataIndex;
     }
 });

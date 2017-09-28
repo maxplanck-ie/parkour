@@ -124,7 +124,10 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 {
                     text: 'Barcode',
                     dataIndex: 'barcode',
-                    width: 90
+                    width: 95,
+                    renderer: function(value, meta) {
+                        return meta.record.getBarcode();
+                    }
                 },
                 {
                     text: 'Date',
@@ -230,8 +233,8 @@ Ext.define('MainHub.view.libraries.Libraries', {
                     dataIndex: 'concentration_method',
                     width: 50,
                     renderer: function(value, meta) {
-                        var store = Ext.getStore('concentrationMethodsStore'),
-                            record = store.findRecord('id', value);
+                        var store = Ext.getStore('concentrationMethodsStore');
+                        var record = store.findRecord('id', value);
                         meta.tdAttr = 'data-qtip="' + record.get('name') + '"';
                         return record.getShortName();
                     }
@@ -251,10 +254,14 @@ Ext.define('MainHub.view.libraries.Libraries', {
             ftype: 'grouping',
             startCollapsed: true,
             groupHeaderTpl: [
-                '<strong>Request: {children:this.getName}</strong> (No. of Libraries/Samples: {rows.length})',
+                '<strong>Request: {children:this.getName}</strong> (# of Libraries/Samples: {rows.length}, Total Sequencing Depth: {children:this.getTotalDepth} M)',
                 {
                     getName: function(children) {
                         return children[0].get('requestName');
+                    },
+                    getTotalDepth: function(children) {
+                        var sequencingDepths = Ext.Array.pluck(Ext.Array.pluck(children, 'data'), 'sequencing_depth');
+                        return Ext.Array.sum(sequencingDepths);
                     }
                 }
             ]

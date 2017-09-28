@@ -42,7 +42,8 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
             defaults: {
                 width: 80
             },
-            items: [{
+            items: [
+                {
                     xtype: 'checkcolumn',
                     itemId: 'checkColumn',
                     dataIndex: 'selected',
@@ -71,18 +72,23 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                 {
                     text: 'Barcode',
                     dataIndex: 'barcode',
-                    width: 90
-                },
-                {
-                    text: 'Comments',
-                    dataIndex: 'comments',
-                    width: 150
+                    width: 95,
+                    renderer: function(value) {
+                        var record = Ext.getStore('libraryPreparationStore').findRecord('barcode', value);
+                        return record ? record.getBarcode() : value;
+                    }
                 },
                 {
                     text: 'Protocol',
                     tooltip: 'Library Protocol',
                     dataIndex: 'libraryProtocolName',
                     minWidth: 150
+                },
+                {
+                    text: 'DF',
+                    tooltip: 'Dilution Factor',
+                    dataIndex: 'dilution_factor',
+                    width: 60
                 },
                 {
                     text: 'ng/µl Sample',
@@ -99,17 +105,6 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     text: 'ng Start',
                     tooltip: 'Starting Amount (ng)',
                     dataIndex: 'starting_amount',
-                    width: 100,
-                    editor: {
-                        xtype: 'numberfield',
-                        decimalPrecision: 1,
-                        minValue: 0
-                    }
-                },
-                {
-                    text: 'µl Start',
-                    tooltip: 'Starting Volume (µl)',
-                    dataIndex: 'starting_volume',
                     width: 100,
                     editor: {
                         xtype: 'numberfield',
@@ -138,14 +133,16 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     }
                 },
                 {
-                    text: 'Index I7',
+                    text: 'I7 ID',
                     tooltip: 'Index I7 ID',
-                    dataIndex: 'indexI7Id'
+                    dataIndex: 'indexI7Id',
+                    width: 60
                 },
                 {
-                    text: 'Index I5',
+                    text: 'I5 ID',
                     tooltip: 'Index I5 ID',
-                    dataIndex: 'indexI5Id'
+                    dataIndex: 'indexI5Id',
+                    width: 60
                 },
                 {
                     text: 'Cycles',
@@ -161,6 +158,16 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     text: 'ng/µl Library',
                     tooltip: 'Concentration Library (ng/µl)',
                     dataIndex: 'concentration_library',
+                    width: 100,
+                    editor: {
+                        xtype: 'numberfield',
+                        minValue: 0
+                    }
+                },
+                {
+                    text: 'qPCR (nM)',
+                    tooltip: 'qPCR Result (nM)',
+                    dataIndex: 'qpcr_result',
                     width: 100,
                     editor: {
                         xtype: 'numberfield',
@@ -187,6 +194,23 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     }
                 },
                 {
+                    text: 'QC Comments',
+                    tooltip: 'Incoming Libraries/Samples QC Comments',
+                    dataIndex: 'comments_facility',
+                    width: 150,
+                    editor: {
+                        xtype: 'textfield'
+                    }
+                },
+                {
+                    text: 'Comments',
+                    dataIndex: 'comments',
+                    width: 150,
+                    editor: {
+                        xtype: 'textfield'
+                    }
+                },
+                {
                     text: 'QC Result',
                     dataIndex: 'qc_result',
                     width: 90,
@@ -196,7 +220,8 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                         displayField: 'name',
                         valueField: 'id',
                         store: Ext.create('Ext.data.Store', {
-                            fields: [{
+                            fields: [
+                                {
                                     name: 'id',
                                     type: 'int'
                                 },
@@ -205,7 +230,8 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                                     type: 'string'
                                 }
                             ],
-                            data: [{
+                            data: [
+                                {
                                     id: 1,
                                     name: 'passed'
                                 },
@@ -220,7 +246,8 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                 }
             ]
         },
-        plugins: [{
+        plugins: [
+            {
                 ptype: 'rowediting',
                 clicksToEdit: 1
             },
@@ -236,7 +263,14 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
         features: [{
             ftype: 'grouping',
             startCollapsed: true,
-            groupHeaderTpl: '<strong>Protocol: {name}</strong>'
+            groupHeaderTpl: [
+                '<strong>Protocol: {children:this.getName}</strong>',
+                {
+                    getName: function(children) {
+                        return children[0].get('libraryProtocolName');
+                    }
+                }
+            ]
         }],
         dockedItems: [{
             xtype: 'toolbar',

@@ -170,7 +170,7 @@ def pool_info(request):
             if library in libraries:
                 data.append({
                     'request': req.name,
-                    'library': library.name,
+                    'name': library.name,
                     'barcode': library.barcode,
                     'protocol': library.library_protocol.name,
                 })
@@ -179,8 +179,9 @@ def pool_info(request):
             if sample in samples:
                 data.append({
                     'request': req.name,
-                    'library': sample.name,
+                    'name': sample.name,
                     'barcode': sample.barcode,
+                    'is_converted': sample.is_converted,
                     'protocol': sample.library_protocol.name,
                 })
 

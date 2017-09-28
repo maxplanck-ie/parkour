@@ -16,7 +16,7 @@ Ext.define('MainHub.model.requests.Request', {
         },
         {
             type: 'string',
-            name: 'dateCreated'
+            name: 'date'
         },
         {
             type: 'string',

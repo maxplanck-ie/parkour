@@ -147,7 +147,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                     ftype: 'grouping',
                     startCollapsed: true,
                     groupHeaderTpl: [
-                        '<strong>Request: {children:this.getName}</strong> (Depth: {children:this.getTotalDepth})',
+                        '<strong>Request: {children:this.getName}</strong> (Total Sequencing Depth: {children:this.getTotalDepth} M)',
                         {
                             getName: function(children) {
                                 return children[0].get('requestName');

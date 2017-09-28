@@ -83,6 +83,7 @@ class IndexStoreView(JSONResponseMixin, ListView):
                 'id': index.id,
                 'name': '%s - %s' % (index.index_id, index.index),
                 'index': index.index,
+                'indexId': index.index_id,
             }
             for index in indices
         ]

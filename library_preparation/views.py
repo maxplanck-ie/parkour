@@ -8,32 +8,13 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.core.exceptions import ValidationError
 from xlwt import Workbook, XFStyle, Formula
 
-from library_sample_shared.models import IndexType
+from library_sample_shared.utils import get_indices_ids
 from sample.models import Sample
 from pooling.models import Pooling
 from .models import LibraryPreparation
 from .forms import LibraryPreparationForm
 
 logger = logging.getLogger('db')
-
-
-def get_indices_ids(sample):
-    """ Get Index I7/I5 ids for a given sample. """
-    try:
-        index_type = IndexType.objects.get(pk=sample.index_type.pk)
-        index_i7 = index_type.indices_i7.get(index=sample.index_i7)
-        index_i7_id = index_i7.index_id
-    except Exception:
-        index_i7_id = ''
-
-    try:
-        index_type = IndexType.objects.get(pk=sample.index_type.pk)
-        index_i5 = index_type.indices_i5.get(index=sample.index_i5)
-        index_i5_id = index_i5.index_id
-    except Exception:
-        index_i5_id = ''
-
-    return index_i7_id, index_i5_id
 
 
 @login_required
@@ -59,12 +40,12 @@ def get_all(request):
                 'poolName': pool.name,
                 'sampleId': obj.sample.pk,
                 'barcode': obj.sample.barcode,
-                'comments': obj.sample.comments_facility,
+                'is_converted': obj.sample.is_converted,
+                'comments_facility': obj.sample.comments_facility,
                 'libraryProtocol': obj.sample.library_protocol.pk,
                 'libraryProtocolName': obj.sample.library_protocol.name,
                 'concentration_sample': obj.sample.concentration,
                 'starting_amount': obj.starting_amount,
-                'starting_volume': obj.starting_volume,
                 'spike_in_description': obj.spike_in_description,
                 'spike_in_volume': obj.spike_in_volume,
                 'indexI7Id': index_i7_id,
@@ -72,6 +53,9 @@ def get_all(request):
                 'pcr_cycles': obj.pcr_cycles,
                 'concentration_library': obj.concentration_library,
                 'mean_fragment_size': obj.mean_fragment_size,
+                'dilution_factor': obj.sample.dilution_factor,
+                'comments': obj.comments,
+                'qpcr_result': obj.qpcr_result,
                 'nM': obj.nM,
             })
     data = sorted(data, key=lambda x: x['barcode'][3:])
@@ -93,9 +77,17 @@ def update(request):
 
         if form.is_valid():
             form.save()
-            concentration_sample = request.POST.get('concentration_sample', 0)
-            sample.concentration = concentration_sample
-            sample.save()
+
+            concentration_smpl = request.POST.get('concentration_sample', None)
+            comments_facility = request.POST.get('comments_facility', None)
+
+            if concentration_smpl:
+                sample.concentration = concentration_smpl
+
+            if comments_facility:
+                sample.comments_facility = comments_facility
+
+            sample.save(update_fields=['concentration', 'comments_facility'])
 
             if qc_result:
                 if qc_result == '1':
@@ -149,6 +141,9 @@ def update_all(request):
                     if key == 'concentration_sample':
                         obj.sample.concentration = value
                         obj.sample.save(update_fields=['concentration'])
+                    elif key == 'comments_facility':
+                        obj.sample.comments_facility = value
+                        obj.sample.save(update_fields=['comments_facility'])
                     elif hasattr(obj, key):
                         try:
                             val = obj._meta.get_field(key).to_python(value)
@@ -172,6 +167,29 @@ def update_all(request):
                 error = 'Some of the libraries were not updated ' + \
                     '(see the logs).'
                 logger.exception(e)
+
+    return JsonResponse({'success': not error, 'error': error})
+
+
+@login_required
+@staff_member_required
+def qc_update_all(request):
+    """ Update QC Result for given samples. """
+    error = ''
+
+    samples = json.loads(request.POST.get('samples', '[]'))
+    result = json.loads(request.POST.get('result', ''))
+    qc_result = 3 if result is True else -1
+
+    try:
+        for sample_id in samples:
+            sample = Sample.objects.get(pk=sample_id)
+            sample.status = qc_result
+            sample.save(update_fields=['status'])
+
+    except Exception as e:
+        error = str(e)
+        logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error})
 
@@ -234,8 +252,7 @@ def download_benchtop_protocol(request):
 
             row = [req.name, pool.name, obj.sample.name, obj.sample.barcode,
                    obj.sample.library_protocol.name, obj.sample.concentration,
-                   obj.starting_amount, obj.starting_volume,
-                   obj.spike_in_description, obj.spike_in_volume]
+                   obj.starting_amount, '', obj.spike_in_description, '']
 
             # µl Sample = Starting Amount / Concentration Sample
             col_starting_amount = col_letters[6]

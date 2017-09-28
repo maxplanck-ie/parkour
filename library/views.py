@@ -25,7 +25,7 @@ def get_all(request):
     data = []
 
     try:
-        quality_check = request.GET.get('quality_check')
+        incoming_libraries = request.GET.get('incoming_libraries')
 
         if request.user.is_staff:
             requests = Request.objects.prefetch_related('libraries', 'samples')
@@ -36,7 +36,7 @@ def get_all(request):
 
         for req in requests:
             # User shouldn't see any libraries/samples in the Incoming table
-            if quality_check and not request.user.is_staff:
+            if incoming_libraries and not request.user.is_staff:
                 libraries = []
                 samples = []
             else:
@@ -45,7 +45,7 @@ def get_all(request):
                 samples = req.samples.filter(~Q(status=6))
 
             # In the Incoming table, show libraries/samples with status 1 only
-            if quality_check:
+            if incoming_libraries:
                 libraries = [l for l in libraries if l.status == 1]
                 samples = [s for s in samples if s.status == 1]
 
@@ -154,6 +154,7 @@ def get_all(request):
                         sample.sample_volume_facility,
                     'comments_facility': sample.comments_facility,
                     'rna_quality_facility': sample.rna_quality_facility,
+                    'is_converted': sample.is_converted,
                 }
                 for sample in samples
             ]

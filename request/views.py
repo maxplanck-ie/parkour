@@ -58,7 +58,7 @@ def get_all(request):
             'requestId': req.pk,
             'name': req.name,
             'restrictPermissions': restrict_permissions,
-            'dateCreated': req.create_time.strftime('%d.%m.%Y'),
+            'date': req.create_time.strftime('%d.%m.%Y'),
             'description': req.description,
             'userId': req.user.pk,
             'user': req.user.get_full_name(),
@@ -99,6 +99,7 @@ def get_libraries_and_samples(request):
             'recordType': sample.get_record_type(),
             'sampleId': sample.pk,
             'barcode': sample.barcode,
+            'is_converted': sample.is_converted,
         }
         for sample in req.samples.all()
     ]

@@ -59,12 +59,12 @@ Ext.define('MainHub.view.pooling.PoolingController', {
     },
 
     editRecord: function(editor, context) {
-        var grid = context.grid,
-            record = context.record,
-            changes = record.getChanges(),
-            values = context.newValues,
-            concentrationC1 = values.concentration_c1,
-            url = 'pooling/update/';
+        var grid = context.grid;
+        var record = context.record;
+        var changes = record.getChanges();
+        var values = context.newValues;
+        var concentrationC1 = values.concentration_c1;
+        var url = 'pooling/update/';
 
         var params = $.extend({
             library_id: record.get('libraryId'),
@@ -76,7 +76,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         if (values.concentration > 0 && values.mean_fragment_size > 0 &&
             Object.keys(changes).indexOf('concentration_c1') === -1) {
             concentrationC1 = ((values.concentration / (values.mean_fragment_size * 650)) * Math.pow(10, 6)).toFixed(1);
-            params['concentration_c1'] = concentrationC1;
+            params.concentration_c1 = concentrationC1;
         }
 
         Ext.Ajax.request({
@@ -101,7 +101,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         });
     },
 
-    showGroupContextMenu: function(view, node, group, e) {
+    showGroupContextMenu: function(view, node, poolId, e) {
         var me = this;
         e.stopEvent();
         Ext.create('Ext.menu.Menu', {
@@ -109,7 +109,29 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                 text: 'Select All',
                 iconCls: 'x-fa fa-check-square-o',
                 handler: function() {
-                    me.selectAll(group);
+                    me.selectUnselectAll(parseInt(poolId), true);
+                }
+            },
+            {
+                text: 'Unselect All',
+                iconCls: 'x-fa fa-square-o',
+                handler: function() {
+                    me.selectUnselectAll(parseInt(poolId), false);
+                }
+            },
+            '-',
+            {
+                text: 'QC: All selected passed',
+                iconCls: 'x-fa fa-check',
+                handler: function() {
+                    me.qualityCheckAll(parseInt(poolId), true);
+                }
+            },
+            {
+                text: 'QC: All selected failed',
+                iconCls: 'x-fa fa-times',
+                handler: function() {
+                    me.qualityCheckAll(parseInt(poolId), false);
                 }
             }]
         }).showAt(e.getXY());
@@ -117,8 +139,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
 
     selectRecord: function(cb, rowIndex, checked, record) {
         // Don't select samples which aren't prepared yet
-        if (record.get('sampleId') !== 0 && (
-            record.get('status') === 2 || record.get('status') === -2)) {
+        if (!this.isPrepared(record)) {
             return false;
         } else {
             // Don't select records from a different pool
@@ -132,31 +153,65 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         }
     },
 
-    selectAll: function(poolName) {
+    selectUnselectAll: function(poolId, selected) {
+        var me = this;
         var store = Ext.getStore('poolingStore');
+
         store.each(function(item) {
-            var isNotPrepared = item.get('sampleId') !== 0 && (
-                item.get('status') === 2 || item.get('status') === -2);
-
-            var selectedRecordIndex = store.findBy(function(record) {
-                if (record.get('selected') && record.get('poolName') !== poolName) {
-                    return true;
-                }
-            });
-
-            if (selectedRecordIndex !== -1) return;
-
-            if (item.get('poolName') === poolName && !isNotPrepared) {
-                item.set('selected', true);
+            if (item.get('poolId') === poolId && me.isPrepared(item)) {
+                item.set('selected', selected);
             }
         });
     },
 
+    qualityCheckAll: function(poolId, result) {
+        var store = Ext.getStore('poolingStore');
+        var libraries = [];
+        var samples = [];
+
+        store.each(function(item) {
+            if (item.get('poolId') === poolId && item.get('selected')) {
+                if (item.get('sampleId') === 0) {
+                    libraries.push(item.get('libraryId'));
+                } else {
+                    samples.push(item.get('sampleId'));
+                }
+            }
+        });
+
+        if (libraries.length !== 0 || samples.length !== 0) {
+            Ext.Ajax.request({
+                url: 'pooling/qc_update_all/',
+                method: 'POST',
+                scope: this,
+                params: {
+                    libraries: Ext.JSON.encode(libraries),
+                    samples: Ext.JSON.encode(samples),
+                    result: result
+                },
+                success: function(response) {
+                    var obj = Ext.JSON.decode(response.responseText);
+                    if (obj.success) {
+                        Ext.getStore('poolingStore').reload();
+                    } else {
+                        Ext.ux.ToastMessage(obj.error, 'error');
+                    }
+                },
+                failure: function(response) {
+                    Ext.ux.ToastMessage(response.statusText, 'error');
+                    console.error(response);
+                }
+            });
+        } else {
+            Ext.ux.ToastMessage('You did not select any libraries.', 'warning');
+        }
+    },
+
     downloadBenchtopProtocol: function() {
-        var store = Ext.getStore('poolingStore'),
-            poolName = '',
-            libraries = [],
-            samples = [];
+        var store = Ext.getStore('poolingStore');
+        var poolName = '';
+        var libraries = [];
+        var samples = [];
 
         // Get all checked (selected) records
         store.each(function(record) {
@@ -191,9 +246,9 @@ Ext.define('MainHub.view.pooling.PoolingController', {
     },
 
     downloadPoolingTemplate: function() {
-        var store = Ext.getStore('poolingStore'),
-            libraries = [],
-            samples = [];
+        var store = Ext.getStore('poolingStore');
+        var libraries = [];
+        var samples = [];
 
         // Get all checked (selected) records
         store.each(function(record) {
@@ -233,9 +288,9 @@ Ext.define('MainHub.view.pooling.PoolingController', {
     },
 
     search: function(fld, query) {
-        var grid = Ext.getCmp('poolingTable'),
-            store = grid.getStore(),
-            columns = Ext.pluck(grid.getColumns(), 'dataIndex');
+        var grid = Ext.getCmp('poolingTable');
+        var store = grid.getStore();
+        var columns = Ext.pluck(grid.getColumns(), 'dataIndex');
 
         store.clearFilter();
         store.filterBy(function(record) {
@@ -247,5 +302,9 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             });
             return res;
         });
+    },
+
+    isPrepared: function(item) {
+        return item.get('libraryId') !== 0 || (item.get('sampleId') !== 0 && item.get('status') === 3);
     }
 });

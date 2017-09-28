@@ -48,14 +48,14 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
                 text: 'Apply to All',
                 iconCls: 'x-fa fa-check-circle',
                 handler: function() {
-                    var dataIndex = me.getDataIndex(e, gridView);
+                    var dataIndex = MainHub.Utilities.getDataIndex(e, gridView);
                     me.applyToAll(record, dataIndex);
                 }
             }]
         }).showAt(e.getXY());
     },
 
-    showGroupContextMenu: function(view, node, group, e) {
+    showGroupContextMenu: function(view, node, requestId, e) {
         var me = this;
         e.stopEvent();
         Ext.create('Ext.menu.Menu', {
@@ -63,7 +63,14 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
                 text: 'Select All',
                 iconCls: 'x-fa fa-check-square-o',
                 handler: function() {
-                    me.selectAll(parseInt(group));
+                    me.selectUnselectAll(parseInt(requestId), true);
+                }
+            },
+            {
+                text: 'Unselect All',
+                iconCls: 'x-fa fa-square-o',
+                handler: function() {
+                    me.selectUnselectAll(parseInt(requestId), false);
                 }
             },
             '-',
@@ -71,33 +78,33 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
                 text: 'QC: All selected passed',
                 iconCls: 'x-fa fa-check',
                 handler: function() {
-                    me.qualityCheckAll(parseInt(group), true);
+                    me.qualityCheckAll(parseInt(requestId), true);
                 }
             },
             {
                 text: 'QC: All selected failed',
                 iconCls: 'x-fa fa-times',
                 handler: function() {
-                    me.qualityCheckAll(parseInt(group), false);
+                    me.qualityCheckAll(parseInt(requestId), false);
                 }
             }]
         }).showAt(e.getXY());
     },
 
-    selectAll: function(requestId) {
+    selectUnselectAll: function(requestId, selected) {
         var store = Ext.getStore('incomingLibrariesStore');
         store.each(function(item) {
             if (item.get('requestId') === requestId) {
-                item.set('selected', true);
+                item.set('selected', selected);
             }
         });
     },
 
     toggleEditors: function(editor, context) {
-        var record = context.record,
-            qPCRResultEditor = Ext.getCmp('qPCRResultEditor'),
-            rnaQualityEditor = Ext.getCmp('rnaQualityIncomingEditor'),
-            nucleicAcidTypesStore = Ext.getStore('nucleicAcidTypesStore');
+        var record = context.record;
+        var qPCRResultEditor = Ext.getCmp('qPCRResultEditor');
+        var rnaQualityEditor = Ext.getCmp('rnaQualityIncomingEditor');
+        var nucleicAcidTypesStore = Ext.getStore('nucleicAcidTypesStore');
 
         // Toggle qPCR Result and RNA Quality
         if (record.get('recordType') === 'L') {
@@ -162,9 +169,9 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
     },
 
     editRecord: function(editor, context) {
-        var record = context.record,
-            changes = record.getChanges(),
-            values = context.newValues;
+        var record = context.record;
+        var changes = record.getChanges();
+        var values = context.newValues;
 
         var params = $.extend({
             record_type: record.getRecordType(),
@@ -178,11 +185,11 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
             var amountFacility = parseFloat(values.dilution_factor) *
                 parseFloat(values.concentration_facility) *
                 parseFloat(values.sample_volume_facility);
-            params['amount_facility'] = amountFacility;
+            params.amount_facility = amountFacility;
         }
 
         Ext.Ajax.request({
-            url: 'quality_check/update/',
+            url: 'incoming_libraries/update/',
             method: 'POST',
             timeout: 1000000,
             scope: this,
@@ -221,7 +228,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
 
         if (libraries.length !== 0 || samples.length !== 0) {
             Ext.Ajax.request({
-                url: 'quality_check/qc_update_all/',
+                url: 'incoming_libraries/qc_update_all/',
                 method: 'POST',
                 scope: this,
                 params: {
@@ -308,23 +315,5 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
 
         store.clearFilter();
         store.filter([showFilter, searchFilter]);
-    },
-
-    getDataIndex: function(e, view) {
-        var xPos = e.getXY()[0],
-            columns = view.getGridColumns(),
-            dataIndex;
-
-        for (var column in columns) {
-            var leftEdge = columns[column].getPosition()[0],
-                rightEdge = columns[column].getSize().width + leftEdge;
-
-            if (xPos >= leftEdge && xPos <= rightEdge) {
-                dataIndex = columns[column].dataIndex;
-                break;
-            }
-        }
-
-        return dataIndex;
     }
 });

@@ -46,7 +46,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
         },
         store: 'poolingStore',
         sortableColumns: false,
-        columns: [{
+        columns: [
+            {
                 xtype: 'checkcolumn',
                 itemId: 'checkColumn',
                 dataIndex: 'selected',
@@ -70,12 +71,16 @@ Ext.define('MainHub.view.pooling.Pooling', {
             {
                 text: 'Barcode',
                 dataIndex: 'barcode',
-                width: 90
+                width: 95,
+                renderer: function(value) {
+                    var record = Ext.getStore('poolingStore').findRecord('barcode', value);
+                    return record ? record.getBarcode() : value;
+                }
             },
             {
                 text: 'ng/µl',
                 tooltip: 'Library Concentration (ng/µl)',
-                dataIndex: 'concentration',
+                dataIndex: 'concentration_facility',
                 width: 100
             },
             {
@@ -83,6 +88,28 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 tooltip: 'Mean Fragment Size (bp)',
                 dataIndex: 'mean_fragment_size',
                 width: 75
+            },
+            {
+                text: 'I7 ID',
+                tooltip: 'Index I7 ID',
+                dataIndex: 'index_i7_id',
+                width: 60
+            },
+            {
+                text: 'Index I7',
+                dataIndex: 'index_i7',
+                width: 90
+            },
+            {
+                text: 'I5 ID',
+                tooltip: 'Index I5 ID',
+                dataIndex: 'index_i5_id',
+                width: 60
+            },
+            {
+                text: 'Index I5',
+                dataIndex: 'index_i5',
+                width: 90
             },
             {
                 text: 'nM C1',
@@ -119,7 +146,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
                     displayField: 'name',
                     valueField: 'id',
                     store: Ext.create('Ext.data.Store', {
-                        fields: [{
+                        fields: [
+                            {
                                 name: 'id',
                                 type: 'int'
                             },
@@ -128,7 +156,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
                                 type: 'string'
                             }
                         ],
-                        data: [{
+                        data: [
+                            {
                                 id: 1,
                                 name: 'passed'
                             },
@@ -175,7 +204,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 }
             ]
         }],
-        plugins: [{
+        plugins: [
+            {
                 ptype: 'rowediting',
                 clicksToEdit: 1
             },
@@ -193,19 +223,25 @@ Ext.define('MainHub.view.pooling.Pooling', {
             startCollapsed: true,
             groupHeaderTpl: [
                 '<strong class="{children:this.getHeaderClass}">' +
-                    '{name} | Pool Size: {children:this.getRealPoolSize} M reads ' +
+                    '{children:this.getName} | Pool Size: {children:this.getRealPoolSize} M reads ' +
                     '{children:this.getPoolSize}' +
                 '</strong>',
                 {
+                    getName: function(children) {
+                        return children[0].get('poolName');
+                    },
                     getHeaderClass: function(children) {
-                        var cls = 'pool-header-green',
-                            missingSamples = 0;
+                        var cls = 'pool-header-green';
+                        var missingSamples = 0;
+
                         $.each(children, function(index, item) {
                             if (item.get('sampleId') !== 0 && item.get('status') < 3) {
                                 missingSamples++;
                             }
                         });
+
                         if (missingSamples > 0) cls = 'pool-header-red';
+
                         return cls;
                     },
                     getRealPoolSize: function(children) {

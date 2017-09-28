@@ -105,7 +105,11 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                         {
                             text: 'Barcode',
                             dataIndex: 'barcode',
-                            width: 90
+                            width: 95,
+                            renderer: function(value) {
+                                var record = Ext.getStore('librariesInRequestStore').findRecord('barcode', value);
+                                return record ? record.getBarcode() : value;
+                            }
                         }
                     ]
                 },

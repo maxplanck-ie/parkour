@@ -4,7 +4,9 @@
     },
     "globals": {
         "$": true,
-        "_": true
+        "_": true,
+        "Ext": true,
+        "MainHub": true
     },
     "parserOptions": {
         "sourceType": "module"
@@ -15,9 +17,9 @@
         "brace-style": [2, "1tbs", {
             "allowSingleLine": true
         }],
-        "camelcase": [2, {
-            "properties": "always"
-        }],
+        // "camelcase": [2, {
+        //     "properties": "always"
+        // }],
         "curly": [2, "all"],
         "dot-notation": [2, {
             "allowKeywords": true
@@ -33,7 +35,7 @@
             }
         ],
         "keyword-spacing": [2],
-        "new-cap": 2,
+        // "new-cap": 2,
         "no-bitwise": 2,
         "no-caller": 2,
         "no-cond-assign": [2, "except-parens"],

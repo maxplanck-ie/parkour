@@ -14,6 +14,7 @@ class LibraryPreparationAdmin(admin.ModelAdmin):
                 'pcr_cycles',
                 'concentration_library',
                 'mean_fragment_size',
+                'comments',
                 'nM',
             ),
         }),

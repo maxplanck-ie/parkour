@@ -8,7 +8,7 @@ Ext.define('MainHub.store.librarypreparation.LibraryPreparation', {
 
     model: 'MainHub.model.librarypreparation.LibraryPreparation',
 
-    groupField: 'libraryProtocolName',
+    groupField: 'libraryProtocol',
     // groupDir: 'DESC',
 
     proxy: {

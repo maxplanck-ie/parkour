@@ -19,8 +19,8 @@ Ext.define('MainHub.store.incominglibraries.IncomingLibraries', {
         limitParam: false,  //to remove param "limit"
         noCache: false,     //to remove param "_dc",
         api: {
-            read: 'library/get_all/?quality_check=true',
-            update: 'quality_check/update_all/'
+            read: 'library/get_all/?incoming_libraries=true',
+            update: 'incoming_libraries/update_all/'
         },
         reader: {
             type: 'json',

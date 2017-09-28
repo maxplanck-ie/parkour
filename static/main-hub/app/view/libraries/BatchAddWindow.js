@@ -21,88 +21,90 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
         border: 0,
         layout: 'card',
         items: [{
-                xtype: 'container',
-                layout: {
-                    type: 'vbox',
-                    align: 'center',
-                    pack: 'center'
-                },
-                defaults: {
-                    border: 0
-                },
-                items: [{
-                        xtype: 'container',
-                        layout: 'hbox',
-                        defaultType: 'button',
-                        defaults: {
-                            margin: 10,
-                            width: 100,
-                            height: 40
-                        },
-                        items: [{
-                                itemId: 'libraryCardBtn',
-                                text: 'Library'
-                            },
-                            {
-                                itemId: 'sampleCardBtn',
-                                text: 'Sample'
-                            }
-                        ]
+            xtype: 'container',
+            layout: {
+                type: 'vbox',
+                align: 'center',
+                pack: 'center'
+            },
+            defaults: {
+                border: 0
+            },
+            items: [
+                {
+                    xtype: 'container',
+                    layout: 'hbox',
+                    defaultType: 'button',
+                    defaults: {
+                        margin: 10,
+                        width: 100,
+                        height: 40
                     },
-                    {
-                        html: '<p style="text-align:center">' +
+                    items: [
+                        {
+                            itemId: 'libraryCardBtn',
+                            text: 'Library'
+                        },
+                        {
+                            itemId: 'sampleCardBtn',
+                            text: 'Sample'
+                        }
+                    ]
+                },
+                {
+                    html: '<p style="text-align:center">' +
                             'Choose <strong>Library</strong> if samples for sequencing are completely prepared by the user.<br><br>' +
                             'Choose <strong>Sample</strong> if libraries are prepared by the facility.' +
                             '</p>',
-                        width: 350
-                    }
-                ]
+                    width: 350
+                }
+            ]
+        },
+        {
+            xtype: 'grid',
+            selModel: {
+                type: 'spreadsheet',
+                // rowNumbererHeaderWidth: 40,
+                rowSelect: false
             },
-            {
-                xtype: 'grid',
-                selModel: {
-                    type: 'spreadsheet',
-                    // rowNumbererHeaderWidth: 40,
-                    rowSelect: false
+            id: 'batchAddGrid',
+            itemId: 'batchAddGrid',
+            sortableColumns: false,
+            multiSelect: true,
+            border: 0,
+            viewConfig: {
+                markDirty: false,
+                getRowClass: function(record) {
+                    return (record.get('invalid')) ? 'invalid' : '';
+                }
+            },
+            tbar: [{
+                xtype: 'container',
+                padding: 5,
+                layout: 'hbox',
+                items: [{
+                    xtype: 'numberfield',
+                    itemId: 'numEmptyRecords',
+                    fieldLabel: 'Create empty records',
+                    padding: '0 10px 0 0',
+                    labelWidth: 145,
+                    width: 230,
+                    minValue: 0
                 },
-                id: 'batchAddGrid',
-                itemId: 'batchAddGrid',
-                sortableColumns: false,
-                multiSelect: true,
-                border: 0,
-                viewConfig: {
-                    markDirty: false,
-                    getRowClass: function(record) {
-                        return (record.get('invalid')) ? 'invalid' : '';
-                    }
-                },
-                tbar: [{
-                    xtype: 'container',
-                    padding: 5,
-                    layout: 'hbox',
-                    items: [{
-                            xtype: 'numberfield',
-                            itemId: 'numEmptyRecords',
-                            fieldLabel: 'Create empty records',
-                            padding: '0 10px 0 0',
-                            labelWidth: 145,
-                            width: 230,
-                            minValue: 0
-                        },
-                        {
-                            xtype: 'button',
-                            itemId: 'createEmptyRecordsBtn',
-                            text: 'Create'
-                        }
-                    ]
-                }],
-                plugins: [{
-                    ptype: 'rowediting',
-                    clicksToEdit: 1
-                }, {
-                    ptype: 'clipboard'
-                }]
-            }
+                {
+                    xtype: 'button',
+                    itemId: 'createEmptyRecordsBtn',
+                    text: 'Create'
+                }
+                ]
+            }],
+            plugins: [{
+                ptype: 'rowediting',
+                clicksToEdit: 1
+            }, {
+                ptype: 'clipboard'
+            }]
+        }
         ]
     }],
 

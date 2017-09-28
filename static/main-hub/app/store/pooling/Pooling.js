@@ -8,7 +8,7 @@ Ext.define('MainHub.store.pooling.Pooling', {
 
     model: 'MainHub.model.pooling.Pooling',
 
-    groupField: 'poolName',
+    groupField: 'poolId',
     // groupDir: 'DESC',
 
     proxy: {

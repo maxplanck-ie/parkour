@@ -11,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from django.core.exceptions import ValidationError
 
+from library_sample_shared.utils import get_indices_ids
 from index_generator.models import Pool
 from library_preparation.models import LibraryPreparation
 from library.models import Library
@@ -45,6 +46,7 @@ def get_all(request):
             req = library.request.get()
             percentage_library = \
                 library.sequencing_depth / sum_sequencing_depth
+            index_i7_id, index_i5_id = get_indices_ids(library)
 
             libraries_in_pool.append({
                 'name': library.name,
@@ -56,11 +58,16 @@ def get_all(request):
                 'poolSize': pool_size,
                 'requestId': req.id,
                 'requestName': req.name,
-                'concentration': library.concentration,
+                # 'concentration': library.concentration,
+                'concentration_facility': library.concentration_facility,
                 'mean_fragment_size': library.mean_fragment_size,
                 'sequencing_depth': library.sequencing_depth,
                 'concentration_c1': pooling_obj.concentration_c1,
                 'percentage_library': round(percentage_library * 100),
+                'index_i7_id': index_i7_id,
+                'index_i7': library.index_i7,
+                'index_i5_id': index_i5_id,
+                'index_i5': library.index_i5,
             })
 
         # Converted samples (sample -> library)
@@ -69,6 +76,7 @@ def get_all(request):
             req = sample.request.get()
             percentage_library = \
                 sample.sequencing_depth / sum_sequencing_depth
+            index_i7_id, index_i5_id = get_indices_ids(sample)
 
             try:
                 concentration_c1 = \
@@ -81,16 +89,22 @@ def get_all(request):
                 'status': sample.status,
                 'sampleId': sample.pk,
                 'barcode': sample.barcode,
+                'is_converted': sample.is_converted,
                 'poolId': pool.pk,
                 'poolName': pool.name,
                 'poolSize': pool_size,
                 'requestId': req.pk,
                 'requestName': req.name,
-                'concentration': lib_prep_obj.concentration_library,
+                # 'concentration': lib_prep_obj.concentration_library,
+                'concentration_facility': sample.concentration_facility,
                 'mean_fragment_size': lib_prep_obj.mean_fragment_size,
                 'sequencing_depth': sample.sequencing_depth,
                 'concentration_c1': concentration_c1,
                 'percentage_library': round(percentage_library * 100),
+                'index_i7_id': index_i7_id,
+                'index_i7': sample.index_i7,
+                'index_i5_id': index_i5_id,
+                'index_i5': sample.index_i5,
             })
 
         data += libraries_in_pool
@@ -112,8 +126,8 @@ def update(request):
     try:
         try:
             concentration = float(request.POST.get('concentration'))
-        except ValueError:
-            raise ValueError('Library Concentartion is not set.')
+        except Exception:
+            raise ValueError('Library Concentration is not set.')
 
         if library_id == '0' or library_id == 0:
             obj = Pooling.objects.get(sample_id=sample_id)
@@ -146,8 +160,6 @@ def update(request):
                 else:
                     record.status = -1
                     record.save(update_fields=['status'])
-
-                    # TODO@me: send email
         else:
             error = str(form.errors)
             logger.debug(form.errors)
@@ -192,6 +204,35 @@ def update_all(request):
                 error = 'Some of the records were not updated ' + \
                     '(see the logs).'
                 logger.exception(e)
+
+    return JsonResponse({'success': not error, 'error': error})
+
+
+@login_required
+@staff_member_required
+def qc_update_all(request):
+    """ Update QC Result for given libraries and samples. """
+    error = ''
+
+    libraries = json.loads(request.POST.get('libraries', '[]'))
+    samples = json.loads(request.POST.get('samples', '[]'))
+    result = json.loads(request.POST.get('result', ''))
+    qc_result = 4 if result is True else -1
+
+    try:
+        for library_id in libraries:
+            library = Library.objects.get(pk=library_id)
+            library.status = qc_result
+            library.save(update_fields=['status'])
+
+        for sample_id in samples:
+            sample = Sample.objects.get(pk=sample_id)
+            sample.status = qc_result
+            sample.save(update_fields=['status'])
+
+    except Exception as e:
+        error = str(e)
+        logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error})
 

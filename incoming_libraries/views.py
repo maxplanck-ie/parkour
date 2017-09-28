@@ -121,7 +121,7 @@ def update_all(request):
 @login_required
 @staff_member_required
 def qc_update_all(request):
-    """ Update QC Result for the given libraries/samples. """
+    """ Update QC Result for given libraries and samples. """
     error = ''
 
     libraries = json.loads(request.POST.get('libraries', '[]'))
