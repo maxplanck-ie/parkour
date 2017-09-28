@@ -75,7 +75,10 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
             // Load files
             if (request.files.length > 0) {
                 Ext.getStore('requestFilesStore').load({
-                    url: Ext.String.format('api/requests/{0}/get_files/', request.id)
+                    url: 'api/requests/get_files/',
+                    params: {
+                        'file_ids': Ext.JSON.encode(request.files)
+                    }
                 });
             }
         }

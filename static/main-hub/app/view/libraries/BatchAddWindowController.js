@@ -892,7 +892,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                     success: function(response) {
                         var obj = Ext.JSON.decode(response.responseText);
 
-                        Ext.getCmp('librariesInRequestTable').getStore().add(obj.data);
+                        Ext.getCmp('libraries-in-request-grid').getStore().add(obj.data);
 
                         for (var i = 0; i < obj.data.length; i++) {
                             var record = store.findRecord('name', obj.data[i].name);

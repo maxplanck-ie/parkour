@@ -14,9 +14,10 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from rest_framework import viewsets
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 
+from common.views import CsrfExemptSessionAuthentication
 from .models import Request, FileRequest
 from .serializers import RequestSerializer, RequestFileSerializer
 from .forms import RequestForm
@@ -219,7 +220,7 @@ def upload_deep_sequencing_request(request):
 @login_required
 def upload_files(request):
     """ Upload request files. """
-    file_ids = []
+    data = []
     error = ''
 
     if request.method == 'POST' and any(request.FILES):
@@ -227,17 +228,13 @@ def upload_files(request):
             for file in request.FILES.getlist('files'):
                 f = FileRequest(name=file.name, file=file)
                 f.save()
-                file_ids.append(f.id)
+                data.append(f.id)
 
         except Exception as e:
             error = 'Could not upload the files.'
             logger.exception(e)
 
-    return JsonResponse({
-        'success': not error,
-        'error': error,
-        'fileIds': file_ids
-    })
+    return JsonResponse({'success': not error, 'error': error, 'data': data})
 
 
 @login_required
@@ -284,8 +281,10 @@ def send_email(request):
 
 
 class RequestViewSet(viewsets.ViewSet):
+    authentication_classes = [CsrfExemptSessionAuthentication]
 
     def list(self, request):
+        """ Get the list of requests. """
         queryset = Request.objects.all().order_by('-create_time')
         if self.request.user.is_staff:
             # Show only those Requests, whose libraries and samples
@@ -299,17 +298,16 @@ class RequestViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
-        data = {}
+        """ Get request with a given id. """
         try:
             queryset = Request.objects.get(pk=pk)
         except (ValueError, Request.DoesNotExist):
-            pass
+            return Response({})
         else:
             serializer = RequestSerializer(queryset, context={
                 'request': request,
             })
-            data = serializer.data
-        return Response(data)
+            return Response(serializer.data)
 
     # def destroy(self, request, pk=None):
     #     try:
@@ -323,11 +321,10 @@ class RequestViewSet(viewsets.ViewSet):
     @detail_route(methods=['get'])
     def get_records(self, request, pk=None):
         """ Get the list of record's submitted libraries and samples. """
-        data = []
         try:
             queryset = Request.objects.get(pk=pk)
         except (ValueError, Request.DoesNotExist):
-            pass
+            return Response([])
         else:
             data = [{
                 'name': obj.name,
@@ -339,17 +336,33 @@ class RequestViewSet(viewsets.ViewSet):
                 if isinstance(obj, Sample) and obj.is_converted else False,
             } for obj in queryset.records]
             data = sorted(data, key=lambda x: x['barcode'][3:])
-        return Response(data)
+            return Response(data)
 
-    @detail_route(methods=['get'])
-    def get_files(self, request, pk=None):
+    # @detail_route(methods=['get'])
+    # def get_files(self, request, pk=None):
+    #     """ Get the list of attached files. """
+    #     data = []
+    #     try:
+    #         queryset = Request.objects.get(pk=pk).files.order_by('name')
+    #     except (ValueError, Request.DoesNotExist):
+    #         pass
+    #     else:
+    #         serializer = RequestFileSerializer(queryset, many=True)
+    #         data = serializer.data
+    #     return Response(data)
+
+    @list_route()
+    def get_files(self, request):
         """ Get the list of attached files. """
-        data = []
+        file_ids = json.loads(request.query_params.get('file_ids', '[]'))
         try:
-            queryset = Request.objects.get(pk=pk).files.order_by('name')
-        except (ValueError, Request.DoesNotExist):
-            pass
+            queryset = FileRequest.objects.filter(pk__in=file_ids)
+        except ValueError:
+            return Response([])
         else:
             serializer = RequestFileSerializer(queryset, many=True)
-            data = serializer.data
-        return Response(data)
+            return Response({
+                'success': True,
+                'message': '',
+                'data': serializer.data
+            })

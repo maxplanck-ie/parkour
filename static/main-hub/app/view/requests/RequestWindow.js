@@ -58,8 +58,9 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                                 xtype: 'filegridfield',
                                 fieldLabel: 'Files',
                                 store: 'requestFilesStore',
+                                // uploadFileUrl: 'api/requests/upload_files/',
                                 uploadFileUrl: 'request/upload_files/',
-                                getFileUrl: 'request/get_files/'
+                                getFileUrl: 'api/requests/get_files/'
                             }
                         ]
                     },

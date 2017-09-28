@@ -127,14 +127,14 @@ Ext.define('Ext.ux.FileGridField', {
                 success: function(f, action) {
                     var obj = Ext.JSON.decode(action.response.responseText);
 
-                    if (obj.success && obj.fileIds.length > 0) {
+                    if (obj.success && obj.data.length > 0) {
                         Ext.Ajax.request({
                             url: getFileUrl,
                             method: 'GET',
                             timeout: 1000000,
                             scope: this,
                             params: {
-                                'file_ids': Ext.JSON.encode(obj.fileIds)
+                                'file_ids': Ext.JSON.encode(obj.data)
                             },
                             success: function(response) {
                                 var obj = Ext.JSON.decode(response.responseText);
@@ -149,9 +149,7 @@ Ext.define('Ext.ux.FileGridField', {
                             }
                         });
                     } else {
-                        Ext.ux.ToastMessage(obj.error, 'error');
-                        console.error('[ERROR]: ' + uploadFileUrl + ' : ' + obj.error);
-                        console.error(response);
+                        Ext.ux.ToastMessage(obj.message, 'error');
                     }
                     wnd.close();
                 },

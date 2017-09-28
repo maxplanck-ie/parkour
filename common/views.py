@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.http import JsonResponse
+from rest_framework.authentication import SessionAuthentication
 
 
 @login_required
@@ -68,3 +69,9 @@ def get_navigation_tree(request):
         ]
 
     return JsonResponse({'text': '.', 'children': data})
+
+
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+
+    def enforce_csrf(self, request):
+        return  # To not perform the csrf check previously happening
