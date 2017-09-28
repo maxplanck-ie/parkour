@@ -10,7 +10,6 @@ Ext.define('MainHub.store.requests.RequestFiles', {
 
     proxy: {
         type: 'ajax',
-        url: 'request/get_files/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"

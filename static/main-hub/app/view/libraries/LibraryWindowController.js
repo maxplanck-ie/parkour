@@ -197,7 +197,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         indexI7Field.disable();
         indexI5Field.disable();
 
-        for (var i = 0; i <= record.get('indexReads'); i++) {
+        for (var i = 0; i <= record.get('index_reads'); i++) {
             indexReadsField.getStore().add({
                 num: i
             })

@@ -1,7 +1,7 @@
 from django.conf import settings
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
-from .models import Request
+from .models import Request, FileRequest
 
 
 class RequestSerializer(ModelSerializer):
@@ -11,13 +11,14 @@ class RequestSerializer(ModelSerializer):
     sum_seq_depth = SerializerMethodField()
     restrict_permissions = SerializerMethodField()
     files = SerializerMethodField()
-    deep_seq_request = SerializerMethodField()
+    deep_seq_request_name = SerializerMethodField()
+    deep_seq_request_path = SerializerMethodField()
 
     class Meta:
         model = Request
         fields = ('id', 'name', 'user', 'user_full_name', 'date',
                   'description', 'sum_seq_depth', 'restrict_permissions',
-                  'files', 'deep_seq_request',)
+                  'files', 'deep_seq_request_name', 'deep_seq_request_path',)
 
     def get_user(self, obj):
         return self.context['request'].user.pk
@@ -42,11 +43,25 @@ class RequestSerializer(ModelSerializer):
     def get_files(self, obj):
         return [file.pk for file in obj.files.all()]
 
-    def get_deep_seq_request(self, obj):
-        result = {'name': '', 'path': ''}
-        if obj.deep_seq_request:
-            result.update({
-                'name': obj.deep_seq_request.name.split('/')[-1],
-                'path': settings.MEDIA_URL + obj.deep_seq_request.name,
-            })
-        return result
+    def get_deep_seq_request_name(self, obj):
+        return obj.deep_seq_request.name.split('/')[-1] \
+            if obj.deep_seq_request else ''
+
+    def get_deep_seq_request_path(self, obj):
+        return settings.MEDIA_URL + obj.deep_seq_request.name \
+            if obj.deep_seq_request else ''
+
+
+class RequestFileSerializer(ModelSerializer):
+    size = SerializerMethodField()
+    path = SerializerMethodField()
+
+    class Meta:
+        model = FileRequest
+        fields = ('id', 'name', 'size', 'path')
+
+    def get_size(self, obj):
+        return obj.file.size
+
+    def get_path(self, obj):
+        return settings.MEDIA_URL + obj.file.name

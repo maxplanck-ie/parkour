@@ -14,99 +14,17 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from rest_framework import viewsets
-# from rest_framework.response import Response
+from rest_framework.decorators import detail_route
+from rest_framework.response import Response
 
 from .models import Request, FileRequest
-from .serializers import RequestSerializer
+from .serializers import RequestSerializer, RequestFileSerializer
 from .forms import RequestForm
+from library.models import Library
+from sample.models import Sample
 
 User = get_user_model()
 logger = logging.getLogger('db')
-
-
-@login_required
-def get_all(request):
-    """ Get the list of all requests. """
-    data = []
-    restrict_permissions = False
-
-    if request.user.is_staff:
-        requests = Request.objects.prefetch_related(
-            'user', 'libraries', 'samples'
-        )
-    else:
-        requests = Request.objects.filter(
-            user_id=request.user.pk
-        ).prefetch_related('user', 'libraries', 'samples')
-
-    for req in requests:
-        records = list(req.libraries.values('status', 'sequencing_depth')) + \
-            list(req.samples.values('status', 'sequencing_depth'))
-        statuses = [r['status'] for r in records]
-
-        # Don't allow the user to modify the requests and libraries/samples
-        # if they have reached status 1 or higher (or failed)
-        if not request.user.is_staff and statuses.count(0) == 0:
-            restrict_permissions = True
-
-        # Hide those Requests, whose libraries/samples
-        # have reached status 6 (for admins only)
-        if request.user.is_staff and statuses.count(6) > 0:
-            continue
-
-        data.append({
-            'requestId': req.pk,
-            'name': req.name,
-            'restrictPermissions': restrict_permissions,
-            'date': req.create_time.strftime('%d.%m.%Y'),
-            'description': req.description,
-            'userId': req.user.pk,
-            'user': req.user.get_full_name(),
-            'files': [file.pk for file in req.files.all()],
-            'deepSeqRequestName':
-                req.deep_seq_request.name.split('/')[-1]
-                if req.deep_seq_request else '',
-            'deepSeqRequestPath':
-                settings.MEDIA_URL + req.deep_seq_request.name
-                if req.deep_seq_request else '',
-            'sumSeqDepth': sum([r['sequencing_depth'] for r in records])
-        })
-
-    data = sorted(data, key=lambda x: x['requestId'], reverse=True)
-
-    return JsonResponse(data, safe=False)
-
-
-@login_required
-def get_libraries_and_samples(request):
-    """ Get the list of all libraries and samples for a given request. """
-    request_id = request.GET.get('request_id')
-    req = Request.objects.get(id=request_id)
-
-    libraries = [
-        {
-            'name': library.name,
-            'recordType': library.get_record_type(),
-            'libraryId': library.pk,
-            'barcode': library.barcode,
-        }
-        for library in req.libraries.all()
-    ]
-
-    samples = [
-        {
-            'name': sample.name,
-            'recordType': sample.get_record_type(),
-            'sampleId': sample.pk,
-            'barcode': sample.barcode,
-            'is_converted': sample.is_converted,
-        }
-        for sample in req.samples.all()
-    ]
-
-    data = sorted(libraries + samples, key=lambda x: x['barcode'][3:])
-
-    return JsonResponse({'success': True, 'data': data})
 
 
 @login_required
@@ -323,32 +241,6 @@ def upload_files(request):
 
 
 @login_required
-def get_files(request):
-    """ Get the list of files for the given request id. """
-    file_ids = json.loads(request.GET.get('file_ids', '[]'))
-    error = ''
-    data = []
-
-    try:
-        files = [f for f in FileRequest.objects.all() if f.id in file_ids]
-        data = [
-            {
-                'id': file.id,
-                'name': file.name,
-                'size': file.file.size,
-                'path': settings.MEDIA_URL + file.file.name,
-            }
-            for file in files
-        ]
-
-    except Exception as e:
-        error = 'Could not get the attached files.'
-        logger.exception(e)
-
-    return JsonResponse({'success': not error, 'error': error, 'data': data})
-
-
-@login_required
 @staff_member_required
 def send_email(request):
     """ Send an email to the user. """
@@ -391,11 +283,9 @@ def send_email(request):
     return JsonResponse({'success': not error, 'error': error})
 
 
-class RequestViewSet(viewsets.ModelViewSet):
-    """ Get the list of requests. """
-    serializer_class = RequestSerializer
+class RequestViewSet(viewsets.ViewSet):
 
-    def get_queryset(self):
+    def list(self, request):
         queryset = Request.objects.all().order_by('-create_time')
         if self.request.user.is_staff:
             # Show only those Requests, whose libraries and samples
@@ -403,4 +293,63 @@ class RequestViewSet(viewsets.ModelViewSet):
             queryset = [x for x in queryset if x.statuses.count(6) == 0]
         else:
             queryset = queryset.filter(user=self.request.user)
-        return queryset
+        serializer = RequestSerializer(queryset, many=True, context={
+            'request': request,
+        })
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        data = {}
+        try:
+            queryset = Request.objects.get(pk=pk)
+        except (ValueError, Request.DoesNotExist):
+            pass
+        else:
+            serializer = RequestSerializer(queryset, context={
+                'request': request,
+            })
+            data = serializer.data
+        return Response(data)
+
+    # def destroy(self, request, pk=None):
+    #     try:
+    #         queryset = Request.objects.get(pk=pk)
+    #     except (ValueError, Request.DoesNotExist):
+    #         pass
+    #     else:
+    #         import pdb; pdb.set_trace()
+    #         pass
+
+    @detail_route(methods=['get'])
+    def get_records(self, request, pk=None):
+        """ Get the list of record's submitted libraries and samples. """
+        data = []
+        try:
+            queryset = Request.objects.get(pk=pk)
+        except (ValueError, Request.DoesNotExist):
+            pass
+        else:
+            data = [{
+                'name': obj.name,
+                'record_type': obj.get_record_type(),
+                'library_id': obj.pk if isinstance(obj, Library) else 0,
+                'sample_id': obj.pk if isinstance(obj, Sample) else 0,
+                'barcode': obj.barcode,
+                'is_coverted': True
+                if isinstance(obj, Sample) and obj.is_converted else False,
+            } for obj in queryset.records]
+            data = sorted(data, key=lambda x: x['barcode'][3:])
+        return Response(data)
+
+    @detail_route(methods=['get'])
+    def get_files(self, request, pk=None):
+        """ Get the list of attached files. """
+        data = []
+        try:
+            queryset = Request.objects.get(pk=pk).files.order_by('name')
+        except (ValueError, Request.DoesNotExist):
+            pass
+        else:
+            serializer = RequestFileSerializer(queryset, many=True)
+            data = serializer.data
+        return Response(data)

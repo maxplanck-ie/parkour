@@ -4,15 +4,19 @@ Ext.define('MainHub.model.requests.Request', {
     fields: [
         {
             type: 'int',
-            name: 'requestId'
-        },
-        {
-            type: 'bool',
-            name: 'restrictPermissions'
+            name: 'id'
         },
         {
             type: 'string',
             name: 'name'
+        },
+        {
+            type: 'int',
+            name: 'user'
+        },
+        {
+            type: 'string',
+            name: 'user_full_name'
         },
         {
             type: 'string',
@@ -23,20 +27,20 @@ Ext.define('MainHub.model.requests.Request', {
             name: 'description'
         },
         {
-            type: 'string',
-            name: 'user'
+            type: 'bool',
+            name: 'restrict_permissions'
         },
         {
             type: 'string',
-            name: 'deepSeqRequestName'
+            name: 'deep_seq_request_name'
         },
         {
             type: 'string',
-            name: 'deepSeqRequestPath'
+            name: 'deep_seq_request_path'
         },
         {
             type: 'int',
-            name: 'sumSeqDepth'
+            name: 'sum_seq_depth'
         }
     ]
 });

@@ -28,7 +28,7 @@ Ext.define('MainHub.view.requests.RequestsController', {
     boxready: function() {
         // Hide the User column for non-administrators
         if (!USER_IS_STAFF) {
-            Ext.getCmp('requestsTable').down('[dataIndex=user]').setVisible(false);
+            Ext.getCmp('requestsTable').down('[dataIndex=user_full_name]').setVisible(false);
         }
         // Ext.getStore('requestsStore').reload();
     },
@@ -92,7 +92,7 @@ Ext.define('MainHub.view.requests.RequestsController', {
             }
         };
 
-        if (!USER_IS_STAFF && !record.get('restrictPermissions')) {
+        if (!USER_IS_STAFF && !record.restrict_permissions) {
             items.push(deleteRequestOption);
         } else if (USER_IS_STAFF) {
             items.push(deleteRequestOption);
@@ -102,7 +102,7 @@ Ext.define('MainHub.view.requests.RequestsController', {
                 iconCls: 'x-fa fa-envelope-o',
                 handler: function() {
                     Ext.create('MainHub.view.requests.EmailWindow', {
-                            // title: 'New Email: ' + record.get('name'),
+                        // title: 'New Email: ' + record.get('name'),
                         title: 'New Email',
                         record: record
                     });
@@ -121,7 +121,7 @@ Ext.define('MainHub.view.requests.RequestsController', {
             timeout: 1000000,
             scope: this,
             params: {
-                'request_id': record.data.requestId
+                'request_id': record.data.id
             },
 
             success: function(response) {

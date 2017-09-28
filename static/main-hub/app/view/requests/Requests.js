@@ -43,31 +43,42 @@ Ext.define('MainHub.view.requests.Requests', {
         store: 'requestsStore',
         sortableColumns: false,
         columns: {
-            items: [{
-                text: 'Name',
-                dataIndex: 'name',
-                flex: 1
-            }, {
-                text: 'User',
-                dataIndex: 'user',
-                flex: 1
-            }, {
-                text: 'Date',
-                dataIndex: 'date',
-                flex: 1
-            }, {
-                text: 'Sum of Sequencing Depth',
-                dataIndex: 'sumSeqDepth',
-                flex: 1
-            }, {
-                text: 'Description',
-                dataIndex: 'description',
-                flex: 1,
-                renderer: function(value, meta) {
-                    meta.tdAttr = 'data-qtip="' + value + '" data-qwidth=300';
-                    return value;
+            items: [
+                {
+                    text: 'Name',
+                    dataIndex: 'name',
+                    renderer: function(value, meta) {
+                        var request = meta.record.data;
+                        if (request.files.length > 0) {
+                            value += '<span style="float:right"><i class="fa fa-paperclip" aria-hidden="true"></i></span>';
+                        }
+                        return value;
+                    }
+                },
+                {
+                    text: 'User',
+                    dataIndex: 'user_full_name'
+                },
+                {
+                    text: 'Date',
+                    dataIndex: 'date'
+                },
+                {
+                    text: 'Sum of Sequencing Depth',
+                    dataIndex: 'sum_seq_depth'
+                },
+                {
+                    text: 'Description',
+                    dataIndex: 'description',
+                    renderer: function(value, meta) {
+                        meta.tdAttr = 'data-qtip="' + value + '" data-qwidth=300';
+                        return value;
+                    }
                 }
-            }]
+            ],
+            defaults: {
+                flex: 1
+            }
         },
         plugins: [{
             ptype: 'bufferedrenderer',

@@ -10,7 +10,7 @@ Ext.define('MainHub.store.requests.Requests', {
 
     proxy: {
         type: 'ajax',
-        url: 'request/get_all/',
+        url: 'api/requests/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"
