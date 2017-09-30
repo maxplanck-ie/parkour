@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 
 from .models import NucleicAcidType, Sample
 from .forms import SampleForm
+from .serializers import SampleSerializer
+from library_sample_shared.views import LibrarySampleBaseViewSet
 
 import logging
 import json
@@ -57,7 +59,7 @@ def save_sample(request):
                     data.append({
                         'name': sample.name,
                         'recordType': 'S',
-                        'sampleId': sample.pk,
+                        'sample_id': sample.pk,
                         'barcode': sample.barcode,
                     })
             else:
@@ -92,3 +94,12 @@ def delete_sample(request):
         logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error})
+
+
+class SampleViewSet(LibrarySampleBaseViewSet):
+    serializer_class = SampleSerializer
+    model_class = Sample
+    model_name = model_class._meta.verbose_name
+    model_name_plural = model_class._meta.verbose_name_plural
+    id_key = '%s_id' % model_name.lower()
+    record_type = model_name[0]

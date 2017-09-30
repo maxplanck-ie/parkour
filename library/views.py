@@ -3,12 +3,17 @@ import json
 
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
+# from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Q
+from rest_framework import viewsets
+from rest_framework.response import Response
 
+from library_sample_shared.views import LibrarySampleBaseViewSet
 from .models import Library
 from request.models import Request
 from .forms import LibraryForm
+from .serializers import LibrarySerializer
+from sample.serializers import SampleSerializer
 
 logger = logging.getLogger('db')
 
@@ -246,3 +251,34 @@ def delete_library(request):
         logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error})
+
+
+class LibrarySampleListViewSet(viewsets.ViewSet):
+
+    def list(self, request):
+        data = []
+
+        requests_queryset = Request.objects.order_by('-create_time')
+        if not request.user.is_staff:
+            requests_queryset = requests_queryset.filter(user=request.user)
+
+        for request_obj in requests_queryset:
+            library_serializer = LibrarySerializer(
+                request_obj.libraries.all(), many=True)
+            sample_serializer = SampleSerializer(
+                request_obj.samples.all(), many=True)
+
+            records = sorted(library_serializer.data + sample_serializer.data,
+                             key=lambda x: x['barcode'][3:])
+            data += records
+
+        return Response(data)
+
+
+class LibraryViewSet(LibrarySampleBaseViewSet):
+    serializer_class = LibrarySerializer
+    model_class = Library
+    model_name = model_class._meta.verbose_name
+    model_name_plural = model_class._meta.verbose_name_plural
+    id_key = '%s_id' % model_name.lower()
+    record_type = model_name[0]

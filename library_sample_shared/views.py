@@ -1,3 +1,4 @@
+import json
 import logging
 
 from django.http import JsonResponse
@@ -5,9 +6,11 @@ from django.views.generic.list import ListView
 from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets
 from rest_framework.response import Response
+from rest_framework.decorators import list_route
 # from rest_framework.permissions import IsAdminUser
 
 from common.utils import JSONResponseMixin
+from request.models import Request
 from .models import Organism, LibraryProtocol, LibraryType, IndexType
 from .serializers import (OrganismSerializer, IndexTypeSerializer,
                           LibraryProtocolSerializer, LibraryTypeSerializer)
@@ -221,3 +224,158 @@ class LibraryTypeViewSet(viewsets.ReadOnlyModelViewSet):
         if library_protocol is not None:
             queryset = queryset.filter(library_protocol__in=[library_protocol])
         return queryset
+
+
+class LibrarySampleBaseViewSet(viewsets.ViewSet):
+
+    def list(self, request):
+        """ Get the list of all libraries/samples. """
+        data = []
+        requests_queryset = Request.objects.order_by('-create_time')
+        if not request.user.is_staff:
+            requests_queryset = requests_queryset.filter(user=request.user)
+        for request_obj in requests_queryset:
+            # TODO: sort by item['barcode'][3:]
+            records = getattr(request_obj, self.model_name_plural.lower())
+            serializer = self.serializer_class(
+                records.order_by('barcode'), many=True)
+            data += serializer.data
+        return Response(data)
+
+    def create(self, request):
+        """ Add new libraries/samples. """
+        post_data = json.loads(request.POST.get('data', '[]'))
+
+        if not post_data:
+            return Response({
+                'success': False,
+                'message': 'Invalid payload.',
+            }, 400)
+
+        serializer = self.serializer_class(data=post_data, many=True)
+        if serializer.is_valid():
+            objects = serializer.save()
+            data = [{
+                'name': obj.name,
+                'record_type': self.record_type,
+                self.id_key: obj.pk,
+                'barcode': obj.barcode
+            } for obj in objects]
+            return Response({'success': True, 'data': data}, 201)
+
+        else:
+            # Try to add valid libraries
+            valid_data = [item[1] for item in zip(serializer.errors, post_data)
+                          if not item[0]]
+
+            if any(valid_data):
+                message = 'Invalid payload. Some records cannot be added.'
+                serializer = self.serializer_class(data=valid_data, many=True)
+                serializer.is_valid()
+                objects = serializer.save()
+
+                data = [{
+                    'name': obj.name,
+                    'record_type': self.record_type,
+                    self.id_key: obj.pk,
+                    'barcode': obj.barcode
+                } for obj in objects]
+
+                return Response({
+                    'success': True,
+                    'message': message,
+                    'data': data,
+                }, 201)
+
+            else:
+                # logger.debug('POST DATA', post_data)
+                # logger.debug('VALIDATION ERRORS', serializer.errors)
+                return Response({
+                    'success': False,
+                    'message': 'Invalid payload.',
+                }, 400)
+
+    def retrieve(self, request, pk=None):
+        """ Get a library/sample with a given id. """
+        try:
+            obj = self.model_class.objects.get(pk=int(pk))
+            serializer = self.serializer_class(obj)
+            return Response({
+                'success': True,
+                'data': serializer.data
+            })
+
+        except ValueError:
+            return Response({
+                'success': False,
+                'message': 'Id is not provided.',
+            }, 400)
+
+        except self.model_class.DoesNotExist:
+            return Response({
+                'success': False,
+                'message': '%s does not exist.' % self.model_name,
+            }, 404)
+
+    @list_route(methods=['post'])
+    def edit(self, request):
+        """ Update multiple libraries/samples. """
+        post_data = json.loads(request.POST.get('data', '[]'))
+
+        if not post_data:
+            return Response({
+                'success': False,
+                'message': 'Invalid payload.',
+            }, 400)
+
+        ids = [x[self.id_key] for x in post_data]
+        objects = self.model_class.objects.filter(pk__in=ids)
+        serializer = self.serializer_class(data=post_data, instance=objects,
+                                           many=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'success': True})
+
+        else:
+            # Try to update valid objects
+            valid_data = [item[1] for item in zip(serializer.errors, post_data)
+                          if not item[0]]
+
+            if any(valid_data):
+                message = 'Invalid payload. Some records cannot be updated.'
+                ids = [x[self.id_key] for x in valid_data]
+                objects = self.model_class.objects.filter(pk__in=ids)
+                serializer = self.serializer_class(
+                    data=valid_data, instance=objects, many=True)
+                serializer.is_valid()
+                serializer.save()
+                return Response({'success': True, 'message': message}, 200)
+
+            else:
+                return Response({
+                    'success': False,
+                    'message': 'Invalid payload.',
+                }, 400)
+
+    # @list_route(methods=['post'])
+    # def delete(self, request):
+    #     pass
+
+    def destroy(self, request, pk=None):
+        """ Delete a library/sample with a given id. """
+        try:
+            obj = self.model_class.objects.get(pk=int(pk))
+            obj.delete()
+            return Response({'success': True})
+
+        except ValueError:
+            return Response({
+                'success': False,
+                'message': 'Id is not provided.',
+            }, 400)
+
+        except self.model_class.DoesNotExist:
+            return Response({
+                'success': False,
+                'message': '%s does not exist.' % self.model_name,
+            }, 404)
