@@ -253,28 +253,6 @@ def delete_library(request):
     return JsonResponse({'success': not error, 'error': error})
 
 
-class LibrarySampleListViewSet(viewsets.ViewSet):
-
-    def list(self, request):
-        data = []
-
-        requests_queryset = Request.objects.order_by('-create_time')
-        if not request.user.is_staff:
-            requests_queryset = requests_queryset.filter(user=request.user)
-
-        for request_obj in requests_queryset:
-            library_serializer = LibrarySerializer(
-                request_obj.libraries.all(), many=True)
-            sample_serializer = SampleSerializer(
-                request_obj.samples.all(), many=True)
-
-            records = sorted(library_serializer.data + sample_serializer.data,
-                             key=lambda x: x['barcode'][3:])
-            data += records
-
-        return Response(data)
-
-
 class LibraryViewSet(LibrarySampleBaseViewSet):
     serializer_class = LibrarySerializer
     model_class = Library

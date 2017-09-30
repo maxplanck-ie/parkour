@@ -9,7 +9,7 @@ from library_sample_shared.models import (Organism, ConcentrationMethod,
                                           ReadLength, LibraryProtocol,
                                           LibraryType, IndexType)
 from library.models import Library
-from sample.models import Sample, NucleicAcidType
+from sample.tests import create_sample
 
 User = get_user_model()
 
@@ -61,55 +61,11 @@ def create_library(name):
     return library
 
 
-def create_sample(name):
-    organism = Organism(name='Organism')
-    organism.save()
-
-    concentration_method = ConcentrationMethod(name='Concentration Method')
-    concentration_method.save()
-
-    read_length = ReadLength(name='Read Length')
-    read_length.save()
-
-    library_protocol = LibraryProtocol(
-        name='Protocol',
-        type='DNA',
-        provider='-',
-        catalog='-',
-        explanation='-',
-        input_requirements='-',
-        typical_application='-',
-    )
-    library_protocol.save()
-
-    library_type = LibraryType(name='Library Type')
-    library_type.save()
-    library_type.library_protocol.add(library_protocol)
-
-    nat = NucleicAcidType(name='Nucleic Acid Type')
-    nat.save()
-
-    sample = Sample(
-        name=name,
-        organism_id=organism.pk,
-        concentration=1.0,
-        concentration_method_id=concentration_method.pk,
-        read_length_id=read_length.pk,
-        sequencing_depth=1,
-        library_protocol_id=library_protocol.pk,
-        library_type_id=library_type.pk,
-        nucleic_acid_type_id=nat.pk,
-    )
-    sample.save()
-
-    return sample
-
-
 # Views
 
 
 class TestLibrariesSamples(BaseTestCase):
-    """ Tests for the libraries and samples. """
+    """ Tests for libraries and samples. """
 
     def setUp(self):
         user = self._create_user('foo@bar.io', 'foo-foo')
@@ -134,7 +90,7 @@ class TestLibrariesSamples(BaseTestCase):
 
 
 class TestLibraries(BaseTestCase):
-    """ Tests for the libraries and samples. """
+    """ Tests for libraries. """
 
     def setUp(self):
         user = self._create_user('foo@bar.io', 'foo-foo')
@@ -246,7 +202,7 @@ class TestLibraries(BaseTestCase):
         self.assertIn('Invalid payload.', data['message'])
 
     def test_add_library_invalid_data(self):
-        """ Ensure error is thrown if the JSON object is empty. """
+        """ Ensure error is thrown if the JSON object contains invalid data."""
         response = self.client.post(reverse('libraries-list'), {
             'data': json.dumps([{
                 'name': self._get_random_name(),
