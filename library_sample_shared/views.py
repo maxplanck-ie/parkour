@@ -184,14 +184,20 @@ def get_library_types(request):
     return JsonResponse(data, safe=False)
 
 
-class OrganismViewSet(viewsets.ViewSet):
-    """ Get the list of organisms. """
+# class OrganismViewSet(viewsets.ViewSet):
+#     """ Get the list of organisms. """
 
-    def list(self, request):
-        queryset = Organism.objects.all()
-        serializer = OrganismSerializer(queryset, many=True)
-        data = move_other_to_end(serializer.data)
-        return Response(data)
+#     def list(self, request):
+#         queryset = Organism.objects.all()
+#         serializer = OrganismSerializer(queryset, many=True)
+#         data = move_other_to_end(serializer.data)
+#         return Response(data)
+
+
+class OrganismViewSet(viewsets.ReadOnlyModelViewSet):
+    """ Get the list of organisms. """
+    queryset = Organism.objects.all()
+    serializer_class = OrganismSerializer
 
 
 class IndexTypeViewSet(viewsets.ReadOnlyModelViewSet):
@@ -222,7 +228,11 @@ class LibraryTypeViewSet(viewsets.ReadOnlyModelViewSet):
         library_protocol = self.request.query_params.get(
             'library_protocol_id', None)
         if library_protocol is not None:
-            queryset = queryset.filter(library_protocol__in=[library_protocol])
+            try:
+                queryset = queryset.filter(
+                    library_protocol__in=[library_protocol])
+            except ValueError:
+                queryset = []
         return queryset
 
 
@@ -264,15 +274,13 @@ class LibrarySampleBaseViewSet(viewsets.ViewSet):
             return Response({'success': True, 'data': data}, 201)
 
         else:
-            # Try to add valid libraries
+            # Try to create valid records
             valid_data = [item[1] for item in zip(serializer.errors, post_data)
                           if not item[0]]
 
             if any(valid_data):
                 message = 'Invalid payload. Some records cannot be added.'
-                serializer = self.serializer_class(data=valid_data, many=True)
-                serializer.is_valid()
-                objects = serializer.save()
+                objects = self._create_or_update_valid(valid_data)
 
                 data = [{
                     'name': obj.name,
@@ -337,18 +345,14 @@ class LibrarySampleBaseViewSet(viewsets.ViewSet):
             return Response({'success': True})
 
         else:
-            # Try to update valid objects
+            # Try to update valid records
             valid_data = [item[1] for item in zip(serializer.errors, post_data)
                           if not item[0]]
 
             if any(valid_data):
                 message = 'Invalid payload. Some records cannot be updated.'
                 ids = [x[self.id_key] for x in valid_data]
-                objects = self.model_class.objects.filter(pk__in=ids)
-                serializer = self.serializer_class(
-                    data=valid_data, instance=objects, many=True)
-                serializer.is_valid()
-                serializer.save()
+                self._create_or_update_valid(valid_data, ids)
                 return Response({'success': True, 'message': message}, 200)
 
             else:
@@ -379,3 +383,14 @@ class LibrarySampleBaseViewSet(viewsets.ViewSet):
                 'success': False,
                 'message': '%s does not exist.' % self.model_name,
             }, 404)
+
+    def _create_or_update_valid(self, valid_data, ids=None):
+        """ Create or update objects valid objects. """
+        if not ids:
+            serializer = self.serializer_class(data=valid_data, many=True)
+        else:
+            objects = self.model_class.objects.filter(pk__in=ids)
+            serializer = self.serializer_class(
+                data=valid_data, instance=objects, many=True)
+        serializer.is_valid()
+        return serializer.save()

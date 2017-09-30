@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 
+from common.tests import BaseTestCase
 from .models import (Organism, ConcentrationMethod, ReadLength, IndexType,
                      IndexI7, GenericIndex, BarcodeCounter, LibraryProtocol,
                      LibraryType, GenericLibrarySample)
@@ -127,60 +128,143 @@ class GenericLibrarySampleTest(TestCase):
 
 # Views
 
-class GetLibraryProtocolsTest(TestCase):
+class TestOrganisms(BaseTestCase):
     def setUp(self):
-        User.objects.create_user(email='foo@bar.io', password='foo-foo')
-
-    def test_nucleic_acid_types(self):
+        self._create_user('foo@bar.io', 'foo-foo')
         self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.get(reverse('get_library_protocols'), {
-            'type': 'DNA'
+
+        self.organism = Organism(name=self._get_random_name())
+        self.organism.save()
+
+    def test_organisms_list(self):
+        """ Ensure get organisms behaves correctly. """
+        response = self.client.get(reverse('organism-list'))
+        data = response.json()
+        organisms = [x['name'] for x in data]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.organism.name, organisms)
+
+
+class TestIndexTypes(BaseTestCase):
+    def setUp(self):
+        self._create_user('foo@bar.io', 'foo-foo')
+        self.client.login(email='foo@bar.io', password='foo-foo')
+
+        self.index_type = IndexType(name=self._get_random_name())
+        self.index_type.save()
+
+    def test_index_type_list(self):
+        """ Ensure get index types behaves correctly. """
+        response = self.client.get(reverse('index-type-list'))
+        data = response.json()
+        index_types = [x['name'] for x in data]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.index_type.name, index_types)
+
+
+class TestLibraryProtocols(BaseTestCase):
+    """ Tests for library protocols. """
+
+    def setUp(self):
+        self._create_user('foo@bar.io', 'foo-foo')
+        self.client.login(email='foo@bar.io', password='foo-foo')
+
+        self.library_protocol1 = LibraryProtocol(
+            name=self._get_random_name(),
+            type='DNA',
+            provider='-',
+            catalog='-',
+            explanation='-',
+            input_requirements='-',
+            typical_application='-',
+        )
+        self.library_protocol2 = LibraryProtocol(
+            name=self._get_random_name(),
+            type='RNA',
+            provider='-',
+            catalog='-',
+            explanation='-',
+            input_requirements='-',
+            typical_application='-',
+        )
+        self.library_protocol1.save()
+        self.library_protocol2.save()
+
+    def test_library_protocol_list(self):
+        """ Ensure get library protocols behaves correctly. """
+        response = self.client.get(reverse('library-protocol-list'))
+        data = response.json()
+        protocols = [x['name'] for x in data]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.library_protocol1.name, protocols)
+        self.assertIn(self.library_protocol2.name, protocols)
+
+    def test_library_protocol_with_type_list(self):
+        """
+        Ensure get library protocols given nucleic acid type behaves correctly.
+        """
+        response = self.client.get(reverse('library-protocol-list'), {
+            'type': 'DNA',
         })
+        data = response.json()
+        protocols = [x['name'] for x in data]
         self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(response.content, b'[]')
-
-    def test_wrong_http_method(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('get_library_protocols'))
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, b'[]')
+        self.assertIn(self.library_protocol1.name, protocols)
+        self.assertNotIn(self.library_protocol2.name, protocols)
+        self.client.get(reverse('library-protocol-list'), {type: 'DNA'})
 
 
-class GetLibraryTypes(TestCase):
+class TestLibraryTypes(BaseTestCase):
+    """ Tests for library types. """
+
     def setUp(self):
-        User.objects.create_user(email='foo@bar.io', password='foo-foo')
+        self._create_user('foo@bar.io', 'foo-foo')
+        self.client.login(email='foo@bar.io', password='foo-foo')
+
         self.library_protocol = LibraryProtocol(
-            name='Protocol',
-            provider='Provider',
+            name=self._get_random_name(),
+            type='DNA',
+            provider='-',
+            catalog='-',
+            explanation='-',
+            input_requirements='-',
+            typical_application='-',
         )
         self.library_protocol.save()
 
-        self.library_type = LibraryType(name='Library Type')
+        self.library_type = LibraryType(name=self._get_random_name())
         self.library_type.save()
         self.library_type.library_protocol.add(self.library_protocol)
 
-    def test_get_library_types_ok(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.get(reverse('get_library_types'), {
-            'library_protocol_id': self.library_protocol.pk
+    def test_library_type_list(self):
+        """ Ensure get library types behaves correctly. """
+        response = self.client.get(reverse('library-type-list'))
+        data = response.json()
+        library_types = [x['name'] for x in data]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.library_type.name, library_types)
+
+    def test_library_type_with_protocol_list(self):
+        """
+        Ensure get library types given library protocol behaves correctly.
+        """
+        response = self.client.get(reverse('library-type-list'), {
+            'library_protocol_id': self.library_protocol.pk,
         })
-
+        data = response.json()
+        library_types = [x['name'] for x in data]
         self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(str(response.content, 'utf-8'), [
-            {
-                'id': self.library_type.pk,
-                'name': 'Library Type',
-                'protocol': [self.library_protocol.pk]
-            },
-            {
-                'id': 1,
-                'name': 'Other',
-                'protocol': [self.library_protocol.pk]
-            }
-        ])
+        self.assertEqual(len(library_types), 2)  # +1 for 'Other'
+        self.assertIn(self.library_type.name, library_types)
 
-    def test_wrong_http_method(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('get_library_types'))
+    def test_library_type_invalid_protocol(self):
+        """
+        Ensure get library types given invalid library protocol behaves
+        correctly.
+        """
+        response = self.client.get(reverse('library-type-list'), {
+            'library_protocol_id': 'blah',
+        })
+        data = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, b'[]')
+        self.assertEqual(data, [])
