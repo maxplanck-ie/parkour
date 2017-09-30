@@ -11,10 +11,13 @@ from rest_framework.decorators import list_route
 
 from common.utils import JSONResponseMixin
 from request.models import Request
-from .models import Organism, LibraryProtocol, LibraryType, IndexType
+
+from .models import (Organism, LibraryProtocol, LibraryType, IndexType,
+                     IndexI7, IndexI5)
+
 from .serializers import (OrganismSerializer, IndexTypeSerializer,
-                          LibraryProtocolSerializer, LibraryTypeSerializer)
-from .utils import move_other_to_end
+                          LibraryProtocolSerializer, LibraryTypeSerializer,
+                          IndexI7Serializer, IndexI5Serializer)
 
 logger = logging.getLogger('db')
 
@@ -184,16 +187,6 @@ def get_library_types(request):
     return JsonResponse(data, safe=False)
 
 
-# class OrganismViewSet(viewsets.ViewSet):
-#     """ Get the list of organisms. """
-
-#     def list(self, request):
-#         queryset = Organism.objects.all()
-#         serializer = OrganismSerializer(queryset, many=True)
-#         data = move_other_to_end(serializer.data)
-#         return Response(data)
-
-
 class OrganismViewSet(viewsets.ReadOnlyModelViewSet):
     """ Get the list of organisms. """
     queryset = Organism.objects.all()
@@ -204,6 +197,43 @@ class IndexTypeViewSet(viewsets.ReadOnlyModelViewSet):
     """ Get the list of index types. """
     queryset = IndexType.objects.all()
     serializer_class = IndexTypeSerializer
+
+
+class IndexViewSet(viewsets.ViewSet):
+
+    def list(self, request):
+        """ Get the list of all indices. """
+        index_i7_serializer = IndexI7Serializer(
+            IndexI7.objects.all(), many=True)
+        index_i5_serializer = IndexI5Serializer(
+            IndexI5.objects.all(), many=True)
+        indices = index_i7_serializer.data + index_i5_serializer.data
+        data = sorted(indices, key=lambda x: x['index_id'])
+        return Response(data)
+
+    @list_route(methods=['get'])
+    def i7(self, request):
+        """ Get the list of indices i7. """
+        queryset = self._get_index_queryset(IndexI7)
+        serializer = IndexI7Serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @list_route(methods=['get'])
+    def i5(self, request):
+        """ Get the list of indices i5. """
+        queryset = self._get_index_queryset(IndexI5)
+        serializer = IndexI5Serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def _get_index_queryset(self, model):
+        queryset = model.objects.order_by('index_id')
+        index_type = self.request.query_params.get('index_type_id', None)
+        if index_type is not None:
+            try:
+                queryset = queryset.filter(index_type=index_type)
+            except ValueError:
+                queryset = []
+        return queryset
 
 
 class LibraryProtocolViewSet(viewsets.ReadOnlyModelViewSet):

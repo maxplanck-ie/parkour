@@ -4,8 +4,8 @@ from django.contrib.auth import get_user_model
 
 from common.tests import BaseTestCase
 from .models import (Organism, ConcentrationMethod, ReadLength, IndexType,
-                     IndexI7, GenericIndex, BarcodeCounter, LibraryProtocol,
-                     LibraryType, GenericLibrarySample)
+                     GenericIndex, IndexI7, IndexI5, BarcodeCounter,
+                     LibraryProtocol, LibraryType, GenericLibrarySample)
 
 User = get_user_model()
 
@@ -160,6 +160,98 @@ class TestIndexTypes(BaseTestCase):
         index_types = [x['name'] for x in data]
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.index_type.name, index_types)
+
+
+class TestIndices(BaseTestCase):
+    """ Test indices I7 and I5. """
+
+    def setUp(self):
+        self._create_user('foo@bar.io', 'foo-foo')
+        self.client.login(email='foo@bar.io', password='foo-foo')
+
+        self.index1 = IndexI7(
+            index_id=self._get_random_name(),
+            index=self._get_random_name(8),
+        )
+        self.index2 = IndexI7(
+            index_id=self._get_random_name(),
+            index=self._get_random_name(8),
+        )
+        self.index1.save()
+        self.index2.save()
+
+        self.index3 = IndexI5(
+            index_id=self._get_random_name(),
+            index=self._get_random_name(8),
+        )
+        self.index3.save()
+
+        self.index_type1 = IndexType(
+            name=self._get_random_name(),
+            is_index_i7=True,
+        )
+        self.index_type1.save()
+        self.index_type1.indices_i7.add(self.index1)
+
+        self.index_type2 = IndexType(
+            name=self._get_random_name(),
+            is_index_i5=True,
+        )
+        self.index_type2.save()
+        self.index_type2.indices_i5.add(self.index3)
+
+    def test_indices_list(self):
+        """ Ensure get all indices behaves correctly. """
+        response = self.client.get(reverse('index-list'))
+        data = response.json()
+        indices = [x['index_id'] for x in data]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.index1.index_id, indices)
+        self.assertIn(self.index2.index_id, indices)
+        self.assertIn(self.index3.index_id, indices)
+
+    def test_indices_i7_list(self):
+        """ Ensure get indices i7 behaves correctly. """
+        response = self.client.get(reverse('index-i7'))
+        data = response.json()
+        indices = [x['index_id'] for x in data]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.index1.index_id, indices)
+        self.assertIn(self.index2.index_id, indices)
+        self.assertNotIn(self.index3.index_id, indices)
+
+    def test_indices_i5_list(self):
+        """ Ensure get indices i5 behaves correctly. """
+        response = self.client.get(reverse('index-i5'))
+        data = response.json()
+        indices = [x['index_id'] for x in data]
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(self.index1.index_id, indices)
+        self.assertNotIn(self.index2.index_id, indices)
+        self.assertIn(self.index3.index_id, indices)
+
+    def test_indices_i7_with_index_type(self):
+        """ Ensure get indices i7 given index type behaves correctly. """
+        response = self.client.get(reverse('index-i7'), {
+            'index_type_id': self.index_type1.pk,
+        })
+        data = response.json()
+        indices = [x['index_id'] for x in data]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.index1.index_id, indices)
+        self.assertNotIn(self.index2.index_id, indices)
+        self.assertNotIn(self.index3.index_id, indices)
+
+    def test_indices_i5_with_invalid_index_type(self):
+        """
+        Ensure get indices i5 given invalid index type behaves correctly.
+        """
+        response = self.client.get(reverse('index-i5'), {
+            'index_type_id': 'blah',
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data, [])
 
 
 class TestLibraryProtocols(BaseTestCase):

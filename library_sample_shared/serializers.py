@@ -1,7 +1,8 @@
 from rest_framework.serializers import (ModelSerializer, ListSerializer,
                                         SerializerMethodField)
 
-from .models import Organism, IndexType, LibraryProtocol, LibraryType
+from .models import (Organism, IndexType, LibraryProtocol, LibraryType,
+                     IndexI7, IndexI5)
 
 
 class OrganismSerializer(ModelSerializer):
@@ -28,6 +29,28 @@ class IndexTypeSerializer(ModelSerializer):
 
     def get_index_length(self, obj):
         return int(obj.get_index_length_display())
+
+
+class IndexBaseSerializer(ModelSerializer):
+    name = SerializerMethodField()
+
+    class Meta:
+        fields = ('id', 'name', 'index', 'index_id',)
+
+    def get_name(self, obj):
+        return '%s - %s' % (obj.index_id, obj.index)
+
+
+class IndexI7Serializer(IndexBaseSerializer):
+
+    class Meta(IndexBaseSerializer.Meta):
+        model = IndexI7
+
+
+class IndexI5Serializer(IndexBaseSerializer):
+
+    class Meta(IndexBaseSerializer.Meta):
+        model = IndexI5
 
 
 class LibraryProtocolSerializer(ModelSerializer):
