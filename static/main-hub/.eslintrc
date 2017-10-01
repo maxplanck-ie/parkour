@@ -6,7 +6,8 @@
         "$": true,
         "_": true,
         "Ext": true,
-        "MainHub": true
+        "MainHub": true,
+        "Noty": true
     },
     "parserOptions": {
         "sourceType": "module"

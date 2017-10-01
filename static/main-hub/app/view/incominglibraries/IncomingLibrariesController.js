@@ -1,6 +1,7 @@
 Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.incominglibraries-incominglibraries',
+
     mixins: [
         'MainHub.grid.CheckboxesAndSearchInputMixin',
         'MainHub.store.SyncStoreMixin'
@@ -63,35 +64,37 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
         var me = this;
         e.stopEvent();
         Ext.create('Ext.menu.Menu', {
-            items: [{
-                text: 'Select All',
-                iconCls: 'x-fa fa-check-square-o',
-                handler: function() {
-                    me.selectUnselectAll(parseInt(requestId), true);
+            items: [
+                {
+                    text: 'Select All',
+                    iconCls: 'x-fa fa-check-square-o',
+                    handler: function() {
+                        me.selectUnselectAll(parseInt(requestId), true);
+                    }
+                },
+                {
+                    text: 'Unselect All',
+                    iconCls: 'x-fa fa-square-o',
+                    handler: function() {
+                        me.selectUnselectAll(parseInt(requestId), false);
+                    }
+                },
+                '-',
+                {
+                    text: 'QC: All selected passed',
+                    iconCls: 'x-fa fa-check',
+                    handler: function() {
+                        me.qualityCheckAll(parseInt(requestId), 'passed');
+                    }
+                },
+                {
+                    text: 'QC: All selected failed',
+                    iconCls: 'x-fa fa-times',
+                    handler: function() {
+                        me.qualityCheckAll(parseInt(requestId), 'failed');
+                    }
                 }
-            },
-            {
-                text: 'Unselect All',
-                iconCls: 'x-fa fa-square-o',
-                handler: function() {
-                    me.selectUnselectAll(parseInt(requestId), false);
-                }
-            },
-            '-',
-            {
-                text: 'QC: All selected passed',
-                iconCls: 'x-fa fa-check',
-                handler: function() {
-                    me.qualityCheckAll(parseInt(requestId), 'passed');
-                }
-            },
-            {
-                text: 'QC: All selected failed',
-                iconCls: 'x-fa fa-times',
-                handler: function() {
-                    me.qualityCheckAll(parseInt(requestId), 'failed');
-                }
-            }]
+            ]
         }).showAt(e.getXY());
     },
 
@@ -130,7 +133,6 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
     },
 
     applyToAll: function(record, dataIndex) {
-        var me = this;
         var store = Ext.getStore('incomingLibrariesStore');
         var allowedColumns = ['dilution_factor', 'concentration_facility',
             'concentration_method_facility', 'sample_volume_facility',
@@ -195,7 +197,10 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
         });
 
         if (store.getModifiedRecords().length === 0) {
-            Ext.ux.ToastMessage('You did not select any libraries/samples.', 'warning');
+            new Noty({
+                text: 'You did not select any libraries/samples.',
+                type: 'warning'
+            }).show();
             return;
         }
 

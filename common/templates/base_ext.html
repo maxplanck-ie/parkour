@@ -12,8 +12,11 @@
 
 {#    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">#}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'js/noty/lib/noty.css' %}">
+
     <script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/underscore-min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/noty/lib/noty.min.js' %}"></script>
 
     <link rel="stylesheet" href="{% static 'main-hub/ext/build/classic/theme-triton/resources/theme-triton-all.css' %}">
 
@@ -25,6 +28,15 @@
 
     <script type="text/javascript" src="{% static 'main-hub/overrides/csrf.js' %}"></script>
 {#    <script type="text/javascript" src="{% static 'main-hub/ext/build/classic/theme-triton/theme-triton-debug.js' %}"></script>#}
+
+    <script type="text/javascript">
+        Noty.overrideDefaults({
+            layout: 'topRight',
+            theme: 'relax',
+            timeout: 2500,
+            type: 'information'
+        });
+    </script>
 </head>
 
 <body>

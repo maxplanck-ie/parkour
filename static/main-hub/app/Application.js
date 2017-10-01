@@ -49,13 +49,13 @@ Ext.define('MainHub.Application', {
         'Ext.ux.ToastMessage'
     ],
 
-    launch: function () {
+    launch: function() {
         // TODO - Launch the application
     },
 
-    onAppUpdate: function () {
+    onAppUpdate: function() {
         Ext.Msg.confirm('Application Update', 'This application has an update, reload?',
-            function (choice) {
+            function(choice) {
                 if (choice === 'yes') {
                     window.location.reload();
                 }
@@ -93,8 +93,8 @@ Ext.define('MainHub.Utilities', {
         var dataIndex;
 
         for (var column in columns) {
-            var leftEdge = columns[column].getPosition()[0],
-                rightEdge = columns[column].getSize().width + leftEdge;
+            var leftEdge = columns[column].getPosition()[0];
+            var rightEdge = columns[column].getSize().width + leftEdge;
 
             if (xPos >= leftEdge && xPos <= rightEdge) {
                 dataIndex = columns[column].dataIndex;
@@ -112,9 +112,7 @@ Ext.define('MainHub.Store', {
         Ext.getStore(storeName).sync({
             success: function() {
                 Ext.getStore(storeName).reload();
-                setTimeout(function() {
-                    Ext.ux.ToastMessage('The changes have been saved.');
-                }, 100);
+                new Noty({ text: 'The changes have been saved.' }).show();
             },
             failure: function(batch, options) {
                 var error = batch.operations[0].getError();
@@ -129,9 +127,7 @@ Ext.define('MainHub.Store', {
                     error = error.statusText;
                 }
 
-                setTimeout(function() {
-                    Ext.ux.ToastMessage(error, 'error');
-                }, 100);
+                new Noty({ text: error, type: 'error' }).show();
             }
         });
     }
@@ -177,8 +173,8 @@ Ext.define('MainHub.grid.CheckboxesAndSearchInputMixin', {
                 var res = false;
                 if (searchQuery) {
                     Ext.each(columns, function(column) {
-                        var value = record.get(column);
-                        if (value && value.toString().toLowerCase().indexOf(searchQuery.toLowerCase()) > -1) {
+                        var val = record.get(column);
+                        if (val && val.toString().toLowerCase().indexOf(searchQuery.toLowerCase()) > -1) {
                             res = res || true;
                         }
                     });
@@ -199,9 +195,7 @@ Ext.define('MainHub.store.SyncStoreMixin', {
         Ext.getStore(name).sync({
             success: function() {
                 Ext.getStore(name).reload();
-                setTimeout(function() {
-                    Ext.ux.ToastMessage('The changes have been saved.');
-                }, 100);
+                new Noty({ text: 'The changes have been saved.' }).show();
             },
             failure: function(batch, options) {
                 var error = batch.operations[0].getError();
@@ -216,9 +210,7 @@ Ext.define('MainHub.store.SyncStoreMixin', {
                     error = error.statusText;
                 }
 
-                setTimeout(function() {
-                    Ext.ux.ToastMessage(error, 'error');
-                }, 100);
+                new Noty({ text: error, type: 'error' }).show();
             }
         });
     }
