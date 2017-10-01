@@ -11,12 +11,13 @@ from rest_framework.decorators import list_route
 from common.utils import JSONResponseMixin
 from request.models import Request
 
-from .models import (Organism, LibraryProtocol, LibraryType, IndexType,
-                     IndexI7, IndexI5)
+from .models import (Organism, ReadLength, LibraryProtocol, LibraryType,
+                     IndexType, IndexI7, IndexI5, ConcentrationMethod)
 
 from .serializers import (OrganismSerializer, IndexTypeSerializer,
                           LibraryProtocolSerializer, LibraryTypeSerializer,
-                          IndexI7Serializer, IndexI5Serializer)
+                          IndexI7Serializer, IndexI5Serializer,
+                          ReadLengthSerializer, ConcentrationMethodSerializer)
 
 from library.serializers import LibrarySerializer
 from sample.serializers import SampleSerializer
@@ -193,6 +194,18 @@ class OrganismViewSet(viewsets.ReadOnlyModelViewSet):
     """ Get the list of organisms. """
     queryset = Organism.objects.all()
     serializer_class = OrganismSerializer
+
+
+class ReadLengthViewSet(viewsets.ReadOnlyModelViewSet):
+    """ Get the list of read lengths. """
+    queryset = ReadLength.objects.all()
+    serializer_class = ReadLengthSerializer
+
+
+class ConcentrationMethodViewSet(viewsets.ReadOnlyModelViewSet):
+    """ Get the list of concentration methods. """
+    queryset = ConcentrationMethod.objects.all()
+    serializer_class = ConcentrationMethodSerializer
 
 
 class IndexTypeViewSet(viewsets.ReadOnlyModelViewSet):

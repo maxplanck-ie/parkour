@@ -1,14 +1,28 @@
 from rest_framework.serializers import (ModelSerializer, ListSerializer,
                                         SerializerMethodField)
 
-from .models import (Organism, IndexType, LibraryProtocol, LibraryType,
-                     IndexI7, IndexI5)
+from .models import (Organism, ReadLength, IndexType, LibraryProtocol,
+                     LibraryType, IndexI7, IndexI5, ConcentrationMethod)
 
 
 class OrganismSerializer(ModelSerializer):
 
     class Meta:
         model = Organism
+        fields = ('id', 'name')
+
+
+class ReadLengthSerializer(ModelSerializer):
+
+    class Meta:
+        model = ReadLength
+        fields = ('id', 'name')
+
+
+class ConcentrationMethodSerializer(ModelSerializer):
+
+    class Meta:
+        model = ConcentrationMethod
         fields = ('id', 'name')
 
 

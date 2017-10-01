@@ -133,6 +133,7 @@ class GenericLibrarySampleTest(TestCase):
 # Views
 
 class TestOrganisms(BaseTestCase):
+
     def setUp(self):
         self._create_user('foo@bar.io', 'foo-foo')
         self.client.login(email='foo@bar.io', password='foo-foo')
@@ -147,6 +148,43 @@ class TestOrganisms(BaseTestCase):
         organisms = [x['name'] for x in data]
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.organism.name, organisms)
+
+
+class TestReadLengths(BaseTestCase):
+
+    def setUp(self):
+        self._create_user('foo@bar.io', 'foo-foo')
+        self.client.login(email='foo@bar.io', password='foo-foo')
+
+        self.read_length = ReadLength(name=self._get_random_name())
+        self.read_length.save()
+
+    def test_organisms_list(self):
+        """ Ensure get read lengths behaves correctly. """
+        response = self.client.get(reverse('read-length-list'))
+        data = response.json()
+        read_lengths = [x['name'] for x in data]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.read_length.name, read_lengths)
+
+
+class TestConcentrationMethods(BaseTestCase):
+
+    def setUp(self):
+        self._create_user('foo@bar.io', 'foo-foo')
+        self.client.login(email='foo@bar.io', password='foo-foo')
+
+        self.concentration_method = ConcentrationMethod(
+            name=self._get_random_name())
+        self.concentration_method.save()
+
+    def test_organisms_list(self):
+        """ Ensure get concentration methods behaves correctly. """
+        response = self.client.get(reverse('concentration-method-list'))
+        data = response.json()
+        concentration_methods = [x['name'] for x in data]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.concentration_method.name, concentration_methods)
 
 
 class TestIndexTypes(BaseTestCase):
