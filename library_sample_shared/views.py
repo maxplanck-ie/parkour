@@ -7,7 +7,6 @@ from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import list_route
-# from rest_framework.permissions import IsAdminUser
 
 from common.utils import JSONResponseMixin
 from request.models import Request
@@ -242,7 +241,6 @@ class IndexViewSet(viewsets.ViewSet):
 class LibraryProtocolViewSet(viewsets.ReadOnlyModelViewSet):
     """ Get the list of library protocols. """
     serializer_class = LibraryProtocolSerializer
-    # permission_classes = [IsAdminUser]
 
     def get_queryset(self):
         queryset = LibraryProtocol.objects.all()
@@ -440,7 +438,7 @@ class LibrarySampleBaseViewSet(viewsets.ViewSet):
             }, 404)
 
     def _create_or_update_valid(self, valid_data, ids=None):
-        """ Create or update objects valid objects. """
+        """ Create or update valid objects. """
         if not ids:
             serializer = self.serializer_class(data=valid_data, many=True)
         else:

@@ -13,7 +13,7 @@ from library_sample_shared.models import (Organism, ConcentrationMethod,
 User = get_user_model()
 
 
-def create_sample(name):
+def create_sample(name, status=0):
     organism = Organism(name='Organism')
     organism.save()
 
@@ -43,6 +43,7 @@ def create_sample(name):
 
     sample = Sample(
         name=name,
+        status=status,
         organism_id=organism.pk,
         concentration=1.0,
         concentration_method_id=concentration_method.pk,

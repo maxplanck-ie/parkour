@@ -88,7 +88,6 @@ class LibrarySampleBaseListSerializer(ListSerializer):
             obj = object_mapping.get(obj_id, None)
             if obj is not None:
                 ret.append(self.child.update(obj, data))
-
         return ret
 
     # def delete(self, instance):

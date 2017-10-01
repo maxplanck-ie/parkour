@@ -7,6 +7,10 @@ from .models import (Organism, ConcentrationMethod, ReadLength, IndexType,
                      GenericIndex, IndexI7, IndexI5, BarcodeCounter,
                      LibraryProtocol, LibraryType, GenericLibrarySample)
 
+from request.models import Request
+from library.tests import create_library
+from sample.tests import create_sample
+
 User = get_user_model()
 
 
@@ -360,3 +364,28 @@ class TestLibraryTypes(BaseTestCase):
         data = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data, [])
+
+
+class TestLibrariesSamples(BaseTestCase):
+    """ Tests for libraries and samples. """
+
+    def setUp(self):
+        user = self._create_user('foo@bar.io', 'foo-foo')
+        self.client.login(email='foo@bar.io', password='foo-foo')
+
+        self.library = create_library(self._get_random_name())
+        self.sample = create_sample(self._get_random_name())
+
+        self.request = Request(user=user)
+        self.request.save()
+        self.request.libraries.add(self.library)
+        self.request.samples.add(self.sample)
+
+    def test_libraries_and_samples_list(self):
+        """ Ensure get all libraries and samples works correctly. """
+        response = self.client.get(reverse('libraries-and-samples-list'))
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(data), 2)
+        self.assertEqual(data[0]['name'], self.library.name)
+        self.assertEqual(data[1]['name'], self.sample.name)

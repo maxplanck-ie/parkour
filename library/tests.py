@@ -9,12 +9,11 @@ from library_sample_shared.models import (Organism, ConcentrationMethod,
                                           ReadLength, LibraryProtocol,
                                           LibraryType, IndexType)
 from library.models import Library
-from sample.tests import create_sample
 
 User = get_user_model()
 
 
-def create_library(name):
+def create_library(name, status=0):
     organism = Organism(name='Organism')
     organism.save()
 
@@ -44,6 +43,7 @@ def create_library(name):
 
     library = Library(
         name=name,
+        status=status,
         organism_id=organism.pk,
         concentration=1.0,
         concentration_method_id=concentration_method.pk,
@@ -62,32 +62,6 @@ def create_library(name):
 
 
 # Views
-
-
-class TestLibrariesSamples(BaseTestCase):
-    """ Tests for libraries and samples. """
-
-    def setUp(self):
-        user = self._create_user('foo@bar.io', 'foo-foo')
-        self.client.login(email='foo@bar.io', password='foo-foo')
-
-        self.library = create_library(self._get_random_name())
-        self.sample = create_sample(self._get_random_name())
-
-        self.request = Request(user=user)
-        self.request.save()
-        self.request.libraries.add(self.library)
-        self.request.samples.add(self.sample)
-
-    def test_libraries_and_samples_list(self):
-        """ Ensure get all libraries and samples works correctly. """
-        response = self.client.get(reverse('libraries-and-samples-list'))
-        data = response.json()
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(data), 2)
-        self.assertEqual(data[0]['name'], self.library.name)
-        self.assertEqual(data[1]['name'], self.sample.name)
-
 
 class TestLibraries(BaseTestCase):
     """ Tests for libraries. """
