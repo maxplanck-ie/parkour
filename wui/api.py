@@ -9,6 +9,7 @@ from library_sample_shared.views import (OrganismViewSet, IndexTypeViewSet,
 from library.views import LibraryViewSet
 from sample.views import NucleicAcidTypeViewSet, SampleViewSet
 from incoming_libraries.views import IncomingLibrariesViewSet
+from library_preparation.views import LibraryPreparationViewSet
 
 
 router = routers.DefaultRouter()
@@ -27,3 +28,4 @@ router.register(r'libraries_and_samples', LibrarySampleListViewSet, base_name='l
 router.register(r'libraries', LibraryViewSet, base_name='libraries')
 router.register(r'samples', SampleViewSet, base_name='samples')
 router.register(r'incoming_libraries', IncomingLibrariesViewSet, base_name='incoming-libraries')
+router.register(r'library_preparation', LibraryPreparationViewSet, base_name='library-preparation')

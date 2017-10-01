@@ -6,6 +6,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.exceptions import ValidationError
+from django.db.models import Q
+from rest_framework import viewsets
+from rest_framework.response import Response
+from rest_framework.decorators import list_route
+from rest_framework.permissions import IsAdminUser
 from xlwt import Workbook, XFStyle, Formula
 
 from library_sample_shared.utils import get_indices_ids
@@ -13,6 +18,7 @@ from sample.models import Sample
 from pooling.models import Pooling
 from .models import LibraryPreparation
 from .forms import LibraryPreparationForm
+from .serializers import LibraryPreparationSerializer
 
 logger = logging.getLogger('db')
 
@@ -192,6 +198,20 @@ def qc_update_all(request):
         logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error})
+
+
+class LibraryPreparationViewSet(viewsets.ViewSet):
+    permission_classes = [IsAdminUser]
+
+    def list(self, request):
+        """ Get the list of all library preparation objects. """
+        queryset = LibraryPreparation.objects.select_related('sample').filter(
+            Q(sample__status=2) | Q(sample__status=-2)
+        )
+
+        serializer = LibraryPreparationSerializer(queryset, many=True)
+        data = sorted(serializer.data, key=lambda x: x['barcode'][3:])
+        return Response(data)
 
 
 @csrf_exempt
