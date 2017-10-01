@@ -13,8 +13,8 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
 
     items: [{
         xtype: 'grid',
-        id: 'incomingLibraries',
-        itemId: 'incomingLibraries',
+        id: 'incoming-libraries-grid',
+        itemId: 'incoming-libraries-grid',
         height: Ext.Element.getViewportHeight() - 64,
         region: 'center',
         padding: 15,
@@ -29,14 +29,14 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                     items: [
                         {
                             boxLabel: 'Show Libraries',
-                            itemId: 'showLibrariesCheckbox',
+                            itemId: 'show-libraries-checkbox',
                             margin: '0 15 0 0',
                             cls: 'grid-header-checkbox',
                             checked: true
                         },
                         {
                             boxLabel: 'Show Samples',
-                            itemId: 'showSamplesCheckbox',
+                            itemId: 'show-samples-checkbox',
                             cls: 'grid-header-checkbox',
                             checked: true
                         }
@@ -44,7 +44,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                 },
                 {
                     xtype: 'textfield',
-                    itemId: 'searchField',
+                    itemId: 'search-field',
                     emptyText: 'Search',
                     width: 200
                 }
@@ -75,16 +75,19 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                     minWidth: 150,
                     flex: 1,
                     tdCls: 'userEntry',
-                    renderer: function(val, meta) {
+                    renderer: function(value, meta) {
                         meta.tdStyle = 'font-weight:bold';
-                        return val;
+                        return value;
                     }
                 },
                 {
                     text: '',
-                    dataIndex: 'recordType',
+                    dataIndex: 'record_type',
                     tdCls: 'userEntry',
-                    width: 30
+                    width: 30,
+                    renderer: function(value, meta) {
+                        return value.charAt(0);
+                    }
                 },
                 {
                     text: 'Barcode',
@@ -131,7 +134,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                 {
                     text: 'qPCR (nM)',
                     tooltip: 'qPCR Result (user)',
-                    dataIndex: 'qPCRResult',
+                    dataIndex: 'qpcr_result',
                     tdCls: 'userEntry',
                     width: 85
                 },
@@ -283,37 +286,28 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                 },
                 {
                     text: 'QC Result',
-                    dataIndex: 'qc_result',
+                    dataIndex: 'quality_check',
                     tdCls: 'facilityEntry',
                     width: 90,
                     editor: {
                         xtype: 'combobox',
                         queryMode: 'local',
                         displayField: 'name',
-                        valueField: 'value',
+                        valueField: 'name',
                         store: Ext.create('Ext.data.Store', {
-                            fields: [
-                                {
-                                    name: 'id',
-                                    type: 'int'
-                                },
-                                {
-                                    name: 'name',
-                                    type: 'string'
-                                }
-                            ],
+                            fields: [{
+                                name: 'name',
+                                type: 'string'
+                            }],
                             data: [
                                 {
-                                    name: 'passed',
-                                    value: 1
+                                    name: 'passed'
                                 },
                                 {
-                                    name: 'failed',
-                                    value: -1
+                                    name: 'failed'
                                 },
                                 {
-                                    name: 'compromised',
-                                    value: -2
+                                    name: 'compromised'
                                 }
                             ]
                         }),
@@ -329,7 +323,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                 '<strong>Request: {children:this.getName}</strong> (# of Libraries/Samples: {rows.length}, Total Sequencing Depth: {children:this.getTotalDepth} M)',
                 {
                     getName: function(children) {
-                        return children[0].get('requestName');
+                        return children[0].get('request_name');
                     },
                     getTotalDepth: function(children) {
                         var sequencingDepths = Ext.Array.pluck(Ext.Array.pluck(children, 'data'), 'sequencing_depth');
@@ -359,13 +353,13 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                 '->',
                 {
                     xtype: 'button',
-                    itemId: 'cancelBtn',
+                    itemId: 'cancel-button',
                     iconCls: 'fa fa-ban fa-lg',
                     text: 'Cancel'
                 },
                 {
                     xtype: 'button',
-                    itemId: 'saveBtn',
+                    itemId: 'save-button',
                     iconCls: 'fa fa-floppy-o fa-lg',
                     text: 'Save'
                 }

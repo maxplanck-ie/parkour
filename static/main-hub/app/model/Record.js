@@ -11,13 +11,21 @@ Ext.define('MainHub.model.Record', {
         //     type: 'int'
         // },
         {
+            name: 'pk',
+            type: 'int'
+        },
+        {
             name: 'name',
             type: 'string'
         },
         {
-            name: 'status',
-            type: 'int'
+            name: 'record_type',
+            type: 'string'
         },
+        // {
+        //     name: 'status',
+        //     type: 'int'
+        // },
         {
             name: 'barcode',
             type: 'string'
@@ -29,9 +37,13 @@ Ext.define('MainHub.model.Record', {
         }
     ],
 
-    // getRecordType: function() {
-    //     return (this.get('sample_id') === 0) ? 'L' : 'S';
-    // },
+    getRecordType: function() {
+        var type = this.get('record_type');
+        if (type === 'Sample' && this.get('is_converted')) {
+            type = 'Library';
+        }
+        return type;
+    },
 
     getBarcode: function() {
         var barcode = this.get('barcode');

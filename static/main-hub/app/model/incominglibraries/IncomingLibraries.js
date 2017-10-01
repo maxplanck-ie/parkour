@@ -1,5 +1,5 @@
 Ext.define('MainHub.model.incominglibraries.IncomingLibraries', {
-    extend: 'MainHub.model.libraries.Library',
+    extend: 'MainHub.model.Record',
     fields: [
         {
             name: 'dilution_factor',
@@ -49,13 +49,9 @@ Ext.define('MainHub.model.incominglibraries.IncomingLibraries', {
             type: 'string'
         },
         {
-            name: 'qc_result',
-            type: 'int',
+            name: 'quality_check',
+            type: 'string',
             allowNull: true
         }
-    ],
-
-    getRecordType: function() {
-        return (this.get('sampleId') === 0) ? 'L' : 'S';
-    }
+    ]
 });

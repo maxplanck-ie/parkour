@@ -1,32 +1,36 @@
 Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.incominglibraries-incominglibraries',
+    mixins: [
+        'MainHub.grid.CheckboxesAndSearchInputMixin',
+        'MainHub.store.SyncStoreMixin'
+    ],
 
     config: {
         control: {
             '#': {
                 activate: 'activateView'
             },
-            '#incomingLibraries': {
-                refresh: 'refresh',
+            '#incoming-libraries-grid': {
+                // refresh: 'refresh',
                 itemcontextmenu: 'showContextMenu',
                 groupcontextmenu: 'showGroupContextMenu',
                 beforeedit: 'toggleEditors',
                 edit: 'editRecord'
             },
-            '#showLibrariesCheckbox': {
+            '#show-libraries-checkbox': {
                 change: 'changeFilter'
             },
-            '#showSamplesCheckbox': {
+            '#show-samples-checkbox': {
                 change: 'changeFilter'
             },
-            '#searchField': {
+            '#search-field': {
                 change: 'changeFilter'
             },
-            '#cancelBtn': {
+            '#cancel-button': {
                 click: 'cancel'
             },
-            '#saveBtn': {
+            '#save-button': {
                 click: 'save'
             }
         }
@@ -36,9 +40,9 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
         Ext.getStore('incomingLibrariesStore').reload();
     },
 
-    refresh: function() {
-        Ext.getStore('incomingLibrariesStore').reload();
-    },
+    // refresh: function() {
+    //     Ext.getStore('incomingLibrariesStore').reload();
+    // },
 
     showContextMenu: function(gridView, record, item, index, e) {
         var me = this;
@@ -78,14 +82,14 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
                 text: 'QC: All selected passed',
                 iconCls: 'x-fa fa-check',
                 handler: function() {
-                    me.qualityCheckAll(parseInt(requestId), true);
+                    me.qualityCheckAll(parseInt(requestId), 'passed');
                 }
             },
             {
                 text: 'QC: All selected failed',
                 iconCls: 'x-fa fa-times',
                 handler: function() {
-                    me.qualityCheckAll(parseInt(requestId), false);
+                    me.qualityCheckAll(parseInt(requestId), 'failed');
                 }
             }]
         }).showAt(e.getXY());
@@ -94,7 +98,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
     selectUnselectAll: function(requestId, selected) {
         var store = Ext.getStore('incomingLibrariesStore');
         store.each(function(item) {
-            if (item.get('requestId') === requestId) {
+            if (item.get('request') === requestId) {
                 item.set('selected', selected);
             }
         });
@@ -107,7 +111,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
         var nucleicAcidTypesStore = Ext.getStore('nucleicAcidTypesStore');
 
         // Toggle qPCR Result and RNA Quality
-        if (record.get('recordType') === 'L') {
+        if (record.get('record_type') === 'Library') {
             qPCRResultEditor.enable();
             rnaQualityEditor.disable();
         } else {
@@ -138,7 +142,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
 
         if (typeof dataIndex !== 'undefined' && allowedColumns.indexOf(dataIndex) !== -1) {
             store.each(function(item) {
-                if (item.get('requestId') === record.get('requestId') && item !== record) {
+                if (item.get('request') === record.get('request') && item !== record) {
                     item.set(dataIndex, record.get(dataIndex));
 
                     // Calculate Amount (facility)
@@ -157,14 +161,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
             });
 
             // Send the changes to the server
-            store.sync({
-                failure: function(batch, options) {
-                    var error = batch.operations[0].getError();
-                    setTimeout(function() {
-                        Ext.ux.ToastMessage(error, 'error');
-                    }, 100);
-                }
-            });
+            this.syncStore('incomingLibrariesStore');
         }
     },
 
@@ -173,11 +170,6 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
         var changes = record.getChanges();
         var values = context.newValues;
 
-        var params = $.extend({
-            record_type: record.getRecordType(),
-            record_id: (record.getRecordType() === 'L') ? record.get('libraryId') : record.get('sampleId')
-        }, values);
-
         // Compute Amount
         if (Object.keys(changes).indexOf('amount_facility') === -1 &&
             values.dilution_factor && values.concentration_facility &&
@@ -185,73 +177,30 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
             var amountFacility = parseFloat(values.dilution_factor) *
                 parseFloat(values.concentration_facility) *
                 parseFloat(values.sample_volume_facility);
-            params.amount_facility = amountFacility;
+
+            record.set('amount_facility', amountFacility);
         }
 
-        Ext.Ajax.request({
-            url: 'incoming_libraries/update/',
-            method: 'POST',
-            timeout: 1000000,
-            scope: this,
-            params: params,
-
-            success: function(response) {
-                var obj = Ext.JSON.decode(response.responseText);
-                if (obj.success) {
-                    Ext.getStore('incomingLibrariesStore').reload();
-                } else {
-                    Ext.ux.ToastMessage(obj.error, 'error');
-                }
-            },
-
-            failure: function(response) {
-                Ext.ux.ToastMessage(response.statusText, 'error');
-                console.error(response);
-            }
-        });
+        // Send the changes to the server
+        this.syncStore('incomingLibrariesStore');
     },
 
     qualityCheckAll: function(requestId, result) {
         var store = Ext.getStore('incomingLibrariesStore');
-        var libraries = [];
-        var samples = [];
 
         store.each(function(item) {
-            if (item.get('requestId') === requestId && item.get('selected')) {
-                if (item.get('sampleId') === 0) {
-                    libraries.push(item.get('libraryId'));
-                } else {
-                    samples.push(item.get('sampleId'));
-                }
+            if (item.get('request') === requestId && item.get('selected')) {
+                item.set('quality_check', result);
             }
         });
 
-        if (libraries.length !== 0 || samples.length !== 0) {
-            Ext.Ajax.request({
-                url: 'incoming_libraries/qc_update_all/',
-                method: 'POST',
-                scope: this,
-                params: {
-                    libraries: Ext.JSON.encode(libraries),
-                    samples: Ext.JSON.encode(samples),
-                    result: result
-                },
-                success: function(response) {
-                    var obj = Ext.JSON.decode(response.responseText);
-                    if (obj.success) {
-                        Ext.getStore('incomingLibrariesStore').reload();
-                    } else {
-                        Ext.ux.ToastMessage(obj.error, 'error');
-                    }
-                },
-                failure: function(response) {
-                    Ext.ux.ToastMessage(response.statusText, 'error');
-                    console.error(response);
-                }
-            });
-        } else {
+        if (store.getModifiedRecords().length === 0) {
             Ext.ux.ToastMessage('You did not select any libraries/samples.', 'warning');
+            return;
         }
+
+        // Send the changes to the server
+        this.syncStore('incomingLibrariesStore');
     },
 
     cancel: function() {
@@ -259,61 +208,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
     },
 
     save: function() {
-        MainHub.Store.save('incomingLibrariesStore');
-    },
-
-    changeFilter: function(el, value) {
-        var grid = Ext.getCmp('incomingLibraries');
-        var store = grid.getStore();
-        var columns = Ext.pluck(grid.getColumns(), 'dataIndex');
-        var showLibraries = null;
-        var showSamples = null;
-        var searchQuery = null;
-
-        if (el.itemId === 'showLibrariesCheckbox') {
-            showLibraries = value;
-            showSamples = el.up().items.items[1].getValue();
-            searchQuery = el.up('header').down('textfield').getValue();
-        } else if (el.itemId === 'showSamplesCheckbox') {
-            showLibraries = el.up().items.items[0].getValue();
-            showSamples = value;
-            searchQuery = el.up('header').down('textfield').getValue();
-        } else if (el.itemId === 'searchField') {
-            showLibraries = el.up().down('fieldcontainer').items.items[0].getValue();
-            showSamples = el.up().down('fieldcontainer').items.items[1].getValue();
-            searchQuery = value;
-        }
-
-        var showFilter = Ext.util.Filter({
-            filterFn: function(record) {
-                var res = false;
-                if (record.get('recordType') === 'L') {
-                    res = res || showLibraries;
-                } else {
-                    res = res || showSamples;
-                }
-                return res;
-            }
-        });
-
-        var searchFilter = Ext.util.Filter({
-            filterFn: function(record) {
-                var res = false;
-                if (searchQuery) {
-                    Ext.each(columns, function(column) {
-                        var value = record.get(column);
-                        if (value && value.toString().toLowerCase().indexOf(searchQuery.toLowerCase()) > -1) {
-                            res = res || true;
-                        }
-                    });
-                } else {
-                    res = true;
-                }
-                return res;
-            }
-        });
-
-        store.clearFilter();
-        store.filter([showFilter, searchFilter]);
+        // Send the changes to the server
+        this.syncStore('incomingLibrariesStore');
     }
 });

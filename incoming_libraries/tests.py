@@ -57,7 +57,7 @@ class TestIncomingLibraries(BaseTestCase):
         library = create_library(self._get_random_name(), status=1)
         response = self.client.post(reverse('incoming-libraries-edit'), {
             'data': json.dumps([{
-                'id': library.pk,
+                'pk': library.pk,
                 'record_type': 'Library',
                 'dilution_factor': 2,
                 'concentration_facility': 2.0,
@@ -79,11 +79,11 @@ class TestIncomingLibraries(BaseTestCase):
         library2 = create_library(self._get_random_name(), status=1)
         response = self.client.post(reverse('incoming-libraries-edit'), {
             'data': json.dumps([{
-                'id': library1.pk,
+                'pk': library1.pk,
                 'record_type': 'Library',
                 'concentration_facility': 2.0,
             }, {
-                'id': library2.pk,
+                'pk': library2.pk,
                 'record_type': 'Library',
                 'dilution_factor': 'string value',
             }])
@@ -105,11 +105,11 @@ class TestIncomingLibraries(BaseTestCase):
         library = create_library(self._get_random_name(), status=1)
         response = self.client.post(reverse('incoming-libraries-edit'), {
             'data': json.dumps([{
-                'id': library.pk,
+                'pk': library.pk,
                 'record_type': 'Library',
                 'concentration_facility': 2.0,
             }, {
-                'id': 'blah',
+                'pk': 'blah',
                 'record_type': 'Sample',
                 'concentration_facility': 2.0,
             }])
@@ -126,7 +126,7 @@ class TestIncomingLibraries(BaseTestCase):
         library = create_library(self._get_random_name(), status=1)
         response = self.client.post(reverse('incoming-libraries-edit'), {
             'data': json.dumps([{
-                'id': library.pk,
+                'pk': library.pk,
                 'record_type': 'Library',
                 'quality_check': 'passed',
             }])
@@ -142,11 +142,11 @@ class TestIncomingLibraries(BaseTestCase):
         sample2 = create_sample(self._get_random_name(), status=1)
         response = self.client.post(reverse('incoming-libraries-edit'), {
             'data': json.dumps([{
-                'id': sample1.pk,
+                'pk': sample1.pk,
                 'record_type': 'Sample',
                 'quality_check': 'failed',
             }, {
-                'id': sample2.pk,
+                'pk': sample2.pk,
                 'record_type': 'Sample',
                 'quality_check': 'compromised',
             }])

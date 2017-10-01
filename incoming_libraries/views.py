@@ -174,7 +174,10 @@ class IncomingLibrariesViewSet(viewsets.ViewSet):
     @list_route(methods=['post'])
     def edit(self, request):
         """ Update multiple libraries or samples. """
-        post_data = json.loads(request.POST.get('data', '[]'))
+        if request.is_ajax():
+            post_data = request.data.get('data', [])
+        else:
+            post_data = json.loads(request.data.get('data', '[]'))
 
         if not post_data:
             return Response({
@@ -192,10 +195,10 @@ class IncomingLibrariesViewSet(viewsets.ViewSet):
         for obj in post_data:
             try:
                 if obj['record_type'] == 'Library':
-                    library_ids.append(int(obj['id']))
+                    library_ids.append(int(obj['pk']))
                     library_post_data.append(obj)
                 elif obj['record_type'] == 'Sample':
-                    sample_ids.append(int(obj['id']))
+                    sample_ids.append(int(obj['pk']))
                     sample_post_data.append(obj)
             except (KeyError, ValueError):
                 continue
@@ -241,7 +244,7 @@ class IncomingLibrariesViewSet(viewsets.ViewSet):
                           if not item[0]]
 
             if any(valid_data):
-                new_ids = [x['id'] for x in valid_data]
+                new_ids = [x['pk'] for x in valid_data]
                 self._update_valid(
                     model_class, serializer_class, new_ids, valid_data)
                 contain_invalid = True

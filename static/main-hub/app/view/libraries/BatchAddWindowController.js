@@ -41,7 +41,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
 
             '#saveBtn': {
                 click: 'save'
-            },
+            }
         }
     },
 
