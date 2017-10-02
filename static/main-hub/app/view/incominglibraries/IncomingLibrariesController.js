@@ -4,6 +4,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
 
     mixins: [
         'MainHub.grid.CheckboxesAndSearchInputMixin',
+        'MainHub.grid.ContextMenuMixin',
         'MainHub.store.SyncStoreMixin'
     ],
 
@@ -45,59 +46,6 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
     //     Ext.getStore('incomingLibrariesStore').reload();
     // },
 
-    showContextMenu: function(gridView, record, item, index, e) {
-        var me = this;
-        e.stopEvent();
-        Ext.create('Ext.menu.Menu', {
-            items: [{
-                text: 'Apply to All',
-                iconCls: 'x-fa fa-check-circle',
-                handler: function() {
-                    var dataIndex = MainHub.Utilities.getDataIndex(e, gridView);
-                    me.applyToAll(record, dataIndex);
-                }
-            }]
-        }).showAt(e.getXY());
-    },
-
-    showGroupContextMenu: function(view, node, requestId, e) {
-        var me = this;
-        e.stopEvent();
-        Ext.create('Ext.menu.Menu', {
-            items: [
-                {
-                    text: 'Select All',
-                    iconCls: 'x-fa fa-check-square-o',
-                    handler: function() {
-                        me.selectUnselectAll(parseInt(requestId), true);
-                    }
-                },
-                {
-                    text: 'Unselect All',
-                    iconCls: 'x-fa fa-square-o',
-                    handler: function() {
-                        me.selectUnselectAll(parseInt(requestId), false);
-                    }
-                },
-                '-',
-                {
-                    text: 'QC: All selected passed',
-                    iconCls: 'x-fa fa-check',
-                    handler: function() {
-                        me.qualityCheckAll(parseInt(requestId), 'passed');
-                    }
-                },
-                {
-                    text: 'QC: All selected failed',
-                    iconCls: 'x-fa fa-times',
-                    handler: function() {
-                        me.qualityCheckAll(parseInt(requestId), 'failed');
-                    }
-                }
-            ]
-        }).showAt(e.getXY());
-    },
-
     selectUnselectAll: function(requestId, selected) {
         var store = Ext.getStore('incomingLibrariesStore');
         store.each(function(item) {
@@ -130,6 +78,26 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
                 rnaQualityEditor.disable();
             }
         }
+    },
+
+    editRecord: function(editor, context) {
+        var record = context.record;
+        var changes = record.getChanges();
+        var values = context.newValues;
+
+        // Compute Amount
+        if (Object.keys(changes).indexOf('amount_facility') === -1 &&
+            values.dilution_factor && values.concentration_facility &&
+            values.sample_volume_facility) {
+            var amountFacility = parseFloat(values.dilution_factor) *
+                parseFloat(values.concentration_facility) *
+                parseFloat(values.sample_volume_facility);
+
+            record.set('amount_facility', amountFacility);
+        }
+
+        // Send the changes to the server
+        this.syncStore('incomingLibrariesStore');
     },
 
     applyToAll: function(record, dataIndex) {
@@ -167,26 +135,6 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
         }
     },
 
-    editRecord: function(editor, context) {
-        var record = context.record;
-        var changes = record.getChanges();
-        var values = context.newValues;
-
-        // Compute Amount
-        if (Object.keys(changes).indexOf('amount_facility') === -1 &&
-            values.dilution_factor && values.concentration_facility &&
-            values.sample_volume_facility) {
-            var amountFacility = parseFloat(values.dilution_factor) *
-                parseFloat(values.concentration_facility) *
-                parseFloat(values.sample_volume_facility);
-
-            record.set('amount_facility', amountFacility);
-        }
-
-        // Send the changes to the server
-        this.syncStore('incomingLibrariesStore');
-    },
-
     qualityCheckAll: function(requestId, result) {
         var store = Ext.getStore('incomingLibrariesStore');
 
@@ -208,12 +156,12 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
         this.syncStore('incomingLibrariesStore');
     },
 
-    cancel: function() {
-        Ext.getStore('incomingLibrariesStore').rejectChanges();
-    },
-
     save: function() {
         // Send the changes to the server
         this.syncStore('incomingLibrariesStore');
+    },
+
+    cancel: function() {
+        Ext.getStore('incomingLibrariesStore').rejectChanges();
     }
 });

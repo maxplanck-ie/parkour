@@ -11,6 +11,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import list_route
 from rest_framework.permissions import IsAdminUser
+
 from xlwt import Workbook, XFStyle, Formula
 
 from library_sample_shared.utils import get_indices_ids
@@ -21,51 +22,6 @@ from .forms import LibraryPreparationForm
 from .serializers import LibraryPreparationSerializer
 
 logger = logging.getLogger('db')
-
-
-@login_required
-@staff_member_required
-def get_all(request):
-    """ Get the list of all samples for Library Preparation. """
-    error = ''
-    data = []
-
-    objects = LibraryPreparation.objects.select_related('sample')
-
-    for obj in objects:
-        req = obj.sample.request.get()
-
-        if obj and (obj.sample.status == 2 or obj.sample.status == -2):
-            # pool = obj.sample.pool.get()
-            pool = obj.sample.pool.filter()[0]
-            index_i7_id, index_i5_id = get_indices_ids(obj.sample)
-            data.append({
-                'active': False,
-                'name': obj.sample.name,
-                'requestName': req.name,
-                'poolName': pool.name,
-                'sampleId': obj.sample.pk,
-                'barcode': obj.sample.barcode,
-                'is_converted': obj.sample.is_converted,
-                'comments_facility': obj.sample.comments_facility,
-                'libraryProtocol': obj.sample.library_protocol.pk,
-                'libraryProtocolName': obj.sample.library_protocol.name,
-                'concentration_sample': obj.sample.concentration,
-                'starting_amount': obj.starting_amount,
-                'spike_in_description': obj.spike_in_description,
-                'spike_in_volume': obj.spike_in_volume,
-                'indexI7Id': index_i7_id,
-                'indexI5Id': index_i5_id,
-                'pcr_cycles': obj.pcr_cycles,
-                'concentration_library': obj.concentration_library,
-                'mean_fragment_size': obj.mean_fragment_size,
-                'dilution_factor': obj.sample.dilution_factor,
-                'comments': obj.comments,
-                'qpcr_result': obj.qpcr_result,
-                'nM': obj.nM,
-            })
-    data = sorted(data, key=lambda x: x['barcode'][3:])
-    return JsonResponse({'success': not error, 'error': error, 'data': data})
 
 
 @login_required
@@ -98,7 +54,7 @@ def update(request):
             if qc_result:
                 if qc_result == '1':
                     if not obj.concentration_library:
-                        raise ValueError('Library Concentartion is not set.')
+                        raise ValueError('Library Concentration is not set.')
                     sample.status = 3
                     sample.save(update_fields=['status'])
 
@@ -130,76 +86,6 @@ def update(request):
     return JsonResponse({'success': not error, 'error': error})
 
 
-@login_required
-@staff_member_required
-def update_all(request):
-    """ Update a field in all records (apply to all). """
-    error = ''
-
-    if request.is_ajax():
-        data = json.loads(request.body.decode('utf-8'))
-        for item in data:
-            try:
-                sample_id = item['sample_id']
-                obj = LibraryPreparation.objects.get(sample_id=sample_id)
-                changed_value = item['changed_value']
-                for key, value in changed_value.items():
-                    if key == 'concentration_sample':
-                        obj.sample.concentration = value
-                        obj.sample.save(update_fields=['concentration'])
-                    elif key == 'comments_facility':
-                        obj.sample.comments_facility = value
-                        obj.sample.save(update_fields=['comments_facility'])
-                    elif hasattr(obj, key):
-                        try:
-                            val = obj._meta.get_field(key).to_python(value)
-                            if val is None:
-                                raise ValidationError('Wrong value.')
-                        except ValidationError:
-                            pass
-                        else:
-                            setattr(obj, key, value)
-
-                # Calculate nM
-                if 'nM' not in changed_value.keys():
-                    cl = obj.concentration_library
-                    mfs = obj.mean_fragment_size
-                    if all([cl, mfs]) and cl > 0.0 and mfs > 0.0:
-                        obj.nM = round((cl / (650 * mfs)) * 10**6, 2)
-
-                obj.save()
-
-            except Exception as e:
-                error = 'Some of the libraries were not updated ' + \
-                    '(see the logs).'
-                logger.exception(e)
-
-    return JsonResponse({'success': not error, 'error': error})
-
-
-@login_required
-@staff_member_required
-def qc_update_all(request):
-    """ Update QC Result for given samples. """
-    error = ''
-
-    samples = json.loads(request.POST.get('samples', '[]'))
-    result = json.loads(request.POST.get('result', ''))
-    qc_result = 3 if result is True else -1
-
-    try:
-        for sample_id in samples:
-            sample = Sample.objects.get(pk=sample_id)
-            sample.status = qc_result
-            sample.save(update_fields=['status'])
-
-    except Exception as e:
-        error = str(e)
-        logger.exception(e)
-
-    return JsonResponse({'success': not error, 'error': error})
-
-
 class LibraryPreparationViewSet(viewsets.ViewSet):
     permission_classes = [IsAdminUser]
 
@@ -212,6 +98,62 @@ class LibraryPreparationViewSet(viewsets.ViewSet):
         serializer = LibraryPreparationSerializer(queryset, many=True)
         data = sorted(serializer.data, key=lambda x: x['barcode'][3:])
         return Response(data)
+
+    @list_route(methods=['post'])
+    def edit(self, request):
+        """ Update multiple library preparation objects. """
+
+        if request.is_ajax():
+            post_data = request.data.get('data', [])
+        else:
+            post_data = json.loads(request.data.get('data', '[]'))
+
+        if not post_data:
+            return Response({
+                'success': False,
+                'message': 'Invalid payload.',
+            }, 400)
+
+        ids = []
+        for x in post_data:
+            try:
+                ids.append(int(x['pk']))
+            except (KeyError, ValueError):
+                continue
+
+        objects = LibraryPreparation.objects.filter(pk__in=ids)
+        serializer = LibraryPreparationSerializer(
+            data=post_data, instance=objects, many=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'success': True})
+
+        else:
+            # Try to update valid objects
+            valid_data = [item[1] for item in zip(serializer.errors, post_data)
+                          if not item[0]]
+
+            if any(valid_data):
+                self._update_valid(valid_data)
+                return Response({
+                    'success': True,
+                    'message': 'Some records cannot be updated.',
+                })
+            else:
+                return Response({
+                    'success': False,
+                    'message': 'Invalid payload.',
+                }, 400)
+
+    def _update_valid(self, data):
+        """ Update valid objects. """
+        ids = [x['pk'] for x in data]
+        objects = LibraryPreparation.objects.filter(pk__in=ids)
+        serializer = LibraryPreparationSerializer(
+            data=data, instance=objects, many=True)
+        serializer.is_valid()
+        serializer.save()
 
 
 @csrf_exempt

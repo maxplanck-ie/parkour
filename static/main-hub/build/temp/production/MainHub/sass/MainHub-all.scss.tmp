@@ -995,6 +995,8 @@ $include-mainhub-application: dynamic(true);;
 $include-mainhub-store: dynamic(true);;
 $include-mainhub-utilities: dynamic(true);;
 $include-mainhub-grid-checkboxesandsearchinputmixin: dynamic(true);;
+$include-mainhub-grid-contextmenumixin: dynamic(true);;
+$include-mainhub-grid-searchinputmixin: dynamic(true);;
 $include-mainhub-model-base: dynamic(true);;
 $include-mainhub-model-record: dynamic(true);;
 $include-mainhub-model-flowcell-flowcell: dynamic(true);;

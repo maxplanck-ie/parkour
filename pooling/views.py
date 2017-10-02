@@ -131,7 +131,8 @@ def update(request):
 
         if library_id == '0' or library_id == 0:
             obj = Pooling.objects.get(sample_id=sample_id)
-            record = Sample.objects.get(pk=sample_id)
+            # record = Sample.objects.get(pk=sample_id)
+            record = obj.sample
 
             # Update concentration value
             lib_prep_obj = LibraryPreparation.objects.get(sample_id=sample_id)
@@ -139,12 +140,13 @@ def update(request):
             lib_prep_obj.save(update_fields=['concentration_library'])
         else:
             obj = Pooling.objects.get(library_id=library_id)
-            record = Library.objects.get(pk=library_id)
+            # record = Library.objects.get(pk=library_id)
+            record = obj.library
 
             # Update concentration value
-            library = Library.objects.get(pk=library_id)
-            library.concentration = concentration
-            library.save(update_fields=['concentration'])
+            # library = Library.objects.get(pk=library_id)
+            record.concentration = concentration
+            record.save(update_fields=['concentration'])
 
         form = PoolingForm(request.POST, instance=obj)
 
@@ -182,11 +184,13 @@ def update_all(request):
         for item in data:
             try:
                 if item['sample_id'] == 0 or item['sample_id'] == '0':
-                    library = Library.objects.get(pk=item['library_id'])
-                    obj = Pooling.objects.get(library=library)
+                    # library = Library.objects.get(pk=item['library_id'])
+                    # obj = Pooling.objects.get(library=library)
+                    obj = Pooling.objects.get(library_id=item['library_id'])
                 else:
-                    sample = Sample.objects.get(pk=item['sample_id'])
-                    obj = Pooling.objects.get(sample=sample)
+                    # sample = Sample.objects.get(pk=item['sample_id'])
+                    # obj = Pooling.objects.get(sample=sample)
+                    obj = Pooling.objects.get(sample_id=item['sample_id'])
                 changed_value = item['changed_value']
                 for key, value in changed_value.items():
                     if hasattr(obj, key):

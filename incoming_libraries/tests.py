@@ -91,8 +91,7 @@ class TestIncomingLibraries(BaseTestCase):
         data = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertTrue(data['success'])
-        self.assertEqual('Invalid payload. Some records cannot be updated.',
-                         data['message'])
+        self.assertEqual(data['message'], 'Some records cannot be updated.')
         self.assertEqual(Library.objects.get(
             pk=library1.pk).concentration_facility, 2.0)
 

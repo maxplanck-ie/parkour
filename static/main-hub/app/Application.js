@@ -87,6 +87,7 @@ Ext.define('MainHub.Utilities', {
         var poolingStore = Ext.getStore('poolingStore');
         if (poolingStore.isLoaded()) poolingStore.reload();
     },
+
     getDataIndex: function(e, view) {
         var xPos = e.getXY()[0];
         var columns = view.getGridColumns();
@@ -129,6 +130,25 @@ Ext.define('MainHub.Store', {
 
                 new Noty({ text: error, type: 'error' }).show();
             }
+        });
+    }
+});
+
+Ext.define('MainHub.grid.SearchInputMixin', {
+    changeFilter: function(el, value) {
+        var grid = el.up('grid');
+        var store = grid.getStore();
+        var columns = Ext.pluck(grid.getColumns(), 'dataIndex');
+
+        store.clearFilter();
+        store.filterBy(function(record) {
+            var res = false;
+            Ext.each(columns, function(column) {
+                if (record.data[column] && record.data[column].toString().toLowerCase().indexOf(value.toLowerCase()) > -1) {
+                    res = res || true;
+                }
+            });
+            return res;
         });
     }
 });
@@ -190,14 +210,94 @@ Ext.define('MainHub.grid.CheckboxesAndSearchInputMixin', {
     }
 });
 
+Ext.define('MainHub.grid.ContextMenuMixin', {
+    showContextMenu: function(gridView, record, item, index, e) {
+        var me = this;
+        e.stopEvent();
+        Ext.create('Ext.menu.Menu', {
+            items: [{
+                text: 'Apply to All',
+                iconCls: 'x-fa fa-check-circle',
+                handler: function() {
+                    var dataIndex = me.getDataIndex(e, gridView);
+                    me.applyToAll(record, dataIndex);
+                }
+            }]
+        }).showAt(e.getXY());
+    },
+
+    showGroupContextMenu: function(view, node, groupId, e) {
+        var me = this;
+        e.stopEvent();
+        Ext.create('Ext.menu.Menu', {
+            items: [{
+                text: 'Select All',
+                iconCls: 'x-fa fa-check-square-o',
+                handler: function() {
+                    me.selectUnselectAll(parseInt(groupId), true);
+                }
+            },
+            {
+                text: 'Unselect All',
+                iconCls: 'x-fa fa-square-o',
+                handler: function() {
+                    me.selectUnselectAll(parseInt(groupId), false);
+                }
+            },
+                '-',
+            {
+                text: 'QC: All selected passed',
+                iconCls: 'x-fa fa-check',
+                handler: function() {
+                    me.qualityCheckAll(parseInt(groupId), 'passed');
+                }
+            },
+            {
+                text: 'QC: All selected failed',
+                iconCls: 'x-fa fa-times',
+                handler: function() {
+                    me.qualityCheckAll(parseInt(groupId), 'failed');
+                }
+            }]
+        }).showAt(e.getXY());
+    },
+
+    getDataIndex: function(e, view) {
+        var xPos = e.getXY()[0];
+        var columns = view.getGridColumns();
+        var dataIndex;
+
+        for (var column in columns) {
+            var leftEdge = columns[column].getPosition()[0];
+            var rightEdge = columns[column].getSize().width + leftEdge;
+
+            if (xPos >= leftEdge && xPos <= rightEdge) {
+                dataIndex = columns[column].dataIndex;
+                break;
+            }
+        }
+
+        return dataIndex;
+    }
+});
+
 Ext.define('MainHub.store.SyncStoreMixin', {
     syncStore: function(name) {
         Ext.getStore(name).sync({
-            success: function() {
+            success: function(batch) {
+                var response = batch.operations[0].getResponse();
+                var obj = Ext.JSON.decode(response.responseText);
+
                 Ext.getStore(name).reload();
-                new Noty({ text: 'The changes have been saved.' }).show();
+
+                if (obj.hasOwnProperty('message') && obj.message !== '') {
+                    new Noty({ text: obj.message, type: 'warning' }).show();
+                } else {
+                    new Noty({ text: 'The changes have been saved.' }).show();
+                }
             },
-            failure: function(batch, options) {
+
+            failure: function(batch) {
                 var error = batch.operations[0].getError();
                 console.error(error);
 

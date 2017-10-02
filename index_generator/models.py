@@ -34,3 +34,12 @@ class Pool(DateTimeMixin):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        super().save(*args, **kwargs)
+
+        """ Update the pool name after receiving a Pool id. """
+        if created:
+            self.name = 'Pool_%i' % self.pk
+            self.save()

@@ -209,14 +209,14 @@ def save_pool(request):
                 # Update sample fields
                 smpl.index_i7 = index_i7
                 smpl.index_i5 = index_i5
-                smpl.is_pooled = True
-                smpl.is_converted = True
-                smpl.barcode = smpl.barcode.replace('S', 'L')
+                # smpl.is_pooled = True
+                # smpl.is_converted = True
+                # smpl.barcode = smpl.barcode.replace('S', 'L')
                 smpl.save()
 
                 # # Create Library Preparation object
-                lp_obj = LibraryPreparation(sample=smpl)
-                lp_obj.save()
+                # lp_obj = LibraryPreparation(sample=smpl)
+                # lp_obj.save()
 
             # Trigger Pool Size update
             pool.save(update_fields=['size'])

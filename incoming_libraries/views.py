@@ -222,7 +222,7 @@ class IncomingLibrariesViewSet(viewsets.ViewSet):
         else:
             return Response({
                 'success': True,
-                'message': 'Invalid payload. Some records cannot be updated.',
+                'message': 'Some records cannot be updated.',
             })
 
     def _update_objects(self, model_class, serializer_class, ids, data):

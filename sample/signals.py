@@ -13,4 +13,4 @@ def create_barcode(sender, instance, created, **kwargs):
         counter.save()
 
         instance.barcode = generate_barcode('S', str(counter.counter))
-        instance.save()
+        instance.save(update_fields=['barcode'])
