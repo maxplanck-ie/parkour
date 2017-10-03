@@ -3,9 +3,10 @@ from .base import *
 
 DEBUG = True
 
-# INSTALLED_APPS += (
-#     'debug_toolbar',
-# )
+INSTALLED_APPS += (
+    # 'debug_toolbar',
+    'django_extensions',
+)
 
 # MIDDLEWARE_CLASSES += (
 #     'debug_toolbar.middleware.DebugToolbarMiddleware',
@@ -49,3 +50,6 @@ PDF_OPTIONS = {
     'footer-center': 'Page [page] of [topage]',
     'footer-font-size': 8,
 }
+
+# Always use Python for shell_plus
+SHELL_PLUS = 'plain'

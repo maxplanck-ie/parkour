@@ -13,6 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
+# from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
@@ -283,33 +284,62 @@ def send_email(request):
     return JsonResponse({'success': not error, 'error': error})
 
 
-class RequestViewSet(viewsets.ViewSet):
+class RequestViewSet(viewsets.GenericViewSet):
+    serializer_class = RequestSerializer
 
-    def list(self, request):
-        queryset = Request.objects.all().order_by('-create_time')
+    def get_queryset(self):
+        queryset = Request.objects.prefetch_related(
+            'user', 'libraries', 'samples', 'files').order_by('-create_time')
+
+        # If a search query is given
+        search_query = self.request.query_params.get('query', None)
+        if search_query:
+            # TODO: implements this
+            # fields = [f for f in Request._meta.fields
+            #           if isinstance(f, CharField) or isinstance(f, TextField)]
+            # queries = [Q(**{f.name: search_query}) for f in fields]
+            # qs = Q()
+            # for query in queries:
+            #     qs = qs | query
+            # queryset = queryset.filter(qs)
+            pass
+
         if self.request.user.is_staff:
             # Show only those Requests, whose libraries and samples
             # haven't reached status 6 yet
-            queryset = [x for x in queryset if x.statuses.count(6) == 0]
+            # TODO: find a way to hide requests
+            # queryset = [x for x in queryset if x.statuses.count(6) == 0]
+            pass
         else:
             queryset = queryset.filter(user=self.request.user)
-        serializer = RequestSerializer(queryset, many=True, context={
-            'request': request,
-        })
+        return queryset
+
+    def list(self, request):
+        """ Get the list of requests. """
+        queryset = self.get_queryset()
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
-        data = {}
         try:
             queryset = Request.objects.get(pk=pk)
-        except (ValueError, Request.DoesNotExist):
-            pass
+        except ValueError:
+            return Response({
+                'success': False,
+                'message': 'Id is not provided.',
+            }, 400)
+        except Request.DoesNotExist:
+            return Response({
+                'success': False,
+                'message': 'Request does not exist.',
+            }, 404)
         else:
-            serializer = RequestSerializer(queryset, context={
-                'request': request,
-            })
-            data = serializer.data
-        return Response(data)
+            serializer = self.get_serializer(queryset)
+            return Response(serializer.data)
 
     # def destroy(self, request, pk=None):
     #     try:
@@ -323,11 +353,18 @@ class RequestViewSet(viewsets.ViewSet):
     @detail_route(methods=['get'])
     def get_records(self, request, pk=None):
         """ Get the list of record's submitted libraries and samples. """
-        data = []
         try:
             queryset = Request.objects.get(pk=pk)
-        except (ValueError, Request.DoesNotExist):
-            pass
+        except ValueError:
+            return Response({
+                'success': False,
+                'message': 'Id is not provided.',
+            }, 400)
+        except Request.DoesNotExist:
+            return Response({
+                'success': False,
+                'message': 'Request does not exist.',
+            }, 404)
         else:
             data = [{
                 'name': obj.name,
@@ -339,17 +376,24 @@ class RequestViewSet(viewsets.ViewSet):
                 if isinstance(obj, Sample) and obj.is_converted else False,
             } for obj in queryset.records]
             data = sorted(data, key=lambda x: x['barcode'][3:])
-        return Response(data)
+            return Response(data)
 
     @detail_route(methods=['get'])
     def get_files(self, request, pk=None):
         """ Get the list of attached files. """
-        data = []
         try:
             queryset = Request.objects.get(pk=pk).files.order_by('name')
-        except (ValueError, Request.DoesNotExist):
-            pass
+        except ValueError:
+            return Response({
+                'success': False,
+                'message': 'Id is not provided.',
+            }, 400)
+        except Request.DoesNotExist:
+            return Response({
+                'success': False,
+                'message': 'Request does not exist.',
+            }, 404)
         else:
             serializer = RequestFileSerializer(queryset, many=True)
             data = serializer.data
-        return Response(data)
+            return Response(data)
