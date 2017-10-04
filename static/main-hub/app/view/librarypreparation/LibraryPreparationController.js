@@ -86,7 +86,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
 
         if (typeof dataIndex !== undefined && allowedColumns.indexOf(dataIndex) !== -1) {
             store.each(function(item) {
-                if (item.get('libraryProtocol') === record.get('libraryProtocol') && item !== record) {
+                if (item.get('library_protocol') === record.get('library_protocol') && item !== record) {
                     item.set(dataIndex, record.get(dataIndex));
 
                     // Calculate nM

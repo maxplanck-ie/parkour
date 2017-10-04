@@ -38,7 +38,6 @@ class TestLibraryPreparation(BaseTestCase):
 
     def setUp(self):
         self.user = self._create_user('test@test.io', 'foo-bar')
-        self._create_user('non-staff@test.io', 'test', False)  # non-staff user
 
     def test_library_preparation_list(self):
         """ Ensure get library preparation list behaves correctly. """
@@ -60,12 +59,13 @@ class TestLibraryPreparation(BaseTestCase):
 
     def test_library_preparation_list_non_staff(self):
         """Ensure error is thrown if a non-staff user tries to get the list."""
+        self._create_user('non-staff@test.io', 'test', False)
         self.client.login(email='non-staff@test.io', password='test')
         response = self.client.get(reverse('library-preparation-list'))
         self.assertTrue(response.status_code, 403)
 
     def test_update_library_preparation_object(self):
-        """ Ensure update library preparation objects behaves correctly. """
+        """ Ensure update library preparation object behaves correctly. """
         self.client.login(email='test@test.io', password='foo-bar')
 
         obj = create_library_preparation_obj(

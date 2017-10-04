@@ -2,36 +2,41 @@ Ext.define('MainHub.view.pooling.PoolingController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.pooling',
 
-    requires: ['Ext.ux.FileUploadWindow'],
+    mixins: [
+        'MainHub.grid.SearchInputMixin',
+        'MainHub.grid.ContextMenuMixin',
+        'MainHub.store.SyncStoreMixin'
+    ],
 
     config: {
         control: {
             '#': {
                 activate: 'activateView'
             },
-            '#poolingTable': {
+            '#pooling-grid': {
                 // boxready: 'refresh',
-                refresh: 'refresh',
+                // refresh: 'refresh',
+                itemcontextmenu: 'showContextMenu',
+                groupcontextmenu: 'showGroupContextMenu',
                 beforeEdit: 'toggleEditors',
-                edit: 'editRecord',
-                groupcontextmenu: 'showGroupContextMenu'
+                edit: 'editRecord'
             },
-            '#checkColumn': {
+            '#check-column': {
                 beforecheckchange: 'selectRecord'
             },
-            '#downloadBenchtopProtocolPBtn': {
+            '#download-benchtop-protocol-button': {
                 click: 'downloadBenchtopProtocol'
             },
-            '#downloadPoolingTemplateBtn': {
+            '#download-pooling-template-button': {
                 click: 'downloadPoolingTemplate'
             },
-            '#searchField': {
-                change: 'search'
+            '#search-field': {
+                change: 'changeFilter'
             },
-            '#cancelBtn': {
+            '#cancel-button': {
                 click: 'cancel'
             },
-            '#saveBtn': {
+            '#save-button': {
                 click: 'save'
             }
         }
@@ -41,101 +46,14 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         Ext.getStore('poolingStore').reload();
     },
 
-    refresh: function() {
-        Ext.getStore('poolingStore').load(function(records, operation, success) {
-            if (success && records.length > 0) {
-                Ext.getCmp('downloadBenchtopProtocolPBtn').setDisabled(false);
-                Ext.getCmp('downloadPoolingTemplateBtn').setDisabled(false);
-            }
-        });
-    },
-
-    toggleEditors: function(editor, context) {
-        var record = context.record;
-        if (record.get('sampleId') !== 0 && (
-            record.get('status') === 2 || record.get('status') === -2)) {
-            return false
-        }
-    },
-
-    editRecord: function(editor, context) {
-        var grid = context.grid;
-        var record = context.record;
-        var changes = record.getChanges();
-        var values = context.newValues;
-        var concentrationC1 = values.concentration_c1;
-        var url = 'pooling/update/';
-
-        var params = $.extend({
-            library_id: record.get('libraryId'),
-            sample_id: record.get('sampleId'),
-            qc_result: values.qc_result !== null ? values.qc_result : ''
-        }, values);
-
-        // Set Library Concentration C1
-        if (values.concentration > 0 && values.mean_fragment_size > 0 &&
-            Object.keys(changes).indexOf('concentration_c1') === -1) {
-            concentrationC1 = ((values.concentration / (values.mean_fragment_size * 650)) * Math.pow(10, 6)).toFixed(1);
-            params.concentration_c1 = concentrationC1;
-        }
-
-        Ext.Ajax.request({
-            url: url,
-            method: 'POST',
-            scope: this,
-            params: params,
-
-            success: function(response) {
-                var obj = Ext.JSON.decode(response.responseText);
-                if (obj.success) {
-                    grid.fireEvent('refresh', grid);
-                } else {
-                    Ext.ux.ToastMessage(obj.error, 'error');
-                }
-            },
-
-            failure: function(response) {
-                Ext.ux.ToastMessage(response.statusText, 'error');
-                console.error(response);
-            }
-        });
-    },
-
-    showGroupContextMenu: function(view, node, poolId, e) {
-        var me = this;
-        e.stopEvent();
-        Ext.create('Ext.menu.Menu', {
-            items: [{
-                text: 'Select All',
-                iconCls: 'x-fa fa-check-square-o',
-                handler: function() {
-                    me.selectUnselectAll(parseInt(poolId), true);
-                }
-            },
-            {
-                text: 'Unselect All',
-                iconCls: 'x-fa fa-square-o',
-                handler: function() {
-                    me.selectUnselectAll(parseInt(poolId), false);
-                }
-            },
-            '-',
-            {
-                text: 'QC: All selected passed',
-                iconCls: 'x-fa fa-check',
-                handler: function() {
-                    me.qualityCheckAll(parseInt(poolId), true);
-                }
-            },
-            {
-                text: 'QC: All selected failed',
-                iconCls: 'x-fa fa-times',
-                handler: function() {
-                    me.qualityCheckAll(parseInt(poolId), false);
-                }
-            }]
-        }).showAt(e.getXY());
-    },
+    // refresh: function() {
+    //     Ext.getStore('poolingStore').load(function(records, operation, success) {
+    //         if (success && records.length > 0) {
+    //             Ext.getCmp('downloadBenchtopProtocolPBtn').setDisabled(false);
+    //             Ext.getCmp('downloadPoolingTemplateBtn').setDisabled(false);
+    //         }
+    //     });
+    // },
 
     selectRecord: function(cb, rowIndex, checked, record) {
         // Don't select samples which aren't prepared yet
@@ -145,8 +63,11 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             // Don't select records from a different pool
             var selectedRecord = Ext.getStore('poolingStore').findRecord('selected', true);
             if (selectedRecord) {
-                if (record.get('poolId') !== selectedRecord.get('poolId')) {
-                    Ext.ux.ToastMessage('You can only select records from the same pool.', 'warning');
+                if (record.get('pool') !== selectedRecord.get('pool')) {
+                    new Noty({
+                        text: 'You can only select libraries from the same pool.',
+                        type: 'warning'
+                    }).show();
                     return false;
                 }
             }
@@ -158,53 +79,76 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         var store = Ext.getStore('poolingStore');
 
         store.each(function(item) {
-            if (item.get('poolId') === poolId && me.isPrepared(item)) {
+            if (item.get('pool') === poolId && me.isPrepared(item)) {
                 item.set('selected', selected);
             }
         });
     },
 
+    toggleEditors: function(editor, context) {
+        var record = context.record;
+        if (record.get('record_type') === 'Sample' && (
+            record.get('status') === 2 || record.get('status') === -2)) {
+            return false
+        }
+    },
+
+    editRecord: function(editor, context) {
+        var record = context.record;
+        var changes = record.getChanges();
+        var values = context.newValues;
+        var reload = Object.keys(changes).indexOf('quality_check') !== -1;
+
+        // Set Concentration C1
+        if (Object.keys(changes).indexOf('concentration_c1') === -1 &&
+            values.concentration > 0 && values.mean_fragment_size > 0) {
+            var concentrationC1 = ((values.concentration /
+                (values.mean_fragment_size * 650)) * Math.pow(10, 6)).toFixed(1);
+
+            record.set('concentration_c1', concentrationC1);
+        }
+
+        // Send the changes to the server
+        this.syncStore('poolingStore', reload);
+    },
+
+    applyToAll: function(record, dataIndex) {
+        var me = this;
+        var store = Ext.getStore('poolingStore');
+        var allowedColumns = ['concentration_c1'];
+
+        if (dataIndex && allowedColumns.indexOf(dataIndex) !== -1) {
+            store.each(function(item) {
+                if (item.get('pool') === record.get('pool') &&
+                    item !== record && me.isPrepared(item)) {
+                    item.set(dataIndex, record.get(dataIndex));
+                }
+            });
+
+            // Send the changes to the server
+            this.syncStore('poolingStore');
+        }
+    },
+
     qualityCheckAll: function(poolId, result) {
         var store = Ext.getStore('poolingStore');
-        var libraries = [];
-        var samples = [];
 
         store.each(function(item) {
-            if (item.get('poolId') === poolId && item.get('selected')) {
-                if (item.get('sampleId') === 0) {
-                    libraries.push(item.get('libraryId'));
-                } else {
-                    samples.push(item.get('sampleId'));
-                }
+            if (item.get('pool') === poolId && item.get('selected')) {
+                item.set('quality_check', result);
             }
         });
 
-        if (libraries.length !== 0 || samples.length !== 0) {
-            Ext.Ajax.request({
-                url: 'pooling/qc_update_all/',
-                method: 'POST',
-                scope: this,
-                params: {
-                    libraries: Ext.JSON.encode(libraries),
-                    samples: Ext.JSON.encode(samples),
-                    result: result
-                },
-                success: function(response) {
-                    var obj = Ext.JSON.decode(response.responseText);
-                    if (obj.success) {
-                        Ext.getStore('poolingStore').reload();
-                    } else {
-                        Ext.ux.ToastMessage(obj.error, 'error');
-                    }
-                },
-                failure: function(response) {
-                    Ext.ux.ToastMessage(response.statusText, 'error');
-                    console.error(response);
-                }
-            });
-        } else {
-            Ext.ux.ToastMessage('You did not select any libraries.', 'warning');
+        if (store.getModifiedRecords().length === 0) {
+            new Noty({
+                text: 'You did not select any libraries.',
+                type: 'warning'
+            }).show();
+            return;
         }
+
+        // Send the changes to the server
+        this.syncStore('poolingStore', true);
     },
 
     downloadBenchtopProtocol: function() {
@@ -279,32 +223,17 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         }
     },
 
+    save: function() {
+        // Send the changes to the server
+        this.syncStore('poolingStore');
+    },
+
     cancel: function() {
         Ext.getStore('poolingStore').rejectChanges();
     },
 
-    save: function() {
-        MainHub.Store.save('poolingStore');
-    },
-
-    search: function(fld, query) {
-        var grid = Ext.getCmp('poolingTable');
-        var store = grid.getStore();
-        var columns = Ext.pluck(grid.getColumns(), 'dataIndex');
-
-        store.clearFilter();
-        store.filterBy(function(record) {
-            var res = false;
-            Ext.each(columns, function(column) {
-                if (record.data[column] && record.data[column].toString().toLowerCase().indexOf(query.toLowerCase()) > -1) {
-                    res = res || true;
-                }
-            });
-            return res;
-        });
-    },
-
     isPrepared: function(item) {
-        return item.get('libraryId') !== 0 || (item.get('sampleId') !== 0 && item.get('status') === 3);
+        return item.get('record_type') === 'Library' ||
+            (item.get('record_type') === 'Sample' && item.get('status') === 3);
     }
 });

@@ -174,10 +174,6 @@ def save_pool(request):
 
             # Make current libraries not available for repeated pooling
             for library_id in library_ids:
-                library = Library.objects.get(pk=library_id)
-                library.is_pooled = True
-                library.save(update_fields=['is_pooled'])
-
                 # Create Pooling object
                 pooling_obj = Pooling(library=library)
 

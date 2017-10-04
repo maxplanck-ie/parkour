@@ -185,23 +185,8 @@ class IncomingLibrariesViewSet(viewsets.ViewSet):
                 'message': 'Invalid payload.',
             }, 400)
 
-        library_ids = []
-        sample_ids = []
-        library_post_data = []
-        sample_post_data = []
-
-        # Separate library and sample data, ignoring objects
-        # without either 'id' or 'record_type' or non-integer id
-        for obj in post_data:
-            try:
-                if obj['record_type'] == 'Library':
-                    library_ids.append(int(obj['pk']))
-                    library_post_data.append(obj)
-                elif obj['record_type'] == 'Sample':
-                    sample_ids.append(int(obj['pk']))
-                    sample_post_data.append(obj)
-            except (KeyError, ValueError):
-                continue
+        library_ids, sample_ids, library_post_data, sample_post_data = \
+            self._separate_data(post_data)
 
         libraries_ok, libraries_contain_invalid = self._update_objects(
             Library, LibrarySerializer, library_ids, library_post_data)
@@ -224,6 +209,29 @@ class IncomingLibrariesViewSet(viewsets.ViewSet):
                 'success': True,
                 'message': 'Some records cannot be updated.',
             })
+
+    def _separate_data(self, data):
+        """
+        Separate library and sample data, ignoring objects without
+        either 'id' or 'record_type' or non-integer id.
+        """
+        library_ids = []
+        sample_ids = []
+        library_data = []
+        sample_data = []
+
+        for obj in data:
+            try:
+                if obj['record_type'] == 'Library':
+                    library_ids.append(int(obj['pk']))
+                    library_data.append(obj)
+                elif obj['record_type'] == 'Sample':
+                    sample_ids.append(int(obj['pk']))
+                    sample_data.append(obj)
+            except (KeyError, ValueError):
+                continue
+
+        return library_ids, sample_ids, library_data, sample_data
 
     def _update_objects(self, model_class, serializer_class, ids, data):
         """

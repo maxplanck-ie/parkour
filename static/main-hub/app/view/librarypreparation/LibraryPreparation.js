@@ -230,9 +230,6 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                                 },
                                 {
                                     name: 'failed'
-                                },
-                                {
-                                    name: 'compromised'
                                 }
                             ]
                         }),

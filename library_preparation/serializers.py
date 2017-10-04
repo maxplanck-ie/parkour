@@ -64,8 +64,7 @@ class LibraryPreparationSerializer(ModelSerializer):
                   'index_i5_id', 'quality_check',)
 
     def to_internal_value(self, data):
-        internal_value = super(
-            LibraryPreparationSerializer, self).to_internal_value(data)
+        internal_value = super().to_internal_value(data)
 
         concentration_sample = data.get('concentration_sample', None)
         comments_facility = data.get('comments_facility', None)
