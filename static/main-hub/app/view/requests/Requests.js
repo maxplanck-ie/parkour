@@ -24,28 +24,19 @@ Ext.define('MainHub.view.requests.Requests', {
         padding: 15,
         header: {
             title: 'Requests',
-            items: [
-            // {
-            //     xtype: 'textfield',
-            //     itemId: 'searchField',
-            //     emptyText: 'Search',
-            //     width: 200,
-            //     margin: '0 15px 0 0',
-            //     disabled: true
-            // },
-                {
-                    xtype: 'searchfield',
-                    store: 'requestsStore',
-                    emptyText: 'Search',
-                    margin: '0 15px 0 0',
-                    width: 250
-                },
-                {
-                    xtype: 'button',
-                    itemId: 'addRequestBtn',
-                    text: 'Add'
-                }
-            ]
+            items: [{
+                xtype: 'searchfield',
+                store: 'requestsStore',
+                emptyText: 'Search',
+                margin: '0 15px 0 0',
+                width: 250,
+                disabled: true
+            },
+            {
+                xtype: 'button',
+                itemId: 'addRequestBtn',
+                text: 'Add'
+            }]
         },
         viewConfig: {
             // loadMask: false
@@ -92,11 +83,6 @@ Ext.define('MainHub.view.requests.Requests', {
             defaults: {
                 flex: 1
             }
-        },
-        // plugins: [{
-        //     ptype: 'bufferedrenderer',
-        //     trailingBufferZone: 100,
-        //     leadingBufferZone: 100
-        // }]
+        }
     }]
 });

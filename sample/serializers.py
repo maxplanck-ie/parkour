@@ -13,14 +13,18 @@ class NucleicAcidTypeSerializer(ModelSerializer):
 
 
 class SampleSerializer(LibrarySampleBaseSerializer):
-    id = IntegerField(required=False)
-    sample_id = SerializerMethodField()
+    pk = IntegerField(required=False)
+    record_type = SerializerMethodField()
+    nucleic_acid_type_name = SerializerMethodField()
 
     class Meta(LibrarySampleBaseSerializer.Meta):
         model = Sample
         fields = LibrarySampleBaseSerializer.Meta.fields + \
-            ('id', 'sample_id', 'nucleic_acid_type', 'rna_quality',
-             'is_converted',)
+            ('pk', 'record_type', 'is_converted', 'rna_quality',
+             'nucleic_acid_type', 'nucleic_acid_type_name',)
 
-    def get_sample_id(self, obj):
-        return obj.pk
+    def get_record_type(self, obj):
+        return 'Sample'
+
+    def get_nucleic_acid_type_name(self, obj):
+        return obj.nucleic_acid_type.name

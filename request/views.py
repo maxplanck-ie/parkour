@@ -18,6 +18,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 
+from common.views import StandardResultsSetPagination
 from .models import Request, FileRequest
 from .serializers import RequestSerializer, RequestFileSerializer
 from .forms import RequestForm
@@ -286,6 +287,7 @@ def send_email(request):
 
 class RequestViewSet(viewsets.GenericViewSet):
     serializer_class = RequestSerializer
+    pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
         queryset = Request.objects.prefetch_related(

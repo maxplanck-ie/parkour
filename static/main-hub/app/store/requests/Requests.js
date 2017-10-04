@@ -26,7 +26,7 @@ Ext.define('MainHub.store.requests.Requests', {
             totalProperty: 'count'
         },
 
-        filterParam: 'query',
+        filterParam: 'query'
         // encodeFilters: function(filters) {
         //     return filters[0].value;
         // }

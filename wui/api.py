@@ -4,9 +4,8 @@ from request.views import RequestViewSet
 from library_sample_shared.views import (OrganismViewSet, IndexTypeViewSet,
                                          LibraryProtocolViewSet, IndexViewSet,
                                          LibraryTypeViewSet, ReadLengthViewSet,
-                                         LibrarySampleListViewSet,
                                          ConcentrationMethodViewSet)
-from library.views import LibraryViewSet
+from library.views import LibrarySampleTree, LibraryViewSet
 from sample.views import NucleicAcidTypeViewSet, SampleViewSet
 from incoming_libraries.views import IncomingLibrariesViewSet
 from library_preparation.views import LibraryPreparationViewSet
@@ -24,7 +23,7 @@ router.register(r'library_protocols', LibraryProtocolViewSet, base_name='library
 router.register(r'library_types', LibraryTypeViewSet, base_name='library-type')
 router.register(r'nucleic_acid_types', NucleicAcidTypeViewSet, base_name='nucleic-acid-type')
 
-router.register(r'libraries_and_samples', LibrarySampleListViewSet, base_name='libraries-and-samples')
+router.register(r'libraries_and_samples', LibrarySampleTree, base_name='libraries-and-samples')
 router.register(r'libraries', LibraryViewSet, base_name='libraries')
 router.register(r'samples', SampleViewSet, base_name='samples')
 router.register(r'incoming_libraries', IncomingLibrariesViewSet, base_name='incoming-libraries')

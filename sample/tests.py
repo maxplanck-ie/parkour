@@ -155,7 +155,7 @@ class TestSamples(BaseTestCase):
         self.assertEqual(response.status_code, 201)
         self.assertTrue(data['success'])
         self.assertEqual(name, data['data'][0]['name'])
-        self.assertEqual('S', data['data'][0]['record_type'])
+        self.assertEqual('Sample', data['data'][0]['record_type'])
 
     def test_add_sample_contains_invalid(self):
         """ Ensure add sample containing invalid data behaves correctly. """
@@ -212,9 +212,8 @@ class TestSamples(BaseTestCase):
 
         response = self.client.post(reverse('samples-edit'), {
             'data': json.dumps([{
+                'pk': sample.pk,
                 'name': new_name,
-                'id': sample.pk,
-                'sample_id': sample.pk,
                 'organism': sample.organism.pk,
                 'concentration': 1.0,
                 'concentration_method': sample.concentration_method.pk,
@@ -238,9 +237,8 @@ class TestSamples(BaseTestCase):
 
         response = self.client.post(reverse('samples-edit'), {
             'data': json.dumps([{
+                'pk': sample1.pk,
                 'name': new_name1,
-                'id': sample1.pk,
-                'sample_id': sample1.pk,
                 'organism': sample1.organism.pk,
                 'concentration': 1.0,
                 'concentration_method': sample1.concentration_method.pk,
@@ -250,8 +248,8 @@ class TestSamples(BaseTestCase):
                 'library_type': sample1.library_type.pk,
                 'nucleic_acid_type': sample1.nucleic_acid_type.pk,
             }, {
+                'pk': sample2.pk,
                 'name': new_name2,
-                'id': sample2.pk,
                 'sample_id': sample2.pk,
                 'concentration': 1.0,
                 'sequencing_depth': 1,

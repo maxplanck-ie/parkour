@@ -2,14 +2,6 @@ Ext.define('MainHub.model.Record', {
     extend: 'MainHub.model.Base',
 
     fields: [
-        // {
-        //     name: 'library_id',
-        //     type: 'int'
-        // },
-        // {
-        //     name: 'sample_id',
-        //     type: 'int'
-        // },
         {
             name: 'pk',
             type: 'int'
@@ -22,10 +14,11 @@ Ext.define('MainHub.model.Record', {
             name: 'record_type',
             type: 'string'
         },
-        // {
-        //     name: 'status',
-        //     type: 'int'
-        // },
+        {
+            name: 'status',
+            type: 'int',
+            allowNull: true
+        },
         {
             name: 'barcode',
             type: 'string'

@@ -9,6 +9,7 @@ from library_sample_shared.models import (Organism, ConcentrationMethod,
                                           ReadLength, LibraryProtocol,
                                           LibraryType, IndexType)
 from library.models import Library
+from sample.tests import create_sample
 
 User = get_user_model()
 
@@ -63,6 +64,29 @@ def create_library(name, status=0):
 
 # Views
 
+class TestLibrarySampleTree(BaseTestCase):
+    """ Tests for the libraries and samples tree. """
+
+    def setUp(self):
+        user = self._create_user('foo@bar.io', 'foo-foo')
+        self.client.login(email='foo@bar.io', password='foo-foo')
+
+        library = create_library(self._get_random_name())
+        sample = create_sample(self._get_random_name())
+
+        self.request = Request(user=user)
+        self.request.save()
+        self.request.libraries.add(library)
+        self.request.samples.add(sample)
+
+    def test_libraries_and_samples_list(self):
+        """ Ensure get all libraries and samples works correctly. """
+        response = self.client.get(reverse('libraries-and-samples-list'))
+        data = response.json()['children'][0]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.request.name, data['name'])
+
+
 class TestLibraries(BaseTestCase):
     """ Tests for libraries. """
 
@@ -110,19 +134,21 @@ class TestLibraries(BaseTestCase):
 
     def test_add_library(self):
         """ Ensure add library behaves correctly. """
+        library = create_library(self._get_random_name())
         name = self._get_random_name()
+
         response = self.client.post(reverse('libraries-list'), {
             'data': json.dumps([{
                 'name': name,
-                'organism': self.library.organism.pk,
+                'organism': library.organism.pk,
                 'concentration': 1.0,
-                'concentration_method': self.library.concentration_method.pk,
-                'read_length': self.library.read_length.pk,
+                'concentration_method': library.concentration_method.pk,
+                'read_length': library.read_length.pk,
                 'sequencing_depth': 1,
-                'library_protocol': self.library.library_protocol.pk,
-                'library_type': self.library.library_type.pk,
+                'library_protocol': library.library_protocol.pk,
+                'library_type': library.library_type.pk,
                 'amplification_cycles': 1,
-                'index_type': self.library.index_type.pk,
+                'index_type': library.index_type.pk,
                 'index_reads': 0,
                 'mean_fragment_size': 1,
             }])
@@ -131,7 +157,7 @@ class TestLibraries(BaseTestCase):
         self.assertEqual(response.status_code, 201)
         self.assertTrue(data['success'])
         self.assertEqual(name, data['data'][0]['name'])
-        self.assertEqual('L', data['data'][0]['record_type'])
+        self.assertEqual('Library', data['data'][0]['record_type'])
 
     def test_add_library_contains_invalid(self):
         """ Ensure add library containing invalid data behaves correctly. """
@@ -194,9 +220,8 @@ class TestLibraries(BaseTestCase):
 
         response = self.client.post(reverse('libraries-edit'), {
             'data': json.dumps([{
+                'pk': library.pk,
                 'name': new_name,
-                'id': library.pk,
-                'library_id': library.pk,
                 'organism': library.organism.pk,
                 'concentration': 1.0,
                 'concentration_method': library.concentration_method.pk,
@@ -223,9 +248,8 @@ class TestLibraries(BaseTestCase):
 
         response = self.client.post(reverse('libraries-edit'), {
             'data': json.dumps([{
+                'pk': library1.pk,
                 'name': new_name1,
-                'id': library1.pk,
-                'library_id': library1.pk,
                 'organism': library1.organism.pk,
                 'concentration': 1.0,
                 'concentration_method': library1.concentration_method.pk,
@@ -238,9 +262,8 @@ class TestLibraries(BaseTestCase):
                 'index_reads': 0,
                 'mean_fragment_size': 1,
             }, {
+                'pk': library2.pk,
                 'name': new_name2,
-                'id': library2.pk,
-                'library_id': library2.pk,
                 'concentration': 2.0,
                 'sequencing_depth': 2,
                 'amplification_cycles': 2,

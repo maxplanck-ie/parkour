@@ -12,8 +12,8 @@ from library_sample_shared.views import LibrarySampleBaseViewSet
 from .models import Library
 from request.models import Request
 from .forms import LibraryForm
-from .serializers import LibrarySerializer
-from sample.serializers import SampleSerializer
+from .serializers import (LibrarySerializer, RequestParentNodeSerializer,
+                          RequestChildrenNodesSerializer)
 
 logger = logging.getLogger('db')
 
@@ -253,10 +253,37 @@ def delete_library(request):
     return JsonResponse({'success': not error, 'error': error})
 
 
+class LibrarySampleTree(viewsets.ViewSet):
+
+    def get_queryset(self):
+        queryset = Request.objects.prefetch_related(
+            'libraries', 'samples').order_by('-create_time')
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(user=self.request.user)
+        return queryset
+
+    def list(self, request):
+        """ Get the list of libraries and samples. """
+        queryset = self.get_queryset()
+        request_id = self.request.query_params.get('node', None)
+
+        if request_id and request_id != 'root':
+            try:
+                queryset = Request.objects.get(pk=request_id)
+            except (ValueError, Request.DoesNotExist):
+                return Response({})
+            else:
+                serializer = RequestChildrenNodesSerializer(queryset)
+                return Response({
+                    'success': True,
+                    'children': serializer.data['children']
+                })
+        serializer = RequestParentNodeSerializer(queryset, many=True)
+        return Response({'success': True, 'children': serializer.data})
+
+
 class LibraryViewSet(LibrarySampleBaseViewSet):
     serializer_class = LibrarySerializer
     model_class = Library
     model_name = model_class._meta.verbose_name
     model_name_plural = model_class._meta.verbose_name_plural
-    id_key = '%s_id' % model_name.lower()
-    record_type = model_name[0]

@@ -110,5 +110,3 @@ class SampleViewSet(LibrarySampleBaseViewSet):
     model_class = Sample
     model_name = model_class._meta.verbose_name
     model_name_plural = model_class._meta.verbose_name_plural
-    id_key = '%s_id' % model_name.lower()
-    record_type = model_name[0]

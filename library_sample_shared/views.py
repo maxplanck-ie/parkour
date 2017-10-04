@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import list_route
 
 from common.utils import JSONResponseMixin
+from common.views import StandardResultsSetPagination
 from request.models import Request
 
 from .models import (Organism, ReadLength, LibraryProtocol, LibraryType,
@@ -18,9 +19,6 @@ from .serializers import (OrganismSerializer, IndexTypeSerializer,
                           LibraryProtocolSerializer, LibraryTypeSerializer,
                           IndexI7Serializer, IndexI5Serializer,
                           ReadLengthSerializer, ConcentrationMethodSerializer)
-
-from library.serializers import LibrarySerializer
-from sample.serializers import SampleSerializer
 
 logger = logging.getLogger('db')
 
@@ -280,32 +278,12 @@ class LibraryTypeViewSet(viewsets.ReadOnlyModelViewSet):
         return queryset
 
 
-class LibrarySampleListViewSet(viewsets.ViewSet):
-
-    def list(self, request):
-        data = []
-
-        requests_queryset = Request.objects.order_by('-create_time')
-        if not request.user.is_staff:
-            requests_queryset = requests_queryset.filter(user=request.user)
-
-        for request_obj in requests_queryset:
-            library_serializer = LibrarySerializer(
-                request_obj.libraries.all(), many=True)
-            sample_serializer = SampleSerializer(
-                request_obj.samples.all(), many=True)
-
-            records = sorted(library_serializer.data + sample_serializer.data,
-                             key=lambda x: x['barcode'][3:])
-            data += records
-
-        return Response(data)
-
-
 class LibrarySampleBaseViewSet(viewsets.ViewSet):
+    pagination_class = StandardResultsSetPagination
 
+    # TODO: either add pagination or remove at all
     def list(self, request):
-        """ Get the list of all libraries/samples. """
+        """ Get the list of all libraries or samples. """
         data = []
         requests_queryset = Request.objects.order_by('-create_time')
         if not request.user.is_staff:
@@ -332,10 +310,10 @@ class LibrarySampleBaseViewSet(viewsets.ViewSet):
         if serializer.is_valid():
             objects = serializer.save()
             data = [{
+                'pk': obj.pk,
+                'record_type': self.model_name,
                 'name': obj.name,
-                'record_type': self.record_type,
-                self.id_key: obj.pk,
-                'barcode': obj.barcode
+                'barcode': obj.barcode,
             } for obj in objects]
             return Response({'success': True, 'data': data}, 201)
 
@@ -349,10 +327,10 @@ class LibrarySampleBaseViewSet(viewsets.ViewSet):
                 objects = self._create_or_update_valid(valid_data)
 
                 data = [{
+                    'pk': obj.pk,
+                    'record_type': self.model_name,
                     'name': obj.name,
-                    'record_type': self.record_type,
-                    self.id_key: obj.pk,
-                    'barcode': obj.barcode
+                    'barcode': obj.barcode,
                 } for obj in objects]
 
                 return Response({
@@ -402,7 +380,7 @@ class LibrarySampleBaseViewSet(viewsets.ViewSet):
                 'message': 'Invalid payload.',
             }, 400)
 
-        ids = [x[self.id_key] for x in post_data]
+        ids = [x['pk'] for x in post_data]
         objects = self.model_class.objects.filter(pk__in=ids)
         serializer = self.serializer_class(data=post_data, instance=objects,
                                            many=True)
@@ -417,7 +395,7 @@ class LibrarySampleBaseViewSet(viewsets.ViewSet):
 
             if any(valid_data):
                 message = 'Invalid payload. Some records cannot be updated.'
-                ids = [x[self.id_key] for x in valid_data]
+                ids = [x['pk'] for x in valid_data]
                 self._create_or_update_valid(valid_data, ids)
                 return Response({'success': True, 'message': message}, 200)
 

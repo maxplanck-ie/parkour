@@ -93,8 +93,8 @@ class LibrarySampleBaseListSerializer(ListSerializer):
 
     def update(self, instance, validated_data):
         # Maps for id->instance and id->data item.
-        object_mapping = {obj.id: obj for obj in instance}
-        data_mapping = {item['id']: item for item in validated_data}
+        object_mapping = {obj.pk: obj for obj in instance}
+        data_mapping = {item['pk']: item for item in validated_data}
 
         # Perform updates
         ret = []
@@ -111,22 +111,21 @@ class LibrarySampleBaseListSerializer(ListSerializer):
 class LibrarySampleBaseSerializer(ModelSerializer):
     request_id = SerializerMethodField()
     request_name = SerializerMethodField()
-    record_type = SerializerMethodField()
-    date = SerializerMethodField()
     library_protocol_name = SerializerMethodField()
     library_type_name = SerializerMethodField()
     concentration_method_name = SerializerMethodField()
     read_length_name = SerializerMethodField()
+    organism_name = SerializerMethodField()
 
     class Meta:
         list_serializer_class = LibrarySampleBaseListSerializer
         fields = ('request_id', 'request_name', 'name', 'barcode', 'status',
-                  'record_type', 'date', 'library_protocol',
-                  'library_protocol_name', 'library_type', 'library_type_name',
-                  'organism', 'equal_representation_nucleotides',
-                  'concentration', 'concentration_method', 'read_length',
-                  'read_length_name', 'sequencing_depth', 'comments',
-                  'amplification_cycles',)
+                  'create_time', 'library_protocol', 'library_protocol_name',
+                  'library_type', 'library_type_name', 'organism',
+                  'equal_representation_nucleotides', 'concentration',
+                  'concentration_method', 'read_length', 'read_length_name',
+                  'sequencing_depth', 'comments', 'amplification_cycles',
+                  'organism_name',)
         extra_kwargs = {'barcode': {'required': False}}
 
     def get_request_id(self, obj):
@@ -134,12 +133,6 @@ class LibrarySampleBaseSerializer(ModelSerializer):
 
     def get_request_name(self, obj):
         return obj.request.get().name
-
-    def get_record_type(self, obj):
-        return obj.get_record_type()
-
-    def get_date(self, obj):
-        return obj.create_time
 
     def get_library_protocol_name(self, obj):
         return obj.library_protocol.name
@@ -152,3 +145,6 @@ class LibrarySampleBaseSerializer(ModelSerializer):
 
     def get_read_length_name(self, obj):
         return obj.read_length.name
+
+    def get_organism_name(self, obj):
+        return obj.organism.name
