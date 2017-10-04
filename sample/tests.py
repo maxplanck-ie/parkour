@@ -5,15 +5,16 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 
 from common.tests import BaseTestCase
+from common.utils import generate_barcode, get_random_name
 from request.models import Request
 from .models import NucleicAcidType, Sample
 from library_sample_shared.models import (Organism, ConcentrationMethod,
                                           ReadLength, LibraryProtocol,
-                                          LibraryType)
+                                          LibraryType, BarcodeCounter)
 User = get_user_model()
 
 
-def create_sample(name, status=0):
+def create_sample(name, status=0, save=True):
     organism = Organism(name='Organism')
     organism.save()
 
@@ -53,12 +54,36 @@ def create_sample(name, status=0):
         library_type_id=library_type.pk,
         nucleic_acid_type_id=nat.pk,
     )
-    sample.save()
+
+    if save:
+        sample.save()
 
     return sample
 
 
 # Models
+
+class TestSampleModel(TestCase):
+
+    def setUp(self):
+        self.sample = create_sample(get_random_name(), save=False)
+
+    def test_barcode_generation(self):
+        """
+        Ensure the barcode counter is incremented and is assigned to a
+        new sample.
+        """
+        prev_counter = BarcodeCounter.load().counter
+        self.assertEqual(self.sample.barcode, '')
+        self.sample.save()
+
+        updated_sample = Sample.objects.get(pk=self.sample.pk)
+        new_counter = BarcodeCounter.load().counter
+        barcode = generate_barcode('S', str(new_counter))
+
+        self.assertEqual(new_counter, prev_counter + 1)
+        self.assertEqual(updated_sample.barcode, barcode)
+
 
 class NucleicAcidTypeTest(TestCase):
     def setUp(self):

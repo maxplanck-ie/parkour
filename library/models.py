@@ -3,7 +3,8 @@ import random
 
 from django.db import models
 
-from library_sample_shared.models import GenericLibrarySample
+from common.utils import generate_barcode
+from library_sample_shared.models import GenericLibrarySample, BarcodeCounter
 
 
 class Library(GenericLibrarySample):
@@ -52,3 +53,16 @@ class Library(GenericLibrarySample):
     class Meta:
         verbose_name = 'Library'
         verbose_name_plural = 'Libraries'
+
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        super().save(*args, **kwargs)
+
+        if created:
+            # Create barcode
+            counter = BarcodeCounter.load()
+            counter.increment()
+            counter.save()
+
+            self.barcode = generate_barcode('L', str(counter.counter))
+            self.save(update_fields=['barcode'])

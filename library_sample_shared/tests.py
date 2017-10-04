@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 
 from common.tests import BaseTestCase
+from common.utils import get_random_name
 from .models import (Organism, ConcentrationMethod, ReadLength, IndexType,
                      GenericIndex, IndexI7, IndexI5, BarcodeCounter,
                      LibraryProtocol, LibraryType, GenericLibrarySample)
@@ -15,7 +16,7 @@ User = get_user_model()
 
 class OrganismTest(TestCase):
     def setUp(self):
-        self.organism = Organism(name='mouse')
+        self.organism = Organism(name=get_random_name())
 
     def test_organism_name(self):
         self.assertTrue(isinstance(self.organism, Organism))
@@ -24,7 +25,7 @@ class OrganismTest(TestCase):
 
 class ConcentrationMethodTest(TestCase):
     def setUp(self):
-        self.method = ConcentrationMethod(name='fluorography')
+        self.method = ConcentrationMethod(name=get_random_name())
 
     def test_concentration_method_name(self):
         self.assertTrue(isinstance(self.method, ConcentrationMethod))
@@ -33,7 +34,7 @@ class ConcentrationMethodTest(TestCase):
 
 class ReadLengthTest(TestCase):
     def setUp(self):
-        self.read_length = ReadLength(name='1x50')
+        self.read_length = ReadLength(name=get_random_name())
 
     def test_read_length_name(self):
         self.assertTrue(isinstance(self.read_length, ReadLength))
@@ -42,7 +43,7 @@ class ReadLengthTest(TestCase):
 
 class IndexTypeTest(TestCase):
     def setUp(self):
-        self.index_type = IndexType(name='Nextera')
+        self.index_type = IndexType(name=get_random_name())
 
     def test_index_type_name(self):
         self.assertTrue(isinstance(self.index_type, IndexType))
@@ -82,13 +83,14 @@ class BarcodeCounterTest(TestCase):
 class LibraryProtocolTest(TestCase):
     def setUp(self):
         self.library_protocol = LibraryProtocol(
-            name='Protocol',
+            name=get_random_name(),
             provider='',
             catalog='',
             explanation='',
             input_requirements='',
             typical_application='',
         )
+        self.library_protocol.save()
 
     def test_library_protocol_name(self):
         self.assertTrue(isinstance(self.library_protocol, LibraryProtocol))
@@ -97,10 +99,20 @@ class LibraryProtocolTest(TestCase):
             self.library_protocol.name,
         )
 
+    def test_library_protocol_in_library_type(self):
+        """
+        Ensure a new library protocol is added to the list of protocols of
+        the library type 'Other'.
+        """
+        library_type = LibraryType.objects.get(name='Other')
+        library_protocols = library_type.library_protocol.all().values_list(
+            'name', flat=True)
+        self.assertIn(self.library_protocol.name, library_protocols)
+
 
 class LibraryTypeTest(TestCase):
     def setUp(self):
-        self.library_type = LibraryType(name='Library Type')
+        self.library_type = LibraryType(name=get_random_name())
 
     def test_library_type_name(self):
         self.assertTrue(isinstance(self.library_type, LibraryType))
@@ -109,12 +121,12 @@ class LibraryTypeTest(TestCase):
 
 class GenericLibrarySampleTest(TestCase):
     def setUp(self):
-        organism = Organism(name='mouse')
-        concentration_method = ConcentrationMethod(name='fluorography')
-        read_length = ReadLength(name='1x50')
+        organism = Organism(name=get_random_name())
+        concentration_method = ConcentrationMethod(name=get_random_name())
+        read_length = ReadLength(name=get_random_name())
 
         self.library = GenericLibrarySample(
-            name='Library1',
+            name=get_random_name(),
             organism=organism,
             concentration=1.0,
             concentration_method=concentration_method,

@@ -1,7 +1,9 @@
-from django.http import JsonResponse
-
-from datetime import datetime
+import string
+import random
 from time import time
+from datetime import datetime
+
+from django.http import JsonResponse
 
 
 class JSONResponseMixin:
@@ -36,3 +38,10 @@ def generate_barcode(record_type, counter):
     barcode = datetime.now().strftime('%y') + record_type
     barcode += '0' * (6 - len(counter)) + counter
     return barcode
+
+
+def get_random_name(len=10):
+    """ Generate a random string of a given length. """
+    return ''.join(random.SystemRandom().choice(
+        string.ascii_lowercase + string.digits
+    ) for _ in range(len))

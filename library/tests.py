@@ -1,20 +1,23 @@
 import json
 
+from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 
 from common.tests import BaseTestCase
+from common.utils import generate_barcode, get_random_name
 from request.models import Request
 from library_sample_shared.models import (Organism, ConcentrationMethod,
                                           ReadLength, LibraryProtocol,
-                                          LibraryType, IndexType)
+                                          LibraryType, IndexType,
+                                          BarcodeCounter)
 from library.models import Library
 from sample.tests import create_sample
 
 User = get_user_model()
 
 
-def create_library(name, status=0):
+def create_library(name, status=0, save=True):
     organism = Organism(name='Organism')
     organism.save()
 
@@ -57,9 +60,35 @@ def create_library(name, status=0):
         index_reads=0,
         mean_fragment_size=1,
     )
-    library.save()
+
+    if save:
+        library.save()
 
     return library
+
+
+# Models
+
+class TestLibraryModel(TestCase):
+
+    def setUp(self):
+        self.library = create_library(get_random_name(), save=False)
+
+    def test_barcode_generation(self):
+        """
+        Ensure the barcode counter is incremented and is assigned to a
+        new library.
+        """
+        prev_counter = BarcodeCounter.load().counter
+        self.assertEqual(self.library.barcode, '')
+        self.library.save()
+
+        updated_library = Library.objects.get(pk=self.library.pk)
+        new_counter = BarcodeCounter.load().counter
+        barcode = generate_barcode('L', str(new_counter))
+
+        self.assertEqual(new_counter, prev_counter + 1)
+        self.assertEqual(updated_library.barcode, barcode)
 
 
 # Views
