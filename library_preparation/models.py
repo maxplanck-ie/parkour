@@ -66,5 +66,6 @@ class LibraryPreparation(DateTimeMixin):
         verbose_name_plural = 'Library Preparation'
 
     def __str__(self):
-        return '%s (Request: %s)' % (self.sample.name,
-                                     self.sample.request.get())
+        # return '%s (Request: %s)' % (self.sample.name,
+        #                              self.sample.request.get())
+        return '{} ({})'.format(self.sample.name, self.sample.barcode)

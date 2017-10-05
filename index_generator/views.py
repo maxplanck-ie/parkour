@@ -172,7 +172,6 @@ def save_pool(request):
             pool.libraries.add(*library_ids)
             pool.samples.add(*sample_ids)
 
-            # Make current libraries not available for repeated pooling
             for library_id in library_ids:
                 # Create Pooling object
                 pooling_obj = Pooling(library=library)
@@ -188,8 +187,6 @@ def save_pool(request):
 
                 pooling_obj.save()
 
-            # Make current samples not available for repeated pooling
-            # and set their Index I7 and Index I5 indices
             for sample in samples:
                 smpl = Sample.objects.get(pk=sample['sample_id'])
                 idx_i7_id = sample['index_i7_id']

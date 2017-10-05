@@ -219,35 +219,6 @@ def update_all(request):
     return JsonResponse({'success': not error, 'error': error})
 
 
-@login_required
-@staff_member_required
-def qc_update_all(request):
-    """ Update QC Result for given libraries and samples. """
-    error = ''
-
-    libraries = json.loads(request.POST.get('libraries', '[]'))
-    samples = json.loads(request.POST.get('samples', '[]'))
-    result = json.loads(request.POST.get('result', ''))
-    qc_result = 4 if result is True else -1
-
-    try:
-        for library_id in libraries:
-            library = Library.objects.get(pk=library_id)
-            library.status = qc_result
-            library.save(update_fields=['status'])
-
-        for sample_id in samples:
-            sample = Sample.objects.get(pk=sample_id)
-            sample.status = qc_result
-            sample.save(update_fields=['status'])
-
-    except Exception as e:
-        error = str(e)
-        logger.exception(e)
-
-    return JsonResponse({'success': not error, 'error': error})
-
-
 class PoolingViewSet(viewsets.ViewSet):
     permission_classes = [IsAdminUser]
 
