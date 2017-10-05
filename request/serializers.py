@@ -7,7 +7,6 @@ from .models import Request, FileRequest
 class RequestSerializer(ModelSerializer):
     user = SerializerMethodField()
     user_full_name = SerializerMethodField()
-    date = SerializerMethodField()
     sum_seq_depth = SerializerMethodField()
     restrict_permissions = SerializerMethodField()
     files = SerializerMethodField()
@@ -16,29 +15,30 @@ class RequestSerializer(ModelSerializer):
 
     class Meta:
         model = Request
-        fields = ('id', 'name', 'user', 'user_full_name', 'date',
+        fields = ('id', 'name', 'user', 'user_full_name', 'create_time',
                   'description', 'sum_seq_depth', 'restrict_permissions',
                   'files', 'deep_seq_request_name', 'deep_seq_request_path',)
 
     def get_user(self, obj):
-        return self.context['request'].user.pk
+        return obj.user.pk
 
     def get_user_full_name(self, obj):
-        return self.context['request'].user.get_full_name()
-
-    def get_date(self, obj):
-        return obj.create_time.strftime('%d.%m.%Y')
+        return obj.user.get_full_name()
 
     def get_sum_seq_depth(self, obj):
-        return sum(x.sequencing_depth for x in obj.records)
+        library_depths = obj.libraries.values_list(
+            'sequencing_depth', flat=True)
+        sample_depths = obj.samples.values_list(
+            'sequencing_depth', flat=True)
+        return sum(library_depths) + sum(sample_depths)
 
     def get_restrict_permissions(self, obj):
         """
         Don't allow the users to modify the requests and libraries/samples
         if they have reached status 1 or higher (or failed).
         """
-        return True if not self.context['request'].user.is_staff and \
-            obj.statuses.count(0) == 0 else False
+        return True if not obj.user.is_staff and obj.statuses.count(0) == 0 \
+            else False
 
     def get_files(self, obj):
         return [file.pk for file in obj.files.all()]

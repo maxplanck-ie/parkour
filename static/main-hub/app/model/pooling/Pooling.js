@@ -7,35 +7,27 @@ Ext.define('MainHub.model.pooling.Pooling', {
             type: 'bool'
         },
         {
-            name: 'libraryId',
+            name: 'request',
             type: 'int'
         },
         {
-            name: 'sampleId',
-            type: 'int'
-        },
-        {
-            name: 'requestId',
-            type: 'int'
-        },
-        {
-            name: 'requestName',
+            name: 'request_name',
             type: 'string'
         },
         {
-            name: 'poolId',
+            name: 'pool',
             type: 'int'
         },
         {
-            name: 'poolName',
+            name: 'pool_name',
             type: 'string'
         },
         {
-            name: 'poolSize',
+            name: 'pool_size',
             type: 'string'
         },
         {
-            name: 'concentration',
+            name: 'concentration_facility',
             type: 'float',
             allowNull: true
         },
@@ -55,10 +47,6 @@ Ext.define('MainHub.model.pooling.Pooling', {
         },
         {
             name: 'percentage_library',
-            type: 'int'
-        },
-        {
-            name: 'file',
             type: 'string'
         },
         {
@@ -76,6 +64,11 @@ Ext.define('MainHub.model.pooling.Pooling', {
         {
             name: 'index_i5',
             type: 'string'
+        },
+        {
+            name: 'quality_check',
+            type: 'string',
+            allowNull: true
         }
     ]
 });

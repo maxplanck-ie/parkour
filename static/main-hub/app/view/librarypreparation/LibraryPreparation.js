@@ -14,14 +14,14 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
 
     items: [{
         xtype: 'grid',
-        id: 'libraryPreparationTable',
-        itemId: 'libraryPreparationTable',
+        id: 'library-preparation-grid',
+        itemId: 'library-preparation-grid',
         height: Ext.Element.getViewportHeight() - 64,
         header: {
             title: 'Library Preparation',
             items: [{
                 xtype: 'textfield',
-                itemId: 'searchField',
+                itemId: 'search-field',
                 emptyText: 'Search',
                 width: 200
             }]
@@ -53,17 +53,17 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                 {
                     text: 'Request',
                     tooltip: 'Request ID',
-                    dataIndex: 'requestName',
+                    dataIndex: 'request_name',
                     width: 150
                 },
                 {
                     text: 'Pool',
                     tooltip: 'Pool ID',
-                    dataIndex: 'poolName',
+                    dataIndex: 'pool_name',
                     width: 120
                 },
                 {
-                    text: 'Sample',
+                    text: 'Name',
                     tooltip: 'Sample Name',
                     dataIndex: 'name',
                     minWidth: 200,
@@ -81,7 +81,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                 {
                     text: 'Protocol',
                     tooltip: 'Library Protocol',
-                    dataIndex: 'libraryProtocolName',
+                    dataIndex: 'library_protocol_name',
                     minWidth: 150
                 },
                 {
@@ -135,13 +135,13 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                 {
                     text: 'I7 ID',
                     tooltip: 'Index I7 ID',
-                    dataIndex: 'indexI7Id',
+                    dataIndex: 'index_i7_id',
                     width: 60
                 },
                 {
                     text: 'I5 ID',
                     tooltip: 'Index I5 ID',
-                    dataIndex: 'indexI5Id',
+                    dataIndex: 'index_i5_id',
                     width: 60
                 },
                 {
@@ -212,31 +212,23 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                 },
                 {
                     text: 'QC Result',
-                    dataIndex: 'qc_result',
+                    dataIndex: 'quality_check',
                     width: 90,
                     editor: {
                         xtype: 'combobox',
                         queryMode: 'local',
                         displayField: 'name',
-                        valueField: 'id',
+                        valueField: 'name',
                         store: Ext.create('Ext.data.Store', {
-                            fields: [
-                                {
-                                    name: 'id',
-                                    type: 'int'
-                                },
-                                {
-                                    name: 'name',
-                                    type: 'string'
-                                }
-                            ],
+                            fields: [{
+                                name: 'name',
+                                type: 'string'
+                            }],
                             data: [
                                 {
-                                    id: 1,
                                     name: 'passed'
                                 },
                                 {
-                                    id: 2,
                                     name: 'failed'
                                 }
                             ]
@@ -267,7 +259,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                 '<strong>Protocol: {children:this.getName}</strong>',
                 {
                     getName: function(children) {
-                        return children[0].get('libraryProtocolName');
+                        return children[0].get('library_protocol_name');
                     }
                 }
             ]
@@ -278,22 +270,21 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
             items: [
                 {
                     xtype: 'button',
-                    id: 'downloadBenchtopProtocolLPBtn',
-                    itemId: 'downloadBenchtopProtocolLPBtn',
+                    itemId: 'download-benchtop-protocol-button',
                     text: 'Download Benchtop Protocol',
-                    iconCls: 'fa fa-file-excel-o fa-lg'
-                    // disabled: true
+                    iconCls: 'fa fa-file-excel-o fa-lg',
+                    disabled: true  // TODO: fix XSL generation
                 },
                 '->',
                 {
                     xtype: 'button',
-                    itemId: 'cancelBtn',
+                    itemId: 'cancel-button',
                     iconCls: 'fa fa-ban fa-lg',
                     text: 'Cancel'
                 },
                 {
                     xtype: 'button',
-                    itemId: 'saveBtn',
+                    itemId: 'save-button',
                     iconCls: 'fa fa-floppy-o fa-lg',
                     text: 'Save'
                 }

@@ -5,12 +5,12 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
     config: {
         control: {
             '#': {
-                activate: 'activateView'
+                // activate: 'activateView'
             },
             '#librariesTable': {
-                boxready: 'refresh',
-                refresh: 'refresh',
-                itemcontextmenu: 'showContextMenu'
+                // boxready: 'refresh',
+                // refresh: 'refresh',
+                // itemcontextmenu: 'showContextMenu'
             },
             '#showLibrariesCheckbox': {
                 change: 'changeFilter'

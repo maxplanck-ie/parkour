@@ -6,7 +6,8 @@ Ext.define('MainHub.view.requests.Requests', {
         'MainHub.view.requests.RequestsController',
         'MainHub.view.requests.RequestWindow',
         'MainHub.view.requests.EmailWindow',
-        'MainHub.view.libraries.LibraryWindow'
+        'MainHub.view.libraries.LibraryWindow',
+        'Ext.ux.form.SearchField'
     ],
 
     controller: 'requests',
@@ -24,24 +25,26 @@ Ext.define('MainHub.view.requests.Requests', {
         header: {
             title: 'Requests',
             items: [{
-                xtype: 'textfield',
-                itemId: 'searchField',
+                xtype: 'searchfield',
+                store: 'requestsStore',
                 emptyText: 'Search',
-                width: 200,
-                margin: '0 15px 0 0'
+                margin: '0 15px 0 0',
+                width: 250,
+                disabled: true
             },
             {
                 xtype: 'button',
                 itemId: 'addRequestBtn',
                 text: 'Add'
-            }
-            ]
+            }]
         },
         viewConfig: {
             // loadMask: false
+            emptyText: '<h1 style="text-align:center;margin:75px">No matching results</h1>'
         },
         store: 'requestsStore',
         sortableColumns: false,
+
         columns: {
             items: [
                 {
@@ -63,8 +66,9 @@ Ext.define('MainHub.view.requests.Requests', {
                 },
                 {
                     text: 'Date',
-                    dataIndex: 'date',
-                    flex: 1
+                    dataIndex: 'create_time',
+                    flex: 1,
+                    renderer: Ext.util.Format.dateRenderer('d.m.Y')
                 },
                 {
                     text: 'Sum of Sequencing Depth',

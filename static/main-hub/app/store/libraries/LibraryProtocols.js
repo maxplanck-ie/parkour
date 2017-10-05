@@ -10,7 +10,6 @@ Ext.define('MainHub.store.libraries.LibraryProtocols', {
 
     proxy: {
         type: 'ajax',
-        // url: 'get_library_protocols/',
         url: 'api/library_protocols/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"

@@ -3,20 +3,33 @@ Ext.define('MainHub.model.librarypreparation.LibraryPreparation', {
 
     fields: [
         {
-            name: 'requestName',
+            name: 'pk',
+            type: 'int'
+        },
+        {
+            name: 'name',
             type: 'string'
         },
         {
-            name: 'poolName',
+            name: 'is_converted',
+            type: 'bool'
+        },
+        {
+            name: 'barcode',
+            type: 'string'
+        },
+        {
+            name: 'request_name',
+            type: 'string'
+        },
+        {
+            name: 'pool_name',
             type: 'string'
         },
         {
             name: 'selected',
-            type: 'bool'
-        },
-        {
-            name: 'sampleId',
-            type: 'int'
+            type: 'bool',
+            defaultValue: false
         },
         {
             name: 'comments_facility',
@@ -27,12 +40,12 @@ Ext.define('MainHub.model.librarypreparation.LibraryPreparation', {
             type: 'string'
         },
         {
-            name: 'libraryProtocolName',
-            type: 'string'
+            name: 'library_protocol',
+            type: 'int'
         },
         {
-            name: 'libraryProtocol',
-            type: 'int'
+            name: 'library_protocol_name',
+            type: 'string'
         },
         {
             name: 'concentration_sample',
@@ -53,11 +66,11 @@ Ext.define('MainHub.model.librarypreparation.LibraryPreparation', {
             allowNull: true
         },
         {
-            name: 'indexI7Id',
+            name: 'index_i7_id',
             type: 'string'
         },
         {
-            name: 'indexI5Id',
+            name: 'index_i5_id',
             type: 'string'
         },
         {
@@ -88,6 +101,11 @@ Ext.define('MainHub.model.librarypreparation.LibraryPreparation', {
         {
             name: 'dilution_factor',
             type: 'int',
+            allowNull: true
+        },
+        {
+            name: 'quality_check',
+            type: 'string',
             allowNull: true
         }
     ]

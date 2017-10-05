@@ -1,6 +1,7 @@
 import json
 import logging
 import time
+import itertools
 
 from xlwt import Workbook, XFStyle, Formula
 
@@ -10,6 +11,10 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from django.core.exceptions import ValidationError
+from rest_framework import viewsets
+from rest_framework.response import Response
+from rest_framework.decorators import list_route
+from rest_framework.permissions import IsAdminUser
 
 from library_sample_shared.utils import get_indices_ids
 from index_generator.models import Pool
@@ -18,6 +23,8 @@ from library.models import Library
 from sample.models import Sample
 from .models import Pooling
 from .forms import PoolingForm
+from .serializers import (PoolingSerializer, PoolingLibrarySerializer,
+                          PoolingSampleSerializer)
 
 logger = logging.getLogger('db')
 
@@ -131,7 +138,8 @@ def update(request):
 
         if library_id == '0' or library_id == 0:
             obj = Pooling.objects.get(sample_id=sample_id)
-            record = Sample.objects.get(pk=sample_id)
+            # record = Sample.objects.get(pk=sample_id)
+            record = obj.sample
 
             # Update concentration value
             lib_prep_obj = LibraryPreparation.objects.get(sample_id=sample_id)
@@ -139,12 +147,13 @@ def update(request):
             lib_prep_obj.save(update_fields=['concentration_library'])
         else:
             obj = Pooling.objects.get(library_id=library_id)
-            record = Library.objects.get(pk=library_id)
+            # record = Library.objects.get(pk=library_id)
+            record = obj.library
 
             # Update concentration value
-            library = Library.objects.get(pk=library_id)
-            library.concentration = concentration
-            library.save(update_fields=['concentration'])
+            # library = Library.objects.get(pk=library_id)
+            record.concentration = concentration
+            record.save(update_fields=['concentration'])
 
         form = PoolingForm(request.POST, instance=obj)
 
@@ -182,11 +191,13 @@ def update_all(request):
         for item in data:
             try:
                 if item['sample_id'] == 0 or item['sample_id'] == '0':
-                    library = Library.objects.get(pk=item['library_id'])
-                    obj = Pooling.objects.get(library=library)
+                    # library = Library.objects.get(pk=item['library_id'])
+                    # obj = Pooling.objects.get(library=library)
+                    obj = Pooling.objects.get(library_id=item['library_id'])
                 else:
-                    sample = Sample.objects.get(pk=item['sample_id'])
-                    obj = Pooling.objects.get(sample=sample)
+                    # sample = Sample.objects.get(pk=item['sample_id'])
+                    # obj = Pooling.objects.get(sample=sample)
+                    obj = Pooling.objects.get(sample_id=item['sample_id'])
                 changed_value = item['changed_value']
                 for key, value in changed_value.items():
                     if hasattr(obj, key):
@@ -235,6 +246,120 @@ def qc_update_all(request):
         logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error})
+
+
+class PoolingViewSet(viewsets.ViewSet):
+    permission_classes = [IsAdminUser]
+
+    def list(self, request):
+        """ Get the list of all pooling objects. """
+        queryset = Pool.objects.order_by('-create_time')
+        serializer = PoolingSerializer(queryset, many=True)
+        return Response(list(itertools.chain(*serializer.data)))
+
+    @list_route(methods=['post'])
+    def edit(self, request):
+        """ Update multiple objects. """
+        if request.is_ajax():
+            post_data = request.data.get('data', [])
+        else:
+            post_data = json.loads(request.data.get('data', '[]'))
+
+        if not post_data:
+            return Response({
+                'success': False,
+                'message': 'Invalid payload.',
+            }, 400)
+
+        library_ids, sample_ids, library_post_data, sample_post_data = \
+            self._separate_data(post_data)
+
+        libraries_ok, libraries_no_invalid = self._update_objects(
+            Library, PoolingLibrarySerializer, library_ids, library_post_data)
+
+        samples_ok, samples_no_invalid = self._update_objects(
+            Sample, PoolingSampleSerializer, sample_ids, sample_post_data)
+
+        result = [libraries_ok, libraries_no_invalid,
+                  samples_ok, samples_no_invalid]
+        result = [x for x in result if x is not None]
+
+        if result.count(True) == len(result):
+            return Response({'success': True})
+        elif result.count(False) == len(result):
+            return Response({
+                'success': False,
+                'message': 'Invalid payload.',
+            }, 400)
+        else:
+            return Response({
+                'success': True,
+                'message': 'Some records cannot be updated.',
+            })
+
+    def _separate_data(self, data):
+        """
+        Separate library and sample data, ignoring objects without
+        either 'id' or 'record_type' or non-integer id.
+        """
+        library_ids = []
+        sample_ids = []
+        library_data = []
+        sample_data = []
+
+        for obj in data:
+            try:
+                if obj['record_type'] == 'Library':
+                    library_ids.append(int(obj['pk']))
+                    library_data.append(obj)
+                elif obj['record_type'] == 'Sample':
+                    sample_ids.append(int(obj['pk']))
+                    sample_data.append(obj)
+            except (KeyError, ValueError):
+                continue
+
+        return library_ids, sample_ids, library_data, sample_data
+
+    def _update_objects(self, model_class, serializer_class, ids, data):
+        """
+        Update multiple objects with a given model class and a
+        serializer class.
+        """
+        objects_ok = True
+        no_invalid = True
+
+        # objects = model_class.objects.filter(pk__in=ids, status=1)
+        objects = model_class.objects.filter(pk__in=ids)
+
+        if not objects:
+            return None, None
+
+        serializer = serializer_class(data=data, instance=objects, many=True)
+
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            # Try to update valid objects
+            valid_data = [item[1] for item in zip(serializer.errors, data)
+                          if not item[0]]
+
+            if any(valid_data):
+                new_ids = [x['pk'] for x in valid_data]
+                self._update_valid(
+                    model_class, serializer_class, new_ids, valid_data)
+            else:
+                objects_ok = False
+                no_invalid = False
+
+        return objects_ok, no_invalid
+
+    def _update_valid(self, model_class, serializer_class, ids, valid_data):
+        """ Update valid objects. """
+        objects = model_class.objects.filter(pk__in=ids)
+        serializer = serializer_class(
+            data=valid_data, instance=objects, many=True)
+        serializer.is_valid()
+        serializer.save()
 
 
 @csrf_exempt

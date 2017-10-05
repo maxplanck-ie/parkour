@@ -174,10 +174,6 @@ def save_pool(request):
 
             # Make current libraries not available for repeated pooling
             for library_id in library_ids:
-                library = Library.objects.get(pk=library_id)
-                library.is_pooled = True
-                library.save(update_fields=['is_pooled'])
-
                 # Create Pooling object
                 pooling_obj = Pooling(library=library)
 
@@ -209,14 +205,14 @@ def save_pool(request):
                 # Update sample fields
                 smpl.index_i7 = index_i7
                 smpl.index_i5 = index_i5
-                smpl.is_pooled = True
-                smpl.is_converted = True
-                smpl.barcode = smpl.barcode.replace('S', 'L')
+                # smpl.is_pooled = True
+                # smpl.is_converted = True
+                # smpl.barcode = smpl.barcode.replace('S', 'L')
                 smpl.save()
 
                 # # Create Library Preparation object
-                lp_obj = LibraryPreparation(sample=smpl)
-                lp_obj.save()
+                # lp_obj = LibraryPreparation(sample=smpl)
+                # lp_obj.save()
 
             # Trigger Pool Size update
             pool.save(update_fields=['size'])

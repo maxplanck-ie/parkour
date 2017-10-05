@@ -2,21 +2,22 @@ Ext.define('MainHub.model.Record', {
     extend: 'MainHub.model.Base',
 
     fields: [
-        // {
-        //     name: 'library_id',
-        //     type: 'int'
-        // },
-        // {
-        //     name: 'sample_id',
-        //     type: 'int'
-        // },
+        {
+            name: 'pk',
+            type: 'int'
+        },
         {
             name: 'name',
             type: 'string'
         },
         {
+            name: 'record_type',
+            type: 'string'
+        },
+        {
             name: 'status',
-            type: 'int'
+            type: 'int',
+            allowNull: true
         },
         {
             name: 'barcode',
@@ -29,9 +30,13 @@ Ext.define('MainHub.model.Record', {
         }
     ],
 
-    // getRecordType: function() {
-    //     return (this.get('sample_id') === 0) ? 'L' : 'S';
-    // },
+    getRecordType: function() {
+        var type = this.get('record_type');
+        if (type === 'Sample' && this.get('is_converted')) {
+            type = 'Library';
+        }
+        return type;
+    },
 
     getBarcode: function() {
         var barcode = this.get('barcode');

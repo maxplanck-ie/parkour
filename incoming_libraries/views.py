@@ -5,11 +5,17 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.exceptions import ValidationError
+from rest_framework import viewsets
+from rest_framework.response import Response
+from rest_framework.decorators import list_route
+from rest_framework.permissions import IsAdminUser
 
+from request.models import Request
 from library_sample_shared.models import ConcentrationMethod
 from library.models import Library
 from sample.models import Sample
 from .forms import IncomingLibraryForm, IncomingSampleForm
+from .serializers import LibrarySerializer, SampleSerializer
 
 logger = logging.getLogger('db')
 
@@ -146,3 +152,120 @@ def qc_update_all(request):
         logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error})
+
+
+class IncomingLibrariesViewSet(viewsets.ViewSet):
+    permission_classes = [IsAdminUser]
+
+    def list(self, request):
+        """ Get the list of all incoming libraries and samples. """
+        data = []
+        requests_queryset = Request.objects.order_by('-create_time')
+        for request_obj in requests_queryset:
+            library_serializer = LibrarySerializer(
+                request_obj.libraries.filter(status=1), many=True)
+            sample_serializer = SampleSerializer(
+                request_obj.samples.filter(status=1), many=True)
+            records = sorted(library_serializer.data + sample_serializer.data,
+                             key=lambda x: x['barcode'][3:])
+            data += records
+        return Response(data)
+
+    @list_route(methods=['post'])
+    def edit(self, request):
+        """ Update multiple libraries or samples. """
+        if request.is_ajax():
+            post_data = request.data.get('data', [])
+        else:
+            post_data = json.loads(request.data.get('data', '[]'))
+
+        if not post_data:
+            return Response({
+                'success': False,
+                'message': 'Invalid payload.',
+            }, 400)
+
+        library_ids, sample_ids, library_post_data, sample_post_data = \
+            self._separate_data(post_data)
+
+        libraries_ok, libraries_contain_invalid = self._update_objects(
+            Library, LibrarySerializer, library_ids, library_post_data)
+
+        samples_ok, samples_contain_invalid = self._update_objects(
+            Sample, SampleSerializer, sample_ids, sample_post_data)
+
+        result = [libraries_ok, libraries_contain_invalid,
+                  samples_ok, samples_contain_invalid]
+
+        if result.count(True) == 4:
+            return Response({'success': True})
+        elif result.count(False) == 4:
+            return Response({
+                'success': False,
+                'message': 'Invalid payload.',
+            }, 400)
+        else:
+            return Response({
+                'success': True,
+                'message': 'Some records cannot be updated.',
+            })
+
+    def _separate_data(self, data):
+        """
+        Separate library and sample data, ignoring objects without
+        either 'id' or 'record_type' or non-integer id.
+        """
+        library_ids = []
+        sample_ids = []
+        library_data = []
+        sample_data = []
+
+        for obj in data:
+            try:
+                if obj['record_type'] == 'Library':
+                    library_ids.append(int(obj['pk']))
+                    library_data.append(obj)
+                elif obj['record_type'] == 'Sample':
+                    sample_ids.append(int(obj['pk']))
+                    sample_data.append(obj)
+            except (KeyError, ValueError):
+                continue
+
+        return library_ids, sample_ids, library_data, sample_data
+
+    def _update_objects(self, model_class, serializer_class, ids, data):
+        """
+        Update multiple objects with a given model class and a
+        serializer class.
+        """
+        contain_invalid = False
+
+        objects = model_class.objects.filter(pk__in=ids, status=1)
+        serializer = serializer_class(data=data, instance=objects, many=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            objects_ok = True
+        else:
+            # Try to update valid objects
+            valid_data = [item[1] for item in zip(serializer.errors, data)
+                          if not item[0]]
+
+            if any(valid_data):
+                new_ids = [x['pk'] for x in valid_data]
+                self._update_valid(
+                    model_class, serializer_class, new_ids, valid_data)
+                contain_invalid = True
+                objects_ok = True
+            else:
+                objects_ok = False
+
+        return objects_ok, contain_invalid
+
+    def _update_valid(self, model_class, serializer_class, ids, valid_data):
+        """ Update valid objects. """
+        objects = model_class.objects.filter(pk__in=ids)
+        serializer = serializer_class(
+            data=valid_data, instance=objects, many=True)
+        serializer.is_valid()
+        serializer.save()

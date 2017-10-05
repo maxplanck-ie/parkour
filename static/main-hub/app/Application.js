@@ -49,13 +49,13 @@ Ext.define('MainHub.Application', {
         'Ext.ux.ToastMessage'
     ],
 
-    launch: function () {
+    launch: function() {
         // TODO - Launch the application
     },
 
-    onAppUpdate: function () {
+    onAppUpdate: function() {
         Ext.Msg.confirm('Application Update', 'This application has an update, reload?',
-            function (choice) {
+            function(choice) {
                 if (choice === 'yes') {
                     window.location.reload();
                 }
@@ -87,14 +87,15 @@ Ext.define('MainHub.Utilities', {
         var poolingStore = Ext.getStore('poolingStore');
         if (poolingStore.isLoaded()) poolingStore.reload();
     },
+
     getDataIndex: function(e, view) {
         var xPos = e.getXY()[0];
         var columns = view.getGridColumns();
         var dataIndex;
 
         for (var column in columns) {
-            var leftEdge = columns[column].getPosition()[0],
-                rightEdge = columns[column].getSize().width + leftEdge;
+            var leftEdge = columns[column].getPosition()[0];
+            var rightEdge = columns[column].getSize().width + leftEdge;
 
             if (xPos >= leftEdge && xPos <= rightEdge) {
                 dataIndex = columns[column].dataIndex;
@@ -112,13 +113,207 @@ Ext.define('MainHub.Store', {
         Ext.getStore(storeName).sync({
             success: function() {
                 Ext.getStore(storeName).reload();
+                new Noty({ text: 'The changes have been saved.' }).show();
             },
             failure: function(batch, options) {
                 var error = batch.operations[0].getError();
-                // console.error(error);
-                setTimeout(function() {
-                    Ext.ux.ToastMessage(error, 'error');
-                }, 100);
+                console.error(error);
+
+                try {
+                    var obj = Ext.JSON.decode(error.response.responseText);
+                    if (!obj.success && obj.message && obj.message !== '') {
+                        error = obj.message;
+                    }
+                } catch (e) {
+                    error = error.statusText;
+                }
+
+                new Noty({ text: error, type: 'error' }).show();
+            }
+        });
+    }
+});
+
+Ext.define('MainHub.grid.SearchInputMixin', {
+    changeFilter: function(el, value) {
+        var grid = el.up('grid');
+        var store = grid.getStore();
+        var columns = Ext.pluck(grid.getColumns(), 'dataIndex');
+
+        store.clearFilter();
+        store.filterBy(function(record) {
+            var res = false;
+            Ext.each(columns, function(column) {
+                if (record.data[column] && record.data[column].toString().toLowerCase().indexOf(value.toLowerCase()) > -1) {
+                    res = res || true;
+                }
+            });
+            return res;
+        });
+    }
+});
+
+Ext.define('MainHub.grid.CheckboxesAndSearchInputMixin', {
+    changeFilter: function(el, value) {
+        var grid = el.up('grid');
+        var store = grid.getStore();
+        var columns = Ext.pluck(grid.getColumns(), 'dataIndex');
+        var showLibraries = null;
+        var showSamples = null;
+        var searchQuery = null;
+
+        if (el.itemId === 'show-libraries-checkbox') {
+            showLibraries = value;
+            showSamples = el.up().items.items[1].getValue();
+            searchQuery = el.up('header').down('textfield').getValue();
+        } else if (el.itemId === 'show-samples-checkbox') {
+            showLibraries = el.up().items.items[0].getValue();
+            showSamples = value;
+            searchQuery = el.up('header').down('textfield').getValue();
+        } else if (el.itemId === 'search-field') {
+            showLibraries = el.up().down('fieldcontainer').items.items[0].getValue();
+            showSamples = el.up().down('fieldcontainer').items.items[1].getValue();
+            searchQuery = value;
+        }
+
+        var showFilter = Ext.util.Filter({
+            filterFn: function(record) {
+                var res = false;
+                if (record.get('record_type') === 'Library') {
+                    res = res || showLibraries;
+                } else {
+                    res = res || showSamples;
+                }
+                return res;
+            }
+        });
+
+        var searchFilter = Ext.util.Filter({
+            filterFn: function(record) {
+                var res = false;
+                if (searchQuery) {
+                    Ext.each(columns, function(column) {
+                        var val = record.get(column);
+                        if (val && val.toString().toLowerCase().indexOf(searchQuery.toLowerCase()) > -1) {
+                            res = res || true;
+                        }
+                    });
+                } else {
+                    res = true;
+                }
+                return res;
+            }
+        });
+
+        store.clearFilter();
+        store.filter([showFilter, searchFilter]);
+    }
+});
+
+Ext.define('MainHub.grid.ContextMenuMixin', {
+    showContextMenu: function(gridView, record, item, index, e) {
+        var me = this;
+        e.stopEvent();
+        Ext.create('Ext.menu.Menu', {
+            items: [{
+                text: 'Apply to All',
+                iconCls: 'x-fa fa-check-circle',
+                handler: function() {
+                    var dataIndex = me.getDataIndex(e, gridView);
+                    me.applyToAll(record, dataIndex);
+                }
+            }]
+        }).showAt(e.getXY());
+    },
+
+    showGroupContextMenu: function(view, node, groupId, e) {
+        var me = this;
+        e.stopEvent();
+        Ext.create('Ext.menu.Menu', {
+            items: [{
+                text: 'Select All',
+                iconCls: 'x-fa fa-check-square-o',
+                handler: function() {
+                    me.selectUnselectAll(parseInt(groupId), true);
+                }
+            },
+            {
+                text: 'Unselect All',
+                iconCls: 'x-fa fa-square-o',
+                handler: function() {
+                    me.selectUnselectAll(parseInt(groupId), false);
+                }
+            },
+                '-',
+            {
+                text: 'QC: All selected passed',
+                iconCls: 'x-fa fa-check',
+                handler: function() {
+                    me.qualityCheckAll(parseInt(groupId), 'passed');
+                }
+            },
+            {
+                text: 'QC: All selected failed',
+                iconCls: 'x-fa fa-times',
+                handler: function() {
+                    me.qualityCheckAll(parseInt(groupId), 'failed');
+                }
+            }]
+        }).showAt(e.getXY());
+    },
+
+    getDataIndex: function(e, view) {
+        var xPos = e.getXY()[0];
+        var columns = view.getGridColumns();
+        var dataIndex;
+
+        for (var column in columns) {
+            var leftEdge = columns[column].getPosition()[0];
+            var rightEdge = columns[column].getSize().width + leftEdge;
+
+            if (xPos >= leftEdge && xPos <= rightEdge) {
+                dataIndex = columns[column].dataIndex;
+                break;
+            }
+        }
+
+        return dataIndex;
+    }
+});
+
+Ext.define('MainHub.store.SyncStoreMixin', {
+    syncStore: function(name, reload) {
+        var reload = reload || false;
+        Ext.getStore(name).sync({
+            success: function(batch) {
+                var response = batch.operations[0].getResponse();
+                var obj = Ext.JSON.decode(response.responseText);
+
+                if (reload) {
+                    Ext.getStore(name).reload();
+                }
+
+                if (obj.hasOwnProperty('message') && obj.message !== '') {
+                    new Noty({ text: obj.message, type: 'warning' }).show();
+                } else {
+                    new Noty({ text: 'The changes have been saved.' }).show();
+                }
+            },
+
+            failure: function(batch) {
+                var error = batch.operations[0].getError();
+                console.error(error);
+
+                try {
+                    var obj = Ext.JSON.decode(error.response.responseText);
+                    if (!obj.success && obj.message && obj.message !== '') {
+                        error = obj.message;
+                    }
+                } catch (e) {
+                    error = error.statusText;
+                }
+
+                new Noty({ text: error, type: 'error' }).show();
             }
         });
     }

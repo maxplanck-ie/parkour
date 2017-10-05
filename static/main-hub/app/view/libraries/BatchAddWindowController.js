@@ -41,7 +41,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
 
             '#saveBtn': {
                 click: 'save'
-            },
+            }
         }
     },
 
@@ -394,7 +394,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         indexReadsEditor.getStore().removeAll();
         indexReadsEditor.enable();
 
-        for (var i = 0; i <= record.get('indexReads'); i++) {
+        for (var i = 0; i <= record.get('index_reads'); i++) {
             indexReadsEditor.getStore().add({
                 num: i
             });

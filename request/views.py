@@ -13,11 +13,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
+# from django.db.models import Q
 from rest_framework import viewsets
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 
-from common.views import CsrfExemptSessionAuthentication
+from common.views import (CsrfExemptSessionAuthentication,
+                          StandardResultsSetPagination)
 from .models import Request, FileRequest
 from .serializers import RequestSerializer, RequestFileSerializer
 from .forms import RequestForm
@@ -220,7 +222,7 @@ def upload_deep_sequencing_request(request):
 @login_required
 def upload_files(request):
     """ Upload request files. """
-    data = []
+    file_ids = []
     error = ''
 
     if request.method == 'POST' and any(request.FILES):
@@ -228,13 +230,17 @@ def upload_files(request):
             for file in request.FILES.getlist('files'):
                 f = FileRequest(name=file.name, file=file)
                 f.save()
-                data.append(f.id)
+                file_ids.append(f.id)
 
         except Exception as e:
             error = 'Could not upload the files.'
             logger.exception(e)
 
-    return JsonResponse({'success': not error, 'error': error, 'data': data})
+    return JsonResponse({
+        'success': not error,
+        'error': error,
+        'fileIds': file_ids
+    })
 
 
 @login_required
@@ -280,33 +286,62 @@ def send_email(request):
     return JsonResponse({'success': not error, 'error': error})
 
 
-class RequestViewSet(viewsets.ViewSet):
-    # authentication_classes = [CsrfExemptSessionAuthentication]
+class RequestViewSet(viewsets.GenericViewSet):
+    serializer_class = RequestSerializer
+    pagination_class = StandardResultsSetPagination
 
-    def list(self, request):
-        """ Get the list of requests. """
-        queryset = Request.objects.all().order_by('-create_time')
+    def get_queryset(self):
+        queryset = Request.objects.prefetch_related(
+            'user', 'libraries', 'samples', 'files').order_by('-create_time')
+
+        # If a search query is given
+        search_query = self.request.query_params.get('query', None)
+        if search_query:
+            # TODO: implements this
+            # fields = [f for f in Request._meta.fields
+            #           if isinstance(f, CharField) or isinstance(f, TextField)]
+            # queries = [Q(**{f.name: search_query}) for f in fields]
+            # qs = Q()
+            # for query in queries:
+            #     qs = qs | query
+            # queryset = queryset.filter(qs)
+            pass
+
         if self.request.user.is_staff:
             # Show only those Requests, whose libraries and samples
             # haven't reached status 6 yet
-            queryset = [x for x in queryset if x.statuses.count(6) == 0]
+            # TODO: find a way to hide requests
+            # queryset = [x for x in queryset if x.statuses.count(6) == 0]
+            pass
         else:
             queryset = queryset.filter(user=self.request.user)
-        serializer = RequestSerializer(queryset, many=True, context={
-            'request': request,
-        })
+        return queryset
+
+    def list(self, request):
+        """ Get the list of requests. """
+        queryset = self.get_queryset()
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
-        """ Get request with a given id. """
         try:
             queryset = Request.objects.get(pk=pk)
-        except (ValueError, Request.DoesNotExist):
-            return Response({})
+        except ValueError:
+            return Response({
+                'success': False,
+                'message': 'Id is not provided.',
+            }, 400)
+        except Request.DoesNotExist:
+            return Response({
+                'success': False,
+                'message': 'Request does not exist.',
+            }, 404)
         else:
-            serializer = RequestSerializer(queryset, context={
-                'request': request,
-            })
+            serializer = self.get_serializer(queryset)
             return Response(serializer.data)
 
     # def destroy(self, request, pk=None):
@@ -323,8 +358,16 @@ class RequestViewSet(viewsets.ViewSet):
         """ Get the list of record's submitted libraries and samples. """
         try:
             queryset = Request.objects.get(pk=pk)
-        except (ValueError, Request.DoesNotExist):
-            return Response([])
+        except ValueError:
+            return Response({
+                'success': False,
+                'message': 'Id is not provided.',
+            }, 400)
+        except Request.DoesNotExist:
+            return Response({
+                'success': False,
+                'message': 'Request does not exist.',
+            }, 404)
         else:
             data = [{
                 'name': obj.name,
@@ -338,31 +381,22 @@ class RequestViewSet(viewsets.ViewSet):
             data = sorted(data, key=lambda x: x['barcode'][3:])
             return Response(data)
 
-    # @detail_route(methods=['get'])
-    # def get_files(self, request, pk=None):
-    #     """ Get the list of attached files. """
-    #     data = []
-    #     try:
-    #         queryset = Request.objects.get(pk=pk).files.order_by('name')
-    #     except (ValueError, Request.DoesNotExist):
-    #         pass
-    #     else:
-    #         serializer = RequestFileSerializer(queryset, many=True)
-    #         data = serializer.data
-    #     return Response(data)
-
-    @list_route()
-    def get_files(self, request):
+    @detail_route(methods=['get'])
+    def get_files(self, request, pk=None):
         """ Get the list of attached files. """
-        file_ids = json.loads(request.query_params.get('file_ids', '[]'))
         try:
-            queryset = FileRequest.objects.filter(pk__in=file_ids)
+            queryset = Request.objects.get(pk=pk).files.order_by('name')
         except ValueError:
-            return Response([])
+            return Response({
+                'success': False,
+                'message': 'Id is not provided.',
+            }, 400)
+        except Request.DoesNotExist:
+            return Response({
+                'success': False,
+                'message': 'Request does not exist.',
+            }, 404)
         else:
             serializer = RequestFileSerializer(queryset, many=True)
-            return Response({
-                'success': True,
-                'message': '',
-                'data': serializer.data
-            })
+            data = serializer.data
+            return Response(data)

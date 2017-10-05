@@ -1,11 +1,29 @@
+import json
+import string
+import random
+
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
+
 from .models import Organization, PrincipalInvestigator, CostUnit
 
-import json
 
 User = get_user_model()
+
+
+class BaseTestCase(TestCase):
+
+    def _create_user(self, email, password, is_staff=True):
+        user = User.objects.create_user(email=email, password=password,
+                                        is_staff=is_staff)
+        user.save()
+        return user
+
+    def _get_random_name(self, len=10):
+        return ''.join(random.SystemRandom().choice(
+            string.ascii_lowercase + string.digits
+        ) for _ in range(len))
 
 
 # Models

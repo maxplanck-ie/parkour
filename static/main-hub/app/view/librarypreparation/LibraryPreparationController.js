@@ -2,27 +2,33 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.library-preparation',
 
+    mixins: [
+        'MainHub.grid.SearchInputMixin',
+        'MainHub.grid.ContextMenuMixin',
+        'MainHub.store.SyncStoreMixin'
+    ],
+
     config: {
         control: {
             '#': {
                 activate: 'activateView'
             },
-            '#libraryPreparationTable': {
-                refresh: 'refresh',
+            '#library-preparation-grid': {
+                // refresh: 'refresh',
                 edit: 'editRecord',
                 itemcontextmenu: 'showContextMenu',
                 groupcontextmenu: 'showGroupContextMenu'
             },
-            '#downloadBenchtopProtocolLPBtn': {
+            '#download-benchtop-protocol-button': {
                 click: 'downloadBenchtopProtocol'
             },
-            '#searchField': {
-                change: 'search'
+            '#search-field': {
+                change: 'changeFilter'
             },
-            '#cancelBtn': {
+            '#cancel-button': {
                 click: 'cancel'
             },
-            '#saveBtn': {
+            '#save-button': {
                 click: 'save'
             }
         }
@@ -32,13 +38,41 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
         Ext.getStore('libraryPreparationStore').reload();
     },
 
-    refresh: function(grid) {
-        // Ext.getStore('libraryPreparationStore').load(function(records, operation, success) {
-        //     if (success && records.length > 0) {
-        //         Ext.getCmp('downloadBenchtopProtocolLPBtn').setDisabled(false);
-        //     }
-        // });
-        Ext.getStore('libraryPreparationStore').reload();
+    // refresh: function(grid) {
+    //     // Ext.getStore('libraryPreparationStore').load(function(records, operation, success) {
+    //     //     if (success && records.length > 0) {
+    //     //         Ext.getCmp('downloadBenchtopProtocolLPBtn').setDisabled(false);
+    //     //     }
+    //     // });
+    //     Ext.getStore('libraryPreparationStore').reload();
+    // },
+
+    selectUnselectAll: function(libraryProtocolId, selected) {
+        var store = Ext.getStore('libraryPreparationStore');
+
+        store.each(function(item) {
+            if (item.get('library_protocol') === libraryProtocolId) {
+                item.set('selected', selected);
+            }
+        });
+    },
+
+    editRecord: function(editor, context) {
+        var record = context.record;
+        var changes = record.getChanges();
+        var values = context.newValues;
+
+        // Set nM
+        if (Object.keys(changes).indexOf('nM') === -1 &&
+            values.concentration_library > 0 &&
+            values.mean_fragment_size > 0) {
+            var nM = ((values.concentration_library /
+                (values.mean_fragment_size * 650)) * 1000000).toFixed(2);
+            record.set('nM', nM);
+        }
+
+        // Send the changes to the server
+        this.syncStore('libraryPreparationStore');
     },
 
     applyToAll: function(record, dataIndex) {
@@ -52,7 +86,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
 
         if (typeof dataIndex !== undefined && allowedColumns.indexOf(dataIndex) !== -1) {
             store.each(function(item) {
-                if (item.get('libraryProtocol') === record.get('libraryProtocol') && item !== record) {
+                if (item.get('library_protocol') === record.get('library_protocol') && item !== record) {
                     item.set(dataIndex, record.get(dataIndex));
 
                     // Calculate nM
@@ -60,216 +94,78 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
                         var concentrationLibrary = item.get('concentration_library');
                         var meanFragmentSize = item.get('mean_fragment_size');
                         if (concentrationLibrary && meanFragmentSize) {
-                            var nM = ((concentrationLibrary / (meanFragmentSize * 650)) * 1000000).toFixed(2);;
+                            var nM = ((concentrationLibrary /
+                                (meanFragmentSize * 650)) * 1000000).toFixed(2);;
                             item.set('nM', nM);
                         }
                     }
                 }
             });
-            store.sync({
-                failure: function(batch, options) {
-                    var error = batch.operations[0].getError();
-                    console.error(error);
-                    setTimeout(function() {
-                        Ext.ux.ToastMessage(error.statusText, 'error');
-                    }, 100);
-                }
-            });
+
+            // Send the changes to the server
+            this.syncStore('libraryPreparationStore');
         }
-    },
-
-    editRecord: function(editor, context) {
-        var record = context.record;
-        var changes = record.getChanges();
-        var values = context.newValues;
-        // var concentrationSample = values.concentration_sample;
-        // var startingAmount = values.starting_amount;
-        // var startingVolume = values.starting_volume;
-        // var spikeInVolume = values.spike_in_volume;
-        var concentrationLibrary = values.concentration_library;
-        var meanFragmentSize = values.mean_fragment_size;
-        var nM = values.nM;
-
-        var params = $.extend({
-            sample_id: record.get('sampleId'),
-            qc_result: values.qc_result !== null ? values.qc_result : ''
-        }, values);
-
-        // Set nM
-        if (concentrationLibrary > 0 && meanFragmentSize > 0 &&
-            Object.keys(changes).indexOf('nM') === -1) {
-            nM = ((concentrationLibrary / (meanFragmentSize * 650)) * 1000000).toFixed(2);
-            params.nM = nM;
-        }
-
-        Ext.Ajax.request({
-            url: 'library_preparation/update/',
-            method: 'POST',
-            scope: this,
-            params: params,
-            success: function(response) {
-                var obj = Ext.JSON.decode(response.responseText);
-                if (obj.success) {
-                    Ext.getStore('libraryPreparationStore').reload();
-                } else {
-                    Ext.ux.ToastMessage(obj.error, 'error');
-                }
-            },
-            failure: function(response) {
-                Ext.ux.ToastMessage(response.statusText, 'error');
-                console.error(response);
-            }
-        });
-    },
-
-    showGroupContextMenu: function(view, node, libraryProtocolId, e) {
-        var me = this;
-        e.stopEvent();
-        Ext.create('Ext.menu.Menu', {
-            items: [{
-                text: 'Select All',
-                iconCls: 'x-fa fa-check-square-o',
-                handler: function() {
-                    me.selectUnselectAll(parseInt(libraryProtocolId), true);
-                }
-            },
-            {
-                text: 'Unselect All',
-                iconCls: 'x-fa fa-square-o',
-                handler: function() {
-                    me.selectUnselectAll(parseInt(libraryProtocolId), false);
-                }
-            },
-            '-',
-            {
-                text: 'QC: All selected passed',
-                iconCls: 'x-fa fa-check',
-                handler: function() {
-                    me.qualityCheckAll(parseInt(libraryProtocolId), true);
-                }
-            },
-            {
-                text: 'QC: All selected failed',
-                iconCls: 'x-fa fa-times',
-                handler: function() {
-                    me.qualityCheckAll(parseInt(libraryProtocolId), false);
-                }
-            }]
-        }).showAt(e.getXY());
-    },
-
-    selectUnselectAll: function(libraryProtocolId, selected) {
-        var store = Ext.getStore('libraryPreparationStore');
-
-        store.each(function(item) {
-            if (item.get('libraryProtocol') === libraryProtocolId) {
-                item.set('selected', selected);
-            }
-        });
     },
 
     qualityCheckAll: function(libraryProtocolId, result) {
         var store = Ext.getStore('libraryPreparationStore');
-        var samples = [];
 
         store.each(function(item) {
-            if (item.get('libraryProtocol') === libraryProtocolId && item.get('selected')) {
-                samples.push(item.get('sampleId'));
+            if (item.get('library_protocol') === libraryProtocolId && item.get('selected')) {
+                item.set('quality_check', result);
             }
         });
 
-        if (samples.length !== 0) {
-            Ext.Ajax.request({
-                url: 'library_preparation/qc_update_all/',
-                method: 'POST',
-                scope: this,
-                params: {
-                    samples: Ext.JSON.encode(samples),
-                    result: result
-                },
-                success: function(response) {
-                    var obj = Ext.JSON.decode(response.responseText);
-                    if (obj.success) {
-                        Ext.getStore('libraryPreparationStore').reload();
-                    } else {
-                        Ext.ux.ToastMessage(obj.error, 'error');
-                    }
-                },
-                failure: function(response) {
-                    Ext.ux.ToastMessage(response.statusText, 'error');
-                    console.error(response);
-                }
-            });
-        } else {
-            Ext.ux.ToastMessage('You did not select any samples.', 'warning');
+        if (store.getModifiedRecords().length === 0) {
+            new Noty({
+                text: 'You did not select any records.',
+                type: 'warning'
+            }).show();
+            return;
         }
+
+        // Send the changes to the server
+        this.syncStore('libraryPreparationStore');
     },
 
     downloadBenchtopProtocol: function(btn) {
         var store = Ext.getStore('libraryPreparationStore');
-        var samples = [];
+        var ids = [];
 
-        // Get all checked (selected) samples
+        // Get all checked (selected) records
         store.each(function(record) {
             if (record.get('selected')) {
-                samples.push(record.get('sampleId'));
+                ids.push(record.get('pk'));
             }
         });
 
-        if (samples.length > 0) {
-            var form = Ext.create('Ext.form.Panel', {
-                standardSubmit: true
-            });
-
-            form.submit({
-                url: 'library_preparation/download_benchtop_protocol/',
-                target: '_blank',
-                params: {
-                    'samples': Ext.JSON.encode(samples)
-                }
-            });
-        } else {
-            Ext.ux.ToastMessage('You did not select any samples.', 'warning');
+        if (ids.length === 0) {
+            new Noty({
+                text: 'You did not select any records.',
+                type: 'warning'
+            }).show();
+            return;
         }
+
+        var form = Ext.create('Ext.form.Panel', {
+            standardSubmit: true
+        });
+
+        form.submit({
+            url: 'library_preparation/download_benchtop_protocol/',
+            target: '_blank',
+            params: {
+                'ids': Ext.JSON.encode(ids)
+            }
+        });
     },
 
-    showContextMenu: function(gridView, record, item, index, e) {
-        var me = this;
-        e.stopEvent();
-        Ext.create('Ext.menu.Menu', {
-            items: [{
-                text: 'Apply to All',
-                iconCls: 'x-fa fa-check-circle',
-                handler: function() {
-                    var dataIndex = MainHub.Utilities.getDataIndex(e, gridView);
-                    me.applyToAll(record, dataIndex);
-                }
-            }]
-        }).showAt(e.getXY());
+    save: function() {
+        // Send the changes to the server
+        this.syncStore('libraryPreparationStore');
     },
 
     cancel: function() {
         Ext.getStore('libraryPreparationStore').rejectChanges();
-    },
-
-    save: function() {
-        MainHub.Store.save('libraryPreparationStore');
-    },
-
-    search: function(fld, query) {
-        var grid = Ext.getCmp('libraryPreparationTable');
-        var store = grid.getStore();
-        var columns = Ext.pluck(grid.getColumns(), 'dataIndex');
-
-        store.clearFilter();
-        store.filterBy(function(record) {
-            var res = false;
-            Ext.each(columns, function(column) {
-                if (record.data[column] && record.data[column].toString().toLowerCase().indexOf(query.toLowerCase()) > -1) {
-                    res = res || true;
-                }
-            });
-            return res;
-        });
     }
 });
