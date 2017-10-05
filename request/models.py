@@ -60,3 +60,24 @@ class Request(DateTimeMixin):
     @property
     def statuses(self):
         return [x.status for x in self.records]
+
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        super().save(*args, **kwargs)
+
+        if created:
+            # Set name after getting an id
+            self.name = '%i_%s' % (self.id, self.user.last_name)
+            if self.user.pi:
+                self.name += '_' + self.user.pi.name
+            self.save()
+
+    def delete(self, *args, **kwargs):
+        # Delete all libraries and samples
+        self.libraries.all().delete()
+        self.samples.all().delete()
+
+        # Delete all files
+        self.files.all().delete()
+
+        super().delete(*args, **kwargs)

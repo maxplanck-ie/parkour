@@ -150,7 +150,7 @@ class TestLibraries(BaseTestCase):
         self.assertFalse(data['success'])
         self.assertIn('Id is not provided.', data['message'])
 
-    def test_single_library_incorrect_id(self):
+    def test_single_library_invalid_id(self):
         """ Ensure error is thrown if the id does not exist. """
         response = self.client.get(reverse(
             'libraries-detail',

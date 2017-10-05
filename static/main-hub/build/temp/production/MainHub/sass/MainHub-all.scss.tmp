@@ -1,5 +1,5 @@
 $app-name:  dynamic( 'MainHub' );
-$image-search-path: '/Users/evgeny/Work/parkour/static/main-hub/build/production/MainHub/resources';
+$image-search-path: '/Users/anatskiy/Work/parkour/static/main-hub/build/production/MainHub/resources';
 $theme-name:  dynamic( 'theme-triton' );
 $include-ext-abstractcomponent: dynamic(true);;
 $include-ext-abstractcontainer: dynamic(true);;
@@ -1020,7 +1020,6 @@ $include-mainhub-model-libraries-rnaquality: dynamic(true);;
 $include-mainhub-model-libraries-samplenucleicacidtype: dynamic(true);;
 $include-mainhub-model-librarypreparation-librarypreparation: dynamic(true);;
 $include-mainhub-model-pooling-pooling: dynamic(true);;
-$include-mainhub-model-requests-librariesinrequest: dynamic(true);;
 $include-mainhub-model-requests-request: dynamic(true);;
 $include-mainhub-model-requests-requestfile: dynamic(true);;
 $include-mainhub-overrides-grid-plugin-clipboard: dynamic(true);;

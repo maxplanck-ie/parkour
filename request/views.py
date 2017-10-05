@@ -17,6 +17,7 @@ from django.core.mail import send_mail
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
+from rest_framework.exceptions import NotFound
 
 from common.views import (CsrfExemptSessionAuthentication,
                           StandardResultsSetPagination)
@@ -30,82 +31,24 @@ User = get_user_model()
 logger = logging.getLogger('db')
 
 
-@login_required
-def save_request(request):
-    """ Add new or edit an existing request """
-    error = ''
+def handle_request_id_exceptions(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        
+        except ValueError:
+            return Response({
+                'success': False,
+                'message': 'Id is not provided.',
+            }, 400)
+        
+        except Request.DoesNotExist:
+            return Response({
+                'success': False,
+                'message': 'Request does not exist.',
+            }, 404)
 
-    request_id = request.POST.get('request_id', '')
-    libraries = json.loads(request.POST.get('libraries', '[]'))
-    samples = json.loads(request.POST.get('samples', '[]'))
-    files = json.loads(request.POST.get('files', '[]'))
-
-    try:
-        if request.method != 'POST':
-            raise ValueError('Wrong HTTP method.')
-
-        mode = request.POST.get('mode')
-        if mode == 'add':
-            form = RequestForm(request.POST)
-        elif mode == 'edit':
-            req = Request.objects.get(id=request_id)
-            form = RequestForm(request.POST, instance=req)
-        else:
-            raise ValueError('Wrong or missing mode.')
-
-        if not libraries and not samples:
-            raise ValueError('Please provide Libraries and/or Samples.')
-
-        if form.is_valid():
-            if mode == 'add':
-                req = form.save(commit=False)
-                req.user = request.user
-                req.save()
-                req.files.add(*files)
-            else:
-                req = form.save()
-                old_files = [file for file in req.files.all()]
-                req.files.clear()
-                req.save()
-
-                if not files:
-                    files_to_delete = old_files  # delete all files
-                else:
-                    req.files.add(*files)
-                    new_files = [file for file in req.files.all()]
-                    files_to_delete = list(set(old_files) - set(new_files))
-
-                # Delete files
-                for file in files_to_delete:
-                    file.delete()
-
-            req.libraries.add(*libraries)
-            req.samples.add(*samples)
-
-        else:
-            error = str(form.errors)
-
-    except Exception as e:
-        error = str(e)
-        logger.exception(e)
-
-    return JsonResponse({'success': not error, 'error': error})
-
-
-@login_required
-def delete_request(request):
-    """ Delete request with all its libraries and samples. """
-    error = ''
-    request_id = request.POST.get('request_id', '')
-
-    try:
-        req = Request.objects.get(pk=request_id)
-        req.delete()
-    except (ValueError, Request.DoesNotExist) as e:
-        error = str(e)
-        logger.exception(e)
-
-    return JsonResponse({'success': not error, 'error': error})
+    return wrapper
 
 
 @csrf_exempt
@@ -244,6 +187,32 @@ def upload_files(request):
 
 
 @login_required
+def get_files(request):
+    """ Get the list of files for the given request id. """
+    file_ids = json.loads(request.GET.get('file_ids', '[]'))
+    error = ''
+    data = []
+
+    try:
+        files = [f for f in FileRequest.objects.all() if f.id in file_ids]
+        data = [
+            {
+                'id': file.id,
+                'name': file.name,
+                'size': file.file.size,
+                'path': settings.MEDIA_URL + file.file.name,
+            }
+            for file in files
+        ]
+
+    except Exception as e:
+        error = 'Could not get the attached files.'
+        logger.exception(e)
+
+    return JsonResponse({'success': not error, 'error': error, 'data': data})
+
+
+@login_required
 @staff_member_required
 def send_email(request):
     """ Send an email to the user. """
@@ -320,83 +289,109 @@ class RequestViewSet(viewsets.GenericViewSet):
     def list(self, request):
         """ Get the list of requests. """
         queryset = self.get_queryset()
-        page = self.paginate_queryset(queryset)
+        # page = self.paginate_queryset(queryset)
+    
+        try:
+            page = self.paginate_queryset(queryset)
+        except NotFound:
+            page = None
+        
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
+        
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
-    def retrieve(self, request, pk=None):
-        try:
-            queryset = Request.objects.get(pk=pk)
-        except ValueError:
-            return Response({
-                'success': False,
-                'message': 'Id is not provided.',
-            }, 400)
-        except Request.DoesNotExist:
-            return Response({
-                'success': False,
-                'message': 'Request does not exist.',
-            }, 404)
+    def create(self, request):
+        """ Create a request. """
+        
+        if request.is_ajax():
+            post_data = request.data.get('data', [])
         else:
-            serializer = self.get_serializer(queryset)
-            return Response(serializer.data)
+            post_data = json.loads(request.data.get('data', '[]'))
+        post_data.update({'user': request.user.pk})
 
-    # def destroy(self, request, pk=None):
-    #     try:
-    #         queryset = Request.objects.get(pk=pk)
-    #     except (ValueError, Request.DoesNotExist):
-    #         pass
-    #     else:
-    #         import pdb; pdb.set_trace()
-    #         pass
+        serializer = self.serializer_class(data=post_data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'success': True}, 201)
+        
+        else:
+            return Response({
+                'success': False,
+                'message': 'Invalid payload.',
+                'errors': serializer.errors,
+            }, 400)
+
+    @handle_request_id_exceptions
+    def retrieve(self, request, pk=None):
+        """ Get request with a given id. """
+        queryset = Request.objects.get(pk=pk)
+        serializer = self.get_serializer(queryset)
+        return Response(serializer.data)
+
+    @detail_route(methods=['post'])
+    @handle_request_id_exceptions
+    def edit(self, request, pk=None):
+        """ Update request with a given id. """
+        queryset = Request.objects.get(pk=pk)
+
+        if request.is_ajax():
+            post_data = request.data.get('data', {})
+            if isinstance(post_data, str):
+                post_data = json.loads(post_data)
+                # try:
+                #     post_data = json.loads(post_data):
+                # except Exception:
+                #     pass
+        else:
+            post_data = json.loads(request.data.get('data', '{}'))
+
+        post_data.update({'user': request.user.pk})
+
+        serializer = self.get_serializer(data=post_data, instance=queryset)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'success': True})
+
+        else:
+            return Response({
+                'success': False,
+                'message': 'Invalid payload.',
+                'errors': serializer.errors,
+            }, 400)
+
+    @handle_request_id_exceptions
+    def destroy(self, request, pk=None):
+        """ Delete a request. """
+        queryset = Request.objects.get(pk=pk)
+        queryset.delete()
+        return Response({'success': True})
 
     @detail_route(methods=['get'])
+    @handle_request_id_exceptions
     def get_records(self, request, pk=None):
         """ Get the list of record's submitted libraries and samples. """
-        try:
-            queryset = Request.objects.get(pk=pk)
-        except ValueError:
-            return Response({
-                'success': False,
-                'message': 'Id is not provided.',
-            }, 400)
-        except Request.DoesNotExist:
-            return Response({
-                'success': False,
-                'message': 'Request does not exist.',
-            }, 404)
-        else:
-            data = [{
-                'name': obj.name,
-                'record_type': obj.get_record_type(),
-                'library_id': obj.pk if isinstance(obj, Library) else 0,
-                'sample_id': obj.pk if isinstance(obj, Sample) else 0,
-                'barcode': obj.barcode,
-                'is_coverted': True
-                if isinstance(obj, Sample) and obj.is_converted else False,
-            } for obj in queryset.records]
-            data = sorted(data, key=lambda x: x['barcode'][3:])
-            return Response(data)
+        queryset = Request.objects.get(pk=pk)
+        data = [{
+            'pk': obj.pk,
+            'record_type': obj.__class__.__name__,
+            'name': obj.name,
+            'barcode': obj.barcode,
+            'is_converted': True
+            if isinstance(obj, Sample) and obj.is_converted else False,
+        } for obj in queryset.records]
+        
+        data = sorted(data, key=lambda x: x['barcode'][3:])
+        return Response(data)
 
     @detail_route(methods=['get'])
+    @handle_request_id_exceptions
     def get_files(self, request, pk=None):
         """ Get the list of attached files. """
-        try:
-            queryset = Request.objects.get(pk=pk).files.order_by('name')
-        except ValueError:
-            return Response({
-                'success': False,
-                'message': 'Id is not provided.',
-            }, 400)
-        except Request.DoesNotExist:
-            return Response({
-                'success': False,
-                'message': 'Request does not exist.',
-            }, 404)
-        else:
-            serializer = RequestFileSerializer(queryset, many=True)
-            data = serializer.data
-            return Response(data)
+        queryset = Request.objects.get(pk=pk).files.order_by('name')
+        serializer = RequestFileSerializer(queryset, many=True)
+        return Response(serializer.data)

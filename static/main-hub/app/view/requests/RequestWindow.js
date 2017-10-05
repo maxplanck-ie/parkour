@@ -58,9 +58,11 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                                 xtype: 'filegridfield',
                                 fieldLabel: 'Files',
                                 store: 'requestFilesStore',
-                                // uploadFileUrl: 'api/requests/upload_files/',
                                 uploadFileUrl: 'request/upload_files/',
-                                getFileUrl: 'api/requests/get_files/'
+                                getFileUrl: 'request/get_files/'
+                                // uploadFileUrl: 'api/requests/upload_files/',
+                                // getFileUrl: 'api/requests/get_files/'
+                                
                             }
                         ]
                     },
@@ -104,15 +106,19 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                     {
                         text: '',
                         dataIndex: 'record_type',
-                        width: 35
+                        width: 35,
+                        renderer: function(value, meta) {
+                            return meta.record.getRecordType().charAt(0);
+                        }
                     },
                     {
                         text: 'Barcode',
                         dataIndex: 'barcode',
                         width: 95,
-                        renderer: function(value) {
-                            var record = Ext.getStore('librariesInRequestStore').findRecord('barcode', value);
-                            return record ? record.getBarcode() : value;
+                        renderer: function(value, meta) {
+                            // var record = Ext.getStore('librariesInRequestStore').findRecord('barcode', value);
+                            // return record ? record.getBarcode() : value;
+                            return meta.record.getBarcode();
                         }
                     }
                     ]
@@ -125,9 +131,9 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                 '->',
                 {
                     itemId: 'add-library-button',
-                    text: 'Add'
-                }
-                ]
+                    text: 'Add',
+                    disabled: true
+                }]
             }
         ]
     }],

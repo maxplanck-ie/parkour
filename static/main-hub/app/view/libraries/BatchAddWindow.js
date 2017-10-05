@@ -16,6 +16,8 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
     maximizable: true,
     layout: 'fit',
 
+    id: 'lol',
+
     items: [{
         xtype: 'panel',
         border: 0,

@@ -1,26 +1,23 @@
 from django.conf import settings
+from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 from .models import Request, FileRequest
 
 
 class RequestSerializer(ModelSerializer):
-    user = SerializerMethodField()
     user_full_name = SerializerMethodField()
     sum_seq_depth = SerializerMethodField()
     restrict_permissions = SerializerMethodField()
-    files = SerializerMethodField()
     deep_seq_request_name = SerializerMethodField()
     deep_seq_request_path = SerializerMethodField()
+    files = SerializerMethodField()
 
     class Meta:
         model = Request
-        fields = ('id', 'name', 'user', 'user_full_name', 'create_time',
+        fields = ('pk', 'name', 'user', 'user_full_name', 'create_time',
                   'description', 'sum_seq_depth', 'restrict_permissions',
                   'files', 'deep_seq_request_name', 'deep_seq_request_path',)
-
-    def get_user(self, obj):
-        return obj.user.pk
 
     def get_user_full_name(self, obj):
         return obj.user.get_full_name()
@@ -41,7 +38,7 @@ class RequestSerializer(ModelSerializer):
             else False
 
     def get_files(self, obj):
-        return [file.pk for file in obj.files.all()]
+        return obj.files.all().values_list('pk', flat=True)
 
     def get_deep_seq_request_name(self, obj):
         return obj.deep_seq_request.name.split('/')[-1] \
@@ -50,6 +47,51 @@ class RequestSerializer(ModelSerializer):
     def get_deep_seq_request_path(self, obj):
         return settings.MEDIA_URL + obj.deep_seq_request.name \
             if obj.deep_seq_request else ''
+
+    def to_internal_value(self, data):
+        internal_value = super().to_internal_value(data)
+
+        records = data.get('records', [])
+        if not records:
+            raise ValidationError({
+                'records': ['No libraries or samples are provided.'],
+            })
+
+        files = data.get('files', [])
+
+        libraries = []
+        samples = []
+        for obj in records:
+            if obj['record_type'] == 'Library':
+                libraries.append(int(obj['pk']))
+            elif obj['record_type'] == 'Sample':
+                samples.append(int(obj['pk']))
+
+        internal_value.update({
+            'libraries': libraries,
+            'samples': samples,
+            'files': files,
+        })
+
+        return internal_value
+
+    def update(self, instance, validated_data):
+        # Remember old files
+        old_files = set(instance.files.all())
+        instance.files.clear()
+
+        # Update the request with new values
+        instance = super().update(instance, validated_data)
+        
+        # Get new files
+        new_files = set(instance.files.all())
+        
+        # Delete files which are not in the list of request's files anymore
+        files_to_delete = list(old_files - new_files)
+        for file in files_to_delete:
+            file.delete()
+
+        return instance
 
 
 class RequestFileSerializer(ModelSerializer):

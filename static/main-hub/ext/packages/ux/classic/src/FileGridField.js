@@ -127,14 +127,14 @@ Ext.define('Ext.ux.FileGridField', {
                 success: function(f, action) {
                     var obj = Ext.JSON.decode(action.response.responseText);
 
-                    if (obj.success && obj.data.length > 0) {
+                    if (obj.success && obj.fileIds.length > 0) {
                         Ext.Ajax.request({
                             url: getFileUrl,
                             method: 'GET',
                             timeout: 1000000,
                             scope: this,
                             params: {
-                                'file_ids': Ext.JSON.encode(obj.data)
+                                'file_ids': Ext.JSON.encode(obj.fileIds)
                             },
                             success: function(response) {
                                 var obj = Ext.JSON.decode(response.responseText);

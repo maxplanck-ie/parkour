@@ -3,14 +3,14 @@ Ext.define('MainHub.store.requests.LibrariesInRequest', {
     storeId: 'librariesInRequestStore',
 
     requires: [
-        'MainHub.model.requests.LibrariesInRequest'
+        'MainHub.model.Record'
     ],
 
-    model: 'MainHub.model.requests.LibrariesInRequest',
+    model: 'MainHub.model.Record',
 
     proxy: {
         type: 'ajax',
-        timeout: 1000000,
+        // timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"
         limitParam: false,  //to remove param "limit"

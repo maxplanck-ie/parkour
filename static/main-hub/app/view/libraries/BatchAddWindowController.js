@@ -71,6 +71,8 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             configuration = this.getSampleGridConfiguration();
         }
 
+        wnd.maximize();  // auto fullscreen
+
         var grid = Ext.getCmp('batchAddGrid');
         grid.reconfigure(configuration[0], configuration[1]);
 
@@ -870,7 +872,8 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
     save: function(btn) {
         var wnd = btn.up('window');
         var store = Ext.getCmp('batchAddGrid').getStore();
-        var url = (wnd.recordType === 'L') ? 'library/save/' : 'sample/save/';
+        // var url = (wnd.recordType === 'L') ? 'library/save/' : 'sample/save/';
+        var url = (wnd.recordType === 'L') ? 'api/libraries/' : 'api/samples/';
 
         if (store.getCount() > 0) {
             this.validateAll();
@@ -882,34 +885,30 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             if (numInvalidRecords === 0) {
                 Ext.Ajax.request({
                     url: url,
+                    method: 'POST',
                     timeout: 1000000,
                     scope: this,
                     params: {
                         mode: 'add',
-                        records: Ext.JSON.encode(Ext.Array.pluck(store.data.items, 'data'))
+                        data: Ext.JSON.encode(Ext.Array.pluck(store.data.items, 'data'))
                     },
 
                     success: function(response) {
                         var obj = Ext.JSON.decode(response.responseText);
 
-                        Ext.getCmp('libraries-in-request-grid').getStore().add(obj.data);
+                        if (obj.success) {
+                            Ext.getCmp('libraries-in-request-grid').getStore().add(obj.data);
 
-                        for (var i = 0; i < obj.data.length; i++) {
-                            var record = store.findRecord('name', obj.data[i].name);
-                            store.remove(record);
-                        }
+                            for (var i = 0; i < obj.data.length; i++) {
+                                var record = store.findRecord('name', obj.data[i].name);
+                                store.remove(record);
+                            }
 
-                        if (obj.error.length === 0) {
-                            Ext.ux.ToastMessage('Records have been added!');
+                            new Noty({ text: 'Records have been added!' }).show();
+
                             wnd.close()
                         } else {
-                            var errorMessage = '<ul>';
-                            for (var i = 0; i < obj.error.length; i++) {
-                                errorMessage += '<li>' + obj.error[i].name +
-                                    ': ' + obj.error[i].value + '</li>';
-                            }
-                            errorMessage += '</ul>';
-                            Ext.ux.ToastMessage(errorMessage, 'error');
+                            new Noty({ text: obj.message, type: 'error' }).show();
                         }
 
                         // wnd.setLoading(false);
@@ -917,8 +916,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
 
                     failure: function(response) {
                         // wnd.setLoading(false);
-                        Ext.ux.ToastMessage(response.statusText, 'error');
-                        console.error('[ERROR]: ' + url);
+                        new Noty({ text: response.statusText, type: 'error' }).show();
                         console.error(response);
                     }
                 });
