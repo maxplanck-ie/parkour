@@ -47,6 +47,7 @@ Ext.define('MainHub.view.requests.Requests', {
                 {
                     text: 'Name',
                     dataIndex: 'name',
+                    flex: 1,
                     renderer: function(value, meta) {
                         var request = meta.record.data;
                         if (request.files.length > 0) {
@@ -57,28 +58,29 @@ Ext.define('MainHub.view.requests.Requests', {
                 },
                 {
                     text: 'User',
-                    dataIndex: 'user_full_name'
+                    dataIndex: 'user_full_name',
+                    flex: 1
                 },
                 {
                     text: 'Date',
-                    dataIndex: 'date'
+                    dataIndex: 'date',
+                    flex: 1
                 },
                 {
                     text: 'Sum of Sequencing Depth',
-                    dataIndex: 'sum_seq_depth'
+                    dataIndex: 'sum_seq_depth',
+                    flex: 1
                 },
                 {
                     text: 'Description',
                     dataIndex: 'description',
+                    flex: 1,
                     renderer: function(value, meta) {
                         meta.tdAttr = 'data-qtip="' + value + '" data-qwidth=300';
                         return value;
                     }
                 }
-            ],
-            defaults: {
-                flex: 1
-            }
+            ]
         },
         plugins: [{
             ptype: 'bufferedrenderer',

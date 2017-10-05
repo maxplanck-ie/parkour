@@ -281,7 +281,7 @@ def send_email(request):
 
 
 class RequestViewSet(viewsets.ViewSet):
-    authentication_classes = [CsrfExemptSessionAuthentication]
+    # authentication_classes = [CsrfExemptSessionAuthentication]
 
     def list(self, request):
         """ Get the list of requests. """
