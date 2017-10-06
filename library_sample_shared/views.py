@@ -23,6 +23,35 @@ from .serializers import (OrganismSerializer, IndexTypeSerializer,
 logger = logging.getLogger('db')
 
 
+class MoveOtherMixin(object):
+    """ Move the 'Other' option to the end of the returning list. """
+
+    def list(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(self._get_data(serializer))
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(self._get_data(serializer))
+
+    def _get_data(self, serializer):
+        data = serializer.data
+
+        # Move the 'Other' option to the end of the list
+        other_options = sorted([
+            x for x in data if 'Other' in x['name']
+        ], key=lambda x: x['name'])
+
+        for other in other_options:
+            index = data.index(other)
+            data.append(data.pop(index))
+
+        return data
+
+
 class SimpleStoreView(JSONResponseMixin, ListView):
     """ Base class for simple Ext JS stores (with "id" and "name" only). """
     def render_to_response(self, context, **response_kwargs):
@@ -36,26 +65,6 @@ class SimpleStoreView(JSONResponseMixin, ListView):
         ]
 
         return self.render_to_json_response(data, **response_kwargs)
-
-
-@login_required
-def get_organisms(request):
-    """ Get the list of organisms. """
-    data = [
-        {
-            'id': organism.pk,
-            'name': organism.name
-        }
-        for organism in Organism.objects.all()
-    ]
-
-    # move 'Other' option to the end of the list
-    other = [x for x in data if x['name'] == 'Other']
-    if other:
-        index = data.index(other[0])
-        data.append(data.pop(index))
-
-    return JsonResponse(data, safe=False)
 
 
 @login_required
@@ -188,9 +197,9 @@ def get_library_types(request):
     return JsonResponse(data, safe=False)
 
 
-class OrganismViewSet(viewsets.ReadOnlyModelViewSet):
+class OrganismViewSet(MoveOtherMixin, viewsets.ReadOnlyModelViewSet):
     """ Get the list of organisms. """
-    queryset = Organism.objects.all()
+    queryset = Organism.objects.order_by('name')
     serializer_class = OrganismSerializer
 
 
@@ -202,13 +211,13 @@ class ReadLengthViewSet(viewsets.ReadOnlyModelViewSet):
 
 class ConcentrationMethodViewSet(viewsets.ReadOnlyModelViewSet):
     """ Get the list of concentration methods. """
-    queryset = ConcentrationMethod.objects.all()
+    queryset = ConcentrationMethod.objects.order_by('name')
     serializer_class = ConcentrationMethodSerializer
 
 
-class IndexTypeViewSet(viewsets.ReadOnlyModelViewSet):
+class IndexTypeViewSet(MoveOtherMixin, viewsets.ReadOnlyModelViewSet):
     """ Get the list of index types. """
-    queryset = IndexType.objects.all()
+    queryset = IndexType.objects.order_by('name')
     serializer_class = IndexTypeSerializer
 
 
@@ -249,24 +258,24 @@ class IndexViewSet(viewsets.ViewSet):
         return queryset
 
 
-class LibraryProtocolViewSet(viewsets.ReadOnlyModelViewSet):
+class LibraryProtocolViewSet(MoveOtherMixin, viewsets.ReadOnlyModelViewSet):
     """ Get the list of library protocols. """
     serializer_class = LibraryProtocolSerializer
 
     def get_queryset(self):
-        queryset = LibraryProtocol.objects.all()
+        queryset = LibraryProtocol.objects.order_by('name')
         na_type = self.request.query_params.get('type', None)
         if na_type is not None:
             queryset = queryset.filter(type=na_type)
         return queryset
 
 
-class LibraryTypeViewSet(viewsets.ReadOnlyModelViewSet):
+class LibraryTypeViewSet(MoveOtherMixin, viewsets.ReadOnlyModelViewSet):
     """ Get the list of library types. """
     serializer_class = LibraryTypeSerializer
 
     def get_queryset(self):
-        queryset = LibraryType.objects.all()
+        queryset = LibraryType.objects.order_by('name')
         library_protocol = self.request.query_params.get(
             'library_protocol_id', None)
         if library_protocol is not None:
