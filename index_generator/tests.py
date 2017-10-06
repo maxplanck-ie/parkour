@@ -1,42 +1,70 @@
 import json
 
-from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 
 from .models import Pool, PoolSize
-from request.models import Request
+# from request.models import Request
+from common.tests import BaseTestCase
+from common.utils import get_random_name
 from common.models import Organization, PrincipalInvestigator
 from library_sample_shared.models import (ReadLength, IndexType,
                                           IndexI7, IndexI5)
-from library_preparation.models import LibraryPreparation
-from pooling.models import Pooling
-from library.models import Library
-from sample.models import Sample
+# from library_preparation.models import LibraryPreparation
+# from pooling.models import Pooling
+# from library.models import Library
+# from sample.models import Sample
+
+from library.tests import create_library
+from sample.tests import create_sample
 
 User = get_user_model()
 
 
+def create_pool(user, save=True):
+    pool_size = PoolSize(size=25)
+    pool_size.save()
+
+    pool = Pool(user=user, size=pool_size)
+
+    if save:
+        pool.save()
+
+    return pool
+
+
 # Models
 
-class PoolTest(TestCase):
+class PoolTest(BaseTestCase):
     def setUp(self):
-        pool_size = PoolSize(size=200)
-        pool_size.save()
-
-        self.user = User.objects.create_user(
-            first_name='Foo',
-            last_name='Bar',
-            email='foo@bar.io',
-            password='foo-foo',
-        )
-        self.pool = Pool(user=self.user, size=pool_size)
-        self.pool.save()
+        self.user = self._create_user('test@test.io', 'foo-bar')
+        self.pool = create_pool(self.user)
 
     def test_pool_name(self):
         self.assertTrue(isinstance(self.pool, Pool))
         self.assertEqual(self.pool.__str__(), self.pool.name)
         self.assertEqual(self.pool.name, 'Pool_%i' % self.pool.pk)
+
+    def test_update_library(self):
+        """
+        When a library is added to a pool, ensure its is_pooled is set to True.
+        """
+        library = create_library(get_random_name(), 2)
+        self.pool.libraries.add(library)
+        library = library.__class__.objects.get(pk=library.pk)
+        self.assertTrue(library.is_pooled)
+
+    def test_update_sample(self):
+        """
+        When a sample is added to a pool, ensure its is_pooled and is_converted
+        are set to True, and the barcode is updated.
+        """
+        sample = create_sample(get_random_name(), 2)
+        self.pool.samples.add(sample)
+        sample = sample.__class__.objects.get(pk=sample.pk)
+        self.assertTrue(sample.is_pooled)
+        self.assertTrue(sample.is_converted)
+        self.assertIn('L', sample.barcode)
 
 
 # Views

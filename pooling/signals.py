@@ -3,11 +3,12 @@ from django.dispatch import receiver
 
 from sample.models import Sample
 from index_generator.models import Pool
+from library_preparation.models import LibraryPreparation
 from .models import Pooling
 
 
 @receiver(m2m_changed, sender=Pool.libraries.through)
-def update_libraries(sender, instance, action, **kwargs):
+def update_libraries_create_pooling_obj(sender, instance, action, **kwargs):
     """
     When a library is added to a pool, set its is_pooled to True, and
     for each library create a Pooling object.
@@ -24,17 +25,24 @@ def update_libraries(sender, instance, action, **kwargs):
 @receiver(post_save, sender=Sample)
 def create_pooling_objects_sample(sender, instance, **kwargs):
     """
-    When a sample passes the quality check and reaches the status 4,
+    When a sample passes the quality check and reaches the status 3,
     create a Pooling object for it.
     """
 
-    if instance.status == 4:
-        try:
-            Pooling.objects.get(pk=instance.pk)
+    # Ignore the signal if a sample is not in a pool yet
+    if not instance.is_pooled:
+        return
 
+    try:
+        lib_prep_object = LibraryPreparation.objects.get(sample=instance)
+    except LibraryPreparation.DoesNotExist:
+        lib_prep_object = None
+
+    if lib_prep_object and instance.status == 3:
+        # If a sample has an associated Library Preparation object and
+        # passes the quality check, create a Pooling object for the sample
+        try:
+            Pooling.objects.get(sample=instance)
         except Pooling.DoesNotExist:
             pooling_obj = Pooling(sample=instance)
             pooling_obj.save()
-
-        else:
-            pass

@@ -8,29 +8,22 @@ from library.tests import create_library
 from sample.tests import create_sample
 
 from request.models import Request
-from index_generator.models import PoolSize, Pool
+from index_generator.tests import create_pool
 from .models import Pooling
 
 
 def create_pooling_object(user, add_library=False, add_sample=False,
-                          library_status=2, sample_status=3):
+                          sample_failed=False):
     library = None
     sample = None
 
     if add_library:
-        library = create_library(get_random_name(), library_status)
+        library = create_library(get_random_name(), 2)
 
     if add_sample:
-        sample = create_sample(get_random_name(), sample_status)
+        sample = create_sample(get_random_name(), 2)
 
-    pool_size = PoolSize(size=25)
-    pool_size.save()
-
-    pool = Pool(user=user, size=pool_size)
-    pool.save()
-
-    pooling_object = Pooling()
-    pooling_object.save()
+    pool = create_pool(user)
 
     request = Request(user=user)
     request.save()
@@ -38,14 +31,25 @@ def create_pooling_object(user, add_library=False, add_sample=False,
     if library:
         request.libraries.add(library)
         pool.libraries.add(library)
-        pooling_object.library = library
-        pooling_object.save()
+        pooling_object = Pooling.objects.get(library=library)
 
     if sample:
         request.samples.add(sample)
         pool.samples.add(sample)
-        pooling_object.sample = sample
-        pooling_object.save()
+
+        # Update the sample instance because after being added to the pool,
+        # it was modified
+        sample = sample.__class__.objects.get(pk=sample.pk)
+
+        if sample_failed:
+            sample.status = -1  # failed quality check
+            sample.save()
+            pooling_object = sample
+
+        else:
+            sample.status = 3  # passed quality check
+            sample.save()
+            pooling_object = Pooling.objects.get(sample=sample)
 
     return pooling_object
 
@@ -55,15 +59,42 @@ def create_pooling_object(user, add_library=False, add_sample=False,
 class TestPoolingModel(BaseTestCase):
 
     def setUp(self):
-        user = self._create_user('test@test.io', 'foo-bar')
-        self.pooling_obj = create_pooling_object(user, add_library=True)
+        self.user = self._create_user('test@test.io', 'foo-bar')
+        self.pooling_obj = create_pooling_object(self.user, add_library=True)
 
     def test_name(self):
         self.assertTrue(isinstance(self.pooling_obj, Pooling))
         self.assertEqual(self.pooling_obj.__str__(), '{} ({})'.format(
             self.pooling_obj.library.name,
-            self.pooling_obj.library.pool.get().name,
+            self.pooling_obj.library.barcode,
         ))
+
+    def test_create_pooling_object_from_library(self):
+        """
+        Ensure a Pooling object is created when a library is added to a pool.
+        """
+        library = create_library(get_random_name())
+        pool = create_pool(self.user)
+        pool.libraries.add(library)
+        self.assertEqual(Pooling.objects.filter(library=library).count(), 1)
+
+    def test_create_pooling_object_from_sample(self):
+        """
+        Ensure a Pooling object is created when a sample passed the quality
+        check (and gets the status 4) after the Library Preparation step.
+        """
+        sample = create_sample(get_random_name(), status=3)
+        pool = create_pool(self.user)
+        pool.samples.add(sample)
+
+        # Update the sample instance because after being added to the pool,
+        # it was modified
+        sample = sample.__class__.objects.get(pk=sample.pk)
+
+        sample.status = 3  # passed quality check
+        sample.save()
+
+        self.assertEqual(Pooling.objects.filter(sample=sample).count(), 1)
 
 
 # Views
@@ -80,13 +111,9 @@ class TestPooling(BaseTestCase):
         pooling_object1 = create_pooling_object(self.user, add_library=True)
         pooling_object2 = create_pooling_object(self.user, add_sample=True)
 
-        # Create a failed library
-        pooling_object3 = create_pooling_object(self.user, add_library=True,
-                                                library_status=-1)
-
-        # Create a failed sample
-        pooling_object4 = create_pooling_object(self.user, add_sample=True,
-                                                sample_status=-1)
+        # Create failed sample
+        failed_sample = create_pooling_object(self.user, add_sample=True,
+                                              sample_failed=True)
 
         response = self.client.get(reverse('pooling-list'))
         data = response.json()
@@ -95,8 +122,7 @@ class TestPooling(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(pooling_object1.library.name, objects)
         self.assertIn(pooling_object2.sample.name, objects)
-        self.assertNotIn(pooling_object3.library.name, objects)
-        self.assertNotIn(pooling_object4.sample.name, objects)
+        self.assertNotIn(failed_sample.name, objects)
 
     def test_pooling_list_non_staff(self):
         """Ensure error is thrown if a non-staff user tries to get the list."""

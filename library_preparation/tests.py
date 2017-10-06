@@ -3,10 +3,10 @@ import json
 from django.core.urlresolvers import reverse
 
 from common.tests import BaseTestCase
+from common.utils import get_random_name
 from sample.tests import create_sample
 from request.models import Request
-from index_generator.models import Pool, PoolSize
-# from pooling.models import Pooling
+from index_generator.tests import create_pool
 from .models import LibraryPreparation
 
 
@@ -18,18 +18,39 @@ def create_library_preparation_obj(sample_name, user, sample_status):
     request.save()
     request.samples.add(sample)
 
-    pool_size = PoolSize(size=25)
-    pool_size.save()
-
-    pool = Pool(user=user, size=pool_size)
-    pool.save()
+    pool = create_pool(user)
     pool.samples.add(sample)
 
-    return LibraryPreparation.objects.get(sample_id=sample.pk)
+    return LibraryPreparation.objects.get(sample=sample)
 
 
 # Models
-# TODO: write models tests
+
+class TestLibraryPreparationModel(BaseTestCase):
+
+    def setUp(self):
+        self.user = self._create_user('test@test.io', 'foo-bar')
+        self.library_prep_obj = create_library_preparation_obj(
+            self._get_random_name(), self.user, 2
+        )
+
+    def test_name(self):
+        self.assertTrue(isinstance(self.library_prep_obj, LibraryPreparation))
+        self.assertEqual(self.library_prep_obj.__str__(), '{} ({})'.format(
+            self.library_prep_obj.sample.name,
+            self.library_prep_obj.sample.barcode,
+        ))
+
+    def test_create_library_preparation_object(self):
+        """
+        Ensure a Library Preparation object is created when a sample
+        is added to a pool.
+        """
+        sample = create_sample(get_random_name(), 2)
+        pool = create_pool(self.user)
+        pool.samples.add(sample)
+        self.assertEqual(
+            LibraryPreparation.objects.filter(sample=sample).count(), 1)
 
 
 # Views
