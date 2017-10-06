@@ -7,15 +7,15 @@ Ext.define('MainHub.view.requests.RequestsController', {
             '#': {
                 activate: 'activateView'
             },
-            '#requestsTable': {
+            '#requests-grid': {
                 boxready: 'boxready',
-                refresh: 'refresh',
+                // refresh: 'refresh',
                 itemcontextmenu: 'showContextMenu'
             },
-            '#addRequestBtn': {
+            '#add-request-button': {
                 click: 'addRequest'
             },
-            '#searchField': {
+            '#search-field': {
                 change: 'search'
             }
         }
@@ -28,14 +28,14 @@ Ext.define('MainHub.view.requests.RequestsController', {
     boxready: function() {
         // Hide the User column for non-administrators
         if (!USER_IS_STAFF) {
-            Ext.getCmp('requestsTable').down('[dataIndex=user_full_name]').setVisible(false);
+            Ext.getCmp('requests-grid').down('[dataIndex=user_full_name]').setVisible(false);
         }
         // Ext.getStore('requestsStore').reload();
     },
 
-    refresh: function() {
-        Ext.getStore('requestsStore').reload();
-    },
+    // refresh: function() {
+    //     Ext.getStore('requestsStore').reload();
+    // },
 
     addRequest: function(btn) {
         Ext.create('MainHub.view.requests.RequestWindow', {
@@ -45,7 +45,7 @@ Ext.define('MainHub.view.requests.RequestsController', {
     },
 
     search: function(fld, query) {
-        var grid = Ext.getCmp('requestsTable');
+        var grid = Ext.getCmp('requests-grid');
         var store = grid.getStore();
         var columns = Ext.pluck(grid.getColumns(), 'dataIndex');
 
@@ -63,25 +63,27 @@ Ext.define('MainHub.view.requests.RequestsController', {
         // grid.setHeight(Ext.Element.getViewportHeight() - 64);
     },
 
-    showContextMenu: function(grid, record, item, index, e) {
+    showContextMenu: function(grid, record, itemEl, index, e) {
         var me = this;
-        var items = [{
+
+        var menuItems = [{
             text: 'Edit',
             iconCls: 'x-fa fa-pencil',
             handler: function() {
                 Ext.create('MainHub.view.requests.RequestWindow', {
-                    title: 'Edit Request',
+                    title: 'Edit',
                     mode: 'edit',
                     record: record
                 }).show();
             }
         }];
+
         var deleteRequestOption = {
             text: 'Delete',
             iconCls: 'x-fa fa-trash',
             handler: function() {
                 Ext.Msg.show({
-                    title: 'Delete request',
+                    title: 'Delete',
                     message: 'Are you sure you want to delete the request?',
                     buttons: Ext.Msg.YESNO,
                     icon: Ext.Msg.QUESTION,
@@ -93,12 +95,12 @@ Ext.define('MainHub.view.requests.RequestsController', {
         };
 
         if (!USER_IS_STAFF && !record.restrict_permissions) {
-            items.push(deleteRequestOption);
+            menuItems.push(deleteRequestOption);
         } else if (USER_IS_STAFF) {
-            items.push(deleteRequestOption);
-            items.push('-');
-            items.push({
-                text: 'Compose an Email',
+            menuItems.push(deleteRequestOption);
+            menuItems.push('-');
+            menuItems.push({
+                text: 'Compose Email',
                 iconCls: 'x-fa fa-envelope-o',
                 handler: function() {
                     Ext.create('MainHub.view.requests.EmailWindow', {
@@ -111,31 +113,28 @@ Ext.define('MainHub.view.requests.RequestsController', {
         }
 
         e.stopEvent();
-        Ext.create('Ext.menu.Menu', { items: items }).showAt(e.getXY());
+        Ext.create('Ext.menu.Menu', { items: menuItems }).showAt(e.getXY());
     },
 
     deleteRequest: function(record) {
         Ext.Ajax.request({
-            url: 'request/delete/',
-            method: 'POST',
-            timeout: 1000000,
+            url: Ext.String.format('api/requests/{0}/', record.get('pk')),
+            method: 'DELETE',
             scope: this,
-            params: {
-                'request_id': record.data.id
-            },
 
             success: function(response) {
                 var obj = Ext.JSON.decode(response.responseText);
+
                 if (obj.success) {
-                    MainHub.Utilities.reloadAllStores();
-                    Ext.ux.ToastMessage('Record has been deleted!');
+                    Ext.getStore('requestsStore').reload();
+                    new Noty({ text: 'Request has been deleted!' }).show();
                 } else {
-                    Ext.ux.ToastMessage(obj.error, 'error');
+                    new Noty({ text: obj.message, type: 'error' }).show();
                 }
             },
 
             failure: function(response) {
-                Ext.ux.ToastMessage(response.statusText, 'error');
+                new Noty({ text: response.statusText, type: 'error' }).show();
                 console.error(response);
             }
         });

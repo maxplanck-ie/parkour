@@ -2,6 +2,7 @@ import json
 import logging
 from datetime import datetime
 from unicodedata import normalize
+import itertools
 
 import pdfkit
 
@@ -23,9 +24,6 @@ from common.views import (CsrfExemptSessionAuthentication,
                           StandardResultsSetPagination)
 from .models import Request, FileRequest
 from .serializers import RequestSerializer, RequestFileSerializer
-from .forms import RequestForm
-from library.models import Library
-from sample.models import Sample
 
 User = get_user_model()
 logger = logging.getLogger('db')
@@ -35,13 +33,13 @@ def handle_request_id_exceptions(func):
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        
+
         except ValueError:
             return Response({
                 'success': False,
                 'message': 'Id is not provided.',
             }, 400)
-        
+
         except Request.DoesNotExist:
             return Response({
                 'success': False,
@@ -49,116 +47,6 @@ def handle_request_id_exceptions(func):
             }, 404)
 
     return wrapper
-
-
-@csrf_exempt
-@login_required
-def generate_deep_sequencing_request(request):
-    """ Generate Deep Sequencing Request form in PDF. """
-    request_id = request.POST.get('request_id', '')
-
-    try:
-        req = Request.objects.get(pk=request_id)
-        user = User.objects.get(id=req.user.id)
-        cost_unit = ','.join(sorted([u.name for u in user.cost_unit.all()]))
-        organization = user.organization.name if user.organization else ''
-
-        libraries = [
-            {
-                'name': library.name,
-                'type': 'Library',
-                'barcode': library.barcode,
-                'sequencing_depth': library.sequencing_depth,
-            }
-            for library in req.libraries.all()
-        ]
-
-        samples = [
-            {
-                'name': sample.name,
-                'type': 'Sample',
-                'barcode': sample.barcode,
-                'sequencing_depth': sample.sequencing_depth,
-            }
-            for sample in req.samples.all()
-        ]
-
-        records = sorted(libraries + samples, key=lambda x: x['barcode'][3:])
-
-        html = render_to_string('deepseq_request_pdf.html', {
-            'request_name': req.name,
-            'date': datetime.now().strftime('%d.%m.%Y'),
-            'user': user.get_full_name(),
-            'phone': user.phone if user.phone else '',
-            'email': user.email,
-            'organization': organization,
-            'cost_unit': cost_unit,
-            'description': req.description,
-            'records': records,
-        })
-
-        pdf = pdfkit.from_string(html, False, options=settings.PDF_OPTIONS)
-
-        # Generate response
-        request_name = normalize('NFKD', req.name).encode('ASCII', 'ignore')
-        request_name = request_name.decode('utf-8')
-        f_name = request_name + '_Deep_Sequencing_Request.pdf'
-        response = HttpResponse(pdf, content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="%s"' % f_name
-
-    except Exception as e:
-        logger.exception(e)
-        response = JsonResponse({'success': False})
-
-    return response
-
-
-@csrf_exempt
-@login_required
-def upload_deep_sequencing_request(request):
-    """
-    Upload Deep Sequencing request with PI's signature and
-    change request status to 1.
-    """
-    error = ''
-    file_name = ''
-    file_path = ''
-
-    request_id = request.POST.get('request_id')
-
-    if any(request.FILES):
-        try:
-            req = Request.objects.get(pk=request_id)
-            req.deep_seq_request = request.FILES.get('file')
-            req.save()
-
-            file_name = req.deep_seq_request.name.split('/')[-1]
-            file_path = settings.MEDIA_URL + req.deep_seq_request.name
-
-            libraries = req.libraries.all()
-            samples = req.samples.all()
-
-            # Set statuses to 1
-            for library in libraries:
-                library.status = 1
-                library.save(update_fields=['status'])
-
-            for sample in samples:
-                sample.status = 1
-                sample.save(update_fields=['status'])
-
-        except (ValueError, Request.DoesNotExist) as e:
-            error = str(e)
-            logger.exception(e)
-    else:
-        error = 'File is missing.'
-
-    return JsonResponse({
-        'success': not error,
-        'error': error,
-        'name': file_name,
-        'path': file_path
-    })
 
 
 @csrf_exempt
@@ -258,6 +146,7 @@ def send_email(request):
 class RequestViewSet(viewsets.GenericViewSet):
     serializer_class = RequestSerializer
     pagination_class = StandardResultsSetPagination
+    authentication_classes = [CsrfExemptSessionAuthentication]
 
     def get_queryset(self):
         queryset = Request.objects.prefetch_related(
@@ -290,22 +179,22 @@ class RequestViewSet(viewsets.GenericViewSet):
         """ Get the list of requests. """
         queryset = self.get_queryset()
         # page = self.paginate_queryset(queryset)
-    
+
         try:
             page = self.paginate_queryset(queryset)
         except NotFound:
             page = None
-        
+
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
-        
+
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     def create(self, request):
         """ Create a request. """
-        
+
         if request.is_ajax():
             post_data = request.data.get('data', [])
         else:
@@ -313,11 +202,11 @@ class RequestViewSet(viewsets.GenericViewSet):
         post_data.update({'user': request.user.pk})
 
         serializer = self.serializer_class(data=post_data)
-        
+
         if serializer.is_valid():
             serializer.save()
             return Response({'success': True}, 201)
-        
+
         else:
             return Response({
                 'success': False,
@@ -382,9 +271,9 @@ class RequestViewSet(viewsets.GenericViewSet):
             'name': obj.name,
             'barcode': obj.barcode,
             'is_converted': True
-            if isinstance(obj, Sample) and obj.is_converted else False,
+            if hasattr(obj, 'is_converted') and obj.is_converted else False,
         } for obj in queryset.records]
-        
+
         data = sorted(data, key=lambda x: x['barcode'][3:])
         return Response(data)
 
@@ -395,3 +284,76 @@ class RequestViewSet(viewsets.GenericViewSet):
         queryset = Request.objects.get(pk=pk).files.order_by('name')
         serializer = RequestFileSerializer(queryset, many=True)
         return Response(serializer.data)
+
+    @detail_route(methods=['get'])
+    @handle_request_id_exceptions
+    def download_deep_sequencing_request(self, request, pk=None):
+        """ Generate a deep sequencing request form in PDF. """
+        req = Request.objects.get(pk=pk)
+        user = req.user
+        cost_unit = ', '.join(sorted(
+            user.cost_unit.values_list('name', flat=True)
+        ))
+
+        objects = list(itertools.chain(req.samples.all(), req.libraries.all()))
+        records = [{
+            'name': obj.name,
+            'type': obj.__class__.__name__,
+            'barcode': obj.barcode,
+            'sequencing_depth': obj.sequencing_depth,
+        } for obj in objects]
+        records = sorted(records, key=lambda x: x['barcode'][3:])
+
+        html = render_to_string('deepseq_request_pdf.html', {
+            'request_name': req.name,
+            'date': datetime.now().strftime('%d.%m.%Y'),
+            'user': user.get_full_name(),
+            'phone': user.phone if user.phone else '',
+            'email': user.email,
+            'organization':
+            user.organization.name if user.organization else '',
+            'cost_unit': cost_unit,
+            'description': req.description,
+            'records': records,
+        })
+
+        pdf = pdfkit.from_string(html, False, options=settings.PDF_OPTIONS)
+
+        # Generate response
+        request_name = normalize('NFKD', req.name).encode('ASCII', 'ignore')
+        request_name = request_name.decode('utf-8')
+        f_name = request_name + '_Deep_Sequencing_Request.pdf'
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="%s"' % f_name
+
+        return response
+
+    @detail_route(methods=['post'])
+    @handle_request_id_exceptions
+    def upload_deep_sequencing_request(self, request, pk=None):
+        """
+        Upload a deep sequencing request with the PI's signature and
+        change request's libraries' and samples' statuses to 1.
+        """
+        req = Request.objects.get(pk=pk)
+
+        if not any(request.FILES):
+            return JsonResponse({
+                'success': False,
+                'message': 'File is missing.'
+            }, status=400)
+
+        req.deep_seq_request = request.FILES.get('file')
+        req.save()
+
+        file_name = req.deep_seq_request.name.split('/')[-1]
+        file_path = settings.MEDIA_URL + req.deep_seq_request.name
+
+        req.libraries.all().update(status=1)
+        req.samples.all().update(status=1)
+
+        return JsonResponse({
+             'success': True,
+             'name': file_name,
+             'path': file_path
+        })

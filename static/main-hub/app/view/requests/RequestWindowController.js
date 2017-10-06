@@ -11,7 +11,11 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
             },
             '#libraries-in-request-grid': {
                 refresh: 'refreshLibrariesInRequestGrid',
-                itemcontextmenu: 'showContextMenu'
+                itemcontextmenu: 'showContextMenu',
+                headercontextmenu: 'showHeaderMenu'
+            },
+            '#check-column': {
+                beforecheckchange: 'selectItem'
             },
             '#download-request-blank-button': {
                 click: 'generatePDF'
@@ -91,48 +95,132 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
         this.initializeTooltips();
     },
 
-    showContextMenu: function(grid, record, item, index, e) {
-        var me = this;
+    selectItem: function(cb, rowIndex, checked, record) {
+        var selectedItems = this.getSelectedItems();
 
-        e.stopEvent();
-        Ext.create('Ext.menu.Menu', {
-            items: [
-                // {
-                //     text: 'Edit',
-                //     iconCls: 'x-fa fa-pencil',
-                //     handler: function() {
-                //         me.editRecord(record);
-                //     }
-                // },
+        if (selectedItems.length > 0) {
+            if (record.get('record_type') !== selectedItems[0].record_type) {
+                new Noty({
+                    text: 'You can only select items of the same type.',
+                    type: 'warning'
+                }).show();
+                return false;
+            }
+        }
+    },
+
+    showContextMenu: function(grid, record, itemEl, index, e) {
+        var me = this;
+        var selectedItems = this.getSelectedItems();
+        var menuItems;
+
+        if (selectedItems.length <= 1) {
+            var selectedItem = selectedItems.length === 0 ? record.data : selectedItems[0];
+            var selectedItemName = selectedItem.name;
+
+            menuItems = [
                 {
-                    text: 'Delete',
+                    text: Ext.String.format('Edit "{0}"', selectedItemName),
+                    iconCls: 'x-fa fa-pencil',
+                    handler: function() {
+                        me.editRecords([selectedItem]);
+                    }
+                },
+                {
+                    text: Ext.String.format('Delete "{0}"', selectedItemName),
                     iconCls: 'x-fa fa-trash',
                     handler: function() {
                         Ext.Msg.show({
                             title: 'Delete record',
-                            message: 'Are you sure you want to delete this record?',
+                            message: Ext.String.format('Are you sure you want to delete "{0}"?', selectedItemName),
                             buttons: Ext.Msg.YESNO,
                             icon: Ext.Msg.QUESTION,
                             fn: function(btn) {
                                 if (btn === 'yes') {
-                                    me.deleteRecord(record);
+                                    me.deleteRecord(selectedItem);
                                 }
                             }
                         });
                     }
                 }
-            ]
+            ];
+        } else {
+            menuItems = [{
+                text: Ext.String.format('Edit {0} Items', selectedItems.length),
+                iconCls: 'x-fa fa-pencil',
+                handler: function() {
+                    me.editRecords(selectedItems);
+                }
+            }];
+        }
+
+        e.stopEvent();
+        Ext.create('Ext.menu.Menu', {
+            items: menuItems
         }).showAt(e.getXY());
     },
 
-    // editRecord: function(record) {
-    //     var store = Ext.getStore('librariesStore');
-    //     Ext.create('MainHub.view.libraries.LibraryWindow', {
-    //         title: record.get('record_type') === 'Library' ? 'Edit Library' : 'Edit Sample',
-    //         mode: 'edit',
-    //         record: store.findRecord('barcode', record.get('barcode'))
-    //     }).show();
-    // },
+    showHeaderMenu: function(ct, column, e) {
+        var me = this;
+
+        if (column.dataIndex !== 'selected') {
+            return;
+        }
+
+        e.stopEvent();
+        Ext.create('Ext.menu.Menu', {
+            items: [{
+                text: 'Select All Libraries',
+                iconCls: 'x-fa fa-check-square-o',
+                handler: function() {
+                    me.selectAll('Library');
+                }
+            }, {
+                text: 'Select All Samples',
+                iconCls: 'x-fa fa-check-square-o',
+                handler: function() {
+                    me.selectAll('Sample');
+                }
+            }, '-', {
+                text: 'Unselect All',
+                iconCls: 'x-fa fa-square-o',
+                handler: function() {
+                    me.unselectAll();
+                }
+            }]
+        }).showAt(e.getXY());
+    },
+
+    selectAll: function(recordType) {
+        var store = Ext.getStore('librariesInRequestStore');
+        var selectedItems = this.getSelectedItems();
+
+        if (selectedItems.length > 0 && selectedItems[0].record_type !== recordType) {
+            new Noty({
+                text: 'You can only select items of the same type.',
+                type: 'warning'
+            }).show();
+            return false;
+        }
+
+        store.each(function(item) {
+            if (item.get('record_type') === recordType) {
+                item.set('selected', true);
+            }
+        });
+    },
+
+    unselectAll: function() {
+        var store = Ext.getStore('librariesInRequestStore');
+
+        store.each(function(item) {
+            item.set('selected', false);
+        });
+    },
+
+    editRecords: function(records) {
+        // debugger;
+    },
 
     deleteRecord: function(record) {
         var url = record.get('record_type') === 'Library' ? 'api/libraries/{0}/' : 'api/samples/{0}/';
@@ -162,25 +250,29 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
 
     generatePDF: function(btn) {
         var wnd = btn.up('window');
-        var form = Ext.create('Ext.form.Panel', {
-            standardSubmit: true
-        });
+        var form = Ext.create('Ext.form.Panel', { standardSubmit: true });
+        var url = Ext.String.format(
+            'api/requests/{0}/download_deep_sequencing_request/',
+            wnd.record.get('pk')
+        );
 
         form.submit({
-            url: 'request/generate_deep_sequencing_request/',
-            target: '_blank',
-            params: {
-                request_id: wnd.record.get('pk')
-            }
+            url: url,
+            method: 'GET',
+            target: '_blank'
         });
     },
 
     uploadPDF: function(btn) {
         var me = this;
         var wnd = btn.up('window');
-        var url = 'request/upload_deep_sequencing_request/';
+        // var url = 'request/upload_deep_sequencing_request/';
         var downloadRequestBlankBtn = wnd.down('#download-request-blank-button');
         var uploadSignedRequestBtn = wnd.down('#upload-signed-request-button');
+        var url = Ext.String.format(
+            'api/requests/{0}/upload_deep_sequencing_request/',
+            wnd.record.get('pk')
+        );
 
         Ext.create('Ext.ux.FileUploadWindow', {
             onFileUpload: function() {
@@ -199,9 +291,6 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                     url: url,
                     method: 'POST',
                     waitMsg: 'Uploading...',
-                    params: {
-                        'request_id': wnd.record.get('pk')
-                    },
 
                     success: function(f, action) {
                         var obj = Ext.JSON.decode(action.response.responseText);
@@ -223,7 +312,8 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                             Ext.getStore('requestsStore').reload();
                         } else {
                             new Noty({
-                                text: 'There was a problem with the provided file.',
+                                // text: 'There was a problem with the provided file.',
+                                text: obj.message,
                                 type: 'error'
                             }).show();
                         }
@@ -232,7 +322,12 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                     },
 
                     failure: function(f, action) {
-                        var errorMsg = (action.failureType === 'server') ? 'Server error.' : 'Error.';
+                        var errorMsg;
+                        if (action.failureType === 'server') {
+                            errorMsg = action.result.message ? action.result.message : 'Server error.'
+                        } else {
+                            errorMsg = 'Error.'
+                        }
                         new Noty({ text: errorMsg, type: 'error' }).show();
                         console.error(action);
                     }
@@ -334,5 +429,22 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
             grid.down('#add-library-button').disable();
             grid.suspendEvent('itemcontextmenu');
         }
+    },
+
+    getSelectedItems: function() {
+        var store = Ext.getStore('librariesInRequestStore');
+        var selectedItems = [];
+
+        store.each(function(item) {
+            if (item.get('selected')) {
+                selectedItems.push({
+                    pk: item.get('pk'),
+                    name: item.get('name'),
+                    record_type: item.get('record_type')
+                });
+            }
+        });
+
+        return selectedItems;
     }
 });

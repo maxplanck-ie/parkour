@@ -16,8 +16,6 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
     maximizable: true,
     layout: 'fit',
 
-    id: 'lol',
-
     items: [{
         xtype: 'panel',
         border: 0,
@@ -44,11 +42,11 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                     },
                     items: [
                         {
-                            itemId: 'libraryCardBtn',
+                            itemId: 'library-card-button',
                             text: 'Library'
                         },
                         {
-                            itemId: 'sampleCardBtn',
+                            itemId: 'sample-card-button',
                             text: 'Sample'
                         }
                     ]
@@ -69,8 +67,8 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                 // rowNumbererHeaderWidth: 40,
                 rowSelect: false
             },
-            id: 'batchAddGrid',
-            itemId: 'batchAddGrid',
+            id: 'batch-add-grid',
+            itemId: 'batch-add-grid',
             sortableColumns: false,
             multiSelect: true,
             border: 0,
@@ -80,48 +78,55 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                     return (record.get('invalid')) ? 'invalid' : '';
                 }
             },
-            tbar: [{
-                xtype: 'container',
-                padding: 5,
-                layout: 'hbox',
-                items: [{
-                    xtype: 'numberfield',
-                    itemId: 'numEmptyRecords',
-                    fieldLabel: 'Create empty records',
-                    padding: '0 10px 0 0',
-                    labelWidth: 145,
-                    width: 230,
-                    minValue: 0
-                },
-                {
-                    xtype: 'button',
-                    itemId: 'createEmptyRecordsBtn',
-                    text: 'Create'
-                }
-                ]
-            }],
             plugins: [{
                 ptype: 'rowediting',
                 clicksToEdit: 1
             }, {
                 ptype: 'clipboard'
             }]
-        }
-        ]
+        }]
     }],
 
-    dockedItems: [{
-        xtype: 'toolbar',
-        dock: 'bottom',
-        items: [
-            '->',
+    dockedItems: [
+        {
+            xtype: 'toolbar',
+            dock: 'top',
+            itemId: 'create-empty-records',
+            items: [{
+                xtype: 'numberfield',
+                itemId: 'num-empty-records',
+                fieldLabel: 'Create empty records',
+                padding: '0 10px 0 0',
+                labelWidth: 145,
+                width: 230,
+                minValue: 0
+            },
             {
                 xtype: 'button',
-                itemId: 'saveBtn',
-                iconCls: 'fa fa-floppy-o fa-lg',
-                text: 'Save'
-            }
-        ],
-        hidden: true
-    }]
+                itemId: 'create-empty-records-button',
+                text: 'Create'
+            }],
+            hidden: true
+        }, {
+            xtype: 'toolbar',
+            dock: 'bottom',
+            items: [
+                '->',
+                {
+                    xtype: 'button',
+                    itemId: 'cancel-button',
+                    iconCls: 'fa fa-floppy-o fa-lg',
+                    text: 'Cancel',
+                    hidden: true
+                },
+                {
+                    xtype: 'button',
+                    itemId: 'save-button',
+                    iconCls: 'fa fa-floppy-o fa-lg',
+                    text: 'Save'
+                }
+            ],
+            hidden: true
+        }
+    ]
 });

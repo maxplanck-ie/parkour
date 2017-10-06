@@ -7,21 +7,19 @@ Ext.define('Ext.ux.FiddleCheckColumn', {
             '<tpl if="empty"> ', Ext.baseCSSPrefix, 'column-header-inner-empty</tpl>">',
             '<span class="', Ext.baseCSSPrefix, 'column-header-text-container">',
                 '<span class="', Ext.baseCSSPrefix, 'column-header-text-wrapper">',
-                    '<span id="{id}-textContainerEl" data-ref="textContainerEl" class="', Ext.baseCSSPrefix, 'column-header-text',
-                        '{childElCls}">',
+                    '<span id="{id}-textContainerEl" data-ref="textContainerEl" class="', Ext.baseCSSPrefix, 'column-header-text', '{childElCls}">',
                         '<div class="', Ext.baseCSSPrefix, 'grid-checkcolumn" role="button" src="' + Ext.BLANK_IMAGE_URL + '"></div>',
                     '</span>',
                 '</span>',
             '</span>',
             '<tpl if="!menuDisabled">',
-                '<div id="{id}-triggerEl" data-ref="triggerEl" role="presentation" class="', Ext.baseCSSPrefix, 'column-header-trigger',
-                '{childElCls}" style="{triggerStyle}"></div>',
+                '<div id="{id}-triggerEl" data-ref="triggerEl" role="presentation" class="', Ext.baseCSSPrefix, 'column-header-trigger', '{childElCls}" style="{triggerStyle}"></div>',
             '</tpl>',
         '</div>',
         '{%this.renderContainer(out,values)%}'
     ],
 
-    constructor : function(config) {
+    constructor: function(config) {
         var me = this;
 
         Ext.apply(config, {
@@ -36,7 +34,7 @@ Ext.define('Ext.ux.FiddleCheckColumn', {
             checked: false
         });
 
-        me.callParent([ config ]);
+        me.callParent([config]);
 
         me.on('headerclick', me.onHeaderClick);
         me.on('selectall', me.onSelectAll);
@@ -46,8 +44,8 @@ Ext.define('Ext.ux.FiddleCheckColumn', {
     /**
      * utility method: given a header component, goes down to the component
      */
-    getHeaderCheckboxEl: function(header){
-        return header.getEl().down("."+Ext.baseCSSPrefix+'grid-checkcolumn');
+    getHeaderCheckboxEl: function(header) {
+        return header.getEl().down('.' + Ext.baseCSSPrefix + 'grid-checkcolumn');
     },
 
     onHeaderClick: function(headerCt, header, e, el) {
@@ -68,7 +66,7 @@ Ext.define('Ext.ux.FiddleCheckColumn', {
 
     onSelectAll: function(store, column, checked) {
         var dataIndex = column.dataIndex;
-        for(var i = 0; i < store.getCount(); i++) {
+        for (var i = 0; i < store.getCount(); i++) {
             var record = store.getAt(i);
             if (checked) {
                 record.set(dataIndex, true);
@@ -76,5 +74,5 @@ Ext.define('Ext.ux.FiddleCheckColumn', {
                 record.set(dataIndex, false);
             }
         }
-	}
+    }
 });

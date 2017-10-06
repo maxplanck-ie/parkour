@@ -2,9 +2,9 @@ Ext.define('validator.Unique', {
     extend: 'Ext.data.validator.Validator',
     alias: 'data.validator.unique',
     validate: function(value, record) {
-        var store = Ext.getCmp('batchAddGrid').getStore(),
-            names = [],
-            isValid = true;
+        var store = Ext.getCmp('batch-add-grid').getStore();
+        var names = [];
+        // var isValid = true;
 
         store.each(function(item) {
             var name = item.get('name');

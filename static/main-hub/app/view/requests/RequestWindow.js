@@ -62,7 +62,7 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                                 getFileUrl: 'request/get_files/'
                                 // uploadFileUrl: 'api/requests/upload_files/',
                                 // getFileUrl: 'api/requests/get_files/'
-                                
+
                             }
                         ]
                     },
@@ -90,14 +90,25 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                 padding: '12px 15px 15px 0',
                 rowspan: 2,
                 viewConfig: {
-                    loadMask: false
+                    // loadMask: false
+                    stripeRows: false
                 },
                 sortableColumns: false,
+                enableColumnMove: false,
+                enableColumnResize: false,
+                enableColumnHide: false,
                 columns: {
                     items: [{
-                        xtype: 'rownumberer',
+                        xtype: 'checkcolumn',
+                        itemId: 'check-column',
+                        dataIndex: 'selected',
+                        tdCls: 'no-dirty',
                         width: 40
                     },
+                    // {
+                    //     xtype: 'rownumberer',
+                    //     width: 40
+                    // },
                     {
                         text: 'Name',
                         dataIndex: 'name',
@@ -120,20 +131,26 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                             // return record ? record.getBarcode() : value;
                             return meta.record.getBarcode();
                         }
-                    }
-                    ]
+                    }]
                 },
                 store: 'librariesInRequestStore',
-                bbar: [{
-                    itemId: 'batch-add-button',
-                    text: 'Batch Add'
-                },
-                '->',
-                {
-                    itemId: 'add-library-button',
-                    text: 'Add',
-                    disabled: true
-                }]
+                // bbar: [{
+                //     itemId: 'batch-add-button',
+                //     text: 'Batch Add'
+                // },
+                // '->',
+                // {
+                //     itemId: 'add-library-button',
+                //     text: 'Add',
+                //     disabled: true
+                // }]
+                bbar: [
+                    '->',
+                    {
+                        itemId: 'batch-add-button',
+                        text: 'Add'
+                    }
+                ]
             }
         ]
     }],

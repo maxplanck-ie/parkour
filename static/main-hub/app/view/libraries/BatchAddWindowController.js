@@ -4,22 +4,19 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
 
     config: {
         control: {
-            '#': {
-                boxready: 'boxready'
-            },
-            '#libraryCardBtn': {
+            '#library-card-button': {
                 click: 'selectCard'
             },
-            '#sampleCardBtn': {
+            '#sample-card-button': {
                 click: 'selectCard'
             },
-            '#batchAddGrid': {
+            '#batch-add-grid': {
                 itemcontextmenu: 'showContextMenu',
                 beforeedit: 'toggleEditors',
                 edit: 'editRecord',
                 validate: 'validateAll'
             },
-            '#createEmptyRecordsBtn': {
+            '#create-empty-records-button': {
                 click: 'createEmptyRecords'
             },
 
@@ -39,15 +36,10 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                 select: 'selectLibraryProtocol'
             },
 
-            '#saveBtn': {
+            '#save-button': {
                 click: 'save'
             }
         }
-    },
-
-    boxready: function() {
-        Ext.getStore('libraryProtocolsStore').reload();
-        Ext.getStore('libraryTypesStore').reload();
     },
 
     selectCard: function(btn) {
@@ -58,26 +50,31 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
 
         wnd.setSize(1000, 650);
         wnd.center();
+        wnd.getDockedItems('toolbar[dock="top"]')[0].show();
         wnd.getDockedItems('toolbar[dock="bottom"]')[0].show();
         layout.setActiveItem(1);
 
-        if (btn.itemId === 'libraryCardBtn') {
-            wnd.recordType = 'L';
+        if (btn.itemId === 'library-card-button') {
+            wnd.recordType = 'Library';
             wnd.setTitle('Add Libraries');
             configuration = this.getLibraryGridConfiguration();
         } else {
-            wnd.recordType = 'S';
+            wnd.recordType = 'Sample';
             wnd.setTitle('Add Samples');
             configuration = this.getSampleGridConfiguration();
         }
 
         wnd.maximize();  // auto fullscreen
 
-        var grid = Ext.getCmp('batchAddGrid');
+        var grid = Ext.getCmp('batch-add-grid');
         grid.reconfigure(configuration[0], configuration[1]);
 
+        // Load stores
+        Ext.getStore('libraryProtocolsStore').reload();
+        Ext.getStore('libraryTypesStore').reload();
+
         // Add empty records on enter
-        var numEmptyRecords = wnd.down('#numEmptyRecords');
+        var numEmptyRecords = wnd.down('#num-empty-records');
         numEmptyRecords.getEl().on('keypress', function(e, fld) {
             if (e.getKey() === e.ENTER) {
                 me.createEmptyRecords(numEmptyRecords);
@@ -106,27 +103,12 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         }).showAt(e.getXY());
     },
 
-    createEmptyRecords: function(btn) {
-        var grid = Ext.getCmp('batchAddGrid');
-        var store = grid.getStore();
-        var numRecords = btn.up().down('#numEmptyRecords').getValue();
-
-        if (numRecords !== null && numRecords > 0) {
-            var data = [];
-            for (var i = 0; i < numRecords; i++) {
-                data.push({
-                    concentration: 0
-                });
-            }
-            store.add(data);
-        }
-    },
-
     applyToAll: function(record, dataIndex) {
-        var store = record.store
-        if (typeof dataIndex !== 'undefined') {
+        var store = record.store;
+
+        if (dataIndex) {
             if (dataIndex === 'name') {
-                Ext.ux.ToastMessage('Names must be unique.', 'warning');
+                new Noty({ text: 'Names must be unique.', type: 'warning' }).show();
                 return;
             }
 
@@ -146,7 +128,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                         item.set('index_type', record.get('index_type'));
                     }
 
-                    // If the # of Indes Reads was selected, update Index Type too
+                    // If the # of Index Reads was selected, update Index Type too
                     else if (dataIndex === 'index_reads') {
                         item.set({
                             index_reads: record.get('index_reads'),
@@ -158,9 +140,9 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                         });
                     }
 
-                    // If Index I7 was selected, update the # of Index Reads and Index Type too
+                    // If Index I7 was selected, update the # of Index Reads and Index Types
                     else if (dataIndex === 'index_i7') {
-                        // Reset Index I5 for records with different Index Type and Index Reads
+                        // Reset Index I5 for records with different Index Types and Index Reads
                         if ((item.get('index_type') !== record.get('index_type')) &&
                             (item.get('index_reads') !== record.get('index_reads'))) {
                             item.set('index_i5', '');
@@ -173,7 +155,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                         });
                     }
 
-                    // If Index I5 was selected, update IndexI7, the # of Index Reads, and Index Type too
+                    // If Index I5 was selected, update IndexI7, the # of Index Reads, and Index Types
                     else if (dataIndex === 'index_i5') {
                         item.set({
                             index_i5: record.get('index_i5'),
@@ -208,8 +190,8 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                         }
                         // Samples
                         else {
-                            // Reset Library Type, if Nucleic Acid Types are different or
-                            // Library Protocols are different
+                            // Reset Library Type if Nucleic Acid Types Library Protocols
+                            // are different
                             if ((item.get('nucleic_acid_type') !== record.get('nucleic_acid_type')) ||
                                 ((item.get('nucleic_acid_type') === record.get('nucleic_acid_type')) &&
                                     (item.get('library_protocol') !== record.get('library_protocol')))) {
@@ -220,7 +202,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                         item.set('library_protocol', record.get('library_protocol'));
                     }
 
-                    // If Library Type was selected, update Library Protocol and Nuc. Type too
+                    // If Library Type was selected, update Library Protocol and Nucleic Acid Type
                     else if (dataIndex === 'library_type') {
                         item.set({
                             library_type: record.get('library_type'),
@@ -229,13 +211,13 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                         });
                     }
 
-                    // RNA Quality should be applied only when Nuc. Type is RNA
+                    // RNA Quality should be applied only when Nucleic Acid Type is RNA
                     else if (dataIndex === 'rna_quality') {
                         var nat = Ext.getStore('nucleicAcidTypesStore').findRecord('id',
                             item.get('nucleic_acid_type')
                         );
 
-                        if (nat !== null && nat.get('type') === 'RNA') {
+                        if (nat && nat.get('type') === 'RNA') {
                             item.set(dataIndex, record.get(dataIndex));
                         }
                     } else {
@@ -251,19 +233,12 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         }
     },
 
-    delete: function(record, gridView) {
-        var store = record.store;
-        store.remove(record);
-        gridView.refresh();
-    },
-
     toggleEditors: function(editor, context) {
         var wnd = this.getView();
         var indexTypeEditor = Ext.getCmp('indexTypeEditor');
         var indexReadsEditor = Ext.getCmp('indexReadsEditor');
         var indexI7Editor = Ext.getCmp('indexI7Editor');
         var indexI5Editor = Ext.getCmp('indexI5Editor');
-        // var nucleicAcidTypeEditor = Ext.getCmp('nucleicAcidTypeEditor');
         var nucleicAcidTypesStore = Ext.getStore('nucleicAcidTypesStore');
         var libraryProtocolEditor = Ext.getCmp('libraryProtocolEditor');
         var libraryProtocolsStore = Ext.getStore('libraryProtocolsStore');
@@ -282,7 +257,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         }
 
         // Libraries
-        if (wnd.recordType === 'L') {
+        if (wnd.recordType === 'Library') {
             // Toggle Index Reads, IndexI7, and IndexI5
             if (record.get('index_type') !== null) {
                 if (record.get('index_reads') !== null) {
@@ -306,7 +281,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         }
 
         // Samples
-        else if (wnd.recordType === 'S') {
+        else if (wnd.recordType === 'Sample') {
             // Toggle Library Protocol
             if (record.get('nucleic_acid_type') === null) {
                 libraryProtocolEditor.disable();
@@ -326,7 +301,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             var nat = nucleicAcidTypesStore.findRecord('id',
                 record.get('nucleic_acid_type')
             );
-            if (nat !== null && nat.get('type') === 'RNA') {
+            if (nat && nat.get('type') === 'RNA') {
                 rnaQualityEditor.enable();
             } else {
                 rnaQualityEditor.disable();
@@ -335,11 +310,9 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
     },
 
     editRecord: function(editor, context) {
-        var grid = Ext.getCmp('batchAddGrid');
-        // var store = grid.getStore();
+        var grid = Ext.getCmp('batch-add-grid');
         var record = context.record;
         var changes = record.getChanges();
-        // var values = context.newValues;
 
         for (var dataIndex in changes) {
             if (changes.hasOwnProperty(dataIndex)) {
@@ -477,14 +450,12 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
     },
 
     getLibraryGridConfiguration: function() {
-        var me = this;
-
         var store = Ext.create('Ext.data.Store', {
             model: 'MainHub.model.libraries.BatchAdd.Library',
             data: []
         });
 
-        var columns = $.merge(this.getCommonColumns(), [{
+        var columns = Ext.Object.merge(this.getCommonColumns(), [{
             text: 'size (bp)',
             dataIndex: 'mean_fragment_size',
             tooltip: 'Mean Fragment Size',
@@ -494,7 +465,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                 allowDecimals: false,
                 minValue: 0
             },
-            renderer: me.errorRenderer
+            renderer: this.errorRenderer
         },
         {
             text: 'Index Type',
@@ -512,7 +483,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                 matchFieldWidth: false,
                 forceSelection: true
             },
-            renderer: me.comboboxErrorRenderer
+            renderer: this.comboboxErrorRenderer
         },
         {
             text: '# of Index Reads',
@@ -544,7 +515,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                     meta.tdAttr = 'data-qtip="' + record.get('errors')[dataIndex] + '"';
                 }
 
-                return (item !== null) ? item.get('num') : '';
+                return item ? item.get('num') : '';
             }
         },
         {
@@ -569,7 +540,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                 regexText: 'Only A, T, C and G (uppercase) are allowed. Index length must be 6 or 8.',
                 matchFieldWidth: false
             },
-            renderer: me.errorRenderer
+            renderer: this.errorRenderer
         },
         {
             text: 'Index I5',
@@ -593,7 +564,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                 regexText: 'Only A, T, C and G (uppercase) are allowed. Index length must be 6 or 8.',
                 matchFieldWidth: false
             },
-            renderer: me.errorRenderer
+            renderer: this.errorRenderer
         },
         {
             text: 'qPCR (nM)',
@@ -623,8 +594,6 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
     },
 
     getSampleGridConfiguration: function() {
-        var me = this;
-
         var store = Ext.create('Ext.data.Store', {
             model: 'MainHub.model.libraries.BatchAdd.Sample',
             data: []
@@ -646,7 +615,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                 matchFieldWidth: false,
                 forceSelection: true
             },
-            renderer: me.comboboxErrorRenderer
+            renderer: this.comboboxErrorRenderer
         },
         {
             text: 'RQN',
@@ -664,7 +633,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                 regex: new RegExp('^(11|10|[1-9]?(\.[0-9]+)?|\.[0-9]+)$'),
                 regexText: 'Only values between 1 and 10 are allowed.'
             },
-            renderer: me.errorRenderer
+            renderer: this.errorRenderer
         }
         ]);
 
@@ -693,242 +662,243 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
     },
 
     getCommonColumns: function() {
-        var me = this;
-        return [{
-            xtype: 'rownumberer',
-            dataIndex: 'numberer',
-            width: 40
-        },
-        {
-            text: 'Name',
-            dataIndex: 'name',
-            tooltip: 'Name',
-            minWidth: 200,
-            flex: 1,
-            editor: {
-                xtype: 'textfield',
-                regex: new RegExp('^[A-Za-z0-9_\-]+$'),
-                regexText: 'Only A-Za-z0-9 as well as _ and - are allowed'
+        return [
+            {
+                xtype: 'rownumberer',
+                dataIndex: 'numberer',
+                width: 40
             },
-            renderer: me.errorRenderer
-        },
-        {
-            text: 'Protocol',
-            dataIndex: 'library_protocol',
-            tooltip: 'Library Preparation Protocol',
-            width: 200,
-            editor: {
-                xtype: 'combobox',
-                id: 'libraryProtocolEditor',
-                itemId: 'libraryProtocolEditor',
-                queryMode: 'local',
-                displayField: 'name',
-                valueField: 'id',
-                store: 'libraryProtocolsStore',
-                matchFieldWidth: false,
-                forceSelection: true,
-                listConfig: {
-                    getInnerTpl: function() {
-                        return '<span data-qtip="' +
-                                '<strong>Provider</strong>: {provider}<br/>' +
-                                '<strong>Catalog</strong>: {catalog}<br/>' +
-                                '<strong>Explanation</strong>: {explanation}<br/>' +
-                                '<strong>Input Requirements</strong>: {inputRequirements}<br/>' +
-                                '<strong>Typical Application</strong>: {typicalApplication}<br/>' +
-                                '<strong>Comments</strong>: {comments}' +
-                                '">{name}</span>'
+            {
+                text: 'Name',
+                dataIndex: 'name',
+                tooltip: 'Name',
+                minWidth: 200,
+                flex: 1,
+                editor: {
+                    xtype: 'textfield',
+                    regex: new RegExp('^[A-Za-z0-9_\-]+$'),
+                    regexText: 'Only A-Za-z0-9 as well as _ and - are allowed'
+                },
+                renderer: this.errorRenderer
+            },
+            {
+                text: 'Protocol',
+                dataIndex: 'library_protocol',
+                tooltip: 'Library Preparation Protocol',
+                width: 200,
+                editor: {
+                    xtype: 'combobox',
+                    id: 'libraryProtocolEditor',
+                    itemId: 'libraryProtocolEditor',
+                    queryMode: 'local',
+                    displayField: 'name',
+                    valueField: 'id',
+                    store: 'libraryProtocolsStore',
+                    matchFieldWidth: false,
+                    forceSelection: true,
+                    listConfig: {
+                        getInnerTpl: function() {
+                            return '<span data-qtip="' +
+                                    '<strong>Provider</strong>: {provider}<br/>' +
+                                    '<strong>Catalog</strong>: {catalog}<br/>' +
+                                    '<strong>Explanation</strong>: {explanation}<br/>' +
+                                    '<strong>Input Requirements</strong>: {inputRequirements}<br/>' +
+                                    '<strong>Typical Application</strong>: {typicalApplication}<br/>' +
+                                    '<strong>Comments</strong>: {comments}' +
+                                    '">{name}</span>'
+                        }
                     }
+                },
+                renderer: this.comboboxErrorRenderer
+            },
+            {
+                text: 'Library Type',
+                dataIndex: 'library_type',
+                tooltip: 'Library Type',
+                width: 200,
+                editor: {
+                    xtype: 'combobox',
+                    id: 'libraryTypeEditor',
+                    itemId: 'libraryTypeEditor',
+                    queryMode: 'local',
+                    displayField: 'name',
+                    valueField: 'id',
+                    store: 'libraryTypesStore',
+                    // matchFieldWidth: false,
+                    forceSelection: true
+                },
+                renderer: this.comboboxErrorRenderer
+            },
+            {
+                text: 'ng/μl',
+                dataIndex: 'concentration',
+                tooltip: 'Concentration',
+                width: 90,
+                editor: {
+                    xtype: 'numberfield',
+                    minValue: 0
+                },
+                renderer: this.errorRenderer
+            },
+            {
+                text: 'Length',
+                dataIndex: 'read_length',
+                tooltip: 'Read Length',
+                width: 70,
+                editor: {
+                    xtype: 'combobox',
+                    queryMode: 'local',
+                    valueField: 'id',
+                    displayField: 'name',
+                    store: 'readLengthsStore',
+                    matchFieldWidth: false,
+                    forceSelection: true
+                },
+                renderer: this.comboboxErrorRenderer
+            },
+            {
+                text: 'Depth (M)',
+                dataIndex: 'sequencing_depth',
+                tooltip: 'Sequencing Depth',
+                width: 85,
+                editor: {
+                    xtype: 'numberfield',
+                    minValue: 0,
+                    allowDecimals: false
+                },
+                renderer: this.errorRenderer
+            },
+            {
+                text: 'Amplification',
+                tooltip: 'Amplification cycles',
+                dataIndex: 'amplification_cycles',
+                width: 105,
+                editor: {
+                    xtype: 'numberfield',
+                    minValue: 0,
+                    allowDecimals: false,
+                    allowBlank: true
+                },
+                renderer: this.errorRenderer
+            },
+            {
+                xtype: 'checkcolumn',
+                text: 'Equal nucl.',
+                tooltip: 'Equal Representation of Nucleotides: check = Yes, no check = No',
+                dataIndex: 'equal_representation_nucleotides',
+                width: 95,
+                editor: {
+                    xtype: 'checkbox',
+                    cls: 'x-grid-checkheader-editor'
                 }
             },
-            renderer: me.comboboxErrorRenderer
-        },
-        {
-            text: 'Library Type',
-            dataIndex: 'library_type',
-            tooltip: 'Library Type',
-            width: 200,
-            editor: {
-                xtype: 'combobox',
-                id: 'libraryTypeEditor',
-                itemId: 'libraryTypeEditor',
-                queryMode: 'local',
-                displayField: 'name',
-                valueField: 'id',
-                store: 'libraryTypesStore',
-                // matchFieldWidth: false,
-                forceSelection: true
+            {
+                text: 'F/S',
+                dataIndex: 'concentration_method',
+                tooltip: 'Concentration Determined by',
+                width: 80,
+                editor: {
+                    xtype: 'combobox',
+                    queryMode: 'local',
+                    valueField: 'id',
+                    displayField: 'name',
+                    store: 'concentrationMethodsStore',
+                    matchFieldWidth: false,
+                    forceSelection: true
+                },
+                renderer: this.comboboxErrorRenderer
             },
-            renderer: me.comboboxErrorRenderer
-        },
-        {
-            text: 'ng/μl',
-            dataIndex: 'concentration',
-            tooltip: 'Concentration',
-            width: 90,
-            editor: {
-                xtype: 'numberfield',
-                minValue: 0
+            {
+                text: 'Organism',
+                dataIndex: 'organism',
+                tooltip: 'Organism',
+                width: 100,
+                editor: {
+                    xtype: 'combobox',
+                    queryMode: 'local',
+                    valueField: 'id',
+                    displayField: 'name',
+                    store: 'organismsStore',
+                    // matchFieldWidth: false,
+                    forceSelection: true
+                },
+                renderer: this.comboboxErrorRenderer
             },
-            renderer: me.errorRenderer
-        },
-        {
-            text: 'Length',
-            dataIndex: 'read_length',
-            tooltip: 'Read Length',
-            width: 70,
-            editor: {
-                xtype: 'combobox',
-                queryMode: 'local',
-                valueField: 'id',
-                displayField: 'name',
-                store: 'readLengthsStore',
-                matchFieldWidth: false,
-                forceSelection: true
-            },
-            renderer: me.comboboxErrorRenderer
-        },
-        {
-            text: 'Depth (M)',
-            dataIndex: 'sequencing_depth',
-            tooltip: 'Sequencing Depth',
-            width: 85,
-            editor: {
-                xtype: 'numberfield',
-                minValue: 0,
-                allowDecimals: false
-            },
-            renderer: me.errorRenderer
-        },
-        {
-            text: 'Amplification',
-            tooltip: 'Amplification cycles',
-            dataIndex: 'amplification_cycles',
-            width: 105,
-            editor: {
-                xtype: 'numberfield',
-                minValue: 0,
-                allowDecimals: false,
-                allowBlank: true
-            },
-            renderer: me.errorRenderer
-        },
-        {
-            xtype: 'checkcolumn',
-            text: 'Equal nucl.',
-            tooltip: 'Equal Representation of Nucleotides: check = Yes, no check = No',
-            dataIndex: 'equal_representation_nucleotides',
-            width: 95,
-            editor: {
-                xtype: 'checkbox',
-                cls: 'x-grid-checkheader-editor'
+            {
+                text: 'Comments',
+                dataIndex: 'comments',
+                tooltip: 'Comments',
+                width: 200,
+                editor: {
+                    xtype: 'textfield',
+                    allowBlank: true
+                }
             }
-        },
-        {
-            text: 'F/S',
-            dataIndex: 'concentration_method',
-            tooltip: 'Concentration Determined by',
-            width: 80,
-            editor: {
-                xtype: 'combobox',
-                queryMode: 'local',
-                valueField: 'id',
-                displayField: 'name',
-                store: 'concentrationMethodsStore',
-                matchFieldWidth: false,
-                forceSelection: true
-            },
-            renderer: me.comboboxErrorRenderer
-        },
-        {
-            text: 'Organism',
-            dataIndex: 'organism',
-            tooltip: 'Organism',
-            width: 100,
-            editor: {
-                xtype: 'combobox',
-                queryMode: 'local',
-                valueField: 'id',
-                displayField: 'name',
-                store: 'organismsStore',
-                // matchFieldWidth: false,
-                forceSelection: true
-            },
-            renderer: me.comboboxErrorRenderer
-        },
-        {
-            text: 'Comments',
-            dataIndex: 'comments',
-            tooltip: 'Comments',
-            width: 200,
-            editor: {
-                // xtype: 'textarea',
-                xtype: 'textfield',
-                allowBlank: true
-            }
-        }
         ]
     },
 
     save: function(btn) {
         var wnd = btn.up('window');
-        var store = Ext.getCmp('batchAddGrid').getStore();
-        // var url = (wnd.recordType === 'L') ? 'library/save/' : 'sample/save/';
-        var url = (wnd.recordType === 'L') ? 'api/libraries/' : 'api/samples/';
+        var store = Ext.getCmp('batch-add-grid').getStore();
+        var url = (wnd.recordType === 'Library') ? 'api/libraries/' : 'api/samples/';
 
-        if (store.getCount() > 0) {
-            this.validateAll();
-
-            var numInvalidRecords = store.data.items.reduce(function(n, item) {
-                return n + (item.get('invalid') === true);
-            }, 0);
-
-            if (numInvalidRecords === 0) {
-                Ext.Ajax.request({
-                    url: url,
-                    method: 'POST',
-                    timeout: 1000000,
-                    scope: this,
-                    params: {
-                        mode: 'add',
-                        data: Ext.JSON.encode(Ext.Array.pluck(store.data.items, 'data'))
-                    },
-
-                    success: function(response) {
-                        var obj = Ext.JSON.decode(response.responseText);
-
-                        if (obj.success) {
-                            Ext.getCmp('libraries-in-request-grid').getStore().add(obj.data);
-
-                            for (var i = 0; i < obj.data.length; i++) {
-                                var record = store.findRecord('name', obj.data[i].name);
-                                store.remove(record);
-                            }
-
-                            new Noty({ text: 'Records have been added!' }).show();
-
-                            wnd.close()
-                        } else {
-                            new Noty({ text: obj.message, type: 'error' }).show();
-                        }
-
-                        // wnd.setLoading(false);
-                    },
-
-                    failure: function(response) {
-                        // wnd.setLoading(false);
-                        new Noty({ text: response.statusText, type: 'error' }).show();
-                        console.error(response);
-                    }
-                });
-            } else {
-                Ext.ux.ToastMessage('Check the records.', 'warning');
-            }
+        if (store.getCount() === 0) {
+            return;
         }
+
+        this.validateAll();
+
+        var numInvalidRecords = store.data.items.reduce(function(n, item) {
+            return n + (item.get('invalid') === true);
+        }, 0);
+
+        if (numInvalidRecords !== 0) {
+            new Noty({ text: 'Check the records.', type: 'warning' }).show();
+            return;
+        }
+
+        Ext.Ajax.request({
+            url: url,
+            method: 'POST',
+            // timeout: 1000000,
+            scope: this,
+            params: {
+                mode: 'add',
+                data: Ext.JSON.encode(Ext.Array.pluck(store.data.items, 'data'))
+            },
+
+            success: function(response) {
+                var obj = Ext.JSON.decode(response.responseText);
+
+                if (obj.success) {
+                    Ext.getCmp('libraries-in-request-grid').getStore().add(obj.data);
+
+                    for (var i = 0; i < obj.data.length; i++) {
+                        var record = store.findRecord('name', obj.data[i].name);
+                        store.remove(record);
+                    }
+
+                    new Noty({ text: 'Records have been added!' }).show();
+
+                    wnd.close()
+                } else {
+                    new Noty({ text: obj.message, type: 'error' }).show();
+                }
+
+                // wnd.setLoading(false);
+            },
+
+            failure: function(response) {
+                // wnd.setLoading(false);
+                new Noty({ text: response.statusText, type: 'error' }).show();
+                console.error(response);
+            }
+        });
     },
 
     validateAll: function() {
         var me = this;
-        var grid = Ext.getCmp('batchAddGrid');
+        var grid = Ext.getCmp('batch-add-grid');
         var store = grid.getStore();
 
         // Validate all records
@@ -941,7 +911,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
     },
 
     validateRecord: function(record) {
-        var grid = Ext.getCmp('batchAddGrid');
+        var grid = Ext.getCmp('batch-add-grid');
         var store = grid.getStore();
         var validation = record.getValidation(true).data;
         var invalid = false;
@@ -1004,5 +974,27 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         var item = store.findRecord('id', value, 0, false, false, true);
 
         return item ? item.get('name') : '';
+    },
+
+    createEmptyRecords: function(btn) {
+        var grid = Ext.getCmp('batch-add-grid');
+        var store = grid.getStore();
+        var numRecords = btn.up().down('#num-empty-records').getValue();
+
+        if (numRecords && numRecords > 0) {
+            var data = [];
+            for (var i = 0; i < numRecords; i++) {
+                data.push({
+                    concentration: 0
+                });
+            }
+            store.add(data);
+        }
+    },
+
+    delete: function(record, gridView) {
+        var store = record.store;
+        store.remove(record);
+        gridView.refresh();
     }
 });

@@ -17,8 +17,8 @@ Ext.define('MainHub.view.requests.Requests', {
 
     items: [{
         xtype: 'grid',
-        id: 'requestsTable',
-        itemId: 'requestsTable',
+        id: 'requests-grid',
+        itemId: 'requests-grid',
         height: Ext.Element.getViewportHeight() - 64,
         region: 'center',
         padding: 15,
@@ -34,16 +34,18 @@ Ext.define('MainHub.view.requests.Requests', {
             },
             {
                 xtype: 'button',
-                itemId: 'addRequestBtn',
+                itemId: 'add-request-button',
                 text: 'Add'
             }]
         },
         viewConfig: {
             // loadMask: false
-            emptyText: '<h1 style="text-align:center;margin:75px">No matching results</h1>'
+            // emptyText: '<h1 style="text-align:center;margin:75px">No matching results</h1>'
+            stripeRows: false
         },
         store: 'requestsStore',
         sortableColumns: false,
+        enableColumnMove: false,
 
         columns: {
             items: [
@@ -71,8 +73,8 @@ Ext.define('MainHub.view.requests.Requests', {
                     renderer: Ext.util.Format.dateRenderer('d.m.Y')
                 },
                 {
-                    text: 'Sum of Sequencing Depth',
-                    dataIndex: 'sum_seq_depth',
+                    text: 'Total Sequencing Depth',
+                    dataIndex: 'total_sequencing_depth',
                     flex: 1
                 },
                 {

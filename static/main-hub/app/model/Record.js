@@ -27,6 +27,11 @@ Ext.define('MainHub.model.Record', {
             name: 'is_converted',
             type: 'bool',
             defaultValue: false
+        },
+        {
+            name: 'selected',
+            type: 'bool',
+            defaultValue: false
         }
     ],
 

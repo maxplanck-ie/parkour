@@ -7,7 +7,7 @@ from .models import Request, FileRequest
 
 class RequestSerializer(ModelSerializer):
     user_full_name = SerializerMethodField()
-    sum_seq_depth = SerializerMethodField()
+    total_sequencing_depth = SerializerMethodField()
     restrict_permissions = SerializerMethodField()
     deep_seq_request_name = SerializerMethodField()
     deep_seq_request_path = SerializerMethodField()
@@ -16,13 +16,14 @@ class RequestSerializer(ModelSerializer):
     class Meta:
         model = Request
         fields = ('pk', 'name', 'user', 'user_full_name', 'create_time',
-                  'description', 'sum_seq_depth', 'restrict_permissions',
-                  'files', 'deep_seq_request_name', 'deep_seq_request_path',)
+                  'description', 'total_sequencing_depth', 'files',
+                  'restrict_permissions', 'deep_seq_request_name',
+                  'deep_seq_request_path',)
 
     def get_user_full_name(self, obj):
         return obj.user.get_full_name()
 
-    def get_sum_seq_depth(self, obj):
+    def get_total_sequencing_depth(self, obj):
         library_depths = obj.libraries.values_list(
             'sequencing_depth', flat=True)
         sample_depths = obj.samples.values_list(
@@ -82,10 +83,10 @@ class RequestSerializer(ModelSerializer):
 
         # Update the request with new values
         instance = super().update(instance, validated_data)
-        
+
         # Get new files
         new_files = set(instance.files.all())
-        
+
         # Delete files which are not in the list of request's files anymore
         files_to_delete = list(old_files - new_files)
         for file in files_to_delete:

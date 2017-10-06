@@ -64,7 +64,7 @@ class TestRequestModel(TestCase):
         sample = create_sample(get_random_name())
         Library = library.__class__
         Sample = sample.__class__
-        
+
         request.libraries.add(library)
         request.samples.add(sample)
         request.delete()
@@ -102,7 +102,7 @@ class TestRequests(BaseTestCase):
         response = self.client.get(reverse('request-list'))
         data = response.json()['results']
         requests = [x['name'] for x in data]
-        
+
         self.assertEqual(response.status_code, 200)
         self.assertIn(request1.name, requests)
         self.assertIn(request2.name, requests)
@@ -124,22 +124,22 @@ class TestRequests(BaseTestCase):
         """ Ensure get single request behaves correctly. """
         self.client.login(email='foo@bar.io', password='foo-foo')
         request = create_request(self.user)
-        
+
         response = self.client.get(reverse(
-            'request-detail', 
+            'request-detail',
             kwargs={'pk': request.pk}
         ))
         data = response.json()
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(request.name, data['name'])        
+        self.assertEqual(request.name, data['name'])
 
     def test_single_request_no_id(self):
         """ Ensure error is thrown if an id is not provided. """
         self.client.login(email='foo@bar.io', password='foo-foo')
-        
+
         response = self.client.get(reverse(
-            'request-detail', 
+            'request-detail',
             kwargs={'pk': 'blah'}
         ))
         data = response.json()
@@ -153,7 +153,7 @@ class TestRequests(BaseTestCase):
         self.client.login(email='foo@bar.io', password='foo-foo')
 
         response = self.client.get(reverse(
-            'request-detail', 
+            'request-detail',
             kwargs={'pk': -1}
         ))
         data = response.json()
@@ -180,7 +180,7 @@ class TestRequests(BaseTestCase):
                     'record_type': 'Sample',
                 }],
                 # 'files': [],
-            })    
+            })
         })
 
         self.assertEqual(response.status_code, 201)
@@ -190,7 +190,7 @@ class TestRequests(BaseTestCase):
 
     def test_create_request_no_records(self):
         """
-        Ensure error is thrown if no records are provided when 
+        Ensure error is thrown if no records are provided when
         creating a new request.
         """
         self.client.login(email='foo@bar.io', password='foo-foo')
@@ -200,7 +200,7 @@ class TestRequests(BaseTestCase):
                 'description': get_random_name(),
                 'records': [],
                 # 'files': [],
-            })    
+            })
         })
         data = response.json()
 
@@ -242,7 +242,7 @@ class TestRequests(BaseTestCase):
 
     def test_update_request_no_records(self):
         """
-        Ensure error is thrown if no records are provided when 
+        Ensure error is thrown if no records are provided when
         updating a request.
         """
         self.client.login(email='foo@bar.io', password='foo-foo')
@@ -297,7 +297,7 @@ class TestRequests(BaseTestCase):
         request = create_request(self.user)
 
         response = self.client.delete(reverse(
-            'request-detail', 
+            'request-detail',
             kwargs={'pk': request.pk}
         ))
 
@@ -307,9 +307,9 @@ class TestRequests(BaseTestCase):
     def test_delete_request_no_id(self):
         """ Ensure error is thrown if an id is not provided. """
         self.client.login(email='foo@bar.io', password='foo-foo')
-        
+
         response = self.client.delete(reverse(
-            'request-detail', 
+            'request-detail',
             kwargs={'pk': 'blah'}
         ))
         data = response.json()
@@ -323,7 +323,7 @@ class TestRequests(BaseTestCase):
         self.client.login(email='foo@bar.io', password='foo-foo')
 
         response = self.client.delete(reverse(
-            'request-detail', 
+            'request-detail',
             kwargs={'pk': -1}
         ))
         data = response.json()
@@ -342,7 +342,7 @@ class TestRequests(BaseTestCase):
         request.samples.add(sample)
 
         response = self.client.get(reverse(
-            'request-get-records', 
+            'request-get-records',
             kwargs={'pk': request.pk}
         ))
         data = response.json()

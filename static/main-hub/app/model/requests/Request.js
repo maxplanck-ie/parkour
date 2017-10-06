@@ -40,7 +40,7 @@ Ext.define('MainHub.model.requests.Request', {
         },
         {
             type: 'int',
-            name: 'sum_seq_depth'
+            name: 'total_sequencing_depth'
         }
     ]
 });
