@@ -153,40 +153,38 @@ Ext.define('MainHub.view.pooling.PoolingController', {
 
     downloadBenchtopProtocol: function() {
         var store = Ext.getStore('poolingStore');
-        var poolName = '';
         var libraries = [];
         var samples = [];
 
-        // Get all checked (selected) records
         store.each(function(record) {
             if (record.get('selected')) {
-                if (record.get('libraryId') === 0) {
-                    samples.push(record.get('sampleId'));
-                    poolName = record.get('poolName');
+                if (record.get('record_type') === 'Library') {
+                    samples.push(record.get('pk'));
                 } else {
-                    libraries.push(record.get('libraryId'));
-                    poolName = record.get('poolName');
+                    libraries.push(record.get('pk'));
                 }
             }
         });
 
-        if (libraries.length > 0 || samples.length > 0) {
-            var form = Ext.create('Ext.form.Panel', {
-                standardSubmit: true
-            });
-
-            form.submit({
-                url: 'pooling/download_benchtop_protocol/',
-                target: '_blank',
-                params: {
-                    pool_name: poolName,
-                    samples: Ext.JSON.encode(samples),
-                    libraries: Ext.JSON.encode(libraries)
-                }
-            });
-        } else {
-            Ext.ux.ToastMessage('You did not select any libraries.', 'warning');
+        if (libraries.length === 0 && samples.length === 0) {
+            new Noty({ text: 'You did not select any libraries.', type: 'warning' }).show();
+            return;
         }
+
+        var poolId = store.data.items[0].get('pool');
+        var form = Ext.create('Ext.form.Panel', {
+            standardSubmit: true
+        });
+
+        form.submit({
+            url: 'api/pooling/download_benchtop_protocol/',
+            target: '_blank',
+            params: {
+                pool_id: poolId,
+                samples: Ext.JSON.encode(samples),
+                libraries: Ext.JSON.encode(libraries)
+            }
+        });
     },
 
     downloadPoolingTemplate: function() {
@@ -194,33 +192,33 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         var libraries = [];
         var samples = [];
 
-        // Get all checked (selected) records
         store.each(function(record) {
             if (record.get('selected')) {
-                if (record.get('libraryId') === 0) {
-                    samples.push(record.get('sampleId'));
+                if (record.get('record_type') === 'Library') {
+                    samples.push(record.get('pk'));
                 } else {
-                    libraries.push(record.get('libraryId'));
+                    libraries.push(record.get('pk'));
                 }
             }
         });
 
-        if (libraries.length > 0 || samples.length > 0) {
-            var form = Ext.create('Ext.form.Panel', {
-                standardSubmit: true
-            });
-
-            form.submit({
-                url: 'pooling/download_pooling_template/',
-                target: '_blank',
-                params: {
-                    samples: Ext.JSON.encode(samples),
-                    libraries: Ext.JSON.encode(libraries)
-                }
-            });
-        } else {
-            Ext.ux.ToastMessage('You did not select any libraries.', 'warning');
+        if (libraries.length === 0 && samples.length === 0) {
+            new Noty({ text: 'You did not select any libraries.', type: 'warning' }).show();
+            return;
         }
+
+        var form = Ext.create('Ext.form.Panel', {
+            standardSubmit: true
+        });
+
+        form.submit({
+            url: 'api/pooling/download_pooling_template/',
+            target: '_blank',
+            params: {
+                samples: Ext.JSON.encode(samples),
+                libraries: Ext.JSON.encode(libraries)
+            }
+        });
     },
 
     save: function() {

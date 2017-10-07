@@ -143,10 +143,6 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 text: '%',
                 tooltip: '% library in Pool',
                 dataIndex: 'percentage_library',
-                // renderer: function(value, meta) {
-                //     // return val + '%';
-                //     return ':)';
-                // },
                 width: 55
             },
             {
@@ -185,15 +181,15 @@ Ext.define('MainHub.view.pooling.Pooling', {
                     xtype: 'button',
                     itemId: 'download-benchtop-protocol-button',
                     text: 'Download Benchtop Protocol',
-                    iconCls: 'fa fa-file-excel-o fa-lg',
-                    disabled: true
+                    iconCls: 'fa fa-file-excel-o fa-lg'
+                    // disabled: true
                 },
                 {
                     xtype: 'button',
                     itemId: 'download-pooling-template-button',
                     text: 'Download Template QC Normalization and Pooling',
-                    iconCls: 'fa fa-file-excel-o fa-lg',
-                    disabled: true
+                    iconCls: 'fa fa-file-excel-o fa-lg'
+                    // disabled: true
                 },
                 '->',
                 {
