@@ -290,19 +290,36 @@ class LibraryTypeViewSet(MoveOtherMixin, viewsets.ReadOnlyModelViewSet):
 class LibrarySampleBaseViewSet(viewsets.ViewSet):
     pagination_class = StandardResultsSetPagination
 
-    # TODO: either add pagination or remove at all
+    # TODO: add pagination
     def list(self, request):
         """ Get the list of all libraries or samples. """
         data = []
-        requests_queryset = Request.objects.order_by('-create_time')
+
+        request_id = request.query_params.get('request_id', None)
+        ids = json.loads(request.query_params.get('ids', '[]'))
+
+        if request_id:
+            request_queryset = Request.objects.filter(pk=request_id)
+        else:
+            request_queryset = Request.objects.order_by('-create_time')
+
         if not request.user.is_staff:
-            requests_queryset = requests_queryset.filter(user=request.user)
-        for request_obj in requests_queryset:
+            request_queryset = request_queryset.filter(user=request.user)
+
+        for request_obj in request_queryset:
             # TODO: sort by item['barcode'][3:]
             records = getattr(request_obj, self.model_name_plural.lower())
-            serializer = self.serializer_class(
-                records.order_by('barcode'), many=True)
+            if ids:
+                try:
+                    records = records.filter(pk__in=ids)
+                except ValueError:
+                    return Response({
+                        'success': False,
+                        'message': 'Invalid payload.',
+                    }, 400)
+            serializer = self.serializer_class(records, many=True)
             data += serializer.data
+
         return Response(data)
 
     def create(self, request):
@@ -320,7 +337,7 @@ class LibrarySampleBaseViewSet(viewsets.ViewSet):
             objects = serializer.save()
             data = [{
                 'pk': obj.pk,
-                'record_type': self.model_name,
+                'record_type': obj.__class__.__name__,
                 'name': obj.name,
                 'barcode': obj.barcode,
             } for obj in objects]
@@ -337,7 +354,7 @@ class LibrarySampleBaseViewSet(viewsets.ViewSet):
 
                 data = [{
                     'pk': obj.pk,
-                    'record_type': self.model_name,
+                    'record_type': obj.__class__.__name__,
                     'name': obj.name,
                     'barcode': obj.barcode,
                 } for obj in objects]

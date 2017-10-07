@@ -119,11 +119,11 @@ class TestSamples(BaseTestCase):
     """ Tests for samples. """
 
     def setUp(self):
-        user = self._create_user('foo@bar.io', 'foo-foo')
+        self.user = self._create_user('foo@bar.io', 'foo-foo')
         self.client.login(email='foo@bar.io', password='foo-foo')
 
         self.sample = create_sample(self._get_random_name())
-        self.request = Request(user=user)
+        self.request = Request(user=self.user)
         self.request.save()
         self.request.samples.add(self.sample)
 
@@ -149,7 +149,7 @@ class TestSamples(BaseTestCase):
         self.assertFalse(data['success'])
         self.assertIn('Id is not provided.', data['message'])
 
-    def test_single_sample_incorrect_id(self):
+    def test_single_sample_invalid_id(self):
         """ Ensure error is thrown if the id does not exist. """
         response = self.client.get(reverse(
             'samples-detail',
@@ -159,6 +159,46 @@ class TestSamples(BaseTestCase):
         self.assertEqual(response.status_code, 404)
         self.assertFalse(data['success'])
         self.assertIn('Sample does not exist.', data['message'])
+
+    def test_multiple_samples(self):
+        """ Ensure get multiple samples behaves correctly. """
+        sample1 = create_sample(get_random_name())
+        sample2 = create_sample(get_random_name())
+        sample3 = create_sample(get_random_name())
+
+        request = Request(user=self.user)
+        request.save()
+        request.samples.add(*[sample1.pk, sample2.pk, sample3.pk])
+
+        response = self.client.get(reverse('samples-list'), {
+            'request_id': request.pk,
+            'ids': json.dumps([sample1.pk, sample2.pk])
+        })
+        data = response.json()
+        samples = [x['name'] for x in data]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(sample1.name, samples)
+        self.assertIn(sample2.name, samples)
+        self.assertNotIn(sample3.name, samples)
+
+    def test_multiple_sample_contains_invalid(self):
+        """
+        Ensure get multiple samples containing invalid ids behaves correctly.
+        """
+        sample = create_sample(get_random_name())
+
+        request = Request(user=self.user)
+        request.save()
+        request.samples.add(sample)
+
+        response = self.client.get(reverse('samples-list'), {
+            'request_id': request.pk,
+            'ids': json.dumps([sample.pk, 'blah'])
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(data['success'])
+        self.assertEqual(data['message'], 'Invalid payload.')
 
     def test_add_sample(self):
         """ Ensure add sample behaves correctly. """

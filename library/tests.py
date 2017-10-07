@@ -120,11 +120,11 @@ class TestLibraries(BaseTestCase):
     """ Tests for libraries. """
 
     def setUp(self):
-        user = self._create_user('foo@bar.io', 'foo-foo')
+        self.user = self._create_user('foo@bar.io', 'foo-foo')
         self.client.login(email='foo@bar.io', password='foo-foo')
 
         self.library = create_library(self._get_random_name())
-        self.request = Request(user=user)
+        self.request = Request(user=self.user)
         self.request.save()
         self.request.libraries.add(self.library)
 
@@ -160,6 +160,46 @@ class TestLibraries(BaseTestCase):
         self.assertEqual(response.status_code, 404)
         self.assertFalse(data['success'])
         self.assertIn('Library does not exist.', data['message'])
+
+    def test_multiple_libraries(self):
+        """ Ensure get multiple libraries behaves correctly. """
+        library1 = create_library(get_random_name())
+        library2 = create_library(get_random_name())
+        library3 = create_library(get_random_name())
+
+        request = Request(user=self.user)
+        request.save()
+        request.libraries.add(*[library1.pk, library2.pk, library3.pk])
+
+        response = self.client.get(reverse('libraries-list'), {
+            'request_id': request.pk,
+            'ids': json.dumps([library1.pk, library2.pk])
+        })
+        data = response.json()
+        libraries = [x['name'] for x in data]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(library1.name, libraries)
+        self.assertIn(library2.name, libraries)
+        self.assertNotIn(library3.name, libraries)
+
+    def test_multiple_libraries_contains_invalid(self):
+        """
+        Ensure get multiple libraries containing invalid ids behaves correctly.
+        """
+        library = create_library(get_random_name())
+
+        request = Request(user=self.user)
+        request.save()
+        request.libraries.add(library)
+
+        response = self.client.get(reverse('libraries-list'), {
+            'request_id': request.pk,
+            'ids': json.dumps([library.pk, 'blah'])
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(data['success'])
+        self.assertEqual(data['message'], 'Invalid payload.')
 
     def test_add_library(self):
         """ Ensure add library behaves correctly. """
