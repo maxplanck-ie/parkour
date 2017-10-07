@@ -11,14 +11,14 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 # from django.db.models import Q
 from rest_framework import viewsets
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import detail_route, permission_classes
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
+from rest_framework.permissions import IsAdminUser
 
 from common.views import (CsrfExemptSessionAuthentication,
                           StandardResultsSetPagination)
@@ -98,49 +98,6 @@ def get_files(request):
         logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error, 'data': data})
-
-
-@login_required
-@staff_member_required
-def send_email(request):
-    """ Send an email to the user. """
-    error = ''
-
-    request_id = request.POST.get('request_id', '')
-    subject = request.POST.get('subject', '')
-    message = request.POST.get('message', '')
-    include_failed_records = json.loads(request.POST.get(
-        'include_failed_records', 'false'))
-    records = []
-
-    try:
-        if subject == '' or message == '':
-            raise ValueError('Email subject and/or message is missing.')
-
-        req = Request.objects.get(pk=request_id)
-        if include_failed_records:
-            records = list(req.libraries.filter(status=-1)) + \
-                list(req.samples.filter(status=-1))
-            records = sorted(records, key=lambda x: x.barcode[3:])
-
-        send_mail(
-            subject=subject,
-            message='',
-            html_message=render_to_string('email.html', {
-                'full_name': req.user.get_full_name(),
-                'message': message,
-                'records': records,
-            }),
-            # from_email=settings.SERVER_EMAIL,
-            from_email='deepseq@ie-freiburg.mpg.de',
-            recipient_list=[req.user.email],
-        )
-
-    except Exception as e:
-        error = str(e)
-        logger.exception(e)
-
-    return JsonResponse({'success': not error, 'error': error})
 
 
 class RequestViewSet(viewsets.GenericViewSet):
@@ -357,3 +314,47 @@ class RequestViewSet(viewsets.GenericViewSet):
              'name': file_name,
              'path': file_path
         })
+
+    @detail_route(methods=['post'])
+    @handle_request_id_exceptions
+    @permission_classes((IsAdminUser))
+    def send_email(self, request, pk=None):
+        """ Send an email to the user. """
+        error = ''
+
+        req = Request.objects.get(pk=pk)
+        subject = request.data.get('subject', '')
+        message = request.data.get('message', '')
+        include_failed_records = json.loads(request.POST.get(
+            'include_failed_records', 'false'))
+        records = []
+
+        # TODO: check if it's possible to send emails at all
+
+        try:
+            if subject == '' or message == '':
+                raise ValueError('Email subject and/or message is missing.')
+
+            if include_failed_records:
+                records = list(req.libraries.filter(status=-1)) + \
+                    list(req.samples.filter(status=-1))
+                records = sorted(records, key=lambda x: x.barcode[3:])
+
+            send_mail(
+                subject=subject,
+                message='',
+                html_message=render_to_string('email.html', {
+                    'full_name': req.user.get_full_name(),
+                    'message': message,
+                    'records': records,
+                }),
+                # from_email=settings.SERVER_EMAIL,
+                from_email='deepseq@ie-freiburg.mpg.de',
+                recipient_list=[req.user.email],
+            )
+
+        except Exception as e:
+            error = str(e)
+            logger.exception(e)
+
+        return JsonResponse({'success': not error, 'error': error})
