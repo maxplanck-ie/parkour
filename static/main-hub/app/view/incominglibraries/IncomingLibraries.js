@@ -60,18 +60,25 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
         },
         store: 'incomingLibrariesStore',
         sortableColumns: false,
+        enableColumnMove: false,
+
         columns: {
             items: [
                 {
                     xtype: 'checkcolumn',
                     itemId: 'checkColumn',
                     dataIndex: 'selected',
+                    resizable: false,
+                    menuDisabled: true,
+                    hideable: false,
                     tdCls: 'no-dirty userEntry',
                     width: 40
                 },
                 {
                     text: 'Name',
                     dataIndex: 'name',
+                    menuDisabled: true,
+                    hideable: false,
                     minWidth: 150,
                     flex: 1,
                     tdCls: 'userEntry',
@@ -83,6 +90,9 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                 {
                     text: '',
                     dataIndex: 'record_type',
+                    resizable: false,
+                    menuDisabled: true,
+                    hideable: false,
                     tdCls: 'userEntry',
                     width: 30,
                     renderer: function(value, meta) {
@@ -92,6 +102,9 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                 {
                     text: 'Barcode',
                     dataIndex: 'barcode',
+                    resizable: false,
+                    menuDisabled: true,
+                    hideable: false,
                     tdCls: 'userEntry',
                     width: 90
                 },
@@ -287,6 +300,9 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                 {
                     text: 'QC Result',
                     dataIndex: 'quality_check',
+                    resizable: false,
+                    menuDisabled: true,
+                    hideable: false,
                     tdCls: 'facilityEntry',
                     width: 90,
                     editor: {

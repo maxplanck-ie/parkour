@@ -18,6 +18,9 @@ Ext.define('MainHub.view.flowcell.PoolInfoWindow', {
             loadMask: false
         },
         sortableColumns: false,
+        enableColumnMove: false,
+        enableColumnResize: false,
+        enableColumnHide: false,
         store: 'poolInfoStore',
         columns: [{
                 text: 'Request',

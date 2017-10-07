@@ -46,11 +46,15 @@ Ext.define('MainHub.view.pooling.Pooling', {
         },
         store: 'poolingStore',
         sortableColumns: false,
+        enableColumnMove: false,
         columns: [
             {
                 xtype: 'checkcolumn',
                 itemId: 'check-column',
                 dataIndex: 'selected',
+                resizable: false,
+                menuDisabled: true,
+                hideable: false,
                 tdCls: 'no-dirty',
                 width: 40
             },
@@ -58,6 +62,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 text: 'Request',
                 tooltip: 'Request ID',
                 dataIndex: 'request_name',
+                menuDisabled: true,
+                hideable: false,
                 minWidth: 200,
                 flex: 1
             },
@@ -65,12 +71,17 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 text: 'Name',
                 tooltip: 'Library Name',
                 dataIndex: 'name',
+                menuDisabled: true,
+                hideable: false,
                 minWidth: 200,
                 flex: 1
             },
             {
                 text: 'Barcode',
                 dataIndex: 'barcode',
+                resizable: false,
+                menuDisabled: true,
+                hideable: false,
                 width: 95,
                 renderer: function(value) {
                     var record = Ext.getStore('poolingStore').findRecord('barcode', value);
@@ -141,6 +152,9 @@ Ext.define('MainHub.view.pooling.Pooling', {
             {
                 text: 'QC Result',
                 dataIndex: 'quality_check',
+                resizable: false,
+                menuDisabled: true,
+                hideable: false,
                 width: 90,
                 editor: {
                     xtype: 'combobox',

@@ -69,10 +69,14 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                     viewConfig: {
                         markDirty: false
                     },
+                    enableColumnMove: false,
+                    enableColumnResize: false,
+                    enableColumnHide: false,
                     store: 'lanesStore',
                     columns: [{
                         text: 'Pool',
                         dataIndex: 'poolName',
+                        sortable: false,
                         flex: 1
                     }, {
                         text: 'Lane',
@@ -102,6 +106,9 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                 },
                 store: 'poolsStore',
                 sortableColumns: false,
+                enableColumnMove: false,
+                enableColumnResize: false,
+                enableColumnHide: false,
                 columns: [{
                     text: 'Pool',
                     dataIndex: 'name',

@@ -20,6 +20,7 @@ Ext.define('MainHub.view.libraries.Libraries', {
         region: 'center',
         padding: 15,
         sortableColumns: false,
+        enableColumnMove: false,
 
         rowLines: true,
         viewConfig: {
@@ -81,7 +82,10 @@ Ext.define('MainHub.view.libraries.Libraries', {
                     xtype: 'treecolumn',
                     text: 'Name',
                     dataIndex: 'name',
+                    menuDisabled: true,
+                    hideable: false,
                     minWidth: 250,
+
                     flex: 1,
                     renderer: function(value, meta) {
                         if (meta.record.get('leaf')) {
@@ -93,6 +97,9 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 {
                     text: 'Status',
                     dataIndex: 'status',
+                    resizable: false,
+                    menuDisabled: true,
+                    hideable: false,
                     width: 60,
                     renderer: function(value, meta) {
                         if (meta.record.get('leaf')) {
@@ -134,6 +141,9 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 {
                     text: '',
                     dataIndex: 'record_type',
+                    resizable: false,
+                    menuDisabled: true,
+                    hideable: false,
                     width: 30,
                     renderer: function(value, meta) {
                         return meta.record.getRecordType().charAt(0);
@@ -142,6 +152,9 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 {
                     text: 'Barcode',
                     dataIndex: 'barcode',
+                    resizable: false,
+                    menuDisabled: true,
+                    hideable: false,
                     width: 95,
                     renderer: function(value, meta) {
                         return meta.record.getBarcode();

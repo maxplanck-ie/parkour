@@ -36,19 +36,27 @@ Ext.define('MainHub.view.flowcell.LoadFlowcells', {
         },
         store: 'flowcellsStore',
         sortableColumns: false,
+        enableColumnMove: false,
         columns: [{
             xtype: 'checkcolumn',
             itemId: 'checkColumn',
             dataIndex: 'selected',
+            resizable: false,
+            menuDisabled: true,
+            hideable: false,
             tdCls: 'no-dirty',
             width: 40
         }, {
             text: 'Lane',
             dataIndex: 'laneName',
+            menuDisabled: true,
+            hideable: false,
             flex: 1
         }, {
             text: 'Pool',
             dataIndex: 'poolName',
+            menuDisabled: true,
+            hideable: false,
             flex: 1
         }, {
             text: 'Length',
@@ -94,6 +102,9 @@ Ext.define('MainHub.view.flowcell.LoadFlowcells', {
         }, {
             text: 'QC Result',
             dataIndex: 'qc_result',
+            resizable: false,
+            menuDisabled: true,
+            hideable: false,
             editor: {
                 xtype: 'combobox',
                 queryMode: 'local',

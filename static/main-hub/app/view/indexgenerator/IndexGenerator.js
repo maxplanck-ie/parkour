@@ -49,10 +49,14 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                 store: 'indexGeneratorStore',
                 rootVisible: false,
                 sortableColumns: false,
+                enableColumnMove: false,
+                enableColumnHide: false,
+
                 columns: [{
                         xtype: 'checkcolumn',
                         itemId: 'checkColumn',
                         dataIndex: 'selected',
+                        resizable: false,
                         tdCls: 'no-dirty',
                         width: 40
                     },
@@ -65,11 +69,13 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                     {
                         text: 'Barcode',
                         dataIndex: 'barcode',
+                        resizable: false,
                         width: 90
                     },
                     {
                         text: '',
                         dataIndex: 'recordType',
+                        resizable: false,
                         width: 35
                     },
                     {
@@ -178,6 +184,9 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                 },
                 problematicCycles: [],
                 sortableColumns: false,
+                enableColumnMove: false,
+                enableColumnResize: false,
+                enableColumnHide: false,
                 columns: [{
                         text: 'Name',
                         dataIndex: 'name',
