@@ -14,6 +14,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
     modal: true,
     resizable: false,
     maximizable: true,
+    autoShow: true,
     layout: 'fit',
 
     items: [{
@@ -40,16 +41,13 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                         width: 100,
                         height: 40
                     },
-                    items: [
-                        {
-                            itemId: 'library-card-button',
-                            text: 'Library'
-                        },
-                        {
-                            itemId: 'sample-card-button',
-                            text: 'Sample'
-                        }
-                    ]
+                    items: [{
+                        itemId: 'library-card-button',
+                        text: 'Library'
+                    }, {
+                        itemId: 'sample-card-button',
+                        text: 'Sample'
+                    }]
                 },
                 {
                     html: '<p style="text-align:center">' +
@@ -70,10 +68,13 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
             id: 'batch-add-grid',
             itemId: 'batch-add-grid',
             sortableColumns: false,
-            multiSelect: true,
+            enableColumnMove: false,
+            enableColumnHide: false,
+            // multiSelect: true,
             border: 0,
             viewConfig: {
                 markDirty: false,
+                stripeRows: false,
                 getRowClass: function(record) {
                     return (record.get('invalid')) ? 'invalid' : '';
                 }
@@ -100,8 +101,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
                 labelWidth: 145,
                 width: 230,
                 minValue: 0
-            },
-            {
+            }, {
                 xtype: 'button',
                 itemId: 'create-empty-records-button',
                 text: 'Create'
@@ -112,13 +112,13 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
             dock: 'bottom',
             items: [
                 '->',
-                {
-                    xtype: 'button',
-                    itemId: 'cancel-button',
-                    iconCls: 'fa fa-floppy-o fa-lg',
-                    text: 'Cancel',
-                    hidden: true
-                },
+                // {
+                //     xtype: 'button',
+                //     itemId: 'cancel-button',
+                //     iconCls: 'fa fa-ban fa-lg',
+                //     text: 'Cancel',
+                //     hidden: true
+                // },
                 {
                     xtype: 'button',
                     itemId: 'save-button',

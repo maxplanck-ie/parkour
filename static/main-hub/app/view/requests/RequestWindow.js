@@ -134,16 +134,6 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                     }]
                 },
                 store: 'librariesInRequestStore',
-                // bbar: [{
-                //     itemId: 'batch-add-button',
-                //     text: 'Batch Add'
-                // },
-                // '->',
-                // {
-                //     itemId: 'add-library-button',
-                //     text: 'Add',
-                //     disabled: true
-                // }]
                 bbar: [
                     '->',
                     {

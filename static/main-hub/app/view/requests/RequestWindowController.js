@@ -15,7 +15,8 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                 headercontextmenu: 'showHeaderMenu'
             },
             '#check-column': {
-                beforecheckchange: 'selectItem'
+                beforecheckchange: 'selectItem',
+                unselectall: 'unselectAll'
             },
             '#download-request-blank-button': {
                 click: 'generatePDF'
@@ -26,9 +27,6 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
             '#save-button': {
                 click: 'save'
             },
-            // '#add-library-button': {
-            //     click: 'addLibrary'
-            // },
             '#batch-add-button': {
                 click: 'showBatchAddWindow'
             }
@@ -111,6 +109,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
 
     showContextMenu: function(grid, record, itemEl, index, e) {
         var me = this;
+        var recordId = grid.up('window').record.get('pk');
         var selectedItems = this.getSelectedItems();
         var menuItems;
 
@@ -123,7 +122,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                     text: Ext.String.format('Edit "{0}"', selectedItemName),
                     iconCls: 'x-fa fa-pencil',
                     handler: function() {
-                        me.editRecords([selectedItem]);
+                        me.editRecords(recordId, [selectedItem]);
                     }
                 },
                 {
@@ -149,7 +148,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
                 text: Ext.String.format('Edit {0} Items', selectedItems.length),
                 iconCls: 'x-fa fa-pencil',
                 handler: function() {
-                    me.editRecords(selectedItems);
+                    me.editRecords(recordId, selectedItems);
                 }
             }];
         }
@@ -218,8 +217,44 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
         });
     },
 
-    editRecords: function(records) {
-        // debugger;
+    editRecords: function(requestId, records) {
+        var type = records[0].record_type === 'Library' ? 'libraries' : 'samples';
+        var ids = Ext.Array.pluck(records, 'pk');
+        var url = Ext.String.format('api/{0}/', type);
+
+        Ext.Ajax.request({
+            url: url,
+            method: 'GET',
+            scope: this,
+            params: {
+                request_id: requestId,
+                ids: Ext.JSON.encode(ids)
+            },
+
+            success: function(response) {
+                var obj = Ext.JSON.decode(response.responseText);
+
+                if (obj.success) {
+                    if (obj.data.length === 0) {
+                        new Noty({ text: 'No data.', type: 'warning' }).show();
+                        return;
+                    }
+
+                    Ext.create('MainHub.view.libraries.BatchAddWindow', {
+                        mode: 'edit',
+                        type: records[0].record_type,
+                        records: obj.data
+                    });
+                } else {
+                    new Noty({ text: obj.message, type: 'error' }).show();
+                }
+            },
+
+            failure: function(response) {
+                new Noty({ text: response.statusText, type: 'error' }).show();
+                console.error(response);
+            }
+        });
     },
 
     deleteRecord: function(record) {
@@ -397,13 +432,6 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
         });
     },
 
-    // addLibrary: function(btn) {
-    //     Ext.create('MainHub.view.libraries.LibraryWindow', {
-    //         title: 'Add Library/Sample',
-    //         mode: 'add'
-    //     }).show();
-    // },
-
     initializeTooltips: function() {
         $.each($('.request-field-tooltip'), function(idx, item) {
             Ext.create('Ext.tip.ToolTip', {
@@ -417,7 +445,9 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
     },
 
     showBatchAddWindow: function() {
-        Ext.create('MainHub.view.libraries.BatchAddWindow').show();
+        Ext.create('MainHub.view.libraries.BatchAddWindow', {
+            mode: 'add'
+        });
     },
 
     disableButtonsAndMenus: function() {

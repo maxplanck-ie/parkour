@@ -21,5 +21,7 @@ Ext.define('MainHub.store.libraries.LibraryProtocols', {
             rootProperty: 'data',
             successProperty: 'success'
         }
-    }
+    },
+
+    autoLoad: true
 });

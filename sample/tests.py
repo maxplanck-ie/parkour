@@ -175,8 +175,9 @@ class TestSamples(BaseTestCase):
             'ids': json.dumps([sample1.pk, sample2.pk])
         })
         data = response.json()
-        samples = [x['name'] for x in data]
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['success'])
+        samples = [x['name'] for x in data['data']]
         self.assertIn(sample1.name, samples)
         self.assertIn(sample2.name, samples)
         self.assertNotIn(sample3.name, samples)

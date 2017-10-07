@@ -23,11 +23,11 @@ Ext.define('MainHub.model.libraries.LibraryProtocol', {
     },
     {
         type: 'string',
-        name: 'inputRequirements'
+        name: 'input_requirements'
     },
     {
         type: 'string',
-        name: 'typicalApplication'
+        name: 'typical_application'
     },
     {
         type: 'string',

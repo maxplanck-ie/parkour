@@ -176,8 +176,9 @@ class TestLibraries(BaseTestCase):
             'ids': json.dumps([library1.pk, library2.pk])
         })
         data = response.json()
-        libraries = [x['name'] for x in data]
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['success'])
+        libraries = [x['name'] for x in data['data']]
         self.assertIn(library1.name, libraries)
         self.assertIn(library2.name, libraries)
         self.assertNotIn(library3.name, libraries)

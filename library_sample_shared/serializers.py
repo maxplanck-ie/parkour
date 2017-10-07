@@ -75,16 +75,13 @@ class LibraryProtocolSerializer(ModelSerializer):
 
 
 class LibraryTypeSerializer(ModelSerializer):
-    # library_protocol = SerializerMethodField()
-    protocol = SerializerMethodField()
+    library_protocol = SerializerMethodField()
 
     class Meta:
         model = LibraryType
-        # fields = ('id', 'name', 'library_protocol')
-        fields = ('id', 'name', 'protocol')
+        fields = ('id', 'name', 'library_protocol')
 
-    # def get_library_protocol(self, obj):
-    def get_protocol(self, obj):
+    def get_library_protocol(self, obj):
         return LibraryType.objects.filter(pk=obj.pk).values_list(
             'library_protocol__id', flat=True)
 

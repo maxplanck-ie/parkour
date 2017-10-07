@@ -28,80 +28,79 @@ Ext.define('validator.GreaterThanZero', {
 Ext.define('MainHub.model.libraries.BatchAdd.Common', {
     extend: 'Ext.data.Model',
 
-    fields: [{
-        type: 'string',
-        name: 'name'
-    },
-    {
-        type: 'int',
-        name: 'library_protocol',
-        allowNull: true,
-        defaultValue: null
-    },
-    {
-        type: 'int',
-        name: 'library_type',
-        allowNull: true,
-        defaultValue: null
-    },
-    {
-        type: 'int',
-        name: 'sequencing_depth'
-    },
-    {
-        type: 'float',
-        name: 'concentration'
-    },
-    {
-        type: 'int',
-        name: 'concentration_method',
-        allowNull: true,
-        defaultValue: null
-    },
-    {
-        type: 'int',
-        name: 'amplification_cycles'
-    },
-    {
-        type: 'bool',
-        name: 'equal_representation_nucleotides'
-    },
-    {
-        type: 'int',
-        name: 'read_length',
-        allowNull: true,
-        defaultValue: null
-    },
-    {
-        type: 'int',
-        name: 'organism',
-        allowNull: true,
-        defaultValue: null
-    },
-    {
-        type: 'string',
-        name: 'comments'
-    },
-    {
-        type: 'bool',
-        name: 'invalid',
-        defaultValue: false
-    },
-    {
-        type: 'auto',
-        name: 'errors',
-        defaultValue: {}
-    }
+    fields: [
+        {
+            type: 'string',
+            name: 'name'
+        },
+        {
+            type: 'int',
+            name: 'library_protocol',
+            allowNull: true,
+            defaultValue: null
+        },
+        {
+            type: 'int',
+            name: 'library_type',
+            allowNull: true,
+            defaultValue: null
+        },
+        {
+            type: 'int',
+            name: 'sequencing_depth'
+        },
+        {
+            type: 'float',
+            name: 'concentration'
+        },
+        {
+            type: 'int',
+            name: 'concentration_method',
+            allowNull: true,
+            defaultValue: null
+        },
+        {
+            type: 'int',
+            name: 'amplification_cycles'
+        },
+        {
+            type: 'bool',
+            name: 'equal_representation_nucleotides'
+        },
+        {
+            type: 'int',
+            name: 'read_length',
+            allowNull: true,
+            defaultValue: null
+        },
+        {
+            type: 'int',
+            name: 'organism',
+            allowNull: true,
+            defaultValue: null
+        },
+        {
+            type: 'string',
+            name: 'comments'
+        },
+        {
+            type: 'bool',
+            name: 'invalid',
+            defaultValue: false
+        },
+        {
+            type: 'auto',
+            name: 'errors',
+            defaultValue: {}
+        }
     ],
 
     validators: {
         name: [{
             type: 'presence'
-        },
-        {
+        },{
             type: 'unique'
-        }
-        ],
+        }],
         library_protocol: 'presence',
         library_type: 'presence',
         concentration: 'presence',

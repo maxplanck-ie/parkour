@@ -15,7 +15,7 @@ Ext.define('MainHub.model.libraries.Index', {
             type: 'string'
         },
         {
-            name: 'indexId',
+            name: 'index_id',
             type: 'string'
         }
     ]

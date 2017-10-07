@@ -4,6 +4,9 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
 
     config: {
         control: {
+            '#': {
+                boxready: 'boxready'
+            },
             '#library-card-button': {
                 click: 'selectCard'
             },
@@ -39,6 +42,20 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             '#save-button': {
                 click: 'save'
             }
+
+            // '#cancel-button': {
+            //     click: 'cancel'
+            // }
+        }
+    },
+
+    boxready: function(wnd) {
+        if (wnd.mode === 'edit') {
+            if (wnd.type === 'Library') {
+                wnd.down('#library-card-button').click();
+            } else {
+                wnd.down('#sample-card-button').click();
+            }
         }
     },
 
@@ -50,18 +67,27 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
 
         wnd.setSize(1000, 650);
         wnd.center();
-        wnd.getDockedItems('toolbar[dock="top"]')[0].show();
         wnd.getDockedItems('toolbar[dock="bottom"]')[0].show();
+        if (wnd.mode === 'add') {
+            wnd.getDockedItems('toolbar[dock="top"]')[0].show();
+        } else {
+            // wnd.down('#cancel-button').show();
+        }
         layout.setActiveItem(1);
 
         if (btn.itemId === 'library-card-button') {
             wnd.recordType = 'Library';
             wnd.setTitle('Add Libraries');
-            configuration = this.getLibraryGridConfiguration();
+            configuration = this.getLibraryGridConfiguration(wnd.mode);
         } else {
             wnd.recordType = 'Sample';
             wnd.setTitle('Add Samples');
-            configuration = this.getSampleGridConfiguration();
+            configuration = this.getSampleGridConfiguration(wnd.mode);
+        }
+
+        // Add selected records for editing to the store
+        if (wnd.mode === 'edit') {
+            configuration[0].add(wnd.records);
         }
 
         wnd.maximize();  // auto fullscreen
@@ -70,8 +96,8 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         grid.reconfigure(configuration[0], configuration[1]);
 
         // Load stores
-        Ext.getStore('libraryProtocolsStore').reload();
-        Ext.getStore('libraryTypesStore').reload();
+        // Ext.getStore('libraryProtocolsStore').reload();
+        // Ext.getStore('libraryTypesStore').reload();
 
         // Add empty records on enter
         var numEmptyRecords = wnd.down('#num-empty-records');
@@ -445,17 +471,17 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
 
         store.clearFilter();
         store.filterBy(function(item) {
-            return item.get('protocol').indexOf(libraryProtocolId) !== -1;
+            return item.get('library_protocol').indexOf(libraryProtocolId) !== -1;
         });
     },
 
-    getLibraryGridConfiguration: function() {
+    getLibraryGridConfiguration: function(mode) {
         var store = Ext.create('Ext.data.Store', {
             model: 'MainHub.model.libraries.BatchAdd.Library',
             data: []
         });
 
-        var columns = Ext.Object.merge(this.getCommonColumns(), [{
+        var columns = Ext.Array.merge(this.getCommonColumns(mode), [{
             text: 'size (bp)',
             dataIndex: 'mean_fragment_size',
             tooltip: 'Mean Fragment Size',
@@ -515,7 +541,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                     meta.tdAttr = 'data-qtip="' + record.get('errors')[dataIndex] + '"';
                 }
 
-                return item ? item.get('num') : '';
+                return item ? item.get('num') : value;
             }
         },
         {
@@ -580,26 +606,25 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         ]);
 
         // Sort columns
-        var order = ['numberer', 'name',
-            'library_protocol', 'library_type', 'concentration',
-            'mean_fragment_size', 'index_type', 'index_reads',
-            'index_i7', 'index_i5', 'read_length', 'sequencing_depth',
-            'amplification_cycles', 'equal_representation_nucleotides',
-            'qpcr_result', 'sample_volume', 'concentration_method',
-            'organism', 'comments'
+        var order = ['numberer', 'name', 'barcode', 'library_protocol',
+            'library_type', 'concentration', 'mean_fragment_size',
+            'index_type', 'index_reads', 'index_i7', 'index_i5', 'read_length',
+            'sequencing_depth', 'amplification_cycles',
+            'equal_representation_nucleotides', 'qpcr_result',
+            'sample_volume', 'concentration_method', 'organism', 'comments'
         ];
         columns = this.sortColumns(columns, order);
 
         return [store, columns];
     },
 
-    getSampleGridConfiguration: function() {
+    getSampleGridConfiguration: function(mode) {
         var store = Ext.create('Ext.data.Store', {
             model: 'MainHub.model.libraries.BatchAdd.Sample',
             data: []
         });
 
-        var columns = $.merge(this.getCommonColumns(), [{
+        var columns = Ext.Array.merge(this.getCommonColumns(mode), [{
             text: 'Nuc. Type',
             dataIndex: 'nucleic_acid_type',
             tooltip: 'Nucleic Acid Type',
@@ -638,7 +663,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         ]);
 
         // Sort columns
-        var order = ['numberer', 'name', 'nucleic_acid_type',
+        var order = ['numberer', 'name', 'barcode', 'nucleic_acid_type',
             'library_protocol', 'library_type', 'concentration', 'rna_quality',
             'read_length', 'sequencing_depth', 'amplification_cycles',
             'equal_representation_nucleotides', 'sample_volume',
@@ -661,8 +686,8 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         });
     },
 
-    getCommonColumns: function() {
-        return [
+    getCommonColumns: function(mode) {
+        var columns = [
             {
                 xtype: 'rownumberer',
                 dataIndex: 'numberer',
@@ -834,13 +859,27 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                     allowBlank: true
                 }
             }
-        ]
+        ];
+
+        if (mode === 'edit') {
+            columns.push({
+                text: 'Barcode',
+                dataIndex: 'barcode',
+                width: 95
+            });
+        }
+
+        return columns;
     },
 
     save: function(btn) {
         var wnd = btn.up('window');
         var store = Ext.getCmp('batch-add-grid').getStore();
         var url = (wnd.recordType === 'Library') ? 'api/libraries/' : 'api/samples/';
+
+        if (wnd.mode === 'edit') {
+            url += 'edit/';
+        }
 
         if (store.getCount() === 0) {
             return;
@@ -857,13 +896,13 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             return;
         }
 
+        wnd.setLoading('Saving...');
         Ext.Ajax.request({
             url: url,
             method: 'POST',
             // timeout: 1000000,
             scope: this,
             params: {
-                mode: 'add',
                 data: Ext.JSON.encode(Ext.Array.pluck(store.data.items, 'data'))
             },
 
@@ -871,25 +910,30 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
                 var obj = Ext.JSON.decode(response.responseText);
 
                 if (obj.success) {
-                    Ext.getCmp('libraries-in-request-grid').getStore().add(obj.data);
+                    var librariesInRequestGrid = Ext.getCmp('libraries-in-request-grid');
+                    if (wnd.mode === 'add') {
+                        librariesInRequestGrid.getStore().add(obj.data);
 
-                    for (var i = 0; i < obj.data.length; i++) {
-                        var record = store.findRecord('name', obj.data[i].name);
-                        store.remove(record);
+                        for (var i = 0; i < obj.data.length; i++) {
+                            var record = store.findRecord('name', obj.data[i].name);
+                            store.remove(record);
+                        }
+
+                        new Noty({ text: 'Records have been added!' }).show();
+                    } else {
+                        librariesInRequestGrid.down('#check-column').fireEvent('unselectall');
+                        new Noty({ text: 'The changes have been saved!' }).show();
                     }
-
-                    new Noty({ text: 'Records have been added!' }).show();
-
                     wnd.close()
                 } else {
                     new Noty({ text: obj.message, type: 'error' }).show();
                 }
 
-                // wnd.setLoading(false);
+                wnd.setLoading(false);
             },
 
             failure: function(response) {
-                // wnd.setLoading(false);
+                wnd.setLoading(false);
                 new Noty({ text: response.statusText, type: 'error' }).show();
                 console.error(response);
             }
@@ -950,7 +994,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
             var store = meta.column.getEditor().getStore();
             var index = store.findRecord('index', value);
             if (index) {
-                value = index.get('indexId') + ' - ' + value;
+                value = index.get('name');
             }
         }
 
