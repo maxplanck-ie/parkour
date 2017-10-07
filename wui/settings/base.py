@@ -39,6 +39,7 @@ INSTALLED_APPS = [
 
     'authtools',
     'rest_framework',
+    'django_admin_listfilter_dropdown',
 
     'common',
     'library_sample_shared',

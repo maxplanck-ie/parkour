@@ -6,6 +6,7 @@ from django.contrib.auth.forms import PasswordResetForm
 from django.utils.crypto import get_random_string
 from authtools.admin import NamedUserAdmin
 from authtools.forms import UserCreationForm
+from django_admin_listfilter_dropdown.filters import RelatedDropdownFilter
 
 from common.models import PrincipalInvestigator, Organization, CostUnit
 
@@ -28,7 +29,7 @@ class OrganizationAdmin(admin.ModelAdmin):
 class CostUnitAdmin(admin.ModelAdmin):
     list_display = ('name', 'pi',)
     search_fields = ('name', 'pi__name', 'pi__organization__name',)
-    list_filter = ('pi__organization__name', 'pi__name',)
+    list_filter = ('pi__organization__name', ('pi', RelatedDropdownFilter),)
 
 
 class UserCreationForm(UserCreationForm):
@@ -71,26 +72,13 @@ class UserAdmin(NamedUserAdmin):
         }),
     )
 
-    list_display = (
-        'first_name',
-        'last_name',
-        'email',
-        'phone',
-        'organization',
-        'pi',
-        'is_staff',
-    )
+    list_display = ('first_name', 'last_name', 'email', 'phone',
+                    'organization', 'pi', 'cost_units', 'is_staff',)
 
-    search_fields = (
-        'first_name',
-        'last_name',
-        'email',
-        'phone',
-        'organization__name',
-        'pi__name',
-    )
+    search_fields = ('first_name', 'last_name', 'email', 'phone',
+                     'organization__name', 'pi__name', 'cost_unit__name',)
 
-    list_filter = ('is_staff', 'organization',)
+    list_filter = ('is_staff', 'organization', ('pi', RelatedDropdownFilter),)
     list_display_links = ('first_name', 'last_name', 'email',)
     filter_horizontal = ('cost_unit', 'groups', 'user_permissions',)
 
@@ -102,18 +90,17 @@ class UserAdmin(NamedUserAdmin):
             'fields': ('phone', 'organization', 'pi', 'cost_unit',),
         }),
         ('Permissions', {
-            'fields': (
-                'is_active',
-                'is_staff',
-                'is_superuser',
-                'groups',
-                'user_permissions',
-            ),
+            'fields': ('is_active', 'is_staff', 'is_superuser', 'groups',
+                       'user_permissions',),
         }),
         ('Other', {
             'fields': ('last_login',),
         }),
     )
+
+    def cost_units(self, obj):
+        cost_units = obj.cost_unit.all().values_list('name', flat=True)
+        return ', '.join(sorted(cost_units))
 
     def save_model(self, request, obj, form, change):
         if not change and (not form.cleaned_data['password1'] or not
