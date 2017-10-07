@@ -118,7 +118,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
 
         if (store.getModifiedRecords().length === 0) {
             new Noty({
-                text: 'You did not select any records.',
+                text: 'You did not select any samples.',
                 type: 'warning'
             }).show();
             return;
@@ -141,7 +141,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
 
         if (ids.length === 0) {
             new Noty({
-                text: 'You did not select any records.',
+                text: 'You did not select any samples.',
                 type: 'warning'
             }).show();
             return;
@@ -152,7 +152,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
         });
 
         form.submit({
-            url: 'library_preparation/download_benchtop_protocol/',
+            url: 'api/library_preparation/download_benchtop_protocol/',
             target: '_blank',
             params: {
                 'ids': Ext.JSON.encode(ids)

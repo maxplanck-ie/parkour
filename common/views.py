@@ -73,7 +73,6 @@ def get_navigation_tree(request):
 
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
-
     def enforce_csrf(self, request):
         return  # To not perform the csrf check previously happening
 

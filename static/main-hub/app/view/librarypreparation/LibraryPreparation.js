@@ -288,8 +288,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     xtype: 'button',
                     itemId: 'download-benchtop-protocol-button',
                     text: 'Download Benchtop Protocol',
-                    iconCls: 'fa fa-file-excel-o fa-lg',
-                    disabled: true  // TODO: fix XSL generation
+                    iconCls: 'fa fa-file-excel-o fa-lg'
                 },
                 '->',
                 {

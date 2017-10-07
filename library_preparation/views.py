@@ -2,18 +2,18 @@ import logging
 import json
 
 from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from django.core.exceptions import ValidationError
 from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import list_route
+# from rest_framework.decorators import authentication_classes
 from rest_framework.permissions import IsAdminUser
 
 from xlwt import Workbook, XFStyle, Formula
 
+from common.views import CsrfExemptSessionAuthentication
 from library_sample_shared.utils import get_indices_ids
 from sample.models import Sample
 from pooling.models import Pooling
@@ -88,6 +88,7 @@ def update(request):
 
 class LibraryPreparationViewSet(viewsets.ViewSet):
     permission_classes = [IsAdminUser]
+    authentication_classes = [CsrfExemptSessionAuthentication]
 
     def list(self, request):
         """ Get the list of all library preparation objects. """
@@ -155,38 +156,38 @@ class LibraryPreparationViewSet(viewsets.ViewSet):
         serializer.is_valid()
         serializer.save()
 
+    @list_route(methods=['post'])
+    # @authentication_classes((CsrfExemptSessionAuthentication))
+    def download_benchtop_protocol(self, request):
+        """ Generate Benchtop Protocol as XLS file for selected samples. """
+        response = HttpResponse(content_type='application/ms-excel')
+        ids = json.loads(request.data.get('ids', '[]'))
+        objects = LibraryPreparation.objects.filter(pk__in=ids).order_by(
+            'sample__barcode',
+        )
 
-@csrf_exempt
-@login_required
-@staff_member_required
-def download_benchtop_protocol(request):
-    """ Generate Benchtop Protocol as XLS file for selected samples. """
-    response = HttpResponse(content_type='application/ms-excel')
-    samples = json.loads(request.POST.get('samples', '[]'))
+        f_name = 'Library_Preparation_Benchtop_Protocol.xls'
+        response['Content-Disposition'] = 'attachment; filename="%s"' % f_name
 
-    filename = 'Library_Preparation_Benchtop_Protocol.xls'
-    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+        wb = Workbook(encoding='utf-8')
+        ws = wb.add_sheet('Benchtop Protocol')
+        col_letters = {
+            0: 'A',   # Request ID
+            1: 'B',   # Pool ID
+            2: 'C',   # Sample
+            3: 'D',   # Barcode
+            4: 'E',   # Protocol
+            5: 'F',   # Concentration Sample
+            6: 'G',   # Starting Amount
+            7: 'H',   # Starting Volume
+            8: 'I',   # Spike-in Description
+            9: 'J',   # Spike-in Volume
+            10: 'K',  # µl Sample
+            11: 'L',  # µl Buffer
+            12: 'M',  # Index I7 ID
+            13: 'N',  # Index I5 ID
+        }
 
-    wb = Workbook(encoding='utf-8')
-    ws = wb.add_sheet('Benchtop Protocol')
-    col_letters = {
-        0: 'A',   # Request ID
-        1: 'B',   # Pool ID
-        2: 'C',   # Sample
-        3: 'D',   # Barcode
-        4: 'E',   # Protocol
-        5: 'F',   # Concentration Sample
-        6: 'G',   # Starting Amount
-        7: 'H',   # Starting Volume
-        8: 'I',   # Spike-in Description
-        9: 'J',   # Spike-in Volume
-        10: 'K',  # µl Sample
-        11: 'L',  # µl Buffer
-        12: 'M',  # Index I7 ID
-        13: 'N',  # Index I5 ID
-    }
-
-    try:
         header = ['Request ID', 'Pool ID', 'Sample', 'Barcode', 'Protocol',
                   'Concentration Sample (ng/µl)', 'Starting Amount (ng)',
                   'Starting Volume (µl)', 'Spike-in Description',
@@ -204,17 +205,26 @@ def download_benchtop_protocol(request):
         font_style = XFStyle()
         font_style.alignment.wrap = 1
 
-        for sample_id in samples:
-            obj = LibraryPreparation.objects.get(sample_id=sample_id)
-            req = obj.sample.request.get()
-            pool = obj.sample.pool.get()
-            index_i7_id, index_i5_id = get_indices_ids(obj.sample)
+        for lib_prep_obj in objects:
+            sample = lib_prep_obj.sample
+            req = sample.request.get()
+            pool = sample.pool.get()
+            index_i7_id, index_i5_id = get_indices_ids(sample)
             row_num += 1
             row_idx = str(row_num + 1)
 
-            row = [req.name, pool.name, obj.sample.name, obj.sample.barcode,
-                   obj.sample.library_protocol.name, obj.sample.concentration,
-                   obj.starting_amount, '', obj.spike_in_description, '']
+            row = [
+                req.name,                           # Request
+                pool.name,                          # Pool
+                sample.name,                        # Sample
+                sample.barcode,                     # Barcode
+                sample.library_protocol.name,       # Library Protocol
+                sample.concentration,               # Concentration
+                lib_prep_obj.starting_amount,       # Starting Amount
+                '',                                 # Starting Volume
+                lib_prep_obj.spike_in_description,  # Spike-in Description
+                '',                                 # Spike-in Volume
+            ]
 
             # µl Sample = Starting Amount / Concentration Sample
             col_starting_amount = col_letters[6]
@@ -237,9 +247,6 @@ def download_benchtop_protocol(request):
             for i in range(len(row)):
                 ws.write(row_num, i, row[i], font_style)
 
-    except Exception as e:
-        logger.exception(e)
+        wb.save(response)
 
-    wb.save(response)
-
-    return response
+        return response
