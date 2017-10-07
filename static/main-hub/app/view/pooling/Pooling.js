@@ -223,6 +223,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
         features: [{
             ftype: 'grouping',
             startCollapsed: true,
+            enableGroupingMenu: false,
             groupHeaderTpl: [
                 '<strong class="{children:this.getHeaderClass}">' +
                     '{children:this.getName} | Pool Size: {children:this.getRealPoolSize} M reads ' +

@@ -271,6 +271,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
         features: [{
             ftype: 'grouping',
             startCollapsed: true,
+            enableGroupingMenu: false,
             groupHeaderTpl: [
                 '<strong>Protocol: {children:this.getName}</strong>',
                 {

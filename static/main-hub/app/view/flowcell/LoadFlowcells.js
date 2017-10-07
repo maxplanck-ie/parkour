@@ -129,6 +129,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcells', {
         features: [{
             ftype: 'grouping',
             startCollapsed: true,
+            enableGroupingMenu: false,
             groupHeaderTpl: [
                 '<strong>Flowcell ID: {children:this.getFlowcellId}</strong>',
                 {

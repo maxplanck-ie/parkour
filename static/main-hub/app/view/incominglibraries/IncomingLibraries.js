@@ -335,6 +335,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
         features: [{
             ftype: 'grouping',
             startCollapsed: true,
+            enableGroupingMenu: false,
             groupHeaderTpl: [
                 '<strong>Request: {children:this.getName}</strong> (# of Libraries/Samples: {rows.length}, Total Sequencing Depth: {children:this.getTotalDepth} M)',
                 {
