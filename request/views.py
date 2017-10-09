@@ -154,6 +154,8 @@ class RequestViewSet(viewsets.GenericViewSet):
 
         if request.is_ajax():
             post_data = request.data.get('data', [])
+            if isinstance(post_data, str):
+                post_data = json.loads(post_data)
         else:
             post_data = json.loads(request.data.get('data', '[]'))
         post_data.update({'user': request.user.pk})

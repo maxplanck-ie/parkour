@@ -43,6 +43,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
     onRequestWindowBoxready: function(wnd) {
         var downloadRequestBlankBtn = wnd.down('#download-request-blank-button');
         var uploadSignedRequestBtn = wnd.down('#upload-signed-request-button');
+        var librariesInRequestGrid = wnd.down('#libraries-in-request-grid');
 
         Ext.getStore('requestFilesStore').removeAll();
 
@@ -50,6 +51,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
             Ext.getStore('librariesInRequestStore').removeAll();
             downloadRequestBlankBtn.disable();
             uploadSignedRequestBtn.disable();
+            librariesInRequestGrid.getColumns()[0].hide();
         } else {
             var form = Ext.getCmp('request-form').getForm();
             var grid = Ext.getCmp('libraries-in-request-grid');;
@@ -109,7 +111,13 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
 
     showContextMenu: function(grid, record, itemEl, index, e) {
         var me = this;
-        var recordId = grid.up('window').record.get('pk');
+        var wnd = grid.up('window');
+
+        if (wnd.mode === 'add') {
+            return;
+        }
+
+        var recordId = wnd.record.get('pk');
         var selectedItems = this.getSelectedItems();
         var menuItems;
 

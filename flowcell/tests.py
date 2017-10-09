@@ -363,8 +363,8 @@ class TestFlowcell(BaseTestCase):
         self.assertEqual(
             Lane.objects.get(pk=lane1.pk).loading_concentration, 1.0)
 
-    def test_quality_check_passed(self):
-        """ Ensure quality check has passed behaves correctly. """
+    def test_quality_check_completed(self):
+        """ Ensure quality check has completed behaves correctly. """
         self.client.login(email='test@test.io', password='foo-bar')
 
         library = create_library(get_random_name(), 4)
@@ -382,7 +382,7 @@ class TestFlowcell(BaseTestCase):
         response = self.client.post(reverse('flowcell-edit'), {
             'data': json.dumps([{
                 'pk': lane.pk,
-                'quality_check': 'passed',
+                'quality_check': 'completed',
             }])
         })
 
