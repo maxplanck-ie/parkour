@@ -2,19 +2,26 @@ import logging
 import json
 import csv
 import unicodedata
+import itertools
 
 from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from django.core.exceptions import ValidationError
+from django.db.models import Q
+from rest_framework import viewsets
+from rest_framework.response import Response
+from rest_framework.decorators import list_route
+from rest_framework.permissions import IsAdminUser
+
 from xlwt import Workbook, XFStyle
 
+from common.views import CsrfExemptSessionAuthentication
 from index_generator.models import Pool
 from library_sample_shared.models import ReadLength, IndexI7, IndexI5
-from request.models import Request
 from .models import Sequencer, Lane, Flowcell
-from .forms import FlowcellForm, LaneForm
+from .forms import FlowcellForm
+from .serializers import (SequencerSerializer, FlowcellSerializer,
+                          LaneSerializer, PoolSerializer, PoolInfoSerializer)
 
 logger = logging.getLogger('db')
 
@@ -101,23 +108,6 @@ def get_all(request):
 
 
 @login_required
-def sequencer_list(request):
-    """ Get the list of all sequencers. """
-
-    data = [
-        {
-            'name': sequencer.name,
-            'id': sequencer.id,
-            'lanes': sequencer.lanes,
-            'laneCapacity': sequencer.lane_capacity
-        }
-        for sequencer in Sequencer.objects.all()
-    ]
-
-    return JsonResponse(data, safe=False)
-
-
-@login_required
 @staff_member_required
 def pool_list(request):
     """ Get the list of pools for loading flowcells. """
@@ -150,42 +140,6 @@ def pool_list(request):
             })
 
     data = sorted(data, key=lambda x: x['id'])
-
-    return JsonResponse(data, safe=False)
-
-
-@login_required
-@staff_member_required
-def pool_info(request):
-    """ Get additional information for a given pool. """
-    data = []
-
-    pool_id = request.GET.get('pool_id')
-    pool = Pool.objects.get(id=pool_id)
-    libraries = pool.libraries.all()
-    samples = pool.samples.all()
-
-    for req in Request.objects.prefetch_related('libraries', 'samples'):
-        for library in req.libraries.all():
-            if library in libraries:
-                data.append({
-                    'request': req.name,
-                    'name': library.name,
-                    'barcode': library.barcode,
-                    'protocol': library.library_protocol.name,
-                })
-
-        for sample in req.samples.all():
-            if sample in samples:
-                data.append({
-                    'request': req.name,
-                    'name': sample.name,
-                    'barcode': sample.barcode,
-                    'is_converted': sample.is_converted,
-                    'protocol': sample.library_protocol.name,
-                })
-
-    data = sorted(data, key=lambda x: x['barcode'][3:])
 
     return JsonResponse(data, safe=False)
 
@@ -250,96 +204,158 @@ def save(request):
     return JsonResponse({'success': not error, 'error': error})
 
 
-@login_required
-@staff_member_required
-def update(request):
-    """ Edit a flowcell. """
-    error = ''
-    lane_id = request.POST.get('lane_id', '')
-    qc_result = json.loads(request.POST.get('qc_result', 'false'))
+class SequencerViewSet(viewsets.ReadOnlyModelViewSet):
+    """ Get the list of sequencers. """
+    queryset = Sequencer.objects.all()
+    serializer_class = SequencerSerializer
 
-    try:
-        lane = Lane.objects.get(pk=lane_id)
-        form = LaneForm(request.POST, instance=lane)
 
-        if form.is_valid():
-            lane = form.save()
+class PoolViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Pool.objects.all()
+    serializer_class = PoolInfoSerializer
+    permission_classes = [IsAdminUser]
 
-            if qc_result:
-                lane.completed = True
-                lane.save(update_fields=['completed'])
+    def retrieve(self, request, pk=None):
+        """ Get libraries and samples for a pool with a given id. """
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data['records'])
 
-                pool = lane.pool
-                for library in pool.libraries.all():
-                    library.status = 6
-                    library.save(update_fields=['status'])
 
-                for sample in pool.samples.all():
-                    sample.status = 6
-                    sample.save(update_fields=['status'])
+class FlowcellViewSet(viewsets.ViewSet):
+    permission_classes = [IsAdminUser]
+    authentication_classes = [CsrfExemptSessionAuthentication]
+
+    def list(self, request):
+        """ Get the list of all flowcells. """
+        queryset = Lane.objects.all().filter(completed=False)
+        serializer = LaneSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def create(self, request):
+        """ Add a flowcell. """
+
+        if request.is_ajax():
+            post_data = request.data.get('data', [])
+            if isinstance(post_data, str):
+                post_data = json.loads(post_data)
         else:
-            error = str(form.errors)
-            logger.debug(form.errors)
+            post_data = json.loads(request.data.get('data', '[]'))
 
-    except Exception as e:
-        error = str(e)
-        logger.exception(e)
+        if not post_data:
+            return Response({
+                'success': False,
+                'message': 'Invalid payload.',
+            }, 400)
 
-    return JsonResponse({'success': not error, 'error': error})
+        serializer = FlowcellSerializer(data=post_data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'success': True}, 201)
 
+        else:
+            return Response({
+                'success': False,
+                'message': 'Invalid payload.',
+                'errors': serializer.errors,
+            }, 400)
 
-@login_required
-@staff_member_required
-def update_all(request):
-    """ Update a field in all records (apply to all). """
-    error = ''
+    @list_route(methods=['post'])
+    def edit(self, request):
+        """ Update multiple lanes. """
 
-    if request.is_ajax():
-        data = json.loads(request.body.decode('utf-8'))
-        for item in data:
+        if request.is_ajax():
+            post_data = request.data.get('data', [])
+        else:
+            post_data = json.loads(request.data.get('data', '[]'))
+
+        if not post_data:
+            return Response({
+                'success': False,
+                'message': 'Invalid payload.',
+            }, 400)
+
+        lane_ids = []
+        for obj in post_data:
             try:
-                lane_id = item['lane_id']
-                lane = Lane.objects.get(pk=lane_id)
-                changed_value = item['changed_value']
-                for key, value in changed_value.items():
-                    if hasattr(lane, key):
-                        try:
-                            val = lane._meta.get_field(key).to_python(value)
-                            if val is None:
-                                raise ValidationError('Wrong value.')
-                        except ValidationError:
-                            pass
-                        else:
-                            setattr(lane, key, value)
-                lane.save()
+                lane_ids.append(int(obj['pk']))
+            except (KeyError, ValueError):
+                continue
+        lanes = Lane.objects.filter(pk__in=lane_ids)
 
-            except Exception as e:
-                error = 'Some of the libraries were not updated ' + \
-                    '(see the logs).'
-                logger.exception(e)
+        serializer = LaneSerializer(data=post_data, instance=lanes, many=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'success': True})
+        else:
+            # Try to update valid lanes
+            valid_data = [item[1] for item in zip(serializer.errors, post_data)
+                          if not item[0]]
 
-    return JsonResponse({'success': not error, 'error': error})
+            if any(valid_data):
+                self._update_valid(valid_data)
+                return Response({
+                    'success': True,
+                    'message': 'Some lanes cannot be updated.',
+                })
+            else:
+                return Response({
+                    'success': False,
+                    'message': 'Invalid payload.',
+                }, 400)
 
+    def _update_valid(self, data):
+        """ Update valid lanes. """
+        ids = [x['pk'] for x in data]
+        objects = Lane.objects.filter(pk__in=ids)
+        serializer = LaneSerializer(
+            data=data, instance=objects, many=True)
+        serializer.is_valid()
+        serializer.save()
 
-@csrf_exempt
-@login_required
-@staff_member_required
-def download_benchtop_protocol(request):
-    """ Generate Benchtop Protocol as XLS file for selected lanes. """
-    response = HttpResponse(content_type='application/ms-excel')
-    lanes_dict = json.loads(request.POST.get('lanes', '{}'))
+    @list_route(methods=['get'])
+    def pool_list(self, request):
+        data = []
+        queryset = Pool.objects.all().prefetch_related(
+            'libraries', 'samples',
+        ).order_by('name')
 
-    filename = 'FC_Loading_Benchtop_Protocol.xls'
-    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+        for pool in queryset:
+            # Show libraries which have reached the Pooling step
+            libraries = pool.libraries.filter(status__gte=2)
 
-    wb = Workbook(encoding='utf-8')
-    ws = wb.add_sheet('FC_Loading_Benchtop_Protocol')
+            # Show samples which have reached the Pooling step
+            samples = pool.samples.filter(status__gte=3)
 
-    try:
-        if not any(lanes_dict):
-            raise ValueError('No lanes are selected.')
+            # Ignore pools if all of its libraries/samples are
+            # not ready yet or failed
+            if libraries.count() + samples.count() == 0:
+                continue
 
-        lanes = Lane.objects.filter(pk__in=lanes_dict.keys()).order_by('name')
+            # Ignore pools if some of its samples haven't reached the
+            # Pooling step yet
+            if pool.samples.filter(~Q(status=-1)).count() > 0 and \
+                    pool.samples.filter(
+                        Q(status=2) | Q(status=-2)).count() > 0:
+                continue
+
+            if pool.size.multiplier > pool.loaded:
+                serializer = PoolSerializer(pool)
+                data.append(serializer.data)
+
+        return Response(data)
+
+    @list_route(methods=['post'])
+    def download_benchtop_protocol(self, request):
+        """ Generate Benchtop Protocol as XLS file for selected lanes. """
+        response = HttpResponse(content_type='application/ms-excel')
+        ids = json.loads(request.data.get('ids', '[]'))
+
+        f_name = 'FC_Loading_Benchtop_Protocol.xls'
+        response['Content-Disposition'] = 'attachment; filename="%s"' % f_name
+
+        wb = Workbook(encoding='utf-8')
+        ws = wb.add_sheet('FC_Loading_Benchtop_Protocol')
 
         header = ['Pool ID', 'Flowcell ID', 'Sequencer', 'Lane', 'I7 present',
                   'I5 present', 'Equal Representation of Nucleotides',
@@ -356,78 +372,113 @@ def download_benchtop_protocol(request):
         font_style = XFStyle()
         font_style.alignment.wrap = 1
 
-        # for lane_id, flowcell_id in lanes.items():
+        lanes = Lane.objects.filter(pk__in=ids).order_by('name')
         for lane in lanes:
-            pool = lane.pool
-            flowcell_id = lanes_dict[str(lane.pk)]
-            flowcell = Flowcell.objects.get(pk=flowcell_id)
+            flowcell = lane.flowcell.get()
             row_num += 1
 
-            libraries = pool.libraries.select_related('read_length')
-            samples = pool.samples.select_related('read_length')
-            index_i7_show, index_i5_show, equal_representation = \
-                indices_present(libraries, samples)
-            read_length_name = samples[0].read_length.name if any(samples) \
-                else libraries[0].read_length.name
+            records = lane.pool.libraries.all() or lane.pool.samples.all()
+            read_length = records[0].read_length.name
+
+            equal_representation = self._get_equal_representation(lane)
 
             row = [
-                lane.pool.name, flowcell.flowcell_id, flowcell.sequencer.name,
-                lane.name, index_i7_show, index_i5_show, equal_representation,
-                read_length_name, lane.loading_concentration, lane.phix
+                lane.pool.name,              # Pool ID
+                flowcell.flowcell_id,        # Flowcell ID
+                flowcell.sequencer.name,     # Sequencer
+                lane.name,                   # Lane
+                '',                          # I7 present
+                '',                          # I5 present
+                equal_representation,        # Equal Representation of Nucl.
+                read_length,                 # Read Length
+                lane.loading_concentration,  # Loading Concentration
+                lane.phix,                   # PhiX %
             ]
 
             for i in range(len(row)):
                 ws.write(row_num, i, row[i], font_style)
 
-    except Exception as e:
-        logger.exception(e)
+        wb.save(response)
 
-    wb.save(response)
+        return response
 
-    return response
+    @list_route(methods=['post'])
+    def download_sample_sheet(self, request):
+        """ Generate Benchtop Protocol as XLS file for selected lanes. """
+        response = HttpResponse(content_type='text/csv')
+        ids = json.loads(request.data.get('ids', '[]'))
+        flowcell_id = request.data.get('flowcell_id', '')
 
+        writer = csv.writer(response)
+        writer.writerow(['[Header]', '', '', '', '', '', '', '', '', '', ''])
+        writer.writerow(['IEMFileVersion', '4', '', '', '', '', '', '', '', '',
+                        ''])
+        writer.writerow(['Date', '11/3/2016', '', '', '', '', '', '', '', '',
+                         ''])
+        writer.writerow(['Workflow', 'GenerateFASTQ', '', '', '', '', '', '',
+                         '', '', ''])
+        writer.writerow(['Application', 'HiSeq FASTQ Only', '', '', '', '', '',
+                         '', '', '', ''])
+        writer.writerow(['Assay', 'Nextera XT', '', '', '', '', '', '', '', '',
+                        ''])
+        writer.writerow(['Description', '', '', '', '', '', '', '', '', '',
+                         ''])
+        writer.writerow(['Chemistry', 'Amplicon', '', '', '', '', '', '', '',
+                         '', ''])
+        writer.writerow(['', '', '', '', '', '', '', '', '', '', ''])
+        writer.writerow(['[Reads]', '', '', '', '', '', '', '', '', '', ''])
+        writer.writerow(['75', '', '', '', '', '', '', '', '', '', ''])
+        writer.writerow(['75', '', '', '', '', '', '', '', '', '', ''])
+        writer.writerow(['', '', '', '', '', '', '', '', '', '', ''])
+        writer.writerow(['[Settings]', '', '', '', '', '', '', '', '', '', ''])
+        writer.writerow(['ReverseComplement', '0', '', '', '', '', '', '', '',
+                         '', ''])
+        writer.writerow(['Adapter', 'CTGTCTCTTATACACATCT', '', '', '', '', '',
+                         '', '', '', ''])
+        writer.writerow(['', '', '', '', '', '', '', '', '', '', ''])
+        writer.writerow(['[Data]', '', '', '', '', '', '', '', '', '', ''])
 
-@csrf_exempt
-@login_required
-@staff_member_required
-def download_sample_sheet(request):
-    """ Generate Benchtop Protocol as XLS file for selected lanes. """
-    response = HttpResponse(content_type='text/csv')
-    lanes = json.loads(request.POST.get('lanes', '[]'))
-    flowcell_id = json.loads(request.POST.get('flowcell_id', ''))
+        writer.writerow(['Lane', 'Sample_ID', 'Sample_Name', 'Sample_Plate',
+                         'Sample_Well', 'I7_Index_ID', 'index', 'I5_Index_ID',
+                         'index2', 'Sample_Project', 'Description'])
 
-    writer = csv.writer(response)
-    writer.writerow(['[Header]', '', '', '', '', '', '', '', '', '', ''])
-    writer.writerow(['IEMFileVersion', '4', '', '', '', '', '', '', '', '',
-                     ''])
-    writer.writerow(['Date', '11/3/2016', '', '', '', '', '', '', '', '', ''])
-    writer.writerow(['Workflow', 'GenerateFASTQ', '', '', '', '', '', '', '',
-                     '', ''])
-    writer.writerow(['Application', 'HiSeq FASTQ Only', '', '', '', '', '', '',
-                     '', '', ''])
-    writer.writerow(['Assay', 'Nextera XT', '', '', '', '', '', '', '', '',
-                     ''])
-    writer.writerow(['Description', '', '', '', '', '', '', '', '', '', ''])
-    writer.writerow(['Chemistry', 'Amplicon', '', '', '', '', '', '', '', '',
-                     ''])
-    writer.writerow(['', '', '', '', '', '', '', '', '', '', ''])
-    writer.writerow(['[Reads]', '', '', '', '', '', '', '', '', '', ''])
-    writer.writerow(['75', '', '', '', '', '', '', '', '', '', ''])
-    writer.writerow(['75', '', '', '', '', '', '', '', '', '', ''])
-    writer.writerow(['', '', '', '', '', '', '', '', '', '', ''])
-    writer.writerow(['[Settings]', '', '', '', '', '', '', '', '', '', ''])
-    writer.writerow(['ReverseComplement', '0', '', '', '', '', '', '', '', '',
-                     ''])
-    writer.writerow(['Adapter', 'CTGTCTCTTATACACATCT', '', '', '', '', '', '',
-                     '', '', ''])
-    writer.writerow(['', '', '', '', '', '', '', '', '', '', ''])
-    writer.writerow(['[Data]', '', '', '', '', '', '', '', '', '', ''])
+        flowcell = Flowcell.objects.get(pk=flowcell_id)
+        f_name = '%s_SampleSheet.csv' % flowcell.flowcell_id
+        response['Content-Disposition'] = 'attachment; filename="%s"' % f_name
 
-    writer.writerow(['Lane', 'Sample_ID', 'Sample_Name', 'Sample_Plate',
-                     'Sample_Well', 'I7_Index_ID', 'index', 'I5_Index_ID',
-                     'index2', 'Sample_Project', 'Description'])
+        lanes = Lane.objects.filter(pk__in=ids).order_by('name')
 
-    def create_row(lane, record):
+        rows = []
+        for lane in lanes:
+            records = list(itertools.chain(
+                lane.pool.libraries.all().filter(~Q(status=-1)),
+                lane.pool.samples.all().filter(~Q(status=-1))
+            ))
+
+            for record in records:
+                row = self._create_row(lane, record)
+                rows.append(row)
+
+        rows = sorted(rows, key=lambda x: (x[0], x[1][3:]))
+        for row in rows:
+            writer.writerow(row)
+
+        return response
+
+    def _get_equal_representation(self, obj):
+        libraries = obj.pool.libraries.filter(~Q(status=-1))
+        samples = obj.pool.samples.filter(~Q(status=-1))
+
+        eqn_libraries = list(libraries.values_list(
+            'equal_representation_nucleotides', flat=True)).count(True)
+
+        eqn_samples = list(samples.values_list(
+            'equal_representation_nucleotides', flat=True)).count(True)
+
+        return libraries.count() + samples.count() == \
+            eqn_libraries + eqn_samples
+
+    def _create_row(self, lane, record):
         index_i7 = IndexI7.objects.filter(
             index=record.index_i7,
             index_type=record.index_type
@@ -440,7 +491,8 @@ def download_sample_sheet(request):
         )
         index_i5_id = index_i5[0].index_id if index_i5 else ''
 
-        request_name = unicodedata.normalize('NFKD', record.request.get().name)
+        request_name = unicodedata.normalize(
+            'NFKD', record.request.get().name)
         request_name = str(request_name.encode('ASCII', 'ignore'), 'utf-8')
 
         library_protocol = \
@@ -460,32 +512,3 @@ def download_sample_sheet(request):
             request_name,          # Sample_Project / Request ID
             library_protocol,      # Description / Library Protocol
         ]
-
-    flowcell = Flowcell.objects.get(pk=flowcell_id)
-    filename = '%s_SampleSheet.csv' % flowcell.flowcell_id
-    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
-
-    if not any(lanes):
-        raise ValueError('No lanes are selected.')
-
-    lanes = Lane.objects.filter(pk__in=lanes).order_by('name')
-
-    rows = []
-    for lane in lanes:
-        pool = lane.pool
-        libraries = pool.libraries.all()
-        samples = pool.samples.all()
-
-        for library in libraries:
-            row = create_row(lane, library)
-            rows.append(row)
-
-        for sample in samples:
-            row = create_row(lane, sample)
-            rows.append(row)
-
-    rows = sorted(rows, key=lambda x: (x[0], x[1][3:]))
-    for row in rows:
-        writer.writerow(row)
-
-    return response

@@ -11,8 +11,8 @@ class NucleicAcidTypeAdmin(admin.ModelAdmin):
 
 @admin.register(Sample)
 class SampleAdmin(admin.ModelAdmin):
-    list_display = ('name', 'barcode', 'request_name', 'library_protocol',
-                    'library_type',)
+    list_display = ('name', 'barcode', 'status', 'request_name',
+                    'library_protocol', 'library_type',)
     list_select_related = True
     readonly_fields = ('create_time', 'update_time',)
 

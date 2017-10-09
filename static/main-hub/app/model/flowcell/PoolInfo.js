@@ -1,17 +1,11 @@
 Ext.define('MainHub.model.flowcell.PoolInfo', {
-    extend: 'Ext.data.Record',
+    extend: 'MainHub.model.Record',
 
     fields: [{
-        name: 'request',
+        name: 'protocol_name',
         type: 'string'
     }, {
-        name: 'name',
+        name: 'request_name',
         type: 'string'
-    }, {
-        name: 'protocol',
-        type: 'string'
-    }, {
-        name: 'pcrCycles',
-        type: 'int'
     }]
 });

@@ -5,7 +5,7 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
     config: {
         control: {
             '#': {
-                // activate: 'activateView'
+                activate: 'activateView'
             },
             '#librariesTable': {
                 // boxready: 'refresh',

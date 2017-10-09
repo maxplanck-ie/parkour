@@ -28,3 +28,13 @@ tr.pool-disabled > td.x-grid-item-focused {
 #flowcell-result {
     float: right;
 }
+
+tr.pool-ready,
+tr.pool-ready .x-grid-item-focused {
+    color: #388e3c;
+}
+
+tr.pool-not-ready,
+tr.pool-not-ready .x-grid-item-focused {
+    color: #c62828;
+}

@@ -1,11 +1,11 @@
-Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
+Ext.define('MainHub.view.flowcell.FlowcellWindow', {
     extend: 'Ext.window.Window',
 
     requires: [
-        'MainHub.view.flowcell.LoadFlowcellWindowController'
+        'MainHub.view.flowcell.FlowcellWindowController'
     ],
 
-    controller: 'load-flowcell-window',
+    controller: 'flowcell-window',
 
     title: 'Load Flowcell',
     height: 550,
@@ -13,6 +13,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
 
     modal: true,
     resizable: false,
+    autoShow: true,
     layout: 'fit',
 
     items: [{
@@ -29,7 +30,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                 border: 0,
                 items: [{
                     xtype: 'form',
-                    id: 'flowcellForm',
+                    id: 'flowcell-form',
                     padding: '15 15 0 15',
                     width: 396,
                     border: 0,
@@ -43,8 +44,8 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                     },
 
                     items: [{
-                        id: 'sequencerField',
-                        itemId: 'sequencerField',
+                        id: 'sequencer-field',
+                        itemId: 'sequencer-field',
                         queryMode: 'local',
                         displayField: 'name',
                         valueField: 'id',
@@ -61,13 +62,14 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                     }]
                 }, {
                     xtype: 'grid',
-                    id: 'flowcellResultGrid',
-                    itemId: 'flowcellResultGrid',
+                    id: 'flowcell-result-grid',
+                    itemId: 'flowcell-result-grid',
                     padding: '0 15',
                     width: 396,
                     height: 260,
                     viewConfig: {
-                        markDirty: false
+                        markDirty: false,
+                        stripeRows: false
                     },
                     enableColumnMove: false,
                     enableColumnResize: false,
@@ -75,31 +77,38 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                     store: 'lanesStore',
                     columns: [{
                         text: 'Pool',
-                        dataIndex: 'poolName',
+                        dataIndex: 'pool_name',
                         sortable: false,
                         flex: 1
                     }, {
                         text: 'Lane',
-                        dataIndex: 'laneName',
+                        dataIndex: 'lane_name',
                         width: 70
-                    }],
-                    plugins: [{
-                        ptype: 'rowediting',
-                        clicksToEdit: 1
                     }]
                 }]
             }, {
                 xtype: 'grid',
-                id: 'poolsFlowcell',
-                itemId: 'poolsFlowcell',
+                id: 'pools-flowcell-grid',
+                itemId: 'pools-flowcell-grid',
+                cls: 'pools-flowcell',
                 padding: '0 3 0 0',
                 width: 400,
                 height: 375,
                 border: 0,
                 viewConfig: {
                     stripeRows: false,
-                    markDirty: false
+                    markDirty: false,
                     // loadMask: false
+                    getRowClass: function(record) {
+                        var rowClass = '';
+                        if (record.get('ready')) {
+                            rowClass = 'pool-ready';
+                        } else {
+                            rowClass = 'pool-not-ready';
+                            record.setDisabled(true);
+                        }
+                        return rowClass;
+                    }
                 },
                 style: {
                     borderLeft: '1px solid #d0d0d0'
@@ -115,16 +124,16 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
                     flex: 1
                 }, {
                     text: 'Read Length',
-                    dataIndex: 'readLengthName',
+                    dataIndex: 'read_length_name',
                     width: 100
                 }, {
                     text: 'Size',
-                    dataIndex: 'poolSizeId',
+                    dataIndex: 'pool_size_id',
                     width: 90,
                     renderer: function(value, meta) {
                         var pool = meta.record;
                         var poolSize = Ext.getStore('poolSizesStore').findRecord('id', value);
-                        var size = pool.get('size') - pool.get('loaded');
+                        var size = pool.get('pool_size') - pool.get('loaded');
                         return size === 0 ? size : size + 'x' + poolSize.get('size');
                     }
                 }]
@@ -155,7 +164,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcellWindow', {
         items: [
             '->', {
                 xtype: 'button',
-                itemId: 'saveBtn',
+                itemId: 'save-button',
                 text: 'Save',
                 iconCls: 'fa fa-floppy-o fa-lg'
             }

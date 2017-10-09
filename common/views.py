@@ -64,7 +64,7 @@ def get_navigation_tree(request):
             {
                 'text': 'Load Flowcells',
                 'iconCls': 'x-fa fa-level-down',
-                'viewType': 'load-flowcells',
+                'viewType': 'flowcells',
                 'leaf': True
             }
         ]

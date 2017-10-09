@@ -1,27 +1,28 @@
-Ext.define('MainHub.view.flowcell.LoadFlowcells', {
+Ext.define('MainHub.view.flowcell.Flowcells', {
     extend: 'Ext.container.Container',
-    xtype: 'load-flowcells',
-    requires: ['MainHub.view.flowcell.LoadFlowcellsController'],
-    controller: 'load-flowcells',
+    xtype: 'flowcells',
+    requires: ['MainHub.view.flowcell.FlowcellsController'],
+    controller: 'flowcells',
 
     anchor: '100% -1',
     layout: 'fit',
 
     items: [{
         xtype: 'grid',
-        id: 'flowcellsTable',
-        itemId: 'flowcellsTable',
+        id: 'flowcells-grid',
+        itemId: 'flowcells-grid',
         height: Ext.Element.getViewportHeight() - 64,
         header: {
             title: 'Load Flowcells',
             items: [{
                 xtype: 'textfield',
-                itemId: 'searchField',
+                itemId: 'search-field',
                 emptyText: 'Search',
+                margin: '0 15px 0 0',
                 width: 200
             }, {
                 xtype: 'button',
-                itemId: 'loadBtn',
+                itemId: 'load-button',
                 text: 'Load'
             }]
         },
@@ -39,7 +40,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcells', {
         enableColumnMove: false,
         columns: [{
             xtype: 'checkcolumn',
-            itemId: 'checkColumn',
+            itemId: 'check-column',
             dataIndex: 'selected',
             resizable: false,
             menuDisabled: true,
@@ -48,38 +49,41 @@ Ext.define('MainHub.view.flowcell.LoadFlowcells', {
             width: 40
         }, {
             text: 'Lane',
-            dataIndex: 'laneName',
+            dataIndex: 'name',
             menuDisabled: true,
             hideable: false,
             flex: 1
         }, {
             text: 'Pool',
-            dataIndex: 'poolName',
+            dataIndex: 'pool_name',
             menuDisabled: true,
             hideable: false,
             flex: 1
         }, {
             text: 'Length',
             tooltip: 'Read Length',
-            dataIndex: 'readLengthName',
+            dataIndex: 'read_length_name',
             flex: 1
         }, {
             text: 'Index I7',
-            dataIndex: 'indexI7Show',
+            dataIndex: 'index_i7_show',
             flex: 1
         }, {
             text: 'Index I5',
-            dataIndex: 'indexI5Show',
+            dataIndex: 'index_i5_show',
             flex: 1
         }, {
             text: 'Sequencer',
-            dataIndex: 'sequencerName',
+            dataIndex: 'sequencer_name',
             flex: 1
         }, {
             text: 'Equal nucl.',
             tooltip: 'Equal Representation of Nucleotides',
-            dataIndex: 'equalRepresentation',
-            flex: 1
+            dataIndex: 'equal_representation',
+            flex: 1,
+            renderer: function(value) {
+                return value ? 'Yes' : 'No';
+            }
         }, {
             text: 'Loading Conc.',
             tooltip: 'Loading Concentration',
@@ -101,26 +105,23 @@ Ext.define('MainHub.view.flowcell.LoadFlowcells', {
             }
         }, {
             text: 'QC Result',
-            dataIndex: 'qc_result',
+            dataIndex: 'quality_check',
             resizable: false,
             menuDisabled: true,
             hideable: false,
+            width: 90,
             editor: {
                 xtype: 'combobox',
                 queryMode: 'local',
                 displayField: 'name',
-                valueField: 'id',
+                valueField: 'name',
                 store: Ext.create('Ext.data.Store', {
                     fields: [{
                         name: 'name',
                         type: 'string'
-                    }, {
-                        name: 'value',
-                        type: 'bool'
                     }],
                     data: [{
-                        name: 'completed',
-                        value: true
+                        name: 'completed'
                     }]
                 }),
                 forceSelection: true
@@ -134,7 +135,7 @@ Ext.define('MainHub.view.flowcell.LoadFlowcells', {
                 '<strong>Flowcell ID: {children:this.getFlowcellId}</strong>',
                 {
                     getFlowcellId: function(children) {
-                        return children[0].get('flowcellId')
+                        return children[0].get('flowcell_id')
                     }
                 }
             ]
@@ -155,26 +156,26 @@ Ext.define('MainHub.view.flowcell.LoadFlowcells', {
             items: [
                 {
                     xtype: 'button',
-                    itemId: 'downloadBenchtopProtocolFCBtn',
+                    itemId: 'download-benchtop-protocol-button',
                     text: 'Download Benchtop Protocol',
                     iconCls: 'fa fa-file-excel-o fa-lg'
                 },
                 {
                     xtype: 'button',
-                    itemId: 'downloadSampleSheetBtn',
+                    itemId: 'download-sample-sheet-button',
                     text: 'Download Sample Sheet',
                     iconCls: 'fa fa-file-text-o fa-lg'
                 },
                 '->',
                 {
                     xtype: 'button',
-                    itemId: 'cancelBtn',
+                    itemId: 'cancel-button',
                     iconCls: 'fa fa-ban fa-lg',
                     text: 'Cancel'
                 },
                 {
                     xtype: 'button',
-                    itemId: 'saveBtn',
+                    itemId: 'save-button',
                     iconCls: 'fa fa-floppy-o fa-lg',
                     text: 'Save'
                 }

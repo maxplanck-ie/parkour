@@ -375,7 +375,13 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
         var wnd = btn.up('window');
         var form = Ext.getCmp('request-form');
         var store = Ext.getStore('librariesInRequestStore');
-        var url = wnd.mode === 'add' ? 'api/requests/' : 'api/requests/{0}/edit/';
+        var url;
+
+        if (wnd.mode === 'add') {
+            url = 'api/requests/';
+        } else {
+            url = Ext.String.format('api/requests/{0}/edit/', wnd.record.get('pk'))
+        }
 
         if (store.getCount() === 0) {
             new Noty({
@@ -394,7 +400,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
 
         wnd.setLoading('Saving...');
         Ext.Ajax.request({
-            url: Ext.String.format(url, wnd.record.get('pk')),
+            url: url,
             method: 'POST',
             scope: this,
 

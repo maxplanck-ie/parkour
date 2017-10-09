@@ -10,8 +10,8 @@ Ext.define('MainHub.store.flowcell.Pool', {
 
     proxy: {
         type: 'ajax',
-        url: 'flowcell/pool_list/',
-        timeout: 1000000,
+        url: 'api/flowcell/pool_list/',
+        // timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"
         limitParam: false,  //to remove param "limit"
@@ -25,8 +25,9 @@ Ext.define('MainHub.store.flowcell.Pool', {
 
     listeners: {
         disable: function(record, state) {
-            var gridView = Ext.getCmp('poolsFlowcell').getView(),
-                rowIndex = this.indexOf(record);
+            var gridView = Ext.getCmp('poolsFlowcell').getView();
+            var rowIndex = this.indexOf(record);
+
             if (state) {
                 gridView.addRowCls(rowIndex, 'pool-disabled');
             } else {

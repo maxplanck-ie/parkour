@@ -6,8 +6,9 @@ from .models import Library
 
 @admin.register(Library)
 class LibraryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'barcode', 'request_name', 'library_protocol',
-                    'library_type', 'index_type', 'index_i7', 'index_i5',)
+    list_display = ('name', 'barcode', 'status', 'request_name',
+                    'library_protocol', 'library_type', 'index_type',
+                    'index_i7', 'index_i5',)
     list_select_related = True
     readonly_fields = ('create_time', 'update_time',)
 
@@ -15,7 +16,6 @@ class LibraryAdmin(admin.ModelAdmin):
                      'library_type__name', 'request__name',)
 
     list_filter = (('library_protocol', RelatedDropdownFilter),
-                   ('library_type', RelatedDropdownFilter),
                    ('library_type', RelatedDropdownFilter),
                    ('concentration_method', RelatedDropdownFilter),
                    ('organism', RelatedDropdownFilter),

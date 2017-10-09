@@ -8,7 +8,7 @@ Ext.define('MainHub.view.flowcell.PoolInfoWindow', {
     width: 550,
     height: 650,
     modal: true,
-    resizable: false,
+    autoShow: true,
     layout: 'fit',
 
     items: [{
@@ -19,33 +19,31 @@ Ext.define('MainHub.view.flowcell.PoolInfoWindow', {
         },
         sortableColumns: false,
         enableColumnMove: false,
-        enableColumnResize: false,
         enableColumnHide: false,
         store: 'poolInfoStore',
         columns: [{
-                text: 'Request',
-                dataIndex: 'request',
-                flex: 1
-            },
-            {
-                text: 'Library',
-                dataIndex: 'name',
-                flex: 1
-            },
-            {
-                text: 'Barcode',
-                dataIndex: 'barcode',
-                width: 95,
-                renderer: function(value) {
-                    var record = Ext.getStore('poolInfoStore').findRecord('barcode', value);
-                    return record ? record.getBarcode() : value;
-                }
-            },
-            {
-                text: 'Library Preparation Protocol',
-                dataIndex: 'protocol',
-                flex: 1
+            text: 'Request',
+            dataIndex: 'request_name',
+            flex: 1
+        },
+        {
+            text: 'Library',
+            dataIndex: 'name',
+            flex: 1
+        },
+        {
+            text: 'Barcode',
+            dataIndex: 'barcode',
+            resizable: false,
+            width: 95,
+            renderer: function(value, meta) {
+                return meta.record.getBarcode();
             }
-        ]
+        },
+        {
+            text: 'Library Protocol',
+            dataIndex: 'protocol_name',
+            flex: 1
+        }]
     }]
 });

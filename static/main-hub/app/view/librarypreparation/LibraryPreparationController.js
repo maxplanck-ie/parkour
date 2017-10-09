@@ -61,6 +61,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
         var record = context.record;
         var changes = record.getChanges();
         var values = context.newValues;
+        var reload = Object.keys(changes).indexOf('quality_check') !== -1;
 
         // Set nM
         if (Object.keys(changes).indexOf('nM') === -1 &&
@@ -72,7 +73,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
         }
 
         // Send the changes to the server
-        this.syncStore('libraryPreparationStore');
+        this.syncStore('libraryPreparationStore', reload);
     },
 
     applyToAll: function(record, dataIndex) {
@@ -125,7 +126,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
         }
 
         // Send the changes to the server
-        this.syncStore('libraryPreparationStore');
+        this.syncStore('libraryPreparationStore', true);
     },
 
     downloadBenchtopProtocol: function(btn) {

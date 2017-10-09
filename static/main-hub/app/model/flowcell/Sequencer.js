@@ -11,7 +11,7 @@ Ext.define('MainHub.model.flowcell.Sequencer', {
         name: 'lanes',
         type: 'int'
     }, {
-        name: 'laneCapacity',
+        name: 'lane_capacity',
         type: 'int'
     }]
 });
