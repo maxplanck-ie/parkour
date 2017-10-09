@@ -84,6 +84,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
         var record = context.record;
         var changes = record.getChanges();
         var values = context.newValues;
+        var reload = Object.keys(changes).indexOf('quality_check') !== -1;
 
         // Compute Amount
         if (Object.keys(changes).indexOf('amount_facility') === -1 &&
@@ -97,7 +98,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
         }
 
         // Send the changes to the server
-        this.syncStore('incomingLibrariesStore');
+        this.syncStore('incomingLibrariesStore', reload);
     },
 
     applyToAll: function(record, dataIndex) {
@@ -153,7 +154,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
         }
 
         // Send the changes to the server
-        this.syncStore('incomingLibrariesStore');
+        this.syncStore('incomingLibrariesStore', true);
     },
 
     save: function() {

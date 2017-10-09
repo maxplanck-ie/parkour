@@ -281,7 +281,7 @@ class PoolingViewSet(viewsets.ViewSet):
                     model_class, serializer_class, new_ids, valid_data)
             else:
                 objects_ok = False
-                no_invalid = False
+            no_invalid = False
 
         return objects_ok, no_invalid
 

@@ -188,18 +188,20 @@ class IncomingLibrariesViewSet(viewsets.ViewSet):
         library_ids, sample_ids, library_post_data, sample_post_data = \
             self._separate_data(post_data)
 
-        libraries_ok, libraries_contain_invalid = self._update_objects(
+        libraries_ok, libraries_no_invalid = self._update_objects(
             Library, LibrarySerializer, library_ids, library_post_data)
 
-        samples_ok, samples_contain_invalid = self._update_objects(
+        samples_ok, samples_no_invalid = self._update_objects(
             Sample, SampleSerializer, sample_ids, sample_post_data)
 
-        result = [libraries_ok, libraries_contain_invalid,
-                  samples_ok, samples_contain_invalid]
+        result = [libraries_ok, libraries_no_invalid,
+                  samples_ok, samples_no_invalid]
 
-        if result.count(True) == 4:
+        result = [x for x in result if x is not None]
+
+        if result.count(True) == len(result):
             return Response({'success': True})
-        elif result.count(False) == 4:
+        elif result.count(False) == len(result):
             return Response({
                 'success': False,
                 'message': 'Invalid payload.',
@@ -238,14 +240,18 @@ class IncomingLibrariesViewSet(viewsets.ViewSet):
         Update multiple objects with a given model class and a
         serializer class.
         """
-        contain_invalid = False
+        objects_ok = True
+        no_invalid = True
 
         objects = model_class.objects.filter(pk__in=ids, status=1)
+
+        if not objects:
+            return None, None
+
         serializer = serializer_class(data=data, instance=objects, many=True)
 
         if serializer.is_valid():
             serializer.save()
-            objects_ok = True
         else:
             # Try to update valid objects
             valid_data = [item[1] for item in zip(serializer.errors, data)
@@ -255,12 +261,11 @@ class IncomingLibrariesViewSet(viewsets.ViewSet):
                 new_ids = [x['pk'] for x in valid_data]
                 self._update_valid(
                     model_class, serializer_class, new_ids, valid_data)
-                contain_invalid = True
-                objects_ok = True
             else:
                 objects_ok = False
+            no_invalid = False
 
-        return objects_ok, contain_invalid
+        return objects_ok, no_invalid
 
     def _update_valid(self, model_class, serializer_class, ids, valid_data):
         """ Update valid objects. """
