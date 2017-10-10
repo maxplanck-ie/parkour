@@ -92,6 +92,16 @@ Ext.define('MainHub.view.requests.Requests', {
             ptype: 'bufferedrenderer',
             trailingBufferZone: 100,
             leadingBufferZone: 100
+        }, {
+            ptype: 'rowexpander',
+            expandOnDblClick: false,
+            headerWidth: 35,
+            rowBodyTpl: new Ext.XTemplate(
+                '<strong>Attached files:</strong><br/>',
+                '<tpl for="files">',
+                '<span class="attached-file-link"><a href="{path}">{name}</a></span><br/>',
+                '</tpl>'
+            )
         }]
     }]
 });

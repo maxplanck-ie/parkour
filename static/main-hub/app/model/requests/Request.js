@@ -41,6 +41,10 @@ Ext.define('MainHub.model.requests.Request', {
         {
             type: 'int',
             name: 'total_sequencing_depth'
+        },
+        {
+            type: 'auto',
+            name: 'files'
         }
     ]
 });

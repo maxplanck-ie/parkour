@@ -39,7 +39,12 @@ class RequestSerializer(ModelSerializer):
             else False
 
     def get_files(self, obj):
-        return obj.files.all().values_list('pk', flat=True)
+        files = [{
+            'pk': file.pk,
+            'name': file.name.split('/')[-1],
+            'path': settings.MEDIA_URL + file.file.name,
+        } for file in obj.files.all()]
+        return files
 
     def get_deep_seq_request_name(self, obj):
         return obj.deep_seq_request.name.split('/')[-1] \
