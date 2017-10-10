@@ -75,11 +75,19 @@ Ext.define('MainHub.view.pooling.PoolingController', {
     },
 
     selectUnselectAll: function(poolId, selected) {
-        var me = this;
         var store = Ext.getStore('poolingStore');
+        var selectedItems = this.getSelectedItems();
+
+        if (selectedItems.length > 0 && selectedItems[0].pool !== poolId) {
+            new Noty({
+                text: 'You can only select libraries from the same pool.',
+                type: 'warning'
+            }).show();
+            return false;
+        }
 
         store.each(function(item) {
-            if (item.get('pool') === poolId && me.isPrepared(item)) {
+            if (item.get('pool') === poolId && this.isPrepared(item)) {
                 item.set('selected', selected);
             }
         });
@@ -113,14 +121,13 @@ Ext.define('MainHub.view.pooling.PoolingController', {
     },
 
     applyToAll: function(record, dataIndex) {
-        var me = this;
         var store = Ext.getStore('poolingStore');
         var allowedColumns = ['concentration_c1'];
 
         if (dataIndex && allowedColumns.indexOf(dataIndex) !== -1) {
             store.each(function(item) {
                 if (item.get('pool') === record.get('pool') &&
-                    item !== record && me.isPrepared(item)) {
+                    item !== record && this.isPrepared(item)) {
                     item.set(dataIndex, record.get(dataIndex));
                 }
             });
@@ -233,5 +240,22 @@ Ext.define('MainHub.view.pooling.PoolingController', {
     isPrepared: function(item) {
         return item.get('record_type') === 'Library' ||
             (item.get('record_type') === 'Sample' && item.get('status') === 3);
+    },
+
+    getSelectedItems: function() {
+        var store = Ext.getStore('poolingStore');
+        var selectedItems = [];
+
+        store.each(function(item) {
+            if (item.get('selected')) {
+                selectedItems.push({
+                    pk: item.get('pk'),
+                    record_type: item.get('record_type'),
+                    pool: item.get('pool')
+                });
+            }
+        });
+
+        return selectedItems;
     }
 });
