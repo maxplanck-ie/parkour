@@ -26,7 +26,7 @@ Ext.define('MainHub.view.flowcell.FlowcellWindowController', {
 
     onWindowReady: function() {
         Ext.getStore('lanesStore').removeAll();
-        Ext.getStore('poolsStore').load();
+        Ext.getStore('poolsStore').reload();
     },
 
     onWindowClose: function(wnd) {

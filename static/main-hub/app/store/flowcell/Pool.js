@@ -25,7 +25,7 @@ Ext.define('MainHub.store.flowcell.Pool', {
 
     listeners: {
         disable: function(record, state) {
-            var gridView = Ext.getCmp('poolsFlowcell').getView();
+            var gridView = Ext.getCmp('pools-flowcell-grid').getView();
             var rowIndex = this.indexOf(record);
 
             if (state) {

@@ -136,6 +136,11 @@ Ext.define('MainHub.view.flowcell.FlowcellWindow', {
                         var size = pool.get('pool_size') - pool.get('loaded');
                         return size === 0 ? size : size + 'x' + poolSize.get('size');
                     }
+                }],
+                plugins: [{
+                    ptype: 'bufferedrenderer',
+                    trailingBufferZone: 100,
+                    leadingBufferZone: 100
                 }]
             }]
         }, {
