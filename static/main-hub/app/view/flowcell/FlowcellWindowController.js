@@ -326,7 +326,7 @@ Ext.define('MainHub.view.flowcell.FlowcellWindowController', {
 
         wnd.setLoading('Saving...');
         form.submit({
-            url: 'api/flowcell/',
+            url: 'api/flowcells/',
             method: 'POST',
             params: {
                 data: Ext.JSON.encode({

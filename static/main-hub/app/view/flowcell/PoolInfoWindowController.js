@@ -12,7 +12,7 @@ Ext.define('MainHub.view.flowcell.PoolInfoWindowController', {
 
     loadInfo: function(wnd) {
         Ext.getStore('poolInfoStore').load({
-            url: Ext.String.format('api/pool/{0}/', wnd.poolId)
+            url: Ext.String.format('api/pools/{0}/', wnd.poolId)
         });
     }
 });

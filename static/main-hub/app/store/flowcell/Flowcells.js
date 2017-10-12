@@ -15,8 +15,8 @@ Ext.define('MainHub.store.flowcell.Flowcells', {
         limitParam: false,  //to remove param "limit"
         noCache: false,     //to remove param "_dc",
         api: {
-            read: 'api/flowcell/',
-            update: 'api/flowcell/edit/'
+            read: 'api/flowcells/',
+            update: 'api/flowcells/edit/'
         },
         reader: {
             type: 'json',

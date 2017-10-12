@@ -10,7 +10,7 @@ Ext.define('MainHub.store.flowcell.Pool', {
 
     proxy: {
         type: 'ajax',
-        url: 'api/flowcell/pool_list/',
+        url: 'api/flowcells/pool_list/',
         // timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"

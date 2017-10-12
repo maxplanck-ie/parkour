@@ -10,7 +10,7 @@ Ext.define('MainHub.store.flowcell.Sequencer', {
 
     proxy: {
         type: 'ajax',
-        url: 'api/sequencer/',
+        url: 'api/sequencers/',
         // timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"

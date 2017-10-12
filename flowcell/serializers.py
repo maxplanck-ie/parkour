@@ -155,10 +155,11 @@ class FlowcellSerializer(ModelSerializer):
         pools = Pool.objects.all().filter(pk__in=pool_ids)
 
         # After creating a flowcell, update all pool's libraries' and
-        # samples' statuses
+        # samples' statuses if the pool is fully loaded
         for pool in pools:
-            pool.libraries.all().filter(status=4).update(status=5)
-            pool.samples.all().filter(status=4).update(status=5)
+            if pool.loaded == pool.size.multiplier:
+                pool.libraries.all().filter(status=4).update(status=5)
+                pool.samples.all().filter(status=4).update(status=5)
 
         return instance
 

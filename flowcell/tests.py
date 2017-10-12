@@ -106,7 +106,7 @@ class TestSequencer(BaseTestCase):
         sequencer = create_sequencer(
             get_random_name(), lanes=1, lane_capacity=200)
 
-        response = self.client.get(reverse('sequencer-list'))
+        response = self.client.get(reverse('sequencers-list'))
         self.assertEqual(response.status_code, 200)
         data = response.json()
         sequencers = [x['name'] for x in data]
@@ -144,7 +144,7 @@ class TestFlowcell(BaseTestCase):
         sample4 = create_sample(get_random_name(), status=-1)  # failed P QC
         pool3.samples.add(*[sample3.pk, sample4.pk])
 
-        response = self.client.get(reverse('flowcell-pool-list'))
+        response = self.client.get(reverse('flowcells-pool-list'))
         data = response.json()
 
         self.assertEqual(response.status_code, 200)
@@ -195,7 +195,7 @@ class TestFlowcell(BaseTestCase):
         flowcell.lanes.add(*lanes1)
         flowcell.lanes.add(*lanes2)
 
-        response = self.client.get(reverse('flowcell-list'))
+        response = self.client.get(reverse('flowcells-list'))
         data = response.json()
         self.assertEqual(response.status_code, 200)
         lane_ids = [x['pk'] for x in data]
@@ -234,7 +234,7 @@ class TestFlowcell(BaseTestCase):
             'pool_id': pool2.pk,
         } for i in range(4, 8)]
 
-        response = self.client.post(reverse('flowcell-list'), {
+        response = self.client.post(reverse('flowcells-list'), {
             'data': json.dumps({
                 'flowcell_id': flowcell_id,
                 'sequencer': sequencer.pk,
@@ -259,7 +259,7 @@ class TestFlowcell(BaseTestCase):
         sequencer = create_sequencer(get_random_name(), 8, 200)
         flowcell_id = get_random_name()
 
-        response = self.client.post(reverse('flowcell-list'), {
+        response = self.client.post(reverse('flowcells-list'), {
             'data': json.dumps({
                 'flowcell_id': flowcell_id,
                 'sequencer': sequencer.pk,
@@ -288,7 +288,7 @@ class TestFlowcell(BaseTestCase):
         sequencer = create_sequencer(get_random_name(), 8, 200)
         flowcell_id = get_random_name()
 
-        response = self.client.post(reverse('flowcell-list'), {
+        response = self.client.post(reverse('flowcells-list'), {
             'data': json.dumps({
                 'flowcell_id': flowcell_id,
                 'sequencer': sequencer.pk,
@@ -317,7 +317,7 @@ class TestFlowcell(BaseTestCase):
 
         flowcell.lanes.add(lane)
 
-        response = self.client.post(reverse('flowcell-edit'), {
+        response = self.client.post(reverse('flowcells-edit'), {
             'data': json.dumps([{
                 'pk': lane.pk,
                 'loading_concentration': 1.0,
@@ -347,7 +347,7 @@ class TestFlowcell(BaseTestCase):
 
         flowcell.lanes.add(*[lane1.pk, lane2.pk])
 
-        response = self.client.post(reverse('flowcell-edit'), {
+        response = self.client.post(reverse('flowcells-edit'), {
             'data': json.dumps([{
                 'pk': lane1.pk,
                 'loading_concentration': 1.0,
@@ -379,7 +379,7 @@ class TestFlowcell(BaseTestCase):
 
         flowcell.lanes.add(lane)
 
-        response = self.client.post(reverse('flowcell-edit'), {
+        response = self.client.post(reverse('flowcells-edit'), {
             'data': json.dumps([{
                 'pk': lane.pk,
                 'quality_check': 'completed',
@@ -394,7 +394,7 @@ class TestFlowcell(BaseTestCase):
     def test_invalid_json(self):
         """ Ensure error is thrown if the JSON object is empty. """
         self.client.login(email='test@test.io', password='foo-bar')
-        response = self.client.post(reverse('flowcell-edit'), {})
+        response = self.client.post(reverse('flowcells-edit'), {})
         data = response.json()
         self.assertEqual(response.status_code, 400)
         self.assertFalse(data['success'])
