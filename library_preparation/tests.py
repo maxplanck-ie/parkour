@@ -124,7 +124,7 @@ class TestLibraryPreparation(BaseTestCase):
         updated_sample = LibraryPreparation.objects.get(pk=obj.pk).sample
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()['success'])
-        self.assertEqual(updated_sample.concentration, 2.0)
+        self.assertEqual(updated_sample.concentration_facility, 2.0)
         self.assertEqual(updated_sample.comments_facility, 'blah')
 
     def test_contains_invalid_objects(self):

@@ -13,7 +13,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
-from django.shortcuts import get_object_or_404
 # from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route, permission_classes
