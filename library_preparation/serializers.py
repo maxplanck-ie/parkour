@@ -61,7 +61,7 @@ class LibraryPreparationSerializer(ModelSerializer):
                   'spike_in_description', 'spike_in_volume', 'dilution_factor',
                   'comments', 'concentration_library', 'mean_fragment_size',
                   'qpcr_result', 'nM', 'comments_facility', 'index_i7_id',
-                  'index_i5_id', 'quality_check',)
+                  'index_i5_id', 'create_time', 'quality_check',)
 
     def to_internal_value(self, data):
         internal_value = super().to_internal_value(data)

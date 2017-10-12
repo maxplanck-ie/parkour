@@ -89,6 +89,12 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 }
             },
             {
+                text: 'Date',
+                dataIndex: 'create_time',
+                width: 90,
+                renderer: Ext.util.Format.dateRenderer('d.m.Y')
+            },
+            {
                 text: 'ng/µl',
                 tooltip: 'Library Concentration Facility (ng/µl)',
                 dataIndex: 'concentration_facility',

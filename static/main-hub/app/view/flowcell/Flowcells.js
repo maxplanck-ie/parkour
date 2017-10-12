@@ -60,6 +60,12 @@ Ext.define('MainHub.view.flowcell.Flowcells', {
             hideable: false,
             flex: 1
         }, {
+            text: 'Date',
+            dataIndex: 'create_time',
+            // width: 90,
+            flex: 1,
+            renderer: Ext.util.Format.dateRenderer('d.m.Y')
+        }, {
             text: 'Length',
             tooltip: 'Read Length',
             dataIndex: 'read_length_name',

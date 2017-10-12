@@ -3,10 +3,6 @@ Ext.define('MainHub.model.pooling.Pooling', {
 
     fields: [
         {
-            name: 'active',
-            type: 'bool'
-        },
-        {
             name: 'request',
             type: 'int'
         },
@@ -21,6 +17,10 @@ Ext.define('MainHub.model.pooling.Pooling', {
         {
             name: 'pool_name',
             type: 'string'
+        },
+        {
+            name: 'create_time',
+            type: 'date'
         },
         {
             name: 'pool_size',

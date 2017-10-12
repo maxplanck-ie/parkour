@@ -27,6 +27,10 @@ Ext.define('MainHub.model.flowcell.Flowcell', {
             type: 'string'
         },
         {
+            name: 'create_time',
+            type: 'date'
+        },
+        {
             name: 'read_length_name',
             type: 'string'
         },

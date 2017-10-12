@@ -19,6 +19,10 @@ Ext.define('MainHub.model.librarypreparation.LibraryPreparation', {
             type: 'string'
         },
         {
+            name: 'create_time',
+            type: 'date'
+        },
+        {
             name: 'request_name',
             type: 'string'
         },

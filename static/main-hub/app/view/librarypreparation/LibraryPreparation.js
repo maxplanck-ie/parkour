@@ -92,6 +92,12 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     }
                 },
                 {
+                    text: 'Date',
+                    dataIndex: 'create_time',
+                    width: 90,
+                    renderer: Ext.util.Format.dateRenderer('d.m.Y')
+                },
+                {
                     text: 'Protocol',
                     tooltip: 'Library Protocol',
                     dataIndex: 'library_protocol_name',

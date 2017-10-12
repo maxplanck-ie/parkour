@@ -47,6 +47,7 @@ class LaneSerializer(ModelSerializer):
     sequencer = SerializerMethodField()
     sequencer_name = SerializerMethodField()
     equal_representation = SerializerMethodField()
+    create_time = SerializerMethodField()
     quality_check = CharField(required=False)
 
     class Meta:
@@ -55,7 +56,8 @@ class LaneSerializer(ModelSerializer):
         fields = ('pk', 'name', 'flowcell', 'flowcell_id', 'pool', 'pool_name',
                   'read_length_name', 'index_i7_show', 'index_i5_show',
                   'sequencer', 'sequencer_name', 'equal_representation',
-                  'loading_concentration', 'phix', 'quality_check',)
+                  'loading_concentration', 'phix', 'create_time',
+                  'quality_check',)
         extra_kwargs = {
             'name': {'required': False},
             'pool': {'required': False},
@@ -98,6 +100,9 @@ class LaneSerializer(ModelSerializer):
 
         return libraries.count() + samples.count() == \
             eqn_libraries + eqn_samples
+
+    def get_create_time(self, obj):
+        return obj.flowcell.get().create_time
 
     def _get_libraries(self, obj):
         return obj.pool.libraries.filter(~Q(status=-1))

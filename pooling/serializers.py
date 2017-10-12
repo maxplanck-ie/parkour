@@ -46,6 +46,7 @@ class PoolingBaseSerializer(ModelSerializer):
     index_i7_id = SerializerMethodField()
     index_i5_id = SerializerMethodField()
     percentage_library = SerializerMethodField()
+    create_time = SerializerMethodField()
     quality_check = CharField(required=False)
 
     class Meta:
@@ -55,7 +56,7 @@ class PoolingBaseSerializer(ModelSerializer):
                   'pool', 'pool_name', 'pool_size', 'concentration_c1',
                   'concentration_facility', 'mean_fragment_size',
                   'index_i7_id', 'index_i5_id', 'index_i7', 'index_i5',
-                  'percentage_library', 'quality_check',)
+                  'percentage_library', 'create_time', 'quality_check',)
         extra_kwargs = {
             'name': {'required': False},
             'barcode': {'required': False},
@@ -107,6 +108,12 @@ class PoolingBaseSerializer(ModelSerializer):
             sum(samples.values_list('sequencing_depth', flat=True))
         return '{}%'.format(round(obj.sequencing_depth / sum_total * 100))
 
+    def get_create_time(self, obj):
+        try:
+            return obj.pooling.create_time
+        except Pooling.DoesNotExist:
+            return None
+
     def to_internal_value(self, data):
         internal_value = super().to_internal_value(data)
 
@@ -140,8 +147,7 @@ class PoolingLibrarySerializer(PoolingBaseSerializer):
         model = Library
 
     def get_concentration_c1(self, obj):
-        pooling_obj = Pooling.objects.get(library=obj)
-        return pooling_obj.concentration_c1
+        return obj.pooling.concentration_c1
 
     def get_mean_fragment_size(self, obj):
         return obj.mean_fragment_size
@@ -155,14 +161,15 @@ class PoolingSampleSerializer(PoolingBaseSerializer):
 
     def get_concentration_c1(self, obj):
         try:
-            pooling_obj = Pooling.objects.get(sample=obj)
-            return pooling_obj.concentration_c1
+            return obj.pooling.concentration_c1
         except Pooling.DoesNotExist:
             return None
 
     def get_mean_fragment_size(self, obj):
-        library_preparation_object = LibraryPreparation(sample=obj)
-        return library_preparation_object.mean_fragment_size
+        try:
+            return obj.librarypreparation.mean_fragment_size
+        except LibraryPreparation.DoesNotExist:
+            return None
 
 
 class PoolingSerializer(ModelSerializer):
