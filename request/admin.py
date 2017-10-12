@@ -6,7 +6,7 @@ from request.models import Request
 
 @admin.register(Request)
 class RequestAdmin(admin.ModelAdmin):
-    list_display = ('name', 'user', 'request_uploaded',)
+    list_display = ('name', 'user', 'request_uploaded', 'samples_submitted',)
     list_select_related = True
 
     search_fields = ('name', 'user__first_name', 'user__last_name',

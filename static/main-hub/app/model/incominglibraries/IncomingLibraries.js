@@ -49,6 +49,10 @@ Ext.define('MainHub.model.incominglibraries.IncomingLibraries', {
             type: 'string'
         },
         {
+            name: 'samples_submitted',
+            type: 'bool'
+        },
+        {
             name: 'quality_check',
             type: 'string',
             allowNull: true

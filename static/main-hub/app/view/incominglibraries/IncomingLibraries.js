@@ -3,6 +3,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
     xtype: 'incoming-libraries',
 
     requires: [
+        'MainHub.view.incominglibraries.CheckboxGroupingFeature',
         'MainHub.view.incominglibraries.IncomingLibrariesController'
     ],
 
@@ -333,11 +334,17 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
             ]
         },
         features: [{
-            ftype: 'grouping',
+            ftype: 'checkboxgrouping',
+            checkDataIndex: 'samples_submitted',
             startCollapsed: true,
             enableGroupingMenu: false,
             groupHeaderTpl: [
-                '<strong>Request: {children:this.getName}</strong> (# of Libraries/Samples: {rows.length}, Total Sequencing Depth: {children:this.getTotalDepth} M)',
+                '<strong>Request: {children:this.getName}</strong> ',
+                '(# of Libraries/Samples: {rows.length}, ',
+                'Total Sequencing Depth: {children:this.getTotalDepth} M)',
+                '<span style="float:right">',
+                '<input type="checkbox" class="group-checkbox" {children:this.getChecked}> Samples submitted',
+                '</span>',
                 {
                     getName: function(children) {
                         return children[0].get('request_name');
@@ -345,6 +352,9 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                     getTotalDepth: function(children) {
                         var sequencingDepths = Ext.Array.pluck(Ext.Array.pluck(children, 'data'), 'sequencing_depth');
                         return Ext.Array.sum(sequencingDepths);
+                    },
+                    getChecked: function(children) {
+                        return children[0].get(this.owner.checkDataIndex) ? 'checked' : '';
                     }
                 }
             ]

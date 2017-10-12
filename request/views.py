@@ -13,6 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404
 # from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route, permission_classes
@@ -151,15 +152,8 @@ class RequestViewSet(viewsets.GenericViewSet):
 
     def create(self, request):
         """ Create a request. """
-
-        if request.is_ajax():
-            post_data = request.data.get('data', [])
-            if isinstance(post_data, str):
-                post_data = json.loads(post_data)
-        else:
-            post_data = json.loads(request.data.get('data', '[]'))
+        post_data = self._get_post_data(request)
         post_data.update({'user': request.user.pk})
-
         serializer = self.serializer_class(data=post_data)
 
         if serializer.is_valid():
@@ -185,18 +179,7 @@ class RequestViewSet(viewsets.GenericViewSet):
     def edit(self, request, pk=None):
         """ Update request with a given id. """
         queryset = Request.objects.get(pk=pk)
-
-        if request.is_ajax():
-            post_data = request.data.get('data', {})
-            if isinstance(post_data, str):
-                post_data = json.loads(post_data)
-                # try:
-                #     post_data = json.loads(post_data):
-                # except Exception:
-                #     pass
-        else:
-            post_data = json.loads(request.data.get('data', '{}'))
-
+        post_data = self._get_post_data(request)
         post_data.update({'user': request.user.pk})
 
         serializer = self.get_serializer(data=post_data, instance=queryset)
@@ -212,11 +195,20 @@ class RequestViewSet(viewsets.GenericViewSet):
                 'errors': serializer.errors,
             }, 400)
 
+    @detail_route(methods=['post'])
+    @handle_request_id_exceptions
+    def samples_submitted(self, request, pk=None):
+        request_object = Request.objects.get(pk=pk)
+        post_data = self._get_post_data(request)
+        request_object.samples_submitted = post_data['result']
+        request_object.save(update_fields=['samples_submitted'])
+        return Response({'success': True})
+
     @handle_request_id_exceptions
     def destroy(self, request, pk=None):
         """ Delete a request. """
-        queryset = Request.objects.get(pk=pk)
-        queryset.delete()
+        request_object = Request.objects.get(pk=pk)
+        request_object.delete()
         return Response({'success': True})
 
     @detail_route(methods=['get'])
@@ -360,3 +352,13 @@ class RequestViewSet(viewsets.GenericViewSet):
             logger.exception(e)
 
         return JsonResponse({'success': not error, 'error': error})
+
+    def _get_post_data(self, request):
+        post_data = {}
+        if request.is_ajax():
+            post_data = request.data.get('data', {})
+            if isinstance(post_data, str):
+                post_data = json.loads(post_data)
+        else:
+            post_data = json.loads(request.data.get('data', '{}'))
+        return post_data

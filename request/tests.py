@@ -269,7 +269,7 @@ class TestRequests(BaseTestCase):
 
         response = self.client.post(reverse('request-edit',
             kwargs={'pk': 'blah'}),
-            data={'data': json.dumps({})
+            data={'data': json.dumps({}),
         })
         data = response.json()
 
@@ -290,6 +290,24 @@ class TestRequests(BaseTestCase):
         self.assertEqual(response.status_code, 404)
         self.assertFalse(data['success'])
         self.assertEqual(data['message'], 'Request does not exist.')
+
+    def test_samples_submitted(self):
+        """ Ensure set samples_submitted behaves correctly. """
+        self.client.login(email='foo@bar.io', password='foo-foo')
+
+        request = create_request(self.user)
+
+        response = self.client.post(
+            reverse('request-samples-submitted', kwargs={'pk': request.pk}), {
+                'data': json.dumps({
+                    'result': True
+                })
+            }
+        )
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertTrue(Request.objects.get(pk=request.pk).samples_submitted)
 
     def test_delete_request(self):
         """ Ensure delete request behaves correctly. """

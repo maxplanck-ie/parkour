@@ -35,6 +35,7 @@ class BaseSerializer(ModelSerializer):
     request = SerializerMethodField()
     request_name = SerializerMethodField()
     library_protocol_name = SerializerMethodField()
+    samples_submitted = SerializerMethodField()
 
     class Meta:
         list_serializer_class = BaseListSerializer
@@ -44,7 +45,7 @@ class BaseSerializer(ModelSerializer):
                   'sample_volume_facility', 'amount_facility', 'quality_check',
                   'size_distribution_facility', 'comments_facility',
                   'request', 'request_name', 'sequencing_depth',
-                  'library_protocol_name',)
+                  'library_protocol_name', 'samples_submitted',)
         extra_kwargs = {
             'name': {'required': False},
             'barcode': {'required': False},
@@ -62,6 +63,9 @@ class BaseSerializer(ModelSerializer):
 
     def get_library_protocol_name(self, obj):
         return obj.library_protocol.name
+
+    def get_samples_submitted(self, obj):
+        return obj.request.get().samples_submitted
 
 
 class LibrarySerializer(BaseSerializer):

@@ -50,6 +50,11 @@ class Request(DateTimeMixin):
         null=True,
     )
 
+    samples_submitted = models.BooleanField(
+        verbose_name='Samples Submitted',
+        default=False,
+    )
+
     def __str__(self):
         return '%s' % self.name
 
