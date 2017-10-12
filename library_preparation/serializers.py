@@ -1,3 +1,4 @@
+from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import (ModelSerializer, ListSerializer,
                                         IntegerField, CharField,
                                         SerializerMethodField)
@@ -19,11 +20,12 @@ class LibraryPreparationListSerializer(ListSerializer):
             obj = object_mapping.get(obj_id, None)
             if obj is not None:
                 if 'concentration_sample' in data.keys():
-                    obj.sample.concentration = data['concentration_sample']
+                    obj.sample.concentration_facility = \
+                        data['concentration_sample']
                 if 'comments_facility' in data.keys():
                     obj.sample.comments_facility = data['comments_facility']
-                obj.sample.save(
-                    update_fields=['concentration', 'comments_facility'])
+                obj.sample.save(update_fields=['concentration_facility',
+                                               'comments_facility'])
 
                 if 'quality_check' in data.keys():
                     if data['quality_check'] == 'passed':
@@ -75,7 +77,9 @@ class LibraryPreparationSerializer(ModelSerializer):
                     'concentration_sample': float(concentration_sample)
                 })
             except ValueError:
-                pass
+                raise ValidationError({
+                    'concentration_sample': ['A valid float is required.'],
+                })
 
         if comments_facility:
             internal_value.update({
@@ -106,7 +110,7 @@ class LibraryPreparationSerializer(ModelSerializer):
         return obj.sample.library_protocol.name
 
     def get_concentration_sample(self, obj):
-        return obj.sample.concentration
+        return obj.sample.concentration_facility
 
     def get_dilution_factor(self, obj):
         return obj.sample.dilution_factor
