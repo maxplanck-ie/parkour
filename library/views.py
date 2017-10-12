@@ -284,6 +284,3 @@ class LibrarySampleTree(viewsets.ViewSet):
 
 class LibraryViewSet(LibrarySampleBaseViewSet):
     serializer_class = LibrarySerializer
-    model_class = Library
-    model_name = model_class._meta.verbose_name
-    model_name_plural = model_class._meta.verbose_name_plural

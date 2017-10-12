@@ -127,7 +127,7 @@ class TestSamples(BaseTestCase):
         self.request.save()
         self.request.samples.add(self.sample)
 
-    def test_single_library(self):
+    def test_single_sample(self):
         """ Ensure get single sample behaves correctly. """
         response = self.client.get(reverse(
             'samples-detail',
@@ -135,19 +135,7 @@ class TestSamples(BaseTestCase):
         ))
         data = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(data['success'])
-        self.assertIn(self.sample.name, data['data']['name'])
-
-    def test_single_sample_no_id(self):
-        """ Ensure error is thrown if an id is not provided. """
-        response = self.client.get(reverse(
-            'samples-detail',
-            kwargs={'pk': 'blah'},
-        ))
-        data = response.json()
-        self.assertEqual(response.status_code, 400)
-        self.assertFalse(data['success'])
-        self.assertIn('Id is not provided.', data['message'])
+        self.assertIn(self.sample.name, data['name'])
 
     def test_single_sample_invalid_id(self):
         """ Ensure error is thrown if the id does not exist. """
@@ -155,10 +143,7 @@ class TestSamples(BaseTestCase):
             'samples-detail',
             kwargs={'pk': -1},
         ))
-        data = response.json()
         self.assertEqual(response.status_code, 404)
-        self.assertFalse(data['success'])
-        self.assertIn('Sample does not exist.', data['message'])
 
     def test_multiple_samples(self):
         """ Ensure get multiple samples behaves correctly. """
@@ -337,20 +322,7 @@ class TestSamples(BaseTestCase):
             'samples-detail',
             kwargs={'pk': sample.pk},
         ))
-        data = response.json()
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(data['success'])
-
-    def test_delete_sample_no_id(self):
-        """ Ensure error is thrown if an id is not provided. """
-        response = self.client.delete(reverse(
-            'samples-detail',
-            kwargs={'pk': 'blah'},
-        ))
-        data = response.json()
-        self.assertEqual(response.status_code, 400)
-        self.assertFalse(data['success'])
-        self.assertIn('Id is not provided.', data['message'])
+        self.assertEqual(response.status_code, 204)
 
     def test_delete_sample_incorrect_id(self):
         """ Ensure error is thrown if the id does not exist. """
@@ -358,7 +330,4 @@ class TestSamples(BaseTestCase):
             'samples-detail',
             kwargs={'pk': -1},
         ))
-        data = response.json()
         self.assertEqual(response.status_code, 404)
-        self.assertFalse(data['success'])
-        self.assertIn('Sample does not exist.', data['message'])

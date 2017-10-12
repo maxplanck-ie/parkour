@@ -136,19 +136,7 @@ class TestLibraries(BaseTestCase):
         ))
         data = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(data['success'])
-        self.assertIn(self.library.name, data['data']['name'])
-
-    def test_single_library_no_id(self):
-        """ Ensure error is thrown if an id is not provided. """
-        response = self.client.get(reverse(
-            'libraries-detail',
-            kwargs={'pk': 'blah'},
-        ))
-        data = response.json()
-        self.assertEqual(response.status_code, 400)
-        self.assertFalse(data['success'])
-        self.assertIn('Id is not provided.', data['message'])
+        self.assertIn(self.library.name, data['name'])
 
     def test_single_library_invalid_id(self):
         """ Ensure error is thrown if the id does not exist. """
@@ -156,10 +144,7 @@ class TestLibraries(BaseTestCase):
             'libraries-detail',
             kwargs={'pk': -1},
         ))
-        data = response.json()
         self.assertEqual(response.status_code, 404)
-        self.assertFalse(data['success'])
-        self.assertIn('Library does not exist.', data['message'])
 
     def test_multiple_libraries(self):
         """ Ensure get multiple libraries behaves correctly. """
@@ -366,20 +351,7 @@ class TestLibraries(BaseTestCase):
             'libraries-detail',
             kwargs={'pk': library.pk},
         ))
-        data = response.json()
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(data['success'])
-
-    def test_delete_library_no_id(self):
-        """ Ensure error is thrown if an id is not provided. """
-        response = self.client.delete(reverse(
-            'libraries-detail',
-            kwargs={'pk': 'blah'},
-        ))
-        data = response.json()
-        self.assertEqual(response.status_code, 400)
-        self.assertFalse(data['success'])
-        self.assertIn('Id is not provided.', data['message'])
+        self.assertEqual(response.status_code, 204)
 
     def test_delete_library_incorrect_id(self):
         """ Ensure error is thrown if the id does not exist. """
@@ -387,7 +359,4 @@ class TestLibraries(BaseTestCase):
             'libraries-detail',
             kwargs={'pk': -1},
         ))
-        data = response.json()
         self.assertEqual(response.status_code, 404)
-        self.assertFalse(data['success'])
-        self.assertIn('Library does not exist.', data['message'])

@@ -19,8 +19,8 @@ from .serializers import (OrganismSerializer, IndexTypeSerializer,
 logger = logging.getLogger('db')
 
 
-class MoveOtherMixin(object):
-    """ Move the 'Other' option to the end of the returning list. """
+class MoveOtherMixin:
+    """ Move the `Other` option to the end of the returning list. """
 
     def list(self, request):
         queryset = self.filter_queryset(self.get_queryset())
@@ -138,8 +138,11 @@ class LibraryTypeViewSet(MoveOtherMixin, viewsets.ReadOnlyModelViewSet):
         return queryset
 
 
-class LibrarySampleBaseViewSet(viewsets.ViewSet):
+class LibrarySampleBaseViewSet(viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
+
+    def get_queryset(self):
+        return self.get_serializer().Meta.model.objects.all()
 
     # TODO: add pagination
     def list(self, request):
@@ -150,16 +153,16 @@ class LibrarySampleBaseViewSet(viewsets.ViewSet):
         ids = json.loads(request.query_params.get('ids', '[]'))
 
         if request_id:
-            request_queryset = Request.objects.filter(pk=request_id)
+            request_queryset = Request.objects.all().filter(pk=request_id)
         else:
-            request_queryset = Request.objects.order_by('-create_time')
+            request_queryset = Request.objects.all().order_by('-create_time')
 
         if not request.user.is_staff:
             request_queryset = request_queryset.filter(user=request.user)
 
         for request_obj in request_queryset:
             # TODO: sort by item['barcode'][3:]
-            records = getattr(request_obj, self.model_name_plural.lower())
+            records = getattr(request_obj, self._get_model_name_plural())
             if ids:
                 try:
                     records = records.filter(pk__in=ids)
@@ -224,28 +227,6 @@ class LibrarySampleBaseViewSet(viewsets.ViewSet):
                     'message': 'Invalid payload.',
                 }, 400)
 
-    def retrieve(self, request, pk=None):
-        """ Get a library/sample with a given id. """
-        try:
-            obj = self.model_class.objects.get(pk=int(pk))
-            serializer = self.serializer_class(obj)
-            return Response({
-                'success': True,
-                'data': serializer.data
-            })
-
-        except ValueError:
-            return Response({
-                'success': False,
-                'message': 'Id is not provided.',
-            }, 400)
-
-        except self.model_class.DoesNotExist:
-            return Response({
-                'success': False,
-                'message': '%s does not exist.' % self.model_name,
-            }, 404)
-
     @list_route(methods=['post'])
     def edit(self, request):
         """ Update multiple libraries/samples. """
@@ -258,9 +239,10 @@ class LibrarySampleBaseViewSet(viewsets.ViewSet):
             }, 400)
 
         ids = [x['pk'] for x in post_data]
-        objects = self.model_class.objects.filter(pk__in=ids)
-        serializer = self.serializer_class(data=post_data, instance=objects,
-                                           many=True)
+        objects = self._get_model().objects.filter(pk__in=ids)
+        serializer = self.serializer_class(
+            data=post_data, instance=objects, many=True)
+
         if serializer.is_valid():
             serializer.save()
             return Response({'success': True})
@@ -282,36 +264,19 @@ class LibrarySampleBaseViewSet(viewsets.ViewSet):
                     'message': 'Invalid payload.',
                 }, 400)
 
-    # @list_route(methods=['post'])
-    # def delete(self, request):
-    #     pass
-
-    def destroy(self, request, pk=None):
-        """ Delete a library/sample with a given id. """
-        try:
-            obj = self.model_class.objects.get(pk=int(pk))
-            obj.delete()
-            return Response({'success': True})
-
-        except ValueError:
-            return Response({
-                'success': False,
-                'message': 'Id is not provided.',
-            }, 400)
-
-        except self.model_class.DoesNotExist:
-            return Response({
-                'success': False,
-                'message': '%s does not exist.' % self.model_name,
-            }, 404)
-
     def _create_or_update_valid(self, valid_data, ids=None):
         """ Create or update valid objects. """
         if not ids:
             serializer = self.serializer_class(data=valid_data, many=True)
         else:
-            objects = self.model_class.objects.filter(pk__in=ids)
+            objects = self._get_model().objects.filter(pk__in=ids)
             serializer = self.serializer_class(
                 data=valid_data, instance=objects, many=True)
         serializer.is_valid()
         return serializer.save()
+
+    def _get_model(self):
+        return self.get_serializer().Meta.model
+
+    def _get_model_name_plural(self):
+        return self._get_model()._meta.verbose_name_plural.lower()

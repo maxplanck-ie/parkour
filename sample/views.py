@@ -107,6 +107,3 @@ class NucleicAcidTypeViewSet(viewsets.ReadOnlyModelViewSet):
 
 class SampleViewSet(LibrarySampleBaseViewSet):
     serializer_class = SampleSerializer
-    model_class = Sample
-    model_name = model_class._meta.verbose_name
-    model_name_plural = model_class._meta.verbose_name_plural
