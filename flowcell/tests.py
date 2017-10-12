@@ -10,7 +10,7 @@ from index_generator.tests import create_pool
 from .models import Sequencer, Lane, Flowcell
 
 
-def create_sequencer(name, lanes, lane_capacity):
+def create_sequencer(name, lanes=8, lane_capacity=200):
     sequencer = Sequencer(
         name=name,
         lanes=lanes,
@@ -84,7 +84,7 @@ class TestLaneModel(BaseTestCase):
 class TestFlowcellModel(BaseTestCase):
     def setUp(self):
         sequencer = create_sequencer(
-            get_random_name(), lanes=1, lane_capacity=200)
+            get_random_name(), lanes=1)
         self.flowcell = create_flowcell(get_random_name(), sequencer)
 
     def test_lane_name(self):
@@ -103,8 +103,7 @@ class TestSequencer(BaseTestCase):
         """ Ensure get sequencer list behaves correctly. """
         self.client.login(email='test@test.io', password='foo-bar')
 
-        sequencer = create_sequencer(
-            get_random_name(), lanes=1, lane_capacity=200)
+        sequencer = create_sequencer(get_random_name())
 
         response = self.client.get(reverse('sequencers-list'))
         self.assertEqual(response.status_code, 200)
@@ -175,7 +174,7 @@ class TestFlowcell(BaseTestCase):
         pool2.libraries.add(library2)
         pool2.samples.add(sample2)
 
-        sequencer = create_sequencer(get_random_name(), 4, 200)
+        sequencer = create_sequencer(get_random_name(), lanes=4)
         flowcell = create_flowcell(get_random_name(), sequencer)
 
         lanes1 = []
@@ -213,15 +212,15 @@ class TestFlowcell(BaseTestCase):
         sample1 = create_sample(get_random_name(), 4)
         sample2 = create_sample(get_random_name(), 4)
 
-        pool1 = create_pool(self.user)
+        pool1 = create_pool(self.user, multiplier=4)
         pool1.libraries.add(library1)
         pool1.samples.add(sample1)
 
-        pool2 = create_pool(self.user)
+        pool2 = create_pool(self.user, multiplier=8)
         pool2.libraries.add(library2)
         pool2.samples.add(sample2)
 
-        sequencer = create_sequencer(get_random_name(), 8, 200)
+        sequencer = create_sequencer(get_random_name())
         flowcell_id = get_random_name()
 
         lanes1 = [{
@@ -248,15 +247,19 @@ class TestFlowcell(BaseTestCase):
         self.assertIn(flowcell_id, flowcells)
 
         updated_library1 = library1.__class__.objects.get(pk=library1.pk)
+        updated_library2 = library2.__class__.objects.get(pk=library2.pk)
+        updated_sample1 = sample1.__class__.objects.get(pk=sample1.pk)
         updated_sample2 = sample2.__class__.objects.get(pk=sample2.pk)
         self.assertEqual(updated_library1.status, 5)
-        self.assertEqual(updated_sample2.status, 5)
+        self.assertEqual(updated_library2.status, 4)
+        self.assertEqual(updated_sample1.status, 5)
+        self.assertEqual(updated_sample2.status, 4)
 
     def test_create_flowcell_no_lanes(self):
         """ Ensure error is thrown if no lanes are provided. """
         self.client.login(email='test@test.io', password='foo-bar')
 
-        sequencer = create_sequencer(get_random_name(), 8, 200)
+        sequencer = create_sequencer(get_random_name())
         flowcell_id = get_random_name()
 
         response = self.client.post(reverse('flowcells-list'), {
@@ -285,7 +288,7 @@ class TestFlowcell(BaseTestCase):
             'pool_id': pool.pk,
         } for i in range(4)]
 
-        sequencer = create_sequencer(get_random_name(), 8, 200)
+        sequencer = create_sequencer(get_random_name())
         flowcell_id = get_random_name()
 
         response = self.client.post(reverse('flowcells-list'), {
@@ -309,7 +312,7 @@ class TestFlowcell(BaseTestCase):
         pool = create_pool(self.user)
         pool.libraries.add(library)
 
-        sequencer = create_sequencer(get_random_name(), 1, 200)
+        sequencer = create_sequencer(get_random_name(), lanes=1)
         flowcell = create_flowcell(get_random_name(), sequencer)
 
         lane = Lane(name=get_random_name(len=6), pool=pool)
@@ -336,7 +339,7 @@ class TestFlowcell(BaseTestCase):
         pool = create_pool(self.user)
         pool.libraries.add(library)
 
-        sequencer = create_sequencer(get_random_name(), 2, 200)
+        sequencer = create_sequencer(get_random_name(), lanes=2)
         flowcell = create_flowcell(get_random_name(), sequencer)
 
         lane1 = Lane(name=get_random_name(len=6), pool=pool)
@@ -371,7 +374,7 @@ class TestFlowcell(BaseTestCase):
         pool = create_pool(self.user)
         pool.libraries.add(library)
 
-        sequencer = create_sequencer(get_random_name(), 1, 200)
+        sequencer = create_sequencer(get_random_name(), lanes=1)
         flowcell = create_flowcell(get_random_name(), sequencer)
 
         lane = Lane(name=get_random_name(len=6), pool=pool)

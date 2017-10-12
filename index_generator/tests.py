@@ -21,8 +21,8 @@ from sample.tests import create_sample
 User = get_user_model()
 
 
-def create_pool(user, save=True):
-    pool_size = PoolSize(size=25)
+def create_pool(user, multiplier=1, size=200, save=True):
+    pool_size = PoolSize(multiplier=multiplier, size=size)
     pool_size.save()
 
     pool = Pool(user=user, size=pool_size)
