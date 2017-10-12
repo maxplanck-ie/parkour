@@ -16,6 +16,7 @@ from rest_framework.permissions import IsAdminUser
 from xlwt import Workbook, XFStyle
 
 from common.views import CsrfExemptSessionAuthentication
+from common.mixins import MultiEditMixin
 from index_generator.models import Pool
 from library_sample_shared.models import ReadLength, IndexI7, IndexI5
 from .models import Sequencer, Lane, Flowcell
@@ -222,15 +223,13 @@ class PoolViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data['records'])
 
 
-class FlowcellViewSet(viewsets.ViewSet):
+class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAdminUser]
     authentication_classes = [CsrfExemptSessionAuthentication]
+    serializer_class = LaneSerializer
 
-    def list(self, request):
-        """ Get the list of all flowcells. """
-        queryset = Lane.objects.all().filter(completed=False)
-        serializer = LaneSerializer(queryset, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        return Lane.objects.all().filter(completed=False)
 
     def create(self, request):
         """ Add a flowcell. """
@@ -259,59 +258,6 @@ class FlowcellViewSet(viewsets.ViewSet):
                 'message': 'Invalid payload.',
                 'errors': serializer.errors,
             }, 400)
-
-    @list_route(methods=['post'])
-    def edit(self, request):
-        """ Update multiple lanes. """
-
-        if request.is_ajax():
-            post_data = request.data.get('data', [])
-        else:
-            post_data = json.loads(request.data.get('data', '[]'))
-
-        if not post_data:
-            return Response({
-                'success': False,
-                'message': 'Invalid payload.',
-            }, 400)
-
-        lane_ids = []
-        for obj in post_data:
-            try:
-                lane_ids.append(int(obj['pk']))
-            except (KeyError, ValueError):
-                continue
-        lanes = Lane.objects.filter(pk__in=lane_ids)
-
-        serializer = LaneSerializer(data=post_data, instance=lanes, many=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'success': True})
-        else:
-            # Try to update valid lanes
-            valid_data = [item[1] for item in zip(serializer.errors, post_data)
-                          if not item[0]]
-
-            if any(valid_data):
-                self._update_valid(valid_data)
-                return Response({
-                    'success': True,
-                    'message': 'Some lanes cannot be updated.',
-                })
-            else:
-                return Response({
-                    'success': False,
-                    'message': 'Invalid payload.',
-                }, 400)
-
-    def _update_valid(self, data):
-        """ Update valid lanes. """
-        ids = [x['pk'] for x in data]
-        objects = Lane.objects.filter(pk__in=ids)
-        serializer = LaneSerializer(
-            data=data, instance=objects, many=True)
-        serializer.is_valid()
-        serializer.save()
 
     @list_route(methods=['get'])
     def pool_list(self, request):

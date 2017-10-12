@@ -359,7 +359,7 @@ class TestFlowcell(BaseTestCase):
         data = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()['success'])
-        self.assertEqual(data['message'], 'Some lanes cannot be updated.')
+        self.assertEqual(data['message'], 'Some records cannot be updated.')
         self.assertEqual(
             Lane.objects.get(pk=lane1.pk).loading_concentration, 1.0)
 

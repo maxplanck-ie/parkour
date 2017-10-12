@@ -4,6 +4,70 @@ from rest_framework.response import Response
 from rest_framework.decorators import list_route
 
 
+class MultiEditMixin:
+    """
+    Provides the `edit()` action, which updates multiple objects.
+    """
+
+    @list_route(methods=['post'])
+    def edit(self, request):
+        """ Update multiple objects. """
+
+        if request.is_ajax():
+            post_data = request.data.get('data', [])
+        else:
+            post_data = json.loads(request.data.get('data', '[]'))
+
+        if not post_data:
+            return Response({
+                'success': False,
+                'message': 'Invalid payload.',
+            }, 400)
+
+        ids = []
+        for obj in post_data:
+            try:
+                ids.append(int(obj['pk']))
+            except (KeyError, ValueError):
+                continue
+
+        objects = self._get_model().objects.filter(pk__in=ids)
+        serializer = self.get_serializer(
+            data=post_data, instance=objects, many=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'success': True})
+        else:
+            # Try to update valid lanes
+            valid_data = [item[1] for item in zip(serializer.errors, post_data)
+                          if not item[0]]
+
+            if any(valid_data):
+                self._update_valid(valid_data)
+                return Response({
+                    'success': True,
+                    'message': 'Some records cannot be updated.',
+                })
+            else:
+                return Response({
+                    'success': False,
+                    'message': 'Invalid payload.',
+                }, 400)
+
+    def _update_valid(self, data):
+        """ Update valid objects. """
+        ids = [x['pk'] for x in data]
+        objects = self._get_model().objects.filter(pk__in=ids)
+        serializer = self.get_serializer(
+            data=data, instance=objects, many=True)
+        serializer.is_valid()
+        serializer.save()
+
+    def _get_model(self):
+        return self.get_serializer().Meta.model
+
+
 class LibrarySampleMultiEditMixin(object):
     """
     Provides the `edit()` action, which updates multiple objects and deals with

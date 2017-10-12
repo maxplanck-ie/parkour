@@ -14,6 +14,7 @@ from rest_framework.permissions import IsAdminUser
 from xlwt import Workbook, XFStyle, Formula
 
 from common.views import CsrfExemptSessionAuthentication
+from common.mixins import MultiEditMixin
 from library_sample_shared.utils import get_indices_ids
 from sample.models import Sample
 from pooling.models import Pooling
@@ -86,75 +87,21 @@ def update(request):
     return JsonResponse({'success': not error, 'error': error})
 
 
-class LibraryPreparationViewSet(viewsets.ViewSet):
+class LibraryPreparationViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAdminUser]
     authentication_classes = [CsrfExemptSessionAuthentication]
+    serializer_class = LibraryPreparationSerializer
 
     def list(self, request):
-        """ Get the list of all library preparation objects. """
-        queryset = LibraryPreparation.objects.select_related('sample').filter(
-            Q(sample__status=2) | Q(sample__status=-2)
-        )
-
-        serializer = LibraryPreparationSerializer(queryset, many=True)
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
         data = sorted(serializer.data, key=lambda x: x['barcode'][3:])
         return Response(data)
 
-    @list_route(methods=['post'])
-    def edit(self, request):
-        """ Update multiple library preparation objects. """
-
-        if request.is_ajax():
-            post_data = request.data.get('data', [])
-        else:
-            post_data = json.loads(request.data.get('data', '[]'))
-
-        if not post_data:
-            return Response({
-                'success': False,
-                'message': 'Invalid payload.',
-            }, 400)
-
-        ids = []
-        for x in post_data:
-            try:
-                ids.append(int(x['pk']))
-            except (KeyError, ValueError):
-                continue
-
-        objects = LibraryPreparation.objects.filter(pk__in=ids)
-        serializer = LibraryPreparationSerializer(
-            data=post_data, instance=objects, many=True)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'success': True})
-
-        else:
-            # Try to update valid objects
-            valid_data = [item[1] for item in zip(serializer.errors, post_data)
-                          if not item[0]]
-
-            if any(valid_data):
-                self._update_valid(valid_data)
-                return Response({
-                    'success': True,
-                    'message': 'Some records cannot be updated.',
-                })
-            else:
-                return Response({
-                    'success': False,
-                    'message': 'Invalid payload.',
-                }, 400)
-
-    def _update_valid(self, data):
-        """ Update valid objects. """
-        ids = [x['pk'] for x in data]
-        objects = LibraryPreparation.objects.filter(pk__in=ids)
-        serializer = LibraryPreparationSerializer(
-            data=data, instance=objects, many=True)
-        serializer.is_valid()
-        serializer.save()
+    def get_queryset(self):
+        return LibraryPreparation.objects.select_related('sample').filter(
+            Q(sample__status=2) | Q(sample__status=-2)
+        )
 
     @list_route(methods=['post'])
     # @authentication_classes((CsrfExemptSessionAuthentication))

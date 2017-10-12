@@ -134,33 +134,13 @@ class TestRequests(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(request.name, data['name'])
 
-    def test_single_request_no_id(self):
-        """ Ensure error is thrown if an id is not provided. """
-        self.client.login(email='foo@bar.io', password='foo-foo')
-
-        response = self.client.get(reverse(
-            'request-detail',
-            kwargs={'pk': 'blah'}
-        ))
-        data = response.json()
-
-        self.assertEqual(response.status_code, 400)
-        self.assertFalse(data['success'])
-        self.assertEqual(data['message'], 'Id is not provided.')
-
     def test_single_request_invalid_id(self):
         """ Ensure error is thrown if the id does not exist. """
         self.client.login(email='foo@bar.io', password='foo-foo')
-
         response = self.client.get(reverse(
-            'request-detail',
-            kwargs={'pk': -1}
+            'request-detail', kwargs={'pk': -1}
         ))
-        data = response.json()
-
         self.assertEqual(response.status_code, 404)
-        self.assertFalse(data['success'])
-        self.assertEqual(data['message'], 'Request does not exist.')
 
     def test_create_request(self):
         """ Ensure create request behaves correctly. """
@@ -263,33 +243,14 @@ class TestRequests(BaseTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertFalse(response.json()['success'])
 
-    def test_update_request_no_id(self):
-        """ Ensure delete request behaves correctly. """
-        self.client.login(email='foo@bar.io', password='foo-foo')
-
-        response = self.client.post(reverse('request-edit',
-            kwargs={'pk': 'blah'}),
-            data={'data': json.dumps({}),
-        })
-        data = response.json()
-
-        self.assertEqual(response.status_code, 400)
-        self.assertFalse(data['success'])
-        self.assertEqual(data['message'], 'Id is not provided.')
-
     def test_update_request_invalid_id(self):
         """ Ensure error is thrown if the id does not exist. """
         self.client.login(email='foo@bar.io', password='foo-foo')
-
         response = self.client.post(reverse('request-edit',
             kwargs={'pk': -1}),
             data={'data': json.dumps({})
         })
-        data = response.json()
-
         self.assertEqual(response.status_code, 404)
-        self.assertFalse(data['success'])
-        self.assertEqual(data['message'], 'Request does not exist.')
 
     def test_samples_submitted(self):
         """ Ensure set samples_submitted behaves correctly. """
@@ -319,36 +280,16 @@ class TestRequests(BaseTestCase):
             kwargs={'pk': request.pk}
         ))
 
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.json()['success'])
-
-    def test_delete_request_no_id(self):
-        """ Ensure error is thrown if an id is not provided. """
-        self.client.login(email='foo@bar.io', password='foo-foo')
-
-        response = self.client.delete(reverse(
-            'request-detail',
-            kwargs={'pk': 'blah'}
-        ))
-        data = response.json()
-
-        self.assertEqual(response.status_code, 400)
-        self.assertFalse(data['success'])
-        self.assertEqual(data['message'], 'Id is not provided.')
+        self.assertEqual(response.status_code, 204)
 
     def test_delete_request_invalid_id(self):
         """ Ensure error is thrown if the id does not exist. """
         self.client.login(email='foo@bar.io', password='foo-foo')
-
         response = self.client.delete(reverse(
             'request-detail',
             kwargs={'pk': -1}
         ))
-        data = response.json()
-
         self.assertEqual(response.status_code, 404)
-        self.assertFalse(data['success'])
-        self.assertEqual(data['message'], 'Request does not exist.')
 
     def test_get_records(self):
         """ Ensure get request's records behaves correctly. """

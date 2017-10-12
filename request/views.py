@@ -74,40 +74,15 @@ def upload_files(request):
     })
 
 
-@login_required
-def get_files(request):
-    """ Get the list of files for the given request id. """
-    file_ids = json.loads(request.GET.get('file_ids', '[]'))
-    error = ''
-    data = []
-
-    try:
-        files = [f for f in FileRequest.objects.all() if f.id in file_ids]
-        data = [
-            {
-                'id': file.id,
-                'name': file.name,
-                'size': file.file.size,
-                'path': settings.MEDIA_URL + file.file.name,
-            }
-            for file in files
-        ]
-
-    except Exception as e:
-        error = 'Could not get the attached files.'
-        logger.exception(e)
-
-    return JsonResponse({'success': not error, 'error': error, 'data': data})
-
-
-class RequestViewSet(viewsets.GenericViewSet):
+class RequestViewSet(viewsets.ModelViewSet):
     serializer_class = RequestSerializer
     pagination_class = StandardResultsSetPagination
     authentication_classes = [CsrfExemptSessionAuthentication]
 
     def get_queryset(self):
         queryset = Request.objects.prefetch_related(
-            'user', 'libraries', 'samples', 'files').order_by('-create_time')
+            'user', 'libraries', 'samples', 'files'
+        ).order_by('-create_time')
 
         # If a search query is given
         search_query = self.request.query_params.get('query', None)
@@ -130,6 +105,7 @@ class RequestViewSet(viewsets.GenericViewSet):
             pass
         else:
             queryset = queryset.filter(user=self.request.user)
+
         return queryset
 
     def list(self, request):
@@ -166,22 +142,14 @@ class RequestViewSet(viewsets.GenericViewSet):
                 'errors': serializer.errors,
             }, 400)
 
-    @handle_request_id_exceptions
-    def retrieve(self, request, pk=None):
-        """ Get request with a given id. """
-        queryset = Request.objects.get(pk=pk)
-        serializer = self.get_serializer(queryset)
-        return Response(serializer.data)
-
     @detail_route(methods=['post'])
-    @handle_request_id_exceptions
     def edit(self, request, pk=None):
         """ Update request with a given id. """
-        queryset = Request.objects.get(pk=pk)
+        instance = self.get_object()
         post_data = self._get_post_data(request)
         post_data.update({'user': request.user.pk})
 
-        serializer = self.get_serializer(data=post_data, instance=queryset)
+        serializer = self.get_serializer(data=post_data, instance=instance)
 
         if serializer.is_valid():
             serializer.save()
@@ -195,26 +163,17 @@ class RequestViewSet(viewsets.GenericViewSet):
             }, 400)
 
     @detail_route(methods=['post'])
-    @handle_request_id_exceptions
     def samples_submitted(self, request, pk=None):
-        request_object = Request.objects.get(pk=pk)
+        instance = self.get_object()
         post_data = self._get_post_data(request)
-        request_object.samples_submitted = post_data['result']
-        request_object.save(update_fields=['samples_submitted'])
-        return Response({'success': True})
-
-    @handle_request_id_exceptions
-    def destroy(self, request, pk=None):
-        """ Delete a request. """
-        request_object = Request.objects.get(pk=pk)
-        request_object.delete()
+        instance.samples_submitted = post_data['result']
+        instance.save(update_fields=['samples_submitted'])
         return Response({'success': True})
 
     @detail_route(methods=['get'])
-    @handle_request_id_exceptions
     def get_records(self, request, pk=None):
         """ Get the list of record's submitted libraries and samples. """
-        queryset = Request.objects.get(pk=pk)
+        instance = self.get_object()
         data = [{
             'pk': obj.pk,
             'record_type': obj.__class__.__name__,
@@ -222,30 +181,31 @@ class RequestViewSet(viewsets.GenericViewSet):
             'barcode': obj.barcode,
             'is_converted': True
             if hasattr(obj, 'is_converted') and obj.is_converted else False,
-        } for obj in queryset.records]
+        } for obj in instance.records]
 
         data = sorted(data, key=lambda x: x['barcode'][3:])
         return Response(data)
 
     @detail_route(methods=['get'])
-    @handle_request_id_exceptions
     def get_files(self, request, pk=None):
-        """ Get the list of attached files. """
-        queryset = Request.objects.get(pk=pk).files.order_by('name')
-        serializer = RequestFileSerializer(queryset, many=True)
+        """ Get the list of attached files for a request with a given id. """
+        instance = self.get_object()
+        files = instance.files.all().order_by('name')
+        serializer = RequestFileSerializer(files, many=True)
         return Response(serializer.data)
 
     @detail_route(methods=['get'])
-    @handle_request_id_exceptions
     def download_deep_sequencing_request(self, request, pk=None):
         """ Generate a deep sequencing request form in PDF. """
-        req = Request.objects.get(pk=pk)
-        user = req.user
+        instance = self.get_object()
+        user = instance.user
         cost_unit = ', '.join(sorted(
             user.cost_unit.values_list('name', flat=True)
         ))
 
-        objects = list(itertools.chain(req.samples.all(), req.libraries.all()))
+        objects = list(itertools.chain(
+            instance.samples.all(), instance.libraries.all()
+        ))
         records = [{
             'name': obj.name,
             'type': obj.__class__.__name__,
@@ -255,7 +215,7 @@ class RequestViewSet(viewsets.GenericViewSet):
         records = sorted(records, key=lambda x: x['barcode'][3:])
 
         html = render_to_string('deepseq_request_pdf.html', {
-            'request_name': req.name,
+            'request_name': instance.name,
             'date': datetime.now().strftime('%d.%m.%Y'),
             'user': user.get_full_name(),
             'phone': user.phone if user.phone else '',
@@ -263,15 +223,16 @@ class RequestViewSet(viewsets.GenericViewSet):
             'organization':
             user.organization.name if user.organization else '',
             'cost_unit': cost_unit,
-            'description': req.description,
+            'description': instance.description,
             'records': records,
         })
 
         pdf = pdfkit.from_string(html, False, options=settings.PDF_OPTIONS)
 
         # Generate response
-        request_name = normalize('NFKD', req.name).encode('ASCII', 'ignore')
-        request_name = request_name.decode('utf-8')
+        request_name = normalize(
+            'NFKD', instance.name
+        ).encode('ASCII', 'ignore').decode('utf-8')
         f_name = request_name + '_Deep_Sequencing_Request.pdf'
         response = HttpResponse(pdf, content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="%s"' % f_name
@@ -279,13 +240,12 @@ class RequestViewSet(viewsets.GenericViewSet):
         return response
 
     @detail_route(methods=['post'])
-    @handle_request_id_exceptions
     def upload_deep_sequencing_request(self, request, pk=None):
         """
         Upload a deep sequencing request with the PI's signature and
         change request's libraries' and samples' statuses to 1.
         """
-        req = Request.objects.get(pk=pk)
+        instance = self.get_object()
 
         if not any(request.FILES):
             return JsonResponse({
@@ -293,14 +253,14 @@ class RequestViewSet(viewsets.GenericViewSet):
                 'message': 'File is missing.'
             }, status=400)
 
-        req.deep_seq_request = request.FILES.get('file')
-        req.save()
+        instance.deep_seq_request = request.FILES.get('file')
+        instance.save()
 
-        file_name = req.deep_seq_request.name.split('/')[-1]
-        file_path = settings.MEDIA_URL + req.deep_seq_request.name
+        file_name = instance.deep_seq_request.name.split('/')[-1]
+        file_path = settings.MEDIA_URL + instance.deep_seq_request.name
 
-        req.libraries.all().update(status=1)
-        req.samples.all().update(status=1)
+        instance.libraries.all().update(status=1)
+        instance.samples.all().update(status=1)
 
         return JsonResponse({
              'success': True,
@@ -309,13 +269,12 @@ class RequestViewSet(viewsets.GenericViewSet):
         })
 
     @detail_route(methods=['post'])
-    @handle_request_id_exceptions
     @permission_classes((IsAdminUser))
     def send_email(self, request, pk=None):
         """ Send an email to the user. """
         error = ''
 
-        req = Request.objects.get(pk=pk)
+        instance = self.get_object()
         subject = request.data.get('subject', '')
         message = request.data.get('message', '')
         include_failed_records = json.loads(request.POST.get(
@@ -329,21 +288,21 @@ class RequestViewSet(viewsets.GenericViewSet):
                 raise ValueError('Email subject and/or message is missing.')
 
             if include_failed_records:
-                records = list(req.libraries.filter(status=-1)) + \
-                    list(req.samples.filter(status=-1))
+                records = list(instance.libraries.filter(status=-1)) + \
+                    list(instance.samples.filter(status=-1))
                 records = sorted(records, key=lambda x: x.barcode[3:])
 
             send_mail(
                 subject=subject,
                 message='',
                 html_message=render_to_string('email.html', {
-                    'full_name': req.user.get_full_name(),
+                    'full_name': instance.user.get_full_name(),
                     'message': message,
                     'records': records,
                 }),
                 # from_email=settings.SERVER_EMAIL,
                 from_email='deepseq@ie-freiburg.mpg.de',
-                recipient_list=[req.user.email],
+                recipient_list=[instance.user.email],
             )
 
         except Exception as e:
