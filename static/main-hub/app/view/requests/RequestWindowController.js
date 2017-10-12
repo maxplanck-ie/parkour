@@ -299,11 +299,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
             wnd.record.get('pk')
         );
 
-        form.submit({
-            url: url,
-            method: 'GET',
-            target: '_blank'
-        });
+        form.submit({ url: url, method: 'GET' });
     },
 
     uploadPDF: function(btn) {
