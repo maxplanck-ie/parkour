@@ -132,7 +132,12 @@ Ext.define('MainHub.view.flowcell.FlowcellWindow', {
                     width: 90,
                     renderer: function(value, meta) {
                         var pool = meta.record;
-                        var poolSize = Ext.getStore('poolSizesStore').findRecord('id', value);
+
+                        // Exact match
+                        var poolSize = Ext.getStore('poolSizesStore').findRecord(
+                            'id', value, 0, false, false, true
+                        );
+
                         var size = pool.get('pool_size') - pool.get('loaded');
                         return size === 0 ? size : size + 'x' + poolSize.get('size');
                     }

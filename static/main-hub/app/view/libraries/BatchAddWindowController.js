@@ -1015,6 +1015,8 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         }
 
         store.clearFilter();
+
+        // Exact match
         var item = store.findRecord('id', value, 0, false, false, true);
 
         return item ? item.get('name') : '';
