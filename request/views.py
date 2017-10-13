@@ -4,7 +4,7 @@ from datetime import datetime
 from unicodedata import normalize
 import itertools
 
-import pdfkit
+from fpdf import FPDF
 
 from django.http import HttpResponse, JsonResponse
 from django.conf import settings
@@ -47,6 +47,51 @@ def handle_request_id_exceptions(func):
             }, 404)
 
     return wrapper
+
+
+class PDF(FPDF):
+    def __init__(self, title='Title', font='Arial'):
+        self.title = title
+        self.font = font
+        super().__init__()
+
+    def header(self):
+        self.set_font(self.font, style='B', size=14)  # Arial bold 15
+        self.cell(0, 10, self.title, align='C')       # Title
+        self.ln(10)                                   # Line break
+
+    def footer(self):
+        self.set_y(-15)  # Position at 1.5 cm from bottom
+        self.set_font(self.font, size=8)  # Arial 8
+        # Page number
+        self.cell(0, 10, 'Page ' + str(self.page_no()) + ' of {nb}', 0, 0, 'C')
+
+    def info_row(self, title, value):
+        self.set_font(self.font, style='B', size=11)
+        self.cell(35, 10, title + ':')
+        self.set_font(self.font, size=11)
+        self.cell(0, 10, value)
+        self.ln(6)
+
+    def multi_info_row(self, title, value):
+        self.set_font(self.font, style='B', size=11)
+        self.ln(3)
+        self.cell(35, 4, title + ':')
+        self.set_font(self.font, size=11)
+        self.multi_cell(0, 5, value)
+        self.ln(6)
+
+    def table_row(self, index, name, barcode, type, depth, bold=False):
+        if bold:
+            self.set_font(self.font, style='B', size=11)
+        else:
+            self.set_font(self.font, size=11)
+        self.cell(10, 10, str(index))
+        self.cell(60, 10, name)
+        self.cell(40, 10, barcode)
+        self.cell(35, 10, type)
+        self.cell(0, 10, str(depth))
+        self.ln(6)
 
 
 @login_required
@@ -225,10 +270,10 @@ class RequestViewSet(viewsets.ModelViewSet):
         """ Generate a deep sequencing request form in PDF. """
         instance = self.get_object()
         user = instance.user
+        organization = user.organization.name if user.organization else ''
         cost_unit = ', '.join(sorted(
             user.cost_unit.values_list('name', flat=True)
         ))
-
         objects = list(itertools.chain(
             instance.samples.all(), instance.libraries.all()
         ))
@@ -236,24 +281,68 @@ class RequestViewSet(viewsets.ModelViewSet):
             'name': obj.name,
             'type': obj.__class__.__name__,
             'barcode': obj.barcode,
-            'sequencing_depth': obj.sequencing_depth,
+            'depth': obj.sequencing_depth,
         } for obj in objects]
         records = sorted(records, key=lambda x: x['barcode'][3:])
 
-        html = render_to_string('deepseq_request_pdf.html', {
-            'request_name': instance.name,
-            'date': datetime.now().strftime('%d.%m.%Y'),
-            'user': user.get_full_name(),
-            'phone': user.phone if user.phone else '',
-            'email': user.email,
-            'organization':
-            user.organization.name if user.organization else '',
-            'cost_unit': cost_unit,
-            'description': instance.description,
-            'records': records,
-        })
+        pdf = PDF('Deep Sequencing Request')
+        pdf.set_draw_color(217, 217, 217)
+        pdf.alias_nb_pages()
+        pdf.add_page()
 
-        pdf = pdfkit.from_string(html, False, options=settings.PDF_OPTIONS)
+        # Deep Sequencing Request info
+        pdf.info_row('Request Name', instance.name)
+        pdf.info_row('Date', datetime.now().strftime('%d.%m.%Y'))
+        pdf.info_row('User', user.get_full_name())
+        pdf.info_row('Phone', user.phone if user.phone else '')
+        pdf.info_row('Email', user.email)
+        pdf.info_row('Organization', organization)
+        pdf.info_row('Cost Unit(s)', cost_unit)
+        pdf.multi_info_row('Description', instance.description)
+
+        y = pdf.get_y()
+        pdf.line(pdf.l_margin + 1, y, pdf.fw - pdf.r_margin - 1, y)
+
+        # List of libraries/samples
+        heading = 'List of libraries/samples to be submitted for sequencing'
+        pdf.set_font('Arial', style='B', size=13)
+        pdf.ln(5)
+        pdf.cell(0, 10, heading, align='C')
+        pdf.ln(10)
+
+        pdf.table_row('#', 'Name', 'Barcode', 'Type',
+                      'Sequencing Depth (M)', True)
+
+        for i, record in enumerate(records):
+            pdf.table_row(i + 1, record['name'], record['barcode'],
+                          record['type'], record['depth'])
+
+        pdf.ln(10)
+        y = pdf.get_y()
+        pdf.line(pdf.l_margin + 1, y, pdf.fw - pdf.r_margin - 1, y)
+        pdf.ln(30)
+
+        # Ensure there is enough space for the signature
+        if pdf.get_y() > 265:
+            pdf.add_page()
+            pdf.ln(20)
+
+        # Signature
+        pdf.set_draw_color(0, 0, 0)
+        y = pdf.get_y()
+        x1_date = pdf.fw / 2
+        x2_date = x1_date + 45
+        x1_signature = x2_date + 5
+        x2_signature = pdf.fw - pdf.r_margin - 1
+        pdf.line(x1_date, y, x2_date, y)
+        pdf.line(x1_signature, y, x2_signature, y)
+
+        pdf.set_x(x1_date + (x2_date - x1_date) / 2 - 6)
+        pdf.cell(12, 10, '(Date)')
+        pdf.set_x(x1_signature + 2)
+        pdf.cell(0, 10, '(Principal Investigator)')
+
+        pdf = pdf.output(dest='S').encode('latin-1')
 
         # Generate response
         request_name = normalize(

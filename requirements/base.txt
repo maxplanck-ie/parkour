@@ -16,4 +16,4 @@ sphinx-rtd-theme
 
 # Miscellaneous
 xlwt
-pdfkit
+fpdf
