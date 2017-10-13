@@ -49,6 +49,32 @@ def handle_request_id_exceptions(func):
     return wrapper
 
 
+@login_required
+def get_files(request):
+    """ Get the list of files for the given request id. """
+    file_ids = json.loads(request.GET.get('file_ids', '[]'))
+    error = ''
+    data = []
+
+    try:
+        files = [f for f in FileRequest.objects.all() if f.id in file_ids]
+        data = [
+            {
+                'id': file.id,
+                'name': file.name,
+                'size': file.file.size,
+                'path': settings.MEDIA_URL + file.file.name,
+            }
+            for file in files
+        ]
+
+    except Exception as e:
+        error = 'Could not get the attached files.'
+        logger.exception(e)
+
+    return JsonResponse({'success': not error, 'error': error, 'data': data})
+
+
 @csrf_exempt
 @login_required
 def upload_files(request):
@@ -147,7 +173,7 @@ class RequestViewSet(viewsets.ModelViewSet):
         """ Update request with a given id. """
         instance = self.get_object()
         post_data = self._get_post_data(request)
-        post_data.update({'user': request.user.pk})
+        post_data.update({'user': instance.user.pk})
 
         serializer = self.get_serializer(data=post_data, instance=instance)
 
