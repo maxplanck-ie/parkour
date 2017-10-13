@@ -10,6 +10,9 @@ class PoolSize(models.Model):
     multiplier = models.PositiveSmallIntegerField('Multiplier', default=1)
     size = models.PositiveSmallIntegerField('Size')
 
+    class Meta:
+        ordering = ['multiplier', 'size']
+
     def __str__(self):
         return '%ix%i' % (self.multiplier, self.size)
 

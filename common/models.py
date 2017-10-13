@@ -13,9 +13,10 @@ class PrincipalInvestigator(models.Model):
     name = models.CharField('Principal Investigator', max_length=150)
     organization = models.ForeignKey(Organization)
 
-    # class Meta:
-    #     verbose_name = 'Principal Investigator'
-    #     verbose_name_plural = 'Principal Investigators'
+    class Meta:
+        # verbose_name = 'Principal Investigator'
+        # verbose_name_plural = 'Principal Investigators'
+        ordering = ['name']
 
     def __str__(self):
         return '%s (%s)' % (self.name, self.organization.name)
@@ -28,9 +29,10 @@ class CostUnit(models.Model):
         verbose_name='Principal Investigator',
     )
 
-    # class Meta:
-    #     verbose_name = 'Cost Unit'
-    #     verbose_name_plural = 'Cost Units'
+    class Meta:
+        # verbose_name = 'Cost Unit'
+        # verbose_name_plural = 'Cost Units'
+        ordering = ['name']
 
     def __str__(self):
         return '{} ({}: {})'.format(
@@ -69,6 +71,7 @@ class User(AbstractEmailUser):
 
     class Meta:
         db_table = 'auth_user'
+        ordering = ['last_name', 'first_name']
 
     def get_full_name(self):
         return '{} {}'.format(self.first_name, self.last_name)
