@@ -3,7 +3,6 @@ Django
 django-authtools
 djangorestframework
 django-admin-list-filter-dropdown
-gunicorn
 
 # Database
 psycopg2
