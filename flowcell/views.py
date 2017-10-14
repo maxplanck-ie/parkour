@@ -289,6 +289,7 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
                 serializer = PoolSerializer(pool)
                 data.append(serializer.data)
 
+        data = sorted(data, key=lambda x: x['ready'], reverse=True)
         return Response(data)
 
     @list_route(methods=['post'])
