@@ -44,15 +44,15 @@ Ext.define('MainHub.model.flowcell.Flowcell', {
         },
         {
             name: 'index_i7_show',
-            type: 'string'
+            type: 'bool'
         },
         {
             name: 'index_i5_show',
-            type: 'string'
+            type: 'bool'
         },
         {
             name: 'equal_representation',
-            type: 'string'
+            type: 'bool'
         },
         {
             name: 'loading_concentration',

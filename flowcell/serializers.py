@@ -77,10 +77,12 @@ class LaneSerializer(ModelSerializer):
         return records[0].read_length.name
 
     def get_index_i7_show(self, obj):
-        return None
+        records = obj.pool.libraries.all() or obj.pool.samples.all()
+        return records[0].index_type.is_index_i7
 
     def get_index_i5_show(self, obj):
-        return None
+        records = obj.pool.libraries.all() or obj.pool.samples.all()
+        return records[0].index_type.is_index_i5
 
     def get_sequencer(self, obj):
         return obj.flowcell.get().sequencer.pk

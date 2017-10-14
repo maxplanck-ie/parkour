@@ -73,11 +73,17 @@ Ext.define('MainHub.view.flowcell.Flowcells', {
         }, {
             text: 'Index I7',
             dataIndex: 'index_i7_show',
-            flex: 1
+            flex: 1,
+            renderer: function(value) {
+                return value ? 'Yes' : 'No';
+            }
         }, {
             text: 'Index I5',
             dataIndex: 'index_i5_show',
-            flex: 1
+            flex: 1,
+            renderer: function(value) {
+                return value ? 'Yes' : 'No';
+            }
         }, {
             text: 'Sequencer',
             dataIndex: 'sequencer_name',
