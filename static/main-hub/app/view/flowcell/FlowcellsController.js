@@ -176,8 +176,7 @@ Ext.define('MainHub.view.flowcell.FlowcellsController', {
         });
 
         form.submit({
-            url: 'api/flowcell/download_benchtop_protocol/',
-            target: '_blank',
+            url: 'api/flowcells/download_benchtop_protocol/',
             params: {
                 'ids': Ext.JSON.encode(ids)
             }
@@ -210,8 +209,7 @@ Ext.define('MainHub.view.flowcell.FlowcellsController', {
         });
 
         form.submit({
-            url: 'api/flowcell/download_sample_sheet/',
-            target: '_blank',
+            url: 'api/flowcells/download_sample_sheet/',
             params: {
                 'ids': Ext.JSON.encode(ids),
                 'flowcell_id': flowcellId
