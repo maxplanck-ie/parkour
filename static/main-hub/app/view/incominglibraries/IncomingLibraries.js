@@ -342,7 +342,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                 '<strong>Request: {children:this.getName}</strong> ',
                 '(# of Libraries/Samples: {rows.length}, ',
                 'Total Sequencing Depth: {children:this.getTotalDepth} M)',
-                '<span style="float:right">',
+                '<span style="margin-left:25px">',
                 '<input type="checkbox" class="group-checkbox" {children:this.getChecked}> Samples submitted',
                 '</span>',
                 {
