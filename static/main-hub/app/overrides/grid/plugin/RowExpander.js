@@ -22,12 +22,13 @@ Ext.define('MainHub.overrides.grid.plugin.RowExpander', {
                 if (files && files.length === 0) {
                     return '&#160;';
                 } else {
-                    return '<div class="' + Ext.baseCSSPrefix + 'grid-row-expander" role="presentation" tabIndex="0"></div>';
+                    return '<span data-qtip="Click to show attached files" class="request-attachments-expander">' +
+                        '<i class="fa fa-paperclip" aria-hidden="true"></i></span>';
                 }
             },
             processEvent: function(type, view, cell, rowIndex, cellIndex, e, record) {
                 var isTouch = e.pointerType === 'touch';
-                var isExpanderClick = !!e.getTarget('.' + Ext.baseCSSPrefix + 'grid-row-expander');
+                var isExpanderClick = !!e.getTarget('.request-attachments-expander');
 
                 if ((type === 'click' && isExpanderClick) || (type === 'keydown' && e.getKey() === e.SPACE)) {
 

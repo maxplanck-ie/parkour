@@ -52,14 +52,7 @@ Ext.define('MainHub.view.requests.Requests', {
                 {
                     text: 'Name',
                     dataIndex: 'name',
-                    flex: 1,
-                    renderer: function(value, meta) {
-                        var request = meta.record.data;
-                        if (request.files.length > 0) {
-                            value += '<span style="float:right"><i class="fa fa-paperclip" aria-hidden="true"></i></span>';
-                        }
-                        return value;
-                    }
+                    flex: 1
                 },
                 {
                     text: 'User',
@@ -95,11 +88,11 @@ Ext.define('MainHub.view.requests.Requests', {
         }, {
             ptype: 'rowexpander',
             expandOnDblClick: false,
-            headerWidth: 35,
+            headerWidth: 28,
             rowBodyTpl: new Ext.XTemplate(
                 '<strong>Attached files:</strong><br/>',
                 '<tpl for="files">',
-                '<span class="attached-file-link"><a href="{path}">{name}</a></span><br/>',
+                '<span class="attached-file-link"><a href="{path}" download>{name}</a></span><br/>',
                 '</tpl>'
             )
         }]

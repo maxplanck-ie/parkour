@@ -63,7 +63,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
             if (request.deep_seq_request_path !== '') {
                 $('#uploaded-request-file').html(
                     Ext.String.format(
-                        '<a href="{0}" target="_blank">uploaded</a>',
+                        '<a href="{0}" download>uploaded</a>',
                         request.deep_seq_request_path
                     )
                 )
