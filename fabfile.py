@@ -25,7 +25,7 @@ def build_docs():
     with lcd('docs/'):
         local('make clean')
         local('make html')
-        local('open _build/html/index.html')
+        # local('open _build/html/index.html')
 
 
 def coverage(app=''):

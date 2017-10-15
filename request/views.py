@@ -180,7 +180,38 @@ class RequestViewSet(viewsets.ModelViewSet):
         return queryset
 
     def list(self, request):
-        """ Get the list of requests. """
+        """
+        * GET /api/requests/
+            Get the list of requests for a given page number.
+
+        :type page: int
+        :param page: page number (`optional`). If omitted, equals 1 by default.
+
+        :rtype: dict
+        :returns: a list of requests.
+            For example::
+
+                {
+                    "count": 1,
+                    "next": null,
+                    "previous": null,
+                    "results": [
+                        {
+                            "pk": 1,
+                            "name": "Request 1",
+                            "user": 1,
+                            "user_full_name": "Admin",
+                            "create_time": "2017-10-10T20:10:33.388942Z",
+                            "description": "some description",
+                            "total_sequencing_depth": 10,
+                            "files": [],
+                            "restrict_permissions": false,
+                            "deep_seq_request_name": "",
+                            "deep_seq_request_path": ""
+                        }
+                    ]
+                }
+        """
         queryset = self.get_queryset()
         # page = self.paginate_queryset(queryset)
 
@@ -197,7 +228,52 @@ class RequestViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def create(self, request):
-        """ Create a request. """
+        """
+        * POST /api/requests/
+            Create a request.
+
+        :type description: str
+        :param description: request description
+
+        :type records: array
+        :param records: list of libraries and samples.
+            For example::
+
+                [
+                    {
+                        "pk": 1,
+                        "record_type": "Library"
+                    },
+                    {
+                        "pk": 2,
+                        "record_type": "Sample"
+                    }
+                ]
+
+        :type files: array
+        :param files: list of attached files.
+            For example::
+
+                [
+
+                ]
+
+        :rtype: dict
+        :returns: the confirmation of success or an error message
+
+        .. note::
+
+            All ``POST`` data should be put into a dict with the key ``data``.
+            For example::
+
+                {
+                    "data": {
+                        "description": "",
+                        "records": [],
+                        "files": []
+                    }
+                }
+        """
         post_data = self._get_post_data(request)
         post_data.update({'user': request.user.pk})
         serializer = self.serializer_class(data=post_data)
@@ -215,7 +291,56 @@ class RequestViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['post'])
     def edit(self, request, pk=None):
-        """ Update request with a given id. """
+        """
+        * POST /api/requests/{pk}/edit/
+            Update request with a given id.
+
+        :type pk: int
+        :param pk: request id
+
+        :type description: str
+        :param description: request description
+
+        :type records: array
+        :param records: list of libraries and samples.
+            For example::
+
+                [
+                    {
+                        "pk": 1,
+                        "record_type": "Library"
+                    },
+                    {
+                        "pk": 2,
+                        "record_type": "Sample"
+                    }
+                ]
+
+        :type files: array
+        :param files: list of attached files.
+            For example::
+
+                [
+
+                ]
+
+        :rtype: dict
+        :returns: the confirmation of success or an error message
+
+        .. note::
+
+            All ``POST`` data should be put into a dict with the key ``data``.
+            For example::
+
+                {
+                    "data": {
+                        "pk": 1,
+                        "description": "",
+                        "records": [],
+                        "files": []
+                    }
+                }
+        """
         instance = self.get_object()
         post_data = self._get_post_data(request)
         post_data.update({'user': instance.user.pk})
@@ -235,6 +360,20 @@ class RequestViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['post'])
     def samples_submitted(self, request, pk=None):
+        """
+        * POST /api/requests/{pk}/samples_submitted/
+            Update the value ``samples_submitted`` of a request
+            with a given id.
+
+        :type pk: int
+        :param pk: request id
+
+        :type result: bool
+        :param result: value of ``samples_submitted``
+
+        :rtype: dict
+        :returns: the confirmation of success or an error message
+        """
         instance = self.get_object()
         post_data = self._get_post_data(request)
         instance.samples_submitted = post_data['result']
@@ -243,7 +382,28 @@ class RequestViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['get'])
     def get_records(self, request, pk=None):
-        """ Get the list of record's submitted libraries and samples. """
+        """
+        * GET /api/requests/{pk}/get_records/
+            Get the list of submitted libraries and samples for a request
+            with a given id.
+
+        :type pk: int
+        :param pk: request id
+
+        :rtype: list of dicts
+        :returns: the list of libraries and samples.
+            For example::
+
+                [
+                    {
+                        "pk": 1,
+                        "record_type": "Sample",
+                        "name": "Sample",
+                        "barcode": "17S000001",
+                        "is_converted": false
+                    }
+                ]
+        """
         instance = self.get_object()
         data = [{
             'pk': obj.pk,
@@ -259,7 +419,26 @@ class RequestViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['get'])
     def get_files(self, request, pk=None):
-        """ Get the list of attached files for a request with a given id. """
+        """
+        * GET /api/requests/{pk}/get_files/
+            Get the list of attached files for a request with a given id.
+
+        :type pk: int
+        :param pk: request id
+
+        :rtype: list of dicts
+        :returns: the list of libraries and samples.
+            For example::
+
+                [
+                    {
+                        "id": 1,
+                        "name": "image.png",
+                        "size": 133234,
+                        "path": "/media/request_files/2017/10/10/image.png"
+                    }
+                ]
+        """
         instance = self.get_object()
         files = instance.files.all().order_by('name')
         serializer = RequestFileSerializer(files, many=True)
@@ -267,7 +446,17 @@ class RequestViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['get'])
     def download_deep_sequencing_request(self, request, pk=None):
-        """ Generate a deep sequencing request form in PDF. """
+        """
+        * GET /api/requests/{pk}/download_deep_sequencing_request/
+            Generate a deep sequencing request form in PDF for a request
+            with a given id.
+
+        :type pk: int
+        :param pk: request id
+
+        :rtype: file
+        :returns: a generated PDF file.
+        """
         instance = self.get_object()
         user = instance.user
         organization = user.organization.name if user.organization else ''
@@ -357,8 +546,21 @@ class RequestViewSet(viewsets.ModelViewSet):
     @detail_route(methods=['post'])
     def upload_deep_sequencing_request(self, request, pk=None):
         """
-        Upload a deep sequencing request with the PI's signature and
-        change request's libraries' and samples' statuses to 1.
+        * POST /api/requests/{pk}/upload_deep_sequencing_request/
+            Upload a deep sequencing request for a request with a given id.
+
+        :type pk: int
+        :param pk: request id
+
+        :rtype: dict
+        :returns: a dict with the uploaded file's details.
+            For example::
+
+                {
+                    "success": true,
+                    "name": "ds.pdf",
+                    "path": "/media/deep_sequencing_requests/2017/10/10/ds.pdf"
+                }
         """
         instance = self.get_object()
 
