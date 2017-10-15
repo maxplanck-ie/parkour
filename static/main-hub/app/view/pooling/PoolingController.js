@@ -168,9 +168,9 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         store.each(function(record) {
             if (record.get('selected')) {
                 if (record.get('record_type') === 'Library') {
-                    samples.push(record.get('pk'));
-                } else {
                     libraries.push(record.get('pk'));
+                } else {
+                    samples.push(record.get('pk'));
                 }
             }
         });
@@ -187,7 +187,6 @@ Ext.define('MainHub.view.pooling.PoolingController', {
 
         form.submit({
             url: 'api/pooling/download_benchtop_protocol/',
-            target: '_blank',
             params: {
                 pool_id: poolId,
                 samples: Ext.JSON.encode(samples),
@@ -204,9 +203,9 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         store.each(function(record) {
             if (record.get('selected')) {
                 if (record.get('record_type') === 'Library') {
-                    samples.push(record.get('pk'));
-                } else {
                     libraries.push(record.get('pk'));
+                } else {
+                    samples.push(record.get('pk'));
                 }
             }
         });
@@ -222,7 +221,6 @@ Ext.define('MainHub.view.pooling.PoolingController', {
 
         form.submit({
             url: 'api/pooling/download_pooling_template/',
-            target: '_blank',
             params: {
                 samples: Ext.JSON.encode(samples),
                 libraries: Ext.JSON.encode(libraries)
