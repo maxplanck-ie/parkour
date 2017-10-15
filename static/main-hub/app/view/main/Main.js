@@ -12,7 +12,7 @@ Ext.define('MainHub.view.main.Main', {
         'MainHub.view.indexgenerator.IndexGenerator',
         'MainHub.view.librarypreparation.LibraryPreparation',
         'MainHub.view.pooling.Pooling',
-        'MainHub.view.flowcell.LoadFlowcells'
+        'MainHub.view.flowcell.Flowcells'
     ],
 
     controller: 'main',

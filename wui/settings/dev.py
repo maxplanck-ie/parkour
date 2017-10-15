@@ -4,19 +4,20 @@ from .base import *
 DEBUG = True
 
 INSTALLED_APPS += (
-    'debug_toolbar',
+    # 'debug_toolbar',
+    'django_extensions',
 )
 
-MIDDLEWARE_CLASSES += (
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-)
+# MIDDLEWARE_CLASSES += (
+#     'debug_toolbar.middleware.DebugToolbarMiddleware',
+# )
 
-def show_toolbar(request):
-    return True
+# def show_toolbar(request):
+#     return True
 
-DEBUG_TOOLBAR_CONFIG = {
-    'SHOW_TOOLBAR_CALLBACK': show_toolbar,
-}
+# DEBUG_TOOLBAR_CONFIG = {
+#     'SHOW_TOOLBAR_CALLBACK': show_toolbar,
+# }
 
 LOGGING['loggers'] = {
     'django.request': {
@@ -49,3 +50,6 @@ PDF_OPTIONS = {
     'footer-center': 'Page [page] of [topage]',
     'footer-font-size': 8,
 }
+
+# Always use Python for shell_plus
+SHELL_PLUS = 'plain'

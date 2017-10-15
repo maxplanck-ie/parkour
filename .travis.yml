@@ -1,29 +1,20 @@
 language: python
-os: linux
-python:
-  - 3.5
-  # - 3.6
-sudo: true
 
-services:
+python:
+  - 3.6
+
+service:
   - postgresql
 
 before_script:
   - psql -c 'create database parkour;' -U postgres
   - mkdir /home/travis/build/maxplanck-ie/parkour/logs
 
-before_install:
-  - sudo apt-get install -y openssl build-essential xorg libssl-dev
-  - wget https://downloads.wkhtmltopdf.org/0.12/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz
-  - tar -xJf wkhtmltox-0.12.4_linux-generic-amd64.tar.xz
-  - cd wkhtmltox
-  - sudo chown root:root bin/wkhtmltopdf
-  - sudo cp -r * /usr/
-  - cd ..
+install:
+  - pip install -r requirements/prod.txt
 
-install: pip install -r requirements/prod.txt
-
-script: python manage.py test
+script:
+  - python manage.py test
 
 notifications:
   email: false

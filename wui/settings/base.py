@@ -38,13 +38,15 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'authtools',
+    'rest_framework',
+    'django_admin_listfilter_dropdown',
 
     'common',
     'library_sample_shared',
     'library',
     'sample',
     'request',
-    'quality_check',
+    'incoming_libraries',
     'index_generator',
     'library_preparation',
     'pooling',
@@ -210,3 +212,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}

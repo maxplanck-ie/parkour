@@ -14,14 +14,14 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
 
     items: [{
         xtype: 'grid',
-        id: 'libraryPreparationTable',
-        itemId: 'libraryPreparationTable',
+        id: 'library-preparation-grid',
+        itemId: 'library-preparation-grid',
         height: Ext.Element.getViewportHeight() - 64,
         header: {
             title: 'Library Preparation',
             items: [{
                 xtype: 'textfield',
-                itemId: 'searchField',
+                itemId: 'search-field',
                 emptyText: 'Search',
                 width: 200
             }]
@@ -32,53 +32,82 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
             stripeRows: false
             // markDirty: false
         },
+        selModel: {
+            type: 'spreadsheet',
+            rowSelect: false
+        },
         store: 'libraryPreparationStore',
         sortableColumns: false,
+        enableColumnMove: false,
         columns: {
             defaults: {
                 width: 80
             },
-            items: [{
+            items: [
+                {
                     xtype: 'checkcolumn',
                     itemId: 'checkColumn',
                     dataIndex: 'selected',
+                    resizable: false,
+                    menuDisabled: true,
+                    hideable: false,
                     tdCls: 'no-dirty',
                     width: 40
                 },
                 {
                     text: 'Request',
                     tooltip: 'Request ID',
-                    dataIndex: 'requestName',
+                    dataIndex: 'request_name',
+                    menuDisabled: true,
+                    hideable: false,
                     width: 150
                 },
                 {
                     text: 'Pool',
                     tooltip: 'Pool ID',
-                    dataIndex: 'poolName',
+                    dataIndex: 'pool_name',
+                    menuDisabled: true,
+                    hideable: false,
                     width: 120
                 },
                 {
-                    text: 'Sample',
+                    text: 'Name',
                     tooltip: 'Sample Name',
                     dataIndex: 'name',
+                    menuDisabled: true,
+                    hideable: false,
                     minWidth: 200,
                     flex: 1
                 },
                 {
                     text: 'Barcode',
                     dataIndex: 'barcode',
-                    width: 90
+                    resizable: false,
+                    menuDisabled: true,
+                    hideable: false,
+                    width: 95,
+                    renderer: function(value) {
+                        var record = Ext.getStore('libraryPreparationStore').findRecord('barcode', value);
+                        return record ? record.getBarcode() : value;
+                    }
                 },
                 {
-                    text: 'Comments',
-                    dataIndex: 'comments',
-                    width: 150
+                    text: 'Date',
+                    dataIndex: 'create_time',
+                    width: 90,
+                    renderer: Ext.util.Format.dateRenderer('d.m.Y')
                 },
                 {
                     text: 'Protocol',
                     tooltip: 'Library Protocol',
-                    dataIndex: 'libraryProtocolName',
+                    dataIndex: 'library_protocol_name',
                     minWidth: 150
+                },
+                {
+                    text: 'DF',
+                    tooltip: 'Dilution Factor',
+                    dataIndex: 'dilution_factor',
+                    width: 60
                 },
                 {
                     text: 'ng/µl Sample',
@@ -95,17 +124,6 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     text: 'ng Start',
                     tooltip: 'Starting Amount (ng)',
                     dataIndex: 'starting_amount',
-                    width: 100,
-                    editor: {
-                        xtype: 'numberfield',
-                        decimalPrecision: 1,
-                        minValue: 0
-                    }
-                },
-                {
-                    text: 'µl Start',
-                    tooltip: 'Starting Volume (µl)',
-                    dataIndex: 'starting_volume',
                     width: 100,
                     editor: {
                         xtype: 'numberfield',
@@ -134,14 +152,16 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     }
                 },
                 {
-                    text: 'Index I7',
+                    text: 'I7 ID',
                     tooltip: 'Index I7 ID',
-                    dataIndex: 'indexI7Id'
+                    dataIndex: 'index_i7_id',
+                    width: 60
                 },
                 {
-                    text: 'Index I5',
+                    text: 'I5 ID',
                     tooltip: 'Index I5 ID',
-                    dataIndex: 'indexI5Id'
+                    dataIndex: 'index_i5_id',
+                    width: 60
                 },
                 {
                     text: 'Cycles',
@@ -157,6 +177,16 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     text: 'ng/µl Library',
                     tooltip: 'Concentration Library (ng/µl)',
                     dataIndex: 'concentration_library',
+                    width: 100,
+                    editor: {
+                        xtype: 'numberfield',
+                        minValue: 0
+                    }
+                },
+                {
+                    text: 'qPCR (nM)',
+                    tooltip: 'qPCR Result (nM)',
+                    dataIndex: 'qpcr_result',
                     width: 100,
                     editor: {
                         xtype: 'numberfield',
@@ -183,30 +213,44 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     }
                 },
                 {
+                    text: 'QC Comments',
+                    tooltip: 'Incoming Libraries/Samples QC Comments',
+                    dataIndex: 'comments_facility',
+                    width: 150,
+                    editor: {
+                        xtype: 'textfield'
+                    }
+                },
+                {
+                    text: 'Comments',
+                    dataIndex: 'comments',
+                    width: 150,
+                    editor: {
+                        xtype: 'textfield'
+                    }
+                },
+                {
                     text: 'QC Result',
-                    dataIndex: 'qc_result',
+                    dataIndex: 'quality_check',
+                    resizable: false,
+                    menuDisabled: true,
+                    hideable: false,
                     width: 90,
                     editor: {
                         xtype: 'combobox',
                         queryMode: 'local',
                         displayField: 'name',
-                        valueField: 'id',
+                        valueField: 'name',
                         store: Ext.create('Ext.data.Store', {
                             fields: [{
-                                    name: 'id',
-                                    type: 'int'
-                                },
+                                name: 'name',
+                                type: 'string'
+                            }],
+                            data: [
                                 {
-                                    name: 'name',
-                                    type: 'string'
-                                }
-                            ],
-                            data: [{
-                                    id: 1,
                                     name: 'passed'
                                 },
                                 {
-                                    id: 2,
                                     name: 'failed'
                                 }
                             ]
@@ -216,7 +260,8 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                 }
             ]
         },
-        plugins: [{
+        plugins: [
+            {
                 ptype: 'rowediting',
                 clicksToEdit: 1
             },
@@ -224,25 +269,46 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                 ptype: 'bufferedrenderer',
                 trailingBufferZone: 100,
                 leadingBufferZone: 100
+            },
+            {
+                ptype: 'clipboard'
             }
         ],
         features: [{
             ftype: 'grouping',
             startCollapsed: true,
-            groupHeaderTpl: '<strong>Protocol: {name}</strong>'
+            enableGroupingMenu: false,
+            groupHeaderTpl: [
+                '<strong>Protocol: {children:this.getName}</strong>',
+                {
+                    getName: function(children) {
+                        return children[0].get('library_protocol_name');
+                    }
+                }
+            ]
         }],
         dockedItems: [{
             xtype: 'toolbar',
             dock: 'bottom',
             items: [
+                {
+                    xtype: 'button',
+                    itemId: 'download-benchtop-protocol-button',
+                    text: 'Download Benchtop Protocol',
+                    iconCls: 'fa fa-file-excel-o fa-lg'
+                },
                 '->',
                 {
                     xtype: 'button',
-                    id: 'downloadBenchtopProtocolLPBtn',
-                    itemId: 'downloadBenchtopProtocolLPBtn',
-                    text: 'Download Benchtop Protocol',
-                    iconCls: 'fa fa-file-excel-o fa-lg'
-                    // disabled: true
+                    itemId: 'cancel-button',
+                    iconCls: 'fa fa-ban fa-lg',
+                    text: 'Cancel'
+                },
+                {
+                    xtype: 'button',
+                    itemId: 'save-button',
+                    iconCls: 'fa fa-floppy-o fa-lg',
+                    text: 'Save'
                 }
             ]
         }]

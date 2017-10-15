@@ -197,7 +197,7 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
         indexI7Field.disable();
         indexI5Field.disable();
 
-        for (var i = 0; i <= record.get('indexReads'); i++) {
+        for (var i = 0; i <= record.get('index_reads'); i++) {
             indexReadsField.getStore().add({
                 num: i
             })
@@ -278,8 +278,8 @@ Ext.define('MainHub.view.libraries.LibraryWindowController', {
 
             // Set nucleic acid type
             var nucleicAcidTypeField = Ext.getCmp('nucleicAcidTypeField');
-            nucleicAcidTypeField.select(record.nucleicAcidTypeId);
-            nucleicAcidTypeField.fireEvent('select', nucleicAcidTypeField, nucleicAcidTypeField.findRecordByValue(record.nucleicAcidTypeId), true);
+            nucleicAcidTypeField.select(record.nucleic_acid_type);
+            nucleicAcidTypeField.fireEvent('select', nucleicAcidTypeField, nucleicAcidTypeField.findRecordByValue(record.nucleic_acid_type), true);
 
             // Set organism
             var organismSampleField = Ext.getCmp('organismSampleField');

@@ -18,18 +18,21 @@ from django.conf import settings
 from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.views.defaults import page_not_found, server_error
+from .api import router
 
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^accounts/', include('authtools.urls')),
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'^api/', include(router.urls)),
 
     url(r'', include('common.urls')),
     url(r'', include('library_sample_shared.urls')),
     url(r'library/', include('library.urls')),
     url(r'sample/', include('sample.urls')),
     url(r'request/', include('request.urls')),
-    url(r'quality_check/', include('quality_check.urls')),
+    url(r'incoming_libraries/', include('incoming_libraries.urls')),
     url(r'index_generator/', include('index_generator.urls')),
     url(r'library_preparation/', include('library_preparation.urls')),
     url(r'pooling/', include('pooling.urls')),
@@ -37,12 +40,12 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
-    import debug_toolbar
+    # import debug_toolbar
 
     urlpatterns += [
         url(r'^404/$', page_not_found, kwargs={'exception': Exception('Page not Found')}),
         url(r'^500/$', server_error),
-        url(r'^__debug__/', include(debug_toolbar.urls)),
+        # url(r'^__debug__/', include(debug_toolbar.urls)),
     ]
 
     urlpatterns += static(

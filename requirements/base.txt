@@ -1,7 +1,8 @@
 # Django
 Django
 django-authtools
-gunicorn
+djangorestframework
+django-admin-list-filter-dropdown
 
 # Database
 psycopg2
@@ -14,4 +15,4 @@ sphinx-rtd-theme
 
 # Miscellaneous
 xlwt
-pdfkit
+fpdf

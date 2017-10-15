@@ -1,8 +1,11 @@
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from rest_framework import viewsets
 
 from .models import NucleicAcidType, Sample
 from .forms import SampleForm
+from .serializers import NucleicAcidTypeSerializer, SampleSerializer
+from library_sample_shared.views import LibrarySampleBaseViewSet
 
 import logging
 import json
@@ -57,7 +60,7 @@ def save_sample(request):
                     data.append({
                         'name': sample.name,
                         'recordType': 'S',
-                        'sampleId': sample.pk,
+                        'sample_id': sample.pk,
                         'barcode': sample.barcode,
                     })
             else:
@@ -92,3 +95,15 @@ def delete_sample(request):
         logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error})
+
+
+class NucleicAcidTypeViewSet(viewsets.ReadOnlyModelViewSet):
+    """ Get the list of nucleic acid types. """
+    serializer_class = NucleicAcidTypeSerializer
+
+    def get_queryset(self):
+        return NucleicAcidType.objects.order_by('type', 'name')
+
+
+class SampleViewSet(LibrarySampleBaseViewSet):
+    serializer_class = SampleSerializer

@@ -40,3 +40,7 @@ PDF_OPTIONS = {
     'footer-center': 'Page [page] of [topage]',
     'footer-font-size': 8,
 }
+
+REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = [
+    'rest_framework.renderers.JSONRenderer',
+]

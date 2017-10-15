@@ -1,9 +1,11 @@
 from django.db import models
+
+from common.models import DateTimeMixin
 from library.models import Library
 from sample.models import Sample
 
 
-class Pooling(models.Model):
+class Pooling(DateTimeMixin):
     library = models.OneToOneField(
         Library,
         verbose_name='Library',
@@ -30,4 +32,5 @@ class Pooling(models.Model):
 
     def __str__(self):
         obj = self.library if self.library else self.sample
-        return '%s (%s)' % (obj.name, obj.pool.get())
+        # return '%s (%s)' % (obj.name, obj.pool.get())
+        return '{} ({})'.format(obj.name, obj.barcode)

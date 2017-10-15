@@ -13,6 +13,11 @@ class PrincipalInvestigator(models.Model):
     name = models.CharField('Principal Investigator', max_length=150)
     organization = models.ForeignKey(Organization)
 
+    class Meta:
+        # verbose_name = 'Principal Investigator'
+        # verbose_name_plural = 'Principal Investigators'
+        ordering = ['name']
+
     def __str__(self):
         return '%s (%s)' % (self.name, self.organization.name)
 
@@ -24,8 +29,13 @@ class CostUnit(models.Model):
         verbose_name='Principal Investigator',
     )
 
+    class Meta:
+        # verbose_name = 'Cost Unit'
+        # verbose_name_plural = 'Cost Units'
+        ordering = ['name']
+
     def __str__(self):
-        return '%s (%s: %s)' % (
+        return '{} ({}: {})'.format(
             self.name,
             self.pi.organization.name,
             self.pi.name,
@@ -61,6 +71,18 @@ class User(AbstractEmailUser):
 
     class Meta:
         db_table = 'auth_user'
+        ordering = ['last_name', 'first_name']
 
     def get_full_name(self):
-        return '%s %s' % (self.first_name, self.last_name)
+        return '{} {}'.format(self.first_name, self.last_name)
+
+    def __str__(self):
+        return '{} {} ({})'.format(self.first_name, self.last_name, self.email)
+
+
+class DateTimeMixin(models.Model):
+    create_time = models.DateTimeField('Create Time', auto_now_add=True)
+    update_time = models.DateTimeField('Update Time', auto_now=True)
+
+    class Meta:
+        abstract = True

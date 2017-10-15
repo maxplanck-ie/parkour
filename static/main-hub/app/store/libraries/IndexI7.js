@@ -10,7 +10,7 @@ Ext.define('MainHub.store.libraries.IndexI7', {
 
     proxy: {
         type: 'ajax',
-        url: 'get_index_i7/',
+        url: 'api/indices/i7/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"

@@ -4,15 +4,23 @@ from .models import Pooling
 
 @admin.register(Pooling)
 class PoolingAdmin(admin.ModelAdmin):
-    fieldsets = (
-        (None, {
-            'fields': (
-                'concentration_c1',
-                'concentration_c2',
-                'sample_volume',
-                'buffer_volume',
-                'percentage_library',
-                'volume_to_pool',
-            ),
-        }),
-    )
+    list_display = ('name', 'barcode', 'request', 'pool',)
+    search_fields = ('library__name', 'library__barcode', 'sample__name',
+                     'sample__barcode',)
+    list_select_related = True
+
+    def name(self, obj):
+        instance = obj.library if obj.library else obj.sample
+        return instance.name
+
+    def barcode(self, obj):
+        instance = obj.library if obj.library else obj.sample
+        return instance.barcode
+
+    def request(self, obj):
+        instance = obj.library if obj.library else obj.sample
+        return instance.request.get().name
+
+    def pool(self, obj):
+        instance = obj.library if obj.library else obj.sample
+        return instance.pool.get().name

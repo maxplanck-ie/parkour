@@ -1,4 +1,6 @@
 from django.db import models
+
+from common.models import DateTimeMixin
 from index_generator.models import Pool
 
 
@@ -20,12 +22,22 @@ class Lane(models.Model):
     completed = models.BooleanField('Completed', default=False)
 
     def __str__(self):
-        return '%s: %s' % (self.name, self.pool.name)
+        return '{}: {}'.format(self.name, self.pool.name)
+
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        super().save(*args, **kwargs)
+
+        # When a Lane objects is created, increment the loaded value of the
+        # related pool
+        if created:
+            self.pool.loaded += 1
+            self.pool.save(update_fields=['loaded'])
 
 
-class Flowcell(models.Model):
-    sequencer = models.ForeignKey(Sequencer, verbose_name='Sequencer')
+class Flowcell(DateTimeMixin):
     flowcell_id = models.CharField('Flowcell ID', max_length=50)
+    sequencer = models.ForeignKey(Sequencer, verbose_name='Sequencer')
     lanes = models.ManyToManyField(Lane, related_name='flowcell', blank=True)
 
     def __str__(self):

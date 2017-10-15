@@ -55,3 +55,21 @@
 .status.completed {
     background-color: #009688;
 }
+
+.no-leaf-icons .x-tree-icon-parent,
+.no-leaf-icons .x-tree-icon-parent-expanded,
+.no-leaf-icons .x-tree-icon-leaf {
+    display: none !important;
+}
+
+.x-tree-elbow-plus,
+.x-tree-elbow-end-plus,
+.x-grid-tree-node-expanded .x-tree-elbow-plus,
+.x-grid-tree-node-expanded .x-tree-elbow-end-plus {
+    color: #919191;
+}
+
+.parent-node-name.x-grid-td,
+.parent-node-name.x-grid-td .x-grid-cell-inner {
+    overflow: initial !important;
+}

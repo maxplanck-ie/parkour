@@ -8,5 +8,5 @@ Ext.define('MainHub.store.flowcell.Lanes', {
 
     model: 'MainHub.model.flowcell.Lane',
 
-    sorters: 'laneName'
+    sorters: 'lane_name'
 });

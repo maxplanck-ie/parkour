@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('sample', '0002_load_nucleic_acid_types'),
+        ('sample', '0003_add_timestamps'),
     ]
 
     operations = [

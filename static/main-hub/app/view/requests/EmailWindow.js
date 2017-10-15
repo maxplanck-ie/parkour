@@ -25,38 +25,35 @@ Ext.define('MainHub.view.requests.EmailWindow', {
             anchor: '100%'
         },
         items: [{
-                xtype: 'textfield',
-                itemId: 'subjectField',
-                name: 'subject',
-                fieldLabel: 'Subject',
-                emptyText: 'Subject'
-            },
-            {
-                xtype: 'textarea',
-                name: 'message',
-                fieldLabel: 'Message',
-                emptyText: 'Message',
-                height: 175
-            },
-            {
-                xtype: 'fieldcontainer',
-                defaultType: 'checkboxfield',
+            xtype: 'textfield',
+            itemId: 'subject-field',
+            name: 'subject',
+            fieldLabel: 'Subject',
+            emptyText: 'Subject'
+        }, {
+            xtype: 'textarea',
+            name: 'message',
+            fieldLabel: 'Message',
+            emptyText: 'Message',
+            height: 175
+        }, {
+            xtype: 'fieldcontainer',
+            defaultType: 'checkboxfield',
+            name: 'include_failed_records',
+            items: [{
+                boxLabel: 'Include the list of all failed libraries and samples',
                 name: 'include_failed_records',
-                items: [{
-                    boxLabel: 'Include the list of all failed libraries and samples',
-                    name: 'include_failed_records',
-                    inputValue: 'true',
-                    checked: false
-                }]
-            }
-        ]
+                inputValue: 'true',
+                checked: false
+            }]
+        }]
     }],
 
     bbar: [
         '->',
         {
             xtype: 'button',
-            itemId: 'sendEmail',
+            itemId: 'send-email-button',
             iconCls: 'fa fa-paper-plane fa-lg',
             text: 'Send'
         }

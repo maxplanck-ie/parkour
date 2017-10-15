@@ -1,5 +1,7 @@
 from django.db import models
 
+from common.models import DateTimeMixin
+
 
 class Organism(models.Model):
     name = models.CharField('Name', max_length=100)
@@ -149,6 +151,22 @@ class LibraryProtocol(models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        super().save(*args, **kwargs)
+
+        if created:
+            # When a new library protocol is created, add it to the list of
+            # protocols of the Library Type 'Other'. If the latter does not
+            # exist, create it
+            try:
+                library_type = LibraryType.objects.get(name='Other')
+            except LibraryType.DoesNotExist:
+                library_type = LibraryType(name='Other')
+                library_type.save()
+            finally:
+                library_type.library_protocol.add(self)
+
 
 class LibraryType(models.Model):
     name = models.CharField('Name', max_length=200)
@@ -165,12 +183,11 @@ class LibraryType(models.Model):
         return self.name
 
 
-class GenericLibrarySample(models.Model):
+class GenericLibrarySample(DateTimeMixin):
     name = models.CharField(
         'Name',
         max_length=200,
     )
-    date = models.DateTimeField('Date', auto_now_add=True)
     status = models.SmallIntegerField(default=0)
     library_protocol = models.ForeignKey(
         LibraryProtocol,

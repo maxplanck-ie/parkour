@@ -35,7 +35,7 @@ Ext.define('Ext.ux.FileUploadWindow', {
         },
         {
             text: 'Cancel',
-            handler: function () {
+            handler: function() {
                 this.up('window').close();
             }
         }

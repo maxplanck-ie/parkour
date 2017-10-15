@@ -3,12 +3,17 @@ import json
 
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
+# from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Q
+from rest_framework import viewsets
+from rest_framework.response import Response
 
+from library_sample_shared.views import LibrarySampleBaseViewSet
 from .models import Library
 from request.models import Request
 from .forms import LibraryForm
+from .serializers import (LibrarySerializer, RequestParentNodeSerializer,
+                          RequestChildrenNodesSerializer)
 
 logger = logging.getLogger('db')
 
@@ -25,7 +30,7 @@ def get_all(request):
     data = []
 
     try:
-        quality_check = request.GET.get('quality_check')
+        incoming_libraries = request.GET.get('incoming_libraries')
 
         if request.user.is_staff:
             requests = Request.objects.prefetch_related('libraries', 'samples')
@@ -36,7 +41,7 @@ def get_all(request):
 
         for req in requests:
             # User shouldn't see any libraries/samples in the Incoming table
-            if quality_check and not request.user.is_staff:
+            if incoming_libraries and not request.user.is_staff:
                 libraries = []
                 samples = []
             else:
@@ -45,7 +50,7 @@ def get_all(request):
                 samples = req.samples.filter(~Q(status=6))
 
             # In the Incoming table, show libraries/samples with status 1 only
-            if quality_check:
+            if incoming_libraries:
                 libraries = [l for l in libraries if l.status == 1]
                 samples = [s for s in samples if s.status == 1]
 
@@ -57,7 +62,7 @@ def get_all(request):
                     'libraryId': library.pk,
                     'name': library.name,
                     'recordType': library.get_record_type(),
-                    'date': library.date.strftime('%d.%m.%Y'),
+                    'date': library.create_time.strftime('%d.%m.%Y'),
                     'library_protocol': library.library_protocol.pk,
                     'library_protocol_name': library.library_protocol.name,
                     'library_type': library.library_type.pk,
@@ -113,9 +118,9 @@ def get_all(request):
                     'sampleId': sample.pk,
                     'name': sample.name,
                     'recordType': sample.get_record_type(),
-                    'date': sample.date.strftime('%d.%m.%Y'),
-                    'nucleicAcidType': sample.nucleic_acid_type.name,
-                    'nucleicAcidTypeId': sample.nucleic_acid_type_id,
+                    'date': sample.create_time.strftime('%d.%m.%Y'),
+                    'nucleic_acid_type_name': sample.nucleic_acid_type.name,
+                    'nucleic_acid_type': sample.nucleic_acid_type_id,
                     'library_protocol': sample.library_protocol.pk,
                     'library_protocol_name': sample.library_protocol.name,
                     'library_type': sample.library_type.pk,
@@ -154,6 +159,7 @@ def get_all(request):
                         sample.sample_volume_facility,
                     'comments_facility': sample.comments_facility,
                     'rna_quality_facility': sample.rna_quality_facility,
+                    'is_converted': sample.is_converted,
                 }
                 for sample in samples
             ]
@@ -245,3 +251,36 @@ def delete_library(request):
         logger.exception(e)
 
     return JsonResponse({'success': not error, 'error': error})
+
+
+class LibrarySampleTree(viewsets.ViewSet):
+
+    def get_queryset(self):
+        queryset = Request.objects.prefetch_related(
+            'libraries', 'samples').order_by('-create_time')
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(user=self.request.user)
+        return queryset
+
+    def list(self, request):
+        """ Get the list of libraries and samples. """
+        queryset = self.get_queryset()
+        request_id = self.request.query_params.get('node', None)
+
+        if request_id and request_id != 'root':
+            try:
+                queryset = Request.objects.get(pk=request_id)
+            except (ValueError, Request.DoesNotExist):
+                return Response({})
+            else:
+                serializer = RequestChildrenNodesSerializer(queryset)
+                return Response({
+                    'success': True,
+                    'children': serializer.data['children']
+                })
+        serializer = RequestParentNodeSerializer(queryset, many=True)
+        return Response({'success': True, 'children': serializer.data})
+
+
+class LibraryViewSet(LibrarySampleBaseViewSet):
+    serializer_class = LibrarySerializer

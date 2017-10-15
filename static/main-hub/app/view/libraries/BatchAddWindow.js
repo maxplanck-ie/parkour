@@ -14,6 +14,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
     modal: true,
     resizable: false,
     maximizable: true,
+    autoShow: true,
     layout: 'fit',
 
     items: [{
@@ -21,95 +22,111 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
         border: 0,
         layout: 'card',
         items: [{
-                xtype: 'container',
-                layout: {
-                    type: 'vbox',
-                    align: 'center',
-                    pack: 'center'
-                },
-                defaults: {
-                    border: 0
-                },
-                items: [{
-                        xtype: 'container',
-                        layout: 'hbox',
-                        defaultType: 'button',
-                        defaults: {
-                            margin: 10,
-                            width: 100,
-                            height: 40
-                        },
-                        items: [{
-                                itemId: 'libraryCardBtn',
-                                text: 'Library'
-                            },
-                            {
-                                itemId: 'sampleCardBtn',
-                                text: 'Sample'
-                            }
-                        ]
+            xtype: 'container',
+            layout: {
+                type: 'vbox',
+                align: 'center',
+                pack: 'center'
+            },
+            defaults: {
+                border: 0
+            },
+            items: [
+                {
+                    xtype: 'container',
+                    layout: 'hbox',
+                    defaultType: 'button',
+                    defaults: {
+                        margin: 10,
+                        width: 100,
+                        height: 40
                     },
-                    {
-                        html: '<p style="text-align:center">' +
+                    items: [{
+                        itemId: 'library-card-button',
+                        text: 'Library'
+                    }, {
+                        itemId: 'sample-card-button',
+                        text: 'Sample'
+                    }]
+                },
+                {
+                    html: '<p style="text-align:center">' +
                             'Choose <strong>Library</strong> if samples for sequencing are completely prepared by the user.<br><br>' +
                             'Choose <strong>Sample</strong> if libraries are prepared by the facility.' +
                             '</p>',
-                        width: 350
-                    }
-                ]
+                    width: 350
+                }
+            ]
+        },
+        {
+            xtype: 'grid',
+            selModel: {
+                type: 'spreadsheet',
+                // rowNumbererHeaderWidth: 40,
+                rowSelect: false
             },
-            {
-                xtype: 'grid',
-                id: 'batchAddGrid',
-                itemId: 'batchAddGrid',
-                sortableColumns: false,
-                border: 0,
-                viewConfig: {
-                    markDirty: false,
-                    getRowClass: function(record) {
-                        return (record.get('invalid')) ? 'invalid' : '';
-                    }
-                },
-                tbar: [{
-                    xtype: 'container',
-                    padding: 5,
-                    layout: 'hbox',
-                    items: [{
-                            xtype: 'numberfield',
-                            itemId: 'numEmptyRecords',
-                            fieldLabel: 'Create empty records',
-                            padding: '0 10px 0 0',
-                            labelWidth: 145,
-                            width: 230,
-                            minValue: 0
-                        },
-                        {
-                            xtype: 'button',
-                            itemId: 'createEmptyRecordsBtn',
-                            text: 'Create'
-                        }
-                    ]
-                }],
-                plugins: [{
-                    ptype: 'rowediting',
-                    clicksToEdit: 1
-                }]
-            }
-        ]
+            id: 'batch-add-grid',
+            itemId: 'batch-add-grid',
+            sortableColumns: false,
+            enableColumnMove: false,
+            enableColumnHide: false,
+            // multiSelect: true,
+            border: 0,
+            viewConfig: {
+                markDirty: false,
+                stripeRows: false,
+                getRowClass: function(record) {
+                    return (record.get('invalid')) ? 'invalid' : '';
+                }
+            },
+            plugins: [{
+                ptype: 'rowediting',
+                clicksToEdit: 1
+            }, {
+                ptype: 'clipboard'
+            }]
+        }]
     }],
 
-    dockedItems: [{
-        xtype: 'toolbar',
-        dock: 'bottom',
-        items: [
-            '->',
-            {
+    dockedItems: [
+        {
+            xtype: 'toolbar',
+            dock: 'top',
+            itemId: 'create-empty-records',
+            items: [{
+                xtype: 'numberfield',
+                itemId: 'num-empty-records',
+                fieldLabel: 'Create empty records',
+                padding: '0 10px 0 0',
+                labelWidth: 145,
+                width: 230,
+                minValue: 0
+            }, {
                 xtype: 'button',
-                itemId: 'saveBtn',
-                iconCls: 'fa fa-floppy-o fa-lg',
-                text: 'Save'
-            }
-        ],
-        hidden: true
-    }]
+                itemId: 'create-empty-records-button',
+                text: 'Create'
+            }],
+            hidden: true
+        }, {
+            xtype: 'toolbar',
+            dock: 'bottom',
+            items: [
+                '->',
+                // {
+                //     xtype: 'button',
+                //     itemId: 'cancel-button',
+                //     iconCls: 'fa fa-ban fa-lg',
+                //     text: 'Cancel',
+                //     hidden: true
+                // },
+                {
+                    xtype: 'button',
+                    itemId: 'save-button',
+                    iconCls: 'fa fa-floppy-o fa-lg',
+                    text: 'Save'
+                }
+            ],
+            hidden: true
+        }
+    ]
 });

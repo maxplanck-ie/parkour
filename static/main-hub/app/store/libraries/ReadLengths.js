@@ -10,7 +10,7 @@ Ext.define('MainHub.store.libraries.ReadLengths', {
 
     proxy: {
         type: 'ajax',
-        url: 'get_read_lengths/',
+        url: 'api/read_lengths/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"

@@ -8,8 +8,8 @@ Ext.define('MainHub.store.librarypreparation.LibraryPreparation', {
 
     model: 'MainHub.model.librarypreparation.LibraryPreparation',
 
-    groupField: 'libraryProtocolName',
-    // groupDir: 'DESC',
+    groupField: 'library_protocol',
+    groupDir: 'DESC',
 
     proxy: {
         type: 'ajax',
@@ -19,33 +19,32 @@ Ext.define('MainHub.store.librarypreparation.LibraryPreparation', {
         limitParam: false,  //to remove param "limit"
         noCache: false,     //to remove param "_dc",
         api: {
-            read: 'library_preparation/get_all/',
-            update: 'library_preparation/update_all/'
+            read: 'api/library_preparation/',
+            update: 'api/library_preparation/edit/'
         },
         reader: {
             type: 'json',
             rootProperty: 'data',
             successProperty: 'success',
-            messageProperty: 'error'
+            messageProperty: 'message'
         },
         writer: {
             type: 'json',
+            rootProperty: 'data',
             transform: {
                 fn: function(data, request) {
                     if (!(data instanceof Array)) {
                         data = [data];
                     }
+
                     var store = Ext.getStore('libraryPreparationStore');
                     var newData = _.map(data, function(item) {
-                        var record = store.findRecord('id', item.id),
-                            newItem = $.extend({}, item);
+                        var record = store.findRecord('id', item.id);
                         if (record) {
-                            newItem = {
-                                sample_id: record.get('sampleId'),
-                                changed_value: record.getChanges()
-                            };
+                            return Ext.Object.merge({
+                                pk: record.get('pk')
+                            }, record.getChanges());
                         }
-                        return newItem;
                     });
                     return newData;
                 },

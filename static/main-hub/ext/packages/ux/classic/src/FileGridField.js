@@ -15,8 +15,13 @@ Ext.define('Ext.ux.FileGridField', {
             xtype: 'grid',
             height: 200,
             viewConfig: {
-                loadMask: false
+                loadMask: false,
+                stripeRows: false
             },
+            sortableColumns: false,
+            enableColumnMove: false,
+            enableColumnResize: false,
+            enableColumnHide: false,
             columns: {
                 items: [{
                         text: 'Name',
@@ -51,7 +56,7 @@ Ext.define('Ext.ux.FileGridField', {
                         width: 36,
                         dataIndex: 'path',
                         xtype: 'templatecolumn',
-                        tpl: '<a href="{path}" target="_blank"><img src="/static/main-hub/resources/images/download.png"></a>'
+                        tpl: '<a href="{path}" download><img src="/static/main-hub/resources/images/download.png"></a>'
                     },
                     {
                         xtype: 'actioncolumn',
@@ -112,60 +117,59 @@ Ext.define('Ext.ux.FileGridField', {
     },
 
     uploadFiles: function(btn) {
-        var wnd = btn.up('window'),
-            form = wnd.down('form').getForm(),
-            uploadFileUrl = btn.uploadFileUrl,
-            getFileUrl = btn.getFileUrl,
-            grid = btn.grid;
+        var wnd = btn.up('window');
+        var form = wnd.down('form').getForm();
+        var uploadFileUrl = btn.uploadFileUrl;
+        var getFileUrl = btn.getFileUrl;
+        var grid = btn.grid;
 
-        if (form.isValid()) {
-            form.submit({
-                url: uploadFileUrl,
-                method: 'POST',
-                waitMsg: 'Uploading...',
-                params: Ext.JSON.encode(form.getFieldValues()),
-                success: function(f, action) {
-                    var obj = Ext.JSON.decode(action.response.responseText);
-
-                    if (obj.success && obj.fileIds.length > 0) {
-                        Ext.Ajax.request({
-                            url: getFileUrl,
-                            method: 'GET',
-                            timeout: 1000000,
-                            scope: this,
-                            params: {
-                                'file_ids': Ext.JSON.encode(obj.fileIds)
-                            },
-                            success: function(response) {
-                                var obj = Ext.JSON.decode(response.responseText);
-
-                                if (obj.success) {
-                                    grid.getStore().add(obj.data);
-                                } else {
-                                    Ext.ux.ToastMessage(response.statusText, 'error');
-                                    console.error('[ERROR]: ' + getFileUrl);
-                                    console.error(response);
-                                }
-                            }
-                        });
-                    } else {
-                        Ext.ux.ToastMessage(obj.error, 'error');
-                        console.error('[ERROR]: ' + uploadFileUrl + ' : ' + obj.error);
-                        console.error(response);
-                    }
-                    wnd.close();
-                },
-                failure: function(f, action) {
-                    var errorMsg = (action.failureType == 'server') ? 'Server error.' : 'Error.';
-                    Ext.ux.ToastMessage(errorMsg, 'error');
-                    console.error('[ERROR]: ' + uploadFileUrl);
-                    console.error(action.response.responseText);
-                    wnd.close();
-                }
-            });
-        } else {
-            Ext.ux.ToastMessage('You did not select any file(-s)', 'warning');
+        if (!form.isValid()) {
+            new Noty({
+                text: 'You did not select any files.',
+                type: 'warning'
+            }).show();
+            return;
         }
+
+        form.submit({
+            url: uploadFileUrl,
+            method: 'POST',
+            waitMsg: 'Uploading...',
+            params: Ext.JSON.encode(form.getFieldValues()),
+            success: function(f, action) {
+                var obj = Ext.JSON.decode(action.response.responseText);
+
+                if (obj.success && obj.fileIds.length > 0) {
+                    Ext.Ajax.request({
+                        url: getFileUrl,
+                        method: 'GET',
+                        timeout: 1000000,
+                        scope: this,
+                        params: {
+                            'file_ids': Ext.JSON.encode(obj.fileIds)
+                        },
+                        success: function(response) {
+                            var obj = Ext.JSON.decode(response.responseText);
+                            if (obj.success) {
+                                grid.getStore().add(obj.data);
+                            } else {
+                                new Noty({ text: response.statusText, type: 'error' }).show();
+                                console.error(response);
+                            }
+                        }
+                    });
+                } else {
+                    new Noty({ text: obj.message, type: 'error' }).show();
+                }
+                wnd.close();
+            },
+            failure: function(f, action) {
+                var errorMsg = (action.failureType === 'server') ? 'Server error.' : 'Error.';
+                new Noty({ text: errorMsg, type: 'error' }).show();
+                console.error(action.response);
+                wnd.close();
+            }
+        });
     },
 
     deleteFile: function(view, rowIndex, colIndex, item, e, record) {

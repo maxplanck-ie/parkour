@@ -12,6 +12,10 @@ Ext.application({
 
     requires: [
         'MainHub.overrides.list.RootTreeItem',
+        'MainHub.overrides.grid.plugin.Clipboard',
+        'MainHub.overrides.grid.plugin.RowExpander',
+        'MainHub.overrides.grid.selection.SpreadsheetModel',
+        'MainHub.overrides.data.PageMap',
         'MainHub.view.main.Main'
     ],
 

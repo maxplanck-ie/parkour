@@ -10,7 +10,7 @@ Ext.define('MainHub.store.libraries.IndexTypes', {
 
     proxy: {
         type: 'ajax',
-        url: 'get_index_types/',
+        url: 'api/index_types/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"

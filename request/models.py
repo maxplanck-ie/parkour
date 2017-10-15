@@ -1,5 +1,9 @@
+from itertools import chain
+
 from django.db import models
 from django.conf import settings
+
+from common.models import DateTimeMixin
 from library.models import Library
 from sample.models import Sample
 
@@ -12,9 +16,8 @@ class FileRequest(models.Model):
         return self.name
 
 
-class Request(models.Model):
+class Request(DateTimeMixin):
     name = models.CharField('Name', max_length=100, blank=True)
-    date_created = models.DateTimeField('Date', auto_now_add=True)
     description = models.TextField()
 
     user = models.ForeignKey(
@@ -47,5 +50,39 @@ class Request(models.Model):
         null=True,
     )
 
+    samples_submitted = models.BooleanField(
+        verbose_name='Samples Submitted',
+        default=False,
+    )
+
     def __str__(self):
         return '%s' % self.name
+
+    @property
+    def records(self):
+        return list(chain(self.samples.all(), self.libraries.all()))
+
+    @property
+    def statuses(self):
+        return [x.status for x in self.records]
+
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        super().save(*args, **kwargs)
+
+        if created:
+            # Set name after getting an id
+            self.name = '%i_%s' % (self.id, self.user.last_name)
+            if self.user.pi:
+                self.name += '_' + self.user.pi.name
+            self.save()
+
+    def delete(self, *args, **kwargs):
+        # Delete all libraries and samples
+        self.libraries.all().delete()
+        self.samples.all().delete()
+
+        # Delete all files
+        self.files.all().delete()
+
+        super().delete(*args, **kwargs)

@@ -10,7 +10,7 @@ Ext.define('MainHub.store.libraries.ConcentrationMethods', {
 
     proxy: {
         type: 'ajax',
-        url: 'get_concentration_methods/',
+        url: 'api/concentration_methods/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"

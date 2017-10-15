@@ -3,6 +3,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
     xtype: 'incoming-libraries',
 
     requires: [
+        'MainHub.view.incominglibraries.CheckboxGroupingFeature',
         'MainHub.view.incominglibraries.IncomingLibrariesController'
     ],
 
@@ -13,28 +14,30 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
 
     items: [{
         xtype: 'grid',
-        id: 'incomingLibraries',
-        itemId: 'incomingLibraries',
+        id: 'incoming-libraries-grid',
+        itemId: 'incoming-libraries-grid',
         height: Ext.Element.getViewportHeight() - 64,
         region: 'center',
         padding: 15,
         header: {
             title: 'Incoming Libraries and Samples',
-            items: [{
+            items: [
+                {
                     xtype: 'fieldcontainer',
                     defaultType: 'checkboxfield',
                     layout: 'hbox',
                     margin: '0 20 0 0',
-                    items: [{
+                    items: [
+                        {
                             boxLabel: 'Show Libraries',
-                            itemId: 'showLibrariesCheckbox',
+                            itemId: 'show-libraries-checkbox',
                             margin: '0 15 0 0',
                             cls: 'grid-header-checkbox',
                             checked: true
                         },
                         {
                             boxLabel: 'Show Samples',
-                            itemId: 'showSamplesCheckbox',
+                            itemId: 'show-samples-checkbox',
                             cls: 'grid-header-checkbox',
                             checked: true
                         }
@@ -42,7 +45,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                 },
                 {
                     xtype: 'textfield',
-                    itemId: 'searchField',
+                    itemId: 'search-field',
                     emptyText: 'Search',
                     width: 200
                 }
@@ -52,43 +55,64 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
             // loadMask: false
             // markDirty: false
         },
+        selModel: {
+            type: 'spreadsheet',
+            rowSelect: false
+        },
         store: 'incomingLibrariesStore',
         sortableColumns: false,
+        enableColumnMove: false,
+
         columns: {
-            items: [{
+            items: [
+                {
                     xtype: 'checkcolumn',
                     itemId: 'checkColumn',
                     dataIndex: 'selected',
+                    resizable: false,
+                    menuDisabled: true,
+                    hideable: false,
                     tdCls: 'no-dirty userEntry',
                     width: 40
                 },
                 {
                     text: 'Name',
                     dataIndex: 'name',
+                    menuDisabled: true,
+                    hideable: false,
                     minWidth: 150,
                     flex: 1,
                     tdCls: 'userEntry',
-                    renderer: function(val, meta) {
+                    renderer: function(value, meta) {
                         meta.tdStyle = 'font-weight:bold';
-                        return val;
+                        return value;
                     }
                 },
                 {
                     text: '',
-                    dataIndex: 'recordType',
+                    dataIndex: 'record_type',
+                    resizable: false,
+                    menuDisabled: true,
+                    hideable: false,
                     tdCls: 'userEntry',
-                    width: 30
+                    width: 30,
+                    renderer: function(value, meta) {
+                        return value.charAt(0);
+                    }
                 },
                 {
                     text: 'Barcode',
                     dataIndex: 'barcode',
+                    resizable: false,
+                    menuDisabled: true,
+                    hideable: false,
                     tdCls: 'userEntry',
                     width: 90
                 },
                 {
                     text: 'Nuc. Type',
                     tooltip: 'Nucleic Acid Type',
-                    dataIndex: 'nucleicAcidType',
+                    dataIndex: 'nucleic_acid_type_name',
                     tdCls: 'userEntry',
                     minWidth: 100,
                     flex: 1
@@ -115,8 +139,8 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                     tdCls: 'userEntry',
                     width: 50,
                     renderer: function(value, meta) {
-                        var store = Ext.getStore('concentrationMethodsStore'),
-                            record = store.findRecord('id', value);
+                        var store = Ext.getStore('concentrationMethodsStore');
+                        var record = store.findRecord('id', value);
                         meta.tdAttr = 'data-qtip="' + record.get('name') + '"';
                         return (record) ? record.getShortName() : '';
                     }
@@ -124,7 +148,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                 {
                     text: 'qPCR (nM)',
                     tooltip: 'qPCR Result (user)',
-                    dataIndex: 'qPCRResult',
+                    dataIndex: 'qpcr_result',
                     tdCls: 'userEntry',
                     width: 85
                 },
@@ -209,11 +233,13 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                         forceSelection: true
                     },
                     renderer: function(value, meta) {
-                        var store = Ext.getStore('concentrationMethodsStore'),
-                            record = store.findRecord('id', value);
+                        var store = Ext.getStore('concentrationMethodsStore');
+                        var record = store.findRecord('id', value);
+
                         if (record) {
                             meta.tdAttr = 'data-qtip="' + record.get('name') + '"';
                         }
+
                         return (record) ? record.getShortName() : '';
                     }
                 },
@@ -274,35 +300,31 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                 },
                 {
                     text: 'QC Result',
-                    dataIndex: 'qc_result',
+                    dataIndex: 'quality_check',
+                    resizable: false,
+                    menuDisabled: true,
+                    hideable: false,
                     tdCls: 'facilityEntry',
                     width: 90,
                     editor: {
                         xtype: 'combobox',
                         queryMode: 'local',
                         displayField: 'name',
-                        valueField: 'value',
+                        valueField: 'name',
                         store: Ext.create('Ext.data.Store', {
                             fields: [{
-                                    name: 'id',
-                                    type: 'int'
+                                name: 'name',
+                                type: 'string'
+                            }],
+                            data: [
+                                {
+                                    name: 'passed'
                                 },
                                 {
-                                    name: 'name',
-                                    type: 'string'
-                                }
-                            ],
-                            data: [{
-                                    name: 'passed',
-                                    value: 1
+                                    name: 'failed'
                                 },
                                 {
-                                    name: 'failed',
-                                    value: -1
-                                },
-                                {
-                                    name: 'compromised',
-                                    value: -2
+                                    name: 'compromised'
                                 }
                             ]
                         }),
@@ -312,18 +334,33 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
             ]
         },
         features: [{
-            ftype: 'grouping',
+            ftype: 'checkboxgrouping',
+            checkDataIndex: 'samples_submitted',
             startCollapsed: true,
+            enableGroupingMenu: false,
             groupHeaderTpl: [
-                '<strong>Request: {children:this.getName}</strong> (No. of Libraries/Samples: {rows.length})',
+                '<strong>Request: {children:this.getName}</strong> ',
+                '(# of Libraries/Samples: {rows.length}, ',
+                'Total Sequencing Depth: {children:this.getTotalDepth} M)',
+                '<span style="margin-left:25px">',
+                '<input type="checkbox" class="group-checkbox" {children:this.getChecked}> Samples submitted',
+                '</span>',
                 {
                     getName: function(children) {
-                        return children[0].get('requestName');
+                        return children[0].get('request_name');
+                    },
+                    getTotalDepth: function(children) {
+                        var sequencingDepths = Ext.Array.pluck(Ext.Array.pluck(children, 'data'), 'sequencing_depth');
+                        return Ext.Array.sum(sequencingDepths);
+                    },
+                    getChecked: function(children) {
+                        return children[0].get(this.owner.checkDataIndex) ? 'checked' : '';
                     }
                 }
             ]
         }],
-        plugins: [{
+        plugins: [
+            {
                 ptype: 'bufferedrenderer',
                 trailingBufferZone: 100,
                 leadingBufferZone: 100
@@ -331,7 +368,29 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
             {
                 ptype: 'rowediting',
                 clicksToEdit: 1
+            },
+            {
+                ptype: 'clipboard'
             }
-        ]
+        ],
+        dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            items: [
+                '->',
+                {
+                    xtype: 'button',
+                    itemId: 'cancel-button',
+                    iconCls: 'fa fa-ban fa-lg',
+                    text: 'Cancel'
+                },
+                {
+                    xtype: 'button',
+                    itemId: 'save-button',
+                    iconCls: 'fa fa-floppy-o fa-lg',
+                    text: 'Save'
+                }
+            ]
+        }]
     }]
 });

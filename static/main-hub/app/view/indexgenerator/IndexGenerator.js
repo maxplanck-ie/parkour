@@ -49,10 +49,14 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                 store: 'indexGeneratorStore',
                 rootVisible: false,
                 sortableColumns: false,
+                enableColumnMove: false,
+                enableColumnHide: false,
+
                 columns: [{
                         xtype: 'checkcolumn',
                         itemId: 'checkColumn',
                         dataIndex: 'selected',
+                        resizable: false,
                         tdCls: 'no-dirty',
                         width: 40
                     },
@@ -65,11 +69,13 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                     {
                         text: 'Barcode',
                         dataIndex: 'barcode',
+                        resizable: false,
                         width: 90
                     },
                     {
                         text: '',
                         dataIndex: 'recordType',
+                        resizable: false,
                         width: 35
                     },
                     {
@@ -147,7 +153,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                     ftype: 'grouping',
                     startCollapsed: true,
                     groupHeaderTpl: [
-                        '<strong>Request: {children:this.getName}</strong> (Depth: {children:this.getTotalDepth})',
+                        '<strong>Request: {children:this.getName}</strong> (Total Sequencing Depth: {children:this.getTotalDepth} M)',
                         {
                             getName: function(children) {
                                 return children[0].get('requestName');
@@ -178,6 +184,9 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                 },
                 problematicCycles: [],
                 sortableColumns: false,
+                enableColumnMove: false,
+                enableColumnResize: false,
+                enableColumnHide: false,
                 columns: [{
                         text: 'Name',
                         dataIndex: 'name',

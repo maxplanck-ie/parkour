@@ -8,7 +8,7 @@ Ext.define('MainHub.store.incominglibraries.IncomingLibraries', {
 
     model: 'MainHub.model.incominglibraries.IncomingLibraries',
 
-    groupField: 'requestId',
+    groupField: 'request',
     groupDir: 'DESC',
 
     proxy: {
@@ -19,36 +19,35 @@ Ext.define('MainHub.store.incominglibraries.IncomingLibraries', {
         limitParam: false,  //to remove param "limit"
         noCache: false,     //to remove param "_dc",
         api: {
-            read: 'library/get_all/?quality_check=true',
-            update: 'quality_check/update_all/'
+            read: 'api/incoming_libraries/',
+            update: 'api/incoming_libraries/edit/'
         },
         reader: {
             type: 'json',
             rootProperty: 'data',
             successProperty: 'success',
-            messageProperty: 'error'
+            messageProperty: 'message'
         },
         writer: {
             type: 'json',
+            rootProperty: 'data',
             transform: {
                 fn: function(data, request) {
                     if (!(data instanceof Array)) {
                         data = [data];
                     }
+
                     var store = Ext.getStore('incomingLibrariesStore');
                     var newData = _.map(data, function(item) {
-                        var record = store.findRecord('id', item.id),
-                            newItem = $.extend({}, item);
+                        var record = store.findRecord('id', item.id);
                         if (record) {
-                            var recordType = record.getRecordType();
-                            newItem = {
-                                record_type: recordType,
-                                record_id: record.getRecordType() === 'L' ? record.get('libraryId') : record.get('sampleId'),
-                                changed_value: record.getChanges()
-                            };
+                            return Ext.Object.merge({
+                                pk: record.get('pk'),
+                                record_type: record.get('record_type')
+                            }, record.getChanges());
                         }
-                        return newItem;
                     });
+
                     return newData;
                 },
                 scope: this

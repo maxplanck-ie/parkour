@@ -1,21 +1,30 @@
 import json
 import logging
 import time
+import itertools
 
 from xlwt import Workbook, XFStyle, Formula
 
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
+from rest_framework import viewsets
+from rest_framework.response import Response
+from rest_framework.decorators import list_route
+from rest_framework.permissions import IsAdminUser
 
+from common.views import CsrfExemptSessionAuthentication
+from common.mixins import LibrarySampleMultiEditMixin
+from library_sample_shared.utils import get_indices_ids
 from index_generator.models import Pool
 from library_preparation.models import LibraryPreparation
 from library.models import Library
 from sample.models import Sample
 from .models import Pooling
 from .forms import PoolingForm
+from .serializers import (PoolingSerializer, PoolingLibrarySerializer,
+                          PoolingSampleSerializer)
 
 logger = logging.getLogger('db')
 
@@ -44,6 +53,7 @@ def get_all(request):
             req = library.request.get()
             percentage_library = \
                 library.sequencing_depth / sum_sequencing_depth
+            index_i7_id, index_i5_id = get_indices_ids(library)
 
             libraries_in_pool.append({
                 'name': library.name,
@@ -55,11 +65,16 @@ def get_all(request):
                 'poolSize': pool_size,
                 'requestId': req.id,
                 'requestName': req.name,
-                'concentration': library.concentration,
+                # 'concentration': library.concentration,
+                'concentration_facility': library.concentration_facility,
                 'mean_fragment_size': library.mean_fragment_size,
                 'sequencing_depth': library.sequencing_depth,
                 'concentration_c1': pooling_obj.concentration_c1,
                 'percentage_library': round(percentage_library * 100),
+                'index_i7_id': index_i7_id,
+                'index_i7': library.index_i7,
+                'index_i5_id': index_i5_id,
+                'index_i5': library.index_i5,
             })
 
         # Converted samples (sample -> library)
@@ -68,6 +83,7 @@ def get_all(request):
             req = sample.request.get()
             percentage_library = \
                 sample.sequencing_depth / sum_sequencing_depth
+            index_i7_id, index_i5_id = get_indices_ids(sample)
 
             try:
                 concentration_c1 = \
@@ -80,16 +96,22 @@ def get_all(request):
                 'status': sample.status,
                 'sampleId': sample.pk,
                 'barcode': sample.barcode,
+                'is_converted': sample.is_converted,
                 'poolId': pool.pk,
                 'poolName': pool.name,
                 'poolSize': pool_size,
                 'requestId': req.pk,
                 'requestName': req.name,
-                'concentration': lib_prep_obj.concentration_library,
+                # 'concentration': lib_prep_obj.concentration_library,
+                'concentration_facility': sample.concentration_facility,
                 'mean_fragment_size': lib_prep_obj.mean_fragment_size,
                 'sequencing_depth': sample.sequencing_depth,
                 'concentration_c1': concentration_c1,
                 'percentage_library': round(percentage_library * 100),
+                'index_i7_id': index_i7_id,
+                'index_i7': sample.index_i7,
+                'index_i5_id': index_i5_id,
+                'index_i5': sample.index_i5,
             })
 
         data += libraries_in_pool
@@ -100,8 +122,8 @@ def get_all(request):
 
 @login_required
 @staff_member_required
-def edit(request):
-    """ Edit Pooling object. """
+def update(request):
+    """ Update a Pooling object. """
     error = ''
 
     library_id = request.POST.get('library_id', '')
@@ -111,12 +133,13 @@ def edit(request):
     try:
         try:
             concentration = float(request.POST.get('concentration'))
-        except ValueError:
-            raise ValueError('Library Concentartion is not set.')
+        except Exception:
+            raise ValueError('Library Concentration is not set.')
 
         if library_id == '0' or library_id == 0:
             obj = Pooling.objects.get(sample_id=sample_id)
-            record = Sample.objects.get(pk=sample_id)
+            # record = Sample.objects.get(pk=sample_id)
+            record = obj.sample
 
             # Update concentration value
             lib_prep_obj = LibraryPreparation.objects.get(sample_id=sample_id)
@@ -124,12 +147,13 @@ def edit(request):
             lib_prep_obj.save(update_fields=['concentration_library'])
         else:
             obj = Pooling.objects.get(library_id=library_id)
-            record = Library.objects.get(pk=library_id)
+            # record = Library.objects.get(pk=library_id)
+            record = obj.library
 
             # Update concentration value
-            library = Library.objects.get(pk=library_id)
-            library.concentration = concentration
-            library.save(update_fields=['concentration'])
+            # library = Library.objects.get(pk=library_id)
+            record.concentration = concentration
+            record.save(update_fields=['concentration'])
 
         form = PoolingForm(request.POST, instance=obj)
 
@@ -145,8 +169,6 @@ def edit(request):
                 else:
                     record.status = -1
                     record.save(update_fields=['status'])
-
-                    # TODO@me: send email
         else:
             error = str(form.errors)
             logger.debug(form.errors)
@@ -158,40 +180,54 @@ def edit(request):
     return JsonResponse({'success': not error, 'error': error})
 
 
-@csrf_exempt
-@login_required
-@staff_member_required
-def download_benchtop_protocol(request):
-    """ Generate Benchtop Protocol as XLS file for selected records. """
-    response = HttpResponse(content_type='application/ms-excel')
-    libraries = json.loads(request.POST.get('libraries', '[]'))
-    samples = json.loads(request.POST.get('samples', '[]'))
-    pool_name = request.POST.get('pool_name', '')
+class PoolingViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
+    permission_classes = [IsAdminUser]
+    authentication_classes = [CsrfExemptSessionAuthentication]
+    library_model = Library
+    sample_model = Sample
+    library_serializer = PoolingLibrarySerializer
+    sample_serializer = PoolingSampleSerializer
 
-    filename = 'Pooling_Benchtop_Protocol.xls'
-    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+    def list(self, request):
+        """ Get the list of all pooling objects. """
+        queryset = Pool.objects.order_by('-create_time')
+        serializer = PoolingSerializer(queryset, many=True)
+        return Response(list(itertools.chain(*serializer.data)))
 
-    wb = Workbook(encoding='utf-8')
-    ws = wb.add_sheet('Benchtop Protocol')
-    col_letters = {
-        0: 'A',   # Request ID
-        1: 'B',   # Library
-        2: 'C',   # Barcode
-        3: 'D',   # Concentration Library
-        4: 'E',   # Mean Fragment Size
-        5: 'F',   # Library Concentration C1
-        6: 'G',   # Sequencing Depth
-        7: 'H',   # % library in Pool
-        8: 'I',   # Normalized Library Concentration C2
-        9: 'J',   # Sample Volume V1
-        10: 'K',  # Buffer Volume V2
-        11: 'L',  # Volume to Pool
-    }
+    @list_route(methods=['post'])
+    def download_benchtop_protocol(self, request):
+        """ Generate Benchtop Protocol as XLS file for selected records. """
+        response = HttpResponse(content_type='application/ms-excel')
+        libraries = json.loads(request.data.get('libraries', '[]'))
+        samples = json.loads(request.data.get('samples', '[]'))
+        pool_id = request.POST.get('pool_id', '')
+        pool = Pool.objects.get(pk=pool_id)
 
-    try:
-        records = [Library.objects.get(pk=lib_id) for lib_id in libraries] + \
-            [Sample.objects.get(pk=smpl_id) for smpl_id in samples]
-        records = sorted(records, key=lambda x: x.barcode)
+        records = list(itertools.chain(
+            Library.objects.filter(pk__in=libraries),
+            Sample.objects.filter(pk__in=samples),
+        ))
+        records = sorted(records, key=lambda x: x.barcode[3:])
+
+        f_name = 'Pooling_Benchtop_Protocol.xls'
+        response['Content-Disposition'] = 'attachment; filename="%s"' % f_name
+
+        wb = Workbook(encoding='utf-8')
+        ws = wb.add_sheet('Benchtop Protocol')
+        col_letters = {
+            0: 'A',   # Request ID
+            1: 'B',   # Library
+            2: 'C',   # Barcode
+            3: 'D',   # Concentration Library
+            4: 'E',   # Mean Fragment Size
+            5: 'F',   # Library Concentration C1
+            6: 'G',   # Sequencing Depth
+            7: 'H',   # % library in Pool
+            8: 'I',   # Normalized Library Concentration C2
+            9: 'J',   # Sample Volume V1
+            10: 'K',  # Buffer Volume V2
+            11: 'L',  # Volume to Pool
+        }
 
         header = ['Request ID', 'Library', 'Barcode',
                   'Concentration Library (ng/µl)', 'Mean Fragment Size (bp)',
@@ -206,11 +242,11 @@ def download_benchtop_protocol(request):
         font_style_bold = XFStyle()
         font_style_bold.font.bold = True
 
-        ws.write(0, 0, 'Pool ID', font_style_bold)
-        ws.write(0, 1, pool_name, font_style_bold)
-        ws.write(1, 0, 'Pool Volume', font_style_bold)  # B2
-        ws.write(2, 0, 'Sum Sequencing Depth', font_style_bold)  # B3
-        ws.write(3, 0, '', font_style)
+        ws.write(0, 0, 'Pool ID', font_style_bold)               # A1
+        ws.write(0, 1, pool.name, font_style_bold)               # B1
+        ws.write(1, 0, 'Pool Volume', font_style_bold)           # A2
+        ws.write(2, 0, 'Sum Sequencing Depth', font_style_bold)  # A3
+        ws.write(3, 0, '', font_style)                           # A4
 
         row_num = 4
 
@@ -231,8 +267,13 @@ def download_benchtop_protocol(request):
                 concentration = obj.concentration_library
                 mean_fragment_size = obj.mean_fragment_size
 
-            row = [req.name, record.name, record.barcode, concentration,
-                   mean_fragment_size]
+            row = [
+                req.name,            # Request ID
+                record.name,         # Library
+                record.barcode,      # Barcode
+                concentration,       # Concentration Library
+                mean_fragment_size,  # Mean Fragment Size
+            ]
 
             # Library Concentration C1 =
             # (Library Concentration / Mean Fragment Size * 650) * 10^6
@@ -244,12 +285,13 @@ def download_benchtop_protocol(request):
             )
             row.append(Formula(formula))
 
+            # Sequencing Depth
             row.append(record.sequencing_depth)
 
             # % library in Pool
             col_sequencing_depth = col_letters[6]
             formula = '%s%s/$B$3*100' % (col_sequencing_depth, row_idx)
-            row.append(Formula(formula))
+            row.append(Formula(formula))  #
 
             row.extend(['', ''])  # Concentration C2 and Sample Volume V1
 
@@ -282,38 +324,37 @@ def download_benchtop_protocol(request):
         )
         ws.write(2, 1, Formula(formula), font_style)
 
-    except Exception as e:
-        logger.exception(e)
+        wb.save(response)
+        return response
 
-    wb.save(response)
+    @list_route(methods=['post'])
+    def download_pooling_template(self, request):
+        """ Generate Pooling Template as XLS file for selected records. """
+        response = HttpResponse(content_type='application/ms-excel')
+        libraries = json.loads(request.data.get('libraries', '[]'))
+        samples = json.loads(request.data.get('samples', '[]'))
 
-    return response
+        records = list(itertools.chain(
+            Library.objects.filter(pk__in=libraries),
+            Sample.objects.filter(pk__in=samples),
+        ))
+        records = sorted(records, key=lambda x: x.barcode[3:])
 
+        f_name = 'QC_Normalization_and_Pooling_Template.xls'
+        response['Content-Disposition'] = 'attachment; filename="%s"' % f_name
 
-@csrf_exempt
-@login_required
-@staff_member_required
-def download_pooling_template(request):
-    response = HttpResponse(content_type='application/ms-excel')
-    libraries = json.loads(request.POST.get('libraries', '[]'))
-    samples = json.loads(request.POST.get('samples', '[]'))
+        wb = Workbook(encoding='utf-8')
+        ws = wb.add_sheet('QC Normalization and Pooling')
+        col_letters = {
+            0: 'A',   # Library
+            1: 'B',   # Barcode
+            2: 'C',   # ng/µl
+            3: 'D',   # bp
+            4: 'E',   # nM
+            5: 'F',   # Date
+            6: 'G',   # Comments
+        }
 
-    filename = 'QC_Normalization_and_Pooling_Template.xls'
-    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
-
-    wb = Workbook(encoding='utf-8')
-    ws = wb.add_sheet('QC Normalization and Pooling')
-    col_letters = {
-        0: 'A',   # Library
-        1: 'B',   # Barcode
-        2: 'C',   # ng/µl
-        3: 'D',   # bp
-        4: 'E',   # nM
-        5: 'F',   # Date
-        6: 'G',   # Comments
-    }
-
-    try:
         header = ['Library', 'Barcode', 'ng/µl', 'bp', 'nM', 'Date',
                   'Comments']
         row_num = 0
@@ -328,16 +369,23 @@ def download_pooling_template(request):
         font_style = XFStyle()
         font_style.alignment.wrap = 1
 
-        for library_id in libraries:
+        for record in records:
             row_num += 1
             row_idx = str(row_num + 1)
 
-            obj = Pooling.objects.get(library_id=library_id)
+            if isinstance(record, Library):
+                # obj = Pooling.objects.get(library=record)
+                mean_fragment_size = record.mean_fragment_size
+            else:
+                # obj = Pooling.objects.get(sample=record)
+                lib_prep_obj = LibraryPreparation.objects.get(sample=record)
+                mean_fragment_size = lib_prep_obj.mean_fragment_size
+
             row = [
-                obj.library.name,
-                obj.library.barcode,
-                obj.library.concentration,
-                obj.library.mean_fragment_size
+                record.name,                    # Library
+                record.barcode,                 # Barcode
+                record.concentration_facility,  # ng/µl
+                mean_fragment_size,             # bp
             ]
 
             # nM = Library Concentration / ( Mean Fragment Size * 650 ) * 10^6
@@ -348,44 +396,12 @@ def download_pooling_template(request):
             row.append(Formula(formula))
 
             row.extend([
-                time.strftime('%d.%m.%Y'),
-                obj.library.comments
+                time.strftime('%d.%m.%Y'),  # Date
+                record.comments,            # Comments
             ])
 
             for i in range(2):
                 ws.write(row_num, i, row[i], font_style)
 
-        for sample_id in samples:
-            row_num += 1
-            row_idx = str(row_num + 1)
-
-            obj = Pooling.objects.get(sample_id=sample_id)
-            lib_prep_obj = LibraryPreparation.objects.get(sample=obj.sample)
-            row = [
-                obj.sample.name,
-                obj.sample.barcode,
-                lib_prep_obj.concentration_library,
-                lib_prep_obj.mean_fragment_size
-            ]
-
-            # nM = Library Concentration / ( Mean Fragment Size * 650 ) * 10^6
-            col_concentration = col_letters[2]
-            col_mean_fragment_size = col_letters[3]
-            formula = col_concentration + row_idx + '/ (' + \
-                col_mean_fragment_size + row_idx + ') * 1000000'
-            row.append(Formula(formula))
-
-            row.extend([
-                time.strftime('%d.%m.%Y'),
-                obj.library.comments
-            ])
-
-            for i in range(2):
-                ws.write(row_num, i, row[i], font_style)
-
-    except Exception as e:
-        logger.exception(e)
-
-    wb.save(response)
-
-    return response
+        wb.save(response)
+        return response

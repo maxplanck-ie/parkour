@@ -3,6 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.http import JsonResponse
 
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.authentication import SessionAuthentication
+
 
 @login_required
 def index(request):
@@ -62,9 +65,20 @@ def get_navigation_tree(request):
             {
                 'text': 'Load Flowcells',
                 'iconCls': 'x-fa fa-level-down',
-                'viewType': 'load-flowcells',
+                'viewType': 'flowcells',
                 'leaf': True
             }
         ]
 
     return JsonResponse({'text': '.', 'children': data})
+
+
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+    def enforce_csrf(self, request):
+        return  # To not perform the csrf check previously happening
+
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 30
+    page_size_query_param = 'page_size'
+    max_page_size = 100

@@ -8,14 +8,14 @@ Ext.define('MainHub.view.requests.EmailWindowController', {
             '#': {
                 boxready: 'boxready'
             },
-            '#sendEmail': {
+            '#send-email-button': {
                 click: 'send'
             }
         }
     },
 
     boxready: function(wnd) {
-        var subjectField = wnd.down('#subjectField');
+        var subjectField = wnd.down('#subject-field');
         subjectField.setValue(wnd.record.get('name'));
     },
 
@@ -23,26 +23,23 @@ Ext.define('MainHub.view.requests.EmailWindowController', {
         var wnd = btn.up('window');
         var form = wnd.down('#email-form').getForm();
 
-        if (form.isValid()) {
-            var params = $.merge({
-                request_id: wnd.record.get('requestId')
-            }, form.getFieldValues());
-
-            form.submit({
-                url: 'request/send_email/',
-                params: params,
-                success: function(f, action) {
-                    Ext.ux.ToastMessage('Email has been sent!');
-                    wnd.close();
-                },
-                failure: function(f, action) {
-                    var error = action.result ? action.result.error : action.response.statusText;
-                    Ext.ux.ToastMessage(error, 'error');
-                    console.error(action);
-                }
-            });
-        } else {
-            Ext.ux.ToastMessage('All fields must be filled in.', 'warning');
+        if (!form.isValid()) {
+            new Noty({ text: 'All fields must be filled in.', type: 'warning' }).show();
+            return;
         }
+
+        form.submit({
+            url: Ext.String.format('api/requests/{0}/send_email/', wnd.record.get('pk')),
+            params: form.getFieldValues(),
+            success: function(f, action) {
+                new Noty({ text: 'Email has been sent!' }).show();
+                wnd.close();
+            },
+            failure: function(f, action) {
+                var error = action.result ? action.result.error : action.response.statusText;
+                new Noty({ text: error, type: 'error' }).show();
+                console.error(action);
+            }
+        });
     }
 });

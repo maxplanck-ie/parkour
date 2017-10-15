@@ -10,7 +10,7 @@ Ext.define('MainHub.store.libraries.LibraryTypes', {
 
     proxy: {
         type: 'ajax',
-        url: 'get_library_types/',
+        url: 'api/library_types/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"
@@ -21,5 +21,7 @@ Ext.define('MainHub.store.libraries.LibraryTypes', {
             rootProperty: 'data',
             successProperty: 'success'
         }
-    }
+    },
+
+    autoLoad: true
 });

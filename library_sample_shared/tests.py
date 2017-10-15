@@ -2,9 +2,12 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 
+from common.tests import BaseTestCase
+from common.utils import get_random_name
 from .models import (Organism, ConcentrationMethod, ReadLength, IndexType,
-                     IndexI7, GenericIndex, BarcodeCounter, LibraryProtocol,
-                     LibraryType, GenericLibrarySample)
+                     GenericIndex, IndexI7, IndexI5, BarcodeCounter,
+                     LibraryProtocol, LibraryType, GenericLibrarySample)
+
 
 User = get_user_model()
 
@@ -13,7 +16,7 @@ User = get_user_model()
 
 class OrganismTest(TestCase):
     def setUp(self):
-        self.organism = Organism(name='mouse')
+        self.organism = Organism(name=get_random_name())
 
     def test_organism_name(self):
         self.assertTrue(isinstance(self.organism, Organism))
@@ -22,7 +25,7 @@ class OrganismTest(TestCase):
 
 class ConcentrationMethodTest(TestCase):
     def setUp(self):
-        self.method = ConcentrationMethod(name='fluorography')
+        self.method = ConcentrationMethod(name=get_random_name())
 
     def test_concentration_method_name(self):
         self.assertTrue(isinstance(self.method, ConcentrationMethod))
@@ -31,7 +34,7 @@ class ConcentrationMethodTest(TestCase):
 
 class ReadLengthTest(TestCase):
     def setUp(self):
-        self.read_length = ReadLength(name='1x50')
+        self.read_length = ReadLength(name=get_random_name())
 
     def test_read_length_name(self):
         self.assertTrue(isinstance(self.read_length, ReadLength))
@@ -40,7 +43,7 @@ class ReadLengthTest(TestCase):
 
 class IndexTypeTest(TestCase):
     def setUp(self):
-        self.index_type = IndexType(name='Nextera')
+        self.index_type = IndexType(name=get_random_name())
 
     def test_index_type_name(self):
         self.assertTrue(isinstance(self.index_type, IndexType))
@@ -80,13 +83,14 @@ class BarcodeCounterTest(TestCase):
 class LibraryProtocolTest(TestCase):
     def setUp(self):
         self.library_protocol = LibraryProtocol(
-            name='Protocol',
+            name=get_random_name(),
             provider='',
             catalog='',
             explanation='',
             input_requirements='',
             typical_application='',
         )
+        self.library_protocol.save()
 
     def test_library_protocol_name(self):
         self.assertTrue(isinstance(self.library_protocol, LibraryProtocol))
@@ -95,10 +99,20 @@ class LibraryProtocolTest(TestCase):
             self.library_protocol.name,
         )
 
+    def test_library_protocol_in_library_type(self):
+        """
+        Ensure a new library protocol is added to the list of protocols of
+        the library type 'Other'.
+        """
+        library_type = LibraryType.objects.get(name='Other')
+        library_protocols = library_type.library_protocol.all().values_list(
+            'name', flat=True)
+        self.assertIn(self.library_protocol.name, library_protocols)
+
 
 class LibraryTypeTest(TestCase):
     def setUp(self):
-        self.library_type = LibraryType(name='Library Type')
+        self.library_type = LibraryType(name=get_random_name())
 
     def test_library_type_name(self):
         self.assertTrue(isinstance(self.library_type, LibraryType))
@@ -107,12 +121,12 @@ class LibraryTypeTest(TestCase):
 
 class GenericLibrarySampleTest(TestCase):
     def setUp(self):
-        organism = Organism(name='mouse')
-        concentration_method = ConcentrationMethod(name='fluorography')
-        read_length = ReadLength(name='1x50')
+        organism = Organism(name=get_random_name())
+        concentration_method = ConcentrationMethod(name=get_random_name())
+        read_length = ReadLength(name=get_random_name())
 
         self.library = GenericLibrarySample(
-            name='Library1',
+            name=get_random_name(),
             organism=organism,
             concentration=1.0,
             concentration_method=concentration_method,
@@ -127,60 +141,273 @@ class GenericLibrarySampleTest(TestCase):
 
 # Views
 
-class GetLibraryProtocolsTest(TestCase):
-    def setUp(self):
-        User.objects.create_user(email='foo@bar.io', password='foo-foo')
+class TestOrganisms(BaseTestCase):
 
-    def test_nucleic_acid_types(self):
+    def setUp(self):
+        self._create_user('foo@bar.io', 'foo-foo')
         self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.get(reverse('get_library_protocols'), {
-            'type': 'DNA'
+
+        self.organism = Organism(name=self._get_random_name())
+        self.organism.save()
+
+    def test_organisms_list(self):
+        """ Ensure get organisms behaves correctly. """
+        response = self.client.get(reverse('organism-list'))
+        data = response.json()
+        organisms = [x['name'] for x in data]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.organism.name, organisms)
+
+
+class TestReadLengths(BaseTestCase):
+
+    def setUp(self):
+        self._create_user('foo@bar.io', 'foo-foo')
+        self.client.login(email='foo@bar.io', password='foo-foo')
+
+        self.read_length = ReadLength(name=self._get_random_name())
+        self.read_length.save()
+
+    def test_organisms_list(self):
+        """ Ensure get read lengths behaves correctly. """
+        response = self.client.get(reverse('read-length-list'))
+        data = response.json()
+        read_lengths = [x['name'] for x in data]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.read_length.name, read_lengths)
+
+
+class TestConcentrationMethods(BaseTestCase):
+
+    def setUp(self):
+        self._create_user('foo@bar.io', 'foo-foo')
+        self.client.login(email='foo@bar.io', password='foo-foo')
+
+        self.concentration_method = ConcentrationMethod(
+            name=self._get_random_name())
+        self.concentration_method.save()
+
+    def test_organisms_list(self):
+        """ Ensure get concentration methods behaves correctly. """
+        response = self.client.get(reverse('concentration-method-list'))
+        data = response.json()
+        concentration_methods = [x['name'] for x in data]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.concentration_method.name, concentration_methods)
+
+
+class TestIndexTypes(BaseTestCase):
+    def setUp(self):
+        self._create_user('foo@bar.io', 'foo-foo')
+        self.client.login(email='foo@bar.io', password='foo-foo')
+
+        self.index_type = IndexType(name=self._get_random_name())
+        self.index_type.save()
+
+    def test_index_type_list(self):
+        """ Ensure get index types behaves correctly. """
+        response = self.client.get(reverse('index-type-list'))
+        data = response.json()
+        index_types = [x['name'] for x in data]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.index_type.name, index_types)
+
+
+class TestIndices(BaseTestCase):
+    """ Test indices I7 and I5. """
+
+    def setUp(self):
+        self._create_user('foo@bar.io', 'foo-foo')
+        self.client.login(email='foo@bar.io', password='foo-foo')
+
+        self.index1 = IndexI7(
+            index_id=self._get_random_name(),
+            index=self._get_random_name(8),
+        )
+        self.index2 = IndexI7(
+            index_id=self._get_random_name(),
+            index=self._get_random_name(8),
+        )
+        self.index1.save()
+        self.index2.save()
+
+        self.index3 = IndexI5(
+            index_id=self._get_random_name(),
+            index=self._get_random_name(8),
+        )
+        self.index3.save()
+
+        self.index_type1 = IndexType(
+            name=self._get_random_name(),
+            is_index_i7=True,
+        )
+        self.index_type1.save()
+        self.index_type1.indices_i7.add(self.index1)
+
+        self.index_type2 = IndexType(
+            name=self._get_random_name(),
+            is_index_i5=True,
+        )
+        self.index_type2.save()
+        self.index_type2.indices_i5.add(self.index3)
+
+    def test_indices_list(self):
+        """ Ensure get all indices behaves correctly. """
+        response = self.client.get(reverse('index-list'))
+        data = response.json()
+        indices = [x['index_id'] for x in data]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.index1.index_id, indices)
+        self.assertIn(self.index2.index_id, indices)
+        self.assertIn(self.index3.index_id, indices)
+
+    def test_indices_i7_list(self):
+        """ Ensure get indices i7 behaves correctly. """
+        response = self.client.get(reverse('index-i7'))
+        data = response.json()
+        indices = [x['index_id'] for x in data]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.index1.index_id, indices)
+        self.assertIn(self.index2.index_id, indices)
+        self.assertNotIn(self.index3.index_id, indices)
+
+    def test_indices_i5_list(self):
+        """ Ensure get indices i5 behaves correctly. """
+        response = self.client.get(reverse('index-i5'))
+        data = response.json()
+        indices = [x['index_id'] for x in data]
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(self.index1.index_id, indices)
+        self.assertNotIn(self.index2.index_id, indices)
+        self.assertIn(self.index3.index_id, indices)
+
+    def test_indices_i7_with_index_type(self):
+        """ Ensure get indices i7 given index type behaves correctly. """
+        response = self.client.get(reverse('index-i7'), {
+            'index_type_id': self.index_type1.pk,
         })
+        data = response.json()
+        indices = [x['index_id'] for x in data]
         self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(response.content, b'[]')
+        self.assertIn(self.index1.index_id, indices)
+        self.assertNotIn(self.index2.index_id, indices)
+        self.assertNotIn(self.index3.index_id, indices)
 
-    def test_wrong_http_method(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('get_library_protocols'))
+    def test_indices_i5_with_invalid_index_type(self):
+        """
+        Ensure get indices i5 given invalid index type behaves correctly.
+        """
+        response = self.client.get(reverse('index-i5'), {
+            'index_type_id': 'blah',
+        })
+        data = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, b'[]')
+        self.assertEqual(data, [])
 
 
-class GetLibraryTypes(TestCase):
+class TestLibraryProtocols(BaseTestCase):
+    """ Tests for library protocols. """
+
     def setUp(self):
-        User.objects.create_user(email='foo@bar.io', password='foo-foo')
+        self._create_user('foo@bar.io', 'foo-foo')
+        self.client.login(email='foo@bar.io', password='foo-foo')
+
+        self.library_protocol1 = LibraryProtocol(
+            name=self._get_random_name(),
+            type='DNA',
+            provider='-',
+            catalog='-',
+            explanation='-',
+            input_requirements='-',
+            typical_application='-',
+        )
+        self.library_protocol2 = LibraryProtocol(
+            name=self._get_random_name(),
+            type='RNA',
+            provider='-',
+            catalog='-',
+            explanation='-',
+            input_requirements='-',
+            typical_application='-',
+        )
+        self.library_protocol1.save()
+        self.library_protocol2.save()
+
+    def test_library_protocol_list(self):
+        """ Ensure get library protocols behaves correctly. """
+        response = self.client.get(reverse('library-protocol-list'))
+        data = response.json()
+        protocols = [x['name'] for x in data]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.library_protocol1.name, protocols)
+        self.assertIn(self.library_protocol2.name, protocols)
+
+    def test_library_protocol_with_type_list(self):
+        """
+        Ensure get library protocols given nucleic acid type behaves correctly.
+        """
+        response = self.client.get(reverse('library-protocol-list'), {
+            'type': 'DNA',
+        })
+        data = response.json()
+        protocols = [x['name'] for x in data]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.library_protocol1.name, protocols)
+        self.assertNotIn(self.library_protocol2.name, protocols)
+        self.client.get(reverse('library-protocol-list'), {type: 'DNA'})
+
+
+class TestLibraryTypes(BaseTestCase):
+    """ Tests for library types. """
+
+    def setUp(self):
+        self._create_user('foo@bar.io', 'foo-foo')
+        self.client.login(email='foo@bar.io', password='foo-foo')
+
         self.library_protocol = LibraryProtocol(
-            name='Protocol',
-            provider='Provider',
+            name=self._get_random_name(),
+            type='DNA',
+            provider='-',
+            catalog='-',
+            explanation='-',
+            input_requirements='-',
+            typical_application='-',
         )
         self.library_protocol.save()
 
-        self.library_type = LibraryType(name='Library Type')
+        self.library_type = LibraryType(name=self._get_random_name())
         self.library_type.save()
         self.library_type.library_protocol.add(self.library_protocol)
 
-    def test_get_library_types_ok(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.get(reverse('get_library_types'), {
-            'library_protocol_id': self.library_protocol.pk
+    def test_library_type_list(self):
+        """ Ensure get library types behaves correctly. """
+        response = self.client.get(reverse('library-type-list'))
+        data = response.json()
+        library_types = [x['name'] for x in data]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.library_type.name, library_types)
+
+    def test_library_type_with_protocol_list(self):
+        """
+        Ensure get library types given library protocol behaves correctly.
+        """
+        response = self.client.get(reverse('library-type-list'), {
+            'library_protocol_id': self.library_protocol.pk,
         })
-
+        data = response.json()
+        library_types = [x['name'] for x in data]
         self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(str(response.content, 'utf-8'), [
-            {
-                'id': self.library_type.pk,
-                'name': 'Library Type',
-                'protocol': [self.library_protocol.pk]
-            },
-            {
-                'id': 1,
-                'name': 'Other',
-                'protocol': [self.library_protocol.pk]
-            }
-        ])
+        self.assertEqual(len(library_types), 2)  # +1 for 'Other'
+        self.assertIn(self.library_type.name, library_types)
 
-    def test_wrong_http_method(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('get_library_types'))
+    def test_library_type_invalid_protocol(self):
+        """
+        Ensure get library types given invalid library protocol behaves
+        correctly.
+        """
+        response = self.client.get(reverse('library-type-list'), {
+            'library_protocol_id': 'blah',
+        })
+        data = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, b'[]')
+        self.assertEqual(data, [])

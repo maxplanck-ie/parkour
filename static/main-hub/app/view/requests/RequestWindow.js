@@ -19,14 +19,16 @@ Ext.define('MainHub.view.requests.RequestWindow', {
             type: 'table',
             columns: 2
         },
-        items: [{
+        items: [
+            {
                 border: 0,
                 padding: 15,
                 width: 500,
-                items: [{
+                items: [
+                    {
                         xtype: 'form',
-                        id: 'requestForm',
-                        itemId: 'requestForm',
+                        id: 'request-form',
+                        itemId: 'request-form',
                         layout: 'anchor',
                         border: 0,
                         defaultType: 'textfield',
@@ -35,7 +37,8 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                             labelWidth: 80,
                             anchor: '100%'
                         },
-                        items: [{
+                        items: [
+                            {
                                 name: 'name',
                                 id: 'requestName',
                                 fieldLabel: 'Name',
@@ -57,6 +60,9 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                                 store: 'requestFilesStore',
                                 uploadFileUrl: 'request/upload_files/',
                                 getFileUrl: 'request/get_files/'
+                                // uploadFileUrl: 'api/requests/upload_files/',
+                                // getFileUrl: 'api/requests/get_files/'
+
                             }
                         ]
                     },
@@ -76,71 +82,85 @@ Ext.define('MainHub.view.requests.RequestWindow', {
             },
             {
                 xtype: 'grid',
-                id: 'librariesInRequestTable',
-                itemId: 'librariesInRequestTable',
+                id: 'libraries-in-request-grid',
+                itemId: 'libraries-in-request-grid',
                 title: 'Libraries/Samples',
                 width: 345,
                 height: 432,
                 padding: '12px 15px 15px 0',
                 rowspan: 2,
                 viewConfig: {
-                    loadMask: false
+                    // loadMask: false
+                    stripeRows: false
                 },
                 sortableColumns: false,
+                enableColumnMove: false,
+                enableColumnResize: false,
+                enableColumnHide: false,
                 columns: {
                     items: [{
-                            xtype: 'rownumberer',
-                            width: 40
-                        },
-                        {
-                            text: 'Name',
-                            dataIndex: 'name',
-                            flex: 1
-                        },
-                        {
-                            text: '',
-                            dataIndex: 'recordType',
-                            width: 35
-                        },
-                        {
-                            text: 'Barcode',
-                            dataIndex: 'barcode',
-                            width: 90
+                        xtype: 'checkcolumn',
+                        itemId: 'check-column',
+                        dataIndex: 'selected',
+                        tdCls: 'no-dirty',
+                        width: 40
+                    },
+                    // {
+                    //     xtype: 'rownumberer',
+                    //     width: 40
+                    // },
+                    {
+                        text: 'Name',
+                        dataIndex: 'name',
+                        flex: 1
+                    },
+                    {
+                        text: '',
+                        dataIndex: 'record_type',
+                        width: 35,
+                        renderer: function(value, meta) {
+                            return meta.record.getRecordType().charAt(0);
                         }
-                    ]
+                    },
+                    {
+                        text: 'Barcode',
+                        dataIndex: 'barcode',
+                        width: 95,
+                        renderer: function(value, meta) {
+                            // var record = Ext.getStore('librariesInRequestStore').findRecord('barcode', value);
+                            // return record ? record.getBarcode() : value;
+                            return meta.record.getBarcode();
+                        }
+                    }]
                 },
                 store: 'librariesInRequestStore',
-                bbar: [{
-                        itemId: 'batchAddBtn',
-                        text: 'Batch Add'
-                    },
+                bbar: [
                     '->',
                     {
-                        itemId: 'addLibraryBtn',
+                        itemId: 'batch-add-button',
                         text: 'Add'
                     }
                 ]
             }
         ]
     }],
-    bbar: [{
+    bbar: [
+        {
             xtype: 'button',
-            id: 'downloadRequestBlankBtn',
-            itemId: 'downloadRequestBlankBtn',
+            itemId: 'download-request-blank-button',
             iconCls: 'fa fa-download fa-lg',
             text: 'Download Request'
         },
         {
             xtype: 'button',
-            id: 'uploadSignedBlankBtn',
-            itemId: 'uploadSignedBlankBtn',
+            itemId: 'upload-signed-request-button',
             iconCls: 'fa fa-upload fa-lg',
             text: 'Upload signed Request to complete Submission'
         },
         '->',
         {
             xtype: 'button',
-            itemId: 'saveRequestWndBtn',
+            itemId: 'save-button',
             iconCls: 'fa fa-floppy-o fa-lg',
             text: 'Save'
         }
