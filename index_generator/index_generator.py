@@ -26,6 +26,7 @@ class IndexGenerator:
 
         read_lengths = set([l.read_length.pk for l in self._libraries] +
                            [s.read_length.pk for s in self._samples])
+
         if len(read_lengths) != 1:
             raise ValueError('Read lengths must be the same.')
 

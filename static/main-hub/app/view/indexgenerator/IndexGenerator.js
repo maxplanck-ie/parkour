@@ -100,7 +100,9 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                         },
                         renderer: function(value) {
                             var store = Ext.getStore('readLengthsStore');
-                            var record = store.findRecord('id', value)
+                            var record = store.findRecord(
+                                'id', value, 0, false, false, true
+                            );
                             return (record) ? record.get('name') : '';
                         }
                     },
@@ -180,7 +182,8 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
                     ftype: 'summary'
                 }],
                 viewConfig: {
-                    markDirty: false
+                    markDirty: false,
+                    stripeRows: false
                 },
                 problematicCycles: [],
                 sortableColumns: false,

@@ -113,7 +113,6 @@ def get_pool_sizes(request):
         }
         for pool_size in PoolSize.objects.all()
     ]
-    data = sorted(data, key=lambda x: x['size'] * x['multiplier'])
     return JsonResponse(data, safe=False)
 
 
@@ -172,28 +171,13 @@ def save_pool(request):
             pool.libraries.add(*library_ids)
             pool.samples.add(*sample_ids)
 
-            for library_id in library_ids:
-                # Create Pooling object
-                pooling_obj = Pooling(library=library)
-
-                # Update Concentration C1
-                library_concentration = library.concentration
-                mean_fragment_size = library.mean_fragment_size
-                if mean_fragment_size > 0:
-                    concentration_c1 = \
-                        round((library_concentration /
-                              (mean_fragment_size * 650)) * 10**6, 2)
-                    pooling_obj.concentration_c1 = concentration_c1
-
-                pooling_obj.save()
-
             for sample in samples:
                 smpl = Sample.objects.get(pk=sample['sample_id'])
                 idx_i7_id = sample['index_i7_id']
                 idx_i5_id = sample['index_i5_id']
 
                 if idx_i7_id == '':
-                    raise ValueError('Index I7 is not set for "%s"' % smpl.name)
+                    raise ValueError(f'Index I7 is not set for "{smpl.name}"')
 
                 index_i7 = IndexI7.objects.get(index_id=idx_i7_id).index
                 index_i5 = IndexI5.objects.get(index_id=idx_i5_id).index \
@@ -202,17 +186,7 @@ def save_pool(request):
                 # Update sample fields
                 smpl.index_i7 = index_i7
                 smpl.index_i5 = index_i5
-                # smpl.is_pooled = True
-                # smpl.is_converted = True
-                # smpl.barcode = smpl.barcode.replace('S', 'L')
                 smpl.save()
-
-                # # Create Library Preparation object
-                # lp_obj = LibraryPreparation(sample=smpl)
-                # lp_obj.save()
-
-            # Trigger Pool Size update
-            pool.save(update_fields=['size'])
 
         except Exception as e:
             error = str(e) if e.__class__ == ValueError \

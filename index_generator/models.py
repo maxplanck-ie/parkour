@@ -14,7 +14,7 @@ class PoolSize(models.Model):
         ordering = ['multiplier', 'size']
 
     def __str__(self):
-        return '%ix%i' % (self.multiplier, self.size)
+        return f'{self.multiplier}x{self.size}'
 
 
 class Pool(DateTimeMixin):
@@ -22,10 +22,10 @@ class Pool(DateTimeMixin):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name='User')
     size = models.ForeignKey(PoolSize, verbose_name='Size')
     loaded = models.PositiveSmallIntegerField('Loaded', default=0, blank=True)
-
-    libraries = models.ManyToManyField(Library, related_name='pool',
-                                       blank=True)
-    samples = models.ManyToManyField(Sample, related_name='pool', blank=True)
+    libraries = models.ManyToManyField(
+        Library, related_name='pool', blank=True)
+    samples = models.ManyToManyField(
+        Sample, related_name='pool', blank=True)
 
     def get_size(self):
         size = 0
@@ -44,5 +44,5 @@ class Pool(DateTimeMixin):
 
         if created:
             # Update the pool name after receiving a Pool id
-            self.name = 'Pool_%i' % self.pk
+            self.name = f'Pool_{self.pk}'
             self.save()
