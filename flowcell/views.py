@@ -264,7 +264,7 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
         data = []
         queryset = Pool.objects.all().prefetch_related(
             'libraries', 'samples',
-        ).order_by('name')
+        ).order_by('pk')
 
         for pool in queryset:
             # Show libraries which have reached the Pooling step
