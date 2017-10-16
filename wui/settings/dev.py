@@ -5,7 +5,6 @@ DEBUG = True
 
 INSTALLED_APPS += (
     # 'debug_toolbar',
-    'django_extensions',
 )
 
 # MIDDLEWARE_CLASSES += (
@@ -40,16 +39,3 @@ LOGGING['loggers'] = {
         'level': 'DEBUG',
     },
 }
-
-# pdfkit
-# https://wkhtmltopdf.org/usage/wkhtmltopdf.txt
-PDF_OPTIONS = {
-    'encoding': 'UTF-8',
-    'quiet': '',
-    'minimum-font-size': 60,
-    'footer-center': 'Page [page] of [topage]',
-    'footer-font-size': 8,
-}
-
-# Always use Python for shell_plus
-SHELL_PLUS = 'plain'

@@ -1,7 +1,6 @@
 -r base.txt
 
 django-debug-toolbar
-django_extensions
 Fabric3
 pyperclip
 coverage

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'authtools',
     'rest_framework',
     'django_admin_listfilter_dropdown',
+    'django_extensions',
 
     'common',
     'library_sample_shared',
@@ -218,3 +219,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
+
+# Always use Python for shell_plus
+SHELL_PLUS = 'plain'
