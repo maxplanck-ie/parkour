@@ -166,7 +166,7 @@ class LibraryPreparationViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
                 sample.name,                        # Sample
                 sample.barcode,                     # Barcode
                 sample.library_protocol.name,       # Library Protocol
-                sample.concentration,               # Concentration
+                sample.concentration_facility,      # Concentration
                 lib_prep_obj.starting_amount,       # Starting Amount
                 '',                                 # Starting Volume
                 lib_prep_obj.spike_in_description,  # Spike-in Description

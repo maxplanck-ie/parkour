@@ -154,7 +154,6 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
 
         form.submit({
             url: 'api/library_preparation/download_benchtop_protocol/',
-            target: '_blank',
             params: {
                 'ids': Ext.JSON.encode(ids)
             }
