@@ -1,7 +1,10 @@
+from datetime import datetime
 from collections import OrderedDict
 
 from django.shortcuts import render
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 
 from common.models import Organization, PrincipalInvestigator
 from library_sample_shared.models import LibraryProtocol
@@ -12,13 +15,26 @@ from index_generator.models import Pool
 from flowcell.models import Sequencer, Flowcell, Lane
 
 
+@login_required
+@staff_member_required
 def report(request):
     data = {}
+    data['end_date'] = datetime.now().strftime('%d.%m.%y')
     request_ids = Request.objects.all().values_list('pk', flat=True)
-
-    # Total Sample Count
     samples = Sample.objects.filter(request__pk__in=request_ids)
     libraries = Library.objects.filter(request__pk__in=request_ids)
+
+    # Start date
+    oldest_sample = samples.first()
+    oldest_library = libraries.first()
+    oldest_sample_date = oldest_sample.create_time \
+        if oldest_sample else datetime.now()
+    oldest_library_date = oldest_library.create_time \
+        if oldest_library else datetime.now()
+    start_date = min([oldest_sample_date, oldest_library_date])
+    data['start_date'] = start_date.strftime('%d.%m.%y')
+
+    # Total Sample Count
     data['total_counts'] = [
         {
             'type': 'Samples',
@@ -105,7 +121,7 @@ def report(request):
         })
     data['sequncer_counts'] = rows
 
-    # Count by Pi and Sequencer
+    # Count by PI and Sequencer
     # TODO: Highly nonoptimal and slow
     rows = []
     data['sequencers_list'] = sequencers.values_list('name', flat=True)
