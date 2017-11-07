@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block css %}
+<style>
+    #report {
+        margin: 50px auto 75px;
+        width: 50%;
+        min-width: 750px;
+    }
+
+    table caption {
+        font-size: 1.3em;
+    }
+</style>
+{% endblock css %}
+
+{% block content %}
+<div id="report">
+
+    <table class="table table-bordered table-hover">
+        <caption>Total Counts</caption>
+        <thead>
+            <tr>
+                <th width="50%">Type</th>
+                <th width="50%">Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in total_counts %}
+                <tr>
+                    <td>{{ row.type }}</td>
+                    <td>{{ row.count }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table class="table table-bordered table-hover">
+        <caption>Organization Counts</caption>
+        <thead>
+            <tr>
+                <th width="50%">Organization</th>
+                <th width="25%">Samples Submitted</th>
+                <th width="25%">Libraries Submitted</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in organization_counts %}
+            <tr>
+                <td>{{ row.name }}</td>
+                <td>{{ row.samples_count }}</td>
+                <td>{{ row.libraries_count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table class="table table-bordered table-hover">
+        <caption>Protocol Counts</caption>
+        <thead>
+            <tr>
+                <th width="50%">Protocol</th>
+                <th width="25%">Samples Submitted</th>
+                <th width="25%">Libraries Submitted</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in protocol_counts %}
+            <tr>
+                <td>{{ row.name }}</td>
+                <td>{{ row.samples_count }}</td>
+                <td>{{ row.libraries_count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table class="table table-bordered table-hover">
+        <caption>Principal Investigator Counts</caption>
+        <thead>
+            <tr>
+                <th width="50%">Principal Investigator</th>
+                <th width="25%">Samples Submitted</th>
+                <th width="25%">Libraries Submitted</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in pi_counts %}
+            <tr>
+                <td>{{ row.name }}</td>
+                <td>{{ row.samples_count }}</td>
+                <td>{{ row.libraries_count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table class="table table-bordered table-hover">
+        <caption>Device Counts</caption>
+        <thead>
+            <tr>
+                <th width="50%">Device</th>
+                <th width="25%">Number of Libraries</th>
+                <th width="25%">Number of Runs</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in sequncer_counts %}
+            <tr>
+                <td>{{ row.name }}</td>
+                <td>{{ row.libraries_count }}</td>
+                <td>{{ row.runs_count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+{% endblock %}

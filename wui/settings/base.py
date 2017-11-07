@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'library_preparation',
     'pooling',
     'flowcell',
+    'report',
 ]
 
 MIDDLEWARE_CLASSES = [
