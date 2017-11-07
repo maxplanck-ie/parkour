@@ -116,5 +116,26 @@
         </tbody>
     </table>
 
+    <table class="table table-bordered table-hover">
+        <caption>Libraries on Devices</caption>
+        <thead>
+            <tr>
+                <th>Principal Investigator</th>
+                {% for sequencer in sequencers_list %}
+                    <th>{{ sequencer }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in libraries_on_sequencers_count %}
+            <tr>
+                {% for key, value in row.items %}
+                    <td>{{ value }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
 </div>
 {% endblock %}
