@@ -119,7 +119,7 @@ def report(request):
             'libraries_count': samples_count + libraries_count,
             'runs_count': flowcells.count(),
         })
-    data['sequncer_counts'] = rows
+    data['sequencer_counts'] = rows
 
     # Count by PI and Sequencer
     # TODO: Highly nonoptimal and slow
