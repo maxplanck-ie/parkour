@@ -213,7 +213,9 @@ class PoolingViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
         response['Content-Disposition'] = 'attachment; filename="%s"' % f_name
 
         wb = Workbook(encoding='utf-8')
-        ws = wb.add_sheet('Benchtop Protocol')
+
+        # First sheet
+        ws = wb.add_sheet('Pooling')
         col_letters = {
             0: 'A',   # Request ID
             1: 'B',   # Library
@@ -224,9 +226,9 @@ class PoolingViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
             6: 'G',   # Sequencing Depth
             7: 'H',   # % library in Pool
             8: 'I',   # Normalized Library Concentration C2
-            9: 'J',   # Sample Volume V1
-            10: 'K',  # Buffer Volume V2
-            11: 'L',  # Volume to Pool
+            9: 'J',   # Volume to Pool
+            10: 'K',  # µl library
+            11: 'L',  # µl EB
         }
 
         header = ['Request ID', 'Library', 'Barcode',
@@ -234,8 +236,7 @@ class PoolingViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
                   'Library Concentration C1 (nM)', 'Sequencing Depth (M)',
                   '% library in Pool',
                   'Normalized Library Concentration C2 (nM)',
-                  'Sample Volume V1 (µl)', 'Buffer Volume V2 (µl)',
-                  'Volume to Pool (µl)']
+                  'Volume to Pool (µl)', 'µl library', 'µl EB']
 
         font_style = XFStyle()
         font_style.alignment.wrap = 1
@@ -291,31 +292,45 @@ class PoolingViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
             # % library in Pool
             col_sequencing_depth = col_letters[6]
             formula = '%s%s/$B$3*100' % (col_sequencing_depth, row_idx)
-            row.append(Formula(formula))  #
-
-            row.extend(['', ''])  # Concentration C2 and Sample Volume V1
-
-            # Buffer Volume V2 =
-            # ((Concentration C1 * Sample Volume V1) / Concentration C2) -
-            # Sample Volume V1
-            col_concentration_c1 = col_letters[5]
-            col_concentration_c2 = col_letters[8]
-            col_sample_volume = col_letters[9]
-            formula = '((%s%s*%s%s)/%s%s)-%s%s' % (
-                col_concentration_c1, row_idx,
-                col_sample_volume, row_idx,
-                col_concentration_c2, row_idx,
-                col_sample_volume, row_idx,
-            )
             row.append(Formula(formula))
+
+            row.append('')  # Concentration C2
 
             # Volume to Pool
             col_percentage = col_letters[7]
             formula = '$B$2*%s%s/100' % (col_percentage, row_idx)
             row.append(Formula(formula))
 
+            # µl library
+            col_volume_pool = col_letters[9]
+            col_normalization_c2 = col_letters[8]
+            col_concentration_c1 = col_letters[5]
+            formula = '({}{}*{}{})/{}{}'.format(
+                col_volume_pool, row_idx,
+                col_normalization_c2, row_idx,
+                col_concentration_c1, row_idx,
+            )
+            row.append(Formula(formula))
+
+            # µl EB
+            col_ul_library = col_letters[10]
+            formula = '{}{}-{}{}'.format(
+                col_volume_pool, row_idx,
+                col_ul_library, row_idx,
+            )
+            row.append(Formula(formula))
+
+            # Add rows to spreadsheet
             for i in range(len(row)):
                 ws.write(row_num, i, row[i], font_style)
+
+        # Write Sum µl EB
+        col_ul_eb = col_letters[11]
+        formula = 'SUM({}{}:{}{})'.format(
+            col_ul_eb, 6,
+            col_ul_eb, row_idx
+        )
+        ws.write(int(row_idx), 11, Formula(formula), font_style)
 
         # Write Sum Sequencing Depth
         formula = 'SUM(%s%s:%s%s)' % (
@@ -323,6 +338,9 @@ class PoolingViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
             col_sequencing_depth, str(row_num + 1)
         )
         ws.write(2, 1, Formula(formula), font_style)
+
+        # Second sheet
+        ws = wb.add_sheet('ng-ul to nM')
 
         wb.save(response)
         return response

@@ -180,10 +180,8 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             return;
         }
 
-        var poolId = store.data.items[0].get('pool');
-        var form = Ext.create('Ext.form.Panel', {
-            standardSubmit: true
-        });
+        var poolId = store.findRecord('selected', true).get('pool');
+        var form = Ext.create('Ext.form.Panel', { standardSubmit: true });
 
         form.submit({
             url: 'api/pooling/download_benchtop_protocol/',
