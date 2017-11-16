@@ -13,11 +13,17 @@ from common.models import PrincipalInvestigator, Organization, CostUnit
 User = get_user_model()
 
 
+class CostUnitInline(admin.TabularInline):
+    model = CostUnit
+    extra = 1
+
+
 @admin.register(PrincipalInvestigator)
 class PrincipalInvestigatorAdmin(admin.ModelAdmin):
     list_display = ('name', 'organization',)
     search_fields = ('name', 'organization__name',)
     list_filter = ('organization',)
+    inlines = [CostUnitInline]
 
 
 @admin.register(Organization)
