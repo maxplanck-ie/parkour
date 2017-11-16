@@ -341,6 +341,54 @@ class PoolingViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
 
         # Second sheet
         ws = wb.add_sheet('ng-ul to nM')
+        ws.write(0, 0, 'Convert ng/µl to nM', font_style_bold)  # A1
+        ws.write(2, 0,                                          # A3
+                 'Concentration in nM = ((concentration ng/µl) / (650 ' + \
+                 'g/mol x average library size bp)) x 10^6', font_style_bold)
+
+        # Table 1
+        ws.write(6, 0, 'Date', font_style_bold)                   # A7
+        ws.write(6, 1, 'Operator', font_style_bold)               # B7
+        ws.write(6, 2, 'Sample ID', font_style_bold)              # C7
+        ws.write(6, 3, 'Concentration (ng/µl)', font_style_bold)  # D7
+        ws.write(6, 4, 'Average bp', font_style_bold)             # E7
+        ws.write(6, 5, 'nM', font_style_bold)                     # F7
+        for i in range(40):
+            row_idx = 7 + i
+            for j in range(5):
+                ws.write(row_idx, j, '', font_style)
+            formula = f'D{row_idx + 1}/(650*E{row_idx + 1})*10^6'
+            ws.write(row_idx, j + 1, Formula(formula), font_style)
+
+        # Table 2
+        ws.write(6, 11, 'Guidelines', font_style_bold)    # L7
+        ws.write(6, 12, 'nM (optimal)', font_style_bold)  # M7
+        ws.write(6, 13, 'possible', font_style_bold)      # N7
+        ws.write(7, 11, 'HiSeq3000', font_style)          # L8
+        ws.write(8, 11, 'HiSeq2500', font_style)          # L9
+        ws.write(9, 11, 'NextSeq', font_style)            # L10
+        ws.write(10, 11, 'MiSeq', font_style)             # L11
+        ws.write(7, 12, 3, font_style)                    # M8
+        ws.write(8, 12, 1, font_style)                    # M9
+        ws.write(9, 12, '0.5 - 4', font_style)            # M10
+        ws.write(10, 12, 4, font_style)                   # M11
+        ws.write(10, 13, 4, font_style)                   # N11
+
+        # Table 3
+        ws.write(13, 8, 'Add V2 to samples to reach desired C2', font_style)
+        ws.write(14, 8, 'V1', font_style_bold)   # I15
+        ws.write(14, 9, 'C1', font_style_bold)   # J15
+        ws.write(14, 10, 'V2', font_style_bold)  # K15
+        ws.write(14, 11, 'C2', font_style_bold)  # L15
+        for i in range(8):
+            row_idx = 15 + i
+            ws.write(row_idx, 8, '', font_style)                   # V1
+            formula_c1 = f'F{8 + i}'
+            ws.write(row_idx, 9, Formula(formula_c1), font_style)  # C1
+            v2_idx = row_idx + 1
+            formula_v2 = f'((I{v2_idx}*J{v2_idx})/L{v2_idx})-I{v2_idx}'
+            ws.write(row_idx, 10, Formula(formula_v2), font_style)  # V2
+            ws.write(row_idx, 11, 4 + i, font_style)  # C2
 
         wb.save(response)
         return response
