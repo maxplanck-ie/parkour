@@ -7,12 +7,32 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Load initial data for all apps
+        self.load_library_sample_shared_fixtures()
         self.load_sample_fixtures()
         self.load_index_generator_fixtures()
         self.load_flowcell_fixtures()
 
         self.stdout.write(self.style.SUCCESS(
             'Successfully loaded initial data.'))
+
+    def load_library_sample_shared_fixtures(self):
+        call_command('loaddata', 'organisms',
+                     app_label='library_sample_shared')
+
+        call_command('loaddata', 'concentration_methods',
+                     app_label='library_sample_shared')
+
+        call_command('loaddata', 'read_lengths',
+                     app_label='library_sample_shared')
+
+        call_command('loaddata', 'indices',
+                     app_label='library_sample_shared')
+
+        call_command('loaddata', 'library_protocols',
+                     app_label='library_sample_shared')
+
+        call_command('loaddata', 'library_types',
+                     app_label='library_sample_shared')
 
     def load_sample_fixtures(self):
         call_command('loaddata', 'nucleic_acid_types', app_label='sample')
