@@ -2,14 +2,16 @@ Ext.define('MainHub.view.requests.RequestsController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.requests',
 
+    mixins: ['MainHub.grid.ResizeMixin'],
+
     config: {
         control: {
             '#': {
                 activate: 'activateView'
             },
             '#requests-grid': {
+                resize: 'resize',
                 boxready: 'boxready',
-                // refresh: 'refresh',
                 itemcontextmenu: 'showContextMenu'
             },
             '#add-request-button': {
@@ -30,12 +32,7 @@ Ext.define('MainHub.view.requests.RequestsController', {
         if (!USER_IS_STAFF) {
             Ext.getCmp('requests-grid').down('[dataIndex=user_full_name]').setVisible(false);
         }
-        // Ext.getStore('requestsStore').reload();
     },
-
-    // refresh: function() {
-    //     Ext.getStore('requestsStore').reload();
-    // },
 
     addRequest: function(btn) {
         Ext.create('MainHub.view.requests.RequestWindow', {

@@ -5,6 +5,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
     mixins: [
         'MainHub.grid.SearchInputMixin',
         'MainHub.grid.ContextMenuMixin',
+        'MainHub.grid.ResizeMixin',
         'MainHub.store.SyncStoreMixin'
     ],
 
@@ -14,8 +15,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
                 activate: 'activateView'
             },
             '#pooling-grid': {
-                // boxready: 'refresh',
-                // refresh: 'refresh',
+                resize: 'resize',
                 itemcontextmenu: 'showContextMenu',
                 groupcontextmenu: 'showGroupContextMenu',
                 beforeEdit: 'toggleEditors',
@@ -45,15 +45,6 @@ Ext.define('MainHub.view.pooling.PoolingController', {
     activateView: function() {
         Ext.getStore('poolingStore').reload();
     },
-
-    // refresh: function() {
-    //     Ext.getStore('poolingStore').load(function(records, operation, success) {
-    //         if (success && records.length > 0) {
-    //             Ext.getCmp('downloadBenchtopProtocolPBtn').setDisabled(false);
-    //             Ext.getCmp('downloadPoolingTemplateBtn').setDisabled(false);
-    //         }
-    //     });
-    // },
 
     selectRecord: function(cb, rowIndex, checked, record) {
         // Don't select samples which aren't prepared yet

@@ -1,7 +1,6 @@
 Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.index-generator',
-    requires: [],
 
     config: {
         control: {

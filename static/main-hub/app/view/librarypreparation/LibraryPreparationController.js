@@ -5,6 +5,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
     mixins: [
         'MainHub.grid.SearchInputMixin',
         'MainHub.grid.ContextMenuMixin',
+        'MainHub.grid.ResizeMixin',
         'MainHub.store.SyncStoreMixin'
     ],
 
@@ -14,7 +15,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
                 activate: 'activateView'
             },
             '#library-preparation-grid': {
-                // refresh: 'refresh',
+                resize: 'resize',
                 edit: 'editRecord',
                 itemcontextmenu: 'showContextMenu',
                 groupcontextmenu: 'showGroupContextMenu'
@@ -37,15 +38,6 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
     activateView: function() {
         Ext.getStore('libraryPreparationStore').reload();
     },
-
-    // refresh: function(grid) {
-    //     // Ext.getStore('libraryPreparationStore').load(function(records, operation, success) {
-    //     //     if (success && records.length > 0) {
-    //     //         Ext.getCmp('downloadBenchtopProtocolLPBtn').setDisabled(false);
-    //     //     }
-    //     // });
-    //     Ext.getStore('libraryPreparationStore').reload();
-    // },
 
     selectUnselectAll: function(libraryProtocolId, selected) {
         var store = Ext.getStore('libraryPreparationStore');
