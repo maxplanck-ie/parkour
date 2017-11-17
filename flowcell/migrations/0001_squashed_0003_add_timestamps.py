@@ -15,6 +15,9 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('index_generator', '0003_add_timestamps'),
+
+        # TODO: Uncomment after deleting squashed migrations
+        # ('index_generator', '0001_initial'),
     ]
 
     operations = [
