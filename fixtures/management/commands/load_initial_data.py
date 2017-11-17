@@ -7,6 +7,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Load initial data for all apps
+        self.load_common_fixtures()
         self.load_library_sample_shared_fixtures()
         self.load_sample_fixtures()
         self.load_index_generator_fixtures()
@@ -14,6 +15,11 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS(
             'Successfully loaded initial data.'))
+
+    def load_common_fixtures(self):
+        call_command('loaddata', 'organizations', app_label='common')
+        call_command('loaddata', 'principal_investigators', app_label='common')
+        call_command('loaddata', 'cost_units', app_label='common')
 
     def load_library_sample_shared_fixtures(self):
         call_command('loaddata', 'organisms',
