@@ -1,7 +1,10 @@
 import random
 
-from rest_framework.serializers import (ModelSerializer, SerializerMethodField,
-                                        IntegerField)
+from rest_framework.serializers import (
+    ModelSerializer,
+    SerializerMethodField,
+    IntegerField,
+)
 
 from library_sample_shared.serializers import LibrarySampleBaseSerializer
 from sample.serializers import SampleSerializer
@@ -43,17 +46,14 @@ class RequestParentNodeSerializer(ModelSerializer):
         return obj.pk
 
     def get_name(self, obj):
-        libraries = obj.libraries.prefetch_related('sequencing_depth')
-        samples = obj.samples.prefetch_related('sequencing_depth')
-
-        num_total = libraries.count() + samples.count()
+        num_total = obj.libraries.count() + obj.samples.count()
         sum_total = \
-            sum(libraries.values_list('sequencing_depth', flat=True)) + \
-            sum(samples.values_list('sequencing_depth', flat=True))
+            sum(obj.libraries.values_list('sequencing_depth', flat=True)) + \
+            sum(obj.samples.values_list('sequencing_depth', flat=True))
 
-        name = '<strong>Request: {}</strong> ('.format(obj.name) + \
-               '# of Libraries/Samples: {}, '.format(num_total) + \
-               'Total Sequencing Depth: {} M)'.format(sum_total)
+        name = f'<strong>Request: {obj.name}</strong> ' + \
+               f'(# of Libraries/Samples: {num_total}, ' + \
+               f'Total Sequencing Depth: {sum_total} M)'
 
         return name
 
@@ -69,8 +69,7 @@ class LibraryChildNodeSerializer(LibrarySerializer):
     leaf = SerializerMethodField()
 
     class Meta(LibrarySerializer.Meta):
-        fields = LibrarySerializer.Meta.fields + \
-            ('id', 'leaf',)
+        fields = LibrarySerializer.Meta.fields + ('id', 'leaf',)
 
     def get_id(self, obj):
         # Each leaf node needs a unique id
@@ -85,8 +84,7 @@ class SampleChildNodeSerializer(SampleSerializer):
     leaf = SerializerMethodField()
 
     class Meta(SampleSerializer.Meta):
-        fields = SampleSerializer.Meta.fields + \
-            ('id', 'leaf',)
+        fields = SampleSerializer.Meta.fields + ('id', 'leaf',)
 
     def get_id(self, obj):
         # Each leaf node needs a unique id

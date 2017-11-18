@@ -1,6 +1,10 @@
-from rest_framework.serializers import (ModelSerializer, ListSerializer,
-                                        IntegerField, CharField,
-                                        SerializerMethodField)
+from rest_framework.serializers import (
+    ModelSerializer,
+    ListSerializer,
+    SerializerMethodField,
+    IntegerField,
+    CharField,
+)
 from library.models import Library
 from sample.models import Sample
 

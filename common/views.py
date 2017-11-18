@@ -12,7 +12,7 @@ def index(request):
     user = request.user
     return render(request, 'index.html', {
         'DEBUG': settings.DEBUG,
-        'USERNAME': user.get_full_name(),
+        'USERNAME': user.full_name,
         'USER_IS_STAFF': user.is_staff
     })
 

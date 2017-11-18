@@ -1,8 +1,8 @@
 import json
 import logging
+import itertools
 from datetime import datetime
 from unicodedata import normalize
-import itertools
 
 from fpdf import FPDF
 
@@ -20,8 +20,10 @@ from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAdminUser
 
-from common.views import (CsrfExemptSessionAuthentication,
-                          StandardResultsSetPagination)
+from common.views import (
+    CsrfExemptSessionAuthentication,
+    StandardResultsSetPagination,
+)
 from .models import Request, FileRequest
 from .serializers import RequestSerializer, RequestFileSerializer
 
@@ -293,7 +295,7 @@ class RequestViewSet(viewsets.ModelViewSet):
         # Deep Sequencing Request info
         pdf.info_row('Request Name', instance.name)
         pdf.info_row('Date', datetime.now().strftime('%d.%m.%Y'))
-        pdf.info_row('User', user.get_full_name())
+        pdf.info_row('User', user.full_name)
         pdf.info_row('Phone', user.phone if user.phone else '')
         pdf.info_row('Email', user.email)
         pdf.info_row('Organization', organization)
@@ -411,7 +413,7 @@ class RequestViewSet(viewsets.ModelViewSet):
                 subject=subject,
                 message='',
                 html_message=render_to_string('email.html', {
-                    'full_name': instance.user.get_full_name(),
+                    'full_name': instance.user.full_name,
                     'message': message,
                     'records': records,
                 }),
