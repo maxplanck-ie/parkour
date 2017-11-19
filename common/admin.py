@@ -35,7 +35,7 @@ class OrganizationAdmin(admin.ModelAdmin):
 class CostUnitAdmin(admin.ModelAdmin):
     list_display = ('name', 'pi',)
     search_fields = ('name', 'pi__name', 'pi__organization__name',)
-    list_filter = ('pi__organization__name', ('pi', RelatedDropdownFilter),)
+    list_filter = (('pi', RelatedDropdownFilter),)
 
 
 class UserCreationForm(UserCreationForm):
