@@ -1,12 +1,17 @@
 from django.db.models import Q
 from rest_framework.exceptions import ValidationError
-from rest_framework.serializers import (ModelSerializer, ListSerializer,
-                                        SerializerMethodField, IntegerField,
-                                        CharField)
+from rest_framework.serializers import (
+    ModelSerializer,
+    ListSerializer,
+    SerializerMethodField,
+    IntegerField,
+    CharField,
+)
 
 from library.models import Library
 from sample.models import Sample
 from index_generator.models import Pool
+
 from .models import Sequencer, Flowcell, Lane
 
 

@@ -27,13 +27,6 @@ def timeit(func):
     return wrapper
 
 
-# def get_form_errors(errors):
-#     result = 'Form is invalid:<br/><br/>'
-#     for error_field, error_message in errors.items():
-#         result += 'Field "%s":<br/>%s' % (error_field, error_message)
-#     return result
-
-
 def generate_barcode(record_type, counter):
     barcode = datetime.now().strftime('%y') + record_type
     barcode += '0' * (6 - len(counter)) + counter

@@ -54,14 +54,14 @@ Ext.define('MainHub.view.libraries.Libraries', {
                     margin: '0 15 0 0',
                     cls: 'grid-header-checkbox',
                     checked: true,
-                    disabled: true
+                    hidden: true
                 },
                 {
                     boxLabel: 'Show Samples',
                     itemId: 'showSamplesCheckbox',
                     cls: 'grid-header-checkbox',
                     checked: true,
-                    disabled: true
+                    hidden: true
                 }]
             },
             {
@@ -69,7 +69,7 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 itemId: 'searchField',
                 emptyText: 'Search',
                 width: 200,
-                disabled: true
+                hidden: true
             }]
         },
 

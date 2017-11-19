@@ -32,7 +32,6 @@ urlpatterns = [
     url(r'library/', include('library.urls')),
     url(r'sample/', include('sample.urls')),
     url(r'request/', include('request.urls')),
-    url(r'incoming_libraries/', include('incoming_libraries.urls')),
     url(r'index_generator/', include('index_generator.urls')),
     url(r'library_preparation/', include('library_preparation.urls')),
     url(r'pooling/', include('pooling.urls')),

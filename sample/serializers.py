@@ -1,5 +1,8 @@
-from rest_framework.serializers import (ModelSerializer, SerializerMethodField,
-                                        IntegerField)
+from rest_framework.serializers import (
+    ModelSerializer,
+    SerializerMethodField,
+    IntegerField,
+)
 
 from library_sample_shared.serializers import LibrarySampleBaseSerializer
 from sample.models import NucleicAcidType, Sample

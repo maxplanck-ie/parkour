@@ -5,6 +5,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
     mixins: [
         'MainHub.grid.CheckboxesAndSearchInputMixin',
         'MainHub.grid.ContextMenuMixin',
+        'MainHub.grid.ResizeMixin',
         'MainHub.store.SyncStoreMixin'
     ],
 
@@ -14,7 +15,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
                 activate: 'activateView'
             },
             '#incoming-libraries-grid': {
-                // refresh: 'refresh',
+                resize: 'resize',
                 itemcontextmenu: 'showContextMenu',
                 groupcontextmenu: 'showGroupContextMenu',
                 beforeedit: 'toggleEditors',
@@ -41,10 +42,6 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
     activateView: function() {
         Ext.getStore('incomingLibrariesStore').reload();
     },
-
-    // refresh: function() {
-    //     Ext.getStore('incomingLibrariesStore').reload();
-    // },
 
     selectUnselectAll: function(requestId, selected) {
         var store = Ext.getStore('incomingLibrariesStore');

@@ -56,7 +56,7 @@ class Request(DateTimeMixin):
     )
 
     def __str__(self):
-        return '%s' % self.name
+        return self.name
 
     @property
     def records(self):
@@ -72,7 +72,7 @@ class Request(DateTimeMixin):
 
         if created:
             # Set name after getting an id
-            self.name = '%i_%s' % (self.id, self.user.last_name)
+            self.name = f'{self.id}_{self.user.last_name}'
             if self.user.pi:
                 self.name += '_' + self.user.pi.name
             self.save()

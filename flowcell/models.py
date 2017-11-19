@@ -16,13 +16,13 @@ class Sequencer(models.Model):
 class Lane(models.Model):
     name = models.CharField('Name', max_length=6)
     pool = models.ForeignKey(Pool, verbose_name='Pool')
-    loading_concentration = models.FloatField('Loading Concentration',
-                                              blank=True, null=True)
+    loading_concentration = models.FloatField(
+        'Loading Concentration', blank=True, null=True)
     phix = models.FloatField('PhiX %', blank=True, null=True)
     completed = models.BooleanField('Completed', default=False)
 
     def __str__(self):
-        return '{}: {}'.format(self.name, self.pool.name)
+        return f'{self.name}: {self.pool.name}'
 
     def save(self, *args, **kwargs):
         created = self.pk is None

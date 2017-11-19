@@ -19,7 +19,7 @@ class PrincipalInvestigator(models.Model):
         ordering = ['name']
 
     def __str__(self):
-        return '%s (%s)' % (self.name, self.organization.name)
+        return f'{self.name} ({self.organization.name})'
 
 
 class CostUnit(models.Model):
@@ -35,11 +35,7 @@ class CostUnit(models.Model):
         ordering = ['name']
 
     def __str__(self):
-        return '{} ({}: {})'.format(
-            self.name,
-            self.pi.organization.name,
-            self.pi.name,
-        )
+        return f'{self.name} ({self.pi.organization.name}: {self.pi.name})'
 
 
 class User(AbstractEmailUser):
@@ -73,11 +69,12 @@ class User(AbstractEmailUser):
         db_table = 'auth_user'
         ordering = ['last_name', 'first_name']
 
-    def get_full_name(self):
-        return '{} {}'.format(self.first_name, self.last_name)
+    @property
+    def full_name(self):
+        return f'{self.first_name} {self.last_name}'
 
     def __str__(self):
-        return '{} {} ({})'.format(self.first_name, self.last_name, self.email)
+        return f'{self.first_name} {self.last_name} ({self.email})'
 
 
 class DateTimeMixin(models.Model):

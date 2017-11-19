@@ -21,7 +21,7 @@ class RequestSerializer(ModelSerializer):
                   'deep_seq_request_path',)
 
     def get_user_full_name(self, obj):
-        return obj.user.get_full_name()
+        return obj.user.full_name
 
     def get_total_sequencing_depth(self, obj):
         library_depths = obj.libraries.values_list(

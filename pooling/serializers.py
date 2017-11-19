@@ -1,13 +1,16 @@
 from django.db.models import Q
 from rest_framework.exceptions import ValidationError
-from rest_framework.serializers import (ModelSerializer, ListSerializer,
-                                        IntegerField, CharField,
-                                        SerializerMethodField)
+from rest_framework.serializers import (
+    ModelSerializer,
+    ListSerializer,
+    SerializerMethodField,
+    IntegerField,
+    CharField,
+)
 
 from library_sample_shared.models import IndexType
 from library.models import Library
 from sample.models import Sample
-from index_generator.models import Pool
 from library_preparation.models import LibraryPreparation
 from .models import Pooling
 
@@ -170,30 +173,3 @@ class PoolingSampleSerializer(PoolingBaseSerializer):
             return obj.librarypreparation.mean_fragment_size
         except LibraryPreparation.DoesNotExist:
             return None
-
-
-class PoolingSerializer(ModelSerializer):
-    libraries = SerializerMethodField()
-    samples = SerializerMethodField()
-
-    class Meta:
-        model = Pool
-        fields = ('libraries', 'samples',)
-
-    def get_libraries(self, obj):
-        queryset = obj.libraries.filter(status=2)
-        serializer = PoolingLibrarySerializer(queryset, many=True)
-        return serializer.data
-
-    def get_samples(self, obj):
-        queryset = obj.samples.filter(
-            Q(status=3) | Q(status=2) | Q(status=-2))
-        serializer = PoolingSampleSerializer(queryset, many=True)
-        return serializer.data
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        return sorted(
-            data['libraries'] + data['samples'],
-            key=lambda x: x['barcode'][3:],
-        )

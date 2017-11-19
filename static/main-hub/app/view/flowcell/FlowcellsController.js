@@ -9,6 +9,7 @@ Ext.define('MainHub.view.flowcell.FlowcellsController', {
 
     mixins: [
         'MainHub.grid.SearchInputMixin',
+        'MainHub.grid.ResizeMixin',
         'MainHub.store.SyncStoreMixin'
     ],
 
@@ -21,6 +22,7 @@ Ext.define('MainHub.view.flowcell.FlowcellsController', {
                 click: 'onLoadBtnClick'
             },
             '#flowcells-grid': {
+                resize: 'resize',
                 itemcontextmenu: 'showContextMenu',
                 groupcontextmenu: 'showGroupContextMenu',
                 edit: 'editRecord'

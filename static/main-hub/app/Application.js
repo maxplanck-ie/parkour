@@ -318,3 +318,9 @@ Ext.define('MainHub.store.SyncStoreMixin', {
         });
     }
 });
+
+Ext.define('MainHub.grid.ResizeMixin', {
+    resize: function(el) {
+        el.setHeight(Ext.Element.getViewportHeight() - 64);
+    }
+});

@@ -1,6 +1,6 @@
-import logging
-import json
 import csv
+import json
+import logging
 import unicodedata
 import itertools
 
@@ -19,10 +19,16 @@ from common.views import CsrfExemptSessionAuthentication
 from common.mixins import MultiEditMixin
 from index_generator.models import Pool
 from library_sample_shared.models import ReadLength, IndexI7, IndexI5
+
 from .models import Sequencer, Lane, Flowcell
 from .forms import FlowcellForm
-from .serializers import (SequencerSerializer, FlowcellSerializer,
-                          LaneSerializer, PoolSerializer, PoolInfoSerializer)
+from .serializers import (
+    SequencerSerializer,
+    FlowcellSerializer,
+    LaneSerializer,
+    PoolSerializer,
+    PoolInfoSerializer,
+)
 
 logger = logging.getLogger('db')
 
@@ -442,10 +448,11 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
             'NFKD', record.request.get().name)
         request_name = str(request_name.encode('ASCII', 'ignore'), 'utf-8')
 
-        library_protocol = \
-            unicodedata.normalize('NFKD', record.library_protocol.name)
-        library_protocol = str(library_protocol.encode('ASCII', 'ignore'),
-                               'utf-8')
+        library_protocol = unicodedata.normalize(
+            'NFKD', record.library_protocol.name)
+        library_protocol = str(
+            library_protocol.encode('ASCII', 'ignore'), 'utf-8')
+
         return [
             lane.name.split()[1],  # Lane
             record.barcode,        # Sample_ID
