@@ -1,6 +1,6 @@
 import json
-import logging
 import time
+import logging
 import itertools
 
 from xlwt import Workbook, XFStyle, Formula
@@ -21,10 +21,10 @@ from index_generator.models import Pool
 from library_preparation.models import LibraryPreparation
 from library.models import Library
 from sample.models import Sample
+
 from .models import Pooling
 from .forms import PoolingForm
-from .serializers import (PoolingSerializer, PoolingLibrarySerializer,
-                          PoolingSampleSerializer)
+from .serializers import PoolingLibrarySerializer, PoolingSampleSerializer
 
 logger = logging.getLogger('db')
 
@@ -190,9 +190,22 @@ class PoolingViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
 
     def list(self, request):
         """ Get the list of all pooling objects. """
-        queryset = Pool.objects.order_by('-create_time')
-        serializer = PoolingSerializer(queryset, many=True)
-        return Response(list(itertools.chain(*serializer.data)))
+        library_queryset = Library.objects.filter(status=2).exclude(pool=None)
+        sample_queryset = Sample.objects.filter(
+            Q(status=3) | Q(status=2) | Q(status=-2)
+        ).exclude(pool=None)
+
+        library_serializer = PoolingLibrarySerializer(
+            library_queryset, many=True)
+        sample_serializer = PoolingSampleSerializer(
+            sample_queryset, many=True)
+
+        data = sorted(
+            library_serializer.data + sample_serializer.data,
+            key=lambda x: x['barcode'][3:],
+        )
+
+        return Response(data)
 
     @list_route(methods=['post'])
     def download_benchtop_protocol(self, request):

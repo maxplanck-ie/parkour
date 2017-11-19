@@ -1,7 +1,11 @@
 from rest_framework.exceptions import ValidationError
-from rest_framework.serializers import (ModelSerializer, ListSerializer,
-                                        IntegerField, CharField,
-                                        SerializerMethodField)
+from rest_framework.serializers import (
+    ModelSerializer,
+    ListSerializer,
+    SerializerMethodField,
+    IntegerField,
+    CharField,
+)
 
 from library_sample_shared.models import IndexType
 from .models import LibraryPreparation
