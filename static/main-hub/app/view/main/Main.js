@@ -42,13 +42,13 @@ Ext.define('MainHub.view.main.Main', {
                     xtype: 'component',
                     reference: 'logo',
                     cls: 'main-logo',
-                    html: '<div class="logo"><img src="static/main-hub/resources/images/logo.png">Parkour</div>',
-                    width: 280
+                    html: '<div class="logo"><img src="static/main-hub/resources/images/logo.svg"><div class="title">Parkour LIMS</div></div>',
+                    width: 300
                 },
                 {
                     margin: '0 0 0 8',
                     // ui: 'header',
-                    iconCls:'x-fa fa-navicon',
+                    iconCls: 'x-fa fa-navicon',
                     id: 'main-navigation-btn',
                     handler: 'onToggleNavigationSize'
                 },
@@ -87,7 +87,7 @@ Ext.define('MainHub.view.main.Main', {
                     itemId: 'navigationTreeList',
                     ui: 'navigation',
                     store: 'NavigationTree',
-                    width: 280,
+                    width: 300,
                     expanderFirst: false,
                     expanderOnly: false,
                     listeners: {

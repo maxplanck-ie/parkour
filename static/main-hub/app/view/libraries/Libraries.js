@@ -43,6 +43,7 @@ Ext.define('MainHub.view.libraries.Libraries', {
 
         header: {
             title: 'Libraries and Samples',
+            height: 56,
             items: [{
                 xtype: 'fieldcontainer',
                 defaultType: 'checkboxfield',

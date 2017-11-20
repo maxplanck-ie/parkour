@@ -105,12 +105,26 @@
 
     .logo {
         line-height: 65px;
+        position: relative;
 
         img {
-            margin-left: 22px;
-            margin-right: 22px;
-            //top: 8px;
-            //position: relative;
+            margin-left: 17px;
+            margin-right: 17px;
+            position: absolute;
+            top: 17px;
+        }
+
+        .title {
+            font-weight: bold;
+            margin-left: 60px;
+        }
+    }
+}
+
+.main-logo.logo-collapsed {
+    .logo {
+        .title {
+            margin-left: 65px;
         }
     }
 }
