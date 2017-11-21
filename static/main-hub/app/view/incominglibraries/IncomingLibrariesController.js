@@ -30,6 +30,9 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
             '#search-field': {
                 change: 'changeFilter'
             },
+            '#qc-action-buttons': {
+                click: 'qualityCheckActionButtonClick'
+            },
             '#cancel-button': {
                 click: 'cancel'
             },
@@ -39,12 +42,13 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
         }
     },
 
-    activateView: function() {
-        Ext.getStore('incomingLibrariesStore').reload();
+    activateView: function(view) {
+        var store = view.down('grid').getStore();
+        Ext.getStore(store.getId()).reload();
     },
 
     selectUnselectAll: function(requestId, selected) {
-        var store = Ext.getStore('incomingLibrariesStore');
+        var store = Ext.getStore('IncomingLibraries');
         store.each(function(item) {
             if (item.get('request') === requestId) {
                 item.set('selected', selected);
@@ -78,6 +82,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
     },
 
     editRecord: function(editor, context) {
+        var store = editor.grid.getStore();
         var record = context.record;
         var changes = record.getChanges();
         var values = context.newValues;
@@ -95,11 +100,11 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
         }
 
         // Send the changes to the server
-        this.syncStore('incomingLibrariesStore', reload);
+        this.syncStore(store.getId(), reload);
     },
 
     applyToAll: function(record, dataIndex) {
-        var store = Ext.getStore('incomingLibrariesStore');
+        var store = Ext.getStore('IncomingLibraries');
         var allowedColumns = ['dilution_factor', 'concentration_facility',
             'concentration_method_facility', 'sample_volume_facility',
             'amount_facility', 'size_distribution_facility', 'comments_facility',
@@ -129,12 +134,12 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
             });
 
             // Send the changes to the server
-            this.syncStore('incomingLibrariesStore');
+            this.syncStore(store.getId());
         }
     },
 
     qualityCheckAll: function(requestId, result) {
-        var store = Ext.getStore('incomingLibrariesStore');
+        var store = Ext.getStore('IncomingLibraries');
 
         store.each(function(item) {
             if (item.get('request') === requestId && item.get('selected')) {
@@ -151,15 +156,23 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
         }
 
         // Send the changes to the server
-        this.syncStore('incomingLibrariesStore', true);
+        this.syncStore(store.getId(), true);
     },
 
-    save: function() {
-        // Send the changes to the server
-        this.syncStore('incomingLibrariesStore');
+    qualityCheckActionButtonClick: function(grid, cell, rowIndex, colIndex, e, record) {
+        var store = grid.getStore();
+        var result = e.target.getAttribute('data-qtip');
+        record.set('quality_check', result);
+        this.syncStore(store.getId(), true);
     },
 
-    cancel: function() {
-        Ext.getStore('incomingLibrariesStore').rejectChanges();
+    save: function(btn) {
+        var store = btn.up('grid').getStore();
+        this.syncStore(store.getId());
+    },
+
+    cancel: function(btn) {
+        var store = btn.up('grid').getStore();
+        Ext.getStore(store.getId()).rejectChanges();
     }
 });

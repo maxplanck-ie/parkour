@@ -282,15 +282,15 @@ Ext.define('MainHub.grid.ContextMenuMixin', {
 });
 
 Ext.define('MainHub.store.SyncStoreMixin', {
-    syncStore: function(name, reload) {
+    syncStore: function(storeId, reload) {
         var reload = reload || false;
-        Ext.getStore(name).sync({
+        Ext.getStore(storeId).sync({
             success: function(batch) {
                 var response = batch.operations[0].getResponse();
                 var obj = Ext.JSON.decode(response.responseText);
 
                 if (reload) {
-                    Ext.getStore(name).reload();
+                    Ext.getStore(storeId).reload();
                 }
 
                 if (obj.hasOwnProperty('message') && obj.message !== '') {

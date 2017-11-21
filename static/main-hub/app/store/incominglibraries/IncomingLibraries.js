@@ -1,6 +1,6 @@
 Ext.define('MainHub.store.incominglibraries.IncomingLibraries', {
     extend: 'Ext.data.Store',
-    storeId: 'incomingLibrariesStore',
+    storeId: 'IncomingLibraries',
 
     requires: [
         'MainHub.model.incominglibraries.IncomingLibraries'
@@ -37,7 +37,7 @@ Ext.define('MainHub.store.incominglibraries.IncomingLibraries', {
                         data = [data];
                     }
 
-                    var store = Ext.getStore('incomingLibrariesStore');
+                    var store = Ext.getStore('IncomingLibraries');
                     var newData = _.map(data, function(item) {
                         var record = store.findRecord('id', item.id);
                         if (record) {
@@ -53,5 +53,9 @@ Ext.define('MainHub.store.incominglibraries.IncomingLibraries', {
                 scope: this
             }
         }
+    },
+
+    getId: function() {
+        return 'IncomingLibraries';
     }
 });

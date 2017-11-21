@@ -59,7 +59,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
             type: 'spreadsheet',
             rowSelect: false
         },
-        store: 'incomingLibrariesStore',
+        store: 'IncomingLibraries',
         sortableColumns: false,
         enableColumnMove: false,
 
@@ -294,42 +294,33 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
                     dataIndex: 'comments_facility',
                     tdCls: 'facilityEntry',
                     width: 150,
-                    editor: {
-                        xtype: 'textfield'
-                    }
+                    editor: { xtype: 'textfield' }
                 },
                 {
+                    xtype: 'actioncolumn',
+                    itemId: 'qc-action-buttons',
+                    align: 'center',
                     text: 'QC Result',
-                    dataIndex: 'quality_check',
                     resizable: false,
                     menuDisabled: true,
                     hideable: false,
                     tdCls: 'facilityEntry',
-                    width: 90,
-                    editor: {
-                        xtype: 'combobox',
-                        queryMode: 'local',
-                        displayField: 'name',
-                        valueField: 'name',
-                        store: Ext.create('Ext.data.Store', {
-                            fields: [{
-                                name: 'name',
-                                type: 'string'
-                            }],
-                            data: [
-                                {
-                                    name: 'passed'
-                                },
-                                {
-                                    name: 'failed'
-                                },
-                                {
-                                    name: 'compromised'
-                                }
-                            ]
-                        }),
-                        forceSelection: true
-                    }
+                    width: 85,
+                    items: [
+                        {
+                            iconCls: 'qc-action-passed x-fa fa-check',
+                            tooltip: 'passed'
+                        },
+                        {
+                            iconCls: 'qc-action-failed x-fa fa-times',
+                            tooltip: 'failed'
+                        },
+                        {
+                            iconCls: 'qc-action-compromised x-fa fa-exclamation-triangle',
+                            tooltip: 'compromised'
+                        }
+                    ],
+                    editor: { xtype: 'container' }
                 }
             ]
         },

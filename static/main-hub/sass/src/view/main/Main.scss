@@ -150,3 +150,17 @@
 .panel-header-combobox > .x-form-item-label > span.x-form-item-label-inner {
     color: #fff;
 }
+
+// Action buttons
+.x-grid-row-editor .x-action-col-icon {
+    margin-right: 6px;
+}
+.x-action-col-icon.qc-action-passed:hover {
+    color: #66bb6a;
+}
+.x-action-col-icon.qc-action-failed:hover {
+    color: #ef5350;
+}
+.x-action-col-icon.qc-action-compromised:hover {
+    color: #ffc107;
+}
