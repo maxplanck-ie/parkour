@@ -223,5 +223,13 @@ REST_FRAMEWORK = {
     ],
 }
 
-# Always use Python for shell_plus
-SHELL_PLUS = 'plain'
+# Use 'bpython' by default for shell_plus
+SHELL_PLUS = 'bpython'
+
+NOTEBOOK_ARGUMENTS = [
+    '--notebook-dir', os.path.join(BASE_DIR, 'notebooks'),
+]
+
+IPYTHON_ARGUMENTS = [
+    '--debug',
+]
