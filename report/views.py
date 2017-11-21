@@ -6,7 +6,6 @@ from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 
-from common.utils import timeit
 from common.models import Organization, PrincipalInvestigator
 from library_sample_shared.models import LibraryProtocol
 from library.models import Library
@@ -65,7 +64,6 @@ def report(request):
     return render(request, 'report.html', data)
 
 
-@timeit
 def get_total_counts(libraries, samples):
     return [
         {
@@ -79,7 +77,6 @@ def get_total_counts(libraries, samples):
     ]
 
 
-@timeit
 def get_organization_counts(request_ids):
     return [
         {
@@ -97,7 +94,6 @@ def get_organization_counts(request_ids):
     ]
 
 
-@timeit
 def get_library_protocol_counts(request_ids):
     return [
         {
@@ -115,7 +111,6 @@ def get_library_protocol_counts(request_ids):
     ]
 
 
-@timeit
 def get_pi_counts(request_ids, principal_investigators):
     return [
         {
@@ -133,20 +128,16 @@ def get_pi_counts(request_ids, principal_investigators):
     ]
 
 
-@timeit
 def get_sequencer_counts(sequencers):
     rows = []
     for sequencer in sequencers:
-        samples_count = 0
-        libraries_count = 0
         flowcells = Flowcell.objects.filter(sequencer=sequencer)
         lanes = Lane.objects.filter(
             pk__in=flowcells.values_list('lanes', flat=True))
         pools = Pool.objects.filter(
             pk__in=lanes.values_list('pool', flat=True).distinct())
-        for pool in pools:
-            samples_count += pool.samples.all().count()
-            libraries_count += pool.libraries.all().count()
+        samples_count = Sample.objects.filter(pool__in=pools).count()
+        libraries_count = Library.objects.filter(pool__in=pools).count()
         rows.append({
             'name': sequencer.name,
             'libraries_count': samples_count + libraries_count,
@@ -155,27 +146,22 @@ def get_sequencer_counts(sequencers):
     return rows
 
 
-@timeit
 def get_pi_sequencer_counts(principal_investigators, sequencers):
-    # TODO: Highly nonoptimal and slow
     rows = []
     for pi in principal_investigators:
         row = OrderedDict({'pi': pi.name})
         for sequencer in sequencers:
-            samples_count = 0
-            libraries_count = 0
             flowcells = Flowcell.objects.filter(sequencer=sequencer)
             lanes = Lane.objects.filter(
                 pk__in=flowcells.values_list('lanes', flat=True))
             pools = Pool.objects.filter(
                 pk__in=lanes.values_list('pool', flat=True).distinct())
-            for pool in pools:
-                samples_count += pool.samples.filter(
-                    request__user__pi=pi
-                ).count()
-                libraries_count += pool.libraries.filter(
-                    request__user__pi=pi
-                ).count()
+            samples_count = Sample.objects.filter(
+                pool__in=pools, request__user__pi=pi,
+            ).count()
+            libraries_count = Library.objects.filter(
+                pool__in=pools, request__user__pi=pi,
+            ).count()
             row[sequencer.name] = samples_count + libraries_count
         rows.append(row)
     return rows
