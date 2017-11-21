@@ -3,35 +3,35 @@ from authtools.models import AbstractEmailUser
 
 
 class Organization(models.Model):
-    name = models.CharField('Organization', max_length=200)
+    name = models.CharField('Name', max_length=100)
 
     def __str__(self):
         return self.name
 
 
 class PrincipalInvestigator(models.Model):
-    name = models.CharField('Principal Investigator', max_length=150)
+    name = models.CharField('Name', max_length=100)
     organization = models.ForeignKey(Organization)
 
     class Meta:
-        # verbose_name = 'Principal Investigator'
-        # verbose_name_plural = 'Principal Investigators'
-        ordering = ['name']
+        verbose_name = 'Principal Investigator'
+        verbose_name_plural = 'Principal Investigators'
+        ordering = ['organization__name', 'name']
 
     def __str__(self):
         return f'{self.name} ({self.organization.name})'
 
 
 class CostUnit(models.Model):
-    name = models.CharField('Cost Unit', max_length=150)
+    name = models.CharField('Name', max_length=100)
     pi = models.ForeignKey(
         PrincipalInvestigator,
         verbose_name='Principal Investigator',
     )
 
     class Meta:
-        # verbose_name = 'Cost Unit'
-        # verbose_name_plural = 'Cost Units'
+        verbose_name = 'Cost Unit'
+        verbose_name_plural = 'Cost Units'
         ordering = ['name']
 
     def __str__(self):
@@ -41,7 +41,7 @@ class CostUnit(models.Model):
 class User(AbstractEmailUser):
     first_name = models.CharField('First name', max_length=50)
     last_name = models.CharField('Last name', max_length=50)
-    phone = models.CharField('Phone', max_length=100, null=True, blank=True)
+    phone = models.CharField('Phone', max_length=50, null=True, blank=True)
 
     organization = models.ForeignKey(
         Organization,

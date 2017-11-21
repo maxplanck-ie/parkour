@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     'pooling',
     'flowcell',
     'report',
+
+    'fixtures',
 ]
 
 MIDDLEWARE_CLASSES = [
