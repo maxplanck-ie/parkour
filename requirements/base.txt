@@ -15,5 +15,6 @@ sphinx-autobuild
 sphinx-rtd-theme
 
 # Miscellaneous
+jupyter
 xlwt
 fpdf
