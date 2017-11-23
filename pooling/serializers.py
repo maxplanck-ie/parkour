@@ -11,9 +11,9 @@ from rest_framework.serializers import (
 from library_sample_shared.models import IndexType
 from library.models import Library
 from sample.models import Sample
+from library_preparation.models import LibraryPreparation
 
-# from library_preparation.models import LibraryPreparation
-# from .models import Pooling
+from .models import Pooling
 
 
 class BaseListSerializer(ListSerializer):
@@ -166,18 +166,16 @@ class PoolingSampleSerializer(PoolingBaseSerializer):
         fields = PoolingBaseSerializer.Meta.fields + ('is_converted',)
 
     def get_concentration_c1(self, obj):
-        # try:
-        #     return obj.pooling.concentration_c1
-        # except Pooling.DoesNotExist:
-        #     return None
-        return obj.pooling.concentration_c1
+        try:
+            return obj.pooling.concentration_c1
+        except Pooling.DoesNotExist:
+            return None
 
     def get_concentration_library(self, obj):
         return obj.librarypreparation.concentration_library
 
     def get_mean_fragment_size(self, obj):
-        # try:
-        #     return obj.librarypreparation.mean_fragment_size
-        # except LibraryPreparation.DoesNotExist:
-        #     return None
-        return obj.librarypreparation.mean_fragment_size
+        try:
+            return obj.librarypreparation.mean_fragment_size
+        except LibraryPreparation.DoesNotExist:
+            return None
