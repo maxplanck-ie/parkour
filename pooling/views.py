@@ -33,7 +33,9 @@ class PoolingViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
 
     def list(self, request):
         """ Get the list of all pooling objects. """
-        library_queryset = Library.objects.filter(status=2).exclude(pool=None)
+        library_queryset = Library.objects.filter(
+            Q(status=2) | Q(status=-2)
+        ).exclude(pool=None)
         sample_queryset = Sample.objects.filter(
             Q(status=3) | Q(status=2) | Q(status=-2)
         ).exclude(pool=None)
