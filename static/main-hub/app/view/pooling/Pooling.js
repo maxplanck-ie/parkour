@@ -96,8 +96,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
             },
             {
                 text: 'ng/µl',
-                tooltip: 'Library Concentration Facility (ng/µl)',
-                dataIndex: 'concentration_facility',
+                tooltip: 'Concentration Library (ng/µl)',
+                dataIndex: 'concentration_library',
                 width: 100
             },
             {
@@ -110,7 +110,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 text: 'I7 ID',
                 tooltip: 'Index I7 ID',
                 dataIndex: 'index_i7_id',
-                width: 60
+                width: 90
             },
             {
                 text: 'Index I7',
@@ -121,7 +121,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
                 text: 'I5 ID',
                 tooltip: 'Index I5 ID',
                 dataIndex: 'index_i5_id',
-                width: 60
+                width: 90
             },
             {
                 text: 'Index I5',

@@ -1,9 +1,7 @@
 import logging
 import json
 
-from django.http import HttpResponse, JsonResponse
-from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
+from django.http import HttpResponse
 from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -16,75 +14,11 @@ from xlwt import Workbook, XFStyle, Formula
 from common.views import CsrfExemptSessionAuthentication
 from common.mixins import MultiEditMixin
 from library_sample_shared.utils import get_indices_ids
-from sample.models import Sample
-from pooling.models import Pooling
+
 from .models import LibraryPreparation
-from .forms import LibraryPreparationForm
 from .serializers import LibraryPreparationSerializer
 
 logger = logging.getLogger('db')
-
-
-@login_required
-@staff_member_required
-def update(request):
-    """ Update a Library Preparation object. """
-    sample_id = request.POST.get('sample_id', '')
-    qc_result = request.POST.get('qc_result', None)
-    error = ''
-
-    try:
-        sample = Sample.objects.get(pk=sample_id)
-        obj = LibraryPreparation.objects.get(sample=sample)
-        form = LibraryPreparationForm(request.POST, instance=obj)
-
-        if form.is_valid():
-            form.save()
-
-            concentration_smpl = request.POST.get('concentration_sample', None)
-            comments_facility = request.POST.get('comments_facility', None)
-
-            if concentration_smpl:
-                sample.concentration = concentration_smpl
-
-            if comments_facility:
-                sample.comments_facility = comments_facility
-
-            sample.save(update_fields=['concentration', 'comments_facility'])
-
-            if qc_result:
-                if qc_result == '1':
-                    if not obj.concentration_library:
-                        raise ValueError('Library Concentration is not set.')
-                    sample.status = 3
-                    sample.save(update_fields=['status'])
-
-                    # Create Pooling object
-                    pooling_obj = Pooling(sample=sample)
-
-                    # Update Concentration C1
-                    library_concentration = obj.concentration_library
-                    mean_fragment_size = obj.mean_fragment_size
-                    if mean_fragment_size and mean_fragment_size > 0:
-                        concentration_c1 = \
-                            round((library_concentration /
-                                  (mean_fragment_size * 650)) * 10**6, 2)
-                        pooling_obj.concentration_c1 = concentration_c1
-
-                    pooling_obj.save()
-
-                else:
-                    sample.status = -1
-                    sample.save(update_fields=['status'])
-        else:
-            error = str(form.errors)
-            logger.debug(form.errors)
-
-    except Exception as e:
-        logger.exception(e)
-        error = str(e)
-
-    return JsonResponse({'success': not error, 'error': error})
 
 
 class LibraryPreparationViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
@@ -184,9 +118,11 @@ class LibraryPreparationViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
             col_starting_volume = col_letters[7]
             col_ul_sample = col_letters[10]
             col_spike_in_volume = col_letters[9]
-            formula = col_starting_volume + row_idx + '-' + \
-                col_spike_in_volume + row_idx + '-' + \
-                col_ul_sample + row_idx
+            formula = '{}{}-{}{}-{}{}'.format(
+                col_starting_volume, row_idx,
+                col_spike_in_volume, row_idx,
+                col_ul_sample, row_idx,
+            )
             row.append(Formula(formula))
 
             row.extend([index_i7_id, index_i5_id])

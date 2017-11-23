@@ -5,9 +5,7 @@ import itertools
 
 from xlwt import Workbook, XFStyle, Formula
 
-from django.http import HttpResponse, JsonResponse
-from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
+from django.http import HttpResponse
 from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -16,168 +14,13 @@ from rest_framework.permissions import IsAdminUser
 
 from common.views import CsrfExemptSessionAuthentication
 from common.mixins import LibrarySampleMultiEditMixin
-from library_sample_shared.utils import get_indices_ids
 from index_generator.models import Pool
-from library_preparation.models import LibraryPreparation
 from library.models import Library
 from sample.models import Sample
 
-from .models import Pooling
-from .forms import PoolingForm
 from .serializers import PoolingLibrarySerializer, PoolingSampleSerializer
 
 logger = logging.getLogger('db')
-
-
-@login_required
-@staff_member_required
-def get_all(request):
-    """ Get the list of all libraries. """
-    error = ''
-    data = []
-
-    pools = Pool.objects.prefetch_related('libraries', 'samples')
-    for pool in pools:
-        libraries_in_pool = []
-        pool_size = '%ix%i' % (pool.size.multiplier, pool.size.size)
-
-        libraries = pool.libraries.filter(status=2)
-        samples = pool.samples.filter(Q(status=3) | Q(status=2) | Q(status=-2))
-
-        sum_sequencing_depth = sum([l.sequencing_depth for l in libraries])
-        sum_sequencing_depth += sum([s.sequencing_depth for s in samples])
-
-        # Native libraries
-        for library in libraries:
-            pooling_obj = Pooling.objects.get(library=library)
-            req = library.request.get()
-            percentage_library = \
-                library.sequencing_depth / sum_sequencing_depth
-            index_i7_id, index_i5_id = get_indices_ids(library)
-
-            libraries_in_pool.append({
-                'name': library.name,
-                'status': library.status,
-                'libraryId': library.id,
-                'barcode': library.barcode,
-                'poolId': pool.id,
-                'poolName': pool.name,
-                'poolSize': pool_size,
-                'requestId': req.id,
-                'requestName': req.name,
-                # 'concentration': library.concentration,
-                'concentration_facility': library.concentration_facility,
-                'mean_fragment_size': library.mean_fragment_size,
-                'sequencing_depth': library.sequencing_depth,
-                'concentration_c1': pooling_obj.concentration_c1,
-                'percentage_library': round(percentage_library * 100),
-                'index_i7_id': index_i7_id,
-                'index_i7': library.index_i7,
-                'index_i5_id': index_i5_id,
-                'index_i5': library.index_i5,
-            })
-
-        # Converted samples (sample -> library)
-        for sample in samples:
-            lib_prep_obj = LibraryPreparation.objects.get(sample=sample)
-            req = sample.request.get()
-            percentage_library = \
-                sample.sequencing_depth / sum_sequencing_depth
-            index_i7_id, index_i5_id = get_indices_ids(sample)
-
-            try:
-                concentration_c1 = \
-                    Pooling.objects.get(sample=sample).concentration_c1
-            except Pooling.DoesNotExist:
-                concentration_c1 = None
-
-            libraries_in_pool.append({
-                'name': sample.name,
-                'status': sample.status,
-                'sampleId': sample.pk,
-                'barcode': sample.barcode,
-                'is_converted': sample.is_converted,
-                'poolId': pool.pk,
-                'poolName': pool.name,
-                'poolSize': pool_size,
-                'requestId': req.pk,
-                'requestName': req.name,
-                # 'concentration': lib_prep_obj.concentration_library,
-                'concentration_facility': sample.concentration_facility,
-                'mean_fragment_size': lib_prep_obj.mean_fragment_size,
-                'sequencing_depth': sample.sequencing_depth,
-                'concentration_c1': concentration_c1,
-                'percentage_library': round(percentage_library * 100),
-                'index_i7_id': index_i7_id,
-                'index_i7': sample.index_i7,
-                'index_i5_id': index_i5_id,
-                'index_i5': sample.index_i5,
-            })
-
-        data += libraries_in_pool
-        data = sorted(data, key=lambda x: x['barcode'][3:])
-
-    return JsonResponse({'success': not error, 'error': error, 'data': data})
-
-
-@login_required
-@staff_member_required
-def update(request):
-    """ Update a Pooling object. """
-    error = ''
-
-    library_id = request.POST.get('library_id', '')
-    sample_id = request.POST.get('sample_id', '')
-    qc_result = request.POST.get('qc_result', None)
-
-    try:
-        try:
-            concentration = float(request.POST.get('concentration'))
-        except Exception:
-            raise ValueError('Library Concentration is not set.')
-
-        if library_id == '0' or library_id == 0:
-            obj = Pooling.objects.get(sample_id=sample_id)
-            # record = Sample.objects.get(pk=sample_id)
-            record = obj.sample
-
-            # Update concentration value
-            lib_prep_obj = LibraryPreparation.objects.get(sample_id=sample_id)
-            lib_prep_obj.concentration_library = concentration
-            lib_prep_obj.save(update_fields=['concentration_library'])
-        else:
-            obj = Pooling.objects.get(library_id=library_id)
-            # record = Library.objects.get(pk=library_id)
-            record = obj.library
-
-            # Update concentration value
-            # library = Library.objects.get(pk=library_id)
-            record.concentration = concentration
-            record.save(update_fields=['concentration'])
-
-        form = PoolingForm(request.POST, instance=obj)
-
-        if form.is_valid():
-            form.save()
-
-            if qc_result:
-                if qc_result == '1':
-                    # TODO@me: use a form to ensure all fields are filled in
-                    # If so, then:
-                    record.status = 4
-                    record.save(update_fields=['status'])
-                else:
-                    record.status = -1
-                    record.save(update_fields=['status'])
-        else:
-            error = str(form.errors)
-            logger.debug(form.errors)
-
-    except Exception as e:
-        error = str(e)
-        logger.exception(e)
-
-    return JsonResponse({'success': not error, 'error': error})
 
 
 class PoolingViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
@@ -274,12 +117,12 @@ class PoolingViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
             req = record.request.get()
 
             if isinstance(record, Library):
-                concentration = record.concentration
+                concentration = record.concentration_facility
                 mean_fragment_size = record.mean_fragment_size
             else:
-                obj = LibraryPreparation.objects.get(sample=record)
-                concentration = obj.concentration_library
-                mean_fragment_size = obj.mean_fragment_size
+                concentration = record.librarypreparation.concentration_library
+                mean_fragment_size = \
+                    record.librarypreparation.mean_fragment_size
 
             row = [
                 req.name,            # Request ID
@@ -453,25 +296,27 @@ class PoolingViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
             row_idx = str(row_num + 1)
 
             if isinstance(record, Library):
-                # obj = Pooling.objects.get(library=record)
+                concentration = record.concentration_facility
                 mean_fragment_size = record.mean_fragment_size
             else:
-                # obj = Pooling.objects.get(sample=record)
-                lib_prep_obj = LibraryPreparation.objects.get(sample=record)
-                mean_fragment_size = lib_prep_obj.mean_fragment_size
+                concentration = record.librarypreparation.concentration_library
+                mean_fragment_size = \
+                    record.librarypreparation.mean_fragment_size
 
             row = [
-                record.name,                    # Library
-                record.barcode,                 # Barcode
-                record.concentration_facility,  # ng/µl
-                mean_fragment_size,             # bp
+                record.name,         # Library
+                record.barcode,      # Barcode
+                concentration,       # ng/µl
+                mean_fragment_size,  # bp
             ]
 
             # nM = Library Concentration / ( Mean Fragment Size * 650 ) * 10^6
             col_concentration = col_letters[2]
             col_mean_fragment_size = col_letters[3]
-            formula = col_concentration + row_idx + '/ (' + \
-                col_mean_fragment_size + row_idx + ') * 1000000'
+            formula = '{}{}/({}{})*1000000'.format(
+                col_concentration, row_idx,
+                col_mean_fragment_size, row_idx
+            )
             row.append(Formula(formula))
 
             row.extend([

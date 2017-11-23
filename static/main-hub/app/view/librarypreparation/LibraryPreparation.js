@@ -113,7 +113,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     text: 'ng/µl Sample',
                     tooltip: 'Concentration Sample (ng/µl)',
                     dataIndex: 'concentration_sample',
-                    width: 100,
+                    width: 105,
                     editor: {
                         xtype: 'numberfield',
                         decimalPrecision: 2,
@@ -155,13 +155,13 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
                     text: 'I7 ID',
                     tooltip: 'Index I7 ID',
                     dataIndex: 'index_i7_id',
-                    width: 60
+                    width: 90
                 },
                 {
                     text: 'I5 ID',
                     tooltip: 'Index I5 ID',
                     dataIndex: 'index_i5_id',
-                    width: 60
+                    width: 90
                 },
                 {
                     text: 'Cycles',
