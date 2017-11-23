@@ -113,11 +113,10 @@ class PoolingBaseSerializer(ModelSerializer):
         return '{}%'.format(round(obj.sequencing_depth / sum_total * 100))
 
     def get_create_time(self, obj):
-        # try:
-        #     return obj.pooling.create_time
-        # except Pooling.DoesNotExist:
-        #     return None
-        return obj.pooling.create_time
+        try:
+            return obj.pooling.create_time
+        except Pooling.DoesNotExist:
+            return None
 
     def to_internal_value(self, data):
         internal_value = super().to_internal_value(data)
