@@ -103,10 +103,9 @@ class PoolingBaseSerializer(ModelSerializer):
             return ''
 
     def get_percentage_library(self, obj):
-        # TODO: this approach is potentially very slow
         pool = obj.pool.get()
-        libraries = pool.libraries.filter(status=2)
-        samples = pool.samples.filter(Q(status=3) | Q(status=2) | Q(status=-2))
+        libraries = pool.libraries.filter(~Q(status=-1))
+        samples = pool.samples.filter(~Q(status=-1))
         sum_total = \
             sum(libraries.values_list('sequencing_depth', flat=True)) + \
             sum(samples.values_list('sequencing_depth', flat=True))
