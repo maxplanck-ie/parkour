@@ -59,7 +59,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
       type: 'spreadsheet',
       rowSelect: false
     },
-    store: 'incomingLibrariesStore',
+    store: 'IncomingLibraries',
     sortableColumns: false,
     enableColumnMove: false,
 
@@ -297,30 +297,30 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
           editor: { xtype: 'textfield' }
         },
         {
-            xtype: 'actioncolumn',
-            itemId: 'qc-action-buttons',
-            align: 'center',
-            text: 'QC Result',
-            resizable: false,
-            menuDisabled: true,
-            hideable: false,
-            tdCls: 'facilityEntry',
-            width: 85,
-            items: [
-                {
-                    iconCls: 'qc-action-passed x-fa fa-check',
-                    tooltip: 'passed'
-                },
-                {
-                    iconCls: 'qc-action-failed x-fa fa-times',
-                    tooltip: 'failed'
-                },
-                {
-                    iconCls: 'qc-action-compromised x-fa fa-exclamation-triangle',
-                    tooltip: 'compromised'
-                }
-            ],
-            editor: { xtype: 'container' }
+          xtype: 'actioncolumn',
+          itemId: 'qc-action-buttons',
+          align: 'center',
+          text: 'QC Result',
+          resizable: false,
+          menuDisabled: true,
+          hideable: false,
+          tdCls: 'facilityEntry',
+          width: 85,
+          items: [
+            {
+              iconCls: 'qc-action-passed x-fa fa-check',
+              tooltip: 'passed'
+            },
+            {
+              iconCls: 'qc-action-failed x-fa fa-times',
+              tooltip: 'failed'
+            },
+            {
+              iconCls: 'qc-action-compromised x-fa fa-exclamation-triangle',
+              tooltip: 'compromised'
+            }
+          ],
+          editor: { xtype: 'container' }
         }
       ]
     },
