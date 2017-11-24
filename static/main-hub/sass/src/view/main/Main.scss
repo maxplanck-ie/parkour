@@ -40,6 +40,51 @@
     $border-width: 0
 );
 
+@include extjs-button-medium-ui(
+    $ui: 'menu-button',
+    $color: #999,
+    $glyph-color: #919191,
+    $background-color: transparent,
+    $border-width: 0,
+    $padding: 0
+);
+
+@include extjs-button-medium-ui(
+    $ui: 'menu-button-green',
+    $color: #999,
+    $glyph-color: lighten(#66bb6a, 25%),
+    $background-color: transparent,
+    $border-width: 0,
+    $padding: 0
+);
+.x-btn-over .x-btn-icon-el-menu-button-green-medium {
+    color: #66bb6a;
+}
+
+@include extjs-button-medium-ui(
+    $ui: 'menu-button-red',
+    $color: #999,
+    $glyph-color: lighten(#ef5350, 25%),
+    $background-color: transparent,
+    $border-width: 0,
+    $padding: 0
+);
+.x-btn-over .x-btn-icon-el-menu-button-red-medium {
+    color: #ef5350;
+}
+
+@include extjs-button-medium-ui(
+    $ui: 'menu-button-yellow',
+    $color: #999,
+    $glyph-color: lighten(#ffc107, 25%),
+    $background-color: transparent,
+    $border-width: 0,
+    $padding: 0
+);
+.x-btn-over .x-btn-icon-el-menu-button-yellow-medium {
+    color: #ffc107;
+}
+
 @include treelist-ui(
     $ui: 'navigation',
     $padding: 0 10px,

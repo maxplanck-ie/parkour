@@ -170,19 +170,31 @@ Ext.define('MainHub.view.libraries.Libraries', {
                     text: 'Nuc. Type',
                     tooltip: 'Nucleic Acid Type',
                     dataIndex: 'nucleic_acid_type_name',
-                    width: 100
+                    width: 100,
+                    renderer: function (value, meta) {
+                        meta.tdAttr = 'data-qtip="' + value + '"';
+                        return value;
+                    }
                 },
                 {
                     text: 'Protocol',
                     tooltip: 'Library Preparation Protocol',
                     dataIndex: 'library_protocol_name',
-                    width: 100
+                    width: 100,
+                    renderer: function (value, meta) {
+                        meta.tdAttr = 'data-qtip="' + value + '"';
+                        return value;
+                    }
                 },
                 {
                     text: 'Lib. Type',
                     tooltip: 'Library Type',
                     dataIndex: 'library_type_name',
-                    width: 100
+                    width: 100,
+                    renderer: function (value, meta) {
+                        meta.tdAttr = 'data-qtip="' + value + '"';
+                        return value;
+                    }
                 },
                 {
                     text: 'ng/μl',
@@ -203,15 +215,20 @@ Ext.define('MainHub.view.libraries.Libraries', {
                     text: 'bp',
                     tooltip: 'Mean Fragment Size',
                     dataIndex: 'mean_fragment_size',
-                    width: 45
+                    width: 60
                 },
                 {
                     text: 'Index Type',
                     dataIndex: 'index_type_name',
-                    width: 100
+                    width: 100,
+                    renderer: function (value, meta) {
+                        meta.tdAttr = 'data-qtip="' + value + '"';
+                        return value;
+                    }
                 },
                 {
-                    text: '# Index Reads',
+                    text: 'Index Reads',
+                    tooltip: '# of Index Reads',
                     dataIndex: 'index_reads',
                     width: 100
                 },
@@ -284,7 +301,11 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 },
                 {
                     text: 'Comments',
-                    dataIndex: 'comments'
+                    dataIndex: 'comments',
+                    renderer: function (value, meta) {
+                        meta.tdAttr = 'data-qtip="' + value + '"';
+                        return value;
+                    }
                 }
             ]
         }

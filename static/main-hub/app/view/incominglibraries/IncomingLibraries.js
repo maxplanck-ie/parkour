@@ -51,10 +51,10 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
         }
       ]
     },
-    viewConfig: {
-      // loadMask: false
-      // markDirty: false
-    },
+    // viewConfig: {
+    //   loadMask: false,
+    //   markDirty: false
+    // },
     selModel: {
       type: 'spreadsheet',
       rowSelect: false
@@ -73,7 +73,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
           menuDisabled: true,
           hideable: false,
           tdCls: 'no-dirty userEntry',
-          width: 40
+          width: 35
         },
         {
           text: 'Name',
@@ -115,7 +115,11 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
           dataIndex: 'nucleic_acid_type_name',
           tdCls: 'userEntry',
           minWidth: 100,
-          flex: 1
+          flex: 1,
+          renderer: function (value, meta) {
+            meta.tdAttr = 'data-qtip="' + value + '"';
+            return value;
+          }
         },
         {
           text: 'Protocol',
@@ -123,7 +127,11 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
           dataIndex: 'library_protocol_name',
           tdCls: 'userEntry',
           minWidth: 100,
-          flex: 1
+          flex: 1,
+          renderer: function (value, meta) {
+            meta.tdAttr = 'data-qtip="' + value + '"';
+            return value;
+          }
         },
         {
           text: 'ng/µl',
@@ -294,33 +302,13 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
           dataIndex: 'comments_facility',
           tdCls: 'facilityEntry',
           width: 150,
-          editor: { xtype: 'textfield' }
-        },
-        {
-          xtype: 'actioncolumn',
-          itemId: 'qc-action-buttons',
-          align: 'center',
-          text: 'QC Result',
-          resizable: false,
-          menuDisabled: true,
-          hideable: false,
-          tdCls: 'facilityEntry',
-          width: 85,
-          items: [
-            {
-              iconCls: 'qc-action-passed x-fa fa-check',
-              tooltip: 'passed'
-            },
-            {
-              iconCls: 'qc-action-failed x-fa fa-times',
-              tooltip: 'failed'
-            },
-            {
-              iconCls: 'qc-action-compromised x-fa fa-exclamation-triangle',
-              tooltip: 'compromised'
-            }
-          ],
-          editor: { xtype: 'container' }
+          editor: {
+            xtype: 'textfield'
+          },
+          renderer: function (value, meta) {
+            meta.tdAttr = 'data-qtip="' + value + '"';
+            return value;
+          }
         }
       ]
     },

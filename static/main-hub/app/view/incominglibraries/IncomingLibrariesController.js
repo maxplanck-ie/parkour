@@ -4,7 +4,6 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
 
   mixins: [
     'MainHub.grid.CheckboxesAndSearchInputMixin',
-    'MainHub.grid.ContextMenuMixin',
     'MainHub.grid.ResizeMixin',
     'MainHub.store.SyncStoreMixin'
   ],
@@ -30,9 +29,6 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
       '#search-field': {
         change: 'changeFilter'
       },
-      '#qc-action-buttons': {
-        click: 'qualityCheckActionButtonClick'
-      },
       '#cancel-button': {
         click: 'cancel'
       },
@@ -54,6 +50,117 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
         item.set('selected', selected);
       }
     });
+  },
+
+  showContextMenu: function (gridView, record, item, index, e) {
+    var me = this;
+    e.stopEvent();
+    Ext.create('Ext.menu.Menu', {
+      plain: true,
+      items: [
+        {
+          text: 'Apply to All',
+          margin: '5px 5px 2px 5px',
+          handler: function () {
+            var dataIndex = me.getDataIndex(e, gridView);
+            me.applyToAll(record, dataIndex);
+          }
+        },
+        '-',
+        {
+          xtype: 'container',
+          items: [
+            {
+              xtype: 'container',
+              html: 'Quality Check',
+              margin: 5,
+              style: {
+                color: '#000'
+              }
+            },
+            {
+              xtype: 'container',
+              margin: 5,
+              layout: {
+                type: 'hbox',
+                pack: 'center',
+                align: 'middle'
+              },
+              defaults: {
+                xtype: 'button',
+                scale: 'medium',
+                margin: '5px 10px 10px'
+              },
+              items: [
+                {
+                  ui: 'menu-button-green',
+                  tooltip: 'passed',
+                  iconCls: 'fa fa-lg fa-check',
+                  handler: function () {
+                    me.qualityCheckButtonClick(record, 'passed');
+                    this.up('menu').hide();
+                  }
+                },
+                {
+                  ui: 'menu-button-red',
+                  tooltip: 'failed',
+                  iconCls: 'fa fa-lg fa-times',
+                  handler: function () {
+                    me.qualityCheckButtonClick(record, 'failed');
+                    this.up('menu').hide();
+                  }
+                },
+                {
+                  ui: 'menu-button-yellow',
+                  tooltip: 'compromised',
+                  iconCls: 'fa fa-lg fa-exclamation-triangle',
+                  handler: function () {
+                    me.qualityCheckButtonClick(record, 'compromised');
+                    this.up('menu').hide();
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }).showAt(e.getXY());
+  },
+
+  showGroupContextMenu: function (view, node, groupId, e) {
+    var me = this;
+    e.stopEvent();
+    Ext.create('Ext.menu.Menu', {
+      items: [{
+        text: 'Select All',
+        iconCls: 'x-fa fa-check-square-o',
+        handler: function () {
+          me.selectUnselectAll(parseInt(groupId), true);
+        }
+      },
+      {
+        text: 'Unselect All',
+        iconCls: 'x-fa fa-square-o',
+        handler: function () {
+          me.selectUnselectAll(parseInt(groupId), false);
+        }
+      },
+        '-',
+      {
+        text: 'QC: All selected passed',
+        iconCls: 'x-fa fa-check',
+        handler: function () {
+          me.qualityCheckAll(parseInt(groupId), 'passed');
+        }
+      },
+      {
+        text: 'QC: All selected failed',
+        iconCls: 'x-fa fa-times',
+        handler: function () {
+          me.qualityCheckAll(parseInt(groupId), 'failed');
+        }
+      }]
+    }).showAt(e.getXY());
   },
 
   toggleEditors: function (editor, context) {
@@ -171,9 +278,8 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
     this.syncStore(store.getId(), true);
   },
 
-  qualityCheckActionButtonClick: function (grid, cell, rowIndex, colIndex, e, record) {
-    var store = grid.getStore();
-    var result = e.target.getAttribute('data-qtip');
+  qualityCheckButtonClick: function (record, result) {
+    var store = record.store;
     record.set('quality_check', result);
     this.syncStore(store.getId(), true);
   },
@@ -186,5 +292,23 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
   cancel: function (btn) {
     var store = btn.up('grid').getStore();
     Ext.getStore(store.getId()).rejectChanges();
+  },
+
+  getDataIndex: function (e, view) {
+    var xPos = e.getXY()[0];
+    var columns = view.getGridColumns();
+    var dataIndex;
+
+    for (var column in columns) {
+      var leftEdge = columns[column].getPosition()[0];
+      var rightEdge = columns[column].getSize().width + leftEdge;
+
+      if (xPos >= leftEdge && xPos <= rightEdge) {
+        dataIndex = columns[column].dataIndex;
+        break;
+      }
+    }
+
+    return dataIndex;
   }
 });
