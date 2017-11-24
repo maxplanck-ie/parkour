@@ -27,7 +27,7 @@ Ext.define('MainHub.model.pooling.Pooling', {
             type: 'string'
         },
         {
-            name: 'concentration_facility',
+            name: 'concentration_library',
             type: 'float',
             allowNull: true
         },

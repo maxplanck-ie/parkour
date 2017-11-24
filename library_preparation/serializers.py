@@ -8,11 +8,11 @@ from rest_framework.serializers import (
 )
 
 from library_sample_shared.models import IndexType
+
 from .models import LibraryPreparation
 
 
 class LibraryPreparationListSerializer(ListSerializer):
-
     def update(self, instance, validated_data):
         # Maps for id->instance and id->data item.
         object_mapping = {obj.pk: obj for obj in instance}

@@ -12,11 +12,11 @@ from library_sample_shared.models import IndexType
 from library.models import Library
 from sample.models import Sample
 from library_preparation.models import LibraryPreparation
+
 from .models import Pooling
 
 
 class BaseListSerializer(ListSerializer):
-
     def update(self, instance, validated_data):
         # Maps for id->instance and id->data item.
         object_mapping = {obj.pk: obj for obj in instance}
@@ -45,6 +45,7 @@ class PoolingBaseSerializer(ModelSerializer):
     pool_name = SerializerMethodField()
     pool_size = SerializerMethodField()
     concentration_c1 = SerializerMethodField()
+    concentration_library = SerializerMethodField()
     mean_fragment_size = SerializerMethodField()
     index_i7_id = SerializerMethodField()
     index_i5_id = SerializerMethodField()
@@ -57,7 +58,7 @@ class PoolingBaseSerializer(ModelSerializer):
         fields = ('pk', 'record_type', 'name', 'status', 'barcode',
                   'request', 'request_name', 'sequencing_depth',
                   'pool', 'pool_name', 'pool_size', 'concentration_c1',
-                  'concentration_facility', 'mean_fragment_size',
+                  'concentration_library', 'mean_fragment_size',
                   'index_i7_id', 'index_i5_id', 'index_i7', 'index_i5',
                   'percentage_library', 'create_time', 'quality_check',)
         extra_kwargs = {
@@ -102,10 +103,9 @@ class PoolingBaseSerializer(ModelSerializer):
             return ''
 
     def get_percentage_library(self, obj):
-        # TODO: this approach is potentially very slow
         pool = obj.pool.get()
-        libraries = pool.libraries.filter(status=2)
-        samples = pool.samples.filter(Q(status=3) | Q(status=2) | Q(status=-2))
+        libraries = pool.libraries.filter(~Q(status=-1))
+        samples = pool.samples.filter(~Q(status=-1))
         sum_total = \
             sum(libraries.values_list('sequencing_depth', flat=True)) + \
             sum(samples.values_list('sequencing_depth', flat=True))
@@ -145,19 +145,20 @@ class PoolingBaseSerializer(ModelSerializer):
 
 
 class PoolingLibrarySerializer(PoolingBaseSerializer):
-
     class Meta(PoolingBaseSerializer.Meta):
         model = Library
 
     def get_concentration_c1(self, obj):
         return obj.pooling.concentration_c1
 
+    def get_concentration_library(self, obj):
+        return obj.concentration_facility
+
     def get_mean_fragment_size(self, obj):
         return obj.mean_fragment_size
 
 
 class PoolingSampleSerializer(PoolingBaseSerializer):
-
     class Meta(PoolingBaseSerializer.Meta):
         model = Sample
         fields = PoolingBaseSerializer.Meta.fields + ('is_converted',)
@@ -167,6 +168,9 @@ class PoolingSampleSerializer(PoolingBaseSerializer):
             return obj.pooling.concentration_c1
         except Pooling.DoesNotExist:
             return None
+
+    def get_concentration_library(self, obj):
+        return obj.librarypreparation.concentration_library
 
     def get_mean_fragment_size(self, obj):
         try:
