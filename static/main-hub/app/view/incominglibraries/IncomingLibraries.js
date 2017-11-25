@@ -3,6 +3,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
   xtype: 'incoming-libraries',
 
   requires: [
+    'MainHub.components.BaseGrid',
     'MainHub.view.incominglibraries.CheckboxGroupingFeature',
     'MainHub.view.incominglibraries.IncomingLibrariesController'
   ],
@@ -13,12 +14,14 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
   layout: 'fit',
 
   items: [{
-    xtype: 'grid',
+    xtype: 'basegrid',
     id: 'incoming-libraries-grid',
     itemId: 'incoming-libraries-grid',
-    height: Ext.Element.getViewportHeight() - 64,
-    region: 'center',
-    padding: 15,
+    store: 'IncomingLibraries',
+    customConfig: {
+      qualityCheckMenuOptions: ['passed', 'compromised', 'failed']
+    },
+
     header: {
       title: 'Incoming Libraries and Samples',
       items: [
@@ -51,21 +54,6 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
         }
       ]
     },
-    customConfig: {
-      groupIdDataIndex: 'request',
-      qualityCheckMenuOptions: ['passed', 'compromised', 'failed']
-    },
-    // viewConfig: {
-    //   loadMask: false,
-    //   markDirty: false
-    // },
-    selModel: {
-      type: 'spreadsheet',
-      rowSelect: false
-    },
-    store: 'IncomingLibraries',
-    sortableColumns: false,
-    enableColumnMove: false,
 
     columns: {
       items: [
@@ -127,7 +115,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
         },
         {
           text: 'Protocol',
-          tooltip: 'Library Protocol',
+          tooltip: 'Library Preparation Protocol',
           dataIndex: 'library_protocol_name',
           tdCls: 'userEntry',
           minWidth: 100,
@@ -316,6 +304,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
         }
       ]
     },
+
     features: [{
       ftype: 'checkboxgrouping',
       checkDataIndex: 'samples_submitted',
@@ -339,39 +328,6 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
           getChecked: function (children) {
             return children[0].get(this.owner.checkDataIndex) ? 'checked' : '';
           }
-        }
-      ]
-    }],
-    plugins: [
-      {
-        ptype: 'bufferedrenderer',
-        trailingBufferZone: 100,
-        leadingBufferZone: 100
-      },
-      {
-        ptype: 'rowediting',
-        clicksToEdit: 1
-      },
-      {
-        ptype: 'clipboard'
-      }
-    ],
-    dockedItems: [{
-      xtype: 'toolbar',
-      dock: 'bottom',
-      items: [
-        '->',
-        {
-          xtype: 'button',
-          itemId: 'cancel-button',
-          iconCls: 'fa fa-ban fa-lg',
-          text: 'Cancel'
-        },
-        {
-          xtype: 'button',
-          itemId: 'save-button',
-          iconCls: 'fa fa-floppy-o fa-lg',
-          text: 'Save'
         }
       ]
     }]

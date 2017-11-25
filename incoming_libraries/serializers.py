@@ -24,10 +24,10 @@ class BaseListSerializer(ListSerializer):
                 if 'quality_check' in data.keys():
                     if data['quality_check'] == 'passed':
                         obj.status = 2
-                    elif data['quality_check'] == 'failed':
-                        obj.status = -1
                     elif data['quality_check'] == 'compromised':
                         obj.status = -2
+                    elif data['quality_check'] == 'failed':
+                        obj.status = -1
                 ret.append(self.child.update(obj, data))
         return ret
 

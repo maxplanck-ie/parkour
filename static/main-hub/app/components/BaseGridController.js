@@ -1,0 +1,320 @@
+Ext.define('MainHub.components.BaseGridController', {
+  extend: 'Ext.app.ViewController',
+  alias: 'controller.basegrid',
+
+  config: {
+    control: {
+      'grid': {
+        resize: 'resize',
+        itemcontextmenu: 'showMenu',
+        groupcontextmenu: 'showGroupMenu'
+      },
+      '#cancel-button': {
+        click: 'cancel'
+      },
+      '#save-button': {
+        click: 'save'
+      }
+    }
+  },
+
+  resize: function (el) {
+    el.setHeight(Ext.Element.getViewportHeight() - 64);
+  },
+
+  showMenu: function (gridView, record, item, index, e) {
+    var self = this;
+    var qcMenuOptions = gridView.grid.initialConfig.customConfig.qualityCheckMenuOptions;
+    var menuItems = [{
+      text: 'Apply to All',
+      margin: '5px 5px 2px 5px',
+      handler: function () {
+        var dataIndex = self._getDataIndex(e, gridView);
+        self.applyToAll(record, dataIndex);
+      }
+    }];
+
+    if (qcMenuOptions && qcMenuOptions.length > 0) {
+      var qcMenu = {
+        xtype: 'container',
+        items: [
+          {
+            xtype: 'container',
+            html: 'Quality Check',
+            margin: '10px 5px 5px 5px',
+            style: {
+              color: '#000'
+            }
+          },
+          {
+            xtype: 'container',
+            margin: 5,
+            layout: {
+              type: 'hbox',
+              pack: 'center',
+              align: 'middle'
+            },
+            defaults: {
+              xtype: 'button',
+              scale: 'medium',
+              margin: '5px 10px 10px'
+            },
+            items: []
+          }
+        ]
+      };
+
+      if (qcMenuOptions.indexOf('passed') !== -1) {
+        qcMenu.items[1].items.push({
+          ui: 'menu-button-green',
+          tooltip: 'passed',
+          iconCls: 'fa fa-lg fa-check',
+          handler: function () {
+            self.qualityCheckSingle(record, 'passed');
+            this.up('menu').hide();
+          }
+        });
+      }
+
+      if (qcMenuOptions.indexOf('compromised') !== -1) {
+        qcMenu.items[1].items.push({
+          ui: 'menu-button-yellow',
+          tooltip: 'compromised',
+          iconCls: 'fa fa-lg fa-exclamation-triangle',
+          handler: function () {
+            self._qualityCheckSingle(record, 'compromised');
+            this.up('menu').hide();
+          }
+        });
+      }
+
+      if (qcMenuOptions.indexOf('failed') !== -1) {
+        qcMenu.items[1].items.push({
+          ui: 'menu-button-red',
+          tooltip: 'failed',
+          iconCls: 'fa fa-lg fa-times',
+          handler: function () {
+            self._qualityCheckSingle(record, 'failed');
+            this.up('menu').hide();
+          }
+        });
+      }
+
+      menuItems.push('-');
+      menuItems.push(qcMenu);
+    }
+
+    e.stopEvent();
+    Ext.create('Ext.menu.Menu', {
+      plain: true,
+      items: menuItems
+    }).showAt(e.getXY());
+  },
+
+  showGroupMenu: function (gridView, node, groupId, e) {
+    var self = this;
+    var grid = gridView.grid;
+    var qcMenuOptions = gridView.grid.initialConfig.customConfig.qualityCheckMenuOptions;
+    var menuItems = [
+      {
+        text: 'Select All',
+        margin: '5px 5px 0 5px',
+        handler: function () {
+          self.selectUnselectAll(grid, parseInt(groupId), true);
+        }
+      },
+      {
+        text: 'Unselect All',
+        margin: 5,
+        handler: function () {
+          self.selectUnselectAll(grid, parseInt(groupId), false);
+        }
+      }
+    ];
+
+    if (
+      qcMenuOptions &&
+      qcMenuOptions.length > 0 &&
+      self._getSelectedRecords(grid, parseInt(groupId)).length > 0
+    ) {
+      var qcMenu = {
+        xtype: 'container',
+        items: [
+          {
+            xtype: 'container',
+            html: 'Quality Check: Selected',
+            margin: '10px 5px 5px 5px',
+            style: {
+              color: '#000'
+            }
+          },
+          {
+            xtype: 'container',
+            margin: 5,
+            layout: {
+              type: 'hbox',
+              pack: 'center',
+              align: 'middle'
+            },
+            defaults: {
+              xtype: 'button',
+              scale: 'medium',
+              margin: '5px 10px 10px'
+            },
+            items: []
+          }
+        ]
+      };
+
+      if (qcMenuOptions.indexOf('passed') !== -1) {
+        qcMenu.items[1].items.push({
+          ui: 'menu-button-green',
+          tooltip: 'passed',
+          iconCls: 'fa fa-lg fa-check',
+          handler: function () {
+            self.qualityCheckSelected(grid, parseInt(groupId), 'passed');
+            this.up('menu').hide();
+          }
+        });
+      }
+
+      if (qcMenuOptions.indexOf('compromised') !== -1) {
+        qcMenu.items[1].items.push({
+          ui: 'menu-button-yellow',
+          tooltip: 'compromised',
+          iconCls: 'fa fa-lg fa-exclamation-triangle',
+          handler: function () {
+            self.qualityCheckSelected(grid, parseInt(groupId), 'compromised');
+            this.up('menu').hide();
+          }
+        });
+      }
+
+      if (qcMenuOptions.indexOf('failed') !== -1) {
+        qcMenu.items[1].items.push({
+          ui: 'menu-button-red',
+          tooltip: 'failed',
+          iconCls: 'fa fa-lg fa-times',
+          handler: function () {
+            self.qualityCheckSelected(grid, parseInt(groupId), 'failed');
+            this.up('menu').hide();
+          }
+        });
+      }
+
+      menuItems.push('-');
+      menuItems.push(qcMenu);
+    }
+
+    e.stopEvent();
+    Ext.create('Ext.menu.Menu', {
+      plain: true,
+      items: menuItems
+    }).showAt(e.getXY());
+  },
+
+  syncStore: function (storeId, reload) {
+    var reloadStore = reload || false;
+
+    Ext.getStore(storeId).sync({
+      success: function (batch) {
+        var response = batch.operations[0].getResponse();
+        var obj = Ext.JSON.decode(response.responseText);
+
+        if (reloadStore) {
+          Ext.getStore(storeId).reload();
+        }
+
+        if (obj.hasOwnProperty('message') && obj.message !== '') {
+          new Noty({ text: obj.message, type: 'warning' }).show();
+        } else {
+          new Noty({ text: 'The changes have been saved.' }).show();
+        }
+      },
+
+      failure: function (batch) {
+        var error = batch.operations[0].getError();
+        console.error(error);
+
+        try {
+          var obj = Ext.JSON.decode(error.response.responseText);
+          if (!obj.success && obj.message && obj.message !== '') {
+            error = obj.message;
+          }
+        } catch (e) {
+          error = error.statusText;
+        }
+
+        new Noty({ text: error, type: 'error' }).show();
+      }
+    });
+  },
+
+  selectUnselectAll: function (grid, groupId, selected) {
+    var store = grid.getStore();
+
+    store.each(function (item) {
+      if (item.get(store.groupField) === groupId) {
+        item.set('selected', selected);
+      }
+    });
+  },
+
+  qualityCheckSingle: function (record, result) {
+    var store = record.store;
+    record.set('quality_check', result);
+    this.syncStore(store.getId(), true);
+  },
+
+  qualityCheckSelected: function (grid, groupId, result) {
+    var store = grid.getStore();
+
+    store.each(function (item) {
+      if (item.get(store.groupField) === groupId && item.get('selected')) {
+        item.set('quality_check', result);
+      }
+    });
+
+    this.syncStore(store.getId(), true);
+  },
+
+  save: function (btn) {
+    var store = btn.up('grid').getStore();
+    this.syncStore(store.getId());
+  },
+
+  cancel: function (btn) {
+    btn.up('grid').getStore().rejectChanges();
+  },
+
+  _getDataIndex: function (e, view) {
+    var xPos = e.getXY()[0];
+    var columns = view.getGridColumns();
+    var dataIndex;
+
+    for (var column in columns) {
+      var leftEdge = columns[column].getPosition()[0];
+      var rightEdge = columns[column].getSize().width + leftEdge;
+
+      if (xPos >= leftEdge && xPos <= rightEdge) {
+        dataIndex = columns[column].dataIndex;
+        break;
+      }
+    }
+
+    return dataIndex;
+  },
+
+  _getSelectedRecords: function (grid, groupId) {
+    var store = grid.getStore();
+    var records = [];
+
+    store.each(function (item) {
+      if (item.get(store.groupField) === groupId && item.get('selected')) {
+        records.push(item);
+      }
+    });
+
+    return records;
+  }
+});
