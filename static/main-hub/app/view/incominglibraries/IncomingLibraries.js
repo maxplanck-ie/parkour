@@ -51,6 +51,10 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
         }
       ]
     },
+    customConfig: {
+      groupIdDataIndex: 'request',
+      qualityCheckMenuOptions: ['passed', 'compromised', 'failed']
+    },
     // viewConfig: {
     //   loadMask: false,
     //   markDirty: false
