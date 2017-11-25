@@ -112,16 +112,18 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         var me = this;
         e.stopEvent();
         Ext.create('Ext.menu.Menu', {
+            plain: true,
+            defaults: {
+                margin: 5
+            },
             items: [{
                 text: 'Apply to All',
-                iconCls: 'x-fa fa-check-circle',
                 handler: function() {
                     var dataIndex = MainHub.Utilities.getDataIndex(e, gridView);
                     me.applyToAll(record, dataIndex);
                 }
             }, {
                 text: 'Delete',
-                iconCls: 'x-fa fa-trash',
                 handler: function() {
                     me.delete(record, gridView);
                 }

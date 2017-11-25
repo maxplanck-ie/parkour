@@ -1,490 +1,493 @@
 Ext.define('MainHub.view.requests.RequestWindowController', {
-    extend: 'Ext.app.ViewController',
-    alias: 'controller.requests-requestwindow',
+  extend: 'Ext.app.ViewController',
+  alias: 'controller.requests-requestwindow',
 
-    requires: ['Ext.ux.FileUploadWindow'],
+  requires: ['Ext.ux.FileUploadWindow'],
 
-    config: {
-        control: {
-            '#': {
-                boxready: 'onRequestWindowBoxready'
-            },
-            '#libraries-in-request-grid': {
-                refresh: 'refreshLibrariesInRequestGrid',
-                itemcontextmenu: 'showContextMenu',
-                headercontextmenu: 'showHeaderMenu'
-            },
-            '#check-column': {
-                beforecheckchange: 'selectItem',
-                unselectall: 'unselectAll'
-            },
-            '#download-request-blank-button': {
-                click: 'generatePDF'
-            },
-            '#upload-signed-request-button': {
-                click: 'uploadPDF'
-            },
-            '#save-button': {
-                click: 'save'
-            },
-            '#batch-add-button': {
-                click: 'showBatchAddWindow'
-            }
-        }
-    },
+  config: {
+    control: {
+      '#': {
+        boxready: 'onRequestWindowBoxready'
+      },
+      '#libraries-in-request-grid': {
+        refresh: 'refreshLibrariesInRequestGrid',
+        itemcontextmenu: 'showContextMenu',
+        headercontextmenu: 'showHeaderMenu'
+      },
+      '#check-column': {
+        beforecheckchange: 'selectItem',
+        unselectall: 'unselectAll'
+      },
+      '#download-request-blank-button': {
+        click: 'generatePDF'
+      },
+      '#upload-signed-request-button': {
+        click: 'uploadPDF'
+      },
+      '#save-button': {
+        click: 'save'
+      },
+      '#batch-add-button': {
+        click: 'showBatchAddWindow'
+      }
+    }
+  },
 
-    refreshLibrariesInRequestGrid: function(grid) {
-        var requestId = grid.up('window').record.get('pk');
-        grid.getStore().reload({
-            url: Ext.String.format('api/requests/{0}/get_records/', requestId)
+  refreshLibrariesInRequestGrid: function (grid) {
+    var requestId = grid.up('window').record.get('pk');
+    grid.getStore().reload({
+      url: Ext.String.format('api/requests/{0}/get_records/', requestId)
+    });
+  },
+
+  onRequestWindowBoxready: function (wnd) {
+    var downloadRequestBlankBtn = wnd.down('#download-request-blank-button');
+    var uploadSignedRequestBtn = wnd.down('#upload-signed-request-button');
+    var librariesInRequestGrid = wnd.down('#libraries-in-request-grid');
+
+    Ext.getStore('requestFilesStore').removeAll();
+
+    if (wnd.mode === 'add') {
+      Ext.getStore('librariesInRequestStore').removeAll();
+      downloadRequestBlankBtn.disable();
+      uploadSignedRequestBtn.disable();
+      librariesInRequestGrid.getColumns()[0].hide();
+    } else {
+      var form = Ext.getCmp('request-form').getForm();
+      var grid = Ext.getCmp('libraries-in-request-grid');
+      var request = wnd.record.data;
+
+      form.setValues(request);
+      Ext.getCmp('requestName').enable();
+
+      if (request.deep_seq_request_path !== '') {
+        $('#uploaded-request-file').html(
+              Ext.String.format(
+                  '<a href="{0}" download>uploaded</a>',
+                  request.deep_seq_request_path
+              )
+          );
+        downloadRequestBlankBtn.disable();
+        uploadSignedRequestBtn.disable();
+      }
+
+      // Disable Request editing
+      if (!USER_IS_STAFF && request.restrictPermissions) {
+        this.disableButtonsAndMenus();
+      }
+
+      // Load all Libraries/Samples for current Request
+      grid.fireEvent('refresh', grid);
+
+      // Load files
+      if (request.files.length > 0) {
+        Ext.getStore('requestFilesStore').load({
+          url: Ext.String.format('api/requests/{0}/get_files/', request.pk),
+          params: {
+            file_ids: Ext.JSON.encode(request.files)
+          }
         });
-    },
+      }
+    }
 
-    onRequestWindowBoxready: function(wnd) {
-        var downloadRequestBlankBtn = wnd.down('#download-request-blank-button');
-        var uploadSignedRequestBtn = wnd.down('#upload-signed-request-button');
-        var librariesInRequestGrid = wnd.down('#libraries-in-request-grid');
+    this.initializeTooltips();
+  },
 
-        Ext.getStore('requestFilesStore').removeAll();
+  selectItem: function (cb, rowIndex, checked, record) {
+    var selectedItems = this.getSelectedItems();
 
-        if (wnd.mode === 'add') {
-            Ext.getStore('librariesInRequestStore').removeAll();
-            downloadRequestBlankBtn.disable();
-            uploadSignedRequestBtn.disable();
-            librariesInRequestGrid.getColumns()[0].hide();
-        } else {
-            var form = Ext.getCmp('request-form').getForm();
-            var grid = Ext.getCmp('libraries-in-request-grid');;
-            var request = wnd.record.data;
+    if (selectedItems.length > 0) {
+      if (record.get('record_type') !== selectedItems[0].record_type) {
+        new Noty({
+          text: 'You can only select items of the same type.',
+          type: 'warning'
+        }).show();
+        return false;
+      }
+    }
+  },
 
-            form.setValues(request);
-            Ext.getCmp('requestName').enable();
+  showContextMenu: function (grid, record, itemEl, index, e) {
+    var me = this;
+    var wnd = grid.up('window');
 
-            if (request.deep_seq_request_path !== '') {
-                $('#uploaded-request-file').html(
-                    Ext.String.format(
-                        '<a href="{0}" download>uploaded</a>',
-                        request.deep_seq_request_path
-                    )
-                )
-                downloadRequestBlankBtn.disable();
-                uploadSignedRequestBtn.disable();
+    if (wnd.mode === 'add') {
+      return;
+    }
 
-                // this.disableButtonsAndMenus();
-            }
+    var recordId = wnd.record.get('pk');
+    var selectedItems = this.getSelectedItems();
+    var menuItems;
 
-            // Disable Request editing
-            if (!USER_IS_STAFF && request.restrictPermissions) {
-                this.disableButtonsAndMenus();
-            }
+    if (selectedItems.length <= 1) {
+      var selectedItem = selectedItems.length === 0 ? record.data : selectedItems[0];
+      var selectedItemName = selectedItem.name;
 
-            // Load all Libraries/Samples for current Request
-            grid.fireEvent('refresh', grid);
-
-            // Load files
-            if (request.files.length > 0) {
-                Ext.getStore('requestFilesStore').load({
-                    url: Ext.String.format('api/requests/{0}/get_files/', request.pk),
-                    params: {
-                        file_ids: Ext.JSON.encode(request.files)
-                    }
-                });
-            }
+      menuItems = [
+        {
+          text: Ext.String.format('Edit "{0}"', selectedItemName),
+          handler: function () {
+            me.editRecords(recordId, [selectedItem]);
+          }
+        },
+        {
+          text: Ext.String.format('Delete "{0}"', selectedItemName),
+          handler: function () {
+            Ext.Msg.show({
+              title: 'Delete record',
+              message: Ext.String.format('Are you sure you want to delete "{0}"?', selectedItemName),
+              buttons: Ext.Msg.YESNO,
+              icon: Ext.Msg.QUESTION,
+              fn: function (btn) {
+                if (btn === 'yes') {
+                  me.deleteRecord(selectedItem);
+                }
+              }
+            });
+          }
         }
-
-        this.initializeTooltips();
-    },
-
-    selectItem: function(cb, rowIndex, checked, record) {
-        var selectedItems = this.getSelectedItems();
-
-        if (selectedItems.length > 0) {
-            if (record.get('record_type') !== selectedItems[0].record_type) {
-                new Noty({
-                    text: 'You can only select items of the same type.',
-                    type: 'warning'
-                }).show();
-                return false;
-            }
+      ];
+    } else {
+      menuItems = [{
+        text: Ext.String.format('Edit {0} Items', selectedItems.length),
+        handler: function () {
+          me.editRecords(recordId, selectedItems);
         }
-    },
+      }];
+    }
 
-    showContextMenu: function(grid, record, itemEl, index, e) {
-        var me = this;
-        var wnd = grid.up('window');
+    e.stopEvent();
+    Ext.create('Ext.menu.Menu', {
+      plain: true,
+      defaults: {
+        margin: 5
+      },
+      items: menuItems
+    }).showAt(e.getXY());
+  },
 
-        if (wnd.mode === 'add') {
+  showHeaderMenu: function (ct, column, e) {
+    var me = this;
+
+    if (column.dataIndex !== 'selected') {
+      return;
+    }
+
+    e.stopEvent();
+    Ext.create('Ext.menu.Menu', {
+      plain: true,
+      defaults: {
+        margin: 5
+      },
+      items: [{
+        text: 'Select All Libraries',
+        handler: function () {
+          me.selectAll('Library');
+        }
+      }, {
+        text: 'Select All Samples',
+        handler: function () {
+          me.selectAll('Sample');
+        }
+      }, '-', {
+        text: 'Unselect All',
+        handler: function () {
+          me.unselectAll();
+        }
+      }]
+    }).showAt(e.getXY());
+  },
+
+  selectAll: function (recordType) {
+    var store = Ext.getStore('librariesInRequestStore');
+    var selectedItems = this.getSelectedItems();
+
+    if (selectedItems.length > 0 && selectedItems[0].record_type !== recordType) {
+      new Noty({
+        text: 'You can only select items of the same type.',
+        type: 'warning'
+      }).show();
+      return false;
+    }
+
+    store.each(function (item) {
+      if (item.get('record_type') === recordType) {
+        item.set('selected', true);
+      }
+    });
+  },
+
+  unselectAll: function () {
+    var store = Ext.getStore('librariesInRequestStore');
+    store.each(function (item) {
+      item.set('selected', false);
+    });
+  },
+
+  editRecords: function (requestId, records) {
+    var type = records[0].record_type === 'Library' ? 'libraries' : 'samples';
+    var ids = Ext.Array.pluck(records, 'pk');
+    var url = Ext.String.format('api/{0}/', type);
+
+    Ext.Ajax.request({
+      url: url,
+      method: 'GET',
+      scope: this,
+      params: {
+        request_id: requestId,
+        ids: Ext.JSON.encode(ids)
+      },
+
+      success: function (response) {
+        var obj = Ext.JSON.decode(response.responseText);
+
+        if (obj.success) {
+          if (obj.data.length === 0) {
+            new Noty({ text: 'No data.', type: 'warning' }).show();
             return;
-        }
+          }
 
-        var recordId = wnd.record.get('pk');
-        var selectedItems = this.getSelectedItems();
-        var menuItems;
-
-        if (selectedItems.length <= 1) {
-            var selectedItem = selectedItems.length === 0 ? record.data : selectedItems[0];
-            var selectedItemName = selectedItem.name;
-
-            menuItems = [
-                {
-                    text: Ext.String.format('Edit "{0}"', selectedItemName),
-                    iconCls: 'x-fa fa-pencil',
-                    handler: function() {
-                        me.editRecords(recordId, [selectedItem]);
-                    }
-                },
-                {
-                    text: Ext.String.format('Delete "{0}"', selectedItemName),
-                    iconCls: 'x-fa fa-trash',
-                    handler: function() {
-                        Ext.Msg.show({
-                            title: 'Delete record',
-                            message: Ext.String.format('Are you sure you want to delete "{0}"?', selectedItemName),
-                            buttons: Ext.Msg.YESNO,
-                            icon: Ext.Msg.QUESTION,
-                            fn: function(btn) {
-                                if (btn === 'yes') {
-                                    me.deleteRecord(selectedItem);
-                                }
-                            }
-                        });
-                    }
-                }
-            ];
+          Ext.create('MainHub.view.libraries.BatchAddWindow', {
+            mode: 'edit',
+            type: records[0].record_type,
+            records: obj.data
+          });
         } else {
-            menuItems = [{
-                text: Ext.String.format('Edit {0} Items', selectedItems.length),
-                iconCls: 'x-fa fa-pencil',
-                handler: function() {
-                    me.editRecords(recordId, selectedItems);
-                }
-            }];
+          new Noty({ text: obj.message, type: 'error' }).show();
         }
+      },
 
-        e.stopEvent();
-        Ext.create('Ext.menu.Menu', {
-            items: menuItems
-        }).showAt(e.getXY());
-    },
+      failure: function (response) {
+        new Noty({ text: response.statusText, type: 'error' }).show();
+        console.error(response);
+      }
+    });
+  },
 
-    showHeaderMenu: function(ct, column, e) {
-        var me = this;
+  deleteRecord: function (record) {
+    var url = record.get('record_type') === 'Library' ? 'api/libraries/{0}/' : 'api/samples/{0}/';
 
-        if (column.dataIndex !== 'selected') {
-            return;
-        }
+    Ext.Ajax.request({
+      url: Ext.String.format(url, record.get('pk')),
+      method: 'DELETE',
+      scope: this,
 
-        e.stopEvent();
-        Ext.create('Ext.menu.Menu', {
-            items: [{
-                text: 'Select All Libraries',
-                iconCls: 'x-fa fa-check-square-o',
-                handler: function() {
-                    me.selectAll('Library');
-                }
-            }, {
-                text: 'Select All Samples',
-                iconCls: 'x-fa fa-check-square-o',
-                handler: function() {
-                    me.selectAll('Sample');
-                }
-            }, '-', {
-                text: 'Unselect All',
-                iconCls: 'x-fa fa-square-o',
-                handler: function() {
-                    me.unselectAll();
-                }
-            }]
-        }).showAt(e.getXY());
-    },
-
-    selectAll: function(recordType) {
-        var store = Ext.getStore('librariesInRequestStore');
-        var selectedItems = this.getSelectedItems();
-
-        if (selectedItems.length > 0 && selectedItems[0].record_type !== recordType) {
-            new Noty({
-                text: 'You can only select items of the same type.',
-                type: 'warning'
-            }).show();
-            return false;
-        }
-
-        store.each(function(item) {
-            if (item.get('record_type') === recordType) {
-                item.set('selected', true);
-            }
-        });
-    },
-
-    unselectAll: function() {
-        var store = Ext.getStore('librariesInRequestStore');
-
-        store.each(function(item) {
-            item.set('selected', false);
-        });
-    },
-
-    editRecords: function(requestId, records) {
-        var type = records[0].record_type === 'Library' ? 'libraries' : 'samples';
-        var ids = Ext.Array.pluck(records, 'pk');
-        var url = Ext.String.format('api/{0}/', type);
-
-        Ext.Ajax.request({
-            url: url,
-            method: 'GET',
-            scope: this,
-            params: {
-                request_id: requestId,
-                ids: Ext.JSON.encode(ids)
-            },
-
-            success: function(response) {
-                var obj = Ext.JSON.decode(response.responseText);
-
-                if (obj.success) {
-                    if (obj.data.length === 0) {
-                        new Noty({ text: 'No data.', type: 'warning' }).show();
-                        return;
-                    }
-
-                    Ext.create('MainHub.view.libraries.BatchAddWindow', {
-                        mode: 'edit',
-                        type: records[0].record_type,
-                        records: obj.data
-                    });
-                } else {
-                    new Noty({ text: obj.message, type: 'error' }).show();
-                }
-            },
-
-            failure: function(response) {
-                new Noty({ text: response.statusText, type: 'error' }).show();
-                console.error(response);
-            }
-        });
-    },
-
-    deleteRecord: function(record) {
-        var url = record.get('record_type') === 'Library' ? 'api/libraries/{0}/' : 'api/samples/{0}/';
-
-        Ext.Ajax.request({
-            url: Ext.String.format(url, record.get('pk')),
-            method: 'DELETE',
-            scope: this,
-
-            success: function(response) {
-                var obj = Ext.JSON.decode(response.responseText);
-                if (obj.success) {
-                    var grid = Ext.getCmp('libraries-in-request-grid');
-                    grid.fireEvent('refresh', grid);
-                    new Noty({ text: 'Record has been deleted!' }).show();
-                } else {
-                    new Noty({ text: obj.message, type: 'error' }).show();
-                }
-            },
-
-            failure: function(response) {
-                new Noty({ text: response.statusText, type: 'error' }).show();
-                console.error(response);
-            }
-        });
-    },
-
-    generatePDF: function(btn) {
-        var wnd = btn.up('window');
-        var form = Ext.create('Ext.form.Panel', { standardSubmit: true });
-        var url = Ext.String.format(
-            'api/requests/{0}/download_deep_sequencing_request/',
-            wnd.record.get('pk')
-        );
-
-        form.submit({ url: url, method: 'GET' });
-    },
-
-    uploadPDF: function(btn) {
-        var me = this;
-        var wnd = btn.up('window');
-        // var url = 'request/upload_deep_sequencing_request/';
-        var downloadRequestBlankBtn = wnd.down('#download-request-blank-button');
-        var uploadSignedRequestBtn = wnd.down('#upload-signed-request-button');
-        var url = Ext.String.format(
-            'api/requests/{0}/upload_deep_sequencing_request/',
-            wnd.record.get('pk')
-        );
-
-        Ext.create('Ext.ux.FileUploadWindow', {
-            onFileUpload: function() {
-                var uploadWindow = this;
-                var form = this.down('form').getForm();
-
-                if (!form.isValid()) {
-                    new Noty({
-                        text: 'You did not select any file.',
-                        type: 'warning'
-                    }).show();
-                    return;
-                }
-
-                form.submit({
-                    url: url,
-                    method: 'POST',
-                    waitMsg: 'Uploading...',
-
-                    success: function(f, action) {
-                        var obj = Ext.JSON.decode(action.response.responseText);
-
-                        if (obj.success) {
-                            new Noty({
-                                text: 'Deep Sequencing Request has been successfully uploaded.'
-                            }).show();
-
-                            $('#uploaded-request-file').html(
-                                Ext.String.format('<a href="{0}" target="_blank">uploaded</a>', obj.path)
-                            );
-
-                            downloadRequestBlankBtn.disable();
-                            uploadSignedRequestBtn.disable();
-
-                            me.disableButtonsAndMenus();
-
-                            Ext.getStore('requestsStore').reload();
-                        } else {
-                            new Noty({
-                                // text: 'There was a problem with the provided file.',
-                                text: obj.message,
-                                type: 'error'
-                            }).show();
-                        }
-
-                        uploadWindow.close();
-                    },
-
-                    failure: function(f, action) {
-                        var errorMsg;
-                        if (action.failureType === 'server') {
-                            errorMsg = action.result.message ? action.result.message : 'Server error.'
-                        } else {
-                            errorMsg = 'Error.'
-                        }
-                        new Noty({ text: errorMsg, type: 'error' }).show();
-                        console.error(action);
-                    }
-                });
-            }
-        });
-    },
-
-    save: function(btn) {
-        var wnd = btn.up('window');
-        var form = Ext.getCmp('request-form');
-        var store = Ext.getStore('librariesInRequestStore');
-        var url;
-
-        if (wnd.mode === 'add') {
-            url = 'api/requests/';
+      success: function (response) {
+        var obj = Ext.JSON.decode(response.responseText);
+        if (obj.success) {
+          var grid = Ext.getCmp('libraries-in-request-grid');
+          grid.fireEvent('refresh', grid);
+          new Noty({ text: 'Record has been deleted!' }).show();
         } else {
-            url = Ext.String.format('api/requests/{0}/edit/', wnd.record.get('pk'))
+          new Noty({ text: obj.message, type: 'error' }).show();
         }
+      },
 
-        if (store.getCount() === 0) {
-            new Noty({
-                text: 'No libraries/samples are added to the request.',
-                type: 'warning'
-            }).show();
-            return;
-        }
+      failure: function (response) {
+        new Noty({ text: response.statusText, type: 'error' }).show();
+        console.error(response);
+      }
+    });
+  },
+
+  generatePDF: function (btn) {
+    var wnd = btn.up('window');
+    var form = Ext.create('Ext.form.Panel', { standardSubmit: true });
+    var url = Ext.String.format(
+        'api/requests/{0}/download_deep_sequencing_request/',
+        wnd.record.get('pk')
+    );
+
+    form.submit({ url: url, method: 'GET' });
+  },
+
+  uploadPDF: function (btn) {
+    var me = this;
+    var wnd = btn.up('window');
+      // var url = 'request/upload_deep_sequencing_request/';
+    var downloadRequestBlankBtn = wnd.down('#download-request-blank-button');
+    var uploadSignedRequestBtn = wnd.down('#upload-signed-request-button');
+    var url = Ext.String.format(
+        'api/requests/{0}/upload_deep_sequencing_request/',
+        wnd.record.get('pk')
+    );
+
+    Ext.create('Ext.ux.FileUploadWindow', {
+      onFileUpload: function () {
+        var uploadWindow = this;
+        var form = this.down('form').getForm();
 
         if (!form.isValid()) {
-            new Noty({ text: 'Check the form', type: 'warning' }).show();
-            return;
+          new Noty({
+            text: 'You did not select any file.',
+            type: 'warning'
+          }).show();
+          return;
         }
 
-        var data = form.getForm().getFieldValues();
+        form.submit({
+          url: url,
+          method: 'POST',
+          waitMsg: 'Uploading...',
 
-        wnd.setLoading('Saving...');
-        Ext.Ajax.request({
-            url: url,
-            method: 'POST',
-            scope: this,
+          success: function (f, action) {
+            var obj = Ext.JSON.decode(action.response.responseText);
 
-            params: {
-                data: Ext.JSON.encode({
-                    description: data.description,
-                    records: Ext.Array.pluck(store.data.items, 'data'),
-                    files: form.down('filegridfield').getValue()
-                })
-            },
+            if (obj.success) {
+              new Noty({
+                text: 'Deep Sequencing Request has been successfully uploaded.'
+              }).show();
 
-            success: function(response) {
-                var obj = Ext.JSON.decode(response.responseText);
-                if (obj.success) {
-                    var message;
-                    if (wnd.mode === 'add') {
-                        message = 'Request has been saved.';
-                    } else {
-                        message = 'The changes have been saved.';
-                    }
-                    new Noty({ text: message}).show();
-                    Ext.getStore('requestsStore').reload();
-                } else {
-                    new Noty({ text: obj.message, type: 'error' }).show();
-                    console.error(response);
-                }
-                wnd.close();
-            },
+              $('#uploaded-request-file').html(
+                Ext.String.format('<a href="{0}" target="_blank">uploaded</a>', obj.path)
+              );
 
-            failure: function(response) {
-                wnd.setLoading(false);
-                new Noty({ text: response.statusText, type: 'error' }).show();
-                console.error(response);
+              downloadRequestBlankBtn.disable();
+              uploadSignedRequestBtn.disable();
+
+              me.disableButtonsAndMenus();
+
+              Ext.getStore('requestsStore').reload();
+            } else {
+              new Noty({
+                // text: 'There was a problem with the provided file.',
+                text: obj.message,
+                type: 'error'
+              }).show();
             }
-        });
-    },
 
-    initializeTooltips: function() {
-        $.each($('.request-field-tooltip'), function(idx, item) {
-            Ext.create('Ext.tip.ToolTip', {
-                title: 'Help',
-                target: item,
-                html: $(item).attr('tooltip-text'),
-                dismissDelay: 15000,
-                maxWidth: 300
-            });
-        });
-    },
+            uploadWindow.close();
+          },
 
-    showBatchAddWindow: function() {
-        Ext.create('MainHub.view.libraries.BatchAddWindow', {
-            mode: 'add'
-        });
-    },
-
-    disableButtonsAndMenus: function() {
-        if (!USER_IS_STAFF) {
-            var grid = Ext.getCmp('libraries-in-request-grid');
-
-            // Don't add new records to a Request
-            grid.down('#batch-add-button').disable();
-            grid.down('#add-library-button').disable();
-            grid.suspendEvent('itemcontextmenu');
-        }
-    },
-
-    getSelectedItems: function() {
-        var store = Ext.getStore('librariesInRequestStore');
-        var selectedItems = [];
-
-        store.each(function(item) {
-            if (item.get('selected')) {
-                selectedItems.push({
-                    pk: item.get('pk'),
-                    name: item.get('name'),
-                    record_type: item.get('record_type')
-                });
+          failure: function (f, action) {
+            var errorMsg;
+            if (action.failureType === 'server') {
+              errorMsg = action.result.message ? action.result.message : 'Server error.';
+            } else {
+              errorMsg = 'Error.';
             }
+            new Noty({ text: errorMsg, type: 'error' }).show();
+            console.error(action);
+          }
         });
+      }
+    });
+  },
 
-        return selectedItems;
+  save: function (btn) {
+    var wnd = btn.up('window');
+    var form = Ext.getCmp('request-form');
+    var store = Ext.getStore('librariesInRequestStore');
+    var url;
+
+    if (wnd.mode === 'add') {
+      url = 'api/requests/';
+    } else {
+      url = Ext.String.format('api/requests/{0}/edit/', wnd.record.get('pk'));
     }
+
+    if (store.getCount() === 0) {
+      new Noty({
+        text: 'No libraries/samples are added to the request.',
+        type: 'warning'
+      }).show();
+      return;
+    }
+
+    if (!form.isValid()) {
+      new Noty({ text: 'Check the form', type: 'warning' }).show();
+      return;
+    }
+
+    var data = form.getForm().getFieldValues();
+
+    wnd.setLoading('Saving...');
+    Ext.Ajax.request({
+      url: url,
+      method: 'POST',
+      scope: this,
+
+      params: {
+        data: Ext.JSON.encode({
+          description: data.description,
+          records: Ext.Array.pluck(store.data.items, 'data'),
+          files: form.down('filegridfield').getValue()
+        })
+      },
+
+      success: function (response) {
+        var obj = Ext.JSON.decode(response.responseText);
+
+        if (obj.success) {
+          var message;
+
+          if (wnd.mode === 'add') {
+            message = 'Request has been saved.';
+          } else {
+            message = 'The changes have been saved.';
+          }
+
+          new Noty({ text: message }).show();
+          Ext.getStore('requestsStore').reload();
+        } else {
+          new Noty({ text: obj.message, type: 'error' }).show();
+          console.error(response);
+        }
+
+        wnd.close();
+      },
+
+      failure: function (response) {
+        wnd.setLoading(false);
+        new Noty({ text: response.statusText, type: 'error' }).show();
+        console.error(response);
+      }
+    });
+  },
+
+  initializeTooltips: function () {
+    $.each($('.request-field-tooltip'), function (idx, item) {
+      Ext.create('Ext.tip.ToolTip', {
+        title: 'Help',
+        target: item,
+        html: $(item).attr('tooltip-text'),
+        dismissDelay: 15000,
+        maxWidth: 300
+      });
+    });
+  },
+
+  showBatchAddWindow: function () {
+    Ext.create('MainHub.view.libraries.BatchAddWindow', {
+      mode: 'add'
+    });
+  },
+
+  disableButtonsAndMenus: function () {
+    if (!USER_IS_STAFF) {
+      var grid = Ext.getCmp('libraries-in-request-grid');
+
+        // Don't add new records to a Request
+      grid.down('#batch-add-button').disable();
+      grid.down('#add-library-button').disable();
+      grid.suspendEvent('itemcontextmenu');
+    }
+  },
+
+  getSelectedItems: function () {
+    var store = Ext.getStore('librariesInRequestStore');
+    var selectedItems = [];
+
+    store.each(function (item) {
+      if (item.get('selected')) {
+        selectedItems.push({
+          pk: item.get('pk'),
+          name: item.get('name'),
+          record_type: item.get('record_type')
+        });
+      }
+    });
+
+    return selectedItems;
+  }
 });
