@@ -170,31 +170,22 @@ Ext.define('MainHub.view.libraries.Libraries', {
                     text: 'Nuc. Type',
                     tooltip: 'Nucleic Acid Type',
                     dataIndex: 'nucleic_acid_type_name',
-                    width: 100,
-                    renderer: function (value, meta) {
-                        meta.tdAttr = 'data-qtip="' + value + '"';
-                        return value;
-                    }
+                    renderer: 'gridCellTooltipRenderer',
+                    width: 100
                 },
                 {
                     text: 'Protocol',
                     tooltip: 'Library Preparation Protocol',
                     dataIndex: 'library_protocol_name',
-                    width: 100,
-                    renderer: function (value, meta) {
-                        meta.tdAttr = 'data-qtip="' + value + '"';
-                        return value;
-                    }
+                    renderer: 'gridCellTooltipRenderer',
+                    width: 100
                 },
                 {
                     text: 'Lib. Type',
                     tooltip: 'Library Type',
                     dataIndex: 'library_type_name',
-                    width: 100,
-                    renderer: function (value, meta) {
-                        meta.tdAttr = 'data-qtip="' + value + '"';
-                        return value;
-                    }
+                    renderer: 'gridCellTooltipRenderer',
+                    width: 100
                 },
                 {
                     text: 'ng/μl',
@@ -220,11 +211,8 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 {
                     text: 'Index Type',
                     dataIndex: 'index_type_name',
-                    width: 100,
-                    renderer: function (value, meta) {
-                        meta.tdAttr = 'data-qtip="' + value + '"';
-                        return value;
-                    }
+                    renderer: 'gridCellTooltipRenderer',
+                    width: 100
                 },
                 {
                     text: 'Index Reads',
@@ -302,10 +290,7 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 {
                     text: 'Comments',
                     dataIndex: 'comments',
-                    renderer: function (value, meta) {
-                        meta.tdAttr = 'data-qtip="' + value + '"';
-                        return value;
-                    }
+                    renderer: 'gridCellTooltipRenderer'
                 }
             ]
         }

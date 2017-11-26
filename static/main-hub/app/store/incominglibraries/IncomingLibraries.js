@@ -40,7 +40,6 @@ Ext.define('MainHub.store.incominglibraries.IncomingLibraries', {
           var store = Ext.getStore('IncomingLibraries');
           var newData = _.map(data, function (item) {
             var record = store.findRecord('id', item.id, 0, false, true, true);
-
             if (record) {
               return Ext.Object.merge({
                 pk: record.get('pk'),

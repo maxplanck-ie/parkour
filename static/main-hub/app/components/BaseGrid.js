@@ -12,10 +12,15 @@ Ext.define('MainHub.components.BaseGrid', {
   region: 'center',
   padding: 15,
 
-  // viewConfig: {
-  //   loadMask: false,
-  //   markDirty: false
-  // },
+  viewConfig: {
+    stripeRows: false
+    // loadMask: false,
+    // markDirty: false
+  },
+
+  customConfig: {
+    qualityCheckMenuOptions: []
+  },
 
   selModel: {
     type: 'spreadsheet',

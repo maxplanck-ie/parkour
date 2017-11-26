@@ -12,8 +12,14 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
         activate: 'activateView'
       },
       '#incoming-libraries-grid': {
+        resize: 'resize',
+        itemcontextmenu: 'showMenu',
+        groupcontextmenu: 'showGroupMenu',
         beforeedit: 'toggleEditors',
         edit: 'editRecord'
+      },
+      '#search-field': {
+        change: 'changeFilter'
       },
       '#show-libraries-checkbox': {
         change: 'changeFilter'
@@ -21,15 +27,13 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
       '#show-samples-checkbox': {
         change: 'changeFilter'
       },
-      '#search-field': {
-        change: 'changeFilter'
+      '#cancel-button': {
+        click: 'cancel'
+      },
+      '#save-button': {
+        click: 'save'
       }
     }
-  },
-
-  activateView: function (view) {
-    var store = view.down('grid').getStore();
-    Ext.getStore(store.getId()).reload();
   },
 
   toggleEditors: function (editor, context) {
@@ -80,9 +84,9 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
     this.syncStore(store.getId(), reload);
   },
 
-  applyToAll: function (record, dataIndex) {
+  applyToAll: function (gridView, record, dataIndex) {
     var self = this;
-    var store = record.store;
+    var store = gridView.grid.getStore();
     var allowedColumns = [
       'dilution_factor',
       'concentration_facility',
@@ -122,6 +126,8 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibrariesController', {
 
       // Send the changes to the server
       self.syncStore(store.getId());
+    } else {
+      self._showEditableColumnsMessage(gridView, allowedColumns);
     }
   },
 

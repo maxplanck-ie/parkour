@@ -2,20 +2,9 @@ Ext.define('MainHub.components.BaseGridController', {
   extend: 'Ext.app.ViewController',
   alias: 'controller.basegrid',
 
-  config: {
-    control: {
-      'grid': {
-        resize: 'resize',
-        itemcontextmenu: 'showMenu',
-        groupcontextmenu: 'showGroupMenu'
-      },
-      '#cancel-button': {
-        click: 'cancel'
-      },
-      '#save-button': {
-        click: 'save'
-      }
-    }
+  activateView: function (view) {
+    var store = view.down('grid').getStore();
+    Ext.getStore(store.getId()).reload();
   },
 
   resize: function (el) {
@@ -30,7 +19,7 @@ Ext.define('MainHub.components.BaseGridController', {
       margin: '5px 5px 2px 5px',
       handler: function () {
         var dataIndex = self._getDataIndex(e, gridView);
-        self.applyToAll(record, dataIndex);
+        self.applyToAll(gridView, record, dataIndex);
       }
     }];
 
@@ -82,7 +71,7 @@ Ext.define('MainHub.components.BaseGridController', {
           tooltip: 'compromised',
           iconCls: 'fa fa-lg fa-exclamation-triangle',
           handler: function () {
-            self._qualityCheckSingle(record, 'compromised');
+            self.qualityCheckSingle(record, 'compromised');
             this.up('menu').hide();
           }
         });
@@ -94,7 +83,7 @@ Ext.define('MainHub.components.BaseGridController', {
           tooltip: 'failed',
           iconCls: 'fa fa-lg fa-times',
           handler: function () {
-            self._qualityCheckSingle(record, 'failed');
+            self.qualityCheckSingle(record, 'failed');
             this.up('menu').hide();
           }
         });
@@ -225,7 +214,7 @@ Ext.define('MainHub.components.BaseGridController', {
           Ext.getStore(storeId).reload();
         }
 
-        if (obj.hasOwnProperty('message') && obj.message !== '') {
+        if (obj.message && obj.message !== '') {
           new Noty({ text: obj.message, type: 'warning' }).show();
         } else {
           new Noty({ text: 'The changes have been saved.' }).show();
@@ -287,17 +276,27 @@ Ext.define('MainHub.components.BaseGridController', {
     btn.up('grid').getStore().rejectChanges();
   },
 
+  gridCellTooltipRenderer: function (value, meta) {
+    meta.tdAttr = 'data-qtip="' + value + '"';
+    return value;
+  },
+
+  barcodeRenderer: function (value, meta) {
+    var record = this.getView().getStore().findRecord('barcode', value);
+    return record ? record.getBarcode() : value;
+  },
+
   _getDataIndex: function (e, view) {
     var xPos = e.getXY()[0];
     var columns = view.getGridColumns();
     var dataIndex;
 
-    for (var column in columns) {
-      var leftEdge = columns[column].getPosition()[0];
-      var rightEdge = columns[column].getSize().width + leftEdge;
+    for (var colIdx in columns) {
+      var leftEdge = columns[colIdx].getPosition()[0];
+      var rightEdge = columns[colIdx].getSize().width + leftEdge;
 
       if (xPos >= leftEdge && xPos <= rightEdge) {
-        dataIndex = columns[column].dataIndex;
+        dataIndex = columns[colIdx].dataIndex;
         break;
       }
     }
@@ -316,5 +315,36 @@ Ext.define('MainHub.components.BaseGridController', {
     });
 
     return records;
+  },
+
+  _showEditableColumnsMessage: function (gridView, allowedColumns) {
+    var columns = this._findColumnsByDataIndex(gridView.getGridColumns(), allowedColumns);
+    var columnNames = Ext.Array.pluck(columns, 'text').map(
+      function (name) { return '<li>' + name + '</li>'; }
+    ).join('');
+
+    if (columnNames === '') {
+      return;
+    }
+
+    var message = Ext.String.format(
+      'Only the following columns are editable:<br/><ul>{0}</ul>', columnNames
+    );
+
+    new Noty({ text: message, type: 'warning' }).show();
+  },
+
+  _findColumnsByDataIndex: function (columns, allowedColumns) {
+    var result = [];
+
+    Ext.Array.each(columns, function (column) {
+      Ext.Array.each(allowedColumns, function (allowedColumnDataIndex) {
+        if (column.dataIndex === allowedColumnDataIndex) {
+          result.push(column);
+        }
+      });
+    });
+
+    return result;
   }
 });

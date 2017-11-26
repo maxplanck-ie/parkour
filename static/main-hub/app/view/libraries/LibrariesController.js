@@ -112,5 +112,10 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
 
         store.clearFilter();
         store.filter([showFilter, searchFilter]);
+    },
+
+    gridCellTooltipRenderer: function (value, meta) {
+        meta.tdAttr = 'data-qtip="' + value + '"';
+        return value;
     }
 });
