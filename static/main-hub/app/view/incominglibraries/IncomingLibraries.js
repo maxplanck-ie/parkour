@@ -59,7 +59,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
       items: [
         {
           xtype: 'checkcolumn',
-          itemId: 'checkColumn',
+          itemId: 'check-column',
           dataIndex: 'selected',
           resizable: false,
           menuDisabled: true,

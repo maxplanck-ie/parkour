@@ -40,7 +40,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
       items: [
         {
           xtype: 'checkcolumn',
-          itemId: 'checkColumn',
+          itemId: 'check-column',
           dataIndex: 'selected',
           resizable: false,
           menuDisabled: true,
