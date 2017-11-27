@@ -1,6 +1,6 @@
 Ext.define('MainHub.store.pooling.Pooling', {
   extend: 'Ext.data.Store',
-  storeId: 'poolingStore',
+  storeId: 'Pooling',
 
   requires: [
     'MainHub.model.pooling.Pooling'
@@ -37,7 +37,7 @@ Ext.define('MainHub.store.pooling.Pooling', {
             data = [data];
           }
 
-          var store = Ext.getStore('poolingStore');
+          var store = Ext.getStore('Pooling');
           var newData = _.map(data, function (item) {
             var record = store.findRecord('id', item.id, 0, false, true, true);
             if (record) {
@@ -62,5 +62,9 @@ Ext.define('MainHub.store.pooling.Pooling', {
         $('.x-grid-group-title').attr('data-qtip', '');
       }
     }
+  },
+
+  getId: function () {
+    return 'Pooling';
   }
 });

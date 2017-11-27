@@ -15,7 +15,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
         resize: 'resize',
         itemcontextmenu: 'showMenu',
         groupcontextmenu: 'showGroupMenu',
-        boxready: 'addButtons',
+        boxready: 'addToolbarButtons',
         edit: 'editRecord'
       },
       '#search-field': {
@@ -33,7 +33,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
     }
   },
 
-  addButtons: function (grid) {
+  addToolbarButtons: function (grid) {
     grid.down('toolbar[dock="bottom"]').insert(0, {
       type: 'button',
       itemId: 'download-benchtop-protocol-button',
@@ -47,7 +47,6 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
     var record = context.record;
     var changes = record.getChanges();
     var values = context.newValues;
-    var reload = Object.keys(changes).indexOf('quality_check') !== -1;
 
     // Set nM
     if (
@@ -55,12 +54,13 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
       values.concentration_library > 0 &&
       values.mean_fragment_size > 0
     ) {
-      var nM = this._calculateNM(values.concentration_library, values.mean_fragment_size);
+      var nM = this._calculateNM(
+        values.concentration_library, values.mean_fragment_size);
       record.set('nM', nM);
     }
 
     // Send the changes to the server
-    this.syncStore(store.getId(), reload);
+    this.syncStore(store.getId());
   },
 
   applyToAll: function (gridView, record, dataIndex) {
@@ -87,7 +87,10 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparationController', {
 
     if (dataIndex && allowedColumns.indexOf(dataIndex) !== -1) {
       store.each(function (item) {
-        if (item.get('library_protocol') === record.get('library_protocol') && item !== record) {
+        if (
+          item.get(store.groupField) === record.get(store.groupField) &&
+          item !== record
+        ) {
           item.set(dataIndex, record.get(dataIndex));
 
           // Calculate nM

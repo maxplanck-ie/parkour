@@ -18,9 +18,6 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
     id: 'library-preparation-grid',
     itemId: 'library-preparation-grid',
     store: 'LibraryPreparation',
-    customConfig: {
-      qualityCheckMenuOptions: ['passed', 'failed']
-    },
 
     header: {
       title: 'Library Preparation',
@@ -30,6 +27,10 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
         emptyText: 'Search',
         width: 200
       }]
+    },
+
+    customConfig: {
+      qualityCheckMenuOptions: ['passed', 'failed']
     },
 
     columns: {
