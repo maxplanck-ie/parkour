@@ -2,8 +2,6 @@ Ext.define('MainHub.view.requests.RequestsController', {
   extend: 'Ext.app.ViewController',
   alias: 'controller.requests',
 
-  mixins: ['MainHub.grid.ResizeMixin'],
-
   config: {
     control: {
       '#': {
@@ -25,6 +23,10 @@ Ext.define('MainHub.view.requests.RequestsController', {
 
   activateView: function () {
     Ext.getStore('requestsStore').reload();
+  },
+
+  resize: function (el) {
+    el.setHeight(Ext.Element.getViewportHeight() - 64);
   },
 
   boxready: function () {
@@ -56,8 +58,6 @@ Ext.define('MainHub.view.requests.RequestsController', {
       });
       return res;
     });
-
-      // grid.setHeight(Ext.Element.getViewportHeight() - 64);
   },
 
   showContextMenu: function (grid, record, itemEl, index, e) {
