@@ -1,6 +1,6 @@
 Ext.define('MainHub.store.flowcell.Flowcells', {
   extend: 'Ext.data.Store',
-  storeId: 'flowcellsStore',
+  storeId: 'Flowcells',
 
   requires: [
     'MainHub.model.flowcell.Flowcell'
@@ -37,7 +37,7 @@ Ext.define('MainHub.store.flowcell.Flowcells', {
             data = [data];
           }
 
-          var store = Ext.getStore('flowcellsStore');
+          var store = Ext.getStore('Flowcells');
           var newData = _.map(data, function (item) {
             var record = store.findRecord('id', item.id, 0, false, true, true);
             if (record) {
@@ -52,5 +52,9 @@ Ext.define('MainHub.store.flowcell.Flowcells', {
         scope: this
       }
     }
+  },
+
+  getId: function () {
+    return 'Flowcells';
   }
 });

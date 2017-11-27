@@ -13,9 +13,9 @@ Ext.define('MainHub.view.pooling.PoolingController', {
       },
       '#pooling-grid': {
         resize: 'resize',
+        boxready: 'addToolbarButtons',
         itemcontextmenu: 'showMenu',
         groupcontextmenu: 'showGroupMenu',
-        boxready: 'addToolbarButtons',
         beforeEdit: 'toggleEditors',
         edit: 'editRecord'
       },
@@ -90,7 +90,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
   selectUnselectAll: function (grid, groupId, selected) {
     var self = this;
     var store = grid.getStore();
-    var selectedRecords = this._getSelectedRecords(grid, groupId);
+    var selectedRecords = this._getSelectedRecords(store);
 
     if (selectedRecords.length > 0 && selectedRecords[0].pool !== groupId) {
       new Noty({
@@ -152,9 +152,13 @@ Ext.define('MainHub.view.pooling.PoolingController', {
 
   downloadBenchtopProtocol: function (btn) {
     var store = btn.up('grid').getStore();
-    var selectedRecords = this._getSelectedRecordsByRecordType(store);
-    var libraries = selectedRecords[0];
-    var samples = selectedRecords[1];
+    var selectedRecords = this._getSelectedRecords(store);
+    var libraries = selectedRecords.filter(function (item) {
+      return item.record_type === 'Library';
+    });
+    var samples = selectedRecords.filter(function (item) {
+      return item.record_type === 'Sample';
+    });
 
     if (libraries.length === 0 && samples.length === 0) {
       new Noty({
@@ -164,24 +168,26 @@ Ext.define('MainHub.view.pooling.PoolingController', {
       return;
     }
 
-    var poolId = store.findRecord('selected', true).get('pool');
     var form = Ext.create('Ext.form.Panel', { standardSubmit: true });
-
     form.submit({
       url: 'api/pooling/download_benchtop_protocol/',
       params: {
-        pool_id: poolId,
-        samples: Ext.JSON.encode(samples),
-        libraries: Ext.JSON.encode(libraries)
+        pool_id: selectedRecords[0].pool,
+        samples: Ext.JSON.encode(Ext.Array.pluck(samples, 'pk')),
+        libraries: Ext.JSON.encode(Ext.Array.pluck(libraries, 'pk'))
       }
     });
   },
 
   downloadPoolingTemplate: function (btn) {
     var store = btn.up('grid').getStore();
-    var selectedRecords = this._getSelectedRecordsByRecordType(store);
-    var libraries = selectedRecords[0];
-    var samples = selectedRecords[1];
+    var selectedRecords = this._getSelectedRecords(store);
+    var libraries = selectedRecords.filter(function (item) {
+      return item.record_type === 'Library';
+    });
+    var samples = selectedRecords.filter(function (item) {
+      return item.record_type === 'Sample';
+    });
 
     if (libraries.length === 0 && samples.length === 0) {
       new Noty({
@@ -195,8 +201,8 @@ Ext.define('MainHub.view.pooling.PoolingController', {
     form.submit({
       url: 'api/pooling/download_pooling_template/',
       params: {
-        samples: Ext.JSON.encode(samples),
-        libraries: Ext.JSON.encode(libraries)
+        samples: Ext.JSON.encode(Ext.Array.pluck(samples, 'pk')),
+        libraries: Ext.JSON.encode(Ext.Array.pluck(libraries, 'pk'))
       }
     });
   },
@@ -206,8 +212,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
       (item.get('record_type') === 'Sample' && item.get('status') === 3);
   },
 
-  _getSelectedRecords: function (grid, groupId) {
-    var store = grid.getStore();
+  _getSelectedRecords: function (store) {
     var records = [];
 
     store.each(function (item) {
@@ -221,22 +226,5 @@ Ext.define('MainHub.view.pooling.PoolingController', {
     });
 
     return records;
-  },
-
-  _getSelectedRecordsByRecordType: function (store) {
-    var libraries = [];
-    var samples = [];
-
-    store.each(function (record) {
-      if (record.get('selected')) {
-        if (record.get('record_type') === 'Library') {
-          libraries.push(record.get('pk'));
-        } else {
-          samples.push(record.get('pk'));
-        }
-      }
-    });
-
-    return [libraries, samples];
   }
 });

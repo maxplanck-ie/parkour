@@ -124,7 +124,7 @@ Ext.define('MainHub.components.BaseGridController', {
     if (
       qcMenuOptions &&
       qcMenuOptions.length > 0 &&
-      self._getSelectedRecords(grid, parseInt(groupId)).length > 0
+      self._getSelectedRecords(grid.getStore(), parseInt(groupId)).length > 0
     ) {
       var qcMenu = {
         xtype: 'container',
@@ -162,6 +162,18 @@ Ext.define('MainHub.components.BaseGridController', {
           iconCls: 'fa fa-lg fa-check',
           handler: function () {
             self.qualityCheckSelected(grid, parseInt(groupId), 'passed');
+            this.up('menu').hide();
+          }
+        });
+      }
+
+      if (qcMenuOptions.indexOf('completed') !== -1) {
+        qcMenu.items[1].items.push({
+          ui: 'menu-button-green',
+          tooltip: 'completed',
+          iconCls: 'fa fa-lg fa-check',
+          handler: function () {
+            self.qualityCheckSelected(grid, parseInt(groupId), 'completed');
             this.up('menu').hide();
           }
         });
@@ -277,13 +289,17 @@ Ext.define('MainHub.components.BaseGridController', {
   },
 
   gridCellTooltipRenderer: function (value, meta) {
-    meta.tdAttr = 'data-qtip="' + value + '"';
+    meta.tdAttr = Ext.String.format('data-qtip="{0}"', value);
     return value;
   },
 
   barcodeRenderer: function (value, meta) {
     var record = this.getView().getStore().findRecord('barcode', value);
     return record ? record.getBarcode() : value;
+  },
+
+  yesNoRenderer: function (value) {
+    return value ? 'Yes' : 'No';
   },
 
   _getDataIndex: function (e, view) {
@@ -304,8 +320,7 @@ Ext.define('MainHub.components.BaseGridController', {
     return dataIndex;
   },
 
-  _getSelectedRecords: function (grid, groupId) {
-    var store = grid.getStore();
+  _getSelectedRecords: function (store, groupId) {
     var records = [];
 
     store.each(function (item) {

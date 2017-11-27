@@ -1,230 +1,218 @@
 Ext.define('MainHub.view.flowcell.FlowcellsController', {
-    extend: 'Ext.app.ViewController',
-    alias: 'controller.flowcells',
+  extend: 'MainHub.components.BaseGridController',
+  alias: 'controller.flowcells',
 
-    requires: [
-        'MainHub.view.flowcell.FlowcellWindow',
-        'MainHub.view.flowcell.PoolInfoWindow'
-    ],
+  requires: [
+    'MainHub.view.flowcell.FlowcellWindow',
+    'MainHub.view.flowcell.PoolInfoWindow'
+  ],
 
-    mixins: [
-        'MainHub.grid.SearchInputMixin',
-        'MainHub.grid.ResizeMixin',
-        'MainHub.store.SyncStoreMixin'
-    ],
+  mixins: [
+    'MainHub.grid.SearchInputMixin'
+  ],
 
-    config: {
-        control: {
-            '#': {
-                activate: 'activateView'
-            },
-            '#load-button': {
-                click: 'onLoadBtnClick'
-            },
-            '#flowcells-grid': {
-                resize: 'resize',
-                itemcontextmenu: 'showContextMenu',
-                groupcontextmenu: 'showGroupContextMenu',
-                edit: 'editRecord'
-            },
-            '#check-column': {
-                beforecheckchange: 'selectRecord'
-            },
-            '#download-benchtop-protocol-button': {
-                click: 'downloadBenchtopProtocol'
-            },
-            '#download-sample-sheet-button': {
-                click: 'downloadSampleSheet'
-            },
-            '#search-field': {
-                change: 'changeFilter'
-            },
-            '#cancel-button': {
-                click: 'cancel'
-            },
-            '#save-button': {
-                click: 'save'
-            }
-        }
-    },
-
-    activateView: function() {
-        Ext.getStore('flowcellsStore').reload();
-    },
-
-    onLoadBtnClick: function() {
-        Ext.create('MainHub.view.flowcell.FlowcellWindow');
-    },
-
-    showContextMenu: function(gridView, record, item, index, e) {
-        var me = this;
-        e.stopEvent();
-        Ext.create('Ext.menu.Menu', {
-            items: [{
-                text: 'Show Additional Information',
-                iconCls: 'x-fa fa-info',
-                handler: function() {
-                    Ext.create('MainHub.view.flowcell.PoolInfoWindow', {
-                        title: record.get('pool_name'),
-                        poolId: record.get('pool')
-                    });
-                }
-            }, {
-                text: 'Apply to All',
-                iconCls: 'x-fa fa-check-circle',
-                handler: function() {
-                    var dataIndex = MainHub.Utilities.getDataIndex(e, gridView);
-                    me.applyToAll(record, dataIndex);
-                }
-            }]
-        }).showAt(e.getXY());
-    },
-
-    showGroupContextMenu: function(view, node, groupId, e) {
-        var me = this;
-        e.stopEvent();
-        Ext.create('Ext.menu.Menu', {
-            items: [{
-                text: 'Select All',
-                iconCls: 'x-fa fa-check-square-o',
-                handler: function() {
-                    me.selectUnselectAll(parseInt(groupId), true);
-                }
-            }, {
-                text: 'Unselect All',
-                iconCls: 'x-fa fa-square-o',
-                handler: function() {
-                    me.selectUnselectAll(parseInt(groupId), false);
-                }
-            }, '-', {
-                text: 'QC: All selected completed',
-                iconCls: 'x-fa fa-check',
-                handler: function() {
-                    me.qualityCheckAll(parseInt(groupId), 'completed');
-                }
-            }]
-        }).showAt(e.getXY());
-    },
-
-    selectRecord: function(cb, rowIndex, checked, record) {
-        // Don't select lanes from a different flowcell
-        var selectedLane = Ext.getStore('flowcellsStore').findRecord('selected', true);
-        if (selectedLane) {
-            if (record.get('flowcell') !== selectedLane.get('flowcell')) {
-                new Noty({
-                    text: 'You can only select lanes from the same flowcell.',
-                    type: 'warning'
-                }).show();
-            }
-        }
-    },
-
-    selectUnselectAll: function(flowcell, selected) {
-        var store = Ext.getStore('flowcellsStore');
-
-        store.each(function(item) {
-            if (item.get('flowcell') === flowcell) {
-                item.set('selected', selected);
-            }
-        });
-    },
-
-    editRecord: function(editor, context) {
-        var record = context.record;
-        var changes = record.getChanges();
-        var reload = Object.keys(changes).indexOf('quality_check') !== -1;
-
-        // Send the changes to the server
-        this.syncStore('flowcellsStore', reload);
-    },
-
-    applyToAll: function(record, dataIndex) {
-        var store = Ext.getStore('flowcellsStore');
-        var allowedColumns = ['loading_concentration', 'phix'];
-
-        if (typeof dataIndex !== 'undefined' && allowedColumns.indexOf(dataIndex) !== -1) {
-            store.each(function(item) {
-                if (item.get('flowcell') === record.get('flowcell') && item !== record) {
-                    item.set(dataIndex, record.get(dataIndex));
-                }
-            });
-
-            // Send the changes to the server
-            this.syncStore('flowcellsStore');
-        }
-    },
-
-    downloadBenchtopProtocol: function() {
-        var store = Ext.getStore('flowcellsStore');
-        var ids = []
-
-        // Get all checked (selected) records
-        store.each(function(record) {
-            if (record.get('selected')) {
-                ids.push(record.get('pk'));
-            }
-        });
-
-        if (ids.length === 0) {
-            new Noty({
-                text: 'You did not select any lanes.',
-                type: 'warning'
-            }).show();
-            return;
-        }
-
-        var form = Ext.create('Ext.form.Panel', {
-            standardSubmit: true
-        });
-
-        form.submit({
-            url: 'api/flowcells/download_benchtop_protocol/',
-            params: {
-                'ids': Ext.JSON.encode(ids)
-            }
-        });
-    },
-
-    downloadSampleSheet: function() {
-        var store = Ext.getStore('flowcellsStore');
-        var flowcellId = '';
-        var ids = [];
-
-        // Get all checked (selected) samples
-        store.each(function(record) {
-            if (record.get('selected')) {
-                ids.push(record.get('pk'));
-                flowcellId = record.get('flowcell');
-            }
-        });
-
-        if (ids.length === 0) {
-            new Noty({
-                text: 'You did not select any lanes.',
-                type: 'warning'
-            }).show();
-            return;
-        }
-
-        var form = Ext.create('Ext.form.Panel', {
-            standardSubmit: true
-        });
-
-        form.submit({
-            url: 'api/flowcells/download_sample_sheet/',
-            params: {
-                'ids': Ext.JSON.encode(ids),
-                'flowcell_id': flowcellId
-            }
-        });
-    },
-
-    save: function() {
-        // Send the changes to the server
-        this.syncStore('flowcellsStore');
-    },
-
-    cancel: function() {
-        Ext.getStore('flowcellsStore').rejectChanges();
+  config: {
+    control: {
+      '#': {
+        activate: 'activateView'
+      },
+      '#flowcells-grid': {
+        resize: 'resize',
+        boxready: 'addToolbarButtons',
+        itemcontextmenu: 'showMenu',
+        groupcontextmenu: 'showGroupMenu',
+        edit: 'editRecord'
+      },
+      '#check-column': {
+        beforecheckchange: 'selectRecord'
+      },
+      '#load-button': {
+        click: 'onLoadBtnClick'
+      },
+      '#download-benchtop-protocol-button': {
+        click: 'downloadBenchtopProtocol'
+      },
+      '#download-sample-sheet-button': {
+        click: 'downloadSampleSheet'
+      },
+      '#search-field': {
+        change: 'changeFilter'
+      },
+      '#cancel-button': {
+        click: 'cancel'
+      },
+      '#save-button': {
+        click: 'save'
+      }
     }
+  },
+
+  addToolbarButtons: function (grid) {
+    var toolbar = grid.down('toolbar[dock="bottom"]');
+
+    toolbar.insert(0, {
+      type: 'button',
+      itemId: 'download-benchtop-protocol-button',
+      text: 'Download Benchtop Protocol',
+      iconCls: 'fa fa-file-excel-o fa-lg'
+    });
+
+    toolbar.insert(1, {
+      type: 'button',
+      itemId: 'download-sample-sheet-button',
+      text: 'Download Sample Sheet',
+      iconCls: 'fa fa-file-excel-o fa-lg'
+    });
+  },
+
+  showMenu: function (gridView, record, item, index, e) {
+    var self = this;
+
+    e.stopEvent();
+    Ext.create('Ext.menu.Menu', {
+      plain: true,
+      defaults: {
+        margin: 5
+      },
+      items: [
+        {
+          text: 'Apply to All',
+          handler: function () {
+            var dataIndex = self._getDataIndex(e, gridView);
+            self.applyToAll(gridView, record, dataIndex);
+          }
+        },
+        {
+          text: 'Show Additional Information',
+          handler: function () {
+            Ext.create('MainHub.view.flowcell.PoolInfoWindow', {
+              title: record.get('pool_name'),
+              poolId: record.get('pool')
+            });
+          }
+        }
+      ]
+    }).showAt(e.getXY());
+  },
+
+  selectRecord: function (cb, rowIndex, checked, record) {
+    // Don't select lanes from a different flowcell
+    var selectedLane = record.store.findRecord('selected', true);
+    if (selectedLane) {
+      if (record.get('flowcell') !== selectedLane.get('flowcell')) {
+        new Noty({
+          text: 'You can only select lanes from the same flowcell.',
+          type: 'warning'
+        }).show();
+        return false;
+      }
+    }
+  },
+
+  selectUnselectAll: function (grid, groupId, selected) {
+    var store = grid.getStore();
+    var selectedRecords = this._getSelectedRecords(store);
+
+    if (selectedRecords.length > 0 && selectedRecords[0].flowcell !== groupId) {
+      new Noty({
+        text: 'You can only select lanes from the same flowcell.',
+        type: 'warning'
+      }).show();
+      return false;
+    }
+
+    store.each(function (item) {
+      if (item.get(store.groupField) === groupId) {
+        item.set('selected', selected);
+      }
+    });
+  },
+
+  editRecord: function (editor, context) {
+    var store = editor.grid.getStore();
+    this.syncStore(store.getId());
+  },
+
+  applyToAll: function (gridView, record, dataIndex) {
+    var store = gridView.grid.getStore();
+    var allowedColumns = ['loading_concentration', 'phix'];
+
+    if (dataIndex && allowedColumns.indexOf(dataIndex) !== -1) {
+      store.each(function (item) {
+        if (
+          item.get(store.groupField) === record.get(store.groupField) &&
+          item !== record
+        ) {
+          item.set(dataIndex, record.get(dataIndex));
+        }
+      });
+
+      // Send the changes to the server
+      this.syncStore(store.getId());
+    } else {
+      this._showEditableColumnsMessage(gridView, allowedColumns);
+    }
+  },
+
+  onLoadBtnClick: function () {
+    Ext.create('MainHub.view.flowcell.FlowcellWindow');
+  },
+
+  downloadBenchtopProtocol: function (btn) {
+    var store = btn.up('grid').getStore();
+    var selectedLanes = this._getSelectedRecords(store);
+
+    if (selectedLanes.length === 0) {
+      new Noty({
+        text: 'You did not select any lanes.',
+        type: 'warning'
+      }).show();
+      return;
+    }
+
+    var form = Ext.create('Ext.form.Panel', { standardSubmit: true });
+    form.submit({
+      url: 'api/flowcells/download_benchtop_protocol/',
+      params: {
+        'ids': Ext.JSON.encode(Ext.Array.pluck(selectedLanes, 'pk'))
+      }
+    });
+  },
+
+  downloadSampleSheet: function (btn) {
+    var store = btn.up('grid').getStore();
+    var selectedLanes = this._getSelectedRecords(store);
+
+    if (selectedLanes.length === 0) {
+      new Noty({
+        text: 'You did not select any lanes.',
+        type: 'warning'
+      }).show();
+      return;
+    }
+
+    var form = Ext.create('Ext.form.Panel', { standardSubmit: true });
+    form.submit({
+      url: 'api/flowcells/download_sample_sheet/',
+      params: {
+        'ids': Ext.JSON.encode(Ext.Array.pluck(selectedLanes, 'pk')),
+        'flowcell_id': selectedLanes[0].flowcell
+      }
+    });
+  },
+
+  _getSelectedRecords: function (store) {
+    var records = [];
+
+    store.each(function (item) {
+      if (item.get('selected')) {
+        records.push({
+          pk: item.get('pk'),
+          flowcell: item.get('flowcell')
+        });
+      }
+    });
+
+    return records;
+  }
 });
