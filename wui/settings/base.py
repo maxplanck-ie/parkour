@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'pooling',
     'flowcell',
     'report',
+    'invoice',
 
     'fixtures',
 ]
