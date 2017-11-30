@@ -30,15 +30,19 @@ def invoice(request):
     year = 2017
     month = 11
 
+    # flowcells = Flowcell.objects.filter(
+    #     create_time__year=year,
+    #     create_time__month=month,
+    # ).annotate(
+    #     not_completed_lanes_count=Count(
+    #         Case(When(~Q(lanes__completed=True), then=1))
+    #     )
+    # ).filter(
+    #     not_completed_lanes_count__exact=0
+    # ).order_by('create_time')
     flowcells = Flowcell.objects.filter(
         create_time__year=year,
         create_time__month=month,
-    ).annotate(
-        not_completed_lanes_count=Count(
-            Case(When(~Q(lanes__completed=True), then=1))
-        )
-    ).filter(
-        not_completed_lanes_count__exact=0
     ).order_by('create_time')
 
     wb = Workbook(encoding='utf-8')
