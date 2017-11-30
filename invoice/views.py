@@ -1,5 +1,6 @@
 # import datetime
 import calendar
+import itertools
 from collections import OrderedDict
 
 from django.db.models import Q, Count, Case, When
@@ -9,6 +10,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 
 from xlwt import Workbook, XFStyle, Formula
 
+from request.models import Request
 from library.models import Library
 from sample.models import Sample
 from index_generator.models import Pool
@@ -37,7 +39,7 @@ def invoice(request):
         )
     ).filter(
         not_completed_lanes_count__exact=0
-    )
+    ).order_by('create_time')
 
     wb = Workbook(encoding='utf-8')
 
@@ -118,7 +120,7 @@ def invoice(request):
              font_style_bold)
 
     # Fixed Costs Sequencing table
-    fixed_costs_table_row_num = 8 + flowcells.count()
+    fixed_costs_table_row_num = 8 + flowcells.count() * 2
     row_num = fixed_costs_table_row_num
     ws.write(row_num, 0, 'Fixed Costs Sequencing', font_style_bold)
     ws.write(row_num, 1, 'Price', font_style_bold)
@@ -154,90 +156,124 @@ def invoice(request):
         ws.write(row_num, i, column, font_style_bold)
         ws.col(i).width = 8000
 
+    # Main table
     for flowcell in flowcells:
-        row_num += 1
-        row_idx = str(row_num + 1)
-
         lanes = flowcell.lanes.all()
-        pools = Pool.objects.filter(
+        pool = Pool.objects.filter(
             pk__in=lanes.values_list('pool', flat=True).distinct()
-        ).order_by('pk')
-        pool_ids = ', '.join(pools.values_list('name', flat=True))
+        ).order_by('pk')[0]
+        # pool_ids = ', '.join(pools.values_list('name', flat=True))
 
-        record = pools[0].libraries.first() or pools[0].samples.first()
-        request = record.request.get()
-        cost_units = ', '.join(
-            request.user.cost_unit.values_list('name', flat=True))
+        libraries = Library.objects.filter(pool=pool)
+        samples = Sample.objects.filter(pool=pool)
+        total_sequencing_depth = \
+            sum(libraries.filter(~Q(status=-1)).values_list(
+                'sequencing_depth', flat=True)) + \
+            sum(samples.filter(~Q(status=-1)).values_list(
+                'sequencing_depth', flat=True))
 
-        libraries = Library.objects.filter(pool__in=pools)
-        samples = Sample.objects.filter(pool__in=pools)
-        libraries_cnt = libraries.count()
-        samples_cnt = samples.count()
-        failed_libraries_cnt = libraries.filter(status=-1).count()
-        failed_samples_cnt = samples.filter(status=-1).count()
-        seq_reads_link = f'{flowcell.sequencer.name} {record.read_length.name}'
+        requests = Request.objects.filter(pk__in=set(itertools.chain(
+            libraries.values_list('request', flat=True).distinct(),
+            samples.values_list('request', flat=True).distinct()
+        ))).distinct().order_by('create_time')
 
-        formula = f'D{row_idx}-F{row_idx}'
-        effective_libraries_samples = Formula(formula)
+        for req in requests:
+            row_num += 1
+            row_idx = str(row_num + 1)
 
-        formula = f'N{row_idx}*J{row_idx}/100'
-        effective_lanes = Formula(formula)
+            cost_units = ', '.join(
+                req.user.cost_unit.values_list('name', flat=True))
 
-        # formula = 'O{}*VLOOKUP(M{};A{}:B{};2)'.format(
-        #     row_idx, row_idx,
-        #     9 + 1 + flowcells.count(),
-        #     9 + flowcells.count() + len(fixed_costs_prices),
-        # )
-        try:
-            formula = 'O{}*$B${}'.format(
-                row_idx,
-                fixed_costs_table_row_num + 2 +
-                list(fixed_costs_prices.keys()).index(flowcell.sequencer.name),
-            )
-            fixed_costs = Formula(formula)
-        except ValueError:
+            request_libraries = libraries.filter(request=req)
+            request_samples = samples.filter(request=req)
+            libraries_cnt = request_libraries.count()
+            samples_cnt = request_samples.count()
+            failed_libraries_cnt = request_libraries.filter(status=-1).count()
+            failed_samples_cnt = request_samples.filter(status=-1).count()
+            libraries_and_samples = []
+            if libraries_cnt > 0:
+                libraries_and_samples.append('Libraries')
+            if samples_cnt > 0:
+                libraries_and_samples.append('Samples')
+
+            passed_libraries = request_libraries.filter(~Q(status=-1))
+            passed_samples = request_samples.filter(~Q(status=-1))
+            passed_lib_depths_sum = sum(passed_libraries.values_list(
+                'sequencing_depth', flat=True))
+            passed_smpl_depths_sum = sum(passed_samples.values_list(
+                'sequencing_depth', flat=True))
+
+            pool_percentage = \
+                round((passed_lib_depths_sum + passed_smpl_depths_sum) /
+                      total_sequencing_depth * 100)
+
+            record = request_libraries.first() or request_samples.first()
+            seq_reads_link = f'{flowcell.sequencer.name} {record.read_length.name}'
+
+            formula = f'D{row_idx}-F{row_idx}'
+            effective_libraries_samples = Formula(formula)
+
+            formula = f'N{row_idx}*J{row_idx}/100'
+            effective_lanes = Formula(formula)
+
+            # formula = 'O{}*VLOOKUP(M{};A{}:B{};2)'.format(
+            #     row_idx, row_idx,
+            #     9 + 1 + flowcells.count(),
+            #     9 + flowcells.count() + len(fixed_costs_prices),
+            # )
+            # try:
+            #     formula = 'O{}*$B${}'.format(
+            #         row_idx,
+            #         fixed_costs_table_row_num + 2 +
+            #         list(fixed_costs_prices.keys()).index(flowcell.sequencer.name),
+            #     )
+            #     fixed_costs = Formula(formula)
+            # except ValueError:
+            #     fixed_costs = ''
             fixed_costs = ''
 
-        try:
-            formula = 'O{}*$B${}'.format(
-                row_idx,
-                sequencing_costs_table_row_num + 2 +
-                list(sequencing_prices.keys()).index(seq_reads_link)
-            )
-            var_costs_sequencing = Formula(formula)
-        except ValueError:
+            # try:
+            #     formula = 'O{}*$B${}'.format(
+            #         row_idx,
+            #         sequencing_costs_table_row_num + 2 +
+            #         list(sequencing_prices.keys()).index(seq_reads_link)
+            #     )
+            #     var_costs_sequencing = Formula(formula)
+            # except ValueError:
+            #     var_costs_sequencing = ''
             var_costs_sequencing = ''
 
-        formula = f'S{row_idx}+T{row_idx}+R{row_idx}'
-        total_costs = Formula(formula)
+            formula = f'S{row_idx}+T{row_idx}+R{row_idx}'
+            total_costs = Formula(formula)
 
-        row = [
-            flowcell.flowcell_id,
-            request.name,
-            cost_units,
-            libraries_cnt + samples_cnt,
-            f'# of Libraries: {libraries_cnt}, # of Samples: {samples_cnt}',
-            failed_libraries_cnt + failed_samples_cnt,
-            effective_libraries_samples,
-            record.library_protocol.name,
-            pool_ids,
-            '',
-            '{} ({})'.format(flowcell.flowcell_id,
-                             flowcell.create_time.strftime('%d.%m.%Y')),
-            '',
-            flowcell.sequencer.name,
-            flowcell.lanes.count(),
-            effective_lanes,
-            record.read_length.name,
-            seq_reads_link,
-            fixed_costs,
-            '',
-            var_costs_sequencing,
-            total_costs,
-        ]
+            row = [
+                # flowcell.flowcell_id,
+                flowcell.create_time.strftime('%d.%m.%Y'),
+                req.name,
+                cost_units,
+                libraries_cnt + samples_cnt,
+                ' and '.join(libraries_and_samples),
+                failed_libraries_cnt + failed_samples_cnt,
+                effective_libraries_samples,
+                record.library_protocol.name,
+                pool.name,
+                pool_percentage,
+                '{} ({})'.format(flowcell.flowcell_id,
+                                 flowcell.create_time.strftime('%d.%m.%Y')),
+                '',
+                flowcell.sequencer.name,
+                flowcell.lanes.count(),
+                effective_lanes,
+                record.read_length.name,
+                seq_reads_link,
+                fixed_costs,
+                '',
+                var_costs_sequencing,
+                total_costs,
+            ]
 
-        for i in range(len(row)):
-            ws.write(row_num, i, row[i], font_style)
+            for i in range(len(row)):
+                ws.write(row_num, i, row[i], font_style)
 
     wb.save(response)
     return response
