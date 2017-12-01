@@ -235,7 +235,7 @@ Ext.define('MainHub.view.libraries.Libraries', {
                 {
                     text: 'Length',
                     tooltip: 'Read Length',
-                    dataIndex: 'readLength',
+                    dataIndex: 'read_length_name',
                     width: 65
                 },
                 {
