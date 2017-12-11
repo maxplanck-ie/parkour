@@ -56,7 +56,9 @@ class TestRequestModel(TestCase):
 
     def test_delete_request(self):
         """
-        Ensure all dependent libraries, samples and uploaded files are deleted, too. """
+        Ensure all dependent libraries,
+        samples and uploaded files are deleted, too.
+        """
         request = Request(user=self.user)
         request.save()
 
@@ -92,10 +94,10 @@ class TestRequests(BaseTestCase):
     def setUp(self):
         self.user = self._create_user('foo@bar.io', 'foo-foo')
         self.non_staff = self._create_user('non-staff@test.io', 'test', False)
+        self.client.login(email='foo@bar.io', password='foo-foo')
 
     def test_request_list(self):
         """ Ensure get request list behaves correctly. """
-        self.client.login(email='foo@bar.io', password='foo-foo')
         request1 = create_request(self.user)
         request2 = create_request(self.non_staff)
 
@@ -120,9 +122,34 @@ class TestRequests(BaseTestCase):
         self.assertIn(request1.name, requests)
         self.assertNotIn(request2.name, requests)
 
+    def test_search(self):
+        """ Ensure search behaves correctly. """
+        request1 = create_request(self.user)
+        request2 = create_request(self.user)
+        request3 = create_request(self.user)
+
+        name1 = get_random_name()
+        name2 = get_random_name()
+        request1.name = name1
+        request2.description = name1
+        request3.description = name2
+        request1.save()
+        request2.save()
+        request3.save()
+
+        response = self.client.get(
+            reverse('request-list'), {'query': name1},
+        )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        requests = [x['name'] for x in data['results']]
+        self.assertIn(request1.name, requests)
+        self.assertIn(request2.name, requests)
+        self.assertNotIn(request3.name, requests)
+
     def test_single_request(self):
         """ Ensure get single request behaves correctly. """
-        self.client.login(email='foo@bar.io', password='foo-foo')
         request = create_request(self.user)
 
         response = self.client.get(reverse(
@@ -136,7 +163,6 @@ class TestRequests(BaseTestCase):
 
     def test_single_request_invalid_id(self):
         """ Ensure error is thrown if the id does not exist. """
-        self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.get(reverse(
             'request-detail', kwargs={'pk': -1}
         ))
@@ -144,7 +170,6 @@ class TestRequests(BaseTestCase):
 
     def test_create_request(self):
         """ Ensure create request behaves correctly. """
-        self.client.login(email='foo@bar.io', password='foo-foo')
         library = create_library(get_random_name())
         sample = create_sample(get_random_name())
         Library = library.__class__
@@ -173,8 +198,6 @@ class TestRequests(BaseTestCase):
         Ensure error is thrown if no records are provided when
         creating a new request.
         """
-        self.client.login(email='foo@bar.io', password='foo-foo')
-
         response = self.client.post(reverse('request-list'), {
             'data': json.dumps({
                 'description': get_random_name(),
@@ -190,8 +213,6 @@ class TestRequests(BaseTestCase):
 
     def test_update_request(self):
         """ Ensure update request behaves correctly. """
-        self.client.login(email='foo@bar.io', password='foo-foo')
-
         request = create_request(self.user)
         new_description = get_random_name()
         library = create_library(get_random_name())
@@ -199,20 +220,22 @@ class TestRequests(BaseTestCase):
         request.libraries.add(library)
         self.assertNotIn(sample, request.samples.all())
 
-        response = self.client.post(reverse('request-edit',
-            kwargs={'pk': request.pk}),
-            data={'data': json.dumps({
-                'description': new_description,
-                'records': [{
-                    'pk': library.pk,
-                    'record_type': 'Library',
-                }, {
-                    'pk': sample.pk,
-                    'record_type': 'Sample',
-                }],
-                # 'files': [],
-            })
-        })
+        response = self.client.post(
+            reverse('request-edit', kwargs={'pk': request.pk}),
+            data={
+                'data': json.dumps({
+                    'description': new_description,
+                    'records': [{
+                        'pk': library.pk,
+                        'record_type': 'Library',
+                    }, {
+                        'pk': sample.pk,
+                        'record_type': 'Sample',
+                    }],
+                    # 'files': [],
+                }),
+            },
+        )
         updated_request = Request.objects.get(pk=request.pk)
 
         self.assertEqual(response.status_code, 200)
@@ -225,37 +248,34 @@ class TestRequests(BaseTestCase):
         Ensure error is thrown if no records are provided when
         updating a request.
         """
-        self.client.login(email='foo@bar.io', password='foo-foo')
-
         request = create_request(self.user)
         library = create_library(get_random_name())
         request.libraries.add(library)
 
-        response = self.client.post(reverse('request-edit',
-            kwargs={'pk': request.pk}),
-            data={'data': json.dumps({
-                'description': get_random_name(),
-                'records': [],
-                # 'files': [],
-            })
-        })
+        response = self.client.post(
+            reverse('request-edit', kwargs={'pk': request.pk}),
+            data={
+                'data': json.dumps({
+                    'description': get_random_name(),
+                    'records': [],
+                    # 'files': [],
+                }),
+            },
+        )
 
         self.assertEqual(response.status_code, 400)
         self.assertFalse(response.json()['success'])
 
     def test_update_request_invalid_id(self):
         """ Ensure error is thrown if the id does not exist. """
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('request-edit',
-            kwargs={'pk': -1}),
-            data={'data': json.dumps({})
-        })
+        response = self.client.post(
+            reverse('request-edit', kwargs={'pk': -1}),
+            data={'data': json.dumps({})},
+        )
         self.assertEqual(response.status_code, 404)
 
     def test_samples_submitted(self):
         """ Ensure set samples_submitted behaves correctly. """
-        self.client.login(email='foo@bar.io', password='foo-foo')
-
         request = create_request(self.user)
 
         response = self.client.post(
@@ -272,7 +292,6 @@ class TestRequests(BaseTestCase):
 
     def test_delete_request(self):
         """ Ensure delete request behaves correctly. """
-        self.client.login(email='foo@bar.io', password='foo-foo')
         request = create_request(self.user)
 
         response = self.client.delete(reverse(
@@ -284,7 +303,6 @@ class TestRequests(BaseTestCase):
 
     def test_delete_request_invalid_id(self):
         """ Ensure error is thrown if the id does not exist. """
-        self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.delete(reverse(
             'request-detail',
             kwargs={'pk': -1}
@@ -293,7 +311,6 @@ class TestRequests(BaseTestCase):
 
     def test_get_records(self):
         """ Ensure get request's records behaves correctly. """
-        self.client.login(email='foo@bar.io', password='foo-foo')
         request = create_request(self.user)
         library = create_library(get_random_name())
         sample = create_sample(get_random_name())
