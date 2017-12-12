@@ -222,6 +222,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'SEARCH_PARAM': 'query'
 }
 
 # Use 'bpython' by default for shell_plus

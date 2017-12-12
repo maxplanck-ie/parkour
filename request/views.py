@@ -1,10 +1,7 @@
 import json
 import logging
 import itertools
-from datetime import datetime
 from unicodedata import normalize
-
-from fpdf import FPDF
 
 from django.http import HttpResponse, JsonResponse
 from django.conf import settings
@@ -13,12 +10,14 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
-# from django.db.models import Q
-from rest_framework import viewsets
+
+from rest_framework import viewsets, filters
 from rest_framework.decorators import detail_route, permission_classes
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAdminUser
+
+from fpdf import FPDF
 
 from common.views import (
     CsrfExemptSessionAuthentication,
@@ -152,23 +151,14 @@ class RequestViewSet(viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
     authentication_classes = [CsrfExemptSessionAuthentication]
 
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name', 'description', 'user__first_name',
+                     'user__last_name',)
+
     def get_queryset(self):
         queryset = Request.objects.prefetch_related(
             'user', 'libraries', 'samples', 'files'
         ).order_by('-create_time')
-
-        # If a search query is given
-        search_query = self.request.query_params.get('query', None)
-        if search_query:
-            # TODO: implements this
-            # fields = [f for f in Request._meta.fields
-            #           if isinstance(f, CharField) or isinstance(f, TextField)]
-            # queries = [Q(**{f.name: search_query}) for f in fields]
-            # qs = Q()
-            # for query in queries:
-            #     qs = qs | query
-            # queryset = queryset.filter(qs)
-            pass
 
         if self.request.user.is_staff:
             # Show only those Requests, whose libraries and samples
@@ -183,8 +173,7 @@ class RequestViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         """ Get the list of requests. """
-        queryset = self.get_queryset()
-        # page = self.paginate_queryset(queryset)
+        queryset = self.filter_queryset(self.get_queryset())
 
         try:
             page = self.paginate_queryset(queryset)

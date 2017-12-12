@@ -1,5 +1,5 @@
 # Django
-Django
+Django==1.11.4
 django-authtools
 djangorestframework
 django-admin-list-filter-dropdown

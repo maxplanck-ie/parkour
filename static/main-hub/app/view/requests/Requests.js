@@ -3,11 +3,11 @@ Ext.define('MainHub.view.requests.Requests', {
   xtype: 'requests',
 
   requires: [
+    'Ext.ux.form.SearchField',
     'MainHub.view.requests.RequestsController',
     'MainHub.view.requests.RequestWindow',
     'MainHub.view.requests.EmailWindow',
-    'MainHub.view.libraries.LibraryWindow',
-    'Ext.ux.form.SearchField'
+    'MainHub.view.libraries.LibraryWindow'
   ],
 
   controller: 'requests',
@@ -28,9 +28,8 @@ Ext.define('MainHub.view.requests.Requests', {
         xtype: 'searchfield',
         store: 'requestsStore',
         emptyText: 'Search',
-        margin: '0 15px 0 0',
-        width: 250,
-        hidden: true
+        margin: '0 10px 0 0',
+        width: 250
       },
       {
         xtype: 'button',
@@ -39,7 +38,7 @@ Ext.define('MainHub.view.requests.Requests', {
       }]
     },
     viewConfig: {
-      // emptyText: '<h1 style="text-align:center;margin:75px">No matching results</h1>'
+      emptyText: '<h1 style="text-align:center;margin:75px">No items</h1>',
       stripeRows: false
     },
     store: 'requestsStore',
@@ -61,8 +60,8 @@ Ext.define('MainHub.view.requests.Requests', {
         {
           text: 'Date',
           dataIndex: 'create_time',
-          flex: 1,
-          renderer: Ext.util.Format.dateRenderer('d.m.Y')
+          renderer: Ext.util.Format.dateRenderer('d.m.Y'),
+          flex: 1
         },
         {
           text: 'Total Sequencing Depth',
