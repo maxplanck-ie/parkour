@@ -29,13 +29,13 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = InvoicingSerializer
 
     def get_queryset(self):
-        # today = datetime.date.today()
-        # year = today.year
-        # month = today.month
+        today = datetime.date.today()
+        year = today.year
+        month = today.month
 
         return Request.objects.filter(
-            # flowcell__create_time__year=year,
-            # flowcell__create_time__month=month,
+            flowcell__create_time__year=year,
+            flowcell__create_time__month=month,
             sequenced=True,
         ).prefetch_related(
             'libraries', 'samples', 'flowcell',
