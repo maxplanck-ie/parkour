@@ -67,6 +67,12 @@ def get_navigation_tree(request):
                 'iconCls': 'x-fa fa-level-down',
                 'viewType': 'flowcells',
                 'leaf': True
+            },
+            {
+                'text': 'Invoicing',
+                'iconCls': 'x-fa fa-eur',
+                'viewType': 'invoicing',
+                'leaf': True
             }
         ]
 

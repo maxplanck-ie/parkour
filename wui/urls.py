@@ -37,7 +37,7 @@ urlpatterns = [
     url(r'pooling/', include('pooling.urls')),
     url(r'flowcell/', include('flowcell.urls')),
     url(r'report/', include('report.urls')),
-    url(r'invoice/', include('invoice.urls')),
+    url(r'invoicing/', include('invoicing.urls')),
 ]
 
 if settings.DEBUG:

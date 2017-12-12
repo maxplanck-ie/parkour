@@ -235,7 +235,7 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
     serializer_class = LaneSerializer
 
     def get_queryset(self):
-        return Lane.objects.all().filter(completed=False)
+        return Lane.objects.filter(completed=False).order_by('name')
 
     def create(self, request):
         """ Add a flowcell. """

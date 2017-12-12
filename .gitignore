@@ -59,8 +59,8 @@ docs/_build/
 #target/
 
 # Ipython Notebook
-.ipynb
-.ipynb_checkpoints
+*.ipynb
+*.ipynb_checkpoints
 
 .DS_Store
 

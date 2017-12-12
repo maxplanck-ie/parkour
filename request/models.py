@@ -55,6 +55,11 @@ class Request(DateTimeMixin):
         default=False,
     )
 
+    sequenced = models.BooleanField(
+        verbose_name='Sequenced',
+        default=False,
+    )
+
     def __str__(self):
         return self.name
 

@@ -1,6 +1,7 @@
 from django.db import models
 
 from common.models import DateTimeMixin
+from request.models import Request
 from index_generator.models import Pool
 
 
@@ -39,6 +40,8 @@ class Flowcell(DateTimeMixin):
     flowcell_id = models.CharField('Flowcell ID', max_length=50)
     sequencer = models.ForeignKey(Sequencer, verbose_name='Sequencer')
     lanes = models.ManyToManyField(Lane, related_name='flowcell', blank=True)
+    requests = models.ManyToManyField(
+        Request, related_name='flowcell', blank=True)
 
     def __str__(self):
         return self.flowcell_id

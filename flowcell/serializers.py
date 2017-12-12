@@ -1,3 +1,5 @@
+import itertools
+
 from django.db.models import Q
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import (
@@ -8,6 +10,7 @@ from rest_framework.serializers import (
     CharField,
 )
 
+from request.models import Request
 from library.models import Library
 from sample.models import Sample
 from index_generator.models import Pool
@@ -159,7 +162,7 @@ class FlowcellSerializer(ModelSerializer):
         pool_ids = list(Lane.objects.all().filter(pk__in=lane_ids).values_list(
             'pool', flat=True,
         ).distinct())
-        pools = Pool.objects.all().filter(pk__in=pool_ids)
+        pools = Pool.objects.filter(pk__in=pool_ids)
 
         # After creating a flowcell, update all pool's libraries' and
         # samples' statuses if the pool is fully loaded
@@ -167,6 +170,16 @@ class FlowcellSerializer(ModelSerializer):
             if pool.loaded == pool.size.multiplier:
                 pool.libraries.all().filter(status=4).update(status=5)
                 pool.samples.all().filter(status=4).update(status=5)
+
+        # When a Flowcell is loaded, save the all corresponding requests
+        libraries = Library.objects.filter(pool__in=pools)
+        samples = Sample.objects.filter(pool__in=pools)
+        requests = Request.objects.filter(pk__in=set(itertools.chain(
+            libraries.values_list('request', flat=True).distinct(),
+            samples.values_list('request', flat=True).distinct()
+        )))
+        requests.update(sequenced=True)
+        instance.requests.add(*requests)
 
         return instance
 

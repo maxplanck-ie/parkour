@@ -1,12 +1,17 @@
-# import datetime
+import datetime
 import calendar
 import itertools
 from collections import OrderedDict
 
-from django.db.models import Q, Count, Case, When
+from django.db.models import Q
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+
+from rest_framework import viewsets
+# from rest_framework.response import Response
+# from rest_framework.decorators import list_route
+from rest_framework.permissions import IsAdminUser
 
 from xlwt import Workbook, XFStyle, Formula
 
@@ -16,6 +21,26 @@ from sample.models import Sample
 from index_generator.models import Pool
 from flowcell.models import Flowcell
 
+from .serializer import InvoicingSerializer
+
+
+class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [IsAdminUser]
+    serializer_class = InvoicingSerializer
+
+    def get_queryset(self):
+        # today = datetime.date.today()
+        # year = today.year
+        # month = today.month
+
+        return Request.objects.filter(
+            # flowcell__create_time__year=year,
+            # flowcell__create_time__month=month,
+            sequenced=True,
+        ).prefetch_related(
+            'libraries', 'samples', 'flowcell',
+        ).order_by('create_time')
+
 
 @login_required
 @staff_member_required
@@ -24,11 +49,9 @@ def invoice(request):
     response['Content-Disposition'] = 'attachment; ' +\
         'filename="Automated_Cost_calculation.xls"'
 
-    # today = datetime.date.today()
-    # year = today.year
-    # month = today.month
-    year = 2017
-    month = 11
+    today = datetime.date.today()
+    year = today.year
+    month = today.month
 
     # flowcells = Flowcell.objects.filter(
     #     create_time__year=year,

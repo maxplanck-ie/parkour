@@ -12,7 +12,8 @@ Ext.define('MainHub.view.main.Main', {
         'MainHub.view.indexgenerator.IndexGenerator',
         'MainHub.view.librarypreparation.LibraryPreparation',
         'MainHub.view.pooling.Pooling',
-        'MainHub.view.flowcell.Flowcells'
+        'MainHub.view.flowcell.Flowcells',
+        'MainHub.view.invoicing.Invoicing'
     ],
 
     controller: 'main',

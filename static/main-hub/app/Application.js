@@ -42,7 +42,8 @@ Ext.define('MainHub.Application', {
     'flowcell.Sequencer',
     'flowcell.Lanes',
     'flowcell.Pool',
-    'flowcell.PoolInfo'
+    'flowcell.PoolInfo',
+    'invoicing.Invoicing'
   ],
 
   requires: [
