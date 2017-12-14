@@ -101,6 +101,14 @@ Ext.define('MainHub.view.invoicing.Invoicing', {
       ]
     },
 
+    plugins: [
+      {
+        ptype: 'bufferedrenderer',
+        trailingBufferZone: 100,
+        leadingBufferZone: 100
+      }
+    ],
+
     dockedItems: []
   }]
 });

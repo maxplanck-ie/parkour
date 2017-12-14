@@ -4,6 +4,7 @@ from collections import Counter
 from django.db.models import Q
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
+from index_generator.models import Pool
 from request.models import Request
 
 
@@ -49,10 +50,8 @@ class InvoicingSerializer(ModelSerializer):
         ])
 
     def get_pool(self, obj):
-        flowcells = obj.flowcell.all()
-        return '; '.join(
-            flowcells.values_list('lanes__pool__name', flat=True).distinct()
-        )
+        pools = self._get_pools(obj)
+        return '; '.join(pools.values_list('name', flat=True))
 
     def get_percentage(self, obj):
         flowcells = obj.flowcell.all()
@@ -69,25 +68,25 @@ class InvoicingSerializer(ModelSerializer):
         return '; '.join(per_sequencer)
 
     def get_read_length(self, obj):
-        libraries = obj.libraries.all()
-        samples = obj.samples.filter(~Q(status=-1))
+        libraries = self._get_libraries(obj)
+        samples = self._get_samples(obj)
         read_lengths = set(itertools.chain(
-            libraries.values_list('read_length__name', flat=True).distinct(),
-            samples.values_list('read_length__name', flat=True).distinct(),
+            libraries.values_list('read_length__name', flat=True),
+            samples.values_list('read_length__name', flat=True),
         ))
         return ', '.join(read_lengths)
 
     def get_num_libraries_samples(self, obj):
-        num_libraries = obj.libraries.count()
-        num_samples = obj.samples.filter(~Q(status=-1)).count()
+        num_libraries = self._get_libraries(obj).count()
+        num_samples = self._get_samples(obj).count()
         if num_libraries > 0:
             return f'{num_libraries} libraries'
         else:
             return f'{num_samples} samples'
 
     def get_library_protocol(self, obj):
-        library = obj.libraries.first()
-        sample = obj.samples.first()
+        library = self._get_libraries(obj).first()
+        sample = self._get_samples(obj).first()
         item = library or sample
         return item.library_protocol.name
 
@@ -105,3 +104,18 @@ class InvoicingSerializer(ModelSerializer):
 
     def get_total_costs(self, obj):
         return ''
+
+    def _get_libraries(self, obj):
+        return obj.libraries.filter(pool__isnull=False)
+
+    def _get_samples(self, obj):
+        return obj.samples.filter(~Q(pool=None) & ~Q(status=-1))
+
+    def _get_pools(self, obj):
+        libraries = self._get_libraries(obj)
+        samples = self._get_samples(obj)
+        pool_ids = set(itertools.chain(
+            libraries.values_list('pool', flat=True),
+            samples.values_list('pool', flat=True),
+        ))
+        return Pool.objects.filter(pk__in=pool_ids)

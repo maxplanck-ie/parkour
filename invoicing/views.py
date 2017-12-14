@@ -38,8 +38,12 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
             flowcell__create_time__month=month,
             sequenced=True,
         ).prefetch_related(
-            'libraries', 'samples', 'flowcell',
-        ).order_by('create_time')
+            'libraries',
+            'samples',
+            'flowcell',
+            'libraries__pool',
+            'samples__pool',
+        ).distinct().order_by('create_time')
 
 
 @login_required
