@@ -12,6 +12,7 @@ class Command(BaseCommand):
         self.load_sample_fixtures()
         self.load_index_generator_fixtures()
         self.load_flowcell_fixtures()
+        self.load_invoicing_fixtures()
 
         self.stdout.write(self.style.SUCCESS(
             'Successfully loaded initial data.'))
@@ -48,3 +49,9 @@ class Command(BaseCommand):
 
     def load_flowcell_fixtures(self):
         call_command('loaddata', 'sequencers', app_label='flowcell')
+
+    def load_invoicing_fixtures(self):
+        call_command('loaddata', 'fixed_costs', app_label='invoicing')
+        call_command('loaddata', 'library_preparation_costs',
+                     app_label='invoicing')
+        call_command('loaddata', 'sequencing_costs', app_label='invoicing')
