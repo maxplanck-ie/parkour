@@ -8,7 +8,7 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 
-from rest_framework import viewsets
+from rest_framework import mixins, viewsets
 # from rest_framework.response import Response
 # from rest_framework.decorators import list_route
 from rest_framework.permissions import IsAdminUser
@@ -21,7 +21,13 @@ from sample.models import Sample
 from index_generator.models import Pool
 from flowcell.models import Flowcell
 
-from .serializer import InvoicingSerializer
+from .models import FixedCosts, LibraryPreparationCosts, SequencingCosts
+from .serializer import (
+    InvoicingSerializer,
+    FixedCostsSerializer,
+    LibraryPreparationCostsSerializer,
+    SequencingCostsSerializer,
+)
 
 
 class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
@@ -45,6 +51,27 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
             'samples__pool',
             'flowcell__lanes',
         ).distinct().order_by('create_time')
+
+
+class FixedCostsViewSet(mixins.UpdateModelMixin,
+                        viewsets.ReadOnlyModelViewSet):
+    """ Get the list of Fixed Costs. """
+    queryset = FixedCosts.objects.all()
+    serializer_class = FixedCostsSerializer
+
+
+class LibraryPreparationCostsViewSet(mixins.UpdateModelMixin,
+                                     viewsets.ReadOnlyModelViewSet):
+    """ Get the list of Library Preparation Costs. """
+    queryset = LibraryPreparationCosts.objects.all()
+    serializer_class = LibraryPreparationCostsSerializer
+
+
+class SequencingCostsViewSet(mixins.UpdateModelMixin,
+                             viewsets.ReadOnlyModelViewSet):
+    """ Get the list of Sequencing Costs. """
+    queryset = SequencingCosts.objects.all()
+    serializer_class = SequencingCostsSerializer
 
 
 @login_required

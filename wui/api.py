@@ -11,7 +11,12 @@ from incoming_libraries.views import IncomingLibrariesViewSet
 from library_preparation.views import LibraryPreparationViewSet
 from pooling.views import PoolingViewSet
 from flowcell.views import SequencerViewSet, PoolViewSet, FlowcellViewSet
-from invoicing.views import InvoicingViewSet
+from invoicing.views import (
+    InvoicingViewSet,
+    FixedCostsViewSet,
+    LibraryPreparationCostsViewSet,
+    SequencingCostsViewSet,
+)
 
 
 router = routers.DefaultRouter()
@@ -36,3 +41,8 @@ router.register(r'sequencers', SequencerViewSet, base_name='sequencers')
 router.register(r'flowcells', FlowcellViewSet, base_name='flowcells')
 router.register(r'pools', PoolViewSet, base_name='pools')
 router.register(r'invoicing', InvoicingViewSet, base_name='invoicing')
+router.register(r'fixed_costs', FixedCostsViewSet, base_name='fixed-costs')
+router.register(r'library_preparation_costs', LibraryPreparationCostsViewSet,
+                base_name='library-preparation-costs')
+router.register(r'sequencing_costs', SequencingCostsViewSet,
+                base_name='sequencing-costs')

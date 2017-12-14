@@ -3,112 +3,169 @@ Ext.define('MainHub.view.invoicing.Invoicing', {
   xtype: 'invoicing',
 
   requires: [
-    'MainHub.components.BaseGrid',
+    'MainHub.view.invoicing.BaseCostGrid',
     'MainHub.view.invoicing.InvoicingController'
   ],
 
   controller: 'invoicing',
 
-  anchor: '100% -1',
-  layout: 'fit',
+  layout: {
+    type: 'hbox',
+    align: 'stretch'
+  },
 
-  items: [{
-    xtype: 'basegrid',
-    id: 'invoicing-grid',
-    itemId: 'invoicing-grid',
-    store: 'Invoicing',
+  items: [
+    {
+      xtype: 'grid',
+      id: 'invoicing-grid',
+      itemId: 'invoicing-grid',
+      height: Ext.Element.getViewportHeight() - 64,
+      padding: 15,
+      flex: 1,
 
-    header: {
-      title: 'Invoicing',
-      height: 56
-    },
-
-    columns: {
-      defaults: {
-        minWidth: 200,
-        flex: 1
+      viewConfig: {
+        stripeRows: false
       },
+
+      header: {
+        title: 'Invoicing',
+        height: 56
+      },
+
+      store: 'Invoicing',
+
+      sortableColumns: false,
+      enableColumnMove: false,
+      columns: {
+        defaults: {
+          minWidth: 200,
+          flex: 1
+        },
+        items: [
+          {
+            text: 'Request',
+            dataIndex: 'request'
+          },
+          {
+            text: 'Cost Unit',
+            dataIndex: 'cost_unit',
+            renderer: 'gridCellTooltipRenderer'
+          },
+          {
+            text: 'Sequencer',
+            dataIndex: 'sequencer',
+            renderer: 'gridCellTooltipRenderer'
+          },
+          {
+            text: 'Date + Flowcell ID',
+            dataIndex: 'flowcell',
+            renderer: 'gridCellTooltipRenderer'
+          },
+          {
+            text: 'Pool',
+            dataIndex: 'pool',
+            renderer: 'gridCellTooltipRenderer'
+          },
+          {
+            text: '%',
+            dataIndex: 'percentage',
+            renderer: 'gridCellTooltipRenderer'
+          },
+          {
+            text: 'Read Length',
+            dataIndex: 'read_length',
+            renderer: 'gridCellTooltipRenderer'
+          },
+          {
+            text: '# of Libraries/Samples',
+            dataIndex: 'num_libraries_samples',
+            minWidth: 150
+          },
+          {
+            text: 'Library Protocol',
+            dataIndex: 'library_protocol',
+            renderer: 'gridCellTooltipRenderer'
+          },
+          {
+            text: 'Fixed Costs',
+            dataIndex: 'fixed_costs',
+            renderer: Ext.util.Format.deMoney,
+            minWidth: 130
+          },
+          {
+            text: 'Sequencing Costs',
+            dataIndex: 'sequencing_costs',
+            renderer: Ext.util.Format.deMoney,
+            minWidth: 130
+          },
+          {
+            text: 'Preparation Costs',
+            dataIndex: 'preparation_costs',
+            renderer: Ext.util.Format.deMoney,
+            minWidth: 130
+          },
+          {
+            text: 'Variable Costs',
+            dataIndex: 'variable_costs',
+            renderer: Ext.util.Format.deMoney,
+            minWidth: 130
+          },
+          {
+            text: 'Total Costs',
+            dataIndex: 'total_costs',
+            renderer: Ext.util.Format.deMoney,
+            minWidth: 130
+          }
+        ]
+      },
+
+      plugins: [
+        {
+          ptype: 'bufferedrenderer',
+          trailingBufferZone: 100,
+          leadingBufferZone: 100
+        }
+      ],
+
+      dockedItems: []
+    },
+    {
+      title: 'Costs',
+      // headerPosition: 'right',
+      padding: '15px 10px 15px 0',
+      margin: '0 8px 0 0',
+      autoScroll: true,
+      height: Ext.Element.getViewportHeight() - 64,
+      width: 350,
+
+      collapsed: true,
+      collapsible: true,
+      collapseDirection: 'right',
+
+      defaults: {
+        border: 0
+      },
+
       items: [
         {
-          text: 'Request',
-          dataIndex: 'request'
+          xtype: 'costgrid',
+          itemId: 'fixed-costs-grid',
+          title: 'Fixed Costs',
+          store: 'FixedCosts'
         },
         {
-          text: 'Cost Unit',
-          dataIndex: 'cost_unit',
-          renderer: 'gridCellTooltipRenderer'
+          xtype: 'costgrid',
+          itemId: 'preparation-costs-grid',
+          title: 'Preparation Costs',
+          store: 'LibraryPreparationCosts'
         },
         {
-          text: 'Sequencer',
-          dataIndex: 'sequencer',
-          renderer: 'gridCellTooltipRenderer'
-        },
-        {
-          text: 'Date + Flowcell ID',
-          dataIndex: 'flowcell',
-          renderer: 'gridCellTooltipRenderer'
-        },
-        {
-          text: 'Pool',
-          dataIndex: 'pool',
-          renderer: 'gridCellTooltipRenderer'
-        },
-        {
-          text: '%',
-          dataIndex: 'percentage',
-          renderer: 'gridCellTooltipRenderer'
-        },
-        {
-          text: 'Read Length',
-          dataIndex: 'read_length',
-          renderer: 'gridCellTooltipRenderer'
-        },
-        {
-          text: '# of Libraries/Samples',
-          dataIndex: 'num_libraries_samples',
-          minWidth: 150
-        },
-        {
-          text: 'Library Protocol',
-          dataIndex: 'library_protocol',
-          renderer: 'gridCellTooltipRenderer'
-        },
-        {
-          text: 'Fixed Costs',
-          dataIndex: 'fixed_costs',
-          minWidth: 130
-        },
-        {
-          text: 'Sequencing Costs',
-          dataIndex: 'sequencing_costs',
-          minWidth: 130
-        },
-        {
-          text: 'Preparation Costs',
-          dataIndex: 'preparation_costs',
-          minWidth: 130
-        },
-        {
-          text: 'Variable Costs',
-          dataIndex: 'variable_costs',
-          minWidth: 130
-        },
-        {
-          text: 'Total Costs',
-          dataIndex: 'total_costs',
-          minWidth: 130
+          xtype: 'costgrid',
+          itemId: 'sequencing-costs-grid',
+          title: 'Sequencing Costs',
+          store: 'SequencingCosts'
         }
       ]
-    },
-
-    plugins: [
-      {
-        ptype: 'bufferedrenderer',
-        trailingBufferZone: 100,
-        leadingBufferZone: 100
-      }
-    ],
-
-    dockedItems: []
-  }]
+    }
+  ]
 });

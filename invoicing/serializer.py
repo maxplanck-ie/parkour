@@ -7,6 +7,8 @@ from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from index_generator.models import Pool
 from request.models import Request
 
+from .models import FixedCosts, LibraryPreparationCosts, SequencingCosts
+
 
 class InvoicingSerializer(ModelSerializer):
     request = SerializerMethodField()
@@ -140,3 +142,44 @@ class InvoicingSerializer(ModelSerializer):
             samples.values_list('pool', flat=True),
         ))
         return Pool.objects.filter(pk__in=pool_ids)
+
+
+class BaseSerializer(ModelSerializer):
+    name = SerializerMethodField()
+
+    class Meta:
+        fields = ('name',)
+
+    def get_name(self, obj):
+        return str(obj)
+
+
+class FixedCostsSerializer(BaseSerializer):
+    class Meta(BaseSerializer.Meta):
+        model = FixedCosts
+        fields = ('id', 'sequencer', 'price',) + \
+            BaseSerializer.Meta.fields
+        extra_kwargs = {
+            'sequencer': {'required': False},
+        }
+
+
+class LibraryPreparationCostsSerializer(BaseSerializer):
+    class Meta(BaseSerializer.Meta):
+        model = LibraryPreparationCosts
+        fields = ('id', 'library_protocol', 'price',) + \
+            BaseSerializer.Meta.fields
+        extra_kwargs = {
+            'library_protocol': {'required': False},
+        }
+
+
+class SequencingCostsSerializer(BaseSerializer):
+    class Meta(BaseSerializer.Meta):
+        model = SequencingCosts
+        fields = ('id', 'sequencer', 'read_length', 'price',) +\
+            BaseSerializer.Meta.fields
+        extra_kwargs = {
+            'sequencer': {'required': False},
+            'read_length': {'required': False},
+        }

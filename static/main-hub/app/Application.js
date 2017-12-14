@@ -10,6 +10,12 @@ Ext.Loader.setConfig({
   }
 });
 
+// Ext.util.Format.decimalSeparator = ',';
+// Ext.util.Format.thousandSeparator = '.';
+Ext.util.Format.deMoney = function (v) {
+  return Ext.util.Format.currency(v, '€', 2, true, ' ');
+};
+
 Ext.define('MainHub.Application', {
   extend: 'Ext.app.Application',
 
@@ -43,7 +49,10 @@ Ext.define('MainHub.Application', {
     'flowcell.Lanes',
     'flowcell.Pool',
     'flowcell.PoolInfo',
-    'invoicing.Invoicing'
+    'invoicing.Invoicing',
+    'invoicing.FixedCosts',
+    'invoicing.LibraryPreparationCosts',
+    'invoicing.SequencingCosts'
   ],
 
   requires: [
