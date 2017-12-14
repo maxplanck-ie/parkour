@@ -55,15 +55,36 @@ class InvoicingSerializer(ModelSerializer):
 
     def get_percentage(self, obj):
         flowcells = obj.flowcell.all()
+        all_pools = self._get_pools(obj)
 
         per_sequencer = []
         for flowcell in flowcells:
-            count = Counter(
-                flowcell.lanes.values_list('pool__name', flat=True))
-            per_pool = ', '.join(list(
-                map(lambda x: f'1*{x}', list(count.values()))
-            ))
-            per_sequencer.append(per_pool)
+            count = Counter(flowcell.lanes.values_list('pool', flat=True))
+
+            per_pool = []
+            for pool in all_pools.filter(pk__in=count.keys()):
+                # Calculate Total Sequencing Depth for all pool's
+                # libraries and samples
+                p_libs = pool.libraries.filter(pool=pool)
+                p_smpls = pool.samples.filter(pool=pool)
+                total_depth = \
+                    sum(p_libs.values_list('sequencing_depth', flat=True)) + \
+                    sum(p_smpls.values_list('sequencing_depth', flat=True))
+
+                # Calculate Sequencing Depth for all request's
+                # libraries and samples
+                libs = p_libs.filter(request=obj)
+                smpls = p_smpls.filter(request=obj)
+                depth = \
+                    sum(libs.values_list('sequencing_depth', flat=True)) + \
+                    sum(smpls.values_list('sequencing_depth', flat=True))
+
+                percentage = round(depth / total_depth, 2)
+                if percentage == 1.0:
+                    percentage = 1
+
+                per_pool.append(f'{percentage}*{count[pool.pk]}')
+            per_sequencer.append(', '.join(per_pool))
 
         return '; '.join(per_sequencer)
 

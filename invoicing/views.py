@@ -43,6 +43,7 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
             'flowcell',
             'libraries__pool',
             'samples__pool',
+            'flowcell__lanes',
         ).distinct().order_by('create_time')
 
 
