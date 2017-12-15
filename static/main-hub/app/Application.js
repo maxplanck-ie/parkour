@@ -49,6 +49,7 @@ Ext.define('MainHub.Application', {
     'flowcell.Lanes',
     'flowcell.Pool',
     'flowcell.PoolInfo',
+    'invoicing.BillingPeriods',
     'invoicing.Invoicing',
     'invoicing.FixedCosts',
     'invoicing.LibraryPreparationCosts',

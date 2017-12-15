@@ -127,7 +127,24 @@ Ext.define('MainHub.view.invoicing.Invoicing', {
         }
       ],
 
-      dockedItems: []
+      dockedItems: [
+        {
+          xtype: 'toolbar',
+          dock: 'top',
+          items: [{
+            xtype: 'combobox',
+            itemId: 'billing-period-combobox',
+            fieldLabel: 'Select Billing Period',
+            store: 'BillingPeriods',
+            queryMode: 'local',
+            valueField: 'value',
+            displayField: 'name',
+            forceSelection: true,
+            labelWidth: 130,
+            width: 300
+          }]
+        }
+      ]
     },
     {
       title: 'Costs',

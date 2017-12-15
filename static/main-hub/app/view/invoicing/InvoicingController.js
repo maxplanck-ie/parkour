@@ -7,18 +7,28 @@ Ext.define('MainHub.view.invoicing.InvoicingController', {
       '#': {
         activate: 'activateView'
       },
+      '#billing-period-combobox': {
+        select: 'selectBillingPeriod'
+      },
       '#invoicing-grid': {
         resize: 'resize'
       },
       '#fixed-costs-grid,#preparation-costs-grid,#sequencing-costs-grid': {
-        edit: 'edit'
+        edit: 'editPrice'
       }
     }
   },
 
   activateView: function (view) {
-    var store = view.down('#invoicing-grid').getStore();
-    Ext.getStore(store.getId()).reload();
+    var billingPeriodCb = view.down('#billing-period-combobox');
+    billingPeriodCb.getStore().reload({
+      callback: function (records) {
+        var lastRecord = records[records.length - 1];
+        billingPeriodCb.select(lastRecord);
+        billingPeriodCb.fireEvent('select', billingPeriodCb, lastRecord);
+        billingPeriodCb.cancelFocus();
+      }
+    });
 
     // Load cost stores
     view.down('#fixed-costs-grid').getStore().reload();
@@ -30,7 +40,16 @@ Ext.define('MainHub.view.invoicing.InvoicingController', {
     el.setHeight(Ext.Element.getViewportHeight() - 64);
   },
 
-  edit: function (editor, context) {
+  selectBillingPeriod: function (cb, record) {
+    Ext.getStore('Invoicing').reload({
+      params: {
+        year: record.get('value')[0],
+        month: record.get('value')[1]
+      }
+    });
+  },
+
+  editPrice: function (editor, context) {
     var store = editor.grid.getStore();
     var proxy = store.getProxy();
 

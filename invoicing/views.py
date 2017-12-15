@@ -2,6 +2,8 @@ import datetime
 import calendar
 import itertools
 from collections import OrderedDict
+from dateutil.rrule import rrule, MONTHLY
+from dateutil.relativedelta import relativedelta
 
 from django.db.models import Q
 from django.http import HttpResponse
@@ -9,8 +11,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 
 from rest_framework import mixins, viewsets
-# from rest_framework.response import Response
-# from rest_framework.decorators import list_route
+from rest_framework.response import Response
+from rest_framework.decorators import list_route
 from rest_framework.permissions import IsAdminUser
 
 from xlwt import Workbook, XFStyle, Formula
@@ -36,8 +38,8 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         today = datetime.date.today()
-        year = today.year
-        month = today.month
+        year = self.request.query_params.get('year', today.year)
+        month = self.request.query_params.get('month', today.month)
 
         return Request.objects.filter(
             flowcell__create_time__year=year,
@@ -52,10 +54,28 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
             'flowcell__lanes',
         ).distinct().order_by('create_time')
 
+    @list_route(methods=['get'])
+    def billing_periods(self, request):
+        flowcells = Flowcell.objects.all()
+        start_date = flowcells.first().create_time
+        end_date = flowcells.last().create_time
+        end_date = end_date + relativedelta(months=1)
+
+        data = [
+            {
+                'name': dt.strftime('%B %Y'),
+                'value': [dt.year, dt.month],
+            }
+            for dt in rrule(MONTHLY, dtstart=start_date, until=end_date)
+        ]
+
+        return Response(data)
+
 
 class FixedCostsViewSet(mixins.UpdateModelMixin,
                         viewsets.ReadOnlyModelViewSet):
     """ Get the list of Fixed Costs. """
+    permission_classes = [IsAdminUser]
     queryset = FixedCosts.objects.all()
     serializer_class = FixedCostsSerializer
 
@@ -63,6 +83,7 @@ class FixedCostsViewSet(mixins.UpdateModelMixin,
 class LibraryPreparationCostsViewSet(mixins.UpdateModelMixin,
                                      viewsets.ReadOnlyModelViewSet):
     """ Get the list of Library Preparation Costs. """
+    permission_classes = [IsAdminUser]
     queryset = LibraryPreparationCosts.objects.all()
     serializer_class = LibraryPreparationCostsSerializer
 
@@ -70,6 +91,7 @@ class LibraryPreparationCostsViewSet(mixins.UpdateModelMixin,
 class SequencingCostsViewSet(mixins.UpdateModelMixin,
                              viewsets.ReadOnlyModelViewSet):
     """ Get the list of Sequencing Costs. """
+    permission_classes = [IsAdminUser]
     queryset = SequencingCosts.objects.all()
     serializer_class = SequencingCostsSerializer
 
