@@ -12,19 +12,19 @@ Ext.define('MainHub.model.invoicing.Request', {
     },
     {
       name: 'sequencer',
-      type: 'string'
+      type: 'auto'
     },
     {
       name: 'flowcell',
-      type: 'string'
+      type: 'auto'
     },
     {
       name: 'pool',
-      type: 'string'
+      type: 'auto'
     },
     {
       name: 'percentage',
-      type: 'string'
+      type: 'auto'
     },
     {
       name: 'read_length',

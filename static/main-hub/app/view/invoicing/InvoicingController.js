@@ -68,5 +68,51 @@ Ext.define('MainHub.view.invoicing.InvoicingController', {
   gridCellTooltipRenderer: function (value, meta) {
     meta.tdAttr = Ext.String.format('data-qtip="{0}"', value);
     return value;
+  },
+
+  listRenderer: function (value, meta) {
+    meta.tdAttr = Ext.String.format('data-qtip="{0}"', value.join('<br/>'));
+    return value.join('; ');
+  },
+
+  sequencerRenderer: function (value, meta) {
+    var items = value.map(function (item) {
+      return Ext.String.format('{0}: {1}',
+        item.flowcell_id, item.sequencer_name
+      );
+    });
+    meta.tdAttr = Ext.String.format('data-qtip="{0}"', items.join('<br/>'));
+    return Ext.Array.pluck(value, 'sequencer_name').join('; ');
+  },
+
+  percentageRenderer: function (value, meta) {
+    var tpl = new Ext.XTemplate(
+      '<ul>',
+        '<tpl for=".">',
+          '<li>{flowcell_id}',
+            '<ul>',
+              '<tpl for="pools">',
+                '<li>{name}: {percentage}</li>',
+              '</tpl>',
+            '</ul>',
+          '</li>',
+        '</tpl>',
+      '</ul>'
+    );
+    meta.tdAttr = Ext.String.format('data-qtip="{0}"', tpl.apply(value));
+
+    return Ext.Array.pluck(value, 'pools').map(function (item) {
+      return Ext.Array.pluck(item, 'percentage').join(', ');
+    }).join('; ');
+  },
+
+  variableCostsRenderer: function (value, meta) {
+    var cost = meta.record.get('sequencing_costs') + meta.record.get('preparation_costs');
+    return Ext.util.Format.deMoney(cost);
+  },
+
+  totalCostsRenderer: function (value, meta) {
+    var cost = meta.record.get('fixed_costs') + meta.record.get('variable_costs');
+    return Ext.util.Format.deMoney(cost);
   }
 });

@@ -54,22 +54,22 @@ Ext.define('MainHub.view.invoicing.Invoicing', {
           {
             text: 'Sequencer',
             dataIndex: 'sequencer',
-            renderer: 'gridCellTooltipRenderer'
+            renderer: 'sequencerRenderer'
           },
           {
             text: 'Date + Flowcell ID',
             dataIndex: 'flowcell',
-            renderer: 'gridCellTooltipRenderer'
+            renderer: 'listRenderer'
           },
           {
             text: 'Pool',
             dataIndex: 'pool',
-            renderer: 'gridCellTooltipRenderer'
+            renderer: 'listRenderer'
           },
           {
             text: '%',
             dataIndex: 'percentage',
-            renderer: 'gridCellTooltipRenderer'
+            renderer: 'percentageRenderer'
           },
           {
             text: 'Read Length',
@@ -107,13 +107,13 @@ Ext.define('MainHub.view.invoicing.Invoicing', {
           {
             text: 'Variable Costs',
             dataIndex: 'variable_costs',
-            renderer: Ext.util.Format.deMoney,
+            renderer: 'variableCostsRenderer',
             minWidth: 130
           },
           {
             text: 'Total Costs',
             dataIndex: 'total_costs',
-            renderer: Ext.util.Format.deMoney,
+            renderer: 'totalCostsRenderer',
             minWidth: 130
           }
         ]
