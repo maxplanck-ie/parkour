@@ -6,7 +6,17 @@ Ext.define('MainHub.view.invoicing.BaseCostGrid', {
     stripeRows: false
   },
 
-  // sortableColumns: false,
+  tools: [{
+    type: 'gear',
+    handler: function () {
+      window.open(Ext.String.format('{0}/admin/invoicing/{1}/',
+        window.location.origin, this.up('panel').configUrl
+      ));
+    }
+  }],
+
+  hideHeaders: true,
+  sortableColumns: false,
   enableColumnMove: false,
   enableColumnHide: false,
   enableColumnResize: false,

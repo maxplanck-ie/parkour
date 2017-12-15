@@ -150,18 +150,21 @@ Ext.define('MainHub.view.invoicing.Invoicing', {
         {
           xtype: 'costgrid',
           itemId: 'fixed-costs-grid',
+          configUrl: 'fixedcosts',
           title: 'Fixed Costs',
           store: 'FixedCosts'
         },
         {
           xtype: 'costgrid',
           itemId: 'preparation-costs-grid',
+          configUrl: 'librarypreparationcosts',
           title: 'Preparation Costs',
           store: 'LibraryPreparationCosts'
         },
         {
           xtype: 'costgrid',
           itemId: 'sequencing-costs-grid',
+          configUrl: 'sequencingcosts',
           title: 'Sequencing Costs',
           store: 'SequencingCosts'
         }
