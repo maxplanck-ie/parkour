@@ -1,8 +1,8 @@
 import datetime
 import calendar
 import itertools
+import numpy as np
 from collections import OrderedDict
-from dateutil.rrule import rrule, MONTHLY
 from dateutil.relativedelta import relativedelta
 
 from django.db.models import Q
@@ -57,6 +57,10 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
     @list_route(methods=['get'])
     def billing_periods(self, request):
         flowcells = Flowcell.objects.all()
+
+        if flowcells.count() == 0:
+            return Response([])
+
         start_date = flowcells.first().create_time
         end_date = flowcells.last().create_time
         end_date = end_date + relativedelta(months=1)
@@ -66,7 +70,8 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
                 'name': dt.strftime('%B %Y'),
                 'value': [dt.year, dt.month],
             }
-            for dt in rrule(MONTHLY, dtstart=start_date, until=end_date)
+            for dt in np.arange(start_date, end_date,
+                                dtype='datetime64[M]').tolist()
         ]
 
         return Response(data)

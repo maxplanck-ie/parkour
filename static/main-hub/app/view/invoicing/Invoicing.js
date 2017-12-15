@@ -24,6 +24,8 @@ Ext.define('MainHub.view.invoicing.Invoicing', {
       flex: 1,
 
       viewConfig: {
+        deferEmptyText: false,
+        emptyText: '<h1 style="text-align:center;margin:75px">No items</h1>',
         stripeRows: false
       },
 

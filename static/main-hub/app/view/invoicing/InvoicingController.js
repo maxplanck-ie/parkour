@@ -23,10 +23,12 @@ Ext.define('MainHub.view.invoicing.InvoicingController', {
     var billingPeriodCb = view.down('#billing-period-combobox');
     billingPeriodCb.getStore().reload({
       callback: function (records) {
-        var lastRecord = records[records.length - 1];
-        billingPeriodCb.select(lastRecord);
-        billingPeriodCb.fireEvent('select', billingPeriodCb, lastRecord);
-        billingPeriodCb.cancelFocus();
+        if (records.length > 0) {
+          var lastRecord = records[records.length - 1];
+          billingPeriodCb.select(lastRecord);
+          billingPeriodCb.fireEvent('select', billingPeriodCb, lastRecord);
+          billingPeriodCb.cancelFocus();
+        }
       }
     });
 

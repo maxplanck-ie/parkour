@@ -37,7 +37,9 @@ class InvoicingSerializer(ModelSerializer):
         return obj.name
 
     def get_cost_unit(self, obj):
-        return '; '.join(obj.user.cost_unit.values_list('name', flat=True))
+        return ', '.join(
+            obj.user.cost_unit.values_list('name', flat=True).order_by('name')
+        )
 
     def get_sequencer(self, obj):
         flowcells = obj.flowcell.all().order_by('flowcell_id')
@@ -59,7 +61,7 @@ class InvoicingSerializer(ModelSerializer):
             'lanes__pool', flat=True
         ).distinct()
         pools = self._get_pools(obj).filter(pk__in=flowcell_pool_ids)
-        return pools.values_list('name', flat=True)
+        return pools.values_list('name', flat=True).order_by('pk')
 
     def get_percentage(self, obj):
         flowcells = obj.flowcell.all()
@@ -127,22 +129,22 @@ class InvoicingSerializer(ModelSerializer):
         return item.library_protocol.name
 
     def get_fixed_costs(self, obj):
-        return ''
+        return None
 
     def get_sequencing_costs(self, obj):
-        return ''
+        return None
 
     def get_preparation_costs(self, obj):
-        return ''
+        return None
 
     def get_variable_costs(self, obj):
-        return ''
+        return None
 
     def get_total_costs(self, obj):
-        return ''
+        return None
 
     def _get_libraries(self, obj):
-        return obj.libraries.filter(pool__isnull=False)
+        return obj.libraries.filter(~Q(pool=None))
 
     def _get_samples(self, obj):
         return obj.samples.filter(~Q(pool=None) & ~Q(status=-1))
