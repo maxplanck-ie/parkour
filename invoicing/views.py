@@ -5,7 +5,7 @@ import numpy as np
 from collections import OrderedDict
 from dateutil.relativedelta import relativedelta
 
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
@@ -17,6 +17,7 @@ from rest_framework.permissions import IsAdminUser
 
 from xlwt import Workbook, XFStyle, Formula
 
+from common.utils import print_sql_queries
 from request.models import Request
 from library.models import Library
 from sample.models import Sample
@@ -41,18 +42,28 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
         year = self.request.query_params.get('year', today.year)
         month = self.request.query_params.get('month', today.month)
 
-        return Request.objects.filter(
+        flowcell_qs = Flowcell.objects.select_related(
+            'sequencer').order_by('flowcell_id')
+        libraries_qs = Library.objects.filter(~Q(pool=None)).only(
+            'read_length', 'library_protocol',)
+        samples_qs = Sample.objects.filter(~Q(pool=None) & ~Q(status=-1)).only(
+            'read_length', 'library_protocol',)
+
+        queryset = Request.objects.filter(
             flowcell__create_time__year=year,
             flowcell__create_time__month=month,
             sequenced=True,
-        ).prefetch_related(
-            'libraries',
-            'samples',
-            'flowcell',
-            'libraries__pool',
-            'samples__pool',
-            'flowcell__lanes',
+        ).select_related('user').prefetch_related(
+            Prefetch('flowcell', queryset=flowcell_qs),
+            Prefetch('libraries', queryset=libraries_qs),
+            Prefetch('samples', queryset=samples_qs),
         ).distinct().order_by('create_time')
+
+        return queryset
+
+    @print_sql_queries
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     @list_route(methods=['get'])
     def billing_periods(self, request):

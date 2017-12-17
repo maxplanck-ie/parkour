@@ -108,13 +108,18 @@ Ext.define('MainHub.view.invoicing.InvoicingController', {
     }).join('; ');
   },
 
-  variableCostsRenderer: function (value, meta) {
-    var cost = meta.record.get('sequencing_costs') + meta.record.get('preparation_costs');
-    return Ext.util.Format.deMoney(cost);
+  readLengthRenderer: function (value, meta) {
+    var store = Ext.getStore('readLengthsStore');
+    var items = value.map(function (id) {
+      var record = store.findRecord('id', id, 0, false, true, true);
+      return record.get('name');
+    });
+    return items.join(', ');
   },
 
-  totalCostsRenderer: function (value, meta) {
-    var cost = meta.record.get('fixed_costs') + meta.record.get('variable_costs');
-    return Ext.util.Format.deMoney(cost);
+  libraryProtocolRenderer: function (value, meta) {
+    var store = Ext.getStore('libraryProtocolsStore');
+    var record = store.findRecord('id', value, 0, false, true, true);
+    return record ? record.get('name') : value;
   }
 });

@@ -1,18 +1,10 @@
+import re
 import string
 import random
 from time import time
 from datetime import datetime
 
-from django.http import JsonResponse
-
-
-class JSONResponseMixin:
-    """ A mixin that can be used to render a JSON response. """
-    def render_to_json_response(self, context, **response_kwargs):
-        return JsonResponse(self.get_data(context), **response_kwargs)
-
-    def get_data(self, context):
-        return context
+from django.db import connection
 
 
 def timeit(func):
@@ -38,3 +30,21 @@ def get_random_name(len=10):
     return ''.join(random.SystemRandom().choice(
         string.ascii_lowercase + string.digits
     ) for _ in range(len))
+
+
+def print_sql_queries(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        finally:
+            for i, query in enumerate(connection.queries):
+                sql = re.split(
+                    r'(SELECT|FROM|WHERE|GROUP BY|ORDER BY|INNER JOIN|LIMIT)',
+                    query['sql']
+                )
+                if not sql[0]:
+                    sql = sql[1:]
+                sql = [(' ' if i % 2 else '') + x for i, x in enumerate(sql)]
+                print('\n### {} ({} seconds)\n\n{};\n'.format(
+                    i, query['time'], '\n'.join(sql)))
+    return wrapper

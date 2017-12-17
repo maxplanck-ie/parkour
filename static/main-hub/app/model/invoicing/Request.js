@@ -8,7 +8,7 @@ Ext.define('MainHub.model.invoicing.Request', {
     },
     {
       name: 'cost_unit',
-      type: 'string'
+      type: 'auto'
     },
     {
       name: 'sequencer',
@@ -28,7 +28,7 @@ Ext.define('MainHub.model.invoicing.Request', {
     },
     {
       name: 'read_length',
-      type: 'string'
+      type: 'auto'
     },
     {
       name: 'num_libraries_samples',

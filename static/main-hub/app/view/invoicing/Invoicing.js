@@ -51,7 +51,7 @@ Ext.define('MainHub.view.invoicing.Invoicing', {
           {
             text: 'Cost Unit',
             dataIndex: 'cost_unit',
-            renderer: 'gridCellTooltipRenderer'
+            renderer: 'listRenderer'
           },
           {
             text: 'Sequencer',
@@ -76,7 +76,7 @@ Ext.define('MainHub.view.invoicing.Invoicing', {
           {
             text: 'Read Length',
             dataIndex: 'read_length',
-            renderer: 'gridCellTooltipRenderer'
+            renderer: 'readLengthRenderer'
           },
           {
             text: '# of Libraries/Samples',
@@ -86,7 +86,7 @@ Ext.define('MainHub.view.invoicing.Invoicing', {
           {
             text: 'Library Protocol',
             dataIndex: 'library_protocol',
-            renderer: 'gridCellTooltipRenderer'
+            renderer: 'libraryProtocolRenderer'
           },
           {
             text: 'Fixed Costs',
@@ -109,13 +109,13 @@ Ext.define('MainHub.view.invoicing.Invoicing', {
           {
             text: 'Variable Costs',
             dataIndex: 'variable_costs',
-            renderer: 'variableCostsRenderer',
+            renderer: Ext.util.Format.deMoney,
             minWidth: 130
           },
           {
             text: 'Total Costs',
             dataIndex: 'total_costs',
-            renderer: 'totalCostsRenderer',
+            renderer: Ext.util.Format.deMoney,
             minWidth: 130
           }
         ]
