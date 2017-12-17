@@ -61,7 +61,7 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
 
         return queryset
 
-    @print_sql_queries
+    # @print_sql_queries
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 

@@ -101,7 +101,7 @@ class NucleicAcidTypeTest(TestCase):
 
 class TestNucleicAcidTypes(BaseTestCase):
     def setUp(self):
-        self._create_user('foo@bar.io', 'foo-foo')
+        self.create_user('foo@bar.io', 'foo-foo')
         self.client.login(email='foo@bar.io', password='foo-foo')
         self.na_type = NucleicAcidType(name=self._get_random_name())
         self.na_type.save()
@@ -119,7 +119,7 @@ class TestSamples(BaseTestCase):
     """ Tests for samples. """
 
     def setUp(self):
-        self.user = self._create_user('foo@bar.io', 'foo-foo')
+        self.user = self.create_user('foo@bar.io', 'foo-foo')
         self.client.login(email='foo@bar.io', password='foo-foo')
 
         self.sample = create_sample(self._get_random_name())

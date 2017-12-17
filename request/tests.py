@@ -92,9 +92,9 @@ class FileRequestTest(TestCase):
 
 class TestRequests(BaseTestCase):
     def setUp(self):
-        self.user = self._create_user('foo@bar.io', 'foo-foo')
-        self.non_staff = self._create_user('non-staff@test.io', 'test', False)
-        self.client.login(email='foo@bar.io', password='foo-foo')
+        self.user = self.create_user()
+        self.non_staff = self.create_user('non-staff@test.io', 'test', False)
+        self.login()
 
     def test_request_list(self):
         """ Ensure get request list behaves correctly. """
@@ -111,7 +111,7 @@ class TestRequests(BaseTestCase):
 
     def test_request_list_non_staff(self):
         """ Ensure a non-staff user gets only their requests. """
-        self.client.login(email='non-staff@test.io', password='test')
+        self.login('non-staff@test.io', 'test')
         request1 = create_request(self.non_staff)
         request2 = create_request(self.user)
 

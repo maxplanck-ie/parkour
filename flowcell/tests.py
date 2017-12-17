@@ -53,7 +53,7 @@ class TestSequencerModel(BaseTestCase):
 
 class TestLaneModel(BaseTestCase):
     def setUp(self):
-        self.user = self._create_user('test@test.io', 'foo-bar')
+        self.user = self.create_user('test@test.io', 'foo-bar')
         pool = create_pool(self.user)
         self.lane = create_lane(get_random_name(len=6), pool)
 
@@ -95,9 +95,8 @@ class TestFlowcellModel(BaseTestCase):
 # Views
 
 class TestSequencer(BaseTestCase):
-
     def setUp(self):
-        self.user = self._create_user('test@test.io', 'foo-bar')
+        self.user = self.create_user()
 
     def test_sequencer_list(self):
         """ Ensure get sequencer list behaves correctly. """
@@ -116,7 +115,7 @@ class TestFlowcell(BaseTestCase):
     """ Tests for flowcells. """
 
     def setUp(self):
-        self.user = self._create_user('test@test.io', 'foo-bar')
+        self.user = self.create_user()
 
     def test_pool_list(self):
         """ Ensure get pool list behaves correctly. """

@@ -16,8 +16,8 @@ class TestIncomingLibraries(BaseTestCase):
     """ Tests for incoming libraries and samples. """
 
     def setUp(self):
-        user = self._create_user('test@test.io', 'foo-bar')
-        self._create_user('non-staff@test.io', 'test', False)  # non-staff user
+        user = self.create_user()
+        self.create_user('non-staff@test.io', 'test', False)  # non-staff user
 
         # Submission completed
         self.library1 = create_library(self._get_random_name(), status=1)
@@ -34,7 +34,7 @@ class TestIncomingLibraries(BaseTestCase):
 
     def test_incoming_libraries_list(self):
         """ Ensure get incoming libraries and samples behaves correctly. """
-        self.client.login(email='test@test.io', password='foo-bar')
+        self.login()
         response = self.client.get(reverse('incoming-libraries-list'))
         data = response.json()
         libraries = [x['name'] for x in data if x['record_type'] == 'Library']

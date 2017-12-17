@@ -97,7 +97,7 @@ class TestLibrarySampleTree(BaseTestCase):
     """ Tests for the libraries and samples tree. """
 
     def setUp(self):
-        user = self._create_user('foo@bar.io', 'foo-foo')
+        user = self.create_user('foo@bar.io', 'foo-foo')
         self.client.login(email='foo@bar.io', password='foo-foo')
 
         library = create_library(self._get_random_name())
@@ -120,7 +120,7 @@ class TestLibraries(BaseTestCase):
     """ Tests for libraries. """
 
     def setUp(self):
-        self.user = self._create_user('foo@bar.io', 'foo-foo')
+        self.user = self.create_user('foo@bar.io', 'foo-foo')
         self.client.login(email='foo@bar.io', password='foo-foo')
 
         self.library = create_library(self._get_random_name())
@@ -340,7 +340,7 @@ class TestLibraries(BaseTestCase):
     #     Ensure a non-staff user cannot update a library created by
     #     another user.
     #     """
-    #     self._create_user('test_user@test.com', 'foo-foo', False)
+    #     self.create_user('test_user@test.com', 'foo-foo', False)
     #     self.client.login(email='test_user@test.com', password='foo-foo')
     #     pass
 

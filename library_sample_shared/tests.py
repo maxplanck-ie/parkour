@@ -4,12 +4,42 @@ from django.contrib.auth import get_user_model
 
 from common.tests import BaseTestCase
 from common.utils import get_random_name
-from .models import (Organism, ConcentrationMethod, ReadLength, IndexType,
-                     GenericIndex, IndexI7, IndexI5, BarcodeCounter,
-                     LibraryProtocol, LibraryType, GenericLibrarySample)
+from .models import (
+    Organism,
+    ConcentrationMethod,
+    ReadLength,
+    IndexType,
+    GenericIndex,
+    IndexI7,
+    IndexI5,
+    BarcodeCounter,
+    LibraryProtocol,
+    LibraryType,
+    GenericLibrarySample,
+)
 
 
 User = get_user_model()
+
+
+def create_read_length(name):
+    read_length = ReadLength(name=name)
+    read_length.save()
+    return read_length
+
+
+def create_library_protocol(name, type='DNA'):
+    library_protocol = LibraryProtocol(
+        name=name,
+        type=type,
+        provider='-',
+        catalog='-',
+        explanation='-',
+        input_requirements='-',
+        typical_application='-',
+    )
+    library_protocol.save()
+    return library_protocol
 
 
 # Models
@@ -144,7 +174,7 @@ class GenericLibrarySampleTest(TestCase):
 class TestOrganisms(BaseTestCase):
 
     def setUp(self):
-        self._create_user('foo@bar.io', 'foo-foo')
+        self.create_user('foo@bar.io', 'foo-foo')
         self.client.login(email='foo@bar.io', password='foo-foo')
 
         self.organism = Organism(name=self._get_random_name())
@@ -162,7 +192,7 @@ class TestOrganisms(BaseTestCase):
 class TestReadLengths(BaseTestCase):
 
     def setUp(self):
-        self._create_user('foo@bar.io', 'foo-foo')
+        self.create_user('foo@bar.io', 'foo-foo')
         self.client.login(email='foo@bar.io', password='foo-foo')
 
         self.read_length = ReadLength(name=self._get_random_name())
@@ -180,7 +210,7 @@ class TestReadLengths(BaseTestCase):
 class TestConcentrationMethods(BaseTestCase):
 
     def setUp(self):
-        self._create_user('foo@bar.io', 'foo-foo')
+        self.create_user('foo@bar.io', 'foo-foo')
         self.client.login(email='foo@bar.io', password='foo-foo')
 
         self.concentration_method = ConcentrationMethod(
@@ -198,7 +228,7 @@ class TestConcentrationMethods(BaseTestCase):
 
 class TestIndexTypes(BaseTestCase):
     def setUp(self):
-        self._create_user('foo@bar.io', 'foo-foo')
+        self.create_user('foo@bar.io', 'foo-foo')
         self.client.login(email='foo@bar.io', password='foo-foo')
 
         self.index_type = IndexType(name=self._get_random_name())
@@ -217,7 +247,7 @@ class TestIndices(BaseTestCase):
     """ Test indices I7 and I5. """
 
     def setUp(self):
-        self._create_user('foo@bar.io', 'foo-foo')
+        self.create_user('foo@bar.io', 'foo-foo')
         self.client.login(email='foo@bar.io', password='foo-foo')
 
         self.index1 = IndexI7(
@@ -309,7 +339,7 @@ class TestLibraryProtocols(BaseTestCase):
     """ Tests for library protocols. """
 
     def setUp(self):
-        self._create_user('foo@bar.io', 'foo-foo')
+        self.create_user('foo@bar.io', 'foo-foo')
         self.client.login(email='foo@bar.io', password='foo-foo')
 
         self.library_protocol1 = LibraryProtocol(
@@ -361,7 +391,7 @@ class TestLibraryTypes(BaseTestCase):
     """ Tests for library types. """
 
     def setUp(self):
-        self._create_user('foo@bar.io', 'foo-foo')
+        self.create_user('foo@bar.io', 'foo-foo')
         self.client.login(email='foo@bar.io', password='foo-foo')
 
         self.library_protocol = LibraryProtocol(

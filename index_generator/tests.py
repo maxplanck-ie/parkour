@@ -37,8 +37,8 @@ def create_pool(user, multiplier=1, size=200, save=True):
 
 class PoolTest(BaseTestCase):
     def setUp(self):
-        self.user = self._create_user('test@test.io', 'foo-bar')
-        self.pool = create_pool(self.user)
+        user = self.create_user()
+        self.pool = create_pool(user)
 
     def test_pool_name(self):
         self.assertTrue(isinstance(self.pool, Pool))

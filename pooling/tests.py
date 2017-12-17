@@ -59,7 +59,7 @@ def create_pooling_object(user, add_library=False, add_sample=False,
 class TestPoolingModel(BaseTestCase):
 
     def setUp(self):
-        self.user = self._create_user('test@test.io', 'foo-bar')
+        self.user = self.create_user('test@test.io', 'foo-bar')
         self.pooling_obj = create_pooling_object(self.user, add_library=True)
 
     def test_name(self):
@@ -102,7 +102,7 @@ class TestPoolingModel(BaseTestCase):
 class TestPooling(BaseTestCase):
 
     def setUp(self):
-        self.user = self._create_user('test@test.io', 'foo-bar')
+        self.user = self.create_user('test@test.io', 'foo-bar')
 
     def test_pooling_list(self):
         """ Ensure get pooling list behaves correctly. """
@@ -126,7 +126,7 @@ class TestPooling(BaseTestCase):
 
     def test_pooling_list_non_staff(self):
         """Ensure error is thrown if a non-staff user tries to get the list."""
-        self._create_user('non-staff@test.io', 'test', False)
+        self.create_user('non-staff@test.io', 'test', False)
         self.client.login(email='non-staff@test.io', password='test')
         response = self.client.get(reverse('pooling-list'))
         self.assertTrue(response.status_code, 403)

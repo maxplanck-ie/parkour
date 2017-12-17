@@ -27,16 +27,15 @@ def create_library_preparation_obj(sample_name, user, sample_status):
 # Models
 
 class TestLibraryPreparationModel(BaseTestCase):
-
     def setUp(self):
-        self.user = self._create_user('test@test.io', 'foo-bar')
+        self.user = self.create_user()
         self.library_prep_obj = create_library_preparation_obj(
             self._get_random_name(), self.user, 2
         )
 
     def test_name(self):
         self.assertTrue(isinstance(self.library_prep_obj, LibraryPreparation))
-        self.assertEqual(self.library_prep_obj.__str__(), '{} ({})'.format(
+        self.assertEqual(str(self.library_prep_obj), '{} ({})'.format(
             self.library_prep_obj.sample.name,
             self.library_prep_obj.sample.barcode,
         ))
@@ -56,13 +55,12 @@ class TestLibraryPreparationModel(BaseTestCase):
 # Views
 
 class TestLibraryPreparation(BaseTestCase):
-
     def setUp(self):
-        self.user = self._create_user('test@test.io', 'foo-bar')
+        self.user = self.create_user()
 
     def test_library_preparation_list(self):
         """ Ensure get library preparation list behaves correctly. """
-        self.client.login(email='test@test.io', password='foo-bar')
+        self.login()
 
         library_prep_obj1 = create_library_preparation_obj(
             self._get_random_name(), self.user, 2
@@ -80,7 +78,7 @@ class TestLibraryPreparation(BaseTestCase):
 
     def test_library_preparation_list_non_staff(self):
         """Ensure error is thrown if a non-staff user tries to get the list."""
-        self._create_user('non-staff@test.io', 'test', False)
+        self.create_user('non-staff@test.io', 'test', False)
         self.client.login(email='non-staff@test.io', password='test')
         response = self.client.get(reverse('library-preparation-list'))
         self.assertTrue(response.status_code, 403)
