@@ -1,4 +1,6 @@
 import json
+import pytz
+from datetime import datetime
 
 from django.core.urlresolvers import reverse
 from rest_framework import status
@@ -9,7 +11,7 @@ from library_sample_shared.tests import (
     create_read_length,
     create_library_protocol,
 )
-from flowcell.tests import create_sequencer
+from flowcell.tests import create_sequencer, create_flowcell
 
 from .models import FixedCosts, LibraryPreparationCosts, SequencingCosts
 
@@ -191,3 +193,29 @@ class TestSequencingCostsViewSet(BaseAPITestCase):
         self.login('non-staff@test.io', 'test')
         response = self.client.get(reverse('sequencing-costs-list'))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class TestInvoicingViewSet(BaseAPITestCase):
+    """ Tests for the main Invoicing ViewSet. """
+
+    def setUp(self):
+        self.create_user()
+        self.login()
+
+    def test_billing_periods_list(self):
+        sequencer = create_sequencer(get_random_name())
+
+        flowcell1 = create_flowcell(get_random_name(), sequencer)
+        flowcell1.create_time = datetime(2017, 11, 1, 0, 0, 0, tzinfo=pytz.UTC)
+        flowcell1.save()
+
+        flowcell2 = create_flowcell(get_random_name(), sequencer)
+        flowcell2.create_time = datetime(2017, 12, 1, 0, 0, 0, tzinfo=pytz.UTC)
+        flowcell2.save()
+
+        response = self.client.get(reverse('invoicing-billing-periods'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, [
+            {'name': 'November 2017', 'value': [2017, 11]},
+            {'name': 'December 2017', 'value': [2017, 12]},
+        ])
