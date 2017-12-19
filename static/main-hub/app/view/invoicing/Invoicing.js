@@ -133,18 +133,52 @@ Ext.define('MainHub.view.invoicing.Invoicing', {
         {
           xtype: 'toolbar',
           dock: 'top',
-          items: [{
-            xtype: 'combobox',
-            itemId: 'billing-period-combobox',
-            fieldLabel: 'Select Billing Period',
-            store: 'BillingPeriods',
-            queryMode: 'local',
-            valueField: 'value',
-            displayField: 'name',
-            forceSelection: true,
-            labelWidth: 130,
-            width: 300
-          }]
+          items: [
+            {
+              xtype: 'combobox',
+              itemId: 'billing-period-combobox',
+              fieldLabel: 'Select Billing Period',
+              store: 'BillingPeriods',
+              queryMode: 'local',
+              valueField: 'value',
+              displayField: 'name',
+              forceSelection: true,
+              labelWidth: 130,
+              width: 300
+            },
+            '-',
+            {
+              itemId: 'view-uploaded-report-button',
+              text: 'View Uploaded Report',
+              reportUrl: '',
+              hidden: true,
+              handler: function () {
+                var link = document.createElement('a');
+                link.href = this.reportUrl;
+                link.download = this.reportUrl.substr(this.reportUrl.lastIndexOf('/') + 1);
+                link.click();
+              }
+            }
+          ]
+        },
+        {
+          xtype: 'toolbar',
+          dock: 'bottom',
+          items: [
+            {
+              text: 'Download Report',
+              itemId: 'download-report',
+              url: 'api/invoicing/download/',
+              iconCls: 'fa fa-download fa-lg',
+              disabled: true
+            },
+            {
+              text: 'Upload Report',
+              itemId: 'upload-report',
+              uploadUrl: 'api/invoicing/upload/',
+              iconCls: 'fa fa-upload fa-lg'
+            }
+          ]
         }
       ]
     },

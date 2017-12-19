@@ -5,8 +5,9 @@ import numpy as np
 from collections import OrderedDict
 from dateutil.relativedelta import relativedelta
 
-from django.db.models import Q, Prefetch
-from django.http import HttpResponse
+from django.conf import settings
+from django.http import HttpResponse, JsonResponse
+from django.db.models import Q, Prefetch, Min
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 
@@ -15,15 +16,22 @@ from rest_framework.response import Response
 from rest_framework.decorators import list_route
 from rest_framework.permissions import IsAdminUser
 
+from month import Month
 from xlwt import Workbook, XFStyle, Formula
 
+from common.views import CsrfExemptSessionAuthentication
 from request.models import Request
 from library.models import Library
 from sample.models import Sample
 from index_generator.models import Pool
 from flowcell.models import Flowcell
 
-from .models import FixedCosts, LibraryPreparationCosts, SequencingCosts
+from .models import (
+    InvoicingReport,
+    FixedCosts,
+    LibraryPreparationCosts,
+    SequencingCosts,
+)
 from .serializer import (
     InvoicingSerializer,
     FixedCostsSerializer,
@@ -33,6 +41,7 @@ from .serializer import (
 
 
 class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [CsrfExemptSessionAuthentication]
     permission_classes = [IsAdminUser]
     serializer_class = InvoicingSerializer
 
@@ -56,35 +65,68 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
             Prefetch('flowcell', queryset=flowcell_qs),
             Prefetch('libraries', queryset=libraries_qs),
             Prefetch('samples', queryset=samples_qs),
-        ).distinct().order_by('flowcell__create_time', 'name')
+        ).order_by('pk').distinct().annotate(
+            sequencing_date=Min('flowcell__create_time')
+        ).order_by('sequencing_date')
 
         return queryset
 
     # @print_sql_queries
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+    # def list(self, request, *args, **kwargs):
+    #     return super().list(request, *args, **kwargs)
 
     @list_route(methods=['get'])
     def billing_periods(self, request):
         flowcells = Flowcell.objects.all()
+        data = []
 
         if flowcells.count() == 0:
-            return Response([])
+            return Response(data)
 
         start_date = flowcells.first().create_time
         end_date = flowcells.last().create_time
         end_date = end_date + relativedelta(months=1)
 
-        data = [
-            {
+        dates = np.arange(start_date, end_date, dtype='datetime64[M]').tolist()
+        for dt in dates:
+            try:
+                report = InvoicingReport.objects.get(
+                    month=dt.strftime('%Y-%m'))
+                report_url = settings.MEDIA_URL + report.report.name
+            except InvoicingReport.DoesNotExist:
+                report_url = ''
+            data.append({
                 'name': dt.strftime('%B %Y'),
                 'value': [dt.year, dt.month],
-            }
-            for dt in np.arange(start_date, end_date,
-                                dtype='datetime64[M]').tolist()
-        ]
+                'report_url': report_url,
+            })
 
         return Response(data)
+
+    @list_route(methods=['post'])
+    def upload(self, request):
+        """ Upload Invoicing Report. """
+        month = request.data.get('month', None)
+        report = request.data.get('report', None)
+
+        if not month or not report:
+            return Response({
+                'success': False,
+                'error': 'Month or report is not set.',
+            }, 400)
+
+        try:
+            report = InvoicingReport.objects.get(month=month)
+            report.report = request.data.get('report')
+        except InvoicingReport.DoesNotExist:
+            report = InvoicingReport(
+                month=Month.from_string(month),
+                report=request.data.get('report')
+            )
+        finally:
+            report.save()
+
+        return JsonResponse({'success': True})
 
 
 class FixedCostsViewSet(mixins.UpdateModelMixin,

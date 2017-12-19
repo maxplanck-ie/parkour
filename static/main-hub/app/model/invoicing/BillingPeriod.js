@@ -9,6 +9,10 @@ Ext.define('MainHub.model.invoicing.BillingPeriod', {
     {
       name: 'value',
       type: 'auto'
+    },
+    {
+      name: 'report_url',
+      type: 'string'
     }
   ]
 });

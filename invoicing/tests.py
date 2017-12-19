@@ -3,7 +3,10 @@ import pytz
 from datetime import datetime
 
 from django.core.urlresolvers import reverse
+from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework import status
+
+from month import Month
 
 from common.tests import BaseTestCase, BaseAPITestCase
 from common.utils import get_random_name
@@ -13,7 +16,12 @@ from library_sample_shared.tests import (
 )
 from flowcell.tests import create_sequencer, create_flowcell
 
-from .models import FixedCosts, LibraryPreparationCosts, SequencingCosts
+from .models import (
+    InvoicingReport,
+    FixedCosts,
+    LibraryPreparationCosts,
+    SequencingCosts,
+)
 
 
 def create_fixed_cost(sequencer, price):
@@ -42,6 +50,18 @@ def create_sequencing_cost(sequencer, read_length, price):
 
 
 # Models
+
+class TestInvoicingReport(BaseTestCase):
+    def setUp(self):
+        self.now = datetime.now()
+        self.report = InvoicingReport(
+            month=Month(self.now.year, self.now.month),
+            report=SimpleUploadedFile('file.txt', b'content'),
+        )
+
+    def test_name(self):
+        self.assertEqual(str(self.report), self.now.strftime('%B %Y'))
+
 
 class TestFixedCostsModel(BaseTestCase):
     def setUp(self):
@@ -202,6 +222,9 @@ class TestInvoicingViewSet(BaseAPITestCase):
         self.create_user()
         self.login()
 
+    # def tearDown(self):
+    #     InvoicingReport.objects.all().delete()
+
     def test_billing_periods_list(self):
         sequencer = create_sequencer(get_random_name())
 
@@ -216,6 +239,16 @@ class TestInvoicingViewSet(BaseAPITestCase):
         response = self.client.get(reverse('invoicing-billing-periods'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, [
-            {'name': 'November 2017', 'value': [2017, 11]},
-            {'name': 'December 2017', 'value': [2017, 12]},
+            {'name': 'November 2017', 'value': [2017, 11], 'report_url': ''},
+            {'name': 'December 2017', 'value': [2017, 12], 'report_url': ''},
         ])
+
+    def test_report_upload(self):
+        month = datetime.now().strftime('%Y-%m')
+        response = self.client.post(reverse('invoicing-upload'), {
+            'month': month,
+            'report': SimpleUploadedFile('file.txt', b'content'),
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            InvoicingReport.objects.filter(month=month).count(), 1)

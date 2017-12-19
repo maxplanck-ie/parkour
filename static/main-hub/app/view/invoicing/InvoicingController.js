@@ -2,6 +2,10 @@ Ext.define('MainHub.view.invoicing.InvoicingController', {
   extend: 'Ext.app.ViewController',
   alias: 'controller.invoicing',
 
+  requires: [
+    'Ext.ux.FileUploadWindow'
+  ],
+
   config: {
     control: {
       '#': {
@@ -12,6 +16,9 @@ Ext.define('MainHub.view.invoicing.InvoicingController', {
       },
       '#invoicing-grid': {
         resize: 'resize'
+      },
+      '#upload-report': {
+        click: 'uploadReport'
       },
       '#fixed-costs-grid,#preparation-costs-grid,#sequencing-costs-grid': {
         edit: 'editPrice'
@@ -43,12 +50,22 @@ Ext.define('MainHub.view.invoicing.InvoicingController', {
   },
 
   selectBillingPeriod: function (cb, record) {
+    var uploadedReportBtn = cb.up().down('#view-uploaded-report-button');
+    var reportUrl = record.get('report_url');
+
     Ext.getStore('Invoicing').reload({
       params: {
         year: record.get('value')[0],
         month: record.get('value')[1]
       }
     });
+
+    if (reportUrl !== '') {
+      uploadedReportBtn.reportUrl = reportUrl;
+      uploadedReportBtn.show();
+    } else {
+      uploadedReportBtn.hide();
+    }
   },
 
   editPrice: function (editor, context) {
@@ -63,6 +80,42 @@ Ext.define('MainHub.view.invoicing.InvoicingController', {
       success: function (batch) {
         Ext.getCmp('invoicing-grid').getStore().reload();
         new Noty({ text: 'The changes have been saved.' }).show();
+      }
+    });
+  },
+
+  uploadReport: function (btn) {
+    var billingPeriodCb = btn.up('grid').down('#billing-period-combobox');
+    var value = billingPeriodCb.getValue();
+
+    Ext.create('Ext.ux.FileUploadWindow', {
+      fileFieldName: 'report',
+
+      onFileUpload: function () {
+        var uploadWindow = this;
+        var form = this.down('form').getForm();
+
+        if (!form.isValid()) {
+          new Noty({
+            text: 'You did not select any file.',
+            type: 'warning'
+          }).show();
+          return;
+        }
+
+        form.submit({
+          url: btn.uploadUrl,
+          method: 'POST',
+          waitMsg: 'Uploading...',
+          params: {
+            month: value[0] + '-' + value[1]
+          },
+          success: function (f, action) {
+            new Noty({ text: 'Report has been successfully uploaded.' }).show();
+            billingPeriodCb.getStore().reload();
+            uploadWindow.close();
+          }
+        });
       }
     });
   },

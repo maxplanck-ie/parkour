@@ -1,7 +1,27 @@
-from django.db import models
+import calendar
 
+from django.db import models
+from month.models import MonthField
+
+from common.models import DateTimeMixin
 from library_sample_shared.models import LibraryProtocol, ReadLength
 from flowcell.models import Sequencer
+
+
+class InvoicingReport(DateTimeMixin):
+    month = MonthField('Month', unique=True)
+    report = models.FileField(
+        verbose_name='Report',
+        upload_to='invoicing/%Y/%m/',
+    )
+
+    class Meta:
+        verbose_name = 'Invoicing Report'
+        verbose_name_plural = 'Invoicing Report'
+        ordering = ['-month']
+
+    def __str__(self):
+        return f'{calendar.month_name[self.month.month]} {self.month.year}'
 
 
 class FixedCosts(models.Model):
