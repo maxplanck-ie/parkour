@@ -84,7 +84,7 @@ Ext.define('MainHub.view.invoicing.InvoicingController', {
       );
     });
     meta.tdAttr = Ext.String.format('data-qtip="{0}"', items.join('<br/>'));
-    return Ext.Array.pluck(value, 'sequencer_name').join('; ');
+    return _.uniq(Ext.Array.pluck(value, 'sequencer_name')).sort().join('; ');
   },
 
   percentageRenderer: function (value, meta) {

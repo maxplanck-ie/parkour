@@ -119,19 +119,22 @@ class InvoicingSerializer(ModelSerializer):
             for pool in pools.filter(pk__in=count.keys()):
                 # Calculate Sequencing Depth for all request's
                 # libraries and samples
-                libs = pool.libraries.filter(request=obj)
-                smpls = pool.samples.filter(request=obj)
-                depth = \
-                    sum(libs.values_list('sequencing_depth', flat=True)) + \
-                    sum(smpls.values_list('sequencing_depth', flat=True))
+                libraries = pool.libraries.filter(request=obj)
+                samples = pool.samples.filter(request=obj)
+                depth = sum(libraries.values_list(
+                        'sequencing_depth', flat=True)) + \
+                    sum(samples.values_list('sequencing_depth', flat=True))
 
                 # percentage = round(depth / total_depth, 2)
                 percentage = round(depth / total_depth_map[pool.pk], 2)
                 if percentage == 1.0:
                     percentage = 1
 
+                item = libraries.first() or samples.first()
+
                 flowcell_dict['pools'].append({
                     'name': pool.name,
+                    'read_length': item.read_length.pk,
                     'percentage': f'{percentage}*{count[pool.pk]}',
                 })
             data.append(flowcell_dict)
@@ -181,7 +184,6 @@ class InvoicingSerializer(ModelSerializer):
         percentage = ret.get('percentage')
         library_protocol = ret.get('library_protocol')
         num_libraries_samples = ret.get('num_libraries_samples')
-        read_lengths = ret.get('read_length')
 
         fixed_costs = self.context['fixed_costs']
         preparation_costs = self.context['preparation_costs']
@@ -197,6 +199,17 @@ class InvoicingSerializer(ModelSerializer):
         ret['fixed_costs'] = costs
 
         # Calculate Sequencing Costs
+        costs = 0
+        for flowcell in percentage:
+            for pool in flowcell['pools']:
+                key = f"{flowcell['sequencer']}_{pool['read_length']}"
+                try:
+                    costs += sequencing_costs[key] * \
+                        reduce(lambda x, y: Decimal(x) * Decimal(y),
+                               pool['percentage'].split('*'))
+                except KeyError:
+                    pass
+        ret['sequencing_costs'] = costs
 
         # Calculate Preparation Costs
         costs = 0
@@ -220,13 +233,12 @@ class InvoicingSerializer(ModelSerializer):
         return ret
 
     def _get_pools(self, obj):
-        ids = obj.flowcell.values_list('lanes__pool', flat=True).distinct()
-
-        # ids = set(itertools.chain(
-        #     obj.libraries.values_list('pool', flat=True),
-        #     obj.samples.values_list('pool', flat=True),
-        # ))
-
+        ids1 = obj.flowcell.values_list('lanes__pool', flat=True).distinct()
+        ids2 = set(itertools.chain(
+            obj.libraries.values_list('pool', flat=True),
+            obj.samples.values_list('pool', flat=True),
+        ))
+        ids = ids2.intersection(ids1)
         return Pool.objects.filter(pk__in=ids).order_by('pk')
 
 
