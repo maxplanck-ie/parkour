@@ -56,10 +56,7 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
             Prefetch('flowcell', queryset=flowcell_qs),
             Prefetch('libraries', queryset=libraries_qs),
             Prefetch('samples', queryset=samples_qs),
-        ).distinct().order_by(
-            'flowcell__create_time',
-            'flowcell__flowcell_id',
-        )
+        ).distinct().order_by('flowcell__create_time', 'name')
 
         return queryset
 
