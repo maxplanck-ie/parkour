@@ -17,7 +17,6 @@ from rest_framework.permissions import IsAdminUser
 
 from xlwt import Workbook, XFStyle, Formula
 
-from common.utils import print_sql_queries
 from request.models import Request
 from library.models import Library
 from sample.models import Sample
@@ -57,7 +56,10 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
             Prefetch('flowcell', queryset=flowcell_qs),
             Prefetch('libraries', queryset=libraries_qs),
             Prefetch('samples', queryset=samples_qs),
-        ).distinct().order_by('create_time')
+        ).distinct().order_by(
+            'flowcell__create_time',
+            'flowcell__flowcell_id',
+        )
 
         return queryset
 
