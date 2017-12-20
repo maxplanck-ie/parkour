@@ -36,8 +36,8 @@ Ext.define('MainHub.view.invoicing.Invoicing', {
 
       store: 'Invoicing',
 
-      sortableColumns: false,
-      enableColumnMove: false,
+      // sortableColumns: false,
+      // enableColumnMove: false,
       columns: {
         defaults: {
           minWidth: 200,
@@ -46,12 +46,14 @@ Ext.define('MainHub.view.invoicing.Invoicing', {
         items: [
           {
             text: 'Request',
-            dataIndex: 'request'
+            dataIndex: 'request',
+            locked: true
           },
           {
             text: 'Cost Unit',
             dataIndex: 'cost_unit',
-            renderer: 'listRenderer'
+            renderer: 'listRenderer',
+            minWidth: 150
           },
           {
             text: 'Sequencer',
@@ -76,7 +78,8 @@ Ext.define('MainHub.view.invoicing.Invoicing', {
           {
             text: 'Read Length',
             dataIndex: 'read_length',
-            renderer: 'readLengthRenderer'
+            renderer: 'readLengthRenderer',
+            minWidth: 150
           },
           {
             text: '# of Libraries/Samples',
@@ -168,9 +171,8 @@ Ext.define('MainHub.view.invoicing.Invoicing', {
             {
               text: 'Download Report',
               itemId: 'download-report',
-              url: 'api/invoicing/download/',
-              iconCls: 'fa fa-download fa-lg',
-              disabled: true
+              downloadUrl: 'api/invoicing/download/',
+              iconCls: 'fa fa-download fa-lg'
             },
             {
               text: 'Upload Report',

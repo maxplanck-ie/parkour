@@ -17,6 +17,9 @@ Ext.define('MainHub.view.invoicing.InvoicingController', {
       '#invoicing-grid': {
         resize: 'resize'
       },
+      '#download-report': {
+        click: 'downloadReport'
+      },
       '#upload-report': {
         click: 'uploadReport'
       },
@@ -80,6 +83,21 @@ Ext.define('MainHub.view.invoicing.InvoicingController', {
       success: function (batch) {
         Ext.getCmp('invoicing-grid').getStore().reload();
         new Noty({ text: 'The changes have been saved.' }).show();
+      }
+    });
+  },
+
+  downloadReport: function (btn) {
+    var billingPeriodCb = btn.up('grid').down('#billing-period-combobox');
+    var value = billingPeriodCb.getValue();
+    var form = Ext.create('Ext.form.Panel', { standardSubmit: true });
+
+    form.submit({
+      url: btn.downloadUrl,
+      method: 'GET',
+      params: {
+        year: value[0],
+        month: value[1]
       }
     });
   },
@@ -167,12 +185,14 @@ Ext.define('MainHub.view.invoicing.InvoicingController', {
       var record = store.findRecord('id', id, 0, false, true, true);
       return record.get('name');
     });
-    return items.join(', ');
+    return items.join('; ');
   },
 
   libraryProtocolRenderer: function (value, meta) {
-    var store = Ext.getStore('libraryProtocolsStore');
-    var record = store.findRecord('id', value, 0, false, true, true);
-    return record ? record.get('name') : value;
+    var record = Ext.getStore('libraryProtocolsStore').findRecord(
+      'id', value, 0, false, true, true);
+    var name = record.get('name');
+    meta.tdAttr = Ext.String.format('data-qtip="{0}"', name);
+    return name;
   }
 });
