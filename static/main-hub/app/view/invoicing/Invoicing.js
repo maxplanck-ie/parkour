@@ -47,6 +47,7 @@ Ext.define('MainHub.view.invoicing.Invoicing', {
           {
             text: 'Request',
             dataIndex: 'request',
+            minWidth: 250,
             locked: true
           },
           {

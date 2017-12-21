@@ -229,7 +229,7 @@ class InvoicingSerializer(ModelSerializer):
         splt = num_libraries_samples.split(' ')
         if splt[1] == 'samples':
             try:
-                costs = Decimal(splt[0]) + preparation_costs[library_protocol]
+                costs = Decimal(splt[0]) * preparation_costs[library_protocol]
             except KeyError as e:
                 protocol = LibraryProtocol.objects.get(pk=library_protocol)
                 logger.exception(
