@@ -1,3 +1,5 @@
+from django.apps import apps
+
 from rest_framework.serializers import (
     ModelSerializer,
     ListSerializer,
@@ -5,12 +7,13 @@ from rest_framework.serializers import (
     IntegerField,
     CharField,
 )
-from library.models import Library
-from sample.models import Sample
+
+Request = apps.get_model('request', 'Request')
+Library = apps.get_model('library', 'Library')
+Sample = apps.get_model('sample', 'Sample')
 
 
 class BaseListSerializer(ListSerializer):
-
     def update(self, instance, validated_data):
         # Maps for id->instance and id->data item.
         object_mapping = {obj.pk: obj for obj in instance}
@@ -36,10 +39,7 @@ class BaseSerializer(ModelSerializer):
     pk = IntegerField()
     quality_check = CharField(required=False)
     record_type = SerializerMethodField()
-    request = SerializerMethodField()
-    request_name = SerializerMethodField()
     library_protocol_name = SerializerMethodField()
-    samples_submitted = SerializerMethodField()
 
     class Meta:
         list_serializer_class = BaseListSerializer
@@ -48,8 +48,7 @@ class BaseSerializer(ModelSerializer):
                   'concentration_facility', 'concentration_method_facility',
                   'sample_volume_facility', 'amount_facility', 'quality_check',
                   'size_distribution_facility', 'comments_facility',
-                  'request', 'request_name', 'sequencing_depth',
-                  'library_protocol_name', 'samples_submitted',)
+                  'sequencing_depth', 'library_protocol_name',)
         extra_kwargs = {
             'name': {'required': False},
             'barcode': {'required': False},
@@ -59,21 +58,14 @@ class BaseSerializer(ModelSerializer):
             'sequencing_depth': {'required': False},
         }
 
-    def get_request(self, obj):
-        return obj.request.get().pk
-
-    def get_request_name(self, obj):
-        return obj.request.get().name
+    def get_record_type(self, obj):
+        return obj.__class__.__name__
 
     def get_library_protocol_name(self, obj):
         return obj.library_protocol.name
 
-    def get_samples_submitted(self, obj):
-        return obj.request.get().samples_submitted
-
 
 class LibrarySerializer(BaseSerializer):
-
     class Meta(BaseSerializer.Meta):
         model = Library
         fields = BaseSerializer.Meta.fields + \
@@ -83,9 +75,6 @@ class LibrarySerializer(BaseSerializer):
             'qpcr_result': {'required': False},
             'mean_fragment_size': {'required': False},
         }}
-
-    def get_record_type(self, obj):
-        return 'Library'
 
 
 class SampleSerializer(BaseSerializer):
@@ -101,8 +90,42 @@ class SampleSerializer(BaseSerializer):
             'rna_quality': {'required': False},
         }}
 
-    def get_record_type(self, obj):
-        return 'Sample'
-
     def get_nucleic_acid_type_name(self, obj):
         return obj.nucleic_acid_type.name
+
+
+class RequestSerializer(ModelSerializer):
+    request = SerializerMethodField()
+    request_name = SerializerMethodField()
+    libraries = LibrarySerializer(many=True)
+    samples = SampleSerializer(many=True)
+
+    class Meta:
+        model = Request
+        fields = ('request', 'request_name', 'samples_submitted',
+                  'libraries', 'samples',)
+
+    def get_request(self, obj):
+        return obj.pk
+
+    def get_request_name(self, obj):
+        return obj.name
+
+    def to_representation(self, instance):
+        result = []
+        data = super().to_representation(instance)
+
+        if not any(data['libraries']) and not any(data['samples']):
+            return []
+
+        for type in ['libraries', 'samples']:
+            result.extend(list(map(
+                lambda x: {**{
+                    'request': data['request'],
+                    'request_name': data['request_name'],
+                    'samples_submitted': data['samples_submitted'],
+                }, **x},
+                data.pop(type),
+            )))
+
+        return result
