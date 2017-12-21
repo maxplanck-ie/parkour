@@ -65,6 +65,18 @@ Ext.define('MainHub.components.BaseGridController', {
         });
       }
 
+      if (qcMenuOptions.indexOf('completed') !== -1) {
+        qcMenu.items[1].items.push({
+          ui: 'menu-button-green',
+          tooltip: 'completed',
+          iconCls: 'fa fa-lg fa-check',
+          handler: function () {
+            self.qualityCheckSingle(record, 'completed');
+            this.up('menu').hide();
+          }
+        });
+      }
+
       if (qcMenuOptions.indexOf('compromised') !== -1) {
         qcMenu.items[1].items.push({
           ui: 'menu-button-yellow',

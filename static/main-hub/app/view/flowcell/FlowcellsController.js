@@ -21,6 +21,7 @@ Ext.define('MainHub.view.flowcell.FlowcellsController', {
         boxready: 'addToolbarButtons',
         itemcontextmenu: 'showMenu',
         groupcontextmenu: 'showGroupMenu',
+        cellclick: 'showPoolInfo',
         edit: 'editRecord'
       },
       '#check-column': {
@@ -63,36 +64,6 @@ Ext.define('MainHub.view.flowcell.FlowcellsController', {
       text: 'Download Sample Sheet',
       iconCls: 'fa fa-file-excel-o fa-lg'
     });
-  },
-
-  showMenu: function (gridView, record, item, index, e) {
-    var self = this;
-
-    e.stopEvent();
-    Ext.create('Ext.menu.Menu', {
-      plain: true,
-      defaults: {
-        margin: 5
-      },
-      items: [
-        {
-          text: 'Apply to All',
-          handler: function () {
-            var dataIndex = self._getDataIndex(e, gridView);
-            self.applyToAll(gridView, record, dataIndex);
-          }
-        },
-        {
-          text: 'Show Additional Information',
-          handler: function () {
-            Ext.create('MainHub.view.flowcell.PoolInfoWindow', {
-              title: record.get('pool_name'),
-              poolId: record.get('pool')
-            });
-          }
-        }
-      ]
-    }).showAt(e.getXY());
   },
 
   selectRecord: function (cb, rowIndex, checked, record) {
@@ -199,6 +170,15 @@ Ext.define('MainHub.view.flowcell.FlowcellsController', {
         'flowcell_id': selectedLanes[0].flowcell
       }
     });
+  },
+
+  showPoolInfo: function (view, td, cellIndex, record, tr, rowIndex, e) {
+    if (e.getTarget('.pool-name') !== null) {
+      Ext.create('MainHub.view.flowcell.PoolInfoWindow', {
+        title: record.get('pool_name'),
+        pool: record.get('pool')
+      });
+    }
   },
 
   _getSelectedRecords: function (store) {

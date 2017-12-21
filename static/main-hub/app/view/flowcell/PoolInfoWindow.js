@@ -6,10 +6,12 @@ Ext.define('MainHub.view.flowcell.PoolInfoWindow', {
 
   controller: 'flowcell-poolinfowindow',
 
-  width: 550,
-  height: 650,
+  title: 'Pool',
   modal: true,
   autoShow: true,
+
+  width: 500,
+  height: 600,
   layout: 'fit',
 
   items: [{
@@ -22,35 +24,39 @@ Ext.define('MainHub.view.flowcell.PoolInfoWindow', {
     sortableColumns: false,
     enableColumnMove: false,
     enableColumnHide: false,
-    store: 'poolInfoStore',
-    columns: [
-      {
-        text: 'Request',
-        dataIndex: 'request_name',
+    store: 'PoolInfo',
+
+    columns: {
+      defaults: {
         flex: 1
       },
-      {
-        text: 'Library',
-        dataIndex: 'name',
-        flex: 1
-      },
-      {
-        text: 'Barcode',
-        dataIndex: 'barcode',
-        resizable: false,
-        width: 95,
-        renderer: function (value, meta) {
-          return meta.record.getBarcode();
+      items: [
+        {
+          text: 'Library',
+          dataIndex: 'name'
+        },
+        {
+          text: 'Barcode',
+          dataIndex: 'barcode',
+          resizable: false,
+          renderer: function (value, meta, record) {
+            return record.getBarcode();
+          }
+        },
+        {
+          text: 'Library Protocol',
+          dataIndex: 'protocol_name',
+          renderer: function (value, meta) {
+            meta.tdAttr = Ext.String.format('data-qtip="{0}"', value);
+            return value;
+          }
         }
-      },
-      {
-        text: 'Library Protocol',
-        dataIndex: 'protocol_name',
-        flex: 1,
-        renderer: function (value, meta) {
-          meta.tdAttr = Ext.String.format('data-qtip="{0}"', value);
-          return value;
-        }
-      }]
+      ]
+    },
+
+    features: [{
+      ftype: 'grouping',
+      groupHeaderTpl: '<strong>Request: {name}</strong>'
+    }]
   }]
 });
