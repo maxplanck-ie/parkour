@@ -235,8 +235,13 @@ class InvoicingSerializer(ModelSerializer):
                 logger.exception(
                     f'Preparation Cost for "{protocol.name}" is not set.')
         else:
-            # TODO: fixed price for libraries
-            pass
+            try:
+                price = LibraryPreparationCosts.objects.get(
+                    library_protocol__name='Quality Control').price
+                costs = Decimal(splt[0]) * price
+            except LibraryPreparationCosts.DoesNotExist:
+                logger.exception(
+                    f'Preparation Cost for libraries is not set.')
         ret['preparation_costs'] = costs
 
         ret['variable_costs'] = ret['sequencing_costs'] + \

@@ -147,6 +147,7 @@ class LibraryProtocol(models.Model):
     class Meta:
         verbose_name = 'Library Protocol'
         verbose_name_plural = 'Library Protocols'
+        # ordering = ['name']
 
     def __str__(self):
         return self.name
@@ -165,7 +166,8 @@ class LibraryProtocol(models.Model):
                 library_type = LibraryType(name='Other')
                 library_type.save()
             finally:
-                library_type.library_protocol.add(self)
+                if self.name != 'Quality Control':
+                    library_type.library_protocol.add(self)
 
 
 class LibraryType(models.Model):
