@@ -3,6 +3,7 @@ import calendar
 import numpy as np
 from dateutil.relativedelta import relativedelta
 
+from django.apps import apps
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Q, Prefetch, Min
@@ -16,11 +17,6 @@ from month import Month
 from xlwt import Workbook, XFStyle
 
 from common.views import CsrfExemptSessionAuthentication
-from request.models import Request
-from library_sample_shared.models import ReadLength, LibraryProtocol
-from library.models import Library
-from sample.models import Sample
-from flowcell.models import Flowcell
 
 from .models import (
     InvoicingReport,
@@ -35,6 +31,13 @@ from .serializer import (
     SequencingCostsSerializer,
 )
 
+Request = apps.get_model('request', 'Request')
+ReadLength = apps.get_model('library_sample_shared', 'ReadLength')
+LibraryProtocol = apps.get_model('library_sample_shared', 'LibraryProtocol')
+Library = apps.get_model('library', 'Library')
+Sample = apps.get_model('sample', 'Sample')
+Flowcell = apps.get_model('flowcell', 'Flowcell')
+
 
 class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
     authentication_classes = [CsrfExemptSessionAuthentication]
@@ -47,11 +50,20 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
         month = self.request.query_params.get('month', today.month)
 
         flowcell_qs = Flowcell.objects.select_related(
-            'sequencer').order_by('flowcell_id')
-        libraries_qs = Library.objects.filter(~Q(pool=None)).only(
-            'read_length', 'library_protocol',)
-        samples_qs = Sample.objects.filter(~Q(pool=None) & ~Q(status=-1)).only(
-            'read_length', 'library_protocol',)
+            'sequencer',
+        ).order_by('flowcell_id')
+
+        libraries_qs = Library.objects.filter(
+            ~Q(pool=None)
+        ).select_related(
+            'read_length', 'library_protocol',
+        ).only('read_length', 'library_protocol__name')
+
+        samples_qs = Sample.objects.filter(
+            ~Q(pool=None) & ~Q(status=-1)
+        ).select_related(
+            'read_length', 'library_protocol',
+        ).only('read_length', 'library_protocol__name')
 
         queryset = Request.objects.filter(
             flowcell__create_time__year=year,
@@ -63,7 +75,7 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
             Prefetch('samples', queryset=samples_qs),
         ).distinct().annotate(
             sequencing_date=Min('flowcell__create_time')
-        ).order_by('sequencing_date', 'pk')
+        ).only('name', 'user__cost_unit').order_by('sequencing_date', 'pk')
 
         return queryset
 

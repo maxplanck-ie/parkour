@@ -4,18 +4,21 @@ from decimal import Decimal
 from functools import reduce
 from collections import Counter
 
-from django.db.models import Sum
-from django.db.models.functions import Coalesce
+from django.apps import apps
+from django.db.models import Prefetch
 
 from rest_framework.fields import empty
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
-from request.models import Request
-from library_sample_shared.models import ReadLength, LibraryProtocol
-from index_generator.models import Pool
-from flowcell.models import Sequencer
-
 from .models import FixedCosts, LibraryPreparationCosts, SequencingCosts
+
+Request = apps.get_model('request', 'Request')
+ReadLength = apps.get_model('library_sample_shared', 'ReadLength')
+LibraryProtocol = apps.get_model('library_sample_shared', 'LibraryProtocol')
+Library = apps.get_model('library', 'Library')
+Sample = apps.get_model('sample', 'Sample')
+Pool = apps.get_model('index_generator', 'Pool')
+Sequencer = apps.get_model('flowcell', 'Sequencer')
 
 logger = logging.getLogger('db')
 
@@ -46,6 +49,26 @@ class InvoicingSerializer(ModelSerializer):
     def __init__(self, instance=None, data=empty, **kwargs):
         super().__init__(instance, data, **kwargs)
 
+        # Fetch all pools
+        libraries_qs = Library.objects.all().select_related(
+            'read_length',
+        ).only(
+            'read_length',
+            'sequencing_depth',
+        )
+        samples_qs = Sample.objects.all().select_related(
+            'read_length',
+        ).only(
+            'read_length',
+            'sequencing_depth',
+        )
+
+        pool_ids = instance.values_list('flowcell__lanes__pool')
+        pools = Pool.objects.filter(pk__in=pool_ids).prefetch_related(
+            Prefetch('libraries', queryset=libraries_qs),
+            Prefetch('samples', queryset=samples_qs),
+        ).order_by('pk')
+
         # Fetch Fixed Costs
         fixed_costs = FixedCosts.objects.values('sequencer', 'price')
         fixed_costs = {x['sequencer']: x['price'] for x in fixed_costs}
@@ -65,6 +88,7 @@ class InvoicingSerializer(ModelSerializer):
         }
 
         self.context.update({
+            'pools': pools,
             'fixed_costs': fixed_costs,
             'preparation_costs': preparation_costs,
             'sequencing_costs': sequencing_costs,
@@ -95,24 +119,6 @@ class InvoicingSerializer(ModelSerializer):
         pools = self._get_pools(obj)
         data = []
 
-        # Calculate Total Sequencing Depth for all pool's
-        # libraries and samples
-        library_sums = {
-            x['pk']: x['sum']
-            for x in pools.values('pk').annotate(
-                sum=Coalesce(Sum('libraries__sequencing_depth'), 0))
-        }
-        sample_sums = {
-            x['pk']: x['sum']
-            for x in pools.values('pk').annotate(
-                sum=Coalesce(Sum('samples__sequencing_depth'), 0))
-        }
-
-        total_depth_map = {
-            k: library_sums.get(k, 0) + sample_sums.get(k, 0)
-            for k in set(library_sums) | set(sample_sums)
-        }
-
         for flowcell in obj.flowcell.all():
             flowcell_dict = {
                 'flowcell_id': flowcell.flowcell_id,
@@ -122,16 +128,21 @@ class InvoicingSerializer(ModelSerializer):
 
             count = Counter(flowcell.lanes.values_list('pool', flat=True))
             for pool in pools.filter(pk__in=count.keys()):
+                libraries = pool.libraries.all()
+                samples = pool.samples.all()
+                items = list(itertools.chain(libraries, samples))
+                total_depth = sum([x.sequencing_depth for x in items])
+
                 # Calculate Sequencing Depth for all request's
                 # libraries and samples
                 libraries = pool.libraries.filter(request=obj)
                 samples = pool.samples.filter(request=obj)
+
                 depth = sum(libraries.values_list(
-                        'sequencing_depth', flat=True)) + \
+                    'sequencing_depth', flat=True)) + \
                     sum(samples.values_list('sequencing_depth', flat=True))
 
-                # percentage = round(depth / total_depth, 2)
-                percentage = round(depth / total_depth_map[pool.pk], 2)
+                percentage = round(depth / total_depth, 2)
                 if percentage == 1.0:
                     percentage = 1
 
@@ -147,11 +158,7 @@ class InvoicingSerializer(ModelSerializer):
         return data
 
     def get_read_length(self, obj):
-        read_lengths = set(itertools.chain(
-            obj.libraries.values_list('read_length', flat=True),
-            obj.samples.values_list('read_length', flat=True),
-        ))
-        return read_lengths
+        return set([x.read_length.pk for x in obj.records])
 
     def get_num_libraries_samples(self, obj):
         num_libraries = obj.libraries.count()
@@ -162,11 +169,7 @@ class InvoicingSerializer(ModelSerializer):
             return f'{num_samples} samples'
 
     def get_library_protocol(self, obj):
-        library_protocols = set(itertools.chain(
-            obj.libraries.values_list('library_protocol', flat=True),
-            obj.samples.values_list('library_protocol', flat=True),
-        ))
-        return library_protocols.pop()
+        return set([x.library_protocol.pk for x in obj.records]).pop()
 
     def get_fixed_costs(self, obj):
         return 0
@@ -259,7 +262,7 @@ class InvoicingSerializer(ModelSerializer):
             obj.samples.values_list('pool', flat=True),
         ))
         ids = ids2.intersection(ids1)
-        return Pool.objects.filter(pk__in=ids).order_by('pk')
+        return self.context['pools'].filter(pk__in=ids)
 
 
 class BaseSerializer(ModelSerializer):
