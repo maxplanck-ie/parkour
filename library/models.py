@@ -8,16 +8,13 @@ from library_sample_shared.models import GenericLibrarySample, BarcodeCounter
 
 
 class Library(GenericLibrarySample):
-    index_reads = models.PositiveSmallIntegerField('Index Reads')
     mean_fragment_size = models.PositiveIntegerField(
         'Mean Fragment Size',
         null=True,
         blank=True,
     )
+
     qpcr_result = models.FloatField('qPCR Result', null=True, blank=True)
-    amplification_cycles = models.PositiveIntegerField(
-        'Amplification (cycles)',
-    )
 
     # Quality Control
     qpcr_result_facility = models.FloatField(

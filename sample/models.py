@@ -40,13 +40,7 @@ class Sample(GenericLibrarySample):
         blank=True,
     )
 
-    amplification_cycles = models.PositiveIntegerField(
-        'Amplification (cycles)',
-        null=True,
-        blank=True,
-    )
-
-    is_converted = models.BooleanField('Is converted?', default=False)
+    is_converted = models.BooleanField('Converted', default=False)
 
     # Quality Control
     rna_quality_facility = models.FloatField(

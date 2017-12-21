@@ -147,7 +147,7 @@ class LibraryProtocol(models.Model):
     class Meta:
         verbose_name = 'Library Protocol'
         verbose_name_plural = 'Library Protocols'
-        # ordering = ['name']
+        ordering = ['name']
 
     def __str__(self):
         return self.name
@@ -190,51 +190,74 @@ class GenericLibrarySample(DateTimeMixin):
         'Name',
         max_length=200,
     )
+
     status = models.SmallIntegerField(default=0)
+
     library_protocol = models.ForeignKey(
         LibraryProtocol,
         verbose_name='Library Protocol',
     )
+
     library_type = models.ForeignKey(
         LibraryType,
         verbose_name='Library Type',
     )
+
     organism = models.ForeignKey(
         Organism,
         verbose_name='Organism'
     )
+
     concentration = models.FloatField('Concentration')
+
     concentration_method = models.ForeignKey(
         ConcentrationMethod,
         verbose_name='Concentration Method',
     )
+
     equal_representation_nucleotides = models.BooleanField(
         'Equal Representation of Nucleotides',
         default=True,
     )
+
     read_length = models.ForeignKey(
         ReadLength,
         verbose_name='Read Length',
     )
+
     sequencing_depth = models.PositiveIntegerField('Sequencing Depth')
+
     comments = models.TextField('Comments', null=True, blank=True)
-    is_pooled = models.BooleanField('Is pooled?', default=False)
+
+    is_pooled = models.BooleanField('Pooled', default=False)
+
     barcode = models.CharField('Barcode', max_length=9)
+
     index_type = models.ForeignKey(
         IndexType,
         verbose_name='Index Type',
         null=True,
         blank=True,
     )
+
+    index_reads = models.PositiveSmallIntegerField('Index Reads', default=0)
+
     index_i7 = models.CharField(
         'Index I7',
         max_length=8,
         null=True,
         blank=True,
     )
+
     index_i5 = models.CharField(
         'Index I5',
         max_length=8,
+        null=True,
+        blank=True,
+    )
+
+    amplification_cycles = models.PositiveIntegerField(
+        'Amplification cycles',
         null=True,
         blank=True,
     )
