@@ -9,19 +9,17 @@ Ext.define('MainHub.view.invoicing.Invoicing', {
 
   controller: 'invoicing',
 
-  layout: {
-    type: 'hbox',
-    align: 'stretch'
-  },
+  layout: 'border',
+  height: Ext.Element.getViewportHeight() - 64,
 
   items: [
     {
       xtype: 'grid',
       id: 'invoicing-grid',
       itemId: 'invoicing-grid',
-      height: Ext.Element.getViewportHeight() - 64,
+      region: 'center',
+      layout: 'fit',
       padding: 15,
-      flex: 1,
 
       viewConfig: {
         deferEmptyText: false,
@@ -187,11 +185,9 @@ Ext.define('MainHub.view.invoicing.Invoicing', {
     },
     {
       title: 'Costs',
-      // headerPosition: 'right',
-      padding: '15px 10px 15px 0',
-      margin: '0 8px 0 0',
+      margin: '15px 15px 15px 0',
       autoScroll: true,
-      height: Ext.Element.getViewportHeight() - 64,
+      region: 'east',
       width: 350,
 
       collapsed: true,
