@@ -68,6 +68,10 @@ class Request(DateTimeMixin):
         return list(chain(self.samples.all(), self.libraries.all()))
 
     @property
+    def total_sequencing_depth(self):
+        return sum([x.sequencing_depth for x in self.records])
+
+    @property
     def statuses(self):
         return [x.status for x in self.records]
 

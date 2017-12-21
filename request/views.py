@@ -3,6 +3,7 @@ import logging
 import itertools
 from unicodedata import normalize
 
+from django.apps import apps
 from django.http import HttpResponse, JsonResponse
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -10,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
+from django.db.models import Prefetch
 
 from rest_framework import viewsets, filters
 from rest_framework.decorators import detail_route, permission_classes
@@ -27,27 +29,30 @@ from .models import Request, FileRequest
 from .serializers import RequestSerializer, RequestFileSerializer
 
 User = get_user_model()
+Library = apps.get_model('library', 'Library')
+Sample = apps.get_model('sample', 'Sample')
+
 logger = logging.getLogger('db')
 
 
-def handle_request_id_exceptions(func):
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
+# def handle_request_id_exceptions(func):
+#     def wrapper(*args, **kwargs):
+#         try:
+#             return func(*args, **kwargs)
 
-        except ValueError:
-            return Response({
-                'success': False,
-                'message': 'Id is not provided.',
-            }, 400)
+#         except ValueError:
+#             return Response({
+#                 'success': False,
+#                 'message': 'Id is not provided.',
+#             }, 400)
 
-        except Request.DoesNotExist:
-            return Response({
-                'success': False,
-                'message': 'Request does not exist.',
-            }, 404)
+#         except Request.DoesNotExist:
+#             return Response({
+#                 'success': False,
+#                 'message': 'Request does not exist.',
+#             }, 404)
 
-    return wrapper
+#     return wrapper
 
 
 class PDF(FPDF):
@@ -156,8 +161,13 @@ class RequestViewSet(viewsets.ModelViewSet):
                      'user__last_name',)
 
     def get_queryset(self):
-        queryset = Request.objects.prefetch_related(
-            'user', 'libraries', 'samples', 'files'
+        libraries_qs = Library.objects.all().only('status', 'sequencing_depth')
+        samples_qs = Sample.objects.all().only('status', 'sequencing_depth')
+
+        queryset = Request.objects.select_related('user').prefetch_related(
+            Prefetch('libraries', queryset=libraries_qs),
+            Prefetch('samples', queryset=samples_qs),
+            'files',
         ).order_by('-create_time')
 
         if self.request.user.is_staff:

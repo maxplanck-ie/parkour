@@ -7,7 +7,6 @@ from .models import Request, FileRequest
 
 class RequestSerializer(ModelSerializer):
     user_full_name = SerializerMethodField()
-    total_sequencing_depth = SerializerMethodField()
     restrict_permissions = SerializerMethodField()
     deep_seq_request_name = SerializerMethodField()
     deep_seq_request_path = SerializerMethodField()
@@ -16,19 +15,12 @@ class RequestSerializer(ModelSerializer):
     class Meta:
         model = Request
         fields = ('pk', 'name', 'user', 'user_full_name', 'create_time',
-                  'description', 'total_sequencing_depth', 'files',
+                  'description', 'total_sequencing_depth',
                   'restrict_permissions', 'deep_seq_request_name',
-                  'deep_seq_request_path',)
+                  'deep_seq_request_path', 'files',)
 
     def get_user_full_name(self, obj):
         return obj.user.full_name
-
-    def get_total_sequencing_depth(self, obj):
-        library_depths = obj.libraries.values_list(
-            'sequencing_depth', flat=True)
-        sample_depths = obj.samples.values_list(
-            'sequencing_depth', flat=True)
-        return sum(library_depths) + sum(sample_depths)
 
     def get_restrict_permissions(self, obj):
         """
@@ -38,14 +30,6 @@ class RequestSerializer(ModelSerializer):
         return True if not obj.user.is_staff and obj.statuses.count(0) == 0 \
             else False
 
-    def get_files(self, obj):
-        files = [{
-            'pk': file.pk,
-            'name': file.name.split('/')[-1],
-            'path': settings.MEDIA_URL + file.file.name,
-        } for file in obj.files.all()]
-        return files
-
     def get_deep_seq_request_name(self, obj):
         return obj.deep_seq_request.name.split('/')[-1] \
             if obj.deep_seq_request else ''
@@ -53,6 +37,14 @@ class RequestSerializer(ModelSerializer):
     def get_deep_seq_request_path(self, obj):
         return settings.MEDIA_URL + obj.deep_seq_request.name \
             if obj.deep_seq_request else ''
+
+    def get_files(self, obj):
+        files = [{
+            'pk': file.pk,
+            'name': file.name.split('/')[-1],
+            'path': settings.MEDIA_URL + file.file.name,
+        } for file in obj.files.all()]
+        return files
 
     def to_internal_value(self, data):
         internal_value = super().to_internal_value(data)
