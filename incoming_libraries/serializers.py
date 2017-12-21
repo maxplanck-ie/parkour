@@ -112,8 +112,8 @@ class RequestSerializer(ModelSerializer):
         return obj.name
 
     def to_representation(self, instance):
-        result = []
         data = super().to_representation(instance)
+        result = []
 
         if not any(data['libraries']) and not any(data['samples']):
             return []

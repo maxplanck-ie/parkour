@@ -1,5 +1,7 @@
 import random
 
+from django.apps import apps
+
 from rest_framework.serializers import (
     ModelSerializer,
     SerializerMethodField,
@@ -9,8 +11,9 @@ from rest_framework.serializers import (
 from library_sample_shared.serializers import LibrarySampleBaseSerializer
 from sample.serializers import SampleSerializer
 
-from library.models import Library
-from request.models import Request
+
+Library = apps.get_model('library', 'Library')
+Request = apps.get_model('request', 'Request')
 
 
 class LibrarySerializer(LibrarySampleBaseSerializer):
@@ -34,28 +37,16 @@ class LibrarySerializer(LibrarySampleBaseSerializer):
 
 class RequestParentNodeSerializer(ModelSerializer):
     id = SerializerMethodField()
-    name = SerializerMethodField()
     cls = SerializerMethodField()
     leaf = SerializerMethodField()
 
     class Meta:
         model = Request
-        fields = ('id', 'name', 'cls', 'leaf',)
+        fields = ('id', 'name', 'total_records_count',
+                  'total_sequencing_depth', 'cls', 'leaf',)
 
     def get_id(self, obj):
         return obj.pk
-
-    def get_name(self, obj):
-        num_total = obj.libraries.count() + obj.samples.count()
-        sum_total = \
-            sum(obj.libraries.values_list('sequencing_depth', flat=True)) + \
-            sum(obj.samples.values_list('sequencing_depth', flat=True))
-
-        name = f'<strong>Request: {obj.name}</strong> ' + \
-               f'(# of Libraries/Samples: {num_total}, ' + \
-               f'Total Sequencing Depth: {sum_total} M)'
-
-        return name
 
     def get_cls(self, obj):
         return 'parent-node-name'
@@ -65,48 +56,72 @@ class RequestParentNodeSerializer(ModelSerializer):
 
 
 class LibraryChildNodeSerializer(LibrarySerializer):
-    id = SerializerMethodField()
     leaf = SerializerMethodField()
 
     class Meta(LibrarySerializer.Meta):
-        fields = LibrarySerializer.Meta.fields + ('id', 'leaf',)
+        fields = LibrarySerializer.Meta.fields + ('leaf',)
 
-    def get_id(self, obj):
-        # Each leaf node needs a unique id
-        return obj.pk + obj.request.get().pk + random.randint(0, 1000)
+    def get_request_id(self, obj):
+        return None
+
+    def get_request_name(self, obj):
+        return None
 
     def get_leaf(self, obj):
         return True
 
 
 class SampleChildNodeSerializer(SampleSerializer):
-    id = SerializerMethodField()
     leaf = SerializerMethodField()
 
     class Meta(SampleSerializer.Meta):
-        fields = SampleSerializer.Meta.fields + ('id', 'leaf',)
+        fields = SampleSerializer.Meta.fields + ('leaf',)
 
-    def get_id(self, obj):
-        # Each leaf node needs a unique id
-        return obj.pk + obj.request.get().pk + random.randint(0, 1000)
+    def get_request_id(self, obj):
+        return None
+
+    def get_request_name(self, obj):
+        return None
 
     def get_leaf(self, obj):
         return True
 
 
 class RequestChildrenNodesSerializer(ModelSerializer):
+    id = SerializerMethodField()
+    request_id = SerializerMethodField()
+    request_name = SerializerMethodField()
     libraries = LibraryChildNodeSerializer(many=True)
     samples = SampleChildNodeSerializer(many=True)
 
     class Meta:
         model = Request
-        fields = ('libraries', 'samples',)
+        fields = ('id', 'request_id', 'request_name', 'libraries', 'samples',)
+
+    def get_id(self, obj):
+        # Each leaf node needs a unique id
+        return obj.pk + random.randint(0, 1000)
+
+    def get_request_id(self, obj):
+        return obj.pk
+
+    def get_request_name(self, obj):
+        return obj.name
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        libraries = data.pop('libraries')
-        samples = data.pop('samples')
-        merged_data = libraries + samples
+        result = []
+
+        for type in ['libraries', 'samples']:
+            result.extend(list(map(
+                lambda x: {**x, **{
+                    'id': data['id'] + x['pk'],
+                    'request_id': data['request_id'],
+                    'request_name': data['request_name']
+                }},
+                data.pop(type)
+            )))
+
         return {
-            'children': sorted(merged_data, key=lambda x: x['barcode'][3:])
+            'children': sorted(result, key=lambda x: x['barcode'][3:])
         }

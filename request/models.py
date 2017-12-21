@@ -1,4 +1,4 @@
-from itertools import chain
+import itertools
 
 from django.db import models
 from django.conf import settings
@@ -65,11 +65,15 @@ class Request(DateTimeMixin):
 
     @property
     def records(self):
-        return list(chain(self.samples.all(), self.libraries.all()))
+        return list(itertools.chain(self.samples.all(), self.libraries.all()))
 
     @property
     def total_sequencing_depth(self):
         return sum([x.sequencing_depth for x in self.records])
+
+    @property
+    def total_records_count(self):
+        return len(self.records)
 
     @property
     def statuses(self):
