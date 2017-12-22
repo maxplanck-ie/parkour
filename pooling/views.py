@@ -3,27 +3,40 @@ import time
 import logging
 import itertools
 
-from xlwt import Workbook, XFStyle, Formula
-
+from django.apps import apps
 from django.http import HttpResponse
-from django.db.models import Q
+from django.db.models import Q, Prefetch
+
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import list_route
 from rest_framework.permissions import IsAdminUser
 
+from xlwt import Workbook, XFStyle, Formula
+
+from common.utils import print_sql_queries
 from common.views import CsrfExemptSessionAuthentication
 from common.mixins import LibrarySampleMultiEditMixin
-from index_generator.models import Pool
-from library.models import Library
-from sample.models import Sample
 
-from .serializers import PoolingLibrarySerializer, PoolingSampleSerializer
+from .models import Pooling
+
+from .serializers import (
+    PoolingLibrarySerializer,
+    PoolingSampleSerializer,
+    PoolSerializer,
+)
+
+Request = apps.get_model('request', 'Request')
+Library = apps.get_model('library', 'Library')
+Sample = apps.get_model('sample', 'Sample')
+Pool = apps.get_model('index_generator', 'Pool')
+LibraryPreparation = apps.get_model('library_preparation',
+                                    'LibraryPreparation')
 
 logger = logging.getLogger('db')
 
 
-class PoolingViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
+class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ViewSet):
     permission_classes = [IsAdminUser]
     authentication_classes = [CsrfExemptSessionAuthentication]
     library_model = Library
@@ -31,24 +44,98 @@ class PoolingViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
     library_serializer = PoolingLibrarySerializer
     sample_serializer = PoolingSampleSerializer
 
+    def get_context(self, queryset):
+        library_ids = queryset.values_list('libraries', flat=True)
+        sample_ids = queryset.values_list('samples', flat=True)
+
+        # Get Requests in one query
+        requests = Request.objects.filter(
+            Q(libraries__in=library_ids) | Q(samples__in=sample_ids)
+        ).prefetch_related('samples').values(
+            'pk', 'name', 'libraries__id', 'samples__id'
+        ).distinct()
+
+        requests_map = {}
+        for item in requests:
+            if item['libraries__id']:
+                requests_map[item['libraries__id'], 'Library'] = {
+                    'pk': item['pk'],
+                    'name': item['name'],
+                }
+            else:
+                requests_map[item['samples__id'], 'Sample'] = {
+                    'pk': item['pk'],
+                    'name': item['name'],
+                }
+
+        # Get Library Preparation objects in one query
+        preparation_objects = LibraryPreparation.objects.filter(
+            sample__in=sample_ids
+        ).select_related('sample').only(
+            'sample__id',
+            'mean_fragment_size',
+            'concentration_library',
+        )
+        library_reparation_map = {x.sample.pk: x for x in preparation_objects}
+
+        # Get Pooling objects in one query
+        pooling_objects = Pooling.objects.select_related(
+            'library', 'sample'
+        ).filter(
+            Q(library__in=library_ids) | Q(sample__in=sample_ids)
+        ).only('library__id', 'sample__id', 'concentration_c1', 'create_time')
+        pooling_map = {}
+        for x in pooling_objects:
+            if x.library:
+                pooling_map[x.library.pk, 'Library'] = x
+            elif x.sample:
+                pooling_map[x.sample.pk, 'Sample'] = x
+
+        return {
+            'requests': requests_map,
+            'library_preparation': library_reparation_map,
+            'pooling': pooling_map,
+        }
+
+    @print_sql_queries
     def list(self, request):
         """ Get the list of all pooling objects. """
-        library_queryset = Library.objects.filter(
+        libraries_qs = Library.objects.filter(
             Q(status=2) | Q(status=-2)
-        ).exclude(pool=None)
-        sample_queryset = Sample.objects.filter(
-            Q(status=3) | Q(status=2) | Q(status=-2)
-        ).exclude(pool=None)
-
-        library_serializer = PoolingLibrarySerializer(
-            library_queryset, many=True)
-        sample_serializer = PoolingSampleSerializer(
-            sample_queryset, many=True)
-
-        data = sorted(
-            library_serializer.data + sample_serializer.data,
-            key=lambda x: x['barcode'][3:],
+        ).only(
+            'name',
+            'barcode',
+            'status',
+            'index_i7',
+            'index_i5',
+            'sequencing_depth',
+            'mean_fragment_size',
+            'concentration_facility'
         )
+
+        samples_qs = Sample.objects.filter(
+            Q(status=3) | Q(status=2) | Q(status=-2)
+        ).only(
+            'name',
+            'barcode',
+            'status',
+            'index_i7',
+            'index_i5',
+            'sequencing_depth',
+            'is_converted',
+        )
+
+        queryset = Pool.objects.select_related(
+            'size'
+        ).prefetch_related(
+            Prefetch('libraries', queryset=libraries_qs),
+            Prefetch('samples', queryset=samples_qs),
+        )
+
+        serializer = PoolSerializer(
+            queryset, many=True, context=self.get_context(queryset))
+        data = list(itertools.chain(*serializer.data))
+        data = sorted(data, key=lambda x: x['barcode'][3:])
 
         return Response(data)
 

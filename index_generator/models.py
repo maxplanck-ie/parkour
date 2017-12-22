@@ -1,3 +1,5 @@
+import itertools
+
 from django.db import models
 from django.conf import settings
 
@@ -37,6 +39,12 @@ class Pool(DateTimeMixin):
 
     def __str__(self):
         return self.name
+
+    @property
+    def total_sequencing_depth(self):
+        records = list(itertools.chain(
+            self.samples.all(), self.libraries.all()))
+        return sum([x.sequencing_depth for x in records])
 
     def save(self, *args, **kwargs):
         created = self.pk is None
