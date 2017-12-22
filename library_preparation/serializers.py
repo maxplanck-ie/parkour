@@ -7,8 +7,6 @@ from rest_framework.serializers import (
     CharField,
 )
 
-from library_sample_shared.models import IndexType
-
 from .models import LibraryPreparation
 
 
@@ -99,10 +97,10 @@ class LibraryPreparationSerializer(ModelSerializer):
         return obj.sample.barcode
 
     def get_request_name(self, obj):
-        return obj.sample.request.get().name
+        return self.context.get('requests').get(obj.sample.pk)
 
     def get_pool_name(self, obj):
-        return obj.sample.pool.get().name
+        return self.context.get('pools').get(obj.sample.pk)
 
     def get_is_converted(self, obj):
         return obj.sample.is_converted
@@ -123,17 +121,7 @@ class LibraryPreparationSerializer(ModelSerializer):
         return obj.sample.comments_facility
 
     def get_index_i7_id(self, obj):
-        try:
-            index_type = IndexType.objects.get(pk=obj.sample.index_type.pk)
-            index_i7 = index_type.indices_i7.get(index=obj.sample.index_i7)
-            return index_i7.index_id
-        except Exception:
-            return ''
+        return self.context.get('index_ids').get(obj.sample.pk)['index_i7_id']
 
     def get_index_i5_id(self, obj):
-        try:
-            index_type = IndexType.objects.get(pk=obj.sample.index_type.pk)
-            index_i5 = index_type.indices_i5.get(index=obj.sample.index_i5)
-            return index_i5.index_id
-        except Exception:
-            return ''
+        return self.context.get('index_ids').get(obj.sample.pk)['index_i5_id']

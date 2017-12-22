@@ -1,8 +1,10 @@
 import logging
 import json
 
-from django.http import HttpResponse
+from django.apps import apps
 from django.db.models import Q
+from django.http import HttpResponse
+
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import list_route
@@ -13,10 +15,16 @@ from xlwt import Workbook, XFStyle, Formula
 
 from common.views import CsrfExemptSessionAuthentication
 from common.mixins import MultiEditMixin
-from library_sample_shared.utils import get_indices_ids
 
 from .models import LibraryPreparation
 from .serializers import LibraryPreparationSerializer
+
+Request = apps.get_model('request', 'Request')
+IndexType = apps.get_model('library_sample_shared', 'IndexType')
+IndexI7 = apps.get_model('library_sample_shared', 'IndexI7')
+IndexI5 = apps.get_model('library_sample_shared', 'IndexI5')
+Pool = apps.get_model('index_generator', 'Pool')
+Sample = apps.get_model('sample', 'Sample')
 
 logger = logging.getLogger('db')
 
@@ -26,110 +34,154 @@ class LibraryPreparationViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
     authentication_classes = [CsrfExemptSessionAuthentication]
     serializer_class = LibraryPreparationSerializer
 
+    def get_queryset(self):
+        return LibraryPreparation.objects.select_related(
+            'sample',
+            'sample__index_type',
+            'sample__library_protocol',
+        ).filter(Q(sample__status=2) | Q(sample__status=-2))
+
+    def get_context(self, queryset):
+        sample_ids = queryset.values_list('sample', flat=True)
+
+        # Get Requests
+        requests = Request.objects.filter(
+            samples__pk__in=sample_ids).distinct().values('name', 'samples')
+        requests_map = {x['samples']: x['name'] for x in requests}
+
+        # Get Pools
+        pools = Pool.objects.filter(
+            samples__pk__in=sample_ids).distinct().values('name', 'samples')
+        pools_map = {x['samples']: x['name'] for x in pools}
+
+        # Get Indices
+        index_type_ids = {
+            x.sample.index_type.pk
+            for x in queryset if x.sample.index_type
+        }
+        indices_i7 = {x.sample.index_i7 for x in queryset}
+        indices_i5 = {x.sample.index_i5 for x in queryset}
+
+        indices_i7 = IndexI7.objects.filter(
+            index_type__in=index_type_ids, index__in=indices_i7
+        ).values('index_type', 'index_id', 'index')
+        indices_i7_map = {
+            (x['index_type'], x['index']): x['index_id']
+            for x in indices_i7
+        }
+
+        indices_i5 = IndexI5.objects.filter(
+            index_type__in=index_type_ids, index__in=indices_i5
+        ).values('index_type', 'index_id', 'index')
+        indices_i5_map = {
+            (x['index_type'], x['index']): x['index_id']
+            for x in indices_i5
+        }
+
+        index_ids_map = {}
+        for x in queryset:
+            index_ids_map[x.sample.pk] = {'index_i7_id': '', 'index_i5_id': ''}
+            if x.sample.index_type:
+                index_ids_map[x.sample.pk].update({
+                    'index_i7_id': indices_i7_map.get(
+                        (x.sample.index_type.pk, x.sample.index_i7), ''),
+                    'index_i5_id': indices_i5_map.get(
+                        (x.sample.index_type.pk, x.sample.index_i5), ''),
+                })
+
+        return {
+            'index_ids': index_ids_map,
+            'requests': requests_map,
+            'pools': pools_map,
+        }
+
     def list(self, request):
         queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = LibraryPreparationSerializer(
+            queryset, many=True, context=self.get_context(queryset)
+        )
         data = sorted(serializer.data, key=lambda x: x['barcode'][3:])
         return Response(data)
-
-    def get_queryset(self):
-        return LibraryPreparation.objects.select_related('sample').filter(
-            Q(sample__status=2) | Q(sample__status=-2)
-        )
 
     @list_route(methods=['post'])
     # @authentication_classes((CsrfExemptSessionAuthentication))
     def download_benchtop_protocol(self, request):
         """ Generate Benchtop Protocol as XLS file for selected samples. """
-        response = HttpResponse(content_type='application/ms-excel')
         ids = json.loads(request.data.get('ids', '[]'))
-        objects = LibraryPreparation.objects.filter(pk__in=ids).order_by(
-            'sample__barcode',
+
+        filename = 'Library_Preparation_Benchtop_Protocol.xls'
+        response = HttpResponse(content_type='application/ms-excel')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+        queryset = self.filter_queryset(self.get_queryset()).filter(pk__in=ids)
+        serializer = LibraryPreparationSerializer(
+            queryset, many=True, context=self.get_context(queryset)
         )
-
-        f_name = 'Library_Preparation_Benchtop_Protocol.xls'
-        response['Content-Disposition'] = 'attachment; filename="%s"' % f_name
-
-        wb = Workbook(encoding='utf-8')
-        ws = wb.add_sheet('Benchtop Protocol')
-        col_letters = {
-            0: 'A',   # Request ID
-            1: 'B',   # Pool ID
-            2: 'C',   # Sample
-            3: 'D',   # Barcode
-            4: 'E',   # Protocol
-            5: 'F',   # Concentration Sample
-            6: 'G',   # Starting Amount
-            7: 'H',   # Starting Volume
-            8: 'I',   # Spike-in Description
-            9: 'J',   # Spike-in Volume
-            10: 'K',  # µl Sample
-            11: 'L',  # µl Buffer
-            12: 'M',  # Index I7 ID
-            13: 'N',  # Index I5 ID
-        }
-
-        header = ['Request ID', 'Pool ID', 'Sample', 'Barcode', 'Protocol',
-                  'Concentration Sample (ng/µl)', 'Starting Amount (ng)',
-                  'Starting Volume (µl)', 'Spike-in Description',
-                  'Spike-in Volume (µl)', 'µl Sample', 'µl Buffer',
-                  'Index I7 ID', 'Index I5 ID']
-        row_num = 0
-
-        font_style = XFStyle()
-        font_style.font.bold = True
-
-        for i, column in enumerate(header):
-            ws.write(row_num, i, column, font_style)
-            ws.col(i).width = 7000  # Set column width
+        data = sorted(serializer.data, key=lambda x: x['barcode'][3:])
 
         font_style = XFStyle()
         font_style.alignment.wrap = 1
+        font_style_bold = XFStyle()
+        font_style_bold.font.bold = True
 
-        for lib_prep_obj in objects:
-            sample = lib_prep_obj.sample
-            req = sample.request.get()
-            pool = sample.pool.get()
-            index_i7_id, index_i5_id = get_indices_ids(sample)
+        wb = Workbook(encoding='utf-8')
+        ws = wb.add_sheet('Benchtop Protocol')
+
+        header = [
+            'Request ID',
+            'Pool ID',
+            'Sample',
+            'Barcode',
+            'Protocol',
+            'Concentration Sample (ng/µl)',
+            'Starting Amount (ng)',
+            'Starting Volume (µl)',
+            'Spike-in Description',
+            'Spike-in Volume (µl)',
+            'µl Sample',
+            'µl Buffer',
+            'Index I7 ID',
+            'Index I5 ID',
+        ]
+
+        row_num = 0
+
+        for i, column in enumerate(header):
+            ws.write(row_num, i, column, font_style_bold)
+            ws.col(i).width = 8000
+
+        for item in data:
             row_num += 1
             row_idx = str(row_num + 1)
+            library_preparation_object = LibraryPreparation.objects.filter(
+                sample_id=item['pk']
+            ).only('starting_amount', 'spike_in_description').first()
 
             row = [
-                req.name,                           # Request
-                pool.name,                          # Pool
-                sample.name,                        # Sample
-                sample.barcode,                     # Barcode
-                sample.library_protocol.name,       # Library Protocol
-                sample.concentration_facility,      # Concentration
-                lib_prep_obj.starting_amount,       # Starting Amount
-                '',                                 # Starting Volume
-                lib_prep_obj.spike_in_description,  # Spike-in Description
-                '',                                 # Spike-in Volume
+                item['request_name'],
+                item['pool_name'],
+                item['name'],
+                item['barcode'],
+                item['library_protocol_name'],
+                item['concentration_sample'],
+                library_preparation_object.starting_amount,
+                '',
+                library_preparation_object.spike_in_description,
+                '',
             ]
 
             # µl Sample = Starting Amount / Concentration Sample
-            col_starting_amount = col_letters[6]
-            col_concentration = col_letters[5]
-            formula = col_starting_amount + row_idx + '/' + \
-                col_concentration + row_idx
+            formula = f'G{row_idx}/F{row_idx}'
             row.append(Formula(formula))
 
             # µl Buffer = Starting Volume - Spike-in Volume - µl Sample
-            col_starting_volume = col_letters[7]
-            col_ul_sample = col_letters[10]
-            col_spike_in_volume = col_letters[9]
-            formula = '{}{}-{}{}-{}{}'.format(
-                col_starting_volume, row_idx,
-                col_spike_in_volume, row_idx,
-                col_ul_sample, row_idx,
-            )
+            formula = f'H{row_idx}-J{row_idx}-K{row_idx}'
             row.append(Formula(formula))
 
-            row.extend([index_i7_id, index_i5_id])
+            row.extend([item['index_i7_id'], item['index_i5_id']])
 
             for i in range(len(row)):
                 ws.write(row_num, i, row[i], font_style)
 
         wb.save(response)
-
         return response
