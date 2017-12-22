@@ -39,6 +39,7 @@ Ext.define('MainHub.view.requests.Requests', {
     },
     viewConfig: {
       emptyText: '<h1 style="text-align:center;margin:75px">No items</h1>',
+      deferEmptyText: false,
       stripeRows: false
     },
     store: 'requestsStore',
@@ -73,8 +74,9 @@ Ext.define('MainHub.view.requests.Requests', {
           dataIndex: 'description',
           flex: 1,
           renderer: function (value, meta) {
-            meta.tdAttr = 'data-qtip="' + value + '" data-qwidth=300';
-            return value;
+            var val = Ext.util.Format.htmlEncode(value);
+            meta.tdAttr = 'data-qtip="' + val + '" data-qwidth=300';
+            return val;
           }
         }
       ]
@@ -88,11 +90,13 @@ Ext.define('MainHub.view.requests.Requests', {
       expandOnDblClick: false,
       headerWidth: 28,
       rowBodyTpl: new Ext.XTemplate(
-            '<strong>Attached files:</strong><br/>',
-            '<tpl for="files">',
-            '<span class="attached-file-link"><a href="{path}" download>{name}</a></span><br/>',
-            '</tpl>'
-        )
+        '<strong>Attached files:</strong><br/>',
+        '<tpl for="files">',
+          '<span class="attached-file-link">',
+            '<a href="{path}" download>{name}</a>',
+          '</span><br/>',
+        '</tpl>'
+      )
     }]
   }]
 });

@@ -39,20 +39,12 @@ Ext.define('MainHub.view.requests.RequestWindow', {
             },
             items: [
               {
-                name: 'name',
-                id: 'requestName',
-                fieldLabel: 'Name',
-                emptyText: 'Name',
-                readOnly: true,
-                disabled: true
-              },
-              {
                 name: 'description',
                 xtype: 'textarea',
                 fieldLabel: 'Description',
                 emptyText: 'Description',
                 allowBlank: false,
-                height: 125
+                height: 165
               },
               {
                 xtype: 'filegridfield',
@@ -70,13 +62,13 @@ Ext.define('MainHub.view.requests.RequestWindow', {
             id: 'uploadedDeepSeqRequest',
             border: 0,
             html: 'Signed Deep Sequencing Request ' +
-                        '<sup><strong><span class="request-field-tooltip" tooltip-text="' +
-                          '1. Save the request.<br/>' +
-                          '2. Download the Deep Sequencing Request blank using the download button below.<br/>' +
-                          '3. Print and sign it.<br/>' +
-                          '4. Scan the blank and upload it back using the upload button below.<br/><br/>' +
-                        '<strong>Note</strong>: if the blank is already uploaded, you cannot update it.' +
-                      '">[?]</span></strong></sup>: <span id="uploaded-request-file">Not uploaded</span>'
+                    '<sup><strong><span class="request-field-tooltip" tooltip-text="' +
+                      '1. Save the request.<br/>' +
+                      '2. Download the Deep Sequencing Request blank using the download button below.<br/>' +
+                      '3. Print and sign it.<br/>' +
+                      '4. Scan the blank and upload it back using the upload button below.<br/><br/>' +
+                    '<strong>Note</strong>: if the blank is already uploaded, you cannot update it.' +
+                  '">[?]</span></strong></sup>: <span id="uploaded-request-file">Not uploaded</span>'
           }
         ]
       },
@@ -104,10 +96,6 @@ Ext.define('MainHub.view.requests.RequestWindow', {
             tdCls: 'no-dirty',
             width: 40
           },
-          // {
-          //     xtype: 'rownumberer',
-          //     width: 40
-          // },
           {
             text: 'Name',
             dataIndex: 'name',
@@ -125,10 +113,8 @@ Ext.define('MainHub.view.requests.RequestWindow', {
             text: 'Barcode',
             dataIndex: 'barcode',
             width: 95,
-            renderer: function (value, meta) {
-              // var record = Ext.getStore('librariesInRequestStore').findRecord('barcode', value);
-              // return record ? record.getBarcode() : value;
-              return meta.record.getBarcode();
+            renderer: function (value, meta, record) {
+              return record.getBarcode();
             }
           }]
         },

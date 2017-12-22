@@ -58,15 +58,17 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
       var request = wnd.record.data;
 
       form.setValues(request);
-      Ext.getCmp('requestName').enable();
 
       if (request.deep_seq_request_path !== '') {
         $('#uploaded-request-file').html(
-              Ext.String.format(
-                  '<a href="{0}" download>uploaded</a>',
-                  request.deep_seq_request_path
-              )
-          );
+          '<a href="javascript:void(0)" class="uploaded-request-link">uploaded</a>'
+        ).on('click', function () {
+          var link = document.createElement('a');
+          link.href = request.deep_seq_request_path;
+          link.download = request.deep_seq_request_name;
+          link.click();
+        });
+
         downloadRequestBlankBtn.disable();
         uploadSignedRequestBtn.disable();
       }

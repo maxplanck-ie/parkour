@@ -10,13 +10,10 @@ Ext.define('MainHub.view.requests.RequestsController', {
       '#requests-grid': {
         resize: 'resize',
         boxready: 'boxready',
-        itemcontextmenu: 'showContextMenu'
+        itemcontextmenu: 'showMenu'
       },
       '#add-request-button': {
         click: 'addRequest'
-      },
-      '#search-field': {
-        change: 'search'
       }
     }
   },
@@ -30,7 +27,7 @@ Ext.define('MainHub.view.requests.RequestsController', {
   },
 
   boxready: function () {
-        // Hide the User column for non-administrators
+    // Hide the User column for non-administrators
     if (!USER_IS_STAFF) {
       Ext.getCmp('requests-grid').down('[dataIndex=user_full_name]').setVisible(false);
     }
@@ -38,36 +35,19 @@ Ext.define('MainHub.view.requests.RequestsController', {
 
   addRequest: function (btn) {
     Ext.create('MainHub.view.requests.RequestWindow', {
-      title: 'Add Request',
+      title: 'New Request',
       mode: 'add'
     }).show();
   },
 
-  search: function (fld, query) {
-    var grid = Ext.getCmp('requests-grid');
-    var store = grid.getStore();
-    var columns = Ext.pluck(grid.getColumns(), 'dataIndex');
-
-    store.clearFilter();
-    store.filterBy(function (record) {
-      var res = false;
-      Ext.each(columns, function (column) {
-        if (record.data[column].toString().toLowerCase().indexOf(query.toLowerCase()) > -1) {
-          res = res || true;
-        }
-      });
-      return res;
-    });
-  },
-
-  showContextMenu: function (grid, record, itemEl, index, e) {
+  showMenu: function (grid, record, itemEl, index, e) {
     var me = this;
 
     var menuItems = [{
-      text: 'Edit Request',
+      text: 'View',
       handler: function () {
         Ext.create('MainHub.view.requests.RequestWindow', {
-          title: 'Edit',
+          title: record.get('name'),
           mode: 'edit',
           record: record
         }).show();
@@ -75,7 +55,7 @@ Ext.define('MainHub.view.requests.RequestsController', {
     }];
 
     var deleteRequestOption = {
-      text: 'Delete Request',
+      text: 'Delete',
       handler: function () {
         Ext.Msg.show({
           title: 'Delete Request',

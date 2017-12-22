@@ -245,12 +245,26 @@ class RequestViewSet(viewsets.ModelViewSet):
     @detail_route(methods=['get'])
     def get_records(self, request, pk=None):
         """ Get the list of record's submitted libraries and samples. """
-        instance = self.get_object()
+        libraries_qs = Library.objects.all().only(
+            'name',
+            'barcode',
+        )
+        samples_qs = Sample.objects.all().only(
+            'name',
+            'barcode',
+            'is_converted',
+        )
+
+        instance = Request.objects.filter(pk=pk).prefetch_related(
+            Prefetch('libraries', queryset=libraries_qs),
+            Prefetch('samples', queryset=samples_qs),
+        ).only('libraries', 'samples').first()
+
         data = [{
             'pk': obj.pk,
-            'record_type': obj.__class__.__name__,
             'name': obj.name,
             'barcode': obj.barcode,
+            'record_type': obj.__class__.__name__,
             'is_converted': True
             if hasattr(obj, 'is_converted') and obj.is_converted else False,
         } for obj in instance.records]
