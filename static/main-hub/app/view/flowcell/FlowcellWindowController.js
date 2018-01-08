@@ -77,7 +77,7 @@ Ext.define('MainHub.view.flowcell.FlowcellWindowController', {
         handler: function () {
           Ext.create('MainHub.view.flowcell.PoolInfoWindow', {
             title: record.get('name'),
-            poolId: record.get('pk')
+            pool: record.get('pk')
           });
         }
       }]
