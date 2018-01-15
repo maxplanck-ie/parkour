@@ -1,16 +1,23 @@
 import json
+from datetime import datetime
 
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 
 from common.tests import BaseTestCase
-from common.utils import generate_barcode, get_random_name
+from common.utils import get_random_name
+
 from request.models import Request
-from library_sample_shared.models import (Organism, ConcentrationMethod,
-                                          ReadLength, LibraryProtocol,
-                                          LibraryType, IndexType,
-                                          BarcodeCounter)
+from library_sample_shared.models import (
+    Organism,
+    ConcentrationMethod,
+    ReadLength,
+    LibraryProtocol,
+    LibraryType,
+    IndexType,
+    BarcodeCounter,
+)
 from library.models import Library
 from sample.tests import create_sample
 
@@ -79,15 +86,17 @@ class TestLibraryModel(TestCase):
         Ensure the barcode counter is incremented and is assigned to a
         new library.
         """
-        prev_counter = BarcodeCounter.load().counter
+        prev_counter = BarcodeCounter.load().last_id
         self.assertEqual(self.library.barcode, '')
         self.library.save()
 
-        updated_library = Library.objects.get(pk=self.library.pk)
-        new_counter = BarcodeCounter.load().counter
-        barcode = generate_barcode('L', str(new_counter))
-
+        new_counter = BarcodeCounter.load().last_id
         self.assertEqual(new_counter, prev_counter + 1)
+
+        barcode = datetime.now().strftime('%y') + 'L'
+        barcode += '0' * (6 - len(str(new_counter))) + str(new_counter)
+
+        updated_library = Library.objects.get(pk=self.library.pk)
         self.assertEqual(updated_library.barcode, barcode)
 
 

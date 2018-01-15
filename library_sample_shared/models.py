@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db import models
 
 from common.models import DateTimeMixin
@@ -99,31 +101,24 @@ class IndexType(models.Model):
         return self.name
 
 
-class BarcodeSingletonModel(models.Model):
-    class Meta:
-        abstract = True
+class BarcodeCounter(models.Model):
+    year = models.PositiveSmallIntegerField(
+        default=datetime.now().year,
+        unique=True
+    )
 
-    def save(self, *args, **kwargs):
-        self.pk = 1
-        super(BarcodeSingletonModel, self).save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        pass
+    last_id = models.PositiveSmallIntegerField(default=0)
 
     @classmethod
-    def load(cls):
-        obj, created = cls.objects.get_or_create(pk=1)
+    def load(cls, year=datetime.now().year):
+        obj, created = cls.objects.get_or_create(year=year)
         return obj
 
-
-class BarcodeCounter(BarcodeSingletonModel):
-    counter = models.PositiveSmallIntegerField(default=0)
-
     def increment(self):
-        self.counter += 1
+        self.last_id += 1
 
     def __str__(self):
-        return str(self.counter)
+        return str(self.last_id)
 
 
 class LibraryProtocol(models.Model):
@@ -310,8 +305,27 @@ class GenericLibrarySample(DateTimeMixin):
     class Meta:
         abstract = True
 
-    def get_record_type(self):
-        return 'L' if 'L' in self.barcode else 'S'
+    # def get_record_type(self):
+    #     return 'L' if 'L' in self.barcode else 'S'
+
+    def generate_barcode(self):
+        counter = BarcodeCounter.load()
+        counter.increment()
+        counter.save()
+
+        record_type = self.__class__.__name__[0]
+        barcode = datetime.now().strftime('%y') + record_type
+        barcode += '0' * (6 - len(str(counter))) + str(counter)
+
+        self.barcode = barcode
+        self.save(update_fields=['barcode'])
+
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        super().save(*args, **kwargs)
+
+        if created:
+            self.generate_barcode()
 
     def __str__(self):
         return self.name

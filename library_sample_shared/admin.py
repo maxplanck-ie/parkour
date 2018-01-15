@@ -1,8 +1,16 @@
 from django.contrib import admin
 from django_admin_listfilter_dropdown.filters import RelatedDropdownFilter
 
-from .models import (Organism, ConcentrationMethod, ReadLength, IndexType,
-                     IndexI7, IndexI5, LibraryProtocol, LibraryType)
+from .models import (
+    Organism,
+    ConcentrationMethod,
+    ReadLength,
+    IndexType,
+    IndexI7,
+    IndexI5,
+    LibraryProtocol,
+    LibraryType,
+)
 from .forms import IndexTypeForm
 
 
