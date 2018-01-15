@@ -1,9 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 
-from common.utils import generate_barcode
-from library_sample_shared.models import GenericLibrarySample, BarcodeCounter
-# from pooling.models import Pooling
+from library_sample_shared.models import GenericLibrarySample
 
 
 class NucleicAcidType(models.Model):
@@ -51,23 +49,23 @@ class Sample(GenericLibrarySample):
         verbose_name = 'Sample'
         verbose_name_plural = 'Samples'
 
-    def save(self, *args, **kwargs):
-        # prev_obj = type(self).objects.get(pk=self.pk) if self.pk else None
-        created = self.pk is None
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     # prev_obj = type(self).objects.get(pk=self.pk) if self.pk else None
+    #     created = self.pk is None
+    #     super().save(*args, **kwargs)
 
-        if created:
-            # Create barcode
-            counter = BarcodeCounter.load()
-            counter.increment()
-            counter.save()
+    #     if created:
+    #         # Create barcode
+    #         counter = BarcodeCounter.load()
+    #         counter.increment()
+    #         counter.save()
 
-            self.barcode = generate_barcode('S', str(counter.counter))
-            self.save(update_fields=['barcode'])
+    #         self.barcode = generate_barcode('S', str(counter.counter))
+    #         self.save(update_fields=['barcode'])
 
-        # When a Library Preparation object passes the quality check and
-        # the corresponding sample's status changes to 3,
-        # create a Pooling object
-        # if prev_obj and prev_obj.status in [2, -2] and self.status == 3:
-        #     pooling_obj = Pooling(sample=self)
-        #     pooling_obj.save()
+    #     # When a Library Preparation object passes the quality check and
+    #     # the corresponding sample's status changes to 3,
+    #     # create a Pooling object
+    #     # if prev_obj and prev_obj.status in [2, -2] and self.status == 3:
+    #     #     pooling_obj = Pooling(sample=self)
+    #     #     pooling_obj.save()

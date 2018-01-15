@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 
 from common.tests import BaseTestCase
 from common.utils import get_random_name
+
 from .models import (
     Organism,
     ConcentrationMethod,
@@ -17,7 +18,6 @@ from .models import (
     LibraryType,
     GenericLibrarySample,
 )
-
 
 User = get_user_model()
 
@@ -111,13 +111,23 @@ class GenericIndexTest(TestCase):
 
 class BarcodeCounterTest(TestCase):
     def setUp(self):
-        counter = BarcodeCounter.load()
-        counter.increment()
-        counter.save()
+        counter1 = BarcodeCounter.load(2017)
+        counter1.save()
 
-    def test_barcode_counter_name(self):
+        counter2 = BarcodeCounter.load()
+        counter2.increment()
+        counter2.save()
+
+    def test_increment(self):
+        counter1 = BarcodeCounter.load(2017)
+        counter2 = BarcodeCounter.load()
+
+        self.assertEqual(counter1.last_id, 0)
+        self.assertEqual(counter2.last_id, 1)
+
+    def test_name(self):
         counter = BarcodeCounter.load()
-        self.assertEqual(counter.__str__(), str(counter.counter))
+        self.assertEqual(str(counter), str(counter.last_id))
 
 
 class LibraryProtocolTest(TestCase):
