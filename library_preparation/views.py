@@ -154,7 +154,7 @@ class LibraryPreparationViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
             row_num += 1
             row_idx = str(row_num + 1)
             library_preparation_object = LibraryPreparation.objects.filter(
-                sample_id=item['pk']
+                id=item['pk']
             ).only('starting_amount', 'spike_in_description').first()
 
             row = [
