@@ -4,10 +4,10 @@ import logging
 import unicodedata
 import itertools
 
-from django.http import HttpResponse, JsonResponse
-from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
-from django.db.models import Q
+from django.apps import apps
+from django.db.models import Q, Prefetch
+from django.http import HttpResponse
+
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import list_route
@@ -15,20 +15,26 @@ from rest_framework.permissions import IsAdminUser
 
 from xlwt import Workbook, XFStyle
 
+from common.utils import print_sql_queries
 from common.views import CsrfExemptSessionAuthentication
 from common.mixins import MultiEditMixin
-from index_generator.models import Pool
-from library_sample_shared.models import ReadLength, IndexI7, IndexI5
 
 from .models import Sequencer, Lane, Flowcell
-from .forms import FlowcellForm
 from .serializers import (
     SequencerSerializer,
     FlowcellSerializer,
+    FlowcellListSerializer,
     LaneSerializer,
     PoolSerializer,
     PoolInfoSerializer,
 )
+
+ReadLength = apps.get_model('library_sample_shared', 'ReadLength')
+IndexI7 = apps.get_model('library_sample_shared', 'IndexI7')
+IndexI5 = apps.get_model('library_sample_shared', 'IndexI5')
+Library = apps.get_model('library', 'Library')
+Sample = apps.get_model('sample', 'Sample')
+Pool = apps.get_model('index_generator', 'Pool')
 
 logger = logging.getLogger('db')
 
@@ -66,151 +72,6 @@ def indices_present(libraries, samples):
     return index_i7_show, index_i5_show, equal_representation
 
 
-@login_required
-@staff_member_required
-def get_all(request):
-    """ Get the list of all Flowcells. """
-    data = []
-
-    try:
-        for flowcell in Flowcell.objects.prefetch_related('lanes'):
-            for lane in flowcell.lanes.filter(completed=False):
-                pool = lane.pool
-
-                libraries = pool.libraries.select_related('read_length')
-                samples = pool.samples.select_related('read_length')
-                index_i7_show, index_i5_show, equal_representation = \
-                    indices_present(libraries, samples)
-
-                if libraries.count() == 0 and samples.count() == 0:
-                    logger.debug('No libraries and samples in %s' % pool.name)
-                    continue
-
-                read_length_name = samples[0].read_length.name \
-                    if any(samples) else libraries[0].read_length.name
-
-                data.append({
-                    'flowcellId': flowcell.flowcell_id,
-                    'flowcell': flowcell.pk,
-                    'laneId': lane.pk,
-                    'laneName': lane.name,
-                    'pool': pool.pk,
-                    'poolName': pool.name,
-                    'readLengthName': read_length_name,
-                    'indexI7Show': index_i7_show,
-                    'indexI5Show': index_i5_show,
-                    'sequencer': flowcell.sequencer.pk,
-                    'sequencerName': flowcell.sequencer.name,
-                    'equalRepresentation': equal_representation,
-                    'loading_concentration': lane.loading_concentration,
-                    'phix': lane.phix,
-                })
-
-    except Exception as e:
-        logger.exception(e)
-
-    data = sorted(data, key=lambda x: (x['flowcellId'], x['laneName']))
-
-    return JsonResponse(data, safe=False)
-
-
-@login_required
-@staff_member_required
-def pool_list(request):
-    """ Get the list of pools for loading flowcells. """
-    data = []
-    is_ok = False
-
-    for pool in Pool.objects.prefetch_related('libraries', 'samples'):
-        libraries = pool.libraries.all()
-        samples = pool.samples.all()
-
-        # Check if all libraries and samples have status 4
-        if [l.status for l in libraries] >= [4] * pool.libraries.count() and \
-                [s.status for s in samples] >= [4] * pool.samples.count():
-            is_ok = True
-
-        if is_ok and pool.size.multiplier > pool.loaded:
-            # Get Read Length
-            read_length_id = libraries[0].read_length_id if any(libraries) \
-                else samples[0].read_length_id
-            read_length = ReadLength.objects.get(pk=read_length_id)
-
-            data.append({
-                'name': pool.name,
-                'id': pool.pk,
-                'readLength': read_length.pk,
-                'readLengthName': read_length.name,
-                'poolSizeId': pool.size.pk,
-                'size': pool.size.multiplier,
-                'loaded': pool.loaded,
-            })
-
-    data = sorted(data, key=lambda x: x['id'])
-
-    return JsonResponse(data, safe=False)
-
-
-@login_required
-@staff_member_required
-def save(request):
-    """ Save a new flowcell. """
-    error = ''
-    lanes = json.loads(request.POST.get('lanes', '[]'))
-
-    try:
-        if not any(lanes):
-            raise ValueError('No lanes are provided.')
-
-        form = FlowcellForm(request.POST)
-
-        if form.is_valid():
-            flowcell = form.save()
-
-            lane_objects = []
-            loaded_per_pool = {}
-            for lane in lanes:
-                pool_id = lane['pool_id']
-
-                # Create a Labe object
-                l = Lane(name=lane['name'], pool_id=pool_id)
-                l.save()
-                lane_objects.append(l.pk)
-
-                # Count Loaded for each pool on the lanes
-                if pool_id not in loaded_per_pool.keys():
-                    loaded_per_pool[pool_id] = 0
-                loaded_per_pool[pool_id] += 1
-
-            # Update Pool Loaded for each pool
-            for pool_id, loaded in loaded_per_pool.items():
-                pool = Pool.objects.get(pk=pool_id)
-                pool.loaded = loaded
-                pool.save(update_fields=['loaded'])
-
-                # Change native and converted library's status to 5
-                for library in pool.libraries.all():
-                    library.status = 5
-                    library.save(update_fields=['status'])
-
-                for sample in pool.samples.all():
-                    sample.status = 5
-                    sample.save(update_fields=['status'])
-
-            # Add lanes to the flowcell
-            flowcell.lanes.add(*lane_objects)
-
-        else:
-            error = str(form.errors)
-            logger.debug(form.errors.as_data())
-
-    except Exception as e:
-        error = str(e)
-        logger.exception(e)
-
-    return JsonResponse({'success': not error, 'error': error})
-
-
 class SequencerViewSet(viewsets.ReadOnlyModelViewSet):
     """ Get the list of sequencers. """
     queryset = Sequencer.objects.all()
@@ -235,7 +96,33 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
     serializer_class = LaneSerializer
 
     def get_queryset(self):
-        return Lane.objects.filter(completed=False).order_by('name')
+        libraries_qs = Library.objects.filter(
+            ~Q(status=-1)).prefetch_related('read_length').only(
+                'read_length', 'equal_representation_nucleotides')
+        samples_qs = Sample.objects.filter(
+            ~Q(status=-1)).prefetch_related('read_length').only(
+                'read_length', 'equal_representation_nucleotides')
+
+        lanes_qs = Lane.objects.filter(completed=False).select_related(
+            'pool',
+        ).prefetch_related(
+            Prefetch('pool__libraries', queryset=libraries_qs),
+            Prefetch('pool__samples', queryset=samples_qs),
+        ).order_by('name')
+
+        queryset = Flowcell.objects.select_related(
+            'sequencer'
+        ).prefetch_related(
+            Prefetch('lanes', queryset=lanes_qs),
+        ).order_by('-create_time')
+
+        return queryset
+
+    # @print_sql_queries
+    def list(self, request, *args, **kwargs):
+        serializer = FlowcellListSerializer(self.get_queryset(), many=True)
+        data = list(itertools.chain(*serializer.data))
+        return Response(data)
 
     def create(self, request):
         """ Add a flowcell. """

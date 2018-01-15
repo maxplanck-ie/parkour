@@ -14,7 +14,6 @@ from rest_framework.permissions import IsAdminUser
 
 from xlwt import Workbook, XFStyle, Formula
 
-from common.utils import print_sql_queries
 from common.views import CsrfExemptSessionAuthentication
 from common.mixins import LibrarySampleMultiEditMixin
 
@@ -97,7 +96,6 @@ class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ViewSet):
             'pooling': pooling_map,
         }
 
-    @print_sql_queries
     def list(self, request):
         """ Get the list of all pooling objects. """
         libraries_qs = Library.objects.filter(

@@ -1,6 +1,8 @@
 import itertools
 
+from django.apps import apps
 from django.db.models import Q
+
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import (
     ModelSerializer,
@@ -10,23 +12,21 @@ from rest_framework.serializers import (
     CharField,
 )
 
-from request.models import Request
-from library.models import Library
-from sample.models import Sample
-from index_generator.models import Pool
-
 from .models import Sequencer, Flowcell, Lane
+
+Request = apps.get_model('request', 'Request')
+Library = apps.get_model('library', 'Library')
+Sample = apps.get_model('sample', 'Sample')
+Pool = apps.get_model('index_generator', 'Pool')
 
 
 class SequencerSerializer(ModelSerializer):
-
     class Meta:
         model = Sequencer
         fields = ('id', 'name', 'lanes', 'lane_capacity',)
 
 
 class LaneListSerializer(ListSerializer):
-
     def update(self, instance, validated_data):
         # Maps for id->instance and id->data item.
         object_mapping = {obj.pk: obj for obj in instance}
@@ -46,36 +46,23 @@ class LaneListSerializer(ListSerializer):
 
 class LaneSerializer(ModelSerializer):
     pk = IntegerField()
-    flowcell = SerializerMethodField()
-    flowcell_id = SerializerMethodField()
     pool_name = SerializerMethodField()
     read_length_name = SerializerMethodField()
     index_i7_show = SerializerMethodField()
     index_i5_show = SerializerMethodField()
-    sequencer = SerializerMethodField()
-    sequencer_name = SerializerMethodField()
     equal_representation = SerializerMethodField()
-    create_time = SerializerMethodField()
     quality_check = CharField(required=False)
 
     class Meta:
         list_serializer_class = LaneListSerializer
         model = Lane
-        fields = ('pk', 'name', 'flowcell', 'flowcell_id', 'pool', 'pool_name',
-                  'read_length_name', 'index_i7_show', 'index_i5_show',
-                  'sequencer', 'sequencer_name', 'equal_representation',
-                  'loading_concentration', 'phix', 'create_time',
-                  'quality_check',)
+        fields = ('pk', 'name', 'pool', 'pool_name', 'read_length_name',
+                  'index_i7_show', 'index_i5_show', 'equal_representation',
+                  'loading_concentration', 'phix', 'quality_check',)
         extra_kwargs = {
             'name': {'required': False},
             'pool': {'required': False},
         }
-
-    def get_flowcell(self, obj):
-        return obj.flowcell.get().pk
-
-    def get_flowcell_id(self, obj):
-        return obj.flowcell.get().flowcell_id
 
     def get_pool_name(self, obj):
         return obj.pool.name
@@ -85,44 +72,59 @@ class LaneSerializer(ModelSerializer):
         return records[0].read_length.name
 
     def get_index_i7_show(self, obj):
-        records = obj.pool.libraries.all() or obj.pool.samples.all()
-        return records[0].index_type.is_index_i7
+        return None
 
     def get_index_i5_show(self, obj):
-        records = obj.pool.libraries.all() or obj.pool.samples.all()
-        return records[0].index_type.is_index_i5
-
-    def get_sequencer(self, obj):
-        return obj.flowcell.get().sequencer.pk
-
-    def get_sequencer_name(self, obj):
-        return obj.flowcell.get().sequencer.name
+        return None
 
     def get_equal_representation(self, obj):
-        libraries = self._get_libraries(obj)
-        samples = self._get_samples(obj)
+        libraries = obj.pool.libraries.all()
+        samples = obj.pool.samples.all()
 
-        eqn_libraries = list(libraries.values_list(
-            'equal_representation_nucleotides', flat=True)).count(True)
+        eqn_libraries = [
+            x.equal_representation_nucleotides for x in libraries].count(True)
 
-        eqn_samples = list(samples.values_list(
-            'equal_representation_nucleotides', flat=True)).count(True)
+        eqn_samples = [
+            x.equal_representation_nucleotides for x in samples].count(True)
 
-        return libraries.count() + samples.count() == \
-            eqn_libraries + eqn_samples
+        return len(libraries) + len(samples) == eqn_libraries + eqn_samples
 
-    def get_create_time(self, obj):
-        return obj.flowcell.get().create_time
 
-    def _get_libraries(self, obj):
-        return obj.pool.libraries.filter(~Q(status=-1))
+class FlowcellListSerializer(ModelSerializer):
+    flowcell = SerializerMethodField()
+    sequencer_name = SerializerMethodField()
+    lanes = LaneSerializer(many=True)
 
-    def _get_samples(self, obj):
-        return obj.pool.samples.filter(~Q(status=-1))
+    class Meta:
+        model = Flowcell
+        fields = ('flowcell', 'flowcell_id', 'sequencer', 'sequencer_name',
+                  'create_time', 'lanes',)
+
+    def get_flowcell(self, obj):
+        return obj.pk
+
+    def get_sequencer_name(self, obj):
+        return obj.sequencer.name
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        if not any(data['lanes']):
+            return []
+
+        return list(map(
+            lambda x: {**{
+                'flowcell': data['flowcell'],
+                'flowcell_id': data['flowcell_id'],
+                'sequencer': data['sequencer'],
+                'sequencer_name': data['sequencer_name'],
+                'create_time': data['create_time'],
+            }, **x},
+            data.pop('lanes'),
+        ))
 
 
 class FlowcellSerializer(ModelSerializer):
-
     class Meta:
         model = Flowcell
         fields = ('flowcell_id', 'sequencer',)
@@ -244,14 +246,12 @@ class PoolInfoBaseSerializer(ModelSerializer):
 
 
 class PoolInfoLibrarySerializer(PoolInfoBaseSerializer):
-
     class Meta(PoolInfoBaseSerializer.Meta):
         model = Library
         fields = PoolInfoBaseSerializer.Meta.fields
 
 
 class PoolInfoSampleSerializer(PoolInfoBaseSerializer):
-
     class Meta(PoolInfoBaseSerializer.Meta):
         model = Sample
         fields = PoolInfoBaseSerializer.Meta.fields + ('is_converted',)
