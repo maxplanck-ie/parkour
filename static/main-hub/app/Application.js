@@ -15,6 +15,7 @@ Ext.Loader.setConfig({
 Ext.util.Format.deMoney = function (v) {
   return Ext.util.Format.currency(v, '€', 2, true, ' ');
 };
+Ext.Date.defaultFormat = 'd.m.Y';
 
 Ext.define('MainHub.Application', {
   extend: 'Ext.app.Application',

@@ -76,7 +76,7 @@ Ext.define('MainHub.view.flowcell.Flowcells', {
         {
           text: 'Date',
           dataIndex: 'create_time',
-          renderer: Ext.util.Format.dateRenderer('d.m.Y')
+          renderer: Ext.util.Format.dateRenderer()
         },
         {
           text: 'Length',
@@ -130,10 +130,13 @@ Ext.define('MainHub.view.flowcell.Flowcells', {
       startCollapsed: true,
       enableGroupingMenu: false,
       groupHeaderTpl: [
-        '<strong>Flowcell ID: {children:this.getFlowcellId}</strong>',
+        '<strong>{children:this.getFlowcellId} ({children:this.getDate})</strong>',
         {
           getFlowcellId: function (children) {
             return children[0].get('flowcell_id');
+          },
+          getDate: function (children) {
+            return Ext.util.Format.date(children[0].get('create_time'));
           }
         }
       ]
