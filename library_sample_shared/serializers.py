@@ -17,21 +17,18 @@ from .models import (
 
 
 class OrganismSerializer(ModelSerializer):
-
     class Meta:
         model = Organism
         fields = ('id', 'name')
 
 
 class ReadLengthSerializer(ModelSerializer):
-
     class Meta:
         model = ReadLength
         fields = ('id', 'name')
 
 
 class ConcentrationMethodSerializer(ModelSerializer):
-
     class Meta:
         model = ConcentrationMethod
         fields = ('id', 'name')
@@ -56,26 +53,23 @@ class IndexBaseSerializer(ModelSerializer):
     name = SerializerMethodField()
 
     class Meta:
-        fields = ('id', 'name', 'index', 'index_id',)
+        fields = ('id', 'name', 'prefix', 'number', 'index_id', 'index',)
 
     def get_name(self, obj):
         return '%s - %s' % (obj.index_id, obj.index)
 
 
 class IndexI7Serializer(IndexBaseSerializer):
-
     class Meta(IndexBaseSerializer.Meta):
         model = IndexI7
 
 
 class IndexI5Serializer(IndexBaseSerializer):
-
     class Meta(IndexBaseSerializer.Meta):
         model = IndexI5
 
 
 class LibraryProtocolSerializer(ModelSerializer):
-
     class Meta:
         model = LibraryProtocol
         fields = '__all__'

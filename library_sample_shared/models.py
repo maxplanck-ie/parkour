@@ -47,6 +47,10 @@ class GenericIndex(models.Model):
         blank=True,
     )
 
+    # @property
+    # def index_id(self):
+    #     return f'{self.prefix}{self.number}'
+
     class Meta:
         abstract = True
         unique_together = ('prefix', 'number',)

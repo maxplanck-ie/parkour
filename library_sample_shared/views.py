@@ -89,7 +89,6 @@ class IndexTypeViewSet(MoveOtherMixin, viewsets.ReadOnlyModelViewSet):
 
 
 class IndexViewSet(viewsets.ViewSet):
-
     def list(self, request):
         """ Get the list of all indices. """
         index_i7_serializer = IndexI7Serializer(
@@ -103,19 +102,23 @@ class IndexViewSet(viewsets.ViewSet):
     @list_route(methods=['get'])
     def i7(self, request):
         """ Get the list of indices i7. """
-        queryset = self._get_index_queryset(IndexI7)
-        serializer = IndexI7Serializer(queryset, many=True)
-        return Response(serializer.data)
+        data = self._get_sorted_indices(IndexI7, IndexI7Serializer)
+        return Response(data)
 
     @list_route(methods=['get'])
     def i5(self, request):
         """ Get the list of indices i5. """
-        queryset = self._get_index_queryset(IndexI5)
-        serializer = IndexI5Serializer(queryset, many=True)
-        return Response(serializer.data)
+        data = self._get_sorted_indices(IndexI5, IndexI5Serializer)
+        return Response(data)
 
-    def _get_index_queryset(self, model):
-        queryset = model.objects.order_by('index_id')
+    def _get_sorted_indices(self, model_class, serializer_model_class):
+        queryset = self._get_index_queryset(model_class)
+        serializer = serializer_model_class(queryset, many=True)
+        return sorted(serializer.data,
+                      key=lambda x: (x['prefix'], int(x['number'])))
+
+    def _get_index_queryset(self, model_class):
+        queryset = model_class.objects.all()
         index_type = self.request.query_params.get('index_type_id', None)
         if index_type is not None:
             try:
