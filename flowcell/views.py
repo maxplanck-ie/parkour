@@ -5,7 +5,7 @@ import unicodedata
 import itertools
 
 from django.apps import apps
-from django.db.models import Q, Prefetch
+from django.db.models import Prefetch, Q, F
 from django.http import HttpResponse
 
 from rest_framework import viewsets
@@ -15,7 +15,6 @@ from rest_framework.permissions import IsAdminUser
 
 from xlwt import Workbook, XFStyle
 
-from common.utils import print_sql_queries
 from common.views import CsrfExemptSessionAuthentication
 from common.mixins import MultiEditMixin
 
@@ -25,7 +24,7 @@ from .serializers import (
     FlowcellSerializer,
     FlowcellListSerializer,
     LaneSerializer,
-    PoolSerializer,
+    PoolListSerializer,
     PoolInfoSerializer,
 )
 
@@ -39,37 +38,37 @@ Pool = apps.get_model('index_generator', 'Pool')
 logger = logging.getLogger('db')
 
 
-def indices_present(libraries, samples):
-    count_total = libraries.count() + samples.count()
-    index_i7_count = 0
-    index_i5_count = 0
-    equal_representation_count = 0
+# def indices_present(libraries, samples):
+#     count_total = libraries.count() + samples.count()
+#     index_i7_count = 0
+#     index_i5_count = 0
+#     equal_representation_count = 0
 
-    for library in libraries:
-        if library.index_i7 != '':
-            index_i7_count += 1
-        if library.index_i5 != '':
-            index_i5_count += 1
-        if library.equal_representation_nucleotides:
-            equal_representation_count += 1
+#     for library in libraries:
+#         if library.index_i7 != '':
+#             index_i7_count += 1
+#         if library.index_i5 != '':
+#             index_i5_count += 1
+#         if library.equal_representation_nucleotides:
+#             equal_representation_count += 1
 
-    for sample in samples:
-        if sample.index_i7 != '':
-            index_i7_count += 1
-        if sample.index_i5 != '':
-            index_i5_count += 1
-        if sample.equal_representation_nucleotides:
-            equal_representation_count += 1
+#     for sample in samples:
+#         if sample.index_i7 != '':
+#             index_i7_count += 1
+#         if sample.index_i5 != '':
+#             index_i5_count += 1
+#         if sample.equal_representation_nucleotides:
+#             equal_representation_count += 1
 
-    # If at least one Index I7/I5 is set
-    index_i7_show = 'Yes' if index_i7_count > 0 else 'No'
-    index_i5_show = 'Yes' if index_i5_count > 0 else 'No'
+#     # If at least one Index I7/I5 is set
+#     index_i7_show = 'Yes' if index_i7_count > 0 else 'No'
+#     index_i5_show = 'Yes' if index_i5_count > 0 else 'No'
 
-    # If all Equal Representation are set
-    equal_representation = 'Yes' \
-        if equal_representation_count == count_total else 'No'
+#     # If all Equal Representation are set
+#     equal_representation = 'Yes' \
+#         if equal_representation_count == count_total else 'No'
 
-    return index_i7_show, index_i5_show, equal_representation
+#     return index_i7_show, index_i5_show, equal_representation
 
 
 class SequencerViewSet(viewsets.ReadOnlyModelViewSet):
@@ -97,11 +96,14 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         libraries_qs = Library.objects.filter(
-            ~Q(status=-1)).prefetch_related('read_length').only(
-                'read_length', 'equal_representation_nucleotides')
+            ~Q(status=-1)).select_related('read_length', 'index_type').only(
+                'read_length', 'index_type',
+                'equal_representation_nucleotides')
+
         samples_qs = Sample.objects.filter(
-            ~Q(status=-1)).prefetch_related('read_length').only(
-                'read_length', 'equal_representation_nucleotides')
+            ~Q(status=-1)).select_related('read_length', 'index_type').only(
+                'read_length', 'index_type',
+                'equal_representation_nucleotides')
 
         lanes_qs = Lane.objects.filter(completed=False).select_related(
             'pool',
@@ -118,7 +120,6 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
 
         return queryset
 
-    # @print_sql_queries
     def list(self, request, *args, **kwargs):
         serializer = FlowcellListSerializer(self.get_queryset(), many=True)
         data = list(itertools.chain(*serializer.data))
@@ -155,84 +156,82 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
     @list_route(methods=['get'])
     def pool_list(self, request):
         data = []
-        queryset = Pool.objects.all().prefetch_related(
-            'libraries', 'samples',
-        ).order_by('pk')
 
-        for pool in queryset:
-            # Show libraries which have reached the Pooling step
-            libraries = pool.libraries.filter(status__gte=2)
+        # Libraries which have reached the Pooling step
+        libraries_qs = Library.objects.filter(status__gte=2).select_related(
+            'read_length').only('status', 'read_length')
 
-            # Show samples which have reached the Pooling step
-            samples = pool.samples.filter(status__gte=3)
+        # Samples which have reached the Pooling step
+        samples_qs = Sample.objects.filter(status__gte=3).select_related(
+            'read_length').only('status', 'read_length')
 
-            # Ignore pools if all of its libraries/samples are
-            # not ready yet or failed
-            if libraries.count() + samples.count() == 0:
-                continue
+        queryset = Pool.objects.select_related('size').prefetch_related(
+            Prefetch('libraries', queryset=libraries_qs),
+            Prefetch('samples', queryset=samples_qs),
+        ).filter(size__multiplier__gt=F('loaded')).order_by('pk')
 
-            # Ignore pools if some of its samples haven't reached the
-            # Pooling step yet
-            if pool.samples.filter(~Q(status=-1)).count() > 0 and \
-                    pool.samples.filter(
-                        Q(status=2) | Q(status=-2)).count() > 0:
-                continue
-
-            if pool.size.multiplier > pool.loaded:
-                serializer = PoolSerializer(pool)
-                data.append(serializer.data)
-
+        serializer = PoolListSerializer(queryset, many=True)
+        data = [x for x in serializer.data if x != {}]
         data = sorted(data, key=lambda x: x['ready'], reverse=True)
+
         return Response(data)
 
     @list_route(methods=['post'])
     def download_benchtop_protocol(self, request):
         """ Generate Benchtop Protocol as XLS file for selected lanes. """
-        response = HttpResponse(content_type='application/ms-excel')
         ids = json.loads(request.data.get('ids', '[]'))
 
-        f_name = 'FC_Loading_Benchtop_Protocol.xls'
-        response['Content-Disposition'] = 'attachment; filename="%s"' % f_name
+        filename = 'FC_Loading_Benchtop_Protocol.xls'
+        response = HttpResponse(content_type='application/ms-excel')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+        queryset = self.filter_queryset(
+            self.get_queryset()).filter(lanes__pk__in=ids).distinct()
+
+        serializer = FlowcellListSerializer(queryset, many=True)
+        data = list(itertools.chain(*serializer.data))
+
+        font_style = XFStyle()
+        font_style.alignment.wrap = 1
+        font_style_bold = XFStyle()
+        font_style_bold.font.bold = True
 
         wb = Workbook(encoding='utf-8')
         ws = wb.add_sheet('FC_Loading_Benchtop_Protocol')
 
-        header = ['Pool ID', 'Flowcell ID', 'Sequencer', 'Lane', 'I7 present',
-                  'I5 present', 'Equal Representation of Nucleotides',
-                  'Read Length', 'Loading Concentration', 'PhiX %']
+        header = [
+            'Pool ID',
+            'Flowcell ID',
+            'Sequencer',
+            'Lane',
+            'I7 present',
+            'I5 present',
+            'Equal Representation of Nucleotides',
+            'Read Length',
+            'Loading Concentration',
+            'PhiX %',
+        ]
+
         row_num = 0
 
-        font_style = XFStyle()
-        font_style.font.bold = True
-
         for i, column in enumerate(header):
-            ws.write(row_num, i, column, font_style)
-            ws.col(i).width = 7000  # Set column width
+            ws.write(row_num, i, column, font_style_bold)
+            ws.col(i).width = 8000
 
-        font_style = XFStyle()
-        font_style.alignment.wrap = 1
-
-        lanes = Lane.objects.filter(pk__in=ids).order_by('name')
-        for lane in lanes:
-            flowcell = lane.flowcell.get()
+        for item in data:
             row_num += 1
 
-            records = lane.pool.libraries.all() or lane.pool.samples.all()
-            read_length = records[0].read_length.name
-
-            equal_representation = self._get_equal_representation(lane)
-
             row = [
-                lane.pool.name,              # Pool ID
-                flowcell.flowcell_id,        # Flowcell ID
-                flowcell.sequencer.name,     # Sequencer
-                lane.name,                   # Lane
-                '',                          # I7 present
-                '',                          # I5 present
-                equal_representation,        # Equal Representation of Nucl.
-                read_length,                 # Read Length
-                lane.loading_concentration,  # Loading Concentration
-                lane.phix,                   # PhiX %
+                item['pool_name'],
+                item['flowcell_id'],
+                item['sequencer_name'],
+                item['name'],
+                item['index_i7_show'],
+                item['index_i5_show'],
+                item['equal_representation'],
+                item['read_length_name'],
+                item['loading_concentration'],
+                item['phix'],
             ]
 
             for i in range(len(row)):
@@ -245,42 +244,81 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
     @list_route(methods=['post'])
     def download_sample_sheet(self, request):
         """ Generate Benchtop Protocol as XLS file for selected lanes. """
+
+        def create_row(lane, record):
+            index_i7 = IndexI7.objects.filter(
+                index=record.index_i7,
+                index_type=record.index_type
+            )
+            index_i7_id = index_i7[0].index_id if index_i7 else ''
+
+            index_i5 = IndexI5.objects.filter(
+                index=record.index_i5,
+                index_type=record.index_type
+            )
+            index_i5_id = index_i5[0].index_id if index_i5 else ''
+
+            request_name = unicodedata.normalize(
+                'NFKD', record.request.get().name)
+            request_name = str(request_name.encode('ASCII', 'ignore'), 'utf-8')
+
+            library_protocol = unicodedata.normalize(
+                'NFKD', record.library_protocol.name)
+            library_protocol = str(
+                library_protocol.encode('ASCII', 'ignore'), 'utf-8')
+
+            return [
+                lane.name.split()[1],  # Lane
+                record.barcode,        # Sample_ID
+                record.name,           # Sample_Name
+                '',                    # Sample_Plate
+                '',                    # Sample_Well
+                index_i7_id,           # I7_Index_ID
+                record.index_i7,       # index
+                index_i5_id,           # I5_Index_ID
+                record.index_i5,       # index2
+                request_name,          # Sample_Project / Request ID
+                library_protocol,      # Description / Library Protocol
+            ]
+
         response = HttpResponse(content_type='text/csv')
         ids = json.loads(request.data.get('ids', '[]'))
         flowcell_id = request.data.get('flowcell_id', '')
 
         writer = csv.writer(response)
-        writer.writerow(['[Header]', '', '', '', '', '', '', '', '', '', ''])
-        writer.writerow(['IEMFileVersion', '4', '', '', '', '', '', '', '', '',
-                        ''])
-        writer.writerow(['Date', '11/3/2016', '', '', '', '', '', '', '', '',
-                         ''])
-        writer.writerow(['Workflow', 'GenerateFASTQ', '', '', '', '', '', '',
-                         '', '', ''])
-        writer.writerow(['Application', 'HiSeq FASTQ Only', '', '', '', '', '',
-                         '', '', '', ''])
-        writer.writerow(['Assay', 'Nextera XT', '', '', '', '', '', '', '', '',
-                        ''])
-        writer.writerow(['Description', '', '', '', '', '', '', '', '', '',
-                         ''])
-        writer.writerow(['Chemistry', 'Amplicon', '', '', '', '', '', '', '',
-                         '', ''])
-        writer.writerow(['', '', '', '', '', '', '', '', '', '', ''])
-        writer.writerow(['[Reads]', '', '', '', '', '', '', '', '', '', ''])
-        writer.writerow(['75', '', '', '', '', '', '', '', '', '', ''])
-        writer.writerow(['75', '', '', '', '', '', '', '', '', '', ''])
-        writer.writerow(['', '', '', '', '', '', '', '', '', '', ''])
-        writer.writerow(['[Settings]', '', '', '', '', '', '', '', '', '', ''])
-        writer.writerow(['ReverseComplement', '0', '', '', '', '', '', '', '',
-                         '', ''])
-        writer.writerow(['Adapter', 'CTGTCTCTTATACACATCT', '', '', '', '', '',
-                         '', '', '', ''])
-        writer.writerow(['', '', '', '', '', '', '', '', '', '', ''])
-        writer.writerow(['[Data]', '', '', '', '', '', '', '', '', '', ''])
 
-        writer.writerow(['Lane', 'Sample_ID', 'Sample_Name', 'Sample_Plate',
-                         'Sample_Well', 'I7_Index_ID', 'index', 'I5_Index_ID',
-                         'index2', 'Sample_Project', 'Description'])
+        writer.writerow(['[Header]'] + [''] * 10)
+        writer.writerow(['IEMFileVersion', '4'] + [''] * 9)
+        writer.writerow(['Date', '11/3/2016'] + [''] * 9)
+        writer.writerow(['Workflow', 'GenerateFASTQ'] + [''] * 9)
+        writer.writerow(['Application', 'HiSeq FASTQ Only'] + ['' * 9])
+        writer.writerow(['Assay', 'Nextera XT'] + [''] * 9)
+        writer.writerow(['Description'] + [''] * 10)
+        writer.writerow(['Chemistry', 'Amplicon'] + [''] * 9)
+        writer.writerow([''] * 11)
+        writer.writerow(['[Reads]'] + [''] * 10)
+        writer.writerow(['75'] + [''] * 10)
+        writer.writerow(['75'] + [''] * 10)
+        writer.writerow([''] * 11)
+        writer.writerow(['[Settings]'] + [''] * 10)
+        writer.writerow(['ReverseComplement', '0'] + [''] * 9)
+        writer.writerow(['Adapter', 'CTGTCTCTTATACACATCT'] + [''] * 9)
+        writer.writerow([''] * 11)
+        writer.writerow(['[Data]'] + [''] * 10)
+
+        writer.writerow([
+            'Lane',
+            'Sample_ID',
+            'Sample_Name',
+            'Sample_Plate',
+            'Sample_Well',
+            'I7_Index_ID',
+            'index',
+            'I5_Index_ID',
+            'index2',
+            'Sample_Project',
+            'Description',
+        ])
 
         flowcell = Flowcell.objects.get(pk=flowcell_id)
         f_name = '%s_SampleSheet.csv' % flowcell.flowcell_id
@@ -296,7 +334,7 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
             ))
 
             for record in records:
-                row = self._create_row(lane, record)
+                row = create_row(lane, record)
                 rows.append(row)
 
         rows = sorted(rows, key=lambda x: (x[0], x[1][3:]))
@@ -304,52 +342,3 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
             writer.writerow(row)
 
         return response
-
-    def _get_equal_representation(self, obj):
-        libraries = obj.pool.libraries.filter(~Q(status=-1))
-        samples = obj.pool.samples.filter(~Q(status=-1))
-
-        eqn_libraries = list(libraries.values_list(
-            'equal_representation_nucleotides', flat=True)).count(True)
-
-        eqn_samples = list(samples.values_list(
-            'equal_representation_nucleotides', flat=True)).count(True)
-
-        return libraries.count() + samples.count() == \
-            eqn_libraries + eqn_samples
-
-    def _create_row(self, lane, record):
-        index_i7 = IndexI7.objects.filter(
-            index=record.index_i7,
-            index_type=record.index_type
-        )
-        index_i7_id = index_i7[0].index_id if index_i7 else ''
-
-        index_i5 = IndexI5.objects.filter(
-            index=record.index_i5,
-            index_type=record.index_type
-        )
-        index_i5_id = index_i5[0].index_id if index_i5 else ''
-
-        request_name = unicodedata.normalize(
-            'NFKD', record.request.get().name)
-        request_name = str(request_name.encode('ASCII', 'ignore'), 'utf-8')
-
-        library_protocol = unicodedata.normalize(
-            'NFKD', record.library_protocol.name)
-        library_protocol = str(
-            library_protocol.encode('ASCII', 'ignore'), 'utf-8')
-
-        return [
-            lane.name.split()[1],  # Lane
-            record.barcode,        # Sample_ID
-            record.name,           # Sample_Name
-            '',                    # Sample_Plate
-            '',                    # Sample_Well
-            index_i7_id,           # I7_Index_ID
-            record.index_i7,       # index
-            index_i5_id,           # I5_Index_ID
-            record.index_i5,       # index2
-            request_name,          # Sample_Project / Request ID
-            library_protocol,      # Description / Library Protocol
-        ]

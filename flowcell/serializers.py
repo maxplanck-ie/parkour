@@ -72,22 +72,18 @@ class LaneSerializer(ModelSerializer):
         return records[0].read_length.name
 
     def get_index_i7_show(self, obj):
-        return None
+        records = obj.pool.libraries.all() or obj.pool.samples.all()
+        return records[0].index_type.is_index_i7
 
     def get_index_i5_show(self, obj):
-        return None
+        records = obj.pool.libraries.all() or obj.pool.samples.all()
+        return records[0].index_type.is_index_i5
 
     def get_equal_representation(self, obj):
-        libraries = obj.pool.libraries.all()
-        samples = obj.pool.samples.all()
-
-        eqn_libraries = [
-            x.equal_representation_nucleotides for x in libraries].count(True)
-
-        eqn_samples = [
-            x.equal_representation_nucleotides for x in samples].count(True)
-
-        return len(libraries) + len(samples) == eqn_libraries + eqn_samples
+        records = list(itertools.chain(
+            obj.pool.libraries.all(), obj.pool.samples.all()))
+        ern = [x.equal_representation_nucleotides for x in records].count(True)
+        return len(records) == ern
 
 
 class FlowcellListSerializer(ModelSerializer):
@@ -186,7 +182,7 @@ class FlowcellSerializer(ModelSerializer):
         return instance
 
 
-class PoolSerializer(ModelSerializer):
+class PoolListSerializer(ModelSerializer):
     read_length = SerializerMethodField()
     read_length_name = SerializerMethodField()
     pool_size_id = SerializerMethodField()
@@ -205,7 +201,6 @@ class PoolSerializer(ModelSerializer):
         return None
 
     def get_read_length_name(self, obj):
-        # TODO: remove the field from the result?
         records = obj.libraries.all() or obj.samples.all()
         if records.count() > 0:
             return records[0].read_length.name
@@ -218,12 +213,18 @@ class PoolSerializer(ModelSerializer):
         return obj.size.multiplier
 
     def get_ready(self, obj):
-        libraries_statuses = obj.libraries.all().filter(
-            ~Q(status=-1)).values_list('status', flat=True)
-        samples_statuses = obj.samples.all().filter(
-            ~Q(status=-1)).values_list('status', flat=True)
+        libraries_statuses = [x.status for x in obj.libraries.all()]
+        samples_statuses = [x.status for x in obj.samples.all()]
         statuses = list(libraries_statuses) + list(samples_statuses)
         return statuses.count(4) == len(statuses)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # Ignore pools if all of its libraries/samples are
+        # not ready yet or failed
+        if instance.libraries.count() + instance.samples.count() == 0:
+            return {}
+        return data
 
 
 class PoolInfoBaseSerializer(ModelSerializer):
