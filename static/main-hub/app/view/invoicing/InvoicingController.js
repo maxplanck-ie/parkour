@@ -33,7 +33,7 @@ Ext.define('MainHub.view.invoicing.InvoicingController', {
     var billingPeriodCb = view.down('#billing-period-combobox');
     billingPeriodCb.getStore().reload({
       callback: function (records) {
-        if (records.length > 0) {
+        if (records && records.length > 0) {
           var lastRecord = records[records.length - 1];
           billingPeriodCb.select(lastRecord);
           billingPeriodCb.fireEvent('select', billingPeriodCb, lastRecord);

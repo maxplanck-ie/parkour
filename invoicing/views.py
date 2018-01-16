@@ -24,7 +24,7 @@ from .models import (
     LibraryPreparationCosts,
     SequencingCosts,
 )
-from .serializer import (
+from .serializers import (
     InvoicingSerializer,
     FixedCostsSerializer,
     LibraryPreparationCostsSerializer,
