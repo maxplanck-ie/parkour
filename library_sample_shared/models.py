@@ -1,3 +1,5 @@
+import re
+
 from django.db import models
 
 from common.models import DateTimeMixin
@@ -33,13 +35,24 @@ class ReadLength(models.Model):
 
 
 class GenericIndex(models.Model):
-    index_id = models.CharField('Index ID', max_length=15, unique=True)
+    prefix = models.CharField('Prefix', max_length=10, default='')
+    number = models.CharField('Number', max_length=10, default='')
     index = models.CharField('Index', max_length=8)
+
+    # Deprecated (to be removed)
+    index_id = models.CharField(
+        'Index ID',
+        max_length=15,
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         abstract = True
+        unique_together = ('prefix', 'number',)
 
     def __str__(self):
+        # return self.prefix + self.number
         return self.index_id
 
     def type(self):
@@ -65,8 +78,8 @@ class IndexI5(GenericIndex):
 
 class IndexType(models.Model):
     name = models.CharField('Name', max_length=100)
-    is_index_i7 = models.BooleanField('Is Index I7?', default=False)
-    is_index_i5 = models.BooleanField('Is Index I5?', default=False)
+    is_dual = models.BooleanField('Is Dual', default=False)
+
     index_length = models.CharField(
         'Index Length',
         max_length=1,
@@ -75,6 +88,16 @@ class IndexType(models.Model):
             ('8', '8'),
         ),
         default='8',
+    )
+
+    format = models.CharField(
+        'Format',
+        max_length=11,
+        choices=(
+            ('single', 'single tube'),
+            ('plate', 'plate'),
+        ),
+        default='single',
     )
 
     indices_i7 = models.ManyToManyField(
@@ -97,6 +120,46 @@ class IndexType(models.Model):
 
     def __str__(self):
         return self.name
+
+    # Temporary
+    def split_index_ids(self):
+        def split_id(idx):
+            match = re.match(r'([a-zA-Z_]+)([0-9]+)', idx.index_id)
+            if match:
+                idx.prefix = match[1]
+                idx.number = match[2]
+                idx.save()
+
+        indices_i7 = self.indices_i7.all()
+        for index in indices_i7:
+            split_id(index)
+
+        if self.is_dual:
+            indices_i5 = self.indices_i5.all()
+            for index in indices_i5:
+                split_id(index)
+
+
+class IndexPair(models.Model):
+    index_type = models.ForeignKey(IndexType, verbose_name='Index Type')
+    index1 = models.ForeignKey(IndexI7, verbose_name='Index 1')
+    index2 = models.ForeignKey(
+        IndexI5,
+        verbose_name='Index 2',
+        null=True,
+        blank=True,
+    )
+
+    coordinate = models.CharField(max_length=5)
+
+    class Meta:
+        verbose_name = 'Index Pair'
+        verbose_name_plural = 'Index Pairs'
+
+    def __str__(self):
+        index1_id = self.index1.index_id if self.index1 else ''
+        index2_id = self.index2.index_id if self.index2 else ''
+        return f'{index1_id}-{index2_id}'
 
 
 class BarcodeSingletonModel(models.Model):
@@ -262,47 +325,73 @@ class GenericLibrarySample(DateTimeMixin):
         blank=True,
     )
 
-    # Quality Control
+    @property
+    def index_i7_id(self):
+        try:
+            index_type = IndexType.objects.get(pk=self.index_type.pk)
+            index_i7 = index_type.indices_i7.get(index=self.index_i7)
+            return index_i7.index_id
+        except Exception:
+            return ''
+
+    @property
+    def index_i5_id(self):
+        try:
+            index_type = IndexType.objects.get(pk=self.index_type.pk)
+            index_i5 = index_type.indices_i5.get(index=self.index_i5)
+            return index_i5.index_id
+        except Exception:
+            return ''
+
+    # Facility
+
     dilution_factor = models.PositiveIntegerField(
-        'Dilution Factor (facility)',
+        'Dilution Factor',
         default=1,
         blank=True,
     )
+
     concentration_facility = models.FloatField(
-        'Concentration (facility)',
+        'Concentration',
         null=True,
         blank=True,
     )
+
     concentration_method_facility = models.ForeignKey(
         ConcentrationMethod,
         related_name='+',
-        verbose_name='Concentration Method (facility)',
+        verbose_name='Concentration Method',
         null=True,
         blank=True,
     )
+
     sample_volume_facility = models.PositiveIntegerField(
-        'Sample Volume (facility)',
+        'Sample Volume',
         null=True,
         blank=True,
     )
-    date_facility = models.DateTimeField(
-        'Date (facility)',
-        null=True,
-        blank=True,
-    )
+
+    # date_facility = models.DateTimeField(
+    #     'Date',
+    #     null=True,
+    #     blank=True,
+    # )
+
     amount_facility = models.FloatField(
-        'Amount (facility)',
+        'Amount',
         null=True,
         blank=True,
     )
+
     size_distribution_facility = models.CharField(
-        'Size Distribution (facility)',
+        'Size Distribution',
         max_length=200,
         null=True,
         blank=True,
     )
+
     comments_facility = models.TextField(
-        'Comments (facility)',
+        'Comments',
         null=True,
         blank=True,
     )

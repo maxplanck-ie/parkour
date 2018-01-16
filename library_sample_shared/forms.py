@@ -4,13 +4,8 @@ from .models import IndexType
 
 class IndexTypeForm(forms.ModelForm):
     def clean(self):
-        is_index_i7 = self.cleaned_data.get('is_index_i7')
-        is_index_i5 = self.cleaned_data.get('is_index_i5')
         indices_i7 = self.cleaned_data.get('indices_i7').all()
         indices_i5 = self.cleaned_data.get('indices_i5').all()
-
-        if not is_index_i7 and not is_index_i5:
-            raise forms.ValidationError('Index Type (I7/I5) is not specified.')
 
         # Don't allow to choose indices, belonging to another Index Type
         for index_i7 in indices_i7:

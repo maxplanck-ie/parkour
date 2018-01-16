@@ -1,25 +1,26 @@
 Ext.define('MainHub.model.libraries.IndexType', {
-    extend: 'MainHub.model.Base',
+  extend: 'MainHub.model.Base',
 
-    fields: [{
-        name: 'id',
-        type: 'int'
+  fields: [
+    {
+      name: 'id',
+      type: 'int'
     },
     {
-        name: 'name',
-        type: 'string'
+      name: 'name',
+      type: 'string'
     },
     {
-        name: 'indexReads',
-        type: 'int'
+      name: 'index_reads',
+      type: 'int'
     },
     {
-        name: 'isDual',
-        type: 'bool'
+      name: 'is_dual',
+      type: 'bool'
     },
     {
-        name: 'indexLength',
-        type: 'int'
+      name: 'index_length',
+      type: 'int'
     }
-    ]
+  ]
 });

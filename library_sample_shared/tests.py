@@ -86,7 +86,7 @@ class GenericIndexTest(TestCase):
         self.index2 = GenericIndex(index_id='I002', index='ATCACG')
         self.index1.save()
 
-        self.index_type = IndexType(name='Index Type', is_index_i7=True)
+        self.index_type = IndexType(name='Index Type')
         self.index_type.save()
         self.index_type.indices_i7.add(self.index1)
 
@@ -267,17 +267,12 @@ class TestIndices(BaseTestCase):
         )
         self.index3.save()
 
-        self.index_type1 = IndexType(
-            name=self._get_random_name(),
-            is_index_i7=True,
-        )
+        self.index_type1 = IndexType(name=self._get_random_name())
         self.index_type1.save()
         self.index_type1.indices_i7.add(self.index1)
 
         self.index_type2 = IndexType(
-            name=self._get_random_name(),
-            is_index_i5=True,
-        )
+            name=self._get_random_name(), is_dual=True)
         self.index_type2.save()
         self.index_type2.indices_i5.add(self.index3)
 

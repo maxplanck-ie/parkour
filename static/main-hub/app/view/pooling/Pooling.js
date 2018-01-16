@@ -56,7 +56,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
         menuDisabled: true,
         hideable: false,
         tdCls: 'no-dirty',
-        width: 40
+        width: 35
       },
       {
         text: 'Request',
