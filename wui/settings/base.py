@@ -54,8 +54,6 @@ INSTALLED_APPS = [
     'flowcell',
     'report',
     'invoicing',
-
-    'fixtures',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -93,17 +91,6 @@ WSGI_APPLICATION = 'wui.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.environ['DB_NAME'],
-#         'USER': os.environ['DB_USER'],
-#         'PASSWORD': os.environ['DB_PASS'],
-#         'HOST': os.environ['DB_SERVICE'],
-#         'PORT': os.environ['DB_PORT'],
-#     }
-# }
 
 DATABASES = {'default': dj_database_url.config()}
 
@@ -155,36 +142,37 @@ SERVER_EMAIL = 'parkour_support@ie-freiburg.mpg.de'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'formatters': {
-        'standard': {
-            'format': '[%(levelname)s] [%(asctime)s] %(message)s',
-            'datefmt': "%d/%b/%Y %H:%M:%S"
-        },
-        'custom': {
-            'format': '[%(levelname)s] [%(asctime)s] [%(pathname)s:%(lineno)s]: %(funcName)s(): %(message)s',
-            'datefmt': "%d/%b/%Y %H:%M:%S"
-        }
-    },
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
+        }
+    },
+    'formatters': {
+        'simple': {
+            'format': '[%(levelname)s] [%(asctime)s] %(message)s',
+            'datefmt': "%d/%b/%Y %H:%M:%S"
+        },
+        'verbose': {
+            'format': '[%(levelname)s] [%(asctime)s] [%(pathname)s:%(lineno)s]: %(funcName)s(): %(message)s',
+            'datefmt': "%d/%b/%Y %H:%M:%S"
         }
     },
     'handlers': {
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
-            'class': 'common.logger.CustomAdminEmailHandler'
+            'class': 'django.utils.log.AdminEmailHandler'
+            # 'class': 'common.logger.CustomAdminEmailHandler'
         },
         'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
-            'formatter': 'standard',
+            'formatter': 'simple',
         },
         'logfile': {
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(LOG_DIR, 'django.log'),
-            'formatter': 'custom',
+            'formatter': 'verbose',
             'maxBytes': 15 * 1024 * 1024,  # 15 MB
             'backupCount': 2,
         },
@@ -192,7 +180,7 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(LOG_DIR, 'db.log'),
-            'formatter': 'custom',
+            'formatter': 'verbose',
             'maxBytes': 15 * 1024 * 1024,
             'backupCount': 2,
         },
@@ -225,8 +213,8 @@ REST_FRAMEWORK = {
     'SEARCH_PARAM': 'query'
 }
 
-# Use 'bpython' by default for shell_plus
-SHELL_PLUS = 'bpython'
+# Use plain Python by default for shell_plus
+SHELL_PLUS = 'plain'
 
 NOTEBOOK_ARGUMENTS = [
     '--notebook-dir', os.path.join(BASE_DIR, 'notebooks'),
@@ -235,3 +223,9 @@ NOTEBOOK_ARGUMENTS = [
 IPYTHON_ARGUMENTS = [
     '--debug',
 ]
+
+
+# Admin user defaults
+
+SETUP_ADMIN_EMAIL = os.environ.get('SETUP_ADMIN_EMAIL', '')
+SETUP_ADMIN_PASSWORD = os.environ.get('SETUP_ADMIN_PASSWORD', None)
