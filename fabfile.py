@@ -25,14 +25,14 @@ def build_docs():
     with lcd('docs/'):
         local('make clean')
         local('make html')
-        local('open build/html/index.html')
+        # local('open build/html/index.html')
 
 
 def coverage(app=''):
-    local('coverage run --source="." manage.py test %s -v 2' % app)
+    local('coverage run --source="." manage.py test %s' % app)
     local('rm -rf htmlcov/')
     local('coverage html')
-    local('open htmlcov/index.html')
+    # local('open htmlcov/index.html')
 
 
 @hosts(os.environ['FAB_HOST'])

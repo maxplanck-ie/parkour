@@ -55,7 +55,7 @@ logger = logging.getLogger('db')
 #     return wrapper
 
 
-class PDF(FPDF):
+class PDF(FPDF):  # pragma: no cover
     def __init__(self, title='Title', font='Arial'):
         self.title = title
         self.font = font
@@ -281,7 +281,7 @@ class RequestViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @detail_route(methods=['get'])
-    def download_deep_sequencing_request(self, request, pk=None):
+    def download_deep_sequencing_request(self, request, pk=None):  # pragma: no cover
         """ Generate a deep sequencing request form in PDF. """
         instance = self.get_object()
         user = instance.user
@@ -400,7 +400,7 @@ class RequestViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['post'])
     @permission_classes((IsAdminUser))
-    def send_email(self, request, pk=None):
+    def send_email(self, request, pk=None):  # pragma: no cover
         """ Send an email to the user. """
         error = ''
 

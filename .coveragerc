@@ -25,6 +25,7 @@ omit =
     wui/*
     */__init__.py
     */apps.py
+    */tests.py
     fabfile.py
     manage.py
 

@@ -48,8 +48,7 @@ class TestRequestModel(TestCase):
 
     def test_create_request(self):
         request = create_request(self.user)
-        self.assertTrue(isinstance(request, Request))
-        self.assertEqual(request.__str__(), request.name)
+        self.assertEqual(str(request), request.name)
         self.assertEqual(request.name, '{}_{}_{}'.format(
             request.pk, self.user.last_name, self.user.pi.name,
         ))
@@ -76,6 +75,19 @@ class TestRequestModel(TestCase):
         self.assertEqual(Library.objects.filter(pk=library.pk).count(), 0)
         self.assertEqual(Sample.objects.filter(pk=sample.pk).count(), 0)
 
+    def test_total_records_count(self):
+        request = Request(user=self.user)
+        request.save()
+
+        library = create_library(get_random_name())
+        sample = create_sample(get_random_name())
+
+        request.libraries.add(library)
+        request.samples.add(sample)
+
+        request = Request.objects.get(pk=request.pk)
+        self.assertEqual(request.total_records_count, 2)
+
 
 class FileRequestTest(TestCase):
     def setUp(self):
@@ -100,14 +112,18 @@ class TestRequests(BaseTestCase):
         """ Ensure get request list behaves correctly. """
         request1 = create_request(self.user)
         request2 = create_request(self.non_staff)
-
-        response = self.client.get(reverse('request-list'))
-        data = response.json()['results']
-        requests = [x['name'] for x in data]
-
+        response = self.client.get('/api/requests/')
         self.assertEqual(response.status_code, 200)
+        requests = [x['name'] for x in response.json()['results']]
         self.assertIn(request1.name, requests)
         self.assertIn(request2.name, requests)
+
+    def test_request_list_non_existing_page(self):
+        request = create_request(self.user)
+        response = self.client.get('/api/requests/', {'page': -1})
+        self.assertEqual(response.status_code, 200)
+        requests = [x['name'] for x in response.json()]
+        self.assertIn(request.name, requests)
 
     def test_request_list_non_staff(self):
         """ Ensure a non-staff user gets only their requests. """
@@ -115,9 +131,8 @@ class TestRequests(BaseTestCase):
         request1 = create_request(self.non_staff)
         request2 = create_request(self.user)
 
-        response = self.client.get(reverse('request-list'))
-        data = response.json()['results']
-        requests = [x['name'] for x in data]
+        response = self.client.get('/api/requests/')
+        requests = [x['name'] for x in response.json()['results']]
         self.assertEqual(response.status_code, 200)
         self.assertIn(request1.name, requests)
         self.assertNotIn(request2.name, requests)
@@ -127,7 +142,6 @@ class TestRequests(BaseTestCase):
         request1 = create_request(self.user)
         request2 = create_request(self.user)
         request3 = create_request(self.user)
-
         name1 = get_random_name()
         name2 = get_random_name()
         request1.name = name1
@@ -137,13 +151,10 @@ class TestRequests(BaseTestCase):
         request2.save()
         request3.save()
 
-        response = self.client.get(
-            reverse('request-list'), {'query': name1},
-        )
-        data = response.json()
-
+        response = self.client.get('/api/requests/', {'query': name1})
         self.assertEqual(response.status_code, 200)
-        requests = [x['name'] for x in data['results']]
+
+        requests = [x['name'] for x in response.json()['results']]
         self.assertIn(request1.name, requests)
         self.assertIn(request2.name, requests)
         self.assertNotIn(request3.name, requests)
@@ -151,21 +162,13 @@ class TestRequests(BaseTestCase):
     def test_single_request(self):
         """ Ensure get single request behaves correctly. """
         request = create_request(self.user)
-
-        response = self.client.get(reverse(
-            'request-detail',
-            kwargs={'pk': request.pk}
-        ))
-        data = response.json()
-
+        response = self.client.get(f'/api/requests/{request.pk}/')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(request.name, data['name'])
+        self.assertEqual(request.name, response.json()['name'])
 
     def test_single_request_invalid_id(self):
         """ Ensure error is thrown if the id does not exist. """
-        response = self.client.get(reverse(
-            'request-detail', kwargs={'pk': -1}
-        ))
+        response = self.client.get('/api/requests/-1/')
         self.assertEqual(response.status_code, 404)
 
     def test_create_request(self):
@@ -173,8 +176,7 @@ class TestRequests(BaseTestCase):
         library = create_library(get_random_name())
         sample = create_sample(get_random_name())
         Library = library.__class__
-
-        response = self.client.post(reverse('request-list'), {
+        response = self.client.post('/api/requests/', {
             'data': json.dumps({
                 'description': get_random_name(),
                 'records': [{
@@ -187,7 +189,6 @@ class TestRequests(BaseTestCase):
                 # 'files': [],
             })
         })
-
         self.assertEqual(response.status_code, 201)
         self.assertTrue(response.json()['success'])
         self.assertEqual(
@@ -198,7 +199,7 @@ class TestRequests(BaseTestCase):
         Ensure error is thrown if no records are provided when
         creating a new request.
         """
-        response = self.client.post(reverse('request-list'), {
+        response = self.client.post('/api/requests/', {
             'data': json.dumps({
                 'description': get_random_name(),
                 'records': [],
@@ -206,7 +207,6 @@ class TestRequests(BaseTestCase):
             })
         })
         data = response.json()
-
         self.assertEqual(response.status_code, 400)
         self.assertFalse(data['success'])
         self.assertEqual(data['message'], 'Invalid payload.')
@@ -220,26 +220,22 @@ class TestRequests(BaseTestCase):
         request.libraries.add(library)
         self.assertNotIn(sample, request.samples.all())
 
-        response = self.client.post(
-            reverse('request-edit', kwargs={'pk': request.pk}),
-            data={
-                'data': json.dumps({
-                    'description': new_description,
-                    'records': [{
-                        'pk': library.pk,
-                        'record_type': 'Library',
-                    }, {
-                        'pk': sample.pk,
-                        'record_type': 'Sample',
-                    }],
-                    # 'files': [],
-                }),
-            },
-        )
-        updated_request = Request.objects.get(pk=request.pk)
-
+        response = self.client.post(f'/api/requests/{request.pk}/edit/', {
+            'data': json.dumps({
+                'description': new_description,
+                'records': [{
+                    'pk': library.pk,
+                    'record_type': 'Library',
+                }, {
+                    'pk': sample.pk,
+                    'record_type': 'Sample',
+                }],
+                # 'files': [],
+            }),
+        })
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()['success'])
+        updated_request = Request.objects.get(pk=request.pk)
         self.assertEqual(updated_request.description, new_description)
         self.assertIn(sample, updated_request.samples.all())
 
@@ -252,61 +248,45 @@ class TestRequests(BaseTestCase):
         library = create_library(get_random_name())
         request.libraries.add(library)
 
-        response = self.client.post(
-            reverse('request-edit', kwargs={'pk': request.pk}),
-            data={
-                'data': json.dumps({
-                    'description': get_random_name(),
-                    'records': [],
-                    # 'files': [],
-                }),
-            },
-        )
-
+        response = self.client.post(f'/api/requests/{request.pk}/edit/', {
+            'data': json.dumps({
+                'description': get_random_name(),
+                'records': [],
+                # 'files': [],
+            }),
+        })
         self.assertEqual(response.status_code, 400)
         self.assertFalse(response.json()['success'])
 
     def test_update_request_invalid_id(self):
         """ Ensure error is thrown if the id does not exist. """
-        response = self.client.post(
-            reverse('request-edit', kwargs={'pk': -1}),
-            data={'data': json.dumps({})},
-        )
+        response = self.client.post('/api/requests/-1/edit/', {
+            'data': json.dumps({})
+        })
         self.assertEqual(response.status_code, 404)
 
     def test_samples_submitted(self):
         """ Ensure set samples_submitted behaves correctly. """
         request = create_request(self.user)
-
         response = self.client.post(
-            reverse('request-samples-submitted', kwargs={'pk': request.pk}), {
-                'data': json.dumps({
-                    'result': True
-                })
+            f'/api/requests/{request.pk}/samples_submitted/', {
+                'data': json.dumps({'result': True})
             }
         )
-        data = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(data['success'])
-        self.assertTrue(Request.objects.get(pk=request.pk).samples_submitted)
+        self.assertTrue(response.json()['success'])
+        request = Request.objects.get(pk=request.pk)
+        self.assertTrue(request.samples_submitted)
 
     def test_delete_request(self):
         """ Ensure delete request behaves correctly. """
         request = create_request(self.user)
-
-        response = self.client.delete(reverse(
-            'request-detail',
-            kwargs={'pk': request.pk}
-        ))
-
+        response = self.client.delete(f'/api/requests/{request.pk}/')
         self.assertEqual(response.status_code, 204)
 
     def test_delete_request_invalid_id(self):
         """ Ensure error is thrown if the id does not exist. """
-        response = self.client.delete(reverse(
-            'request-detail',
-            kwargs={'pk': -1}
-        ))
+        response = self.client.delete('/api/requests/-1/')
         self.assertEqual(response.status_code, 404)
 
     def test_get_records(self):
@@ -317,14 +297,9 @@ class TestRequests(BaseTestCase):
         request.libraries.add(library)
         request.samples.add(sample)
 
-        response = self.client.get(reverse(
-            'request-get-records',
-            kwargs={'pk': request.pk}
-        ))
-        data = response.json()
-        records = [x['name'] for x in data]
-
+        response = self.client.get(f'/api/requests/{request.pk}/get_records/')
         self.assertEqual(response.status_code, 200)
+        records = [x['name'] for x in response.json()]
         self.assertIn(library.name, records)
         self.assertIn(sample.name, records)
 
