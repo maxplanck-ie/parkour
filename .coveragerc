@@ -23,6 +23,7 @@ exclude_lines =
 omit =
     env/*
     wui/*
+    common/management/commands/*
     */__init__.py
     */apps.py
     */tests.py
