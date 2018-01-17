@@ -2,7 +2,6 @@ import json
 import tempfile
 
 from django.contrib.auth import get_user_model
-from django.core.urlresolvers import reverse
 # from django.core.files.base import ContentFile
 from django.test import TestCase
 

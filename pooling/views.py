@@ -29,8 +29,8 @@ Request = apps.get_model('request', 'Request')
 Library = apps.get_model('library', 'Library')
 Sample = apps.get_model('sample', 'Sample')
 Pool = apps.get_model('index_generator', 'Pool')
-LibraryPreparation = apps.get_model('library_preparation',
-                                    'LibraryPreparation')
+LibraryPreparation = apps.get_model(
+    'library_preparation', 'LibraryPreparation')
 
 logger = logging.getLogger('db')
 
