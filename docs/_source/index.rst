@@ -1,20 +1,21 @@
-Parkour Code Documentation
-===================================
+Parkour LIMS
+============
 
 Parkour is ... short description.
 
+
+Features
+--------
+
+* Request status tracking
+
+
 Contents
-========
+--------
+
 .. toctree::
-   :maxdepth: 5
+   :maxdepth: 2
 
    Installation <installation>
 
-   Parkour API Documentation <api_doc>
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   API Documentation <api>

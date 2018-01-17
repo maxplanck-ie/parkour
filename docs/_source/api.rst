@@ -1,7 +1,5 @@
-Parkour API Documentation
-=========================
-
-test
+API Documentation
+=================
 
 .. toctree::
    :maxdepth: 3
@@ -12,7 +10,7 @@ test
 
    Sample <modules/sample.api>
 
-   Quality Check <modules/quality_check.api>
+   Incoming Libraries <modules/incoming_libraries.api>
 
    Index Generator <modules/index_generator.api>
 
