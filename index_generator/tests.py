@@ -1,12 +1,13 @@
 import json
 
-from django.core.urlresolvers import reverse
-from django.contrib.auth import get_user_model
-
-from .models import Pool, PoolSize
-from request.tests import create_request
 from common.tests import BaseTestCase
 from common.utils import get_random_name
+
+from request.tests import create_request
+from library_sample_shared.tests import create_index_type
+from library.tests import create_library
+from sample.tests import create_sample
+
 from library_sample_shared.models import (
     ReadLength,
     IndexType,
@@ -16,39 +17,15 @@ from library_sample_shared.models import (
 from library.models import Library
 from sample.models import Sample
 
-from library.tests import create_library
-from sample.tests import create_sample
-
+from .models import Pool, PoolSize
 from .index_generator import IndexGenerator
 
-User = get_user_model()
 
-
-INDICES_1_SINGLE = [
-    ('A', '1', 'ATCACG'),
-    ('A', '2', 'CGATGT'),
-    ('A', '3', 'TTAGGC'),
-    ('A', '4', 'TGACCA'),
-    ('A', '5', 'ACAGTG'),
-    ('A', '6', 'GCCAAT'),
-    ('A', '7', 'CAGATC'),
-    ('A', '8', 'ACTTGA'),
-    ('A', '9', 'GATCAG'),
-    ('A', '10', 'TAGCTT'),
-    ('A', '11', 'GGCTAC'),
-    ('A', '12', 'CTTGTA'),
-    ('A', '13', 'AGTCAA'),
-    ('A', '14', 'AGTTCC'),
-    ('A', '15', 'ATGTCA'),
-    ('A', '16', 'CCGTCC'),
-    ('A', '17', 'GTCCGC'),
-    ('A', '18', 'GTGAAA'),
-    ('A', '19', 'GTGGCC'),
-    ('A', '20', 'GTTTCG'),
-    ('A', '21', 'CGTACG'),
-    ('A', '22', 'GAGTGG'),
-    ('A', '23', 'ACTGAT'),
-    ('A', '24', 'ATTCCT'),
+# Best match: A02 and A03
+INDICES_I7 = [
+    ('A', '01', 'AAAAAA'),
+    ('A', '02', 'ATCACG'),
+    ('A', '03', 'TAGTGC'),
 ]
 
 
@@ -66,15 +43,22 @@ def create_pool(user, multiplier=1, size=200, save=True):
 
 # Models
 
-class PoolTest(BaseTestCase):
+class TestPoolModel(BaseTestCase):
     def setUp(self):
         self.user = self.create_user('test@test.io', 'foo-bar')
         self.pool = create_pool(self.user)
 
+        library = create_library(get_random_name(), 2)
+        sample = create_sample(get_random_name(), 2)
+        self.pool.libraries.add(library)
+        self.pool.samples.add(sample)
+
     def test_pool_name(self):
-        self.assertTrue(isinstance(self.pool, Pool))
-        self.assertEqual(self.pool.__str__(), self.pool.name)
-        self.assertEqual(self.pool.name, 'Pool_%i' % self.pool.pk)
+        self.assertEqual(str(self.pool), self.pool.name)
+        self.assertEqual(self.pool.name, f'Pool_{self.pool.pk}')
+
+    def test_total_sequencing_depth(self):
+        self.assertEqual(self.pool.total_sequencing_depth, 2)
 
     def test_update_library(self):
         """
@@ -91,11 +75,22 @@ class PoolTest(BaseTestCase):
         are set to True, and the barcode is updated.
         """
         sample = create_sample(get_random_name(), 2)
+        self.assertNotIn('L', sample.barcode)
         self.pool.samples.add(sample)
         sample = sample.__class__.objects.get(pk=sample.pk)
         self.assertTrue(sample.is_pooled)
         self.assertTrue(sample.is_converted)
         self.assertIn('L', sample.barcode)
+
+
+class TestPoolSizeModel(BaseTestCase):
+    def setUp(self):
+        self.size = PoolSize(multiplier=1, size=200)
+        self.size.save()
+
+    def test_name(self):
+        self.assertEqual(
+            str(self.size), f'{self.size.multiplier}x{self.size.size}')
 
 
 # Views
@@ -110,17 +105,16 @@ class TestPoolSize(BaseTestCase):
         pool_size = PoolSize(multiplier=1, size=10)
         pool_size.save()
 
-        response = self.client.get(reverse('pool-size-list'))
+        response = self.client.get('/api/pool_sizes/')
         self.assertEqual(response.status_code, 200)
-        data = response.json()
-        pool_sizes = [x['id'] for x in data]
+        pool_sizes = [x['id'] for x in response.json()]
         self.assertIn(pool_size.pk, pool_sizes)
 
 
-class TestIndexGenerator(BaseTestCase):
+class TestRecordsList(BaseTestCase):
     def setUp(self):
-        self.user = self.create_user('test@test.io', 'foo-bar')
-        self.client.login(email='test@test.io', password='foo-bar')
+        self.user = self.create_user()
+        self.login()
 
     def test_get_libraries_and_samples_list(self):
         """
@@ -142,10 +136,9 @@ class TestIndexGenerator(BaseTestCase):
         req.libraries.add(*[library1.pk, library2.pk, library3.pk])
         req.samples.add(*[sample1.pk, sample2.pk])
 
-        response = self.client.get(reverse('index-generator-list'))
+        response = self.client.get('/api/index_generator/')
         self.assertEqual(response.status_code, 200)
-        data = response.json()
-        records = [x['name'] for x in data]
+        records = [x['name'] for x in response.json()]
         self.assertIn(library1.name, records)
         self.assertIn(sample1.name, records)
         self.assertNotIn(library2.name, records)
@@ -155,8 +148,8 @@ class TestIndexGenerator(BaseTestCase):
     def test_get_libraries_and_samples_list_non_staff(self):
         """Ensure error is thrown if a non-staff user tries to get the list."""
         self.create_user('non-staff@test.io', 'test', False)
-        self.client.login(email='non-staff@test.io', password='test')
-        response = self.client.get(reverse('index-generator-list'))
+        self.login('non-staff@test.io', 'test')
+        response = self.client.get('/api/index_generator/')
         self.assertTrue(response.status_code, 403)
 
     def test_update_record(self):
@@ -167,7 +160,7 @@ class TestIndexGenerator(BaseTestCase):
         read_length = ReadLength(name=get_random_name())
         read_length.save()
 
-        response = self.client.post(reverse('index-generator-edit'), {
+        response = self.client.post('/api/index_generator/edit/', {
             'data': json.dumps([{
                 'pk': library.pk,
                 'record_type': 'Library',
@@ -181,6 +174,7 @@ class TestIndexGenerator(BaseTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()['success'])
+
         updated_library = Library.objects.get(pk=library.pk)
         updated_sample = Sample.objects.get(pk=sample.pk)
         self.assertEqual(updated_library.read_length, read_length)
@@ -197,7 +191,7 @@ class TestIndexGenerator(BaseTestCase):
         index_type = IndexType(name=get_random_name())
         index_type.save()
 
-        response = self.client.post(reverse('index-generator-edit'), {
+        response = self.client.post('/api/index_generator/edit/', {
             'data': json.dumps([{
                 'pk': library.pk,
                 'record_type': 'Library',
@@ -209,220 +203,132 @@ class TestIndexGenerator(BaseTestCase):
             }])
         })
 
-        data = response.json()
         self.assertEqual(response.status_code, 200)
+        data = response.json()
         self.assertTrue(data['success'])
         self.assertEqual(data['message'], 'Some records cannot be updated.')
+
         updated_library = Library.objects.get(pk=library.pk)
         updated_sample = Sample.objects.get(pk=sample.pk)
         self.assertEqual(updated_library.index_type, library.index_type)
         self.assertEqual(updated_sample.index_type, index_type)
 
-    def test_index_generation_single_mode(self):
-        """
-        Ensure index generation in the single indices mode behaves correctly.
-        """
-        read_length = ReadLength(name=get_random_name())
-        read_length.save()
 
-        index_type = IndexType(
-            name=get_random_name(),
-            index_length='6',
-        )
-        index_type.save()
+class TestIndexGenerator(BaseTestCase):
+    def setUp(self):
+        self.create_user()
+        self.login()
 
-        # Populate the index type with indices
-        for index in INDICES_1_SINGLE:
-            index_i7 = IndexI7(
-                prefix=index[0],
-                number=index[1],
-                index=index[2],
-            )
-            index_i7.save()
-            index_type.indices_i7.add(index_i7)
+        self.index_type1 = IndexType(name=get_random_name(), index_length='6')
+        self.index_type1.save()
 
-        # library = create_library(get_random_name(), 2)
-        sample1 = create_sample(
-            name=get_random_name(),
-            status=2,
-            read_length=read_length,
-            index_type=index_type,
-        )
+        for idx in INDICES_I7:
+            index = IndexI7(prefix=idx[0], number=idx[1], index=idx[2])
+            index.save()
+            self.index_type1.indices_i7.add(index)
 
-        sample2 = create_sample(
-            name=get_random_name(),
-            status=2,
-            read_length=read_length,
-            index_type=index_type,
-        )
+    # def test_generate_index_for_one_sample(self):
+    #     """ Generate index for one sample (format=tube, mode=single). """
+    #     sample = create_sample(
+    #         get_random_name(), 2, index_type=self.index_type1)
+    #     response = self.client.post('/api/index_generator/generate_indices/', {
+    #         'samples': json.dumps([sample.pk]),
+    #     })
+    #     self.assertEqual(response.status_code, 200)
+    #     data = response.json()
+    #     self.assertTrue(data['success'])
 
-        response = self.client.post(
-            reverse('index-generator-generate-indices'), {
-                # 'libraries': json.dumps([]),
-                'samples': json.dumps([sample1.pk, sample2.pk]),
-            }
-        )
+    #     sample = Sample.objects.get(pk=sample.pk)
+    #     indices = self.index_type1.indices_i7.values_list('index', flat=True)
+    #     self.assertIn(sample.index_i7, indices)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.json()['success'])
+    # def test_generate_tube_single_samples_only(self):
+    #     """ Generate indices for samples only (format=tube, mode=single). """
+    #     sample1 = create_sample(get_random_name(), 2)
+    #     sample2 = create_sample(get_random_name(), 2)
+    #     sample3 = create_sample(get_random_name(), 2)
+
+    #     response = self.client.post('/api/index_generator/generate_indices/', {
+    #         'samples': json.dumps([sample1.pk, sample2.pk, sample3.pk]),
+    #     })
+    #     self.assertEqual(response.status_code, 200)
 
     def test_no_samples(self):
         """ Ensure error is thrown if no samples have been provided. """
-        response = self.client.post(
-            reverse('index-generator-generate-indices'), {}
-        )
-
-        data = response.json()
+        response = self.client.post('/api/index_generator/generate_indices/')
         self.assertEqual(response.status_code, 400)
-        self.assertFalse(data['success'])
-        self.assertEqual(data['message'], 'No samples have been provided.')
-
-    def test_read_lengths_not_equal(self):
-        """ Ensure error is thrown if provided read lengths aren't equal. """
-        read_length1 = ReadLength(name=get_random_name())
-        read_length1.save()
-
-        read_length2 = ReadLength(name=get_random_name())
-        read_length2.save()
-
-        sample1 = create_sample(
-            name=get_random_name(),
-            status=2,
-            read_length=read_length1,
-        )
-
-        sample2 = create_sample(
-            name=get_random_name(),
-            status=2,
-            read_length=read_length2,
-        )
-
-        response = self.client.post(
-            reverse('index-generator-generate-indices'), {
-                'samples': json.dumps([sample1.pk, sample2.pk]),
-            }
-        )
-
         data = response.json()
-        self.assertEqual(response.status_code, 400)
         self.assertFalse(data['success'])
-        self.assertEqual(data['message'], 'Read lengths must be the same.')
+        self.assertEqual(data['message'], 'No samples provided.')
 
     def test_index_type_not_set(self):
-        """ Ensure error is thrown of index type is not set. """
-        read_length = ReadLength(name=get_random_name())
-        read_length.save()
+        """ Ensure error is thrown if Index Type is not set. """
+        index_type = create_index_type(get_random_name())
+        sample1 = create_sample(get_random_name(), index_type=index_type)
+        sample2 = create_sample(get_random_name())
 
-        index_type = IndexType(name=get_random_name(), index_length='6')
-        index_type.save()
-
-        # library = create_library(get_random_name(), 2)
-        sample1 = create_sample(
-            name=get_random_name(),
-            status=2,
-            read_length=read_length,
-        )
-
-        sample2 = create_sample(
-            name=get_random_name(),
-            status=2,
-            read_length=read_length,
-            index_type=index_type,
-        )
-
-        response = self.client.post(
-            reverse('index-generator-generate-indices'), {
-                'samples': json.dumps([sample1.pk, sample2.pk]),
-            }
-        )
-
-        data = response.json()
+        response = self.client.post('/api/index_generator/generate_indices/', {
+            'samples': json.dumps([sample1.pk, sample2.pk]),
+        })
         self.assertEqual(response.status_code, 400)
+        data = response.json()
+        self.assertFalse(data['success'])
+        self.assertEqual(data['message'], 'Index Type must be set ' +
+                         'for all libraries and samples.')
+
+    def test_mixed_single_dual_indices(self):
+        """
+        Ensure error is thrown if mixed single/dual indices have been used.
+        """
+        index_type1 = create_index_type(get_random_name())
+        index_type2 = create_index_type(get_random_name(), is_dual=True)
+        sample1 = create_sample(get_random_name(), index_type=index_type1)
+        sample2 = create_sample(get_random_name(), index_type=index_type2)
+
+        response = self.client.post('/api/index_generator/generate_indices/', {
+            'samples': json.dumps([sample1.pk, sample2.pk]),
+        })
+        self.assertEqual(response.status_code, 400)
+        data = response.json()
         self.assertFalse(data['success'])
         self.assertEqual(
-            data['message'],
-            'Index Type must be set for all libraries and samples.'
-        )
+            data['message'], 'Mixed single/dual indices are not allowed.')
 
-    def test_index_conversion(self):
-        """ Ensure the convertion A/C into R and T into G behaves correctly."""
-        converted_index = IndexGenerator._convert_index('ATCACG')
+    def test_mixed_index_lengths(self):
+        """
+        Ensure error is thrown if index types with mixed index lengths
+        have been used.
+        """
+        index_type1 = create_index_type(get_random_name())
+        index_type2 = create_index_type(get_random_name(), index_length='6')
+        sample1 = create_sample(get_random_name(), index_type=index_type1)
+        sample2 = create_sample(get_random_name(), index_type=index_type2)
+
+        response = self.client.post('/api/index_generator/generate_indices/', {
+            'samples': json.dumps([sample1.pk, sample2.pk]),
+        })
+        self.assertEqual(response.status_code, 400)
+        data = response.json()
+        self.assertFalse(data['success'])
+        self.assertEqual(data['message'], 'Index Types with mixed index ' +
+                         'lengths are not allowed.')
+
+    def test_mixed_formats(self):
+        """ Ensure error is thrown if mixed formats have been used. """
+        index_type1 = create_index_type(get_random_name())
+        index_type2 = create_index_type(get_random_name(), format='plate')
+        sample1 = create_sample(get_random_name(), index_type=index_type1)
+        sample2 = create_sample(get_random_name(), index_type=index_type2)
+
+        response = self.client.post('/api/index_generator/generate_indices/', {
+            'samples': json.dumps([sample1.pk, sample2.pk]),
+        })
+        self.assertEqual(response.status_code, 400)
+        data = response.json()
+        self.assertFalse(data['success'])
+        self.assertEqual(data['message'], 'Index Types with mixed formats ' +
+                         'are not allowed.')
+
+    def test_index_convertion(self):
+        converted_index = IndexGenerator.convert_index('ATCACG')
         self.assertEqual(converted_index, 'RGRRRG')
-
-
-# class SavePoolTest(TestCase):
-#     def setUp(self):
-#         self.user = User.objects.create_user(
-#             email='foo@bar.io',
-#             password='foo-foo',
-#             is_staff=True,
-#         )
-#         self.user.save()
-#
-#         self.index_i7 = IndexI7.objects.get(pk=1)
-#
-#         self.library = Library.get_test_library()
-#         self.sample1 = Sample.get_test_sample()
-#         self.sample2 = Sample.get_test_sample()
-#         self.sample1.index = self.index_i7.index
-#         self.library.save()
-#         self.sample1.save()
-#         self.sample2.save()
-#
-#     def test_save_pool(self):
-#         self.client.login(email='foo@bar.io', password='foo-foo')
-#         samples = [{
-#             'sample_id': self.sample1.pk,
-#             'index_i7_id': self.index_i7.index_id,
-#             'index_i5_id': '',
-#         }]
-#         response = self.client.post(reverse('save_pool'), {
-#             'libraries': '[%s]' % self.library.pk,
-#             'samples': json.dumps(samples),
-#         })
-#         self.assertEqual(response.status_code, 200)
-#         self.assertJSONEqual(str(response.content, 'utf-8'), {
-#             'success': True,
-#             'error': '',
-#         })
-#
-#         pooling_objects = Pooling.objects.filter(library=self.library)
-#         self.assertEqual(pooling_objects.count(), 1)
-#
-#         libprep_objects = LibraryPreparation.objects.filter(sample=self.sample1)
-#         self.assertEqual(libprep_objects.count(), 1)
-#
-#     def test_missing_index_i7(self):
-#         self.client.login(email='foo@bar.io', password='foo-foo')
-#         samples = [{
-#             'sample_id': self.sample2.pk,
-#             'index_i7_id': '',
-#             'index_i5_id': '',
-#         }]
-#         response = self.client.post(reverse('save_pool'), {
-#             'libraries': '[%s]' % self.library.pk,
-#             'samples': json.dumps(samples),
-#         })
-#         self.assertEqual(response.status_code, 200)
-#         self.assertJSONEqual(str(response.content, 'utf-8'), {
-#             'success': False,
-#             'error': 'Could not save Pool.',
-#         })
-#
-#     def test_missing_libraries_and_samples(self):
-#         self.client.login(email='foo@bar.io', password='foo-foo')
-#         response = self.client.post(reverse('save_pool'))
-#         self.assertEqual(response.status_code, 200)
-#         self.assertJSONEqual(str(response.content, 'utf-8'), {
-#             'success': False,
-#             'error': 'Neither libraries nor samples have been provided.',
-#         })
-#
-#     def test_wrong_http_method(self):
-#         self.client.login(email='foo@bar.io', password='foo-foo')
-#         response = self.client.get(reverse('save_pool'))
-#         self.assertEqual(response.status_code, 200)
-#         self.assertJSONEqual(str(response.content, 'utf-8'), {
-#             'success': False,
-#             'error': 'Wrong HTTP method.',
-#         })

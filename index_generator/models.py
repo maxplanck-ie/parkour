@@ -29,13 +29,13 @@ class Pool(DateTimeMixin):
     samples = models.ManyToManyField(
         Sample, related_name='pool', blank=True)
 
-    def get_size(self):
-        size = 0
-        for library in self.libraries.all():
-            size += library.sequencing_depth
-        for sample in self.samples.all():
-            size += sample.sequencing_depth
-        return size
+    # def get_size(self):
+    #     size = 0
+    #     for library in self.libraries.all():
+    #         size += library.sequencing_depth
+    #     for sample in self.samples.all():
+    #         size += sample.sequencing_depth
+    #     return size
 
     def __str__(self):
         return self.name

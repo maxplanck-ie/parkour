@@ -18,8 +18,9 @@ def update_libraries_create_pooling_obj(sender, instance, action, **kwargs):
 
         # TODO: maybe there is a better way to create multiple objects at once
         for library in instance.libraries.all():
-            obj = Pooling(library=library)
-            obj.save()
+            obj, created = Pooling.objects.get_or_create(library=library)
+            if created:
+                obj.save()
 
 
 @receiver(post_save, sender=Sample)
@@ -41,8 +42,6 @@ def create_pooling_objects_sample(sender, instance, **kwargs):
     if lib_prep_object and instance.status == 3:
         # If a sample has an associated Library Preparation object and
         # passes the quality check, create a Pooling object for the sample
-        try:
-            Pooling.objects.get(sample=instance)
-        except Pooling.DoesNotExist:
-            pooling_obj = Pooling(sample=instance)
-            pooling_obj.save()
+        obj, created = Pooling.objects.get_or_create(sample=instance)
+        if created:
+            obj.save()

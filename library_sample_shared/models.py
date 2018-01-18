@@ -47,9 +47,9 @@ class GenericIndex(models.Model):
         blank=True,
     )
 
-    # @property
-    # def index_id(self):
-    #     return f'{self.prefix}{self.number}'
+    @property
+    def index_id_(self):  # TODO: rename 'index_id_' to 'index_id'
+        return f'{self.prefix}{self.number}'
 
     class Meta:
         abstract = True
@@ -163,7 +163,10 @@ class IndexPair(models.Model):
     def __str__(self):
         index1_id = self.index1.index_id if self.index1 else ''
         index2_id = self.index2.index_id if self.index2 else ''
-        return f'{index1_id}-{index2_id}'
+        if self.index_type.is_dual:
+            return f'{index1_id}-{index2_id}'
+        else:
+            return index1_id
 
 
 class BarcodeSingletonModel(models.Model):

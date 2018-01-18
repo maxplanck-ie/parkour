@@ -42,6 +42,17 @@ def create_library_protocol(name, type='DNA'):
     return library_protocol
 
 
+def create_index_type(name, save=True, is_dual=False, index_length='8',
+                      format='single'):
+    index_type = IndexType(
+        name=name, is_dual=is_dual, index_length=index_length, format=format)
+
+    if save:
+        index_type.save()
+
+    return index_type
+
+
 # Models
 
 class OrganismTest(TestCase):
@@ -250,21 +261,14 @@ class TestIndices(BaseTestCase):
         self.create_user('foo@bar.io', 'foo-foo')
         self.client.login(email='foo@bar.io', password='foo-foo')
 
-        self.index1 = IndexI7(
-            index_id=self._get_random_name(),
-            index=self._get_random_name(8),
-        )
-        self.index2 = IndexI7(
-            index_id=self._get_random_name(),
-            index=self._get_random_name(8),
-        )
+        self.index1 = IndexI7(prefix='I', number='1',
+                              index=self._get_random_name(8), index_id='I1')
+        self.index2 = IndexI7(prefix='I', number='2',
+                              index=self._get_random_name(8), index_id='I2')
+        self.index3 = IndexI5(prefix='I', number='3',
+                              index=self._get_random_name(8), index_id='I3')
         self.index1.save()
         self.index2.save()
-
-        self.index3 = IndexI5(
-            index_id=self._get_random_name(),
-            index=self._get_random_name(8),
-        )
         self.index3.save()
 
         self.index_type1 = IndexType(name=self._get_random_name())
@@ -279,9 +283,8 @@ class TestIndices(BaseTestCase):
     def test_indices_list(self):
         """ Ensure get all indices behaves correctly. """
         response = self.client.get(reverse('index-list'))
-        data = response.json()
-        indices = [x['index_id'] for x in data]
         self.assertEqual(response.status_code, 200)
+        indices = [x['index_id'] for x in response.json()]
         self.assertIn(self.index1.index_id, indices)
         self.assertIn(self.index2.index_id, indices)
         self.assertIn(self.index3.index_id, indices)
@@ -289,9 +292,8 @@ class TestIndices(BaseTestCase):
     def test_indices_i7_list(self):
         """ Ensure get indices i7 behaves correctly. """
         response = self.client.get(reverse('index-i7'))
-        data = response.json()
-        indices = [x['index_id'] for x in data]
         self.assertEqual(response.status_code, 200)
+        indices = [x['index_id'] for x in response.json()]
         self.assertIn(self.index1.index_id, indices)
         self.assertIn(self.index2.index_id, indices)
         self.assertNotIn(self.index3.index_id, indices)
@@ -299,9 +301,8 @@ class TestIndices(BaseTestCase):
     def test_indices_i5_list(self):
         """ Ensure get indices i5 behaves correctly. """
         response = self.client.get(reverse('index-i5'))
-        data = response.json()
-        indices = [x['index_id'] for x in data]
         self.assertEqual(response.status_code, 200)
+        indices = [x['index_id'] for x in response.json()]
         self.assertNotIn(self.index1.index_id, indices)
         self.assertNotIn(self.index2.index_id, indices)
         self.assertIn(self.index3.index_id, indices)
