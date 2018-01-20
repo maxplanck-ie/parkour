@@ -102,8 +102,7 @@ class GenericIndexTest(TestCase):
         self.index_type.indices_i7.add(self.index1)
 
     def test_generic_index_id(self):
-        self.assertTrue(isinstance(self.index1, GenericIndex))
-        self.assertEqual(self.index1.__str__(), self.index1.index_id)
+        self.assertEqual(str(self.index1), self.index1.index_id_)
         self.assertEqual(self.index1.type(), self.index_type.name)
 
     def test_no_index_type(self):

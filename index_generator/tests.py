@@ -18,14 +18,25 @@ from library.models import Library
 from sample.models import Sample
 
 from .models import Pool, PoolSize
-from .index_generator import IndexGenerator
+from .index_generator import IndexRegistry, IndexGenerator
 
 
 # Best match: A02 and A03
-INDICES_I7 = [
+INDICES_1 = [  # I7
     ('A', '01', 'AAAAAA'),
     ('A', '02', 'ATCACG'),
     ('A', '03', 'TAGTGC'),
+]
+
+INDICES_2 = [  # I7
+    ('B', '01', 'AAAAAA'),
+    ('B', '02', 'ATCACG'),
+    ('B', '03', 'TAGTGC'),
+]
+INDICES_3 = [  # I5
+    ('C', '01', 'AAAAAA'),
+    ('C', '02', 'ATCACG'),
+    ('C', '03', 'TAGTGC'),
 ]
 
 
@@ -214,6 +225,27 @@ class TestRecordsList(BaseTestCase):
         self.assertEqual(updated_sample.index_type, index_type)
 
 
+class TestIndexRegistry(BaseTestCase):
+    def setUp(self):
+        self.index_type1 = IndexType(name=get_random_name(), index_length='6')
+        self.index_type1.save()
+
+        for idx in INDICES_1:
+            index = IndexI7(prefix=idx[0], number=idx[1], index=idx[2])
+            index.save()
+            self.index_type1.indices_i7.add(index)
+
+        self.index_registry1 = IndexRegistry(
+            'single', 'single', [self.index_type1])
+
+    def test_index_registry(self):
+        self.assertIn(self.index_type1.pk, self.index_registry1.indices.keys())
+        self.assertEqual(
+            len(self.index_registry1.indices[self.index_type1.pk]['i7']), 3)
+        self.assertEqual(
+            len(self.index_registry1.indices[self.index_type1.pk]['i5']), 0)
+
+
 class TestIndexGenerator(BaseTestCase):
     def setUp(self):
         self.create_user()
@@ -222,31 +254,61 @@ class TestIndexGenerator(BaseTestCase):
         self.index_type1 = IndexType(name=get_random_name(), index_length='6')
         self.index_type1.save()
 
-        for idx in INDICES_I7:
+        for idx in INDICES_1:
             index = IndexI7(prefix=idx[0], number=idx[1], index=idx[2])
             index.save()
             self.index_type1.indices_i7.add(index)
 
-    # def test_generate_index_for_one_sample(self):
-    #     """ Generate index for one sample (format=tube, mode=single). """
-    #     sample = create_sample(
-    #         get_random_name(), 2, index_type=self.index_type1)
-    #     response = self.client.post('/api/index_generator/generate_indices/', {
-    #         'samples': json.dumps([sample.pk]),
-    #     })
-    #     self.assertEqual(response.status_code, 200)
-    #     data = response.json()
-    #     self.assertTrue(data['success'])
+        self.index_type2 = IndexType(
+            name=get_random_name(), is_dual=True, index_length='6')
+        self.index_type2.save()
 
-    #     sample = Sample.objects.get(pk=sample.pk)
-    #     indices = self.index_type1.indices_i7.values_list('index', flat=True)
-    #     self.assertIn(sample.index_i7, indices)
+        for idx in INDICES_2:
+            index = IndexI7(prefix=idx[0], number=idx[1], index=idx[2])
+            index.save()
+            self.index_type2.indices_i7.add(index)
+
+        for idx in INDICES_3:
+            index = IndexI5(prefix=idx[0], number=idx[1], index=idx[2])
+            index.save()
+            self.index_type2.indices_i5.add(index)
+
+    def test_one_sample_format_tube_mode_single(self):
+        """ Generate index for one sample (format=tube, mode=single). """
+        sample = create_sample(
+            get_random_name(), index_type=self.index_type1)
+        index_i7_ids = [x.index_id_ for x in self.index_type1.indices_i7.all()]
+
+        response = self.client.post('/api/index_generator/generate_indices/', {
+            'samples': json.dumps([sample.pk]),
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertEqual(len(data['data']), 1)
+        self.assertIn(data['data'][0]['index_i7_id'], index_i7_ids)
+
+    def test_one_sample_format_tube_mode_dual(self):
+        sample = create_sample(
+            get_random_name(), index_type=self.index_type2)
+        index_i7_ids = [x.index_id_ for x in self.index_type2.indices_i7.all()]
+        index_i5_ids = [x.index_id_ for x in self.index_type2.indices_i5.all()]
+
+        response = self.client.post('/api/index_generator/generate_indices/', {
+            'samples': json.dumps([sample.pk]),
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertEqual(len(data['data']), 1)
+        self.assertIn(data['data'][0]['index_i7_id'], index_i7_ids)
+        self.assertIn(data['data'][0]['index_i5_id'], index_i5_ids)
 
     # def test_generate_tube_single_samples_only(self):
     #     """ Generate indices for samples only (format=tube, mode=single). """
-    #     sample1 = create_sample(get_random_name(), 2)
-    #     sample2 = create_sample(get_random_name(), 2)
-    #     sample3 = create_sample(get_random_name(), 2)
+    #     sample1 = create_sample(get_random_name())
+    #     sample2 = create_sample(get_random_name())
+    #     sample3 = create_sample(get_random_name())
 
     #     response = self.client.post('/api/index_generator/generate_indices/', {
     #         'samples': json.dumps([sample1.pk, sample2.pk, sample3.pk]),
@@ -261,11 +323,30 @@ class TestIndexGenerator(BaseTestCase):
         self.assertFalse(data['success'])
         self.assertEqual(data['message'], 'No samples provided.')
 
+    def test_read_length(self):
+        """ Ensure error is thrown if Read Length is not the same. """
+        library = create_library(get_random_name())
+        sample = create_sample(get_random_name())
+
+        response = self.client.post('/api/index_generator/generate_indices/', {
+            'libraries': json.dumps([library.pk]),
+            'samples': json.dumps([sample.pk]),
+        })
+        self.assertEqual(response.status_code, 400)
+        data = response.json()
+        self.assertFalse(data['success'])
+        self.assertEqual(data['message'], 'Read Length must be the same ' +
+                         'for all libraries and samples.')
+
     def test_index_type_not_set(self):
         """ Ensure error is thrown if Index Type is not set. """
+        read_length = ReadLength(name=get_random_name())
+        read_length.save()
+
         index_type = create_index_type(get_random_name())
-        sample1 = create_sample(get_random_name(), index_type=index_type)
-        sample2 = create_sample(get_random_name())
+        sample1 = create_sample(
+            get_random_name(), read_length=read_length, index_type=index_type)
+        sample2 = create_sample(get_random_name(), read_length=read_length)
 
         response = self.client.post('/api/index_generator/generate_indices/', {
             'samples': json.dumps([sample1.pk, sample2.pk]),
@@ -280,10 +361,15 @@ class TestIndexGenerator(BaseTestCase):
         """
         Ensure error is thrown if mixed single/dual indices have been used.
         """
+        read_length = ReadLength(name=get_random_name())
+        read_length.save()
+
         index_type1 = create_index_type(get_random_name())
         index_type2 = create_index_type(get_random_name(), is_dual=True)
-        sample1 = create_sample(get_random_name(), index_type=index_type1)
-        sample2 = create_sample(get_random_name(), index_type=index_type2)
+        sample1 = create_sample(
+            get_random_name(), read_length=read_length, index_type=index_type1)
+        sample2 = create_sample(
+            get_random_name(), read_length=read_length, index_type=index_type2)
 
         response = self.client.post('/api/index_generator/generate_indices/', {
             'samples': json.dumps([sample1.pk, sample2.pk]),
@@ -299,10 +385,15 @@ class TestIndexGenerator(BaseTestCase):
         Ensure error is thrown if index types with mixed index lengths
         have been used.
         """
+        read_length = ReadLength(name=get_random_name())
+        read_length.save()
+
         index_type1 = create_index_type(get_random_name())
         index_type2 = create_index_type(get_random_name(), index_length='6')
-        sample1 = create_sample(get_random_name(), index_type=index_type1)
-        sample2 = create_sample(get_random_name(), index_type=index_type2)
+        sample1 = create_sample(
+            get_random_name(), read_length=read_length, index_type=index_type1)
+        sample2 = create_sample(
+            get_random_name(), read_length=read_length, index_type=index_type2)
 
         response = self.client.post('/api/index_generator/generate_indices/', {
             'samples': json.dumps([sample1.pk, sample2.pk]),
@@ -315,10 +406,15 @@ class TestIndexGenerator(BaseTestCase):
 
     def test_mixed_formats(self):
         """ Ensure error is thrown if mixed formats have been used. """
+        read_length = ReadLength(name=get_random_name())
+        read_length.save()
+
         index_type1 = create_index_type(get_random_name())
         index_type2 = create_index_type(get_random_name(), format='plate')
-        sample1 = create_sample(get_random_name(), index_type=index_type1)
-        sample2 = create_sample(get_random_name(), index_type=index_type2)
+        sample1 = create_sample(
+            get_random_name(), read_length=read_length, index_type=index_type1)
+        sample2 = create_sample(
+            get_random_name(), read_length=read_length, index_type=index_type2)
 
         response = self.client.post('/api/index_generator/generate_indices/', {
             'samples': json.dumps([sample1.pk, sample2.pk]),
@@ -332,3 +428,20 @@ class TestIndexGenerator(BaseTestCase):
     def test_index_convertion(self):
         converted_index = IndexGenerator.convert_index('ATCACG')
         self.assertEqual(converted_index, 'RGRRRG')
+
+    def test_index_dict_creation(self):
+        index_dict = IndexGenerator.create_index_dict()
+        self.assertEqual(index_dict, {'prefix': '', 'number': '', 'index': ''})
+
+    def test_result_dict_creation(self):
+        sample = create_sample(get_random_name())
+        result_dict = IndexGenerator.create_result_dict(sample, {}, {})
+        self.assertEqual(result_dict, {
+            'pk': sample.pk,
+            'name': sample.name,
+            'record_type': 'Sample',
+            'read_length': sample.read_length_id,
+            'sequencing_depth': sample.sequencing_depth,
+            'index_i7': {},
+            'index_i5': {},
+        })

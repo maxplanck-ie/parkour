@@ -57,7 +57,7 @@ class GenericIndex(models.Model):
 
     def __str__(self):
         # return self.prefix + self.number
-        return self.index_id
+        return self.index_id_
 
     def type(self):
         try:
