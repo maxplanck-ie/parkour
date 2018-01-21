@@ -1,10 +1,11 @@
 import json
+from collections import namedtuple
 
 from common.tests import BaseTestCase
 from common.utils import get_random_name
 
 from request.tests import create_request
-from library_sample_shared.tests import create_index_type
+from library_sample_shared.tests import create_index_type as _create_index_type
 from library.tests import create_library
 from sample.tests import create_sample
 
@@ -21,22 +22,38 @@ from .models import Pool, PoolSize
 from .index_generator import IndexRegistry, IndexGenerator
 
 
-# Best match: A02 and A03
-INDICES_1 = [  # I7
-    ('A', '01', 'AAAAAA'),
-    ('A', '02', 'ATCACG'),
-    ('A', '03', 'TAGTGC'),
+Index = namedtuple('Index', ['prefix', 'number', 'index'])
+
+INDICES_1 = [  # I7: Best match: A02 and A03
+    Index('A', '01', 'AAAAAA'),
+    Index('A', '02', 'ATCACG'),
+    Index('A', '03', 'TAGTGC'),
 ]
 
 INDICES_2 = [  # I7
-    ('B', '01', 'AAAAAA'),
-    ('B', '02', 'ATCACG'),
-    ('B', '03', 'TAGTGC'),
+    Index('B', '01', 'AAAAAA'),
+    Index('B', '02', 'ATCACG'),
+    Index('B', '03', 'TAGTGC'),
 ]
 INDICES_3 = [  # I5
-    ('C', '01', 'AAAAAA'),
-    ('C', '02', 'ATCACG'),
-    ('C', '03', 'TAGTGC'),
+    Index('C', '01', 'AAAAAA'),
+    Index('C', '02', 'ATCACG'),
+    Index('C', '03', 'TAGTGC'),
+]
+
+INDICES_4 = [  # I7
+    Index('D', '01', 'ACACAC'),
+    Index('D', '02', 'CACACA'),
+]
+
+INDICES_5 = [  # I7: Best match: E01 and E03
+    Index('E', '01', 'AACCAA'),
+    Index('E', '02', 'CCAACC'),
+    Index('E', '03', 'AATTAA'),
+]
+INDICES_6 = [  # I5
+    Index('F', '01', 'CCAACC'),
+    Index('F', '02', 'AACCAA'),
 ]
 
 
@@ -50,6 +67,33 @@ def create_pool(user, multiplier=1, size=200, save=True):
         pool.save()
 
     return pool
+
+
+def create_index_type(indices_i7, indices_i5=None, format='single'):
+    is_dual = indices_i5 is not None
+
+    index_type = IndexType(
+        name=get_random_name(),
+        is_dual=is_dual,
+        format=format,
+        index_length='6',
+    )
+    index_type.save()
+
+    for idx in indices_i7:
+        index = IndexI7(
+            prefix=idx.prefix, number=idx.number, index=idx.index)
+        index.save()
+        index_type.indices_i7.add(index)
+
+    if indices_i5:
+        for idx in indices_i5:
+            index = IndexI5(
+                prefix=idx.prefix, number=idx.number, index=idx.index)
+            index.save()
+            index_type.indices_i5.add(index)
+
+    return index_type
 
 
 # Models
@@ -251,27 +295,15 @@ class TestIndexGenerator(BaseTestCase):
         self.create_user()
         self.login()
 
-        self.index_type1 = IndexType(name=get_random_name(), index_length='6')
-        self.index_type1.save()
+        self.read_length = ReadLength(name=get_random_name())
+        self.read_length.save()
 
-        for idx in INDICES_1:
-            index = IndexI7(prefix=idx[0], number=idx[1], index=idx[2])
-            index.save()
-            self.index_type1.indices_i7.add(index)
+        self.index_type1 = create_index_type(INDICES_1)
+        self.index_type2 = create_index_type(INDICES_2, INDICES_3)
+        self.index_type3 = create_index_type(INDICES_4)
+        self.index_type4 = create_index_type(INDICES_5, INDICES_6)
 
-        self.index_type2 = IndexType(
-            name=get_random_name(), is_dual=True, index_length='6')
-        self.index_type2.save()
-
-        for idx in INDICES_2:
-            index = IndexI7(prefix=idx[0], number=idx[1], index=idx[2])
-            index.save()
-            self.index_type2.indices_i7.add(index)
-
-        for idx in INDICES_3:
-            index = IndexI5(prefix=idx[0], number=idx[1], index=idx[2])
-            index.save()
-            self.index_type2.indices_i5.add(index)
+    # Test valid data
 
     def test_one_sample_format_tube_mode_single(self):
         """ Generate index for one sample (format=tube, mode=single). """
@@ -304,16 +336,185 @@ class TestIndexGenerator(BaseTestCase):
         self.assertIn(data['data'][0]['index_i7_id'], index_i7_ids)
         self.assertIn(data['data'][0]['index_i5_id'], index_i5_ids)
 
-    # def test_generate_tube_single_samples_only(self):
-    #     """ Generate indices for samples only (format=tube, mode=single). """
-    #     sample1 = create_sample(get_random_name())
-    #     sample2 = create_sample(get_random_name())
-    #     sample3 = create_sample(get_random_name())
+    def test_two_samples_format_tube_mode_single(self):
+        sample1 = create_sample(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type1,
+        )
+        sample2 = create_sample(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type1,
+        )
 
-    #     response = self.client.post('/api/index_generator/generate_indices/', {
-    #         'samples': json.dumps([sample1.pk, sample2.pk, sample3.pk]),
-    #     })
-    #     self.assertEqual(response.status_code, 200)
+        response = self.client.post('/api/index_generator/generate_indices/', {
+            'samples': json.dumps([sample1.pk, sample2.pk]),
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertEqual(len(data['data']), 2)
+        self.assertEqual(data['data'][0]['index_i7_id'], 'A02')
+        self.assertEqual(data['data'][1]['index_i7_id'], 'A03')
+
+    def test_two_samples_format_tube_mode_dual(self):
+        sample1 = create_sample(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type2,
+        )
+        sample2 = create_sample(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type2,
+        )
+
+        response = self.client.post('/api/index_generator/generate_indices/', {
+            'samples': json.dumps([sample1.pk, sample2.pk]),
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertEqual(len(data['data']), 2)
+        self.assertEqual(data['data'][0]['index_i7_id'], 'B02')
+        self.assertEqual(data['data'][0]['index_i5_id'], 'C03')
+        self.assertEqual(data['data'][1]['index_i7_id'], 'B03')
+        self.assertEqual(data['data'][1]['index_i5_id'], 'C02')
+
+    def test_libraries_and_samples_format_tube_mode_single(self):
+        library = create_library(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type1,
+        )
+        library.index_i7 = INDICES_1[1].index
+        library.save()
+
+        sample = create_sample(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type1,
+        )
+
+        response = self.client.post('/api/index_generator/generate_indices/', {
+            'libraries': json.dumps([library.pk]),
+            'samples': json.dumps([sample.pk]),
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertEqual(len(data['data']), 2)
+        self.assertEqual(data['data'][0]['index_i7_id'], 'A02')
+        self.assertEqual(data['data'][1]['index_i7_id'], 'A03')
+
+    def test_libraries_and_samples_format_tube_mode_dual(self):
+        library = create_library(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type2,
+        )
+        library.index_i7 = INDICES_2[1].index
+        library.index_i5 = INDICES_3[2].index
+        library.save()
+
+        sample = create_sample(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type2,
+        )
+
+        response = self.client.post('/api/index_generator/generate_indices/', {
+            'libraries': json.dumps([library.pk]),
+            'samples': json.dumps([sample.pk]),
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertEqual(len(data['data']), 2)
+        self.assertEqual(data['data'][0]['index_i7_id'], 'B02')
+        self.assertEqual(data['data'][0]['index_i5_id'], 'C03')
+        self.assertEqual(data['data'][1]['index_i7_id'], 'B03')
+        self.assertEqual(data['data'][1]['index_i5_id'], 'C02')
+
+    def test_custom_index_i7_library(self):
+        """
+        Ensure index generation with types (not selected) indices
+        behaves correctly.
+        """
+        index_type = _create_index_type(get_random_name(), index_length='6')
+        library = create_library(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=index_type,
+        )
+        library.index_i7 = INDICES_1[1].index
+        library.save()
+
+        sample = create_sample(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type1,
+        )
+
+        response = self.client.post('/api/index_generator/generate_indices/', {
+            'libraries': json.dumps([library.pk]),
+            'samples': json.dumps([sample.pk]),
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertEqual(len(data['data']), 2)
+        self.assertEqual(data['data'][0]['index_i7_id'], 'A03')
+        self.assertEqual(data['data'][1]['index_i7_id'], '')
+
+    # Test failing data
+
+    def test_failing_best_pair_format_tube_mode_single(self):
+        sample1 = create_sample(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type3,
+        )
+        sample2 = create_sample(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type3,
+        )
+
+        response = self.client.post('/api/index_generator/generate_indices/', {
+            'samples': json.dumps([sample1.pk, sample2.pk]),
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(data['success'])
+        self.assertIn('best matching pair of Indices I7', data['message'])
+        self.assertIn(sample1.name, data['message'])
+        self.assertIn(sample2.name, data['message'])
+
+    def test_failing_best_pair_format_tube_mode_dual(self):
+        sample1 = create_sample(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type4,
+        )
+        sample2 = create_sample(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type4,
+        )
+
+        response = self.client.post('/api/index_generator/generate_indices/', {
+            'samples': json.dumps([sample1.pk, sample2.pk]),
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(data['success'])
+        self.assertIn('best matching pair of Indices I5', data['message'])
+        self.assertIn(sample1.name, data['message'])
+        self.assertIn(sample2.name, data['message'])
+
+    # Test data validation
 
     def test_no_samples(self):
         """ Ensure error is thrown if no samples have been provided. """
@@ -343,7 +544,7 @@ class TestIndexGenerator(BaseTestCase):
         read_length = ReadLength(name=get_random_name())
         read_length.save()
 
-        index_type = create_index_type(get_random_name())
+        index_type = _create_index_type(get_random_name())
         sample1 = create_sample(
             get_random_name(), read_length=read_length, index_type=index_type)
         sample2 = create_sample(get_random_name(), read_length=read_length)
@@ -364,8 +565,8 @@ class TestIndexGenerator(BaseTestCase):
         read_length = ReadLength(name=get_random_name())
         read_length.save()
 
-        index_type1 = create_index_type(get_random_name())
-        index_type2 = create_index_type(get_random_name(), is_dual=True)
+        index_type1 = _create_index_type(get_random_name())
+        index_type2 = _create_index_type(get_random_name(), is_dual=True)
         sample1 = create_sample(
             get_random_name(), read_length=read_length, index_type=index_type1)
         sample2 = create_sample(
@@ -388,8 +589,8 @@ class TestIndexGenerator(BaseTestCase):
         read_length = ReadLength(name=get_random_name())
         read_length.save()
 
-        index_type1 = create_index_type(get_random_name())
-        index_type2 = create_index_type(get_random_name(), index_length='6')
+        index_type1 = _create_index_type(get_random_name())
+        index_type2 = _create_index_type(get_random_name(), index_length='6')
         sample1 = create_sample(
             get_random_name(), read_length=read_length, index_type=index_type1)
         sample2 = create_sample(
@@ -409,8 +610,8 @@ class TestIndexGenerator(BaseTestCase):
         read_length = ReadLength(name=get_random_name())
         read_length.save()
 
-        index_type1 = create_index_type(get_random_name())
-        index_type2 = create_index_type(get_random_name(), format='plate')
+        index_type1 = _create_index_type(get_random_name())
+        index_type2 = _create_index_type(get_random_name(), format='plate')
         sample1 = create_sample(
             get_random_name(), read_length=read_length, index_type=index_type1)
         sample2 = create_sample(
