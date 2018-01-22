@@ -87,6 +87,8 @@ class IndexTypeAdmin(admin.ModelAdmin):
 @admin.register(IndexPair)
 class IndexPairAdmin(admin.ModelAdmin):
     list_display = ('index_pair', 'coordinate',)
+    search_fields = ('index_type__name',)
+    list_filter = ('index_type',)
 
     def index_pair(self, obj):
         return str(obj)
