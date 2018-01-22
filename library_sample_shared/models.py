@@ -1,8 +1,12 @@
 import re
 
 from django.db import models
+from django.core.validators import MinValueValidator, RegexValidator
 
 from common.models import DateTimeMixin
+
+AlphaValidator = RegexValidator(
+    r'^[A-Z]$', 'Only capital alpha characters are allowed.')
 
 
 class Organism(models.Model):
@@ -154,19 +158,26 @@ class IndexPair(models.Model):
         blank=True,
     )
 
-    coordinate = models.CharField(max_length=5)
+    char_coord = models.CharField(
+        'Character Coordinate', validators=[AlphaValidator], max_length=1)
+    num_coord = models.PositiveSmallIntegerField(
+        'Numeric Coordinate', validators=[MinValueValidator(1)])
 
     class Meta:
         verbose_name = 'Index Pair'
         verbose_name_plural = 'Index Pairs'
 
+    @property
+    def coordinate(self):
+        return f'{self.char_coord}{self.num_coord}'
+
     def __str__(self):
-        index1_id = self.index1.index_id if self.index1 else ''
-        index2_id = self.index2.index_id if self.index2 else ''
+        index1_id = self.index1.index_id_ if self.index1 else ''
+        index2_id = self.index2.index_id_ if self.index2 else ''
+        output = index1_id
         if self.index_type.is_dual:
-            return f'{index1_id}-{index2_id}'
-        else:
-            return index1_id
+            output += f'-{index2_id}'
+        return output
 
 
 class BarcodeSingletonModel(models.Model):

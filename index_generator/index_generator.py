@@ -1,39 +1,84 @@
 import re
 import random
 import itertools
+from collections import namedtuple
 
 from django.apps import apps
 
 IndexI7 = apps.get_model('library_sample_shared', 'IndexI7')
 IndexI5 = apps.get_model('library_sample_shared', 'IndexI5')
+IndexPair = apps.get_model('library_sample_shared', 'IndexPair')
 Library = apps.get_model('library', 'Library')
 Sample = apps.get_model('sample', 'Sample')
 
 
 class IndexRegistry:
-    indices = {}
+    def __init__(self, format, mode, index_types,
+                 start_coord='A1', direction='right'):
+        self.indices = {}
+        self.pairs = []
 
-    def __init__(self, format, mode, index_types):
-        for index_type in index_types:
-            if index_type.pk not in self.indices.keys():
-                self.indices[index_type.pk] = {'i7': [], 'i5': []}
+        if format == 'single':
+            for index_type in index_types:
+                if index_type.pk not in self.indices.keys():
+                    self.indices[index_type.pk] = {'i7': [], 'i5': []}
 
-            self.indices[index_type.pk]['i7'].extend(
-                self._to_list(index_type.indices_i7.all()))
+                self.indices[index_type.pk]['i7'].extend(
+                    self._to_list(index_type.indices_i7.all()))
 
-            if mode == 'dual':
-                self.indices[index_type.pk]['i5'].extend(
-                    self._to_list(index_type.indices_i5.all()))
+                if mode == 'dual':
+                    self.indices[index_type.pk]['i5'].extend(
+                        self._to_list(index_type.indices_i5.all()))
+        else:
+            Pair = namedtuple('Pair', ['index1', 'index2', 'coordinate'])
+            char_coord, num_coord = self._split_coordinate(start_coord)
+
+            index_pairs = IndexPair.objects.filter(
+                index_type=index_types[0],
+                char_coord__gte=char_coord,
+                num_coord__gte=num_coord,
+            )
+
+            if not index_pairs:
+                raise ValueError(
+                    f'No index pairs for Index Type "{index_types[0].name}" ' +
+                    f'and start coordinate "{start_coord}".'
+                )
+
+            # Sort index pairs according to the chosen direction
+            if direction == 'right':
+                index_pairs = sorted(
+                    index_pairs, key=lambda x: (x.char_coord, x.num_coord))
+            else:  # down
+                index_pairs = sorted(
+                    index_pairs, key=lambda x: (x.num_coord, x.char_coord))
+
+            self.pairs = [
+                Pair(
+                    self._to_list([index_pair.index1])[0],
+                    self._to_list([index_pair.index2])[0],
+                    index_pair.coordinate,
+                )
+                for index_pair in index_pairs
+            ]
 
     def get_indices(self, index_group, index_type_id):
         return self.indices[index_type_id][index_group]
 
-    def _to_list(self, indices):
+    @staticmethod
+    def _to_list(indices):
         return list(map(lambda x: {
             'prefix': x.prefix,
             'number': x.number,
             'index': x.index,
         }, indices))
+
+    @staticmethod
+    def _split_coordinate(coordinate):
+        match = re.match(r'([A-Z]+)([1-9]+)', coordinate)
+        if not match:
+            raise ValueError('Invalid start coordinate.')
+        return match[1], int(match[2])
 
 
 class IndexGenerator:
@@ -46,7 +91,7 @@ class IndexGenerator:
     format = ''
     mode = ''
 
-    def __init__(self, library_ids=[], sample_ids=[]):
+    def __init__(self, library_ids, sample_ids, start_coord, direction):
         self._result = []
 
         self.libraries = Library.objects.filter(
@@ -114,6 +159,10 @@ class IndexGenerator:
         if len(set(formats)) != 1:
             raise ValueError('Index Types with mixed formats are not allowed.')
         self.format = formats[0]
+
+        if self.format == 'plate' and len(index_types) != 1:
+            raise ValueError('Index Type must be the same for all libraries ' +
+                             'and samples if the format is "plate".')
 
         return index_types
 
@@ -240,15 +289,19 @@ class IndexGenerator:
         index_key = f'index_{index_group}'
         res_index = {'avg_score': 100.0}
         indices_in_result = [x[index_key]['index'] for x in self._result]
-        indices = self.index_registry.get_indices(
-            index_group, sample.index_type.pk)
+        # indices = self.index_registry.get_indices(
+        #     index_group, sample.index_type.pk)
+
+        indices = list(self.index_registry.get_indices(
+            index_group, sample.index_type.pk))
+        random.shuffle(indices)
 
         # Ensure uniqueness of Indices I7
-        # if self.mode == 'single':
-        indices = [
-            x for x in indices
-            if x['index'] not in indices_in_result
-        ]
+        if self.mode == 'single':
+            indices = [
+                x for x in indices
+                if x['index'] not in indices_in_result
+            ]
 
         # Ensure uniqueness of the combination I7 <-> I5
         if self.mode == 'dual' and index_i7 is not None:

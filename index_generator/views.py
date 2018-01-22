@@ -212,11 +212,15 @@ class IndexGeneratorViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
 
     @list_route(methods=['post'])
     @handle_exceptions
-    @print_sql_queries
+    # @print_sql_queries
     def generate_indices(self, request):
         """ Generate indices for given libraries and samples. """
         libraries = json.loads(request.data.get('libraries', '[]'))
         samples = json.loads(request.data.get('samples', '[]'))
-        index_generator = IndexGenerator(libraries, samples)
+        start_coord = request.data.get('start_coord', 'A1')
+        direction = request.data.get('direction', 'right')
+
+        index_generator = IndexGenerator(
+            libraries, samples, start_coord, direction)
         data = index_generator.generate()
         return Response({'success': True, 'data': data})

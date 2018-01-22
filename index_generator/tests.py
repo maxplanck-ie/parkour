@@ -1,4 +1,5 @@
 import json
+import string
 from collections import namedtuple
 
 from common.tests import BaseTestCase
@@ -14,6 +15,7 @@ from library_sample_shared.models import (
     IndexType,
     IndexI7,
     IndexI5,
+    IndexPair,
 )
 from library.models import Library
 from sample.models import Sample
@@ -23,6 +25,8 @@ from .index_generator import IndexRegistry, IndexGenerator
 
 
 Index = namedtuple('Index', ['prefix', 'number', 'index'])
+
+# Single tube indices
 
 INDICES_1 = [  # I7: Best match: A02 and A03
     Index('A', '01', 'AAAAAA'),
@@ -54,6 +58,19 @@ INDICES_5 = [  # I7: Best match: E01 and E03
 INDICES_6 = [  # I5
     Index('F', '01', 'CCAACC'),
     Index('F', '02', 'AACCAA'),
+]
+
+# Index Pair indices (plate 3x3)
+
+INDICES_7 = [  # I7
+    Index('G', '01', 'CATCGC'),
+    Index('G', '02', 'GTTTGT'),
+    Index('G', '03', 'GTAGTT'),
+]
+INDICES_8 = [  # I5
+    Index('H', '01', 'CTCGGG'),
+    Index('H', '02', 'CACCGT'),
+    Index('H', '03', 'TAAATC'),
 ]
 
 
@@ -92,6 +109,22 @@ def create_index_type(indices_i7, indices_i5=None, format='single'):
                 prefix=idx.prefix, number=idx.number, index=idx.index)
             index.save()
             index_type.indices_i5.add(index)
+
+    if format == 'plate':
+        indices_i7 = index_type.indices_i7.all()
+        indices_i5 = index_type.indices_i5.all()
+        length = len(indices_i7)
+
+        for i, char_coord in enumerate(list(string.ascii_uppercase)[:length]):
+            for j, num_coord in enumerate(range(1, length + 1)):
+                index_pair = IndexPair(
+                    index_type=index_type,
+                    index1=indices_i7[j],
+                    index2=indices_i5[i],
+                    char_coord=char_coord,
+                    num_coord=num_coord,
+                )
+                index_pair.save()
 
     return index_type
 
@@ -271,23 +304,46 @@ class TestRecordsList(BaseTestCase):
 
 class TestIndexRegistry(BaseTestCase):
     def setUp(self):
-        self.index_type1 = IndexType(name=get_random_name(), index_length='6')
-        self.index_type1.save()
+        self.index_type1 = create_index_type(INDICES_1)
+        self.index_type2 = create_index_type(INDICES_7, INDICES_8, 'plate')
 
-        for idx in INDICES_1:
-            index = IndexI7(prefix=idx[0], number=idx[1], index=idx[2])
-            index.save()
-            self.index_type1.indices_i7.add(index)
-
-        self.index_registry1 = IndexRegistry(
-            'single', 'single', [self.index_type1])
-
-    def test_index_registry(self):
-        self.assertIn(self.index_type1.pk, self.index_registry1.indices.keys())
+    def test_format_tube(self):
+        index_registry = IndexRegistry('single', 'single', [self.index_type1])
+        self.assertEqual(len(index_registry.indices.keys()), 1)
+        self.assertIn(self.index_type1.pk, index_registry.indices.keys())
         self.assertEqual(
-            len(self.index_registry1.indices[self.index_type1.pk]['i7']), 3)
+            len(index_registry.indices[self.index_type1.pk]['i7']), 3)
         self.assertEqual(
-            len(self.index_registry1.indices[self.index_type1.pk]['i5']), 0)
+            len(index_registry.indices[self.index_type1.pk]['i5']), 0)
+
+    def test_format_plate(self):
+        index_registry = IndexRegistry('plate', 'dual', [self.index_type2])
+        self.assertEqual(len(index_registry.pairs), 9)
+
+        coordinates = [x.coordinate for x in index_registry.pairs]
+        self.assertEqual(coordinates, [
+            'A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'C2', 'C3'])
+
+    def test_format_plate_filter_by_start_coord(self):
+        index_registry = IndexRegistry(
+            'plate', 'dual', [self.index_type2], 'B2')
+        self.assertEqual(len(index_registry.pairs), 4)
+
+    def test_format_plate_direction_down(self):
+        index_registry = IndexRegistry(
+            'plate', 'dual', [self.index_type2], 'B2', 'down')
+        coordinates = [x.coordinate for x in index_registry.pairs]
+        self.assertEqual(coordinates, ['B2', 'C2', 'B3', 'C3'])
+
+    def test_invalid_start_coordinate(self):
+        with self.assertRaises(ValueError) as context:
+            IndexRegistry('plate', 'dual', [self.index_type2], 'test')
+        self.assertEqual(str(context.exception), 'Invalid start coordinate.')
+
+    def test_no_index_pairs(self):
+        with self.assertRaises(ValueError) as context:
+            IndexRegistry('plate', 'dual', [self.index_type2], 'Z50')
+        self.assertIn('No index pairs', str(context.exception))
 
 
 class TestIndexGenerator(BaseTestCase):
@@ -541,13 +597,14 @@ class TestIndexGenerator(BaseTestCase):
 
     def test_index_type_not_set(self):
         """ Ensure error is thrown if Index Type is not set. """
-        read_length = ReadLength(name=get_random_name())
-        read_length.save()
-
         index_type = _create_index_type(get_random_name())
         sample1 = create_sample(
-            get_random_name(), read_length=read_length, index_type=index_type)
-        sample2 = create_sample(get_random_name(), read_length=read_length)
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=index_type,
+        )
+        sample2 = create_sample(
+            get_random_name(), read_length=self.read_length)
 
         response = self.client.post('/api/index_generator/generate_indices/', {
             'samples': json.dumps([sample1.pk, sample2.pk]),
@@ -562,15 +619,19 @@ class TestIndexGenerator(BaseTestCase):
         """
         Ensure error is thrown if mixed single/dual indices have been used.
         """
-        read_length = ReadLength(name=get_random_name())
-        read_length.save()
-
         index_type1 = _create_index_type(get_random_name())
         index_type2 = _create_index_type(get_random_name(), is_dual=True)
+
         sample1 = create_sample(
-            get_random_name(), read_length=read_length, index_type=index_type1)
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=index_type1,
+        )
         sample2 = create_sample(
-            get_random_name(), read_length=read_length, index_type=index_type2)
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=index_type2,
+        )
 
         response = self.client.post('/api/index_generator/generate_indices/', {
             'samples': json.dumps([sample1.pk, sample2.pk]),
@@ -586,15 +647,19 @@ class TestIndexGenerator(BaseTestCase):
         Ensure error is thrown if index types with mixed index lengths
         have been used.
         """
-        read_length = ReadLength(name=get_random_name())
-        read_length.save()
-
         index_type1 = _create_index_type(get_random_name())
         index_type2 = _create_index_type(get_random_name(), index_length='6')
+
         sample1 = create_sample(
-            get_random_name(), read_length=read_length, index_type=index_type1)
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=index_type1,
+        )
         sample2 = create_sample(
-            get_random_name(), read_length=read_length, index_type=index_type2)
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=index_type2,
+        )
 
         response = self.client.post('/api/index_generator/generate_indices/', {
             'samples': json.dumps([sample1.pk, sample2.pk]),
@@ -607,15 +672,19 @@ class TestIndexGenerator(BaseTestCase):
 
     def test_mixed_formats(self):
         """ Ensure error is thrown if mixed formats have been used. """
-        read_length = ReadLength(name=get_random_name())
-        read_length.save()
-
         index_type1 = _create_index_type(get_random_name())
         index_type2 = _create_index_type(get_random_name(), format='plate')
+
         sample1 = create_sample(
-            get_random_name(), read_length=read_length, index_type=index_type1)
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=index_type1,
+        )
         sample2 = create_sample(
-            get_random_name(), read_length=read_length, index_type=index_type2)
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=index_type2,
+        )
 
         response = self.client.post('/api/index_generator/generate_indices/', {
             'samples': json.dumps([sample1.pk, sample2.pk]),
@@ -625,6 +694,32 @@ class TestIndexGenerator(BaseTestCase):
         self.assertFalse(data['success'])
         self.assertEqual(data['message'], 'Index Types with mixed formats ' +
                          'are not allowed.')
+
+    def test_mixed_index_types_format_plate(self):
+        index_type1 = _create_index_type(get_random_name(), format='plate')
+        index_type2 = _create_index_type(get_random_name(), format='plate')
+
+        sample1 = create_sample(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=index_type1,
+        )
+        sample2 = create_sample(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=index_type2,
+        )
+
+        response = self.client.post('/api/index_generator/generate_indices/', {
+            'samples': json.dumps([sample1.pk, sample2.pk]),
+        })
+        self.assertEqual(response.status_code, 400)
+        data = response.json()
+        self.assertFalse(data['success'])
+        self.assertEqual(data['message'], 'Index Type must be the same for ' +
+                         'all libraries and samples if the format is "plate".')
+
+    # Test static methods
 
     def test_index_convertion(self):
         converted_index = IndexGenerator.convert_index('ATCACG')
