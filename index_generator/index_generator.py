@@ -24,11 +24,13 @@ class IndexRegistry:
                     self.indices[index_type.pk] = {'i7': [], 'i5': []}
 
                 self.indices[index_type.pk]['i7'].extend(
-                    self._to_list(index_type.indices_i7.all()))
+                    self._to_list(
+                        index_type.pk, index_type.indices_i7.all()))
 
                 if mode == 'dual':
                     self.indices[index_type.pk]['i5'].extend(
-                        self._to_list(index_type.indices_i5.all()))
+                        self._to_list(
+                            index_type.pk, index_type.indices_i5.all()))
         else:
             Pair = namedtuple('Pair', ['index1', 'index2', 'coordinate'])
             char_coord, num_coord = self._split_coordinate(start_coord)
@@ -55,8 +57,8 @@ class IndexRegistry:
 
             self.pairs = [
                 Pair(
-                    self._to_list([index_pair.index1])[0],
-                    self._to_list([index_pair.index2])[0],
+                    self._to_list(index_types[0], [index_pair.index1])[0],
+                    self._to_list(index_types[0], [index_pair.index2])[0],
                     index_pair.coordinate,
                 )
                 for index_pair in index_pairs
@@ -66,8 +68,9 @@ class IndexRegistry:
         return self.indices[index_type_id][index_group]
 
     @staticmethod
-    def _to_list(indices):
+    def _to_list(index_type, indices):
         return list(map(lambda x: {
+            'index_type': index_type,
             'prefix': x.prefix,
             'number': x.number,
             'index': x.index,
@@ -90,6 +93,7 @@ class IndexGenerator:
     index_length = 0
     format = ''
     mode = ''
+    MAX_ATTEMPTS = 5
 
     def __init__(self, library_ids, sample_ids, start_coord, direction):
         self._result = []
@@ -113,7 +117,7 @@ class IndexGenerator:
             'index_type__indices_i7', 'index_type__indices_i5',
         ).only(
             'id', 'name', 'sequencing_depth', 'read_length__id', 'index_type',
-        )
+        ).order_by('index_type')
 
         # self.num_libraries = self.libraries.count()
         # self.num_samples = self.samples.count()
@@ -172,8 +176,7 @@ class IndexGenerator:
             self.add_libraries_to_result()
 
             # Find indices for all samples
-            for i, sample in enumerate(self.samples):
-                self.find_indices(sample, i)
+            self.find_indices()
 
         elif self.num_samples == 1:
             self.find_random_indices(self.samples[0])
@@ -183,23 +186,57 @@ class IndexGenerator:
             self.find_best_pair()
 
             # Find indices for the remaining samples
-            for i, sample in enumerate(self.samples[2:]):
-                self.find_indices(sample, i)
+            self.find_indices(2)
 
         return self.result
 
-    def find_indices(self, sample, i):
+    def find_indices(self, start=0):
         """ Find indices index I7 and I5 for a given sample. """
-        index_i7 = self._find_index('i7', sample)
-        index_i5 = self.create_index_dict()
+        samples = self.samples[start:]
+
+        def get_indices(samples, index_group):
+            index_key = f'index_{index_group}'
+            current_indices = [x[index_key] for x in self._result]
+            indices = []
+
+            for sample in samples:
+                index = self._find_index(index_group, sample, current_indices)
+                # TODO: throw error if index wasn't found
+                index = index['index']
+                current_indices.append(index)
+                indices.append(index)
+
+            return self.sort_indices(indices)
+
+        indices_i7 = get_indices(samples, 'i7')
+        indices_i5 = [self.create_index_dict()] * len(indices_i7)
 
         if self.mode == 'dual':
-            index_i5 = self._find_index('i5', sample, index_i7)
-            index_i5 = index_i5['index']
+            attempt = 0
+            is_ok = False
 
-        index_i7 = index_i7['index']
-        self._result.append(
-            self.create_result_dict(sample, index_i7, index_i5))
+            while attempt < self.MAX_ATTEMPTS and not is_ok:
+                indices_i5 = get_indices(samples, 'i5')
+
+                # Ensure uniqueness of the combination I7 <-> I5
+                unique = [
+                    True
+                    if indices_i7[i]['index'] != indices_i5[i]['index']
+                    else False
+                    for i in range(len(indices_i7))
+                ]
+
+                if unique.count(True) == len(indices_i7):
+                    is_ok = True
+
+                attempt += 1
+
+            if not is_ok:
+                raise ValueError('Maximum number of attempts is exceeded.')
+
+        for i, sample in enumerate(samples):
+            self._result.append(
+                self.create_result_dict(sample, indices_i7[i], indices_i5[i]))
 
     def find_best_pair(self):
         """
@@ -268,10 +305,13 @@ class IndexGenerator:
                 index=index, index_type=index_type)
             if idx:
                 idx = self.create_index_dict(
-                    idx[0].prefix, idx[0].number, idx[0].index)
+                    index_type.pk, idx[0].prefix, idx[0].number, idx[0].index)
             else:
-                idx = self.create_index_dict('', '', index)
+                idx = self.create_index_dict('', '', '', index)
             return idx
+
+        no_index = []
+        with_index = []
 
         for library in self.libraries:
             index_i7 = idx_dict(IndexI7, library.index_i7, library.index_type)
@@ -281,31 +321,34 @@ class IndexGenerator:
                 index_i5 = idx_dict(
                     IndexI5, library.index_i5, library.index_type)
 
-            self._result.append(
-                self.create_result_dict(library, index_i7, index_i5))
+            d = self.create_result_dict(library, index_i7, index_i5)
+            if d['index_i7']['prefix'] != '':
+                with_index.append(d)
+            else:
+                no_index.append(d)
 
-    def _find_index(self, index_group, sample, index_i7=None):
+        with_index = sorted(with_index, key=lambda x: (
+            x['index_i7']['prefix'], int(x['index_i7']['number'])
+        ))
+
+        self._result.extend(no_index + with_index)
+
+    def _find_index(self, index_group, sample, current_indices):
         """ Helper function for find_indices(). """
         index_key = f'index_{index_group}'
         res_index = {'avg_score': 100.0}
-        indices_in_result = [x[index_key]['index'] for x in self._result]
-        # indices = self.index_registry.get_indices(
-        #     index_group, sample.index_type.pk)
+        indices_in_result = [x['index'] for x in current_indices]
 
         indices = list(self.index_registry.get_indices(
             index_group, sample.index_type.pk))
         random.shuffle(indices)
 
-        # Ensure uniqueness of Indices I7
+        # Ensure uniqueness
         if self.mode == 'single':
             indices = [
                 x for x in indices
                 if x['index'] not in indices_in_result
             ]
-
-        # Ensure uniqueness of the combination I7 <-> I5
-        if self.mode == 'dual' and index_i7 is not None:
-            indices = [x for x in indices if x['index'] != index_i7['index']]
 
         for index in indices:
             scores = self._calculate_n_scores(sample, index, index_key)
@@ -416,7 +459,6 @@ class IndexGenerator:
     def result(self):
         """ Construct a list of all records and their indices. """
         result = []
-        custom_indices = []  # typed (not selected) indices
 
         for record in self._result:
             index_i7 = record['index_i7']
@@ -426,21 +468,15 @@ class IndexGenerator:
             rec['index_i7_id'] = index_i7['prefix'] + index_i7['number']
             rec['index_i5_id'] = index_i5['prefix'] + index_i5['number']
 
+            # Needed for the client
             for i in range(len(index_i7['index'])):
                 rec[f'index_i7_{i + 1}'] = index_i7['index'][i]
-
             for i in range(len(index_i5['index'])):
                 rec[f'index_i5_{i + 1}'] = index_i5['index'][i]
 
-            if rec['index_i7']['prefix'] != '':
-                result.append(rec)
-            else:
-                custom_indices.append(rec)
+            result.append(rec)
 
-        result = sorted(result, key=lambda x: (
-            x['index_i7']['prefix'], int(x['index_i7']['number']), x['name']))
-        custom_indices = sorted(custom_indices, key=lambda x: x['name'])
-        return result + custom_indices
+        return result
 
     @staticmethod
     def convert_index(index):
@@ -448,8 +484,18 @@ class IndexGenerator:
         return re.sub('T', 'G', re.sub('A|C', 'R', index))
 
     @staticmethod
-    def create_index_dict(prefix='', number='', index=''):
-        return {'prefix': prefix, 'number': number, 'index': index}
+    def sort_indices(indices):
+        return sorted(
+            indices, key=lambda x: (x['index_type'], int(x['number'])))
+
+    @staticmethod
+    def create_index_dict(index_type='', prefix='', number='', index=''):
+        return {
+            'index_type': index_type,
+            'prefix': prefix,
+            'number': number,
+            'index': index,
+        }
 
     @staticmethod
     def create_result_dict(obj, index_i7, index_i5):

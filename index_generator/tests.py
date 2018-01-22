@@ -521,8 +521,8 @@ class TestIndexGenerator(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(data['success'])
         self.assertEqual(len(data['data']), 2)
-        self.assertEqual(data['data'][0]['index_i7_id'], 'A03')
-        self.assertEqual(data['data'][1]['index_i7_id'], '')
+        self.assertEqual(data['data'][0]['index_i7_id'], '')
+        self.assertEqual(data['data'][1]['index_i7_id'], 'A03')
 
     # Test failing data
 
@@ -727,7 +727,9 @@ class TestIndexGenerator(BaseTestCase):
 
     def test_index_dict_creation(self):
         index_dict = IndexGenerator.create_index_dict()
-        self.assertEqual(index_dict, {'prefix': '', 'number': '', 'index': ''})
+        self.assertEqual(index_dict, {
+            'index_type': '', 'prefix': '', 'number': '', 'index': ''
+        })
 
     def test_result_dict_creation(self):
         sample = create_sample(get_random_name())
