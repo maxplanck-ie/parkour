@@ -253,13 +253,6 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
     // Update Summary
     grid.getView().refresh();
 
-    // Highlight cells which have low color diversity
-    grid.problematicCycles = [];
-    $.each(grid.problematicCycles, function (idx, id) {
-      $('.x-grid-row-summary .x-grid-cell-' + id).addClass('problematic-cycle');
-    });
-    // grid.problematicCycles = [];
-
     // Update grid's header and enable/disable 'Pool' button
     if (store.getCount() > 0) {
       grid.setTitle(Ext.String.format(

@@ -198,7 +198,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
           markDirty: false,
           stripeRows: false
         },
-        problematicCycles: [],
+        // problematicCycles: [],
         sortableColumns: false,
         enableColumnMove: false,
         enableColumnResize: false,
@@ -447,7 +447,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
     return diversity;
   },
 
-  renderSummary: function (value, summaryData, dataIndex) {
+  renderSummary: function (value, summaryData, dataIndex, meta) {
     var grid = Ext.getCmp('pool-grid');
     var store = grid.getStore();
     var result = '';
@@ -476,12 +476,8 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
       result = Ext.String.format('{0}%<br/>{1}%', green, red);
 
       if ((green < 20 && red > 80) || (red < 20 && green > 80)) {
+        meta.tdCls = 'problematic-cycle';
         result += '<br/>!';
-
-        // Remember the cell in order to highlight it after summary refresh
-        if (grid.problematicCycles.indexOf(this.id) === -1) {
-          grid.problematicCycles.push(this.id);
-        }
       }
     }
 
