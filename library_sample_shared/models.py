@@ -345,21 +345,15 @@ class GenericLibrarySample(DateTimeMixin):
 
     @property
     def index_i7_id(self):
-        try:
-            index_type = IndexType.objects.get(pk=self.index_type.pk)
-            index_i7 = index_type.indices_i7.get(index=self.index_i7)
-            return index_i7.index_id
-        except Exception:
-            return ''
+        indices = self.index_type.indices_i7.all()
+        index_id = [x.index_id_ for x in indices if x.index == self.index_i7]
+        return index_id[0] if any(index_id) else ''
 
     @property
     def index_i5_id(self):
-        try:
-            index_type = IndexType.objects.get(pk=self.index_type.pk)
-            index_i5 = index_type.indices_i5.get(index=self.index_i5)
-            return index_i5.index_id
-        except Exception:
-            return ''
+        indices = self.index_type.indices_i5.all()
+        index_id = [x.index_id_ for x in indices if x.index == self.index_i7]
+        return index_id[0] if any(index_id) else ''
 
     # Facility
 

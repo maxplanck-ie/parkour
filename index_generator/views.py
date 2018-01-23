@@ -185,20 +185,26 @@ class IndexGeneratorViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
 
         libraries_qs = Library.objects.select_related(
             'library_protocol', 'read_length', 'index_type',
+        ).prefetch_related(
+            'index_type__indices_i7', 'index_type__indices_i5',
         ).filter(
             Q(is_pooled=False) & Q(index_i7__isnull=False) &
             (Q(status=2) | Q(status=-2))
         ).only('id', 'name', 'barcode', 'index_i7', 'index_i5',
                'sequencing_depth', 'library_protocol__name',
-               'read_length__id', 'index_type__id',)
+               'read_length__id', 'index_type__id',
+               'index_type__indices_i7', 'index_type__indices_i5',)
 
         samples_qs = Sample.objects.select_related(
             'library_protocol', 'read_length', 'index_type',
+        ).prefetch_related(
+            'index_type__indices_i7', 'index_type__indices_i5',
         ).filter(
             Q(is_pooled=False) & (Q(status=2) | Q(status=-2))
         ).only('id', 'name', 'barcode', 'index_i7', 'index_i5',
                'sequencing_depth', 'library_protocol__name',
-               'read_length__id', 'index_type__id',)
+               'read_length__id', 'index_type__id',
+               'index_type__indices_i7', 'index_type__indices_i5',)
 
         queryset = Request.objects.prefetch_related(
             Prefetch('libraries', queryset=libraries_qs),
