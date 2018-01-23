@@ -3,10 +3,7 @@ import logging
 import itertools
 
 from django.apps import apps
-from django.http import JsonResponse
 from django.db.models import Prefetch, Q
-from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
 
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -48,94 +45,6 @@ class PoolSizeViewSet(viewsets.ReadOnlyModelViewSet):
     """ Get the list of pool sizes. """
     queryset = PoolSize.objects.all()
     serializer_class = PoolSizeSerializer
-
-
-@login_required
-@staff_member_required
-def save_pool(request):
-    """
-    Create a pool after generating indices, add libraries and "converted"
-    samples to it, update the pool size, and create a Library Preparation
-    object and a Pooling object for each added library/sample.
-    """
-    error = ''
-
-    if request.method == 'POST':
-        pool_size_id = request.POST.get('pool_size_id', None)
-        library_ids = [
-            library_id
-            for library_id in json.loads(request.POST.get('libraries', '[]'))
-        ]
-        samples = [s for s in json.loads(request.POST.get('samples', '[]'))]
-        sample_ids = [sample['sample_id'] for sample in samples]
-
-        try:
-            if not any(library_ids) and not any(sample_ids):
-                raise ValueError('Neither libraries nor samples have been ' +
-                                 'provided.')
-
-            # Check for unique barcode combinations
-            indices = set()
-            for lib_id in library_ids:
-                library = Library.objects.get(pk=lib_id)
-                t = (library.index_i7, library.index_i5)
-                if t in indices:
-                    _ = t[1]
-                    if _ == '':
-                        _ = 'NA'
-                    raise ValueError(
-                        'The following barcodes are not unique ' +
-                        f'I7 {t[0]} I5 {_}'
-                    )
-                indices.add(t)
-            for sample in samples:
-                idx_i7_id = sample['index_i7_id']
-                idx_i5_id = sample['index_i5_id']
-                index_i7 = IndexI7.objects.get(index_id=idx_i7_id).index \
-                    if idx_i7_id else ''
-                index_i5 = IndexI5.objects.get(index_id=idx_i5_id).index \
-                    if idx_i5_id else ''
-                t = (index_i7, index_i5)
-                if t in indices:
-                    _ = t[1]
-                    if _ == '':
-                        _ = 'NA'
-                    raise ValueError(
-                        'The following barcodes are not unique ' +
-                        f'I7 {t[0]} I5 {_}'
-                    )
-                indices.add(t)
-
-            pool = Pool(user=request.user, size_id=pool_size_id)
-            pool.save()
-            pool.libraries.add(*library_ids)
-            pool.samples.add(*sample_ids)
-
-            for sample in samples:
-                smpl = Sample.objects.get(pk=sample['sample_id'])
-                idx_i7_id = sample['index_i7_id']
-                idx_i5_id = sample['index_i5_id']
-
-                if idx_i7_id == '':
-                    raise ValueError(f'Index I7 is not set for "{smpl.name}"')
-
-                index_i7 = IndexI7.objects.get(index_id=idx_i7_id).index
-                index_i5 = IndexI5.objects.get(index_id=idx_i5_id).index \
-                    if idx_i5_id else ''
-
-                # Update sample fields
-                smpl.index_i7 = index_i7
-                smpl.index_i5 = index_i5
-                smpl.save()
-
-        except Exception as e:
-            error = str(e) if e.__class__ == ValueError \
-                else 'Could not save Pool.'
-            logger.exception(error)
-    else:
-        error = 'Wrong HTTP method.'
-
-    return JsonResponse({'success': not error, 'error': error})
 
 
 # @login_required
@@ -230,3 +139,58 @@ class IndexGeneratorViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
             libraries, samples, start_coord, direction)
         data = index_generator.generate()
         return Response({'success': True, 'data': data})
+
+    @list_route(methods=['post'])
+    @handle_exceptions
+    def save_pool(self, request):
+        """
+        Create a pool after generating indices, add libraries and "converted"
+        samples to it, update the pool size, and create a Library Preparation
+        object and a Pooling object for each added library/sample.
+        """
+        pool_size_id = request.data.get('pool_size_id', None)
+        libraries = json.loads(request.data.get('libraries', '[]'))
+        samples = json.loads(request.data.get('samples', '[]'))
+
+        if not any(libraries) and not any(samples):
+            raise ValueError('No libraries nor samples have been provided.')
+
+        try:
+            pool_size = PoolSize.objects.get(pk=pool_size_id)
+        except (ValueError, PoolSize.DoesNotExist):
+            raise ValueError('Invalid Pool Size id.')
+
+        pool = Pool(user=request.user, size=pool_size)
+        pool.save()
+
+        library_ids = [x['pk'] for x in libraries]
+        sample_ids = [x['pk'] for x in samples]
+
+        try:
+            for s in samples:
+                sample = Sample.objects.get(pk=s['pk'])
+                dual = sample.index_type.is_dual
+                index_i7 = s['index_i7']
+                index_i5 = s['index_i5']
+
+                if index_i7 == '':
+                    raise ValueError(
+                        f'Index I7 is not set for "{sample.name}".')
+
+                if dual and index_i5 == '':
+                    raise ValueError(
+                        f'Index I5 is not set for "{sample.name}".')
+
+                # Update sample fields
+                sample.index_i7 = index_i7
+                sample.index_i5 = index_i5
+                sample.save(update_fields=['index_i7', 'index_i5'])
+
+        except ValueError as e:
+            pool.delete()
+            raise e
+
+        pool.libraries.add(*library_ids)
+        pool.samples.add(*sample_ids)
+
+        return Response({'success': True})

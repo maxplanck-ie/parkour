@@ -340,22 +340,41 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
       return;
     }
 
+    // if (Ext.query('.problematic-cycle').length > 0) {
+    //   var n = new Noty({
+    //     text: 'Some of the cycles are non-optimal. Do you want to continue?',
+    //     type: 'warning',
+    //     timeout: false,
+    //     buttons: [
+    //       Noty.button('Yes', '', function () {
+    //         console.log('button 1 clicked');
+    //       }),
+
+    //       Noty.button('No', '', function () {
+    //         console.log('button 2 clicked');
+    //         n.close();
+    //       })
+    //     ]
+    //   }).show();
+    // }
+
     // Get all libraries' and samples' ids
     store.each(function (record) {
+      var item = {
+        pk: record.get('pk'),
+        index_i7: record.get('index_i7').index,
+        index_i5: record.get('index_i5').index
+      }
       if (record.get('record_type') === 'Library') {
-        libraries.push(record.get('pk'));
+        libraries.push(item);
       } else {
-        samples.push({
-          sample_id: record.get('pk'),
-          index_i7_id: record.get('index_i7_id'),
-          index_i5_id: record.get('index_i5_id')
-        });
+        samples.push(item);
       }
     });
 
     Ext.getCmp('poolingContainer').setLoading('Saving...');
     Ext.Ajax.request({
-      url: 'index_generator/save_pool/',
+      url: 'api/index_generator/save_pool/',
       method: 'POST',
       scope: this,
       params: {
@@ -375,7 +394,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
           Ext.getStore('IndexGenerator').reload();
         } else {
           Ext.getCmp('poolingContainer').setLoading(false);
-          new Noty({ text: obj.error, type: 'error' }).show();
+          new Noty({ text: obj.message, type: 'error' }).show();
         }
       },
       failure: function (response) {
