@@ -297,6 +297,8 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             dataIndex: 'index_i7_7',
             cls: 'nucleotide-header',
             renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
             width: 55
           },
           {
@@ -304,6 +306,8 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             dataIndex: 'index_i7_8',
             cls: 'nucleotide-header',
             renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
             width: 55
           },
           {
@@ -376,6 +380,8 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             dataIndex: 'index_i5_7',
             cls: 'nucleotide-header',
             renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
             width: 55
           },
           {
@@ -383,6 +389,8 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             dataIndex: 'index_i5_8',
             cls: 'nucleotide-header',
             renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
             width: 55
           }
         ],
