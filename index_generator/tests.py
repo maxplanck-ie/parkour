@@ -318,21 +318,22 @@ class TestIndexRegistry(BaseTestCase):
 
     def test_format_plate(self):
         index_registry = IndexRegistry('plate', 'dual', [self.index_type2])
-        self.assertEqual(len(index_registry.pairs), 9)
-
-        coordinates = [x.coordinate for x in index_registry.pairs]
+        pairs = index_registry.pairs[self.index_type2.pk]
+        self.assertEqual(len(pairs), 9)
+        coordinates = [x.coordinate for x in pairs]
         self.assertEqual(coordinates, [
             'A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'C2', 'C3'])
 
     def test_format_plate_filter_by_start_coord(self):
         index_registry = IndexRegistry(
             'plate', 'dual', [self.index_type2], 'B2')
-        self.assertEqual(len(index_registry.pairs), 4)
+        self.assertEqual(len(index_registry.pairs[self.index_type2.pk]), 4)
 
     def test_format_plate_direction_down(self):
         index_registry = IndexRegistry(
             'plate', 'dual', [self.index_type2], 'B2', 'down')
-        coordinates = [x.coordinate for x in index_registry.pairs]
+        coordinates = [
+            x.coordinate for x in index_registry.pairs[self.index_type2.pk]]
         self.assertEqual(coordinates, ['B2', 'C2', 'B3', 'C3'])
 
     def test_invalid_start_coordinate(self):
@@ -358,6 +359,8 @@ class TestIndexGenerator(BaseTestCase):
         self.index_type2 = create_index_type(INDICES_2, INDICES_3)
         self.index_type3 = create_index_type(INDICES_4)
         self.index_type4 = create_index_type(INDICES_5, INDICES_6)
+
+        self.index_type5 = create_index_type(INDICES_7, INDICES_8, 'plate')
 
     # Test valid data
 
@@ -393,6 +396,8 @@ class TestIndexGenerator(BaseTestCase):
         self.assertIn(data['data'][0]['index_i5_id'], index_i5_ids)
 
     def test_two_samples_format_tube_mode_single(self):
+        index_i7_ids = [x.index_id_ for x in self.index_type1.indices_i7.all()]
+
         sample1 = create_sample(
             get_random_name(),
             read_length=self.read_length,
@@ -411,10 +416,13 @@ class TestIndexGenerator(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(data['success'])
         self.assertEqual(len(data['data']), 2)
-        self.assertEqual(data['data'][0]['index_i7_id'], 'A02')
-        self.assertEqual(data['data'][1]['index_i7_id'], 'A03')
+        self.assertIn(data['data'][0]['index_i7_id'], index_i7_ids)
+        self.assertIn(data['data'][1]['index_i7_id'], index_i7_ids)
 
     def test_two_samples_format_tube_mode_dual(self):
+        index_i7_ids = [x.index_id_ for x in self.index_type2.indices_i7.all()]
+        index_i5_ids = [x.index_id_ for x in self.index_type2.indices_i5.all()]
+
         sample1 = create_sample(
             get_random_name(),
             read_length=self.read_length,
@@ -433,10 +441,31 @@ class TestIndexGenerator(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(data['success'])
         self.assertEqual(len(data['data']), 2)
-        self.assertEqual(data['data'][0]['index_i7_id'], 'B02')
-        self.assertEqual(data['data'][0]['index_i5_id'], 'C03')
-        self.assertEqual(data['data'][1]['index_i7_id'], 'B03')
-        self.assertEqual(data['data'][1]['index_i5_id'], 'C02')
+        self.assertIn(data['data'][0]['index_i7_id'], index_i7_ids)
+        self.assertIn(data['data'][0]['index_i5_id'], index_i5_ids)
+        self.assertIn(data['data'][1]['index_i7_id'], index_i7_ids)
+        self.assertIn(data['data'][1]['index_i5_id'], index_i5_ids)
+
+    # def test_samples_format_plate_mode_dual(self):
+    #     sample1 = create_sample(
+    #         get_random_name(),
+    #         read_length=self.read_length,
+    #         index_type=self.index_type5,
+    #     )
+    #     sample2 = create_sample(
+    #         get_random_name(),
+    #         read_length=self.read_length,
+    #         index_type=self.index_type5,
+    #     )
+
+    #     response = self.client.post('/api/index_generator/generate_indices/', {
+    #         'samples': json.dumps([sample1.pk, sample2.pk]),
+    #     })
+    #     data = response.json()
+    #     import pdb; pdb.set_trace()
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertTrue(data['success'])
+    #     self.assertEqual(len(data['data']), 2)
 
     def test_libraries_and_samples_format_tube_mode_single(self):
         library = create_library(

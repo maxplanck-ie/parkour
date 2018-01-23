@@ -15,35 +15,46 @@ Sample = apps.get_model('sample', 'Sample')
 class IndexRegistry:
     def __init__(self, format, mode, index_types,
                  start_coord='A1', direction='right'):
+        self.index_types = index_types
+        self.format = format
+        self.mode = mode
         self.indices = {}
-        self.pairs = []
+        self.pairs = {}
 
-        if format == 'single':
-            for index_type in index_types:
-                if index_type.pk not in self.indices.keys():
-                    self.indices[index_type.pk] = {'i7': [], 'i5': []}
-
-                self.indices[index_type.pk]['i7'].extend(
-                    self._to_list(
-                        index_type.pk, index_type.indices_i7.all()))
-
-                if mode == 'dual':
-                    self.indices[index_type.pk]['i5'].extend(
-                        self._to_list(
-                            index_type.pk, index_type.indices_i5.all()))
+        if self.format == 'single':
+            self.fetch_indices()
         else:
-            Pair = namedtuple('Pair', ['index1', 'index2', 'coordinate'])
-            char_coord, num_coord = self._split_coordinate(start_coord)
+            self.fetch_pairs(start_coord, direction)
+
+    def fetch_indices(self):
+        for index_type in self.index_types:
+            if index_type.pk not in self.indices.keys():
+                self.indices[index_type.pk] = {'i7': [], 'i5': []}
+
+            self.indices[index_type.pk]['i7'] = self._to_list(
+                index_type.pk, index_type.indices_i7.all())
+
+            if self.mode == 'dual':
+                self.indices[index_type.pk]['i5'] = self._to_list(
+                    index_type.pk, index_type.indices_i5.all())
+
+    def fetch_pairs(self, start_coord, direction):
+        Pair = namedtuple('Pair', ['index1', 'index2', 'coordinate'])
+        char_coord, num_coord = self._split_coordinate(start_coord)
+
+        for index_type in self.index_types:
+            if index_type.pk not in self.indices.keys():
+                self.pairs[index_type.pk] = []
 
             index_pairs = IndexPair.objects.filter(
-                index_type=index_types[0],
+                index_type=index_type,
                 char_coord__gte=char_coord,
                 num_coord__gte=num_coord,
             )
 
             if not index_pairs:
                 raise ValueError(
-                    f'No index pairs for Index Type "{index_types[0].name}" ' +
+                    f'No index pairs for Index Type "{index_type.name}" ' +
                     f'and start coordinate "{start_coord}".'
                 )
 
@@ -55,10 +66,10 @@ class IndexRegistry:
                 index_pairs = sorted(
                     index_pairs, key=lambda x: (x.num_coord, x.char_coord))
 
-            self.pairs = [
+            self.pairs[index_type.pk] = [
                 Pair(
-                    self._to_list(index_types[0], [index_pair.index1])[0],
-                    self._to_list(index_types[0], [index_pair.index2])[0],
+                    self._to_list(index_type.pk, [index_pair.index1])[0],
+                    self._to_list(index_type.pk, [index_pair.index2])[0],
                     index_pair.coordinate,
                 )
                 for index_pair in index_pairs
@@ -188,11 +199,14 @@ class IndexGenerator:
             # Find indices for the remaining samples
             self.find_indices(2)
 
+        # else:
+        #     self.find_random_indices(self.samples[0])
+        #     self.find_indices(1)
+
         return self.result
 
     def find_indices(self, start=0):
         """ Find indices index I7 and I5 for a given sample. """
-        samples = self.samples[start:]
 
         def get_indices(samples, index_group):
             index_key = f'index_{index_group}'
@@ -207,6 +221,10 @@ class IndexGenerator:
                 indices.append(index)
 
             return self.sort_indices(indices)
+
+        samples = self.samples[start:]
+        if not samples:
+            return
 
         indices_i7 = get_indices(samples, 'i7')
         indices_i5 = [self.create_index_dict()] * len(indices_i7)
