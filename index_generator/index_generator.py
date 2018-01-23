@@ -31,16 +31,16 @@ class IndexRegistry:
             if index_type.pk not in self.indices.keys():
                 self.indices[index_type.pk] = {'i7': [], 'i5': []}
 
-            self.indices[index_type.pk]['i7'] = self._to_list(
+            self.indices[index_type.pk]['i7'] = self.to_list(
                 index_type.pk, index_type.indices_i7.all())
 
             if self.mode == 'dual':
-                self.indices[index_type.pk]['i5'] = self._to_list(
+                self.indices[index_type.pk]['i5'] = self.to_list(
                     index_type.pk, index_type.indices_i5.all())
 
     def fetch_pairs(self, start_coord, direction):
         Pair = namedtuple('Pair', ['index1', 'index2', 'coordinate'])
-        char_coord, num_coord = self._split_coordinate(start_coord)
+        char_coord, num_coord = self.split_coordinate(start_coord)
 
         for index_type in self.index_types:
             if index_type.pk not in self.indices.keys():
@@ -68,8 +68,8 @@ class IndexRegistry:
 
             self.pairs[index_type.pk] = [
                 Pair(
-                    self._to_list(index_type.pk, [index_pair.index1])[0],
-                    self._to_list(index_type.pk, [index_pair.index2])[0],
+                    self.to_list(index_type.pk, [index_pair.index1])[0],
+                    self.to_list(index_type.pk, [index_pair.index2])[0],
                     index_pair.coordinate,
                 )
                 for index_pair in index_pairs
@@ -79,7 +79,7 @@ class IndexRegistry:
         return self.indices[index_type_id][index_group]
 
     @staticmethod
-    def _to_list(index_type, indices):
+    def to_list(index_type, indices):
         return list(map(lambda x: {
             'index_type': index_type,
             'prefix': x.prefix,
@@ -88,7 +88,7 @@ class IndexRegistry:
         }, indices))
 
     @staticmethod
-    def _split_coordinate(coordinate):
+    def split_coordinate(coordinate):
         match = re.match(r'([A-Z]+)([1-9]+)', coordinate)
         if not match:
             raise ValueError('Invalid start coordinate.')
@@ -128,7 +128,11 @@ class IndexGenerator:
             'index_type__indices_i7', 'index_type__indices_i5',
         ).only(
             'id', 'name', 'sequencing_depth', 'read_length__id', 'index_type',
-        ).order_by('index_type')
+        ).order_by('index_type', 'sequencing_depth', 'name')
+
+        # self.samples = sorted(self.samples, key=lambda x: (
+        #     x.index_type.pk, x.sequencing_depth, int(x.barcode[3:])
+        # ))
 
         # self.num_libraries = self.libraries.count()
         # self.num_samples = self.samples.count()
@@ -139,7 +143,7 @@ class IndexGenerator:
             raise ValueError('No samples provided.')
 
         records = list(itertools.chain(self.libraries, self.samples))
-        read_lengths = [x.read_length.pk for x in records]
+        read_lengths = [x.read_length for x in records]
         if len(set(read_lengths)) != 1:
             raise ValueError(
                 'Read Length must be the same for all libraries and samples.')
@@ -175,66 +179,59 @@ class IndexGenerator:
             raise ValueError('Index Types with mixed formats are not allowed.')
         self.format = formats[0]
 
-        if self.format == 'plate' and len(index_types) != 1:
-            raise ValueError('Index Type must be the same for all libraries ' +
-                             'and samples if the format is "plate".')
-
         return index_types
 
     def generate(self):
         if self.num_libraries > 0:
-            # Add all libraries directly to the result
             self.add_libraries_to_result()
 
-            # Find indices for all samples
-            self.find_indices()
-
-        elif self.num_samples == 1:
-            self.find_random_indices(self.samples[0])
-
-        else:
-            # Find best pair
-            self.find_best_pair()
-
-            # Find indices for the remaining samples
-            self.find_indices(2)
-
-        # else:
-        #     self.find_random_indices(self.samples[0])
-        #     self.find_indices(1)
+        # Find indices for all samples
+        self.find_indices()
 
         return self.result
 
-    def find_indices(self, start=0):
-        """ Find indices index I7 and I5 for a given sample. """
+    def find_indices(self):
+        """ Find indices I7/I5 for the selected samples. """
+        depths = [x.sequencing_depth for x in self.samples]
 
-        def get_indices(samples, index_group):
-            index_key = f'index_{index_group}'
-            current_indices = [x[index_key] for x in self._result]
-            indices = []
+        # If there are libraries in the result, extract their indices
+        if any(self._result):
+            init_indices_i7 = []
+            init_indices_i5 = []
 
-            for sample in samples:
-                index = self._find_index(index_group, sample, current_indices)
-                # TODO: throw error if index wasn't found
-                index = index['index']
-                current_indices.append(index)
-                indices.append(index)
+            for item in self._result:
+                init_indices_i7.append(item['index_i7'])
+                init_indices_i5.append(item['index_i5'])
 
-            return self.sort_indices(indices)
+            samples = self.samples
+            depths = [x['sequencing_depth'] for x in self._result] + depths
 
-        samples = self.samples[start:]
-        if not samples:
-            return
+        else:
+            index_i7_1, index_i5_1 = self.find_random_indices(self.samples[0])
+            samples = self.samples[1:]
 
-        indices_i7 = get_indices(samples, 'i7')
-        indices_i5 = [self.create_index_dict()] * len(indices_i7)
+            # If a single sample was selected, add it to the result
+            if not samples:
+                self._result.append(
+                    self.create_result_dict(
+                        self.samples[0], index_i7_1, index_i5_1))
+                return
 
-        if self.mode == 'dual':
+            init_indices_i7 = [index_i7_1]
+            init_indices_i5 = [index_i5_1]
+
+        indices_i7 = self.get_indices(samples, depths, 'i7', init_indices_i7)
+
+        if self.mode == 'single':
+            indices_i5 = [self.create_index_dict()] * len(indices_i7)
+
+        else:
             attempt = 0
             is_ok = False
 
             while attempt < self.MAX_ATTEMPTS and not is_ok:
-                indices_i5 = get_indices(samples, 'i5')
+                indices_i5 = self.get_indices(
+                    samples, depths, 'i5', init_indices_i5)
 
                 # Ensure uniqueness of the combination I7 <-> I5
                 unique = [
@@ -252,50 +249,18 @@ class IndexGenerator:
             if not is_ok:
                 raise ValueError('Maximum number of attempts is exceeded.')
 
-        for i, sample in enumerate(samples):
+        # Skip indices which are already in the result
+        indices_i7 = indices_i7[len(self._result):]
+        indices_i5 = indices_i5[len(self._result):]
+
+        # Add generated indices to the result
+        for i, sample in enumerate(self.samples):
             self._result.append(
-                self.create_result_dict(sample, indices_i7[i], indices_i5[i]))
-
-    def find_best_pair(self):
-        """
-        Find a pair of best matching sample indices and add it to the result.
-        """
-        sample1 = self.samples[0]
-        sample2 = self.samples[1]
-
-        best_pair_i7 = self._find_pair('i7', sample1, sample2)
-        if 'index1' not in best_pair_i7.keys():
-            raise ValueError(
-                'Could not find the best matching pair of Indices I7 for ' +
-                f'"{sample1.name}" and "{sample2.name}".')
-
-        index_i7_index1 = best_pair_i7['index1']
-        index_i7_index2 = best_pair_i7['index2']
-        index_i5_index1 = self.create_index_dict()
-        index_i5_index2 = self.create_index_dict()
-
-        if self.mode == 'dual':
-            best_pair_i5 = self._find_pair(
-                'i5', sample1, sample2, index_i7_index1, index_i7_index2)
-            if 'index1' not in best_pair_i5.keys():
-                raise ValueError(
-                    'Could not find the best matching pair of Indices I5 ' +
-                    f'for "{sample1.name}" and "{sample2.name}".')
-
-            index_i5_index1 = best_pair_i5['index1']
-            index_i5_index2 = best_pair_i5['index2']
-
-        # First sample
-        self._result.append(
-            self.create_result_dict(sample1, index_i7_index1, index_i5_index1))
-
-        # Second sample
-        self._result.append(
-            self.create_result_dict(sample2, index_i7_index2, index_i5_index2))
+                self.create_result_dict(
+                    sample, indices_i7[i], indices_i5[i]))
 
     def find_random_indices(self, sample):
         """ Find random indices I7/I5 for a given sample. """
-        # TODO: deal with I7-I5 pairs
 
         index_i7 = random.choice(
             self.index_registry.get_indices('i7', sample.index_type.pk))
@@ -312,8 +277,7 @@ class IndexGenerator:
                 raise ValueError(
                     f'Failed to generate Index I5 for {sample.name}')
 
-        self._result.append(
-            self.create_result_dict(sample, index_i7, index_i5))
+        return index_i7, index_i5
 
     def add_libraries_to_result(self):
         """ Add all libraries directly to the result. """
@@ -351,11 +315,37 @@ class IndexGenerator:
 
         self._result.extend(no_index + with_index)
 
-    def _find_index(self, index_group, sample, current_indices):
+    def get_indices(self, samples, depths, index_group, init_indices):
+        """ """
+        attempt = 0
+
+        while attempt < self.MAX_ATTEMPTS:
+            indices = list(init_indices)
+
+            try:
+                for i, sample in enumerate(samples):
+                    index = self.find_index(
+                        sample, index_group, indices, depths)
+                    if 'index' not in index:
+                        raise ValueError('Index not found.')
+                    index = index['index']
+                    indices.append(index)
+                indices = self.sort_indices(indices)
+            except ValueError:
+                pass
+
+            if len(indices) == len(self.samples) + len(self._result):
+                return indices
+
+            attempt += 1
+
+        raise ValueError(f'Could not generate indices "{index_group}" ' +
+                         'for the selected samples.')
+
+    def find_index(self, sample, index_group, current_indices, depths):
         """ Helper function for find_indices(). """
-        index_key = f'index_{index_group}'
-        res_index = {'avg_score': 100.0}
         indices_in_result = [x['index'] for x in current_indices]
+        result_index = {'avg_score': 100.0}
 
         indices = list(self.index_registry.get_indices(
             index_group, sample.index_type.pk))
@@ -368,50 +358,31 @@ class IndexGenerator:
                 if x['index'] not in indices_in_result
             ]
 
+        # Calculate color distribution
+        color_distribution = [
+            {'G': 0, 'R': 0} for _ in range(self.index_length)]
+        total_depth = 0
+        for i, index in enumerate(indices_in_result):
+            idx = self.convert_index(index)
+            for cycle in range(self.index_length):
+                color = idx[cycle]
+                color_distribution[cycle][color] += depths[i]
+            total_depth += depths[i]
+        total_depth += sample.sequencing_depth
+
         for index in indices:
-            scores = self._calculate_n_scores(sample, index, index_key)
+            scores = self.calculate_n_scores(
+                sample, index, color_distribution, total_depth)
             avg_score = sum(scores) / self.index_length
-            if avg_score < res_index['avg_score']:
-                res_index = {'avg_score': avg_score, 'index': index}
+            if avg_score < result_index['avg_score']:
+                result_index = {'avg_score': avg_score, 'index': index}
 
-        return res_index
+        return result_index
 
-    def _find_pair(self, index_group, sample1, sample2, idx1=None, idx2=None):
-        """ Helper function for find_best_pair(). """
-        best_pair = {'avg_score': 100.0}  # the worst score
-        indices1 = self.index_registry.get_indices(
-            index_group, sample1.index_type.pk)
-        indices2 = self.index_registry.get_indices(
-            index_group, sample2.index_type.pk)
-
-        if idx1 is not None:
-            indices1 = [x for x in indices1 if x['index'] != idx1['index']]
-        if idx2 is not None:
-            indices2 = [x for x in indices2 if x['index'] != idx2['index']]
-
-        for index1 in indices1:
-            for index2 in indices2:
-                if index1 != index2:
-                    scores = self._best_pair_scores(
-                        index1['index'],
-                        index2['index'],
-                        sample1.sequencing_depth,
-                        sample2.sequencing_depth,
-                    )
-
-                    avg_score = sum(scores) / self.index_length
-                    if avg_score < best_pair['avg_score']:
-                        best_pair = {
-                            'avg_score': avg_score,
-                            'index1': index1,
-                            'index2': index2,
-                        }
-
-        return best_pair
-
-    def _best_pair_scores(self, index1, index2, depth1, depth2):
+    def calculate_n_scores(self, current_sample, current_index,
+                           current_distribution, total_depth):
         """
-        Calculate the scores for two given indices.
+        Calculate the score for N given samples.
 
         Score is an absolute difference between the sequencing depths of
         the two indices divided by the total sequencing depth (in %).
@@ -421,43 +392,9 @@ class IndexGenerator:
 
         If the score > 60%, then the indices are not compatible.
         """
-        index1 = self.convert_index(index1)
-        index2 = self.convert_index(index2)
-        total_depth = depth1 + depth2
+        distribution = list(current_distribution)
         result = []
 
-        for cycle in range(self.index_length):
-            if index1[cycle] != index2[cycle]:
-                difference = abs(depth1 - depth2) / total_depth * 100
-                result.append(difference)
-            else:
-                result.append(100.0)
-
-        return result
-
-    def _calculate_n_scores(self, current_sample, current_index, index_key):
-        """
-        Calculate the score for N given samples.
-
-        The scoring method is the same as in best_pair_scores() but
-        for N samples.
-        """
-        result = []
-
-        # Calculate color distribution for libraries and samples
-        # which are already in the result
-        distribution = [{'G': 0, 'R': 0} for _ in range(self.index_length)]
-        total_depth = 0
-        for record in self._result:
-            index = self.convert_index(record[index_key]['index'])
-            if index != '':
-                for cycle in range(self.index_length):
-                    color = index[cycle]
-                    distribution[cycle][color] += record['sequencing_depth']
-                total_depth += record['sequencing_depth']
-        total_depth += current_sample.sequencing_depth
-
-        # Calculate the scores
         for cycle in range(self.index_length):
             index = self.convert_index(current_index['index'])
             color = index[cycle]
