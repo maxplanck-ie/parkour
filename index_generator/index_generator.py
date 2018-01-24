@@ -66,30 +66,41 @@ class IndexRegistry:
                 index_pairs = sorted(
                     index_pairs, key=lambda x: (x.num_coord, x.char_coord))
 
-            self.pairs[index_type.pk] = [
-                Pair(
-                    self.to_list(index_type.pk, [index_pair.index1])[0],
-                    self.to_list(index_type.pk, [index_pair.index2])[0],
-                    index_pair.coordinate,
-                )
-                for index_pair in index_pairs
-            ]
+            for pair in index_pairs:
+                index1 = self.create_index_dict(
+                    pair.index_type.pk, pair.index1.prefix,
+                    pair.index1.number, pair.index1.index)
+
+                if self.mode == 'dual':
+                    index2 = self.create_index_dict(
+                        pair.index_type.pk, pair.index2.prefix,
+                        pair.index2.number, pair.index2.index)
+                else:
+                    index2 = self.create_index_dict()
+
+                self.pairs[index_type.pk].append(Pair(
+                    index1, index2, pair.coordinate))
 
     def get_indices(self, index_group, index_type_id):
-        # TODO: return empty if index_type_id or index_group don't exist
-        return self.indices[index_type_id][index_group]
+        # Return empty list if index_type_id or index_group don't exist
+        return self.indices.get(
+            index_type_id, {'i7': [], 'i5': []}).get(index_group, [])
 
     def get_pairs(self, index_type_id):
         return self.pairs.get(index_type_id, [])
 
+    def to_list(self, index_type, indices):
+        return list(map(lambda x: self.create_index_dict(
+            index_type, x.prefix, x.number, x.index), indices))
+
     @staticmethod
-    def to_list(index_type, indices):
-        return list(map(lambda x: {
+    def create_index_dict(index_type='', prefix='', number='', index=''):
+        return {
             'index_type': index_type,
-            'prefix': x.prefix,
-            'number': x.number,
-            'index': x.index,
-        }, indices))
+            'prefix': prefix,
+            'number': number,
+            'index': index,
+        }
 
     @staticmethod
     def split_coordinate(coordinate):
@@ -203,10 +214,10 @@ class IndexGenerator:
             idx = class_model.objects.filter(
                 index=index, index_type=index_type)
             if idx:
-                idx = self.create_index_dict(
+                idx = self.index_registry.create_index_dict(
                     index_type.pk, idx[0].prefix, idx[0].number, idx[0].index)
             else:
-                idx = self.create_index_dict('', '', '', index)
+                idx = self.index_registry.create_index_dict('', '', '', index)
             return idx
 
         no_index = []
@@ -214,7 +225,7 @@ class IndexGenerator:
 
         for library in self.libraries:
             index_i7 = idx_dict(IndexI7, library.index_i7, library.index_type)
-            index_i5 = self.create_index_dict()
+            index_i5 = self.index_registry.create_index_dict()
 
             if self.mode == 'dual':
                 index_i5 = idx_dict(
@@ -265,7 +276,8 @@ class IndexGenerator:
         indices_i7 = self.get_indices(samples, depths, 'i7', init_indices_i7)
 
         if self.mode == 'single':
-            indices_i5 = [self.create_index_dict()] * len(indices_i7)
+            indices_i5 = [
+                self.index_registry.create_index_dict()] * len(indices_i7)
 
         else:
             attempt = 0
@@ -306,7 +318,7 @@ class IndexGenerator:
 
         index_i7 = random.choice(
             self.index_registry.get_indices('i7', sample.index_type.pk))
-        index_i5 = self.create_index_dict()
+        index_i5 = self.index_registry.create_index_dict()
 
         if self.mode == 'dual':
             # Ensure I7/I5 uniqueness
@@ -378,6 +390,130 @@ class IndexGenerator:
 
         return result_index
 
+    def find_pairs(self):
+        """ """
+        depths = [x.sequencing_depth for x in self.samples]
+
+        # If there are libraries in the result, extract their indices
+        if any(self._result):
+            init_pairs = list(map(
+                lambda x: (x['index_i7'], x['index_i5']), self._result))
+
+            samples = self.samples
+            depths = [x['sequencing_depth'] for x in self._result] + depths
+
+        else:
+            pair_1 = self.find_random_pair(self.samples[0])
+            samples = self.samples[1:]
+
+            # If a single sample was selected, add it to the result
+            if not samples:
+                self._result.append(
+                    self.create_result_dict(
+                        self.samples[0], pair_1[0], pair_1[1]))
+                return
+
+            init_pairs = [pair_1]
+
+        pairs = self.get_pairs(samples, depths, init_pairs)
+
+        # Skip pairs which are already in the result
+        pairs = pairs[len(self._result):]
+
+        # Add generated pairs to the result
+        for i, sample in enumerate(self.samples):
+            self._result.append(
+                self.create_result_dict(
+                    sample, pairs[i][0], pairs[i][1]))
+
+    def find_random_pair(self, sample):
+        """ """
+        pair = random.choice(self.index_registry.get_pairs(
+            sample.index_type.pk))
+        return (pair.index1, pair.index2)
+
+    def get_pairs(self, samples, depths, init_pairs):
+        """ """
+        attempt = 0
+
+        while attempt < self.MAX_ATTEMPTS:
+            pairs = list(init_pairs)
+
+            try:
+                for sample in samples:
+                    pair = self.find_pair(sample, depths, pairs)
+                    if 'pair' not in pair:
+                        raise ValueError('Pair not found.')
+                    pair = pair['pair']
+                    pairs.append(pair)
+                pairs = self.sort_pairs(pairs)
+            except ValueError:
+                pass
+
+            if len(pairs) == len(self.samples) + len(self._result):
+                return pairs
+
+            attempt += 1
+
+        raise ValueError(f'Could not generate pairs for the selected samples.')
+
+    def find_pair(self, sample, depths, current_pairs):
+        """ """
+        result_pair = {'avg_score': 100.0}
+        pairs = list(self.index_registry.get_pairs(sample.index_type.pk))
+        random.shuffle(pairs)
+
+        # Ensure uniqueness
+        if self.mode == 'single':
+            pairs = [
+                x for x in pairs
+                if (x.index1, x.index2) not in current_pairs
+            ]
+
+        if self.mode == 'single':
+            indices_in_result = list(map(
+                lambda x: x[0]['index'], current_pairs))
+        else:
+            indices_in_result = list(map(
+                lambda x: x[0]['index'] + x[1]['index'],
+                current_pairs,
+            ))
+
+        # Calculate color distribution
+        index_length = len(indices_in_result[0])
+        color_distribution, total_depth = self.calculate_color_distribution(
+            indices_in_result, depths, sample)
+
+        for pair in pairs:
+            converted_index = self.convert_index(
+                self._concat_index_pair(pair))
+            scores = self.calculate_scores(
+                sample, converted_index, color_distribution, total_depth)
+            avg_score = sum(scores) / index_length
+            if avg_score < result_pair['avg_score']:
+                result_pair = {
+                    'avg_score': avg_score,
+                    'pair': (pair.index1, pair.index2),
+                }
+
+        return result_pair
+
+    def calculate_color_distribution(self, indices, sequencing_depths, sample):
+        """ """
+        total_depth = 0
+        index_length = len(indices[0])
+        color_distribution = [{'G': 0, 'R': 0} for _ in range(index_length)]
+
+        for i, index in enumerate(indices):
+            idx = self.convert_index(index)
+            for cycle in range(index_length):
+                color = idx[cycle]
+                color_distribution[cycle][color] += sequencing_depths[i]
+            total_depth += sequencing_depths[i]
+        total_depth += sample.sequencing_depth
+
+        return color_distribution, total_depth
+
     def calculate_scores(self, current_sample, current_converted_index,
                          current_color_distribution, total_depth):
         """
@@ -407,108 +543,6 @@ class IndexGenerator:
                 result.append(100.0)
 
         return result
-
-    def find_pairs(self):
-        """ """
-        depths = [x.sequencing_depth for x in self.samples]
-
-        # If there are libraries in the result, extract their indices
-        if any(self._result):
-            init_pairs = []
-
-        else:
-            pair_1 = self.find_random_pair(self.samples[0])
-            samples = self.samples[1:]
-
-            # If a single sample was selected, add it to the result
-            if not samples:
-                self._result.append(
-                    self.create_result_dict(
-                        self.samples[0], pair_1[0], pair_1[1]))
-                return
-
-            init_pairs = [pair_1]
-
-        pairs = self.get_pairs(samples, depths, init_pairs)
-
-        # Add generated pairs to the result
-        for i, sample in enumerate(self.samples):
-            self._result.append(
-                self.create_result_dict(
-                    sample, pairs[i][0], pairs[i][1]))
-
-    def find_random_pair(self, sample):
-        """ """
-        pair = random.choice(self.index_registry.get_pairs(
-            sample.index_type.pk))
-
-        index1 = pair.index1
-        index2 = self.create_index_dict() \
-            if self.mode == 'single' else pair.index2
-
-        return (index1, index2)
-
-    def get_pairs(self, samples, depths, init_pairs):
-        """ """
-        pairs = list(init_pairs)
-
-        # TODO: add while loop
-
-        for sample in samples:
-            pair = self.find_pair(sample, depths, pairs)
-            if 'pair' not in pair:
-                raise ValueError('Pair not found.')
-            pair = pair['pair']
-            pairs.append(pair)
-
-        return pairs
-
-    def find_pair(self, sample, depths, current_pairs):
-        """ """
-        result_pair = {'avg_score': 100.0}
-        pairs = list(self.index_registry.get_pairs(sample.index_type.pk))
-        random.shuffle(pairs)
-
-        if self.mode == 'single':
-            indices_in_result = list(map(
-                lambda x: x[0]['index'], current_pairs))
-        else:
-            indices_in_result = list(map(
-                lambda x: x[0]['index'] + x[1]['index'],
-                current_pairs,
-            ))
-
-        # Calculate color distribution
-        index_length = len(indices_in_result[0])
-        color_distribution, total_depth = self.calculate_color_distribution(
-            indices_in_result, depths, sample)
-
-        for pair in pairs:
-            converted_index = self.convert_index(
-                self._concat_index_pair(pair))
-            scores = self.calculate_scores(
-                sample, converted_index, color_distribution, total_depth)
-            avg_score = sum(scores) / index_length
-            if avg_score < result_pair['avg_score']:
-                result_pair = {'avg_score': avg_score, 'pair': pair}
-
-        return result_pair
-
-    def calculate_color_distribution(self, indices, sequencing_depths, sample):
-        """ """
-        total_depth = 0
-        index_length = len(indices[0])
-        color_distribution = [{'G': 0, 'R': 0} for _ in range(index_length)]
-
-        for i, index in enumerate(indices):
-            idx = self.convert_index(index)
-            for cycle in range(index_length):
-                color = idx[cycle]
-                color_distribution[cycle][color] += sequencing_depths[i]
-            total_depth += sequencing_depths[i]
-        total_depth += sample.sequencing_depth
-
-        return color_distribution, total_depth
 
     def _concat_index_pair(self, pair):
         return pair.index1['index'] + pair.index2['index'] \
@@ -548,13 +582,10 @@ class IndexGenerator:
             indices, key=lambda x: (x['index_type'], int(x['number'])))
 
     @staticmethod
-    def create_index_dict(index_type='', prefix='', number='', index=''):
-        return {
-            'index_type': index_type,
-            'prefix': prefix,
-            'number': number,
-            'index': index,
-        }
+    def sort_pairs(pairs):
+        # Sort pairs only by Index I7 ID
+        return sorted(
+            pairs, key=lambda x: (x[0]['index_type'], int(x[0]['number'])))
 
     @staticmethod
     def create_result_dict(obj, index_i7, index_i5):

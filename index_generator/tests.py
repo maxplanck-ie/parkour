@@ -79,6 +79,17 @@ INDICES_8 = [  # I5
     Index('H', '03', 'TAAATC'),
 ]
 
+# Index Pair indices (plate 2x3)
+
+INDICES_9 = [  # I7
+    Index('I', '01', 'GTAAAT'),
+    Index('I', '02', 'TACGTT'),
+    Index('I', '03', 'CGTTTA'),
+    Index('I', '04', 'ATGTGG'),
+    Index('I', '05', 'GGCGCT'),
+    Index('I', '06', 'CGATCC'),
+]
+
 
 def create_pool(user, multiplier=1, size=200, save=True):
     pool_size = PoolSize(multiplier=multiplier, size=size)
@@ -116,7 +127,7 @@ def create_index_type(indices_i7, indices_i5=None, format='single'):
             index.save()
             index_type.indices_i5.add(index)
 
-    if format == 'plate':
+    if indices_i5 is not None and format == 'plate':
         indices_i7 = index_type.indices_i7.all()
         indices_i5 = index_type.indices_i5.all()
         length = len(indices_i7)
@@ -313,6 +324,19 @@ class TestIndexRegistry(BaseTestCase):
         self.index_type1 = create_index_type(INDICES_1)
         self.index_type2 = create_index_type(INDICES_7, INDICES_8, 'plate')
 
+        # format 'plate', mode 'single'
+        self.index_type3 = create_index_type(INDICES_9)
+        for i, index in enumerate(self.index_type3.indices_i7.all()):
+            char_coord = 'A' if i < 3 else 'B'
+            num_coord = i % 3 + 1
+            index_pair = IndexPair(
+                index_type=self.index_type3,
+                index1=index,
+                char_coord=char_coord,
+                num_coord=num_coord,
+            )
+            index_pair.save()
+
     def test_format_tube(self):
         index_registry = IndexRegistry('single', 'single', [self.index_type1])
         self.assertEqual(len(index_registry.indices.keys()), 1)
@@ -322,7 +346,14 @@ class TestIndexRegistry(BaseTestCase):
         self.assertEqual(
             len(index_registry.indices[self.index_type1.pk]['i5']), 0)
 
-    def test_format_plate(self):
+    def test_format_plate_mode_single(self):
+        index_registry = IndexRegistry('plate', 'single', [self.index_type3])
+        pairs = index_registry.pairs[self.index_type3.pk]
+        self.assertEqual(len(pairs), 6)
+        coordinates = [x.coordinate for x in pairs]
+        self.assertEqual(coordinates, ['A1', 'A2', 'A3', 'B1', 'B2', 'B3'])
+
+    def test_format_plate_mode_dual(self):
         index_registry = IndexRegistry('plate', 'dual', [self.index_type2])
         pairs = index_registry.pairs[self.index_type2.pk]
         self.assertEqual(len(pairs), 9)
@@ -370,6 +401,18 @@ class TestIndexGenerator(BaseTestCase):
         self.index_type4 = create_index_type(INDICES_5, INDICES_6)
 
         self.index_type5 = create_index_type(INDICES_7, INDICES_8, 'plate')
+
+        self.index_type6 = create_index_type(INDICES_9, None, 'plate')
+        for i, index in enumerate(self.index_type6.indices_i7.all()):
+            char_coord = 'A' if i < 3 else 'B'
+            num_coord = i % 3 + 1
+            index_pair = IndexPair(
+                index_type=self.index_type6,
+                index1=index,
+                char_coord=char_coord,
+                num_coord=num_coord,
+            )
+            index_pair.save()
 
     # Test valid data
 
@@ -509,7 +552,30 @@ class TestIndexGenerator(BaseTestCase):
         self.assertIn(data['data'][1]['index_i5_id'], index_i5_ids)
 
     def test_one_sample_format_plate_mode_single(self):
-        pass
+        index_i7_ids = [x.index_id_ for x in self.index_type6.indices_i7.all()]
+
+        sample = create_sample(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type6,
+        )
+
+        response = self.client.post('/api/index_generator/generate_indices/', {
+            'samples': json.dumps([sample.pk]),
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertEqual(len(data['data']), 1)
+        self.assertIn(data['data'][0]['index_i7_id'], index_i7_ids)
+        self.assertEqual(data['data'][0]['index_i5_id'], '')
+
+        index_i7 = IndexI7.objects.get(
+            index_type=self.index_type6,
+            index=data['data'][0]['index_i7']['index'],
+        )
+        self.assertEqual(IndexPair.objects.filter(
+            index1=index_i7, index2=None).count(), 1)
 
     def test_one_sample_format_plate_mode_dual(self):
         index_i7_ids = [x.index_id_ for x in self.index_type5.indices_i7.all()]
@@ -545,7 +611,44 @@ class TestIndexGenerator(BaseTestCase):
             index1=index_i7, index2=index_i5).count(), 1)
 
     def test_two_samples_format_plate_mode_single(self):
-        pass
+        index_i7_ids = [x.index_id_ for x in self.index_type6.indices_i7.all()]
+
+        sample1 = create_sample(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type6,
+        )
+        sample2 = create_sample(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type6,
+        )
+
+        response = self.client.post('/api/index_generator/generate_indices/', {
+            'samples': json.dumps([sample1.pk, sample2.pk]),
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertEqual(len(data['data']), 2)
+
+        self.assertIn(data['data'][0]['index_i7_id'], index_i7_ids)
+        self.assertEqual(data['data'][0]['index_i5_id'], '')
+        index_i7 = IndexI7.objects.get(
+            index_type=self.index_type6,
+            index=data['data'][0]['index_i7']['index'],
+        )
+        self.assertEqual(IndexPair.objects.filter(
+            index1=index_i7, index2=None).count(), 1)
+
+        self.assertIn(data['data'][1]['index_i7_id'], index_i7_ids)
+        self.assertEqual(data['data'][1]['index_i5_id'], '')
+        index_i7 = IndexI7.objects.get(
+            index_type=self.index_type6,
+            index=data['data'][1]['index_i7']['index'],
+        )
+        self.assertEqual(IndexPair.objects.filter(
+            index1=index_i7, index2=None).count(), 1)
 
     def test_two_samples_format_plate_mode_dual(self):
         index_i7_ids = [x.index_id_ for x in self.index_type5.indices_i7.all()]
@@ -657,10 +760,66 @@ class TestIndexGenerator(BaseTestCase):
         self.assertIn(data['data'][1]['index_i5_id'], index_i5_ids)
 
     def test_libraries_and_samples_format_plate_mode_single(self):
-        pass
+        index_i7_ids = [x.index_id_ for x in self.index_type6.indices_i7.all()]
+
+        library = create_library(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type6,
+        )
+        library.index_i7 = INDICES_9[0].index
+        library.save()
+
+        sample = create_sample(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type6,
+        )
+
+        response = self.client.post('/api/index_generator/generate_indices/', {
+            'libraries': json.dumps([library.pk]),
+            'samples': json.dumps([sample.pk]),
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertEqual(len(data['data']), 2)
+        self.assertEqual(data['data'][0]['index_i7_id'], 'I01')
+        self.assertEqual(data['data'][0]['index_i5_id'], '')
+        self.assertIn(data['data'][1]['index_i7_id'], index_i7_ids)
+        self.assertEqual(data['data'][1]['index_i5_id'], '')
 
     def test_libraries_and_samples_format_plate_mode_dual(self):
-        pass
+        index_i7_ids = [x.index_id_ for x in self.index_type5.indices_i7.all()]
+        index_i5_ids = [x.index_id_ for x in self.index_type5.indices_i5.all()]
+
+        library = create_library(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type5,
+        )
+        library.index_i7 = INDICES_7[0].index
+        library.index_i5 = INDICES_8[0].index
+        library.save()
+
+        sample = create_sample(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type5,
+        )
+
+        response = self.client.post('/api/index_generator/generate_indices/', {
+            'libraries': json.dumps([library.pk]),
+            'samples': json.dumps([sample.pk]),
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertEqual(len(data['data']), 2)
+        self.assertEqual(data['data'][0]['index_i7_id'], 'G01')
+        self.assertEqual(data['data'][0]['index_i5_id'], 'H01')
+        self.assertIn(data['data'][1]['index_i7_id'], index_i7_ids)
+        self.assertIn(data['data'][1]['index_i5_id'], index_i5_ids)
 
     def test_library_custom_index_i7_format_tube_mode_single(self):
         """
@@ -695,12 +854,80 @@ class TestIndexGenerator(BaseTestCase):
         self.assertIn(data['data'][1]['index_i7_id'], index_i7_ids)
 
     def test_library_custom_index_i5_format_tube_mode_dual(self):
-        pass
+        index_i7_ids = [x.index_id_ for x in self.index_type2.indices_i7.all()]
+        index_i5_ids = [x.index_id_ for x in self.index_type2.indices_i5.all()]
+
+        library = create_library(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type2,
+        )
+        library.index_i7 = INDICES_2[0].index
+        library.index_i5 = 'ACACAC'
+        library.save()
+
+        sample = create_sample(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type2,
+        )
+
+        response = self.client.post('/api/index_generator/generate_indices/', {
+            'libraries': json.dumps([library.pk]),
+            'samples': json.dumps([sample.pk]),
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertEqual(len(data['data']), 2)
+        self.assertIn(data['data'][0]['index_i7_id'], index_i7_ids)
+        self.assertEqual(data['data'][0]['index_i5_id'], '')
+        self.assertIn(data['data'][1]['index_i7_id'], index_i7_ids)
+        self.assertIn(data['data'][1]['index_i5_id'], index_i5_ids)
 
     def test_library_custom_indices_i7_and_i5_format_tube_mode_dual(self):
-        pass
+        index_i7_ids = [x.index_id_ for x in self.index_type2.indices_i7.all()]
+        index_i5_ids = [x.index_id_ for x in self.index_type2.indices_i5.all()]
+
+        library = create_library(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type2,
+        )
+        library.index_i7 = 'TGTGTG'
+        library.index_i5 = 'ACACAC'
+        library.save()
+
+        sample = create_sample(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type2,
+        )
+
+        response = self.client.post('/api/index_generator/generate_indices/', {
+            'libraries': json.dumps([library.pk]),
+            'samples': json.dumps([sample.pk]),
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertEqual(len(data['data']), 2)
+        self.assertEqual(data['data'][0]['index_i7_id'], '')
+        self.assertEqual(data['data'][0]['index_i5_id'], '')
+        self.assertIn(data['data'][1]['index_i7_id'], index_i7_ids)
+        self.assertIn(data['data'][1]['index_i5_id'], index_i5_ids)
 
     # Test failing data
+
+    def test_not_enough_indices_format_tube_mode_single(self):
+        """ Ensure error is thrown if the number of samples is greater than
+        the number of unique indices. """
+        pass
+
+    def test_not_enough_indices_format_plate_mode_single(self):
+        """ Ensure error is thrown if the number of samples is greater than
+        the number of unique indices. """
+        pass
 
     def test_save_pool_no_records(self):
         response = self.client.post('/api/index_generator/save_pool/')
@@ -910,12 +1137,6 @@ class TestIndexGenerator(BaseTestCase):
     def test_index_convertion(self):
         converted_index = IndexGenerator.convert_index('ATCACG')
         self.assertEqual(converted_index, 'RGRRRG')
-
-    def test_index_dict_creation(self):
-        index_dict = IndexGenerator.create_index_dict()
-        self.assertEqual(index_dict, {
-            'index_type': '', 'prefix': '', 'number': '', 'index': ''
-        })
 
     def test_result_dict_creation(self):
         sample = create_sample(get_random_name())
