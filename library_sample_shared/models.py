@@ -120,24 +120,6 @@ class IndexType(models.Model):
     def __str__(self):
         return self.name
 
-    # Temporary
-    def split_index_ids(self):
-        def split_id(idx):
-            match = re.match(r'([a-zA-Z_]+)([0-9]+)', idx.index_id)
-            if match:
-                idx.prefix = match[1]
-                idx.number = match[2]
-                idx.save()
-
-        indices_i7 = self.indices_i7.all()
-        for index in indices_i7:
-            split_id(index)
-
-        if self.is_dual:
-            indices_i5 = self.indices_i5.all()
-            for index in indices_i5:
-                split_id(index)
-
 
 class IndexPair(models.Model):
     index_type = models.ForeignKey(IndexType, verbose_name='Index Type')
@@ -374,12 +356,6 @@ class GenericLibrarySample(DateTimeMixin):
         blank=True,
     )
 
-    # date_facility = models.DateTimeField(
-    #     'Date',
-    #     null=True,
-    #     blank=True,
-    # )
-
     amount_facility = models.FloatField(
         'Amount',
         null=True,
@@ -402,8 +378,8 @@ class GenericLibrarySample(DateTimeMixin):
     class Meta:
         abstract = True
 
-    def get_record_type(self):
-        return 'L' if 'L' in self.barcode else 'S'
+    # def get_record_type(self):
+    #     return 'L' if 'L' in self.barcode else 'S'
 
     def __str__(self):
         return self.name
