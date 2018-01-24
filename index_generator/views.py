@@ -166,6 +166,8 @@ class IndexGeneratorViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
         library_ids = [x['pk'] for x in libraries]
         sample_ids = [x['pk'] for x in samples]
 
+        # TODO: check libraries' indices on uniqueness
+
         try:
             for s in samples:
                 sample = Sample.objects.get(pk=s['pk'])
