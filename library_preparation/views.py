@@ -39,6 +39,9 @@ class LibraryPreparationViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
             'sample',
             'sample__index_type',
             'sample__library_protocol',
+        ).prefetch_related(
+            'sample__index_type__indices_i7',
+            'sample__index_type__indices_i5',
         ).filter(Q(sample__status=2) | Q(sample__status=-2))
 
     def get_context(self, queryset):
@@ -54,43 +57,7 @@ class LibraryPreparationViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
             samples__pk__in=sample_ids).distinct().values('name', 'samples')
         pools_map = {x['samples']: x['name'] for x in pools}
 
-        # Get Indices
-        index_type_ids = {
-            x.sample.index_type.pk
-            for x in queryset if x.sample.index_type
-        }
-        indices_i7 = {x.sample.index_i7 for x in queryset}
-        indices_i5 = {x.sample.index_i5 for x in queryset}
-
-        indices_i7 = IndexI7.objects.filter(
-            index_type__in=index_type_ids, index__in=indices_i7
-        ).values('index_type', 'index_id', 'index')
-        indices_i7_map = {
-            (x['index_type'], x['index']): x['index_id']
-            for x in indices_i7
-        }
-
-        indices_i5 = IndexI5.objects.filter(
-            index_type__in=index_type_ids, index__in=indices_i5
-        ).values('index_type', 'index_id', 'index')
-        indices_i5_map = {
-            (x['index_type'], x['index']): x['index_id']
-            for x in indices_i5
-        }
-
-        index_ids_map = {}
-        for x in queryset:
-            index_ids_map[x.sample.pk] = {'index_i7_id': '', 'index_i5_id': ''}
-            if x.sample.index_type:
-                index_ids_map[x.sample.pk].update({
-                    'index_i7_id': indices_i7_map.get(
-                        (x.sample.index_type.pk, x.sample.index_i7), ''),
-                    'index_i5_id': indices_i5_map.get(
-                        (x.sample.index_type.pk, x.sample.index_i5), ''),
-                })
-
         return {
-            'index_ids': index_ids_map,
             'requests': requests_map,
             'pools': pools_map,
         }

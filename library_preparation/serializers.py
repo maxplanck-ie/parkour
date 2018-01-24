@@ -121,7 +121,7 @@ class LibraryPreparationSerializer(ModelSerializer):
         return obj.sample.comments_facility
 
     def get_index_i7_id(self, obj):
-        return self.context.get('index_ids').get(obj.sample.pk)['index_i7_id']
+        return obj.sample.index_i7_id
 
     def get_index_i5_id(self, obj):
-        return self.context.get('index_ids').get(obj.sample.pk)['index_i5_id']
+        return obj.sample.index_i5_id

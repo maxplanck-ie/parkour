@@ -473,7 +473,7 @@ class TestIndexGenerator(BaseTestCase):
         """ Generate index for one sample (format=tube, mode=single). """
         sample = create_sample(
             get_random_name(), index_type=self.index_type1)
-        index_i7_ids = [x.index_id_ for x in self.index_type1.indices_i7.all()]
+        index_i7_ids = [x.index_id for x in self.index_type1.indices_i7.all()]
 
         response = self.client.post('/api/index_generator/generate_indices/', {
             'samples': json.dumps([sample.pk]),
@@ -487,8 +487,8 @@ class TestIndexGenerator(BaseTestCase):
     def test_one_sample_format_tube_mode_dual(self):
         sample = create_sample(
             get_random_name(), index_type=self.index_type2)
-        index_i7_ids = [x.index_id_ for x in self.index_type2.indices_i7.all()]
-        index_i5_ids = [x.index_id_ for x in self.index_type2.indices_i5.all()]
+        index_i7_ids = [x.index_id for x in self.index_type2.indices_i7.all()]
+        index_i5_ids = [x.index_id for x in self.index_type2.indices_i5.all()]
 
         response = self.client.post('/api/index_generator/generate_indices/', {
             'samples': json.dumps([sample.pk]),
@@ -501,7 +501,7 @@ class TestIndexGenerator(BaseTestCase):
         self.assertIn(data['data'][0]['index_i5_id'], index_i5_ids)
 
     def test_two_samples_format_tube_mode_single(self):
-        index_i7_ids = [x.index_id_ for x in self.index_type1.indices_i7.all()]
+        index_i7_ids = [x.index_id for x in self.index_type1.indices_i7.all()]
 
         sample1 = create_sample(
             get_random_name(),
@@ -525,8 +525,8 @@ class TestIndexGenerator(BaseTestCase):
         self.assertIn(data['data'][1]['index_i7_id'], index_i7_ids)
 
     def test_two_samples_format_tube_mode_dual(self):
-        index_i7_ids = [x.index_id_ for x in self.index_type2.indices_i7.all()]
-        index_i5_ids = [x.index_id_ for x in self.index_type2.indices_i5.all()]
+        index_i7_ids = [x.index_id for x in self.index_type2.indices_i7.all()]
+        index_i5_ids = [x.index_id for x in self.index_type2.indices_i5.all()]
 
         sample1 = create_sample(
             get_random_name(),
@@ -552,7 +552,7 @@ class TestIndexGenerator(BaseTestCase):
         self.assertIn(data['data'][1]['index_i5_id'], index_i5_ids)
 
     def test_one_sample_format_plate_mode_single(self):
-        index_i7_ids = [x.index_id_ for x in self.index_type6.indices_i7.all()]
+        index_i7_ids = [x.index_id for x in self.index_type6.indices_i7.all()]
 
         sample = create_sample(
             get_random_name(),
@@ -578,8 +578,8 @@ class TestIndexGenerator(BaseTestCase):
             index1=index_i7, index2=None).count(), 1)
 
     def test_one_sample_format_plate_mode_dual(self):
-        index_i7_ids = [x.index_id_ for x in self.index_type5.indices_i7.all()]
-        index_i5_ids = [x.index_id_ for x in self.index_type5.indices_i5.all()]
+        index_i7_ids = [x.index_id for x in self.index_type5.indices_i7.all()]
+        index_i5_ids = [x.index_id for x in self.index_type5.indices_i5.all()]
 
         sample = create_sample(
             get_random_name(),
@@ -611,7 +611,7 @@ class TestIndexGenerator(BaseTestCase):
             index1=index_i7, index2=index_i5).count(), 1)
 
     def test_two_samples_format_plate_mode_single(self):
-        index_i7_ids = [x.index_id_ for x in self.index_type6.indices_i7.all()]
+        index_i7_ids = [x.index_id for x in self.index_type6.indices_i7.all()]
 
         sample1 = create_sample(
             get_random_name(),
@@ -651,8 +651,8 @@ class TestIndexGenerator(BaseTestCase):
             index1=index_i7, index2=None).count(), 1)
 
     def test_two_samples_format_plate_mode_dual(self):
-        index_i7_ids = [x.index_id_ for x in self.index_type5.indices_i7.all()]
-        index_i5_ids = [x.index_id_ for x in self.index_type5.indices_i5.all()]
+        index_i7_ids = [x.index_id for x in self.index_type5.indices_i7.all()]
+        index_i5_ids = [x.index_id for x in self.index_type5.indices_i5.all()]
 
         sample1 = create_sample(
             get_random_name(),
@@ -700,7 +700,7 @@ class TestIndexGenerator(BaseTestCase):
             index1=index_i7, index2=index_i5).count(), 1)
 
     def test_libraries_and_samples_format_tube_mode_single(self):
-        index_i7_ids = [x.index_id_ for x in self.index_type1.indices_i7.all()]
+        index_i7_ids = [x.index_id for x in self.index_type1.indices_i7.all()]
 
         library = create_library(
             get_random_name(),
@@ -728,8 +728,8 @@ class TestIndexGenerator(BaseTestCase):
         self.assertIn(data['data'][1]['index_i7_id'], index_i7_ids)
 
     def test_libraries_and_samples_format_tube_mode_dual(self):
-        index_i7_ids = [x.index_id_ for x in self.index_type2.indices_i7.all()]
-        index_i5_ids = [x.index_id_ for x in self.index_type2.indices_i5.all()]
+        index_i7_ids = [x.index_id for x in self.index_type2.indices_i7.all()]
+        index_i5_ids = [x.index_id for x in self.index_type2.indices_i5.all()]
 
         library = create_library(
             get_random_name(),
@@ -760,7 +760,7 @@ class TestIndexGenerator(BaseTestCase):
         self.assertIn(data['data'][1]['index_i5_id'], index_i5_ids)
 
     def test_libraries_and_samples_format_plate_mode_single(self):
-        index_i7_ids = [x.index_id_ for x in self.index_type6.indices_i7.all()]
+        index_i7_ids = [x.index_id for x in self.index_type6.indices_i7.all()]
 
         library = create_library(
             get_random_name(),
@@ -790,8 +790,8 @@ class TestIndexGenerator(BaseTestCase):
         self.assertEqual(data['data'][1]['index_i5_id'], '')
 
     def test_libraries_and_samples_format_plate_mode_dual(self):
-        index_i7_ids = [x.index_id_ for x in self.index_type5.indices_i7.all()]
-        index_i5_ids = [x.index_id_ for x in self.index_type5.indices_i5.all()]
+        index_i7_ids = [x.index_id for x in self.index_type5.indices_i7.all()]
+        index_i5_ids = [x.index_id for x in self.index_type5.indices_i5.all()]
 
         library = create_library(
             get_random_name(),
@@ -835,7 +835,7 @@ class TestIndexGenerator(BaseTestCase):
         library.index_i7 = INDICES_1[1].index
         library.save()
 
-        index_i7_ids = [x.index_id_ for x in self.index_type1.indices_i7.all()]
+        index_i7_ids = [x.index_id for x in self.index_type1.indices_i7.all()]
         sample = create_sample(
             get_random_name(),
             read_length=self.read_length,
@@ -854,8 +854,8 @@ class TestIndexGenerator(BaseTestCase):
         self.assertIn(data['data'][1]['index_i7_id'], index_i7_ids)
 
     def test_library_custom_index_i5_format_tube_mode_dual(self):
-        index_i7_ids = [x.index_id_ for x in self.index_type2.indices_i7.all()]
-        index_i5_ids = [x.index_id_ for x in self.index_type2.indices_i5.all()]
+        index_i7_ids = [x.index_id for x in self.index_type2.indices_i7.all()]
+        index_i5_ids = [x.index_id for x in self.index_type2.indices_i5.all()]
 
         library = create_library(
             get_random_name(),
@@ -886,8 +886,8 @@ class TestIndexGenerator(BaseTestCase):
         self.assertIn(data['data'][1]['index_i5_id'], index_i5_ids)
 
     def test_library_custom_indices_i7_and_i5_format_tube_mode_dual(self):
-        index_i7_ids = [x.index_id_ for x in self.index_type2.indices_i7.all()]
-        index_i5_ids = [x.index_id_ for x in self.index_type2.indices_i5.all()]
+        index_i7_ids = [x.index_id for x in self.index_type2.indices_i7.all()]
+        index_i5_ids = [x.index_id for x in self.index_type2.indices_i5.all()]
 
         library = create_library(
             get_random_name(),

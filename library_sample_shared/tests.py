@@ -93,8 +93,8 @@ class IndexTypeTest(TestCase):
 
 class GenericIndexTest(TestCase):
     def setUp(self):
-        self.index1 = IndexI7(index_id='I001', index='ATCACG')
-        self.index2 = GenericIndex(index_id='I002', index='ATCACG')
+        self.index1 = IndexI7(prefix='I', number='001', index='ATCACG')
+        self.index2 = GenericIndex(prefix='I', number='002', index='ATCACG')
         self.index1.save()
 
         self.index_type = IndexType(name='Index Type')
@@ -102,7 +102,7 @@ class GenericIndexTest(TestCase):
         self.index_type.indices_i7.add(self.index1)
 
     def test_generic_index_id(self):
-        self.assertEqual(str(self.index1), self.index1.index_id_)
+        self.assertEqual(str(self.index1), self.index1.index_id)
         self.assertEqual(self.index1.type(), self.index_type.name)
 
     def test_no_index_type(self):
@@ -260,12 +260,12 @@ class TestIndices(BaseTestCase):
         self.create_user('foo@bar.io', 'foo-foo')
         self.client.login(email='foo@bar.io', password='foo-foo')
 
-        self.index1 = IndexI7(prefix='I', number='1',
-                              index=self._get_random_name(8), index_id='I1')
-        self.index2 = IndexI7(prefix='I', number='2',
-                              index=self._get_random_name(8), index_id='I2')
-        self.index3 = IndexI5(prefix='I', number='3',
-                              index=self._get_random_name(8), index_id='I3')
+        self.index1 = IndexI7(
+            prefix='I', number='1', index=self._get_random_name(8))
+        self.index2 = IndexI7(
+            prefix='I', number='2', index=self._get_random_name(8))
+        self.index3 = IndexI5(
+            prefix='I', number='3', index=self._get_random_name(8))
         self.index1.save()
         self.index2.save()
         self.index3.save()

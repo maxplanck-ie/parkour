@@ -43,16 +43,8 @@ class GenericIndex(models.Model):
     number = models.CharField('Number', max_length=10, default='')
     index = models.CharField('Index', max_length=8)
 
-    # Deprecated (to be removed)
-    index_id = models.CharField(
-        'Index ID',
-        max_length=15,
-        null=True,
-        blank=True,
-    )
-
     @property
-    def index_id_(self):  # TODO: rename 'index_id_' to 'index_id'
+    def index_id(self):
         return f'{self.prefix}{self.number}'
 
     class Meta:
@@ -60,8 +52,7 @@ class GenericIndex(models.Model):
         unique_together = ('prefix', 'number',)
 
     def __str__(self):
-        # return self.prefix + self.number
-        return self.index_id_
+        return self.index_id
 
     def type(self):
         try:
@@ -172,8 +163,8 @@ class IndexPair(models.Model):
         return f'{self.char_coord}{self.num_coord}'
 
     def __str__(self):
-        index1_id = self.index1.index_id_ if self.index1 else ''
-        index2_id = self.index2.index_id_ if self.index2 else ''
+        index1_id = self.index1.index_id if self.index1 else ''
+        index2_id = self.index2.index_id if self.index2 else ''
         output = index1_id
         if self.index_type.is_dual:
             output += f'-{index2_id}'
@@ -345,14 +336,14 @@ class GenericLibrarySample(DateTimeMixin):
 
     @property
     def index_i7_id(self):
-        indices = self.index_type.indices_i7.all()
-        index_id = [x.index_id_ for x in indices if x.index == self.index_i7]
+        indices = self.index_type.indices_i7.all() if self.index_type else []
+        index_id = [x.index_id for x in indices if x.index == self.index_i7]
         return index_id[0] if any(index_id) else ''
 
     @property
     def index_i5_id(self):
-        indices = self.index_type.indices_i5.all()
-        index_id = [x.index_id_ for x in indices if x.index == self.index_i7]
+        indices = self.index_type.indices_i5.all() if self.index_type else []
+        index_id = [x.index_id for x in indices if x.index == self.index_i7]
         return index_id[0] if any(index_id) else ''
 
     # Facility
