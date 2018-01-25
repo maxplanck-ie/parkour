@@ -21,8 +21,8 @@ class IndexRegistry:
         self.pairs = {}
 
         # In case if an empty string was passed
-        start_coord = start_coord if start_coord != '' else 'A1'
-        direction = direction if direction != '' else 'right'
+        start_coord = start_coord if start_coord else 'A1'
+        direction = direction if direction else 'right'
 
         self.mode = mode
         self.index_types = index_types
