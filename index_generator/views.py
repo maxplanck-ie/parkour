@@ -166,7 +166,11 @@ class IndexGeneratorViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
         library_ids = [x['pk'] for x in libraries]
         sample_ids = [x['pk'] for x in samples]
 
-        # TODO: check libraries' indices on uniqueness
+        # Check all indices on uniqueness
+        pairs = list(map(
+            lambda x: (x['index_i7'], x['index_i5']), libraries + samples))
+        if len(pairs) != len(set(pairs)):
+            raise ValueError('Some of the indices are not unique.')
 
         try:
             for s in samples:

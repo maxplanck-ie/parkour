@@ -473,6 +473,9 @@ class TestIndexGenerator(BaseTestCase):
             index_type=self.index_type1,
         )
 
+        library.index_i7 = INDICES_1[0].index
+        library.save()
+
         self.assertEqual(sample1.index_i7, None)
         self.assertEqual(sample2.index_i7, None)
 
@@ -481,6 +484,8 @@ class TestIndexGenerator(BaseTestCase):
             'libraries': json.dumps([
                 {
                     'pk': library.pk,
+                    'index_i7': INDICES_1[0].index,
+                    'index_i5': '',
                 }
             ]),
             'samples': json.dumps([
@@ -1041,6 +1046,52 @@ class TestIndexGenerator(BaseTestCase):
         self.assertIn(data['data'][1]['index_i5_id'], index_i5_ids)
 
     # Test failing data
+
+    def test_save_pool_not_unique(self):
+        """ Ensure error is thrown if a pool contains non-unique indices. """
+        library1 = create_library(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type1,
+        )
+        library2 = create_library(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type1,
+        )
+        sample = create_sample(
+            get_random_name(),
+            read_length=self.read_length,
+            index_type=self.index_type1,
+        )
+
+        response = self.client.post('/api/index_generator/save_pool/', {
+            'pool_size_id': self.pool_size.pk,
+            'libraries': json.dumps([
+                {
+                    'pk': library1.pk,
+                    'index_i7': INDICES_1[0].index,
+                    'index_i5': '',
+                },
+                {
+                    'pk': library2.pk,
+                    'index_i7': INDICES_1[0].index,
+                    'index_i5': '',
+                },
+            ]),
+            'samples': json.dumps([
+                {
+                    'pk': sample.pk,
+                    'index_i7': INDICES_1[1].index,
+                    'index_i5': '',
+                },
+            ]),
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(data['success'])
+        self.assertEqual(
+            data['message'], 'Some of the indices are not unique.')
 
     def test_not_enough_indices_format_tube_mode_single(self):
         """ Ensure error is thrown if the number of samples is greater than
