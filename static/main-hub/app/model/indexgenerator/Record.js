@@ -55,6 +55,10 @@ Ext.define('MainHub.model.indexgenerator.Record', {
       type: 'int'
     },
     {
+      name: 'index_type_format',
+      type: 'string'
+    },
+    {
       name: 'read_length',
       type: 'int'
     }

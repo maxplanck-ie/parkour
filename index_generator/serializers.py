@@ -45,12 +45,14 @@ class IndexGeneratorBaseSerializer(ModelSerializer):
     pk = IntegerField()
     record_type = SerializerMethodField()
     library_protocol_name = SerializerMethodField()
+    index_type_format = SerializerMethodField()
 
     class Meta:
         list_serializer_class = IndexGeneratorListSerializer
         fields = ('pk', 'record_type', 'name', 'barcode', 'sequencing_depth',
                   'library_protocol_name', 'read_length', 'index_type',
-                  'index_i7_id', 'index_i7', 'index_i5_id', 'index_i5',)
+                  'index_type_format', 'index_i7_id', 'index_i7',
+                  'index_i5_id', 'index_i5',)
         extra_kwargs = {
             'name': {'required': False},
             'barcode': {'required': False},
@@ -63,6 +65,9 @@ class IndexGeneratorBaseSerializer(ModelSerializer):
 
     def get_library_protocol_name(self, obj):
         return obj.library_protocol.name
+
+    def get_index_type_format(self, obj):
+        return obj.index_type.format if obj.index_type else None
 
     def to_internal_value(self, data):
         internal_value = super().to_internal_value(data)

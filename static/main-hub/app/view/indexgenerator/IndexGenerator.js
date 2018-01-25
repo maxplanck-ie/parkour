@@ -189,7 +189,43 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
         cls: 'pooling-grid',
         header: {
           title: 'Pool',
-          height: 56
+          height: 56,
+          items: [
+            {
+              xtype: 'combobox',
+              itemId: 'start-coordinate',
+              store: 'StartCoordinates',
+              queryMode: 'local',
+              displayField: 'coordinate',
+              valueField: 'coordinate',
+              forceSelection: true,
+              cls: 'panel-header-combobox',
+              fieldLabel: 'Start Coordinate',
+              labelWidth: 110,
+              width: 200,
+              margin: '0 15px 0 0',
+              hidden: true
+            },
+            {
+              xtype: 'combobox',
+              itemId: 'direction',
+              store: Ext.data.Store({
+                data: [
+                  { id: 1, value: 'right' },
+                  { id: 2, value: 'down' }
+                ]
+              }),
+              queryMode: 'local',
+              displayField: 'value',
+              valueField: 'value',
+              forceSelection: true,
+              cls: 'panel-header-combobox',
+              fieldLabel: 'Direction',
+              labelWidth: 65,
+              width: 160,
+              hidden: true
+            }
+          ]
         },
         height: Ext.Element.getViewportHeight() - 94,
         flex: 1,

@@ -101,7 +101,7 @@ class IndexGeneratorViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
             (Q(status=2) | Q(status=-2))
         ).only('id', 'name', 'barcode', 'index_i7', 'index_i5',
                'sequencing_depth', 'library_protocol__name',
-               'read_length__id', 'index_type__id',
+               'read_length__id', 'index_type__id', 'index_type__format',
                'index_type__indices_i7', 'index_type__indices_i5',)
 
         samples_qs = Sample.objects.select_related(
@@ -112,7 +112,7 @@ class IndexGeneratorViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
             Q(is_pooled=False) & (Q(status=2) | Q(status=-2))
         ).only('id', 'name', 'barcode', 'index_i7', 'index_i5',
                'sequencing_depth', 'library_protocol__name',
-               'read_length__id', 'index_type__id',
+               'read_length__id', 'index_type__id', 'index_type__format',
                'index_type__indices_i7', 'index_type__indices_i5',)
 
         queryset = Request.objects.prefetch_related(
@@ -132,8 +132,8 @@ class IndexGeneratorViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
         """ Generate indices for given libraries and samples. """
         libraries = json.loads(request.data.get('libraries', '[]'))
         samples = json.loads(request.data.get('samples', '[]'))
-        start_coord = request.data.get('start_coord', 'A1')
-        direction = request.data.get('direction', 'right')
+        start_coord = request.data.get('start_coord', None)
+        direction = request.data.get('direction', None)
 
         index_generator = IndexGenerator(
             libraries, samples, start_coord, direction)

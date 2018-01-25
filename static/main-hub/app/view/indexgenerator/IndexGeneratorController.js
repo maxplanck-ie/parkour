@@ -185,6 +185,8 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
     var grid = Ext.getCmp('pool-grid');
     var store = grid.getStore();
     var multipleSelect = false;
+    var startCoordinate = grid.down('#start-coordinate');
+    var direction = grid.down('#direction');
 
     if (eOpts && eOpts.hasOwnProperty('multipleSelect')) {
       multipleSelect = eOpts.multipleSelect;
@@ -265,16 +267,26 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
       if (recordTypes.indexOf('Sample') > -1) {
         Ext.getCmp('generate-indices-button').enable();
       }
+
+      // Show plate params
+      if (record.get('index_type_format') == 'plate') {
+        startCoordinate.show();
+        direction.show();
+      }
     } else {
       grid.setTitle('Pool');
       Ext.getCmp('save-pool-button').disable();
       Ext.getCmp('generate-indices-button').disable();
+      startCoordinate.hide();
+      direction.hide();
     }
   },
 
   generateIndices: function () {
     var indexGeneratorGrid = Ext.getCmp('index-generator-grid');
     var poolGrid = Ext.getCmp('pool-grid');
+    var startCoordinate = poolGrid.down('#start-coordinate');
+    var direction = poolGrid.down('#direction');
     var store = poolGrid.getStore();
     var libraries = [];
     var samples = [];
@@ -299,7 +311,9 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
       scope: this,
       params: {
         libraries: Ext.JSON.encode(libraries),
-        samples: Ext.JSON.encode(samples)
+        samples: Ext.JSON.encode(samples),
+        start_coord: startCoordinate.getValue(),
+        direction: direction.getValue()
       },
       success: function (response) {
         var obj = Ext.JSON.decode(response.responseText);

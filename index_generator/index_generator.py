@@ -20,6 +20,10 @@ class IndexRegistry:
         self.indices = {}
         self.pairs = {}
 
+        # In case if an empty string was passed
+        start_coord = start_coord if start_coord != '' else 'A1'
+        direction = direction if direction != '' else 'right'
+
         self.mode = mode
         self.index_types = index_types
         self.direction = direction
@@ -175,7 +179,8 @@ class IndexGenerator:
 
         index_types = self.validate_index_types(records)
 
-        self.index_registry = IndexRegistry(self.mode, index_types)
+        self.index_registry = IndexRegistry(
+            self.mode, index_types, start_coord, direction)
 
     def validate_index_types(self, records):
         """ Check the compatibility of the provided samples. """
