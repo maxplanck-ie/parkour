@@ -1,7 +1,7 @@
 import re
 import random
 import itertools
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 
 from django.apps import apps
 
@@ -201,10 +201,114 @@ class IndexGenerator:
         return index_types
 
     def generate(self):
+        """ """
         if self.num_libraries > 0:
             self.add_libraries_to_result()
 
-        self.find_indices2()
+        # If a single sample was selected, add it to the result
+        if not any(self._result) and self.num_samples == 1:
+            index_i7, index_i5 = self.find_random(self.samples[0])
+            self._result.append(
+                self.create_result_dict(
+                    self.samples[0], index_i7, index_i5))
+            return self.result
+
+        depths = [x.sequencing_depth for x in self.samples]
+
+        init_index_pairs = []
+        init_indices_i7 = []
+        init_indices_i5 = []
+
+        if any(self._result):
+            depths = [x['sequencing_depth'] for x in self._result] + depths
+
+            # If there are libraries in the result, extract their indices
+            for item in self._result:
+                init_index_pairs.append((item['index_i7'], item['index_i5']))
+                init_indices_i7.append(item['index_i7'])
+                init_indices_i5.append(item['index_i5'])
+
+        # Group samples by the index type's format
+        plate_samples, tube_samples = [], []
+        for sample in self.samples:
+            if sample.index_type.format == 'plate':
+                plate_samples.append(sample)
+            else:
+                tube_samples.append(sample)
+
+        # If the number of samples with index type 'plate' is large enough,
+        # take pairs in the selected order (don't actually generate them)
+        if len(plate_samples) > self.MAX_RANDOM_SAMPLES:
+            pairs = self.find_pairs_fixed(plate_samples)
+            for pair in pairs:
+                init_index_pairs.append(pair)
+                init_indices_i7.append(pair[0])
+                init_indices_i5.append(pair[1])
+            plate_samples = []
+
+        # Ignore the first sample because it will be processed separately below
+        if not any(init_index_pairs):
+            if self.samples[0].index_type.format == 'plate':
+                plate_samples.pop(0)
+            else:
+                tube_samples.pop(0)
+
+        attempt = 0
+        is_ok = False
+
+        while not is_ok and attempt < self.MAX_ATTEMPTS:
+            init_pairs = list(init_index_pairs)
+            init_i7 = list(init_indices_i7)
+            init_i5 = list(init_indices_i5)
+
+            if not any(init_pairs):
+                pair_1 = self.find_random(self.samples[0])
+                init_pairs.append(pair_1)
+                init_i7.append(pair_1[0])
+                init_i5.append(pair_1[1])
+
+            # Find index pairs
+            pairs = self.find_pairs(plate_samples, depths, init_pairs)
+
+            # Extract indices from the pairs
+            # for pair in pairs[1:]:
+            for pair in pairs[len(init_pairs):]:
+                init_i7.append(pair[0])
+                init_i5.append(pair[1])
+
+            # Find indices I7 and I5 independently
+            indices_i7 = self.find_indices(
+                tube_samples, depths, 'i7', init_i7)
+            if self.mode == 'single':
+                indices_i5 = [
+                    self.index_registry.create_index_dict()] * len(indices_i7)
+            else:
+                indices_i5 = self.find_indices(
+                    tube_samples, depths, 'i5', init_i5)
+
+            # Ensure uniqueness
+            i7_extracted = [x['index'] for x in indices_i7]
+            i5_extracted = [x['index'] for x in indices_i5]
+            all_pairs = list(zip(i7_extracted, i5_extracted))
+
+            # If all pairs are unique, exit. Otherwise, re-generate the indices
+            if len(all_pairs) == len(set(all_pairs)):
+                is_ok = True
+
+            attempt += 1
+
+        if not is_ok:
+            raise ValueError('Failed to generate indices.')
+
+        # Skip indices which are already in the result
+        indices_i7 = indices_i7[len(self._result):]
+        indices_i5 = indices_i5[len(self._result):]
+
+        # Add generated indices to the result
+        for i, sample in enumerate(self.samples):
+            self._result.append(
+                self.create_result_dict(
+                    sample, indices_i7[i], indices_i5[i]))
 
         return self.result
 
@@ -246,167 +350,6 @@ class IndexGenerator:
 
         self._result.extend(no_index + with_index)
 
-    # def find_indices(self):
-    #     """ Find indices I7/I5 for the selected samples. """
-    #     depths = [x.sequencing_depth for x in self.samples]
-
-    #     # If there are libraries in the result, extract their indices
-    #     if any(self._result):
-    #         init_indices_i7 = []
-    #         init_indices_i5 = []
-
-    #         for item in self._result:
-    #             init_indices_i7.append(item['index_i7'])
-    #             init_indices_i5.append(item['index_i5'])
-
-    #         samples = self.samples
-    #         depths = [x['sequencing_depth'] for x in self._result] + depths
-
-    #     else:
-    #         index_i7_1, index_i5_1 = self.find_random(self.samples[0])
-    #         samples = self.samples[1:]
-
-    #         # If a single sample was selected, add it to the result
-    #         if not samples:
-    #             self._result.append(
-    #                 self.create_result_dict(
-    #                     self.samples[0], index_i7_1, index_i5_1))
-    #             return
-
-    #         init_indices_i7 = [index_i7_1]
-    #         init_indices_i5 = [index_i5_1]
-
-    #     attempt = 0
-    #     is_ok = False
-
-    #     while not is_ok and attempt < self.MAX_ATTEMPTS:
-    #         indices_i7 = self.get_indices(
-    #             samples, depths, 'i7', init_indices_i7)
-
-    #         if self.mode == 'single':
-    #             indices_i5 = [
-    #                 self.index_registry.create_index_dict()] * len(indices_i7)
-    #         else:
-    #             indices_i5 = self.get_indices(
-    #                 samples, depths, 'i5', init_indices_i5)
-
-    #         # Ensure uniqueness
-    #         i7_extracted = [x['index'] for x in indices_i7]
-    #         i5_extracted = [x['index'] for x in indices_i5]
-    #         pairs = list(zip(i7_extracted, i5_extracted))
-
-    #         # If some pairs are not unique, re-generate the indices
-    #         if len(pairs) == len(set(pairs)):
-    #             is_ok = True
-
-    #         attempt += 1
-
-    #     if not is_ok:
-    #         raise ValueError('Failed to generate indices.')
-
-    #     # Skip indices which are already in the result
-    #     indices_i7 = indices_i7[len(self._result):]
-    #     indices_i5 = indices_i5[len(self._result):]
-
-    #     # Add generated indices to the result
-    #     for i, sample in enumerate(self.samples):
-    #         self._result.append(
-    #             self.create_result_dict(
-    #                 sample, indices_i7[i], indices_i5[i]))
-
-    def find_indices2(self):
-        """ Find indices I7/I5 for the selected samples. """
-        depths = [x.sequencing_depth for x in self.samples]
-
-        # If a single sample was selected, add it to the result
-        if not any(self._result) and self.num_samples == 1:
-            index_i7, index_i5 = self.find_random(self.samples[0])
-            self._result.append(
-                self.create_result_dict(
-                    self.samples[0], index_i7, index_i5))
-            return
-
-        if any(self._result):
-            init_index_pairs = []
-            init_indices_i7 = []
-            init_indices_i5 = []
-            samples = self.samples
-            depths = [x['sequencing_depth'] for x in self._result] + depths
-
-            # If there are libraries in the result, extract their indices
-            for item in self._result:
-                init_index_pairs.append((item['index_i7'], item['index_i5']))
-                init_indices_i7.append(item['index_i7'])
-                init_indices_i5.append(item['index_i5'])
-
-        else:
-            init_index_pairs = []
-            init_indices_i7 = []
-            init_indices_i5 = []
-            samples = self.samples[1:]
-
-        plate_samples = []
-        tube_samples = []
-        for sample in samples:
-            if sample.index_type.format == 'plate':
-                plate_samples.append(sample)
-            else:
-                tube_samples.append(sample)
-
-        attempt = 0
-        is_ok = False
-
-        while not is_ok and attempt < self.MAX_ATTEMPTS:
-            if not any(self._result):
-                pair_1 = self.find_random(self.samples[0])
-                init_pairs = list(init_index_pairs) + [pair_1]
-                init_i7 = list(init_indices_i7) + [pair_1[0]]
-                init_i5 = list(init_indices_i5) + [pair_1[1]]
-            else:
-                init_pairs = list(init_index_pairs)
-                init_i7 = list(init_indices_i7)
-                init_i5 = list(init_indices_i5)
-
-            # Find index pairs
-            pairs = self.get_pairs(plate_samples, depths, init_pairs)
-            for pair in pairs[1:]:
-                init_i7.append(pair[0])
-                init_i5.append(pair[1])
-
-            # Find indices I7 and I5 independently
-            indices_i7 = self.get_indices(
-                tube_samples, depths, 'i7', init_i7)
-            if self.mode == 'single':
-                indices_i5 = [
-                    self.index_registry.create_index_dict()] * len(indices_i7)
-            else:
-                indices_i5 = self.get_indices(
-                    tube_samples, depths, 'i5', init_i5)
-
-            # Ensure uniqueness
-            i7_extracted = [x['index'] for x in indices_i7]
-            i5_extracted = [x['index'] for x in indices_i5]
-            all_pairs = list(zip(i7_extracted, i5_extracted))
-
-            # If all pairs are unique, exit. Otherwise, re-generate the indices
-            if len(all_pairs) == len(set(all_pairs)):
-                is_ok = True
-
-            attempt += 1
-
-        if not is_ok:
-            raise ValueError('Failed to generate indices.')
-
-        # Skip indices which are already in the result
-        indices_i7 = indices_i7[len(self._result):]
-        indices_i5 = indices_i5[len(self._result):]
-
-        # Add generated indices to the result
-        for i, sample in enumerate(self.samples):
-            self._result.append(
-                self.create_result_dict(
-                    sample, indices_i7[i], indices_i5[i]))
-
     def find_random(self, sample):
         """ Find random indices I7/I5 for a given sample. """
 
@@ -425,7 +368,7 @@ class IndexGenerator:
                 self.index_registry.get_pairs(sample.index_type.pk))
             return (pair.index1, pair.index2)
 
-    def get_indices(self, samples, depths, index_group, init_indices):
+    def find_indices(self, samples, depths, index_group, init_indices):
         """ """
         if not any(samples):
             return init_indices
@@ -490,43 +433,7 @@ class IndexGenerator:
 
         return result_index
 
-    # def find_pairs(self):
-    #     """ """
-    #     depths = [x.sequencing_depth for x in self.samples]
-
-    #     # If there are libraries in the result, extract their indices
-    #     if any(self._result):
-    #         init_pairs = list(map(
-    #             lambda x: (x['index_i7'], x['index_i5']), self._result))
-
-    #         samples = self.samples
-    #         depths = [x['sequencing_depth'] for x in self._result] + depths
-
-    #     else:
-    #         pair_1 = self.find_random(self.samples[0])
-    #         samples = self.samples[1:]
-
-    #         # If a single sample was selected, add it to the result
-    #         if not samples:
-    #             self._result.append(
-    #                 self.create_result_dict(
-    #                     self.samples[0], pair_1[0], pair_1[1]))
-    #             return
-
-    #         init_pairs = [pair_1]
-
-    #     pairs = self.get_pairs(samples, depths, init_pairs)
-
-    #     # Skip pairs which are already in the result
-    #     pairs = pairs[len(self._result):]
-
-    #     # Add generated pairs to the result
-    #     for i, sample in enumerate(self.samples):
-    #         self._result.append(
-    #             self.create_result_dict(
-    #                 sample, pairs[i][0], pairs[i][1]))
-
-    def get_pairs(self, samples, depths, init_pairs):
+    def find_pairs(self, samples, depths, init_pairs):
         """ """
         if not any(samples):
             return init_pairs
@@ -542,12 +449,15 @@ class IndexGenerator:
                         raise ValueError('Pair not found.')
                     pair = pair['pair']
                     pairs.append(pair)
-                pairs = self.sort_pairs(pairs)
             except ValueError:
                 pass
 
             if len(pairs) == len(init_pairs) + len(samples):
-                return pairs
+                library_pairs = [x for x in pairs if x[0]['is_library']]
+                plate_pairs = [x for x in pairs if not x[0]['is_library']]
+                if True:
+                    plate_pairs = self.sort_pairs(plate_pairs)
+                return library_pairs + plate_pairs
 
             attempt += 1
 
@@ -593,6 +503,25 @@ class IndexGenerator:
                 }
 
         return result_pair
+
+    def find_pairs_fixed(self, plate_samples):
+        """ """
+        result = []
+
+        # Group by index type
+        samples_dict = OrderedDict()
+        for sample in plate_samples:
+            if sample.index_type.pk not in samples_dict.keys():
+                samples_dict[sample.index_type.pk] = []
+            samples_dict[sample.index_type.pk].append(sample)
+
+        for index_type_id, samples in samples_dict.items():
+            pairs = self.index_registry.get_pairs(index_type_id)
+            for i, sample in enumerate(samples):
+                pair = pairs[i]
+                result.append((pair.index1, pair.index2))
+
+        return result
 
     def calculate_color_distribution(self, indices, sequencing_depths, sample):
         """ """

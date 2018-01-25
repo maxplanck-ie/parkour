@@ -41,11 +41,17 @@ INDICES_2 = [  # I7
     Index('B', '01', 'GTAAAT'),
     Index('B', '02', 'TACGTT'),
     Index('B', '03', 'CGTTTA'),
+    Index('B', '04', 'CATTAG'),
+    Index('B', '05', 'CCCAAA'),
+    Index('B', '06', 'TACCCG'),
 ]
 INDICES_3 = [  # I5
     Index('C', '01', 'TCGGCC'),
     Index('C', '02', 'AAACGA'),
     Index('C', '03', 'GGTGCG'),
+    Index('C', '04', 'CTATGT'),
+    Index('C', '05', 'ATTCTG'),
+    Index('C', '06', 'GTACTC'),
 ]
 
 INDICES_4 = [  # I7
@@ -63,24 +69,28 @@ INDICES_6 = [  # I5
     Index('F', '02', 'AACCAA'),
 ]
 
-# Index Pair indices (plate 3x3)
-# G01-H01, G02-H01, G03-H01
-# G01-H02, G02-H02, G03-H02
-# G01-H03, G02-H03, G03-H03
-
+# Index Pair indices (plate 5x5)
+# G01-H01, G02-H01, G03-H01, G04-H01, G05-H01
+# G01-H02, G02-H02, G03-H02, G04-H02, G05-H02
+# G01-H03, G02-H03, G03-H03, G04-H03, G05-H03
+# G01-H04, G02-H04, G03-H04, G04-H04, G05-H04
+# G01-H05, G02-H05, G03-H05, G04-H05, G05-H05
 INDICES_7 = [  # I7
     Index('G', '01', 'CATCGC'),
     Index('G', '02', 'GTTTGT'),
     Index('G', '03', 'GTAGTT'),
+    Index('K', '04', 'GGTTAG'),
+    Index('K', '05', 'AGTAAA'),
 ]
 INDICES_8 = [  # I5
     Index('H', '01', 'CTCGGG'),
     Index('H', '02', 'CACCGT'),
     Index('H', '03', 'TAAATC'),
+    Index('H', '04', 'GTACTC'),
+    Index('H', '05', 'CTGTCG'),
 ]
 
 # Index Pair indices (plate 2x3)
-
 INDICES_9 = [  # I7
     Index('I', '01', 'GTAAAT'),
     Index('I', '02', 'TACGTT'),
@@ -88,6 +98,32 @@ INDICES_9 = [  # I7
     Index('I', '04', 'ATGTGG'),
     Index('I', '05', 'GGCGCT'),
     Index('I', '06', 'CGATCC'),
+]
+
+# Index Pair indices (plate 2x3)
+INDICES_10 = [  # I7
+    Index('J', '01', 'AGACTT'),
+    Index('J', '02', 'GAGAAG'),
+    Index('J', '03', 'TTCGCA'),
+    Index('J', '04', 'CATTAG'),
+    Index('J', '05', 'CCCAAA'),
+    Index('J', '06', 'TACCCG'),
+    Index('J', '07', 'GGGATG'),
+    Index('J', '08', 'TGCACA'),
+    Index('J', '09', 'GAGTGA'),
+    Index('J', '10', 'GTTTTG'),
+]
+INDICES_11 = [  # I5
+    Index('K', '01', 'ATACCC'),
+    Index('K', '02', 'AAGAAA'),
+    Index('K', '03', 'GGTTAG'),
+    Index('K', '04', 'AGTAAA'),
+    Index('K', '05', 'ACTATA'),
+    Index('K', '06', 'CCTCGC'),
+    Index('K', '07', 'CTATGT'),
+    Index('K', '08', 'ATTCTG'),
+    Index('K', '09', 'GTACTC'),
+    Index('K', '10', 'CTGTCG'),
 ]
 
 
@@ -356,21 +392,24 @@ class TestIndexRegistry(BaseTestCase):
     def test_format_plate_mode_dual(self):
         index_registry = IndexRegistry('dual', [self.index_type2])
         pairs = index_registry.pairs[self.index_type2.pk]
-        self.assertEqual(len(pairs), 9)
-        coordinates = [x.coordinate for x in pairs]
+        self.assertEqual(len(pairs), 25)
+        coordinates = [x.coordinate for x in pairs][:10]
         self.assertEqual(coordinates, [
-            'A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'C2', 'C3'])
+            'A1', 'A2', 'A3', 'A4', 'A5', 'B1', 'B2', 'B3', 'B4', 'B5'])
 
     def test_format_plate_filter_by_start_coord(self):
         index_registry = IndexRegistry('dual', [self.index_type2], 'B2')
-        self.assertEqual(len(index_registry.pairs[self.index_type2.pk]), 4)
+        self.assertEqual(len(index_registry.pairs[self.index_type2.pk]), 16)
 
     def test_format_plate_direction_down(self):
         index_registry = IndexRegistry(
-            'dual', [self.index_type2], 'B2', 'down')
+            'dual', [self.index_type2], 'C3', 'down')
         coordinates = [
-            x.coordinate for x in index_registry.pairs[self.index_type2.pk]]
-        self.assertEqual(coordinates, ['B2', 'C2', 'B3', 'C3'])
+            x.coordinate
+            for x in index_registry.pairs[self.index_type2.pk]
+        ][:5]
+
+        self.assertEqual(coordinates, ['C3', 'D3', 'E3', 'C4', 'D4'])
 
     def test_invalid_start_coordinate(self):
         with self.assertRaises(ValueError) as context:
@@ -412,6 +451,8 @@ class TestIndexGenerator(BaseTestCase):
                 num_coord=num_coord,
             )
             index_pair.save()
+
+        self.index_type7 = create_index_type(INDICES_10, INDICES_11, 'plate')
 
     # Test valid data
 
@@ -741,34 +782,45 @@ class TestIndexGenerator(BaseTestCase):
 
         self.assertIn(data['data'][0]['index_i7_id'], index_i7_ids_1)
         self.assertIn(data['data'][0]['index_i5_id'], index_i5_ids_1)
-        index_i7 = IndexI7.objects.get(
-            index_type=self.index_type5,
-            index=data['data'][0]['index_i7']['index'],
-        )
-        index_i5 = IndexI5.objects.get(
-            index_type=self.index_type5,
-            index=data['data'][0]['index_i5']['index'],
-        )
-        self.assertEqual(IndexPair.objects.filter(
-            index1=index_i7, index2=index_i5).count(), 1)
-
         self.assertIn(data['data'][1]['index_i7_id'], index_i7_ids_1)
         self.assertIn(data['data'][1]['index_i5_id'], index_i5_ids_1)
-        index_i7 = IndexI7.objects.get(
-            index_type=self.index_type5,
-            index=data['data'][1]['index_i7']['index'],
-        )
-        index_i5 = IndexI5.objects.get(
-            index_type=self.index_type5,
-            index=data['data'][1]['index_i5']['index'],
-        )
-        self.assertEqual(IndexPair.objects.filter(
-            index1=index_i7, index2=index_i5).count(), 1)
-
         self.assertIn(data['data'][2]['index_i7_id'], index_i7_ids_2)
         self.assertIn(data['data'][2]['index_i5_id'], index_i5_ids_2)
         self.assertIn(data['data'][3]['index_i7_id'], index_i7_ids_2)
         self.assertIn(data['data'][3]['index_i5_id'], index_i5_ids_2)
+
+    def test_more_than_ten_samples_format_plate_mode_dual(self):
+        samples = [
+            create_sample(
+                get_random_name(),
+                read_length=self.read_length,
+                index_type=self.index_type7,
+            )
+            for _ in range(15)
+        ]
+        sample_ids = list(map(lambda x: x.pk, samples))
+
+        response = self.client.post('/api/index_generator/generate_indices/', {
+            'samples': json.dumps(sample_ids),
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertEqual(len(data['data']), 15)
+
+        index_pairs = list(map(
+            lambda x: x['index_i7_id'] + '-' + x['index_i5_id'],
+            data['data'],
+        ))
+
+        correct_pairs = [
+            'J01-K01', 'J02-K01', 'J03-K01', 'J04-K01', 'J05-K01', 'J06-K01',
+            'J07-K01', 'J08-K01', 'J09-K01', 'J10-K01', 'J01-K02', 'J02-K02',
+            'J03-K02', 'J04-K02', 'J05-K02',
+        ]
+
+        # Check index pairs order
+        self.assertEqual(index_pairs, correct_pairs)
 
     def test_libraries_and_samples_format_tube_mode_single(self):
         index_i7_ids = [x.index_id for x in self.index_type1.indices_i7.all()]
