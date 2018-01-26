@@ -1,6 +1,6 @@
 Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
   extend: 'Ext.container.Container',
-  xtype: 'library-preparation',
+  xtype: 'preparation',
 
   requires: [
     'MainHub.components.BaseGrid',
@@ -14,13 +14,12 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
 
   items: [{
     xtype: 'basegrid',
-    alias: 'widget.lol',
     id: 'library-preparation-grid',
     itemId: 'library-preparation-grid',
     store: 'LibraryPreparation',
 
     header: {
-      title: 'Library Preparation',
+      title: 'Preparation',
       items: [{
         xtype: 'textfield',
         itemId: 'search-field',

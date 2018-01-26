@@ -51,9 +51,9 @@ def get_navigation_tree(request):
                 'leaf': True
             },
             {
-                'text': 'Library Preparation',
+                'text': 'Preparation',
                 'iconCls': 'x-fa fa-table',
-                'viewType': 'library-preparation',
+                'viewType': 'preparation',
                 'leaf': True
             },
             {
