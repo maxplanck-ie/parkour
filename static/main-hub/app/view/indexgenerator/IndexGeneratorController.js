@@ -204,19 +204,19 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
       ) {
         record.set('selected', true);
 
-        var indexI7Sequence = record.get('index_i7');
-        var indexI5Sequence = record.get('index_i5');
-        var indexI7 = indexI7Sequence.split('');
-        var indexI5 = indexI5Sequence.split('');
+        var indexI7 = record.get('index_i7');
+        var indexI5 = record.get('index_i5');
+        var indexI7Sequence = indexI7.split('');
+        var indexI5Sequence = indexI5.split('');
 
-        if (indexI7Sequence.length === 6) {
-          indexI7 = indexI7.concat([' ', ' ']);
+        if (indexI7.length === 6) {
+          indexI7Sequence = indexI7Sequence.concat([' ', ' ']);
         }
 
-        if (indexI5Sequence.length === 0) {
+        if (indexI5.length === 0) {
           indexI5 = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '];
         } else if (indexI5Sequence.length === 6) {
-          indexI5 = indexI5.concat([' ', ' ']);
+          indexI5Sequence = indexI5Sequence.concat([' ', ' ']);
         }
 
         var data = {
@@ -228,13 +228,13 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
           index_type: record.get('index_type'),
           index_i7_id: record.get('index_i7_id'),
           index_i5_id: record.get('index_i5_id'),
-          index_i7: indexI7Sequence,
-          index_i5: indexI5Sequence
+          index_i7: { index: indexI7 },
+          index_i5: { index: indexI5 }
         };
 
         for (var i = 0; i < 8; i++) {
-          data['index_i7_' + (i + 1)] = indexI7[i];
-          data['index_i5_' + (i + 1)] = indexI5[i];
+          data['index_i7_' + (i + 1)] = indexI7Sequence[i];
+          data['index_i5_' + (i + 1)] = indexI5Sequence[i];
         }
 
         store.add(data);
@@ -378,7 +378,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
         pk: record.get('pk'),
         index_i7: record.get('index_i7').index,
         index_i5: record.get('index_i5').index
-      }
+      };
       if (record.get('record_type') === 'Library') {
         libraries.push(item);
       } else {
