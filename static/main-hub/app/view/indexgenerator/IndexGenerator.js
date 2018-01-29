@@ -234,7 +234,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
           markDirty: false,
           stripeRows: false
         },
-        // problematicCycles: [],
+        multiSelect: true,
         sortableColumns: false,
         enableColumnMove: false,
         enableColumnResize: false,

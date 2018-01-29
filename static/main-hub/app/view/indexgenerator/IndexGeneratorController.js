@@ -342,6 +342,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
   },
 
   save: function () {
+    var me = this;
     var store = Ext.getCmp('pool-grid').getStore();
     var libraries = [];
     var samples = [];
@@ -412,11 +413,48 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
         }
       },
       failure: function (response) {
+        var errorMsg;
+        try {
+          var obj = Ext.JSON.decode(response.responseText);
+          errorMsg = obj.message;
+        } catch (error) {
+          errorMsg = response.statusText;
+        }
+        new Noty({ text: errorMsg, type: 'error' }).show();
+
+        if (errorMsg === 'Some of the indices are not unique.') {
+          me.highlightNonUnique();
+        }
+
         Ext.getCmp('poolingContainer').setLoading(false);
-        new Noty({ text: response.statusText, type: 'error' }).show();
         console.error(response);
       }
     });
+  },
+
+  highlightNonUnique: function () {
+    var grid = Ext.getCmp('pool-grid');
+    var store = grid.getStore();
+    var duplicates = {};
+
+    var indexPairs = store.data.items.map(function (item) {
+      return item.get('index_i7').index + item.get('index_i5').index;
+    });
+
+    for (var i = 0; i < indexPairs.length; i++) {
+      if (duplicates.hasOwnProperty(indexPairs[i])) {
+        duplicates[indexPairs[i]].push(i);
+      } else if (indexPairs.lastIndexOf(indexPairs[i]) !== i) {
+        duplicates[indexPairs[i]] = [i];
+      }
+    }
+
+    var duplicateIndices = [].concat.apply([], Object.values(duplicates));
+
+    grid.getSelectionModel().deselectAll();
+    for (var j = 0; j < duplicateIndices.length; j++) {
+      grid.getSelectionModel().select(duplicateIndices[j], true);
+    }
   },
 
   // reset: function (record) {
