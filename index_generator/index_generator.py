@@ -54,33 +54,36 @@ class IndexRegistry:
             self.pairs[index_type.pk] = []
 
         index_pairs = IndexPair.objects.filter(
-            index_type=index_type,
-            char_coord__gte=char_coord,
-            num_coord__gte=num_coord,
-        )
+            index_type=index_type).select_related('index1', 'index2')
 
-        if not index_pairs:
+        # Sort index pairs according to the chosen direction
+        if self.direction == 'right':
+            index_pairs = index_pairs.order_by('char_coord', 'num_coord')
+        else:
+            index_pairs = index_pairs.order_by('num_coord', 'char_coord')
+
+        start_idx = None
+        for i, pair in enumerate(index_pairs):
+            if pair.char_coord == char_coord and pair.num_coord == num_coord:
+                start_idx = i
+                break
+
+        if start_idx is None:
             raise ValueError(
                 f'No index pairs for Index Type "{index_type.name}" ' +
                 f'and start coordinate "{self.start_coord}".'
             )
 
-        # Sort index pairs according to the chosen direction
-        if self.direction == 'right':
-            index_pairs = sorted(
-                index_pairs, key=lambda x: (x.char_coord, x.num_coord))
-        else:  # down
-            index_pairs = sorted(
-                index_pairs, key=lambda x: (x.num_coord, x.char_coord))
+        index_pairs = index_pairs[start_idx:]
 
         for pair in index_pairs:
             index1 = self.create_index_dict(
-                pair.index_type.format, pair.index_type.pk,
+                index_type.format, index_type.pk,
                 pair.index1.prefix, pair.index1.number, pair.index1.index)
 
             if self.mode == 'dual':
                 index2 = self.create_index_dict(
-                    pair.index_type.format, pair.index_type.pk,
+                    index_type.format, index_type.pk,
                     pair.index2.prefix, pair.index2.number, pair.index2.index)
             else:
                 index2 = self.create_index_dict()
@@ -153,18 +156,12 @@ class IndexGenerator:
             'read_length', 'index_type',
         ).prefetch_related(
             'index_type__indices_i7', 'index_type__indices_i5',
-        ).only(
-            'id', 'name', 'sequencing_depth', 'read_length__id', 'index_type',
         ).order_by(
             'index_type__format', 'index_type__id', 'sequencing_depth', 'name',
+        ).only(
+            'id', 'name', 'sequencing_depth', 'read_length__id', 'index_type',
         )
 
-        # self.samples = sorted(self.samples, key=lambda x: (
-        #     x.index_type.pk, x.sequencing_depth, int(x.barcode[3:])
-        # ))
-
-        # self.num_libraries = self.libraries.count()
-        # self.num_samples = self.samples.count()
         self.num_libraries = len(self.libraries)
         self.num_samples = len(self.samples)
 

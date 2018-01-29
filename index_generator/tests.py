@@ -398,8 +398,18 @@ class TestIndexRegistry(BaseTestCase):
             'A1', 'A2', 'A3', 'A4', 'A5', 'B1', 'B2', 'B3', 'B4', 'B5'])
 
     def test_format_plate_filter_by_start_coord(self):
-        index_registry = IndexRegistry('dual', [self.index_type2], 'B2')
-        self.assertEqual(len(index_registry.pairs[self.index_type2.pk]), 16)
+        index_registry = IndexRegistry('dual', [self.index_type2], 'B3')
+        self.assertEqual(len(index_registry.pairs[self.index_type2.pk]), 18)
+
+    def test_format_plate_direction_right(self):
+        index_registry = IndexRegistry(
+            'dual', [self.index_type2], 'C3', 'right')
+        coordinates = [
+            x.coordinate
+            for x in index_registry.pairs[self.index_type2.pk]
+        ][:5]
+
+        self.assertEqual(coordinates, ['C3', 'C4', 'C5', 'D1', 'D2'])
 
     def test_format_plate_direction_down(self):
         index_registry = IndexRegistry(
@@ -409,7 +419,7 @@ class TestIndexRegistry(BaseTestCase):
             for x in index_registry.pairs[self.index_type2.pk]
         ][:5]
 
-        self.assertEqual(coordinates, ['C3', 'D3', 'E3', 'C4', 'D4'])
+        self.assertEqual(coordinates, ['C3', 'D3', 'E3', 'A4', 'B4'])
 
     def test_invalid_start_coordinate(self):
         with self.assertRaises(ValueError) as context:
