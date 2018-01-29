@@ -325,7 +325,7 @@ class GenericLibrarySample(DateTimeMixin):
     @property
     def index_i5_id(self):
         indices = self.index_type.indices_i5.all() if self.index_type else []
-        index_id = [x.index_id for x in indices if x.index == self.index_i7]
+        index_id = [x.index_id for x in indices if x.index == self.index_i5]
         return index_id[0] if any(index_id) else ''
 
     # Facility
