@@ -1,26 +1,34 @@
-from rest_framework.serializers import (ModelSerializer, ListSerializer,
-                                        SerializerMethodField)
+from rest_framework.serializers import (
+    ModelSerializer,
+    ListSerializer,
+    SerializerMethodField,
+)
 
-from .models import (Organism, ReadLength, IndexType, LibraryProtocol,
-                     LibraryType, IndexI7, IndexI5, ConcentrationMethod)
+from .models import (
+    Organism,
+    ReadLength,
+    IndexType,
+    LibraryProtocol,
+    LibraryType,
+    IndexI7,
+    IndexI5,
+    ConcentrationMethod,
+)
 
 
 class OrganismSerializer(ModelSerializer):
-
     class Meta:
         model = Organism
         fields = ('id', 'name')
 
 
 class ReadLengthSerializer(ModelSerializer):
-
     class Meta:
         model = ReadLength
         fields = ('id', 'name')
 
 
 class ConcentrationMethodSerializer(ModelSerializer):
-
     class Meta:
         model = ConcentrationMethod
         fields = ('id', 'name')
@@ -28,7 +36,6 @@ class ConcentrationMethodSerializer(ModelSerializer):
 
 class IndexTypeSerializer(ModelSerializer):
     index_reads = SerializerMethodField()
-    is_dual = SerializerMethodField()
     index_length = SerializerMethodField()
 
     class Meta:
@@ -36,10 +43,7 @@ class IndexTypeSerializer(ModelSerializer):
         fields = ('id', 'name', 'index_reads', 'is_dual', 'index_length')
 
     def get_index_reads(self, obj):
-        return [obj.is_index_i7, obj.is_index_i5].count(True)
-
-    def get_is_dual(self, obj):
-        return obj.is_index_i7 and obj.is_index_i5
+        return 2 if obj.is_dual else 1
 
     def get_index_length(self, obj):
         return int(obj.get_index_length_display())
@@ -49,26 +53,23 @@ class IndexBaseSerializer(ModelSerializer):
     name = SerializerMethodField()
 
     class Meta:
-        fields = ('id', 'name', 'index', 'index_id',)
+        fields = ('id', 'name', 'prefix', 'number', 'index_id', 'index',)
 
     def get_name(self, obj):
         return '%s - %s' % (obj.index_id, obj.index)
 
 
 class IndexI7Serializer(IndexBaseSerializer):
-
     class Meta(IndexBaseSerializer.Meta):
         model = IndexI7
 
 
 class IndexI5Serializer(IndexBaseSerializer):
-
     class Meta(IndexBaseSerializer.Meta):
         model = IndexI5
 
 
 class LibraryProtocolSerializer(ModelSerializer):
-
     class Meta:
         model = LibraryProtocol
         fields = '__all__'

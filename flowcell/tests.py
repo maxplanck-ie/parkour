@@ -96,14 +96,12 @@ class TestFlowcellModel(BaseTestCase):
 
 class TestSequencer(BaseTestCase):
     def setUp(self):
-        self.user = self.create_user()
+        self.create_user()
+        self.login()
 
     def test_sequencer_list(self):
         """ Ensure get sequencer list behaves correctly. """
-        self.client.login(email='test@test.io', password='foo-bar')
-
         sequencer = create_sequencer(get_random_name())
-
         response = self.client.get(reverse('sequencers-list'))
         self.assertEqual(response.status_code, 200)
         data = response.json()

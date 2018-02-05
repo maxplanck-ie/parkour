@@ -17,15 +17,17 @@ from sample.tests import create_sample
 User = get_user_model()
 
 
-def create_library(name, status=0, save=True):
+def create_library(name, status=0, save=True, read_length=None,
+                   index_type=None):
     organism = Organism(name='Organism')
     organism.save()
 
     concentration_method = ConcentrationMethod(name='Concentration Method')
     concentration_method.save()
 
-    read_length = ReadLength(name='Read Length')
-    read_length.save()
+    if read_length is None:
+        read_length = ReadLength(name='Read Length')
+        read_length.save()
 
     library_protocol = LibraryProtocol(
         name='Protocol',
@@ -42,8 +44,9 @@ def create_library(name, status=0, save=True):
     library_type.save()
     library_type.library_protocol.add(library_protocol)
 
-    index_type = IndexType(name='Index Type')
-    index_type.save()
+    if index_type is None:
+        index_type = IndexType(name='Index Type')
+        index_type.save()
 
     library = Library(
         name=name,

@@ -1,66 +1,66 @@
 Ext.define('MainHub.model.indexgenerator.Record', {
-    extend: 'MainHub.model.Base',
+  extend: 'MainHub.model.Base',
 
-    fields: [{
-        name: 'name',
-        type: 'string'
+  fields: [
+    {
+      name: 'pk',
+      type: 'int'
     },
     {
-        name: 'requestId',
-        type: 'int'
+      name: 'name',
+      type: 'string'
     },
     {
-        name: 'requestName',
-        type: 'string'
+      name: 'barcode',
+      type: 'string'
     },
     {
-        name: 'libraryId',
-        type: 'int'
+      name: 'record_type',
+      type: 'string'
     },
     {
-        name: 'sampleId',
-        type: 'int'
+      name: 'request',
+      type: 'int'
     },
     {
-        name: 'barcode',
-        type: 'string'
+      name: 'request_name',
+      type: 'string'
     },
     {
-        name: 'recordType',
-        type: 'string'
+      name: 'sequencing_depth',
+      type: 'int'
     },
     {
-        name: 'sequencingDepth',
-        type: 'int'
+      name: 'library_protocol_name',
+      type: 'string'
     },
     {
-        name: 'libraryProtocolName',
-        type: 'string'
-    },
-
-    {
-        name: 'indexI7',
-        type: 'string'
+      name: 'index_i7',
+      type: 'string'
     },
     {
-        name: 'indexI5',
-        type: 'string'
+      name: 'index_i5',
+      type: 'string'
     },
     {
-        name: 'indexI7Id',
-        type: 'string'
+      name: 'index_i7_id',
+      type: 'string'
     },
     {
-        name: 'indexI5Id',
-        type: 'string'
+      name: 'index_i5_id',
+      type: 'string'
     },
     {
-        name: 'index_type',
-        type: 'int'
+      name: 'index_type',
+      type: 'int'
     },
     {
-        name: 'read_length',
-        type: 'int'
+      name: 'index_type_format',
+      type: 'string'
+    },
+    {
+      name: 'read_length',
+      type: 'int'
     }
-    ]
+  ]
 });

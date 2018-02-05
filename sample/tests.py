@@ -8,21 +8,28 @@ from common.tests import BaseTestCase
 from common.utils import generate_barcode, get_random_name
 from request.models import Request
 from .models import NucleicAcidType, Sample
-from library_sample_shared.models import (Organism, ConcentrationMethod,
-                                          ReadLength, LibraryProtocol,
-                                          LibraryType, BarcodeCounter)
+from library_sample_shared.models import (
+    Organism,
+    ConcentrationMethod,
+    ReadLength,
+    LibraryProtocol,
+    LibraryType,
+    BarcodeCounter,
+)
 User = get_user_model()
 
 
-def create_sample(name, status=0, save=True):
+def create_sample(name, status=0, save=True, read_length=None,
+                  index_type=None):
     organism = Organism(name='Organism')
     organism.save()
 
     concentration_method = ConcentrationMethod(name='Concentration Method')
     concentration_method.save()
 
-    read_length = ReadLength(name='Read Length')
-    read_length.save()
+    if read_length is None:
+        read_length = ReadLength(name='Read Length')
+        read_length.save()
 
     library_protocol = LibraryProtocol(
         name='Protocol',
@@ -54,6 +61,9 @@ def create_sample(name, status=0, save=True):
         library_type_id=library_type.pk,
         nucleic_acid_type_id=nat.pk,
     )
+
+    if index_type:
+        sample.index_type = index_type
 
     if save:
         sample.save()

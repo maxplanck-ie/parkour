@@ -41,6 +41,7 @@ Ext.define('MainHub.Application', {
     'libraries.RNAQuality',
     'incominglibraries.IncomingLibraries',
     'indexgenerator.PoolSizes',
+    'indexgenerator.StartCoordinates',
     'requests.LibrariesInRequest',
     'indexgenerator.IndexGenerator',
     'librarypreparation.LibraryPreparation',

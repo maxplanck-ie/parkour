@@ -32,7 +32,16 @@ class Command(BaseCommand):
         call_command('loaddata', 'read_lengths',
                      app_label='library_sample_shared')
 
-        call_command('loaddata', 'indices',
+        call_command('loaddata', 'indices_i7',
+                     app_label='library_sample_shared')
+
+        call_command('loaddata', 'indices_i5',
+                     app_label='library_sample_shared')
+
+        call_command('loaddata', 'index_types',
+                     app_label='library_sample_shared')
+
+        call_command('loaddata', 'index_pairs',
                      app_label='library_sample_shared')
 
         call_command('loaddata', 'library_protocols',

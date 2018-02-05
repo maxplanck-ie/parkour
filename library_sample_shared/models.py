@@ -1,6 +1,12 @@
+import re
+
 from django.db import models
+from django.core.validators import MinValueValidator, RegexValidator
 
 from common.models import DateTimeMixin
+
+AlphaValidator = RegexValidator(
+    r'^[A-Z]$', 'Only capital alpha characters are allowed.')
 
 
 class Organism(models.Model):
@@ -33,11 +39,17 @@ class ReadLength(models.Model):
 
 
 class GenericIndex(models.Model):
-    index_id = models.CharField('Index ID', max_length=15, unique=True)
+    prefix = models.CharField('Prefix', max_length=10, default='')
+    number = models.CharField('Number', max_length=10, default='')
     index = models.CharField('Index', max_length=8)
+
+    @property
+    def index_id(self):
+        return f'{self.prefix}{self.number}'
 
     class Meta:
         abstract = True
+        unique_together = ('prefix', 'number',)
 
     def __str__(self):
         return self.index_id
@@ -65,8 +77,8 @@ class IndexI5(GenericIndex):
 
 class IndexType(models.Model):
     name = models.CharField('Name', max_length=100)
-    is_index_i7 = models.BooleanField('Is Index I7?', default=False)
-    is_index_i5 = models.BooleanField('Is Index I5?', default=False)
+    is_dual = models.BooleanField('Is Dual', default=False)
+
     index_length = models.CharField(
         'Index Length',
         max_length=1,
@@ -75,6 +87,16 @@ class IndexType(models.Model):
             ('8', '8'),
         ),
         default='8',
+    )
+
+    format = models.CharField(
+        'Format',
+        max_length=11,
+        choices=(
+            ('single', 'single tube'),
+            ('plate', 'plate'),
+        ),
+        default='single',
     )
 
     indices_i7 = models.ManyToManyField(
@@ -97,6 +119,38 @@ class IndexType(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class IndexPair(models.Model):
+    index_type = models.ForeignKey(IndexType, verbose_name='Index Type')
+    index1 = models.ForeignKey(IndexI7, verbose_name='Index 1')
+    index2 = models.ForeignKey(
+        IndexI5,
+        verbose_name='Index 2',
+        null=True,
+        blank=True,
+    )
+
+    char_coord = models.CharField(
+        'Character Coordinate', validators=[AlphaValidator], max_length=1)
+    num_coord = models.PositiveSmallIntegerField(
+        'Numeric Coordinate', validators=[MinValueValidator(1)])
+
+    class Meta:
+        verbose_name = 'Index Pair'
+        verbose_name_plural = 'Index Pairs'
+
+    @property
+    def coordinate(self):
+        return f'{self.char_coord}{self.num_coord}'
+
+    def __str__(self):
+        index1_id = self.index1.index_id if self.index1 else ''
+        index2_id = self.index2.index_id if self.index2 else ''
+        output = index1_id
+        if self.index_type.is_dual:
+            output += f'-{index2_id}'
+        return output
 
 
 class BarcodeSingletonModel(models.Model):
@@ -262,47 +316,61 @@ class GenericLibrarySample(DateTimeMixin):
         blank=True,
     )
 
-    # Quality Control
+    @property
+    def index_i7_id(self):
+        indices = self.index_type.indices_i7.all() if self.index_type else []
+        index_id = [x.index_id for x in indices if x.index == self.index_i7]
+        return index_id[0] if any(index_id) else ''
+
+    @property
+    def index_i5_id(self):
+        indices = self.index_type.indices_i5.all() if self.index_type else []
+        index_id = [x.index_id for x in indices if x.index == self.index_i5]
+        return index_id[0] if any(index_id) else ''
+
+    # Facility
+
     dilution_factor = models.PositiveIntegerField(
-        'Dilution Factor (facility)',
+        'Dilution Factor',
         default=1,
         blank=True,
     )
+
     concentration_facility = models.FloatField(
-        'Concentration (facility)',
+        'Concentration',
         null=True,
         blank=True,
     )
+
     concentration_method_facility = models.ForeignKey(
         ConcentrationMethod,
         related_name='+',
-        verbose_name='Concentration Method (facility)',
+        verbose_name='Concentration Method',
         null=True,
         blank=True,
     )
+
     sample_volume_facility = models.PositiveIntegerField(
-        'Sample Volume (facility)',
+        'Sample Volume',
         null=True,
         blank=True,
     )
-    date_facility = models.DateTimeField(
-        'Date (facility)',
-        null=True,
-        blank=True,
-    )
+
     amount_facility = models.FloatField(
-        'Amount (facility)',
+        'Amount',
         null=True,
         blank=True,
     )
+
     size_distribution_facility = models.CharField(
-        'Size Distribution (facility)',
+        'Size Distribution',
         max_length=200,
         null=True,
         blank=True,
     )
+
     comments_facility = models.TextField(
-        'Comments (facility)',
+        'Comments',
         null=True,
         blank=True,
     )
@@ -310,8 +378,8 @@ class GenericLibrarySample(DateTimeMixin):
     class Meta:
         abstract = True
 
-    def get_record_type(self):
-        return 'L' if 'L' in self.barcode else 'S'
+    # def get_record_type(self):
+    #     return 'L' if 'L' in self.barcode else 'S'
 
     def __str__(self):
         return self.name

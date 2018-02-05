@@ -13,7 +13,8 @@ Ext.define('MainHub.components.BaseGridController', {
 
   showMenu: function (gridView, record, item, index, e) {
     var self = this;
-    var qcMenuOptions = gridView.grid.initialConfig.customConfig.qualityCheckMenuOptions;
+    var customConfig = gridView.grid.initialConfig.customConfig;
+    var qcMenuOptions = [];
     var menuItems = [{
       text: 'Apply to All',
       margin: '5px 5px 2px 5px',
@@ -23,7 +24,11 @@ Ext.define('MainHub.components.BaseGridController', {
       }
     }];
 
-    if (qcMenuOptions && qcMenuOptions.length > 0) {
+    if (customConfig && customConfig.qualityCheckMenuOptions) {
+      qcMenuOptions = customConfig.qualityCheckMenuOptions;
+    }
+
+    if (qcMenuOptions.length > 0) {
       var qcMenu = {
         xtype: 'container',
         items: [
@@ -115,7 +120,8 @@ Ext.define('MainHub.components.BaseGridController', {
   showGroupMenu: function (gridView, node, groupId, e) {
     var self = this;
     var grid = gridView.grid;
-    var qcMenuOptions = gridView.grid.initialConfig.customConfig.qualityCheckMenuOptions;
+    var customConfig = gridView.grid.initialConfig.customConfig;
+    var qcMenuOptions = [];
     var menuItems = [
       {
         text: 'Select All',
@@ -133,8 +139,11 @@ Ext.define('MainHub.components.BaseGridController', {
       }
     ];
 
+    if (customConfig && customConfig.qualityCheckMenuOptions) {
+      qcMenuOptions = customConfig.qualityCheckMenuOptions;
+    }
+
     if (
-      qcMenuOptions &&
       qcMenuOptions.length > 0 &&
       self._getSelectedRecords(grid.getStore(), parseInt(groupId)).length > 0
     ) {

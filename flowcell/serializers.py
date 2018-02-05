@@ -72,12 +72,16 @@ class LaneSerializer(ModelSerializer):
         return records[0].read_length.name
 
     def get_index_i7_show(self, obj):
-        records = obj.pool.libraries.all() or obj.pool.samples.all()
-        return records[0].index_type.is_index_i7
+        # records = obj.pool.libraries.all() or obj.pool.samples.all()
+        # return records[0].index_type.is_index_i7
+        # TODO: rethink this
+        return None
 
     def get_index_i5_show(self, obj):
-        records = obj.pool.libraries.all() or obj.pool.samples.all()
-        return records[0].index_type.is_index_i5
+        # records = obj.pool.libraries.all() or obj.pool.samples.all()
+        # return records[0].index_type.is_index_i5
+        # TODO: rethink this
+        return None
 
     def get_equal_representation(self, obj):
         records = list(itertools.chain(

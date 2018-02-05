@@ -113,7 +113,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
     var changes = record.getChanges();
     var values = context.newValues;
 
-      // Set Concentration C1
+    // Set Concentration C1
     if (
       Object.keys(changes).indexOf('concentration_c1') === -1 &&
       values.concentration > 0 &&
