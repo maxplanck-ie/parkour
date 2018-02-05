@@ -53,6 +53,10 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         wnd.down('#sample-card-button').click();
       }
     }
+
+    Ext.apply(Ext.tip.QuickTipManager.getQuickTip(), {
+      dismissDelay: 10000  // hide after 10 seconds
+    });
   },
 
   selectCard: function (btn) {
