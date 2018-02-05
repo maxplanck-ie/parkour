@@ -45,6 +45,7 @@ Ext.define('MainHub.Application', {
     'indexgenerator.IndexGenerator',
     'librarypreparation.LibraryPreparation',
     'pooling.Pooling',
+    'flowcell.Years',
     'flowcell.Flowcells',
     'flowcell.Sequencer',
     'flowcell.Lanes',

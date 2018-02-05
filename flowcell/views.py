@@ -3,6 +3,7 @@ import json
 import logging
 import unicodedata
 import itertools
+import datetime
 
 from django.apps import apps
 from django.db.models import Prefetch, Q, F
@@ -95,6 +96,9 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
     serializer_class = LaneSerializer
 
     def get_queryset(self):
+        today = datetime.date.today()
+        year = self.request.query_params.get('year', today.year)
+
         libraries_qs = Library.objects.filter(
             ~Q(status=-1)).select_related('read_length', 'index_type').only(
                 'read_length', 'index_type',
@@ -112,9 +116,9 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
             Prefetch('pool__samples', queryset=samples_qs),
         ).order_by('name')
 
-        queryset = Flowcell.objects.select_related(
-            'sequencer'
-        ).prefetch_related(
+        queryset = Flowcell.objects.filter(
+            create_time__year=year
+        ).select_related('sequencer').prefetch_related(
             Prefetch('lanes', queryset=lanes_qs),
         ).order_by('-create_time')
 
@@ -152,6 +156,20 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
                 'message': 'Invalid payload.',
                 'errors': serializer.errors,
             }, 400)
+
+    @list_route(methods=['get'])
+    def years(self, request):
+        flowcells = Flowcell.objects.all()
+        data = []
+
+        if flowcells.count() == 0:
+            return Response(data)
+
+        start_year = flowcells.first().create_time.year
+        end_year = flowcells.last().create_time.year
+        data = map(lambda x: {'year': x}, range(start_year, end_year + 1, 1))
+
+        return Response(data)
 
     @list_route(methods=['get'])
     def pool_list(self, request):

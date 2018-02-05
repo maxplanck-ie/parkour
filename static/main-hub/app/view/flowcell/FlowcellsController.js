@@ -16,9 +16,11 @@ Ext.define('MainHub.view.flowcell.FlowcellsController', {
       '#': {
         activate: 'activateView'
       },
+      '#years-combobox': {
+        select: 'selectYear'
+      },
       '#flowcells-grid': {
         resize: 'resize',
-        boxready: 'addToolbarButtons',
         itemcontextmenu: 'showMenu',
         groupcontextmenu: 'showGroupMenu',
         cellclick: 'showPoolInfo',
@@ -48,7 +50,8 @@ Ext.define('MainHub.view.flowcell.FlowcellsController', {
     }
   },
 
-  addToolbarButtons: function (grid) {
+  activateView: function (view) {
+    var grid = view.down('grid');
     var toolbar = grid.down('toolbar[dock="bottom"]');
 
     toolbar.insert(0, {
@@ -63,6 +66,48 @@ Ext.define('MainHub.view.flowcell.FlowcellsController', {
       itemId: 'download-sample-sheet-button',
       text: 'Download Sample Sheet',
       iconCls: 'fa fa-file-excel-o fa-lg'
+    });
+
+    grid.addDocked({
+      xtype: 'toolbar',
+      dock: 'top',
+      items: [{
+        xtype: 'combobox',
+        itemId: 'years-combobox',
+        fieldLabel: 'Select Year',
+        store: 'FlowcellYears',
+        queryMode: 'local',
+        valueField: 'year',
+        displayField: 'year',
+        forceSelection: true,
+        labelWidth: 80,
+        width: 170
+      }]
+    });
+
+    var flowcellYearsCb = view.down('#years-combobox');
+    flowcellYearsCb.getStore().reload({
+      callback: function (items) {
+        if (items && items.length > 0) {
+          var lastItem = items[items.length - 1];
+          flowcellYearsCb.select(lastItem);
+          flowcellYearsCb.fireEvent('select', flowcellYearsCb, lastItem);
+          flowcellYearsCb.cancelFocus();
+        }
+      }
+    });
+  },
+
+  selectYear: function (cb, record) {
+    var grid = cb.up('grid');
+
+    grid.getStore().reload({
+      params: {
+        year: record.get('year')
+      },
+      callback: function () {
+        grid.getView().features[0].collapseAll();
+      }
     });
   },
 
