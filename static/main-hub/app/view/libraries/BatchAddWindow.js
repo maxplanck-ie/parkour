@@ -113,6 +113,12 @@ Ext.define('MainHub.view.libraries.BatchAddWindow', {
           xtype: 'button',
           itemId: 'create-empty-records-button',
           text: 'Create'
+        },
+        {
+          xtype: 'container',
+          margin: '0 0 0 30px',
+          html: '<span id="edit-hint"><strong>Hint:</strong> To edit multiple cells at once (Excel-like), ' +
+            'please select a cell, press Esc, paste data</span>'
         }
       ],
       hidden: true

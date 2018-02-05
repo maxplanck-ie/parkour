@@ -99,6 +99,11 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
     // Ext.getStore('libraryProtocolsStore').reload();
     // Ext.getStore('libraryTypesStore').reload();
 
+    // Flash hint text
+    $('#edit-hint').delay(100)
+      .fadeIn(500).fadeOut(500)
+      .fadeIn(500).fadeOut(500).fadeIn(500);
+
     // Add empty records on enter
     var numEmptyRecords = wnd.down('#num-empty-records');
     numEmptyRecords.getEl().on('keypress', function (e, fld) {
