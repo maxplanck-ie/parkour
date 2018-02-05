@@ -12,8 +12,14 @@ from .models import (
     LibraryProtocol,
     LibraryType,
     IndexPair,
+    BarcodeCounter,
 )
 from .forms import IndexTypeForm
+
+
+@admin.register(BarcodeCounter)
+class BarcodeCounterAdmin(admin.ModelAdmin):
+    pass
 
 
 @admin.register(Organism)
