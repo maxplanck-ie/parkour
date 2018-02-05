@@ -140,6 +140,53 @@ Ext.define('MainHub.view.flowcell.Flowcells', {
           }
         }
       ]
-    }]
+    }],
+
+    dockedItems: [
+      {
+        xtype: 'toolbar',
+        dock: 'top',
+        items: [{
+          xtype: 'combobox',
+          itemId: 'years-combobox',
+          fieldLabel: 'Select Year',
+          store: 'FlowcellYears',
+          queryMode: 'local',
+          valueField: 'year',
+          displayField: 'year',
+          forceSelection: true,
+          labelWidth: 80,
+          width: 170
+        }]
+      },
+      {
+        xtype: 'toolbar',
+        dock: 'bottom',
+        items: [
+          {
+            itemId: 'download-benchtop-protocol-button',
+            text: 'Download Benchtop Protocol',
+            iconCls: 'fa fa-file-excel-o fa-lg'
+          },
+          {
+            itemId: 'download-sample-sheet-button',
+            text: 'Download Sample Sheet',
+            iconCls: 'fa fa-file-excel-o fa-lg'
+          },
+          '->',
+          {
+            itemId: 'cancel-button',
+            iconCls: 'fa fa-ban fa-lg',
+            text: 'Cancel'
+          },
+          {
+            // xtype: 'button',
+            itemId: 'save-button',
+            iconCls: 'fa fa-floppy-o fa-lg',
+            text: 'Save'
+          }
+        ]
+      }
+    ]
   }]
 });

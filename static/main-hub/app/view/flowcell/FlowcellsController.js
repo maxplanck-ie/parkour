@@ -51,41 +51,8 @@ Ext.define('MainHub.view.flowcell.FlowcellsController', {
   },
 
   activateView: function (view) {
-    var grid = view.down('grid');
-    var toolbar = grid.down('toolbar[dock="bottom"]');
-
-    toolbar.insert(0, {
-      type: 'button',
-      itemId: 'download-benchtop-protocol-button',
-      text: 'Download Benchtop Protocol',
-      iconCls: 'fa fa-file-excel-o fa-lg'
-    });
-
-    toolbar.insert(1, {
-      type: 'button',
-      itemId: 'download-sample-sheet-button',
-      text: 'Download Sample Sheet',
-      iconCls: 'fa fa-file-excel-o fa-lg'
-    });
-
-    grid.addDocked({
-      xtype: 'toolbar',
-      dock: 'top',
-      items: [{
-        xtype: 'combobox',
-        itemId: 'years-combobox',
-        fieldLabel: 'Select Year',
-        store: 'FlowcellYears',
-        queryMode: 'local',
-        valueField: 'year',
-        displayField: 'year',
-        forceSelection: true,
-        labelWidth: 80,
-        width: 170
-      }]
-    });
-
     var flowcellYearsCb = view.down('#years-combobox');
+
     flowcellYearsCb.getStore().reload({
       callback: function (items) {
         if (items && items.length > 0) {
