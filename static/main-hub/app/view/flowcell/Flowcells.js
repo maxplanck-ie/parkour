@@ -61,14 +61,14 @@ Ext.define('MainHub.view.flowcell.Flowcells', {
         {
           text: 'Lane',
           dataIndex: 'name',
-          menuDisabled: true,
-          hideable: false
+          hideable: false,
+          filter: { type: 'string' }
         },
         {
           text: 'Pool',
           dataIndex: 'pool_name',
-          menuDisabled: true,
           hideable: false,
+          filter: { type: 'string' },
           renderer: function (value) {
             return Ext.String.format('<a href="javascript:void(0)" class="pool-name">{0}</a>', value);
           }
@@ -76,37 +76,44 @@ Ext.define('MainHub.view.flowcell.Flowcells', {
         {
           text: 'Date',
           dataIndex: 'create_time',
-          renderer: Ext.util.Format.dateRenderer()
+          renderer: Ext.util.Format.dateRenderer(),
+          filter: { type: 'date' }
         },
         {
           text: 'Length',
           tooltip: 'Read Length',
-          dataIndex: 'read_length_name'
+          dataIndex: 'read_length_name',
+          filter: { type: 'list' }
         },
         {
           text: 'Index I7',
           dataIndex: 'index_i7_show',
-          renderer: 'yesNoRenderer'
+          renderer: 'yesNoRenderer',
+          filter: { type: 'boolean' }
         },
         {
           text: 'Index I5',
           dataIndex: 'index_i5_show',
-          renderer: 'yesNoRenderer'
+          renderer: 'yesNoRenderer',
+          filter: { type: 'boolean' }
         },
         {
           text: 'Sequencer',
-          dataIndex: 'sequencer_name'
+          dataIndex: 'sequencer_name',
+          filter: { type: 'list' }
         },
         {
           text: 'Equal nucl.',
           tooltip: 'Equal Representation of Nucleotides',
           dataIndex: 'equal_representation',
-          renderer: 'yesNoRenderer'
+          renderer: 'yesNoRenderer',
+          filter: { type: 'boolean' }
         },
         {
           text: 'Loading Conc.',
           tooltip: 'Loading Concentration',
           dataIndex: 'loading_concentration',
+          filter: { type: 'number' },
           editor: {
             xtype: 'numberfield',
             decimalPrecision: 1,
@@ -116,6 +123,7 @@ Ext.define('MainHub.view.flowcell.Flowcells', {
         {
           text: 'PhiX %',
           dataIndex: 'phix',
+          filter: { type: 'number' },
           editor: {
             xtype: 'numberfield',
             decimalPrecision: 1,
@@ -124,6 +132,8 @@ Ext.define('MainHub.view.flowcell.Flowcells', {
         }
       ]
     },
+
+    plugins: 'gridfilters',
 
     features: [{
       ftype: 'grouping',
