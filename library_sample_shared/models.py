@@ -133,6 +133,7 @@ class IndexPair(models.Model):
 
     char_coord = models.CharField(
         'Character Coordinate', validators=[AlphaValidator], max_length=1)
+
     num_coord = models.PositiveSmallIntegerField(
         'Numeric Coordinate', validators=[MinValueValidator(1)])
 
