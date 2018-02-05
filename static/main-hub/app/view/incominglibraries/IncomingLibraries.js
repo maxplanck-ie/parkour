@@ -65,14 +65,14 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
           menuDisabled: true,
           hideable: false,
           tdCls: 'no-dirty userEntry',
+          locked: true,
           width: 35
         },
         {
           text: 'Name',
           dataIndex: 'name',
-          menuDisabled: true,
-          hideable: false,
-          minWidth: 150,
+          minWidth: 250,
+          locked: true,
           flex: 1,
           tdCls: 'userEntry',
           renderer: function (value, meta) {
@@ -84,7 +84,6 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
           text: '',
           dataIndex: 'record_type',
           resizable: false,
-          menuDisabled: true,
           hideable: false,
           tdCls: 'userEntry',
           width: 30,
@@ -96,7 +95,6 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
           text: 'Barcode',
           dataIndex: 'barcode',
           resizable: false,
-          menuDisabled: true,
           hideable: false,
           tdCls: 'userEntry',
           width: 90

@@ -44,6 +44,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
           resizable: false,
           menuDisabled: true,
           hideable: false,
+          locked: true,
           tdCls: 'no-dirty',
           width: 35
         },
@@ -51,24 +52,19 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
           text: 'Request',
           tooltip: 'Request ID',
           dataIndex: 'request_name',
-          menuDisabled: true,
-          hideable: false,
-          width: 150
+          locked: true,
+          width: 250
         },
         {
           text: 'Pool',
           tooltip: 'Pool ID',
           dataIndex: 'pool_name',
-          menuDisabled: true,
-          hideable: false,
           width: 120
         },
         {
           text: 'Name',
           tooltip: 'Sample Name',
           dataIndex: 'name',
-          menuDisabled: true,
-          hideable: false,
           minWidth: 200,
           flex: 1
         },
@@ -76,8 +72,6 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
           text: 'Barcode',
           dataIndex: 'barcode',
           resizable: false,
-          menuDisabled: true,
-          hideable: false,
           renderer: 'barcodeRenderer',
           width: 95
         },
