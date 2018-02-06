@@ -72,6 +72,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
           text: 'Name',
           dataIndex: 'name',
           minWidth: 250,
+          hideable: false,
           locked: true,
           flex: 1,
           tdCls: 'userEntry',
@@ -280,7 +281,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
             store: 'rnaQualityStore',
             regex: new RegExp('^(11|10|[1-9]?(\.[0-9]+)?|\.[0-9]+)$'),
             regexText: 'Only values between 1 and 10 are allowed.'
-              // matchFieldWidth: false,
+            // matchFieldWidth: false,
           },
           renderer: function (value) {
             return value === 11 ? 'Determined by Facility' : value;
@@ -309,22 +310,27 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
       startCollapsed: true,
       enableGroupingMenu: false,
       groupHeaderTpl: [
-        '<strong>Request: {children:this.getName}</strong> ',
-        '(# of Libraries/Samples: {rows.length}, ',
-        'Total Sequencing Depth: {children:this.getTotalDepth} M)',
-        '<span style="margin-left:25px">',
-        '<input type="checkbox" class="group-checkbox" {children:this.getChecked}> Samples submitted',
+        '<span data-qtip="Samples submitted" style="margin-right:5px">',
+        '<input type="checkbox" class="group-checkbox" {children:this.getChecked}>',
         '</span>',
+        '<div data-qtip="{children:this.getTooltip}" class="incoming-libraries-group-header">',
+        '<strong>Request: {children:this.getName}</strong> ',
+        '</div>',
         {
           getName: function (children) {
             return children[0].get('request_name');
           },
-          getTotalDepth: function (children) {
-            var sequencingDepths = Ext.Array.pluck(Ext.Array.pluck(children, 'data'), 'sequencing_depth');
-            return Ext.Array.sum(sequencingDepths);
-          },
           getChecked: function (children) {
             return children[0].get(this.owner.checkDataIndex) ? 'checked' : '';
+          },
+          getTooltip: function (children) {
+            var totalDepth = Ext.Array.sum(Ext.Array.pluck(Ext.Array.pluck(
+              children, 'data'), 'sequencing_depth'));
+
+            return Ext.String.format(
+              '<strong># of Libraries/Samples:</strong> {0}<br/>' +
+              '<strong>Total Sequencing Depth:</strong> {1}',
+              children.length, totalDepth);
           }
         }
       ]
