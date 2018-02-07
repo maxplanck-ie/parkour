@@ -44,7 +44,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
           resizable: false,
           menuDisabled: true,
           hideable: false,
-          locked: true,
+          // locked: true,
           tdCls: 'no-dirty',
           width: 35
         },
@@ -52,7 +52,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
           text: 'Request',
           tooltip: 'Request ID',
           dataIndex: 'request_name',
-          locked: true,
+          // locked: true,
           width: 250
         },
         {

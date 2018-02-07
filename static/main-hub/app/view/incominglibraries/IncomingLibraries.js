@@ -65,7 +65,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
           menuDisabled: true,
           hideable: false,
           tdCls: 'no-dirty userEntry',
-          locked: true,
+          // locked: true,
           width: 35
         },
         {
@@ -73,7 +73,7 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
           dataIndex: 'name',
           minWidth: 250,
           hideable: false,
-          locked: true,
+          // locked: true,
           flex: 1,
           tdCls: 'userEntry',
           renderer: function (value, meta) {
