@@ -158,7 +158,7 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                     name: 'index_type',
                     fieldLabel: 'Index Type <sup><strong><span class="field-tooltip" tooltip-text="Select from list with predefined options or select other and specify in the comments field (below)">[?]</span></strong></sup>',
                     emptyText: 'Index Type',
-                    store: 'indexTypesStore',
+                    store: 'IndexTypes',
                     forceSelection: true
                 },
                 {

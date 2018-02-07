@@ -40,7 +40,8 @@ class IndexTypeSerializer(ModelSerializer):
 
     class Meta:
         model = IndexType
-        fields = ('id', 'name', 'index_reads', 'is_dual', 'index_length')
+        fields = ('id', 'name', 'index_reads', 'is_dual', 'format',
+                  'index_length',)
 
     def get_index_reads(self, obj):
         return 2 if obj.is_dual else 1

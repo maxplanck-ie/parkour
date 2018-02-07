@@ -506,7 +506,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
           queryMode: 'local',
           displayField: 'name',
           valueField: 'id',
-          store: 'indexTypesStore',
+          store: 'IndexTypes',
           matchFieldWidth: false,
           forceSelection: true
         },

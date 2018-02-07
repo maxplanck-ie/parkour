@@ -45,14 +45,12 @@ class IndexGeneratorBaseSerializer(ModelSerializer):
     pk = IntegerField()
     record_type = SerializerMethodField()
     library_protocol_name = SerializerMethodField()
-    index_type_format = SerializerMethodField()
 
     class Meta:
         list_serializer_class = IndexGeneratorListSerializer
         fields = ('pk', 'record_type', 'name', 'barcode', 'sequencing_depth',
                   'library_protocol_name', 'read_length', 'index_type',
-                  'index_type_format', 'index_i7_id', 'index_i7',
-                  'index_i5_id', 'index_i5',)
+                  'index_i7_id', 'index_i7', 'index_i5_id', 'index_i5',)
         extra_kwargs = {
             'name': {'required': False},
             'barcode': {'required': False},

@@ -269,7 +269,9 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
       }
 
       // Show plate params
-      if (record.get('index_type_format') == 'plate') {
+      var indexType = Ext.getStore('IndexTypes').findRecord(
+        'id', record.get('index_type'), 0, false, true, true);
+      if (indexType && indexType.get('format') === 'plate') {
         startCoordinate.show();
         direction.show();
       }
@@ -528,7 +530,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
 
     if (store.getCount()) {
       var firstItem = store.getAt(0);
-      var indexTypesStore = Ext.getStore('indexTypesStore');
+      var indexTypesStore = Ext.getStore('IndexTypes');
       var firstItemIndexType = indexTypesStore.findRecord(
         'id', firstItem.get('index_type'), 0, false, true, true);
       var recordIndexType = indexTypesStore.findRecord(

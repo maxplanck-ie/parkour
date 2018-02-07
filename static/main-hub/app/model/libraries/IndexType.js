@@ -21,6 +21,10 @@ Ext.define('MainHub.model.libraries.IndexType', {
     {
       name: 'index_length',
       type: 'int'
+    },
+    {
+      name: 'format',
+      type: 'string'
     }
   ]
 });
