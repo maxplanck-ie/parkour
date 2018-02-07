@@ -133,7 +133,7 @@ class IndexGenerator:
     index_length = 0
     format = ''
     mode = ''
-    MAX_ATTEMPTS = 7
+    MAX_ATTEMPTS = 30
     MAX_RANDOM_SAMPLES = 10
 
     def __init__(self, library_ids, sample_ids, start_coord, direction):
