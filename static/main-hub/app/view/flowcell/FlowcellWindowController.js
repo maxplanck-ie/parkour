@@ -177,7 +177,7 @@ Ext.define('MainHub.view.flowcell.FlowcellWindowController', {
         var pool = poolsStore.findRecord(
           'name', data.poolData.name, 0, false, true, true
         );
-        var poolSize = Ext.getStore('poolSizesStore').findRecord(
+        var poolSize = Ext.getStore('PoolSizes').findRecord(
           'id', pool.get('pool_size_id'), 0, false, true, true
         );
         var laneId = $(target).attr('id').replace('-innerCt', '');
@@ -194,7 +194,7 @@ Ext.define('MainHub.view.flowcell.FlowcellWindowController', {
         var pool = poolsStore.findRecord(
           'name', data.poolData.name, 0, false, true, true
         );
-        var poolSize = Ext.getStore('poolSizesStore').findRecord(
+        var poolSize = Ext.getStore('PoolSizes').findRecord(
           'id', pool.get('pool_size_id'), 0, false, true, true
         );
         var laneId = $(target).attr('id').replace('-innerCt', '');

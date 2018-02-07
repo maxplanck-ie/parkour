@@ -145,7 +145,7 @@ Ext.define('MainHub.view.flowcell.FlowcellWindow', {
               var pool = meta.record;
 
               // Exact match
-              var poolSize = Ext.getStore('poolSizesStore').findRecord(
+              var poolSize = Ext.getStore('PoolSizes').findRecord(
                 'id', value, 0, false, true, true
               );
 

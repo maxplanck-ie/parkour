@@ -154,6 +154,11 @@ class TestFlowcell(BaseTestCase):
         self.assertTrue(pool1_obj['ready'])
         self.assertFalse(pool2_obj['ready'])
 
+        self.assertTrue(data[0]['read_length_name'], library1.read_length.name)
+        self.assertTrue(data[1]['read_length_name'], sample1.read_length.name)
+        self.assertTrue(data[0]['pool_size'], pool1.size.multiplier)
+        self.assertTrue(data[1]['pool_size'], pool2.size.multiplier)
+
     def test_flowcell_list(self):
         """ Ensure get flowcell list behaves correctly. """
         self.client.login(email='test@test.io', password='foo-bar')
