@@ -313,25 +313,30 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
         '<span data-qtip="Samples submitted" style="margin-right:5px">',
         '<input type="checkbox" class="group-checkbox" {children:this.getChecked}>',
         '</span>',
-        '<div data-qtip="{children:this.getTooltip}" class="incoming-libraries-group-header">',
+        // '<div data-qtip="{children:this.getTooltip}" class="incoming-libraries-group-header">',
         '<strong>Request: {children:this.getName}</strong> ',
-        '</div>',
+        '(#: {rows.length}, Total Depth: {children:this.getTotalDepth} M)',
+        // '</div>',
         {
           getName: function (children) {
             return children[0].get('request_name');
           },
+          getTotalDepth: function (children) {
+            return Ext.Array.sum(Ext.Array.pluck(Ext.Array.pluck(
+              children, 'data'), 'sequencing_depth'));
+          },
           getChecked: function (children) {
             return children[0].get(this.owner.checkDataIndex) ? 'checked' : '';
-          },
-          getTooltip: function (children) {
-            var totalDepth = Ext.Array.sum(Ext.Array.pluck(Ext.Array.pluck(
-              children, 'data'), 'sequencing_depth'));
-
-            return Ext.String.format(
-              '<strong># of Libraries/Samples:</strong> {0}<br/>' +
-              '<strong>Total Sequencing Depth:</strong> {1}',
-              children.length, totalDepth);
           }
+          // getTooltip: function (children) {
+          //   var totalDepth = Ext.Array.sum(Ext.Array.pluck(Ext.Array.pluck(
+          //     children, 'data'), 'sequencing_depth'));
+
+          //   return Ext.String.format(
+          //     '<strong># of Libraries/Samples:</strong> {0}<br/>' +
+          //     '<strong>Total Sequencing Depth:</strong> {1}',
+          //     children.length, totalDepth);
+          // }
         }
       ]
     }]

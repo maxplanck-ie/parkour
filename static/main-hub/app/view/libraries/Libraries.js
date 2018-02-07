@@ -99,7 +99,7 @@ Ext.define('MainHub.view.libraries.Libraries', {
               return value;
             } else {
               return Ext.String.format(
-                '<strong>Request: {0}</strong> (# of Libraries/Samples: {1}, Total Sequencing Depth: {2})',
+                '<strong>Request: {0}</strong> (#: {1}, Total Depth: {2})',
                 value, record.get('total_records_count'), record.get('total_sequencing_depth')
               );
             }
