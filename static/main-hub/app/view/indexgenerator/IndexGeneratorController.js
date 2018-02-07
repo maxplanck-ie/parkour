@@ -214,7 +214,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
         }
 
         if (indexI5.length === 0) {
-          indexI5 = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '];
+          indexI5Sequence = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '];
         } else if (indexI5Sequence.length === 6) {
           indexI5Sequence = indexI5Sequence.concat([' ', ' ']);
         }
