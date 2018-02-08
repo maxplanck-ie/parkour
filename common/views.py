@@ -73,7 +73,13 @@ def get_navigation_tree(request):
                 'iconCls': 'x-fa fa-eur',
                 'viewType': 'invoicing',
                 'leaf': True
-            }
+            },
+            {
+                'text': 'Usage',
+                'iconCls': 'x-fa fa-pie-chart',
+                'viewType': 'usage',
+                'leaf': True
+            },
         ]
 
     return JsonResponse({'text': '.', 'children': data})

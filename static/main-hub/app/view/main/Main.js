@@ -13,7 +13,8 @@ Ext.define('MainHub.view.main.Main', {
         'MainHub.view.librarypreparation.LibraryPreparation',
         'MainHub.view.pooling.Pooling',
         'MainHub.view.flowcell.Flowcells',
-        'MainHub.view.invoicing.Invoicing'
+        'MainHub.view.invoicing.Invoicing',
+        'MainHub.view.usage.Usage'
     ],
 
     controller: 'main',

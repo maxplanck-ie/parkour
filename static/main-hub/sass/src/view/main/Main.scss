@@ -87,6 +87,45 @@ a {
     $row-indicator-over-color: transparent
 );
 
+//--------------------------------------------------------
+// Create classes for full-size responsive items
+.big-100 {
+    @include responsivecolumn-item(100%);
+}
+
+.big-60 {
+    @include responsivecolumn-item(60%);
+}
+
+.big-50 {
+    @include responsivecolumn-item(50%);
+}
+
+.big-40 {
+    @include responsivecolumn-item(40%);
+}
+
+.big-33 {
+    @include responsivecolumn-item(33.33%);
+}
+
+.big-20 {
+    @include responsivecolumn-item(20%);
+}
+
+//--------------------------------------------------------
+// And classes for small-size responsive items
+.x-responsivecolumn-small {
+    >.small-100 {
+        @include responsivecolumn-item(100%);
+    }
+    >.small-50 {
+        @include responsivecolumn-item(50%);
+    }
+}
+
+//--------------------------------------------------------
+
 .shadow {
     @include box-shadow(0 1px 2px 0 rgba(0,0,0,0.2));
 }
