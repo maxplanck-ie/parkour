@@ -25,7 +25,7 @@ Ext.define('MainHub.view.usage.ChartPolarBase', {
     type: 'pie',
     highlight: true,
     angleField: 'data',
-    donat: 20,
+    donut: 20,
     label: {
       field: 'name',
       display: 'outside',
@@ -39,9 +39,7 @@ Ext.define('MainHub.view.usage.ChartPolarBase', {
     },
     tooltip: {
       trackMouse: true,
-      width: 140,
-      height: 28,
-      renderer: function(toolTip, record, ctx) {
+      renderer: function (toolTip, record, ctx) {
         toolTip.setHtml(record.get('name') + ': ' + record.get('data'));
       }
     }

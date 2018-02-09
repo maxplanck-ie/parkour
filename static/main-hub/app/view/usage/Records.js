@@ -11,19 +11,6 @@ Ext.define('MainHub.view.usage.Records', {
 
   items: [{
     xtype: 'parkourpolar',
-
-    store: {
-      fields: ['name', 'data'],
-      data: [
-        {
-          name: 'Libraries',
-          data: 14
-        },
-        {
-          name: 'Samples',
-          data: 16
-        }
-      ]
-    }
+    store: 'UsageRecords'
   }]
 });

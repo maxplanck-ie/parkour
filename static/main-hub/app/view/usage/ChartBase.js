@@ -17,9 +17,17 @@ Ext.define('MainHub.view.usage.ChartBase', {
     type: 'print',
     handler: function () {
       var panel = this.up('panel');
-      var chart = panel.down('polar');
-      if (chart) {
-        chart.download({
+      var polar = panel.down('polar');
+      var cartesian = panel.down('cartesian');
+
+      if (polar) {
+        polar.download({
+          filename: panel.title
+        });
+      }
+
+      if (cartesian) {
+        cartesian.download({
           filename: panel.title
         });
       }

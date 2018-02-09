@@ -1,6 +1,6 @@
 Ext.define('MainHub.view.usage.Organizations', {
   extend: 'MainHub.view.usage.ChartBase',
-  xtype: 'organizations',
+  xtype: 'usageorganizations',
 
   requires: [
     'MainHub.view.usage.ChartPolarBase'
@@ -10,19 +10,6 @@ Ext.define('MainHub.view.usage.Organizations', {
 
   items: [{
     xtype: 'parkourpolar',
-
-    store: {
-      fields: ['name', 'data'],
-      data: [
-        {
-          name: 'MPI-IE',
-          data: 100
-        },
-        {
-          name: 'MEDEP',
-          data: 20
-        }
-      ]
-    }
+    store: 'UsageOrganizations'
   }]
 });

@@ -1,36 +1,31 @@
 Ext.define('MainHub.view.usage.LibraryTypes', {
   extend: 'MainHub.view.usage.ChartBase',
-  xtype: 'librarytypes',
+  xtype: 'usagelibrarytypes',
 
   requires: [
-    'MainHub.view.usage.ChartPolarBase'
+    'MainHub.view.usage.ChartPolarBase',
+    'MainHub.view.usage.ChartCartesianBase'
   ],
 
   title: 'Library Types',
 
-  items: [{
-    xtype: 'parkourpolar',
+  layout: {
+    type: 'vbox',
+    align: 'center'
+  },
 
-    store: {
-      fields: ['name', 'data'],
-      data: [
-        {
-          name: 'mRNA',
-          data: 300
-        },
-        {
-          name: 'ChiP',
-          data: 500
-        },
-        {
-          name: 'Amplikon',
-          data: 22
-        },
-        {
-          name: 'Single Cell',
-          data: 200
-        }
-      ]
+  height: 800,
+
+  items: [
+    {
+      xtype: 'parkourpolar',
+      store: 'UsageLibraryTypes',
+      height: 365
+    },
+    {
+      xtype: 'parkourcartesian',
+      store: 'UsageLibraryTypes',
+      height: 400
     }
-  }]
+  ]
 });

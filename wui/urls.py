@@ -26,6 +26,7 @@ urlpatterns = [
     url(r'^accounts/', include('authtools.urls')),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^api/', include(router.urls)),
+    url(r'^api/usage/', include('usage.urls')),
 
     url(r'', include('common.urls')),
     url(r'', include('library_sample_shared.urls')),

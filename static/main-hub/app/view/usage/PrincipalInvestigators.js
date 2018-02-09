@@ -1,40 +1,31 @@
 Ext.define('MainHub.view.usage.PrincipalInvestigators', {
   extend: 'MainHub.view.usage.ChartBase',
-  xtype: 'principalinvestigators',
+  xtype: 'usageprincipalinvestigators',
 
   requires: [
-    'MainHub.view.usage.ChartPolarBase'
+    'MainHub.view.usage.ChartPolarBase',
+    'MainHub.view.usage.ChartCartesianBase'
   ],
 
   title: 'Principal Investigators',
 
-  items: [{
-    xtype: 'parkourpolar',
+  layout: {
+    type: 'vbox',
+    align: 'center'
+  },
 
-    store: {
-      fields: ['name', 'data'],
-      data: [
-        {
-          name: 'Akhtar',
-          data: 300
-        },
-        {
-          name: 'Boehm',
-          data: 500
-        },
-        {
-          name: 'Sawarkar',
-          data: 22
-        },
-        {
-          name: 'Iovino',
-          data: 200
-        },
-        {
-          name: 'Lassman',
-          data: 2
-        }
-      ]
+  height: 800,
+
+  items: [
+    {
+      xtype: 'parkourpolar',
+      store: 'UsagePrincipalInvestigators',
+      height: 365
+    },
+    {
+      xtype: 'parkourcartesian',
+      store: 'UsagePrincipalInvestigators',
+      height: 400
     }
-  }]
+  ]
 });

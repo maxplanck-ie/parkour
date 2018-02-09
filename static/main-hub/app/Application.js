@@ -56,7 +56,11 @@ Ext.define('MainHub.Application', {
     'invoicing.Invoicing',
     'invoicing.FixedCosts',
     'invoicing.LibraryPreparationCosts',
-    'invoicing.SequencingCosts'
+    'invoicing.SequencingCosts',
+    'usage.Records',
+    'usage.Organizations',
+    'usage.PrincipalInvestigators',
+    'usage.LibraryTypes'
   ],
 
   requires: [

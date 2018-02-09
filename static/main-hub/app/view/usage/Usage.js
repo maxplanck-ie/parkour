@@ -3,12 +3,15 @@ Ext.define('MainHub.view.usage.Usage', {
   xtype: 'usage',
 
   requires: [
+    'MainHub.view.usage.UsageController',
     'MainHub.view.usage.Records',
     'MainHub.view.usage.Organizations',
     'MainHub.view.usage.PrincipalInvestigators',
     'MainHub.view.usage.LibraryTypes',
     'Ext.ux.layout.ResponsiveColumn'
   ],
+
+  controller: 'usage',
 
   layout: 'responsivecolumn',
 
@@ -18,15 +21,15 @@ Ext.define('MainHub.view.usage.Usage', {
       userCls: 'big-50 small-100'
     },
     {
-      xtype: 'organizations',
+      xtype: 'usageorganizations',
       userCls: 'big-50 small-100'
     },
     {
-      xtype: 'principalinvestigators',
+      xtype: 'usageprincipalinvestigators',
       userCls: 'big-50 small-100'
     },
     {
-      xtype: 'librarytypes',
+      xtype: 'usagelibrarytypes',
       userCls: 'big-50 small-100'
     }
   ]
