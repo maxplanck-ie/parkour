@@ -4,13 +4,34 @@ Ext.define('MainHub.view.usage.ChartPolarBase', {
 
   border: 0,
 
+  // theme: 'sky',
+
   colors: [
-    '#247BA0',
-    '#70C1B3',
-    '#B2DBBF',
-    '#F3FFBD',
-    '#FF1654'
+    '#5DA5DA',
+    '#FAA43A',
+    '#60BD68',
+    '#F17CB0',
+    '#B2912F',
+    '#B276B2',
+    '#DECF3F',
+    '#F15854',
+    '#4D4D4D'
   ],
+
+  // colors: [
+  //   '#8dd3c7',
+  //   '#ffffb3',
+  //   '#bebada',
+  //   '#fb8072',
+  //   '#80b1d3',
+  //   '#fdb462',
+  //   '#b3de69',
+  //   '#fccde5',
+  //   '#d9d9d9',
+  //   '#bc80bd',
+  //   '#ccebc5',
+  //   '#ffed6f'
+  // ],
 
   insetPadding: 40,
   innerPadding: 10,
