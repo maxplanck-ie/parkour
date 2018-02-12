@@ -18,14 +18,22 @@ Ext.define('MainHub.view.usage.LibraryTypes', {
 
   items: [
     {
+      itemId: 'empty-text',
+      html: '<h2 style="color:#999;text-align:center;margin-top:150px">No Data</h2>',
+      border: 0,
+      hidden: true
+    },
+    {
       xtype: 'parkourpolar',
       store: 'UsageLibraryTypes',
-      height: 365
+      height: 365,
+      hidden: false
     },
     {
       xtype: 'parkourcartesian',
       store: 'UsageLibraryTypes',
-      height: 400
+      height: 400,
+      hidden: false
     }
   ]
 });

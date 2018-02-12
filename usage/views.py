@@ -1,4 +1,4 @@
-# from datetime import datetime
+from datetime import datetime
 from collections import Counter
 
 from django.apps import apps
@@ -7,8 +7,6 @@ from django.db.models import Prefetch
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
-
-# from common.utils import print_sql_queries
 
 Request = apps.get_model('request', 'Request')
 LibraryType = apps.get_model('library_sample_shared', 'LibraryType')
@@ -19,10 +17,22 @@ Sample = apps.get_model('sample', 'Sample')
 class RecordsUsage(APIView):
     permission_classes = (IsAdminUser,)
 
-    # @print_sql_queries
     def get(self, request):
-        libraries = Library.objects.filter(request__isnull=False).only('id')
-        samples = Sample.objects.filter(request__isnull=False).only('id')
+        start = request.query_params.get('start', datetime.now())
+        end = request.query_params.get('end', datetime.now())
+
+        libraries = Library.objects.filter(
+            request__isnull=False,
+            create_time__gte=start,
+            create_time__lte=end,
+        ).only('id')
+
+        samples = Sample.objects.filter(
+            request__isnull=False,
+            create_time__gte=start,
+            create_time__lte=end,
+        ).only('id')
+
         return Response([
             {
                 'name': 'Libraries',
@@ -38,8 +48,10 @@ class RecordsUsage(APIView):
 class OrganizationsUsage(APIView):
     permission_classes = (IsAdminUser,)
 
-    # @print_sql_queries
     def get(self, request):
+        start = request.query_params.get('start', datetime.now())
+        end = request.query_params.get('end', datetime.now())
+
         libraries_qs = Library.objects.only('id')
         samples_qs = Sample.objects.only('id')
 
@@ -50,7 +62,8 @@ class OrganizationsUsage(APIView):
                      to_attr='fetched_libraries'),
             Prefetch('samples', queryset=samples_qs,
                      to_attr='fetched_samples'),
-        ).only('id', 'user', 'libraries', 'samples')
+        ).filter(create_time__gte=start, create_time__lte=end) \
+            .only('id', 'user', 'libraries', 'samples')
 
         counts = {}
         for req in requests:
@@ -72,8 +85,10 @@ class OrganizationsUsage(APIView):
 class PrincipalInvestigatorsUsage(APIView):
     permission_classes = (IsAdminUser,)
 
-    # @print_sql_queries
     def get(self, request):
+        start = request.query_params.get('start', datetime.now())
+        end = request.query_params.get('end', datetime.now())
+
         libraries_qs = Library.objects.only('id')
         samples_qs = Sample.objects.only('id')
 
@@ -84,7 +99,8 @@ class PrincipalInvestigatorsUsage(APIView):
                      to_attr='fetched_libraries'),
             Prefetch('samples', queryset=samples_qs,
                      to_attr='fetched_samples'),
-        ).only('id', 'user__pi__name', 'libraries', 'samples')
+        ).filter(create_time__gte=start, create_time__lte=end) \
+            .only('id', 'user__pi__name', 'libraries', 'samples')
 
         counts = {}
         for req in requests:
@@ -109,8 +125,10 @@ class PrincipalInvestigatorsUsage(APIView):
 class LibraryTypesUsage(APIView):
     permission_classes = (IsAdminUser,)
 
-    # @print_sql_queries
     def get(self, request):
+        start = request.query_params.get('start', datetime.now())
+        end = request.query_params.get('end', datetime.now())
+
         libraries_qs = Library.objects.select_related(
             'library_type').only('id', 'library_type__name')
         samples_qs = Sample.objects.select_related(
@@ -121,11 +139,12 @@ class LibraryTypesUsage(APIView):
                      to_attr='fetched_libraries'),
             Prefetch('samples', queryset=samples_qs,
                      to_attr='fetched_samples'),
-        ).only('id', 'libraries', 'samples')
+        ).filter(create_time__gte=start, create_time__lte=end) \
+            .only('id', 'libraries', 'samples')
 
         counts = {}
         for req in requests:
-            # Extract Library Type
+            # Extract Library Types
             library_types = [
                 x.library_type.name for x in req.fetched_libraries]
             sample_types = [

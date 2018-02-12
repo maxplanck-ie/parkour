@@ -18,14 +18,22 @@ Ext.define('MainHub.view.usage.PrincipalInvestigators', {
 
   items: [
     {
+      itemId: 'empty-text',
+      html: '<h2 style="color:#999;text-align:center;margin-top:150px">No Data</h2>',
+      border: 0,
+      hidden: true
+    },
+    {
       xtype: 'parkourpolar',
       store: 'UsagePrincipalInvestigators',
-      height: 365
+      height: 365,
+      hidden: false
     },
     {
       xtype: 'parkourcartesian',
       store: 'UsagePrincipalInvestigators',
-      height: 400
+      height: 400,
+      hidden: false
     }
   ]
 });

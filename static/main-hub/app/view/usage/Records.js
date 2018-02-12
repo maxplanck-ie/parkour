@@ -9,8 +9,17 @@ Ext.define('MainHub.view.usage.Records', {
   title: 'Libraries & Samples',
   // iconCls: 'x-fa fa-pie-chart',
 
-  items: [{
-    xtype: 'parkourpolar',
-    store: 'UsageRecords'
-  }]
+  items: [
+    {
+      itemId: 'empty-text',
+      html: '<h2 style="color:#999;text-align:center;margin-top:150px">No Data</h2>',
+      border: 0,
+      hidden: true
+    },
+    {
+      xtype: 'parkourpolar',
+      store: 'UsageRecords',
+      hidden: false
+    }
+  ]
 });

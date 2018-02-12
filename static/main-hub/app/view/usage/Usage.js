@@ -8,7 +8,8 @@ Ext.define('MainHub.view.usage.Usage', {
     'MainHub.view.usage.Organizations',
     'MainHub.view.usage.PrincipalInvestigators',
     'MainHub.view.usage.LibraryTypes',
-    'Ext.ux.layout.ResponsiveColumn'
+    'Ext.ux.layout.ResponsiveColumn',
+    'Ext.ux.DateRangePicker'
   ],
 
   controller: 'usage',
@@ -16,6 +17,25 @@ Ext.define('MainHub.view.usage.Usage', {
   layout: 'responsivecolumn',
 
   items: [
+    {
+      xtype: 'container',
+      userCls: 'big-100',
+      style: { textAlign: 'center' },
+      items: [{
+        xtype: 'daterangepicker',
+        ui: 'header',
+        cls: 'daterangepicker',
+        padding: 0,
+        drpDefaults: {
+          showButtonTip: false,
+          dateFormat: 'd.m.Y',
+          mainBtnTextColor: '#999',
+          mainBtnIconCls: 'x-fa fa-calendar',
+          presetPeriodsBtnIconCls: 'x-fa fa-calendar-check-o',
+          confirmBtnIconCls: 'x-fa fa-check'
+        }
+      }]
+    },
     {
       xtype: 'usagerecords',
       userCls: 'big-50 small-100'

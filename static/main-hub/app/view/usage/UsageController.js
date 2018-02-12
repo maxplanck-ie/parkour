@@ -5,44 +5,61 @@ Ext.define('MainHub.view.usage.UsageController', {
   config: {
     control: {
       '#': {
-        activate: 'loadData'
+        activate: 'activate'
+      },
+      'daterangepicker': {
+        select: 'setRange'
       },
       'usagerecords': {}
     }
   },
 
-  loadData: function (view) {
-    var recordsChart = view.down('usagerecords');
-    var organizationsChart = view.down('usageorganizations');
-    var principalInvestigatorsChart = view.down('usageprincipalinvestigators');
-    var libraryTypesChart = view.down('usagelibrarytypes');
+  activate: function (view) {
+    var dateRange = view.down('daterangepicker');
+    this.loadData(view, dateRange.getPickerValue());
+  },
 
-    recordsChart.setLoading();
-    recordsChart.down('polar').getStore().load({
-      callback: function () {
-        recordsChart.setLoading(false);
-      }
-    });
+  setRange: function (drp, value) {
+    this.loadData(drp.up('usage'), value);
+  },
 
-    organizationsChart.setLoading();
-    organizationsChart.down('polar').getStore().load({
-      callback: function () {
-        organizationsChart.setLoading(false);
-      }
-    });
+  loadData: function (view, dateRange) {
+    var chartPanels = [
+      'usagerecords',
+      'usageorganizations',
+      'usageprincipalinvestigators',
+      'usagelibrarytypes'
+    ];
 
-    principalInvestigatorsChart.setLoading();
-    principalInvestigatorsChart.down('polar').getStore().load({
-      callback: function () {
-        principalInvestigatorsChart.setLoading(false);
-      }
-    });
+    chartPanels.forEach(function (name) {
+      var panel = view.down(name);
+      var emptyText = panel.down('#empty-text');
+      var polar = panel.down('polar');
+      var cartesian = panel.down('cartesian');
 
-    libraryTypesChart.setLoading();
-    libraryTypesChart.down('polar').getStore().load({
-      callback: function () {
-        libraryTypesChart.setLoading(false);
-      }
+      panel.setLoading();
+      polar.getStore().load({
+        params: {
+          start: dateRange.startDateObj,
+          end: dateRange.endDateObj
+        },
+        callback: function (data) {
+          panel.setLoading(false);
+          if (data.length > 0 && data[0].get('data') > 0) {
+            emptyText.hide();
+            polar.show();
+            if (cartesian) {
+              cartesian.show();
+            }
+          } else {
+            emptyText.show();
+            polar.hide();
+            if (cartesian) {
+              cartesian.hide();
+            }
+          }
+        }
+      });
     });
   }
 });

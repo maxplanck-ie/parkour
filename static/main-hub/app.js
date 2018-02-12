@@ -17,6 +17,7 @@ Ext.application({
         'MainHub.overrides.grid.plugin.RowEditing',
         'MainHub.overrides.grid.selection.SpreadsheetModel',
         'MainHub.overrides.data.PageMap',
+        'MainHub.overrides.Date',
         'MainHub.view.main.Main'
     ],
 
