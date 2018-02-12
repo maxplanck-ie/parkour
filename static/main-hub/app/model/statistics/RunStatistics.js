@@ -1,0 +1,93 @@
+Ext.define('MainHub.model.statistics.RunStatistics', {
+  extend: 'MainHub.model.Base',
+
+  fields: [
+    {
+      name: 'flowcell_id',
+      type: 'string'
+    },
+    {
+      name: 'sequencer',
+      type: 'string'
+    },
+    {
+      name: 'read_length',
+      type: 'string'
+    },
+    {
+      name: 'name',
+      type: 'string'
+    },
+    {
+      name: 'pool',
+      type: 'string'
+    },
+    {
+      name: 'request',
+      type: 'string'
+    },
+    {
+      name: 'library_preparation',
+      type: 'string'
+    },
+    {
+      name: 'library_type',
+      type: 'string'
+    },
+    {
+      name: 'loading_concentration',
+      type: 'float',
+      allowNull: true
+    },
+    {
+      name: 'density',
+      type: 'int',
+      allowNull: true
+    },
+    {
+      name: 'cluster_pf',
+      type: 'float',
+      allowNull: true
+    },
+    {
+      name: 'reads_pf',
+      type: 'float',
+      allowNull: true
+    },
+    {
+      name: 'undetermined_indices',
+      type: 'float',
+      allowNull: true
+    },
+    {
+      name: 'phix',
+      type: 'float',
+      allowNull: true
+    },
+    {
+      name: 'aligned_spike_in',
+      type: 'float',
+      allowNull: true
+    },
+    {
+      name: 'read_1',
+      type: 'float',
+      allowNull: true
+    },
+    {
+      name: 'read_2',
+      type: 'float',
+      allowNull: true
+    },
+    {
+      name: 'read_3',
+      type: 'float',
+      allowNull: true
+    },
+    {
+      name: 'read_4',
+      type: 'float',
+      allowNull: true
+    }
+  ]
+});

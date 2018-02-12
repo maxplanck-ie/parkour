@@ -60,7 +60,8 @@ Ext.define('MainHub.Application', {
     'usage.Records',
     'usage.Organizations',
     'usage.PrincipalInvestigators',
-    'usage.LibraryTypes'
+    'usage.LibraryTypes',
+    'statistics.RunStatistics'
   ],
 
   requires: [

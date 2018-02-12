@@ -23,6 +23,7 @@ from invoicing.views import (
     LibraryPreparationCostsViewSet,
     SequencingCostsViewSet,
 )
+from stats.views import RunStatisticsViewSet
 
 
 router = routers.DefaultRouter()
@@ -41,14 +42,22 @@ router.register(r'pool_sizes', PoolSizeViewSet, base_name='pool-size')
 router.register(r'libraries_and_samples', LibrarySampleTree, base_name='libraries-and-samples')
 router.register(r'libraries', LibraryViewSet, base_name='libraries')
 router.register(r'samples', SampleViewSet, base_name='samples')
+
 router.register(r'incoming_libraries', IncomingLibrariesViewSet, base_name='incoming-libraries')
+
 router.register(r'index_generator', IndexGeneratorViewSet, base_name='index-generator')
+
 router.register(r'library_preparation', LibraryPreparationViewSet, base_name='library-preparation')
+
 router.register(r'pooling', PoolingViewSet, base_name='pooling')
+
 router.register(r'sequencers', SequencerViewSet, base_name='sequencers')
 router.register(r'flowcells', FlowcellViewSet, base_name='flowcells')
 router.register(r'pools', PoolViewSet, base_name='pools')
+
 router.register(r'invoicing', InvoicingViewSet, base_name='invoicing')
 router.register(r'fixed_costs', FixedCostsViewSet, base_name='fixed-costs')
 router.register(r'library_preparation_costs', LibraryPreparationCostsViewSet, base_name='library-preparation-costs')
 router.register(r'sequencing_costs', SequencingCostsViewSet, base_name='sequencing-costs')
+
+router.register(r'run_statistics', RunStatisticsViewSet, base_name='run-statistics')

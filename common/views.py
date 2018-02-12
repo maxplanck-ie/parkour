@@ -80,6 +80,16 @@ def get_navigation_tree(request):
                 'viewType': 'usage',
                 'leaf': True
             },
+            {
+                'text': 'Statistics',
+                'iconCls': 'x-fa fa-line-chart',
+                'expanded': True,
+                'children': [{
+                    'text': 'Runs',
+                    'viewType': 'run-statistics',
+                    'leaf': True,
+                }]
+            },
         ]
 
     return JsonResponse({'text': '.', 'children': data})

@@ -54,6 +54,8 @@ INSTALLED_APPS = [
     'flowcell',
     'report',
     'invoicing',
+    'usage',
+    'stats',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -161,8 +163,8 @@ LOGGING = {
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-            # 'class': 'common.logger.CustomAdminEmailHandler'
+            # 'class': 'django.utils.log.AdminEmailHandler'
+            'class': 'common.logger.CustomAdminEmailHandler'
         },
         'console': {
             'level': 'INFO',
