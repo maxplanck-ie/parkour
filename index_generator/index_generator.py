@@ -1,7 +1,8 @@
 import re
 import random
+import string
 import itertools
-from collections import namedtuple, OrderedDict
+from collections import namedtuple, OrderedDict, defaultdict
 
 from django.apps import apps
 
@@ -59,8 +60,10 @@ class IndexRegistry:
         # Sort index pairs according to the chosen direction
         if self.direction == 'right':
             index_pairs = index_pairs.order_by('char_coord', 'num_coord')
-        else:
+        elif self.direction == 'down':
             index_pairs = index_pairs.order_by('num_coord', 'char_coord')
+        else:  # diagonal
+            index_pairs = self.get_diagonal(index_pairs)
 
         start_idx = None
         for i, pair in enumerate(index_pairs):
@@ -74,7 +77,7 @@ class IndexRegistry:
                 f'and start coordinate "{self.start_coord}".'
             )
 
-        index_pairs = index_pairs[start_idx:]
+        index_pairs = index_pairs[start_idx:] + index_pairs[:start_idx]
 
         for pair in index_pairs:
             index1 = self.create_index_dict(
@@ -90,6 +93,34 @@ class IndexRegistry:
 
             self.pairs[index_type.pk].append(
                 Pair(index1, index2, pair.coordinate))
+
+    def get_diagonal(self, index_pairs):
+        letters = string.ascii_uppercase  # ABCD...
+        last_coord = max([x.coordinate for x in index_pairs])  # e.g., H12
+        char_coord = last_coord[0]
+        num_coord = int(last_coord[1:])
+        rows = letters[:letters.index(char_coord) + 1]
+
+        # Build coordinate matrix
+        # A1, A2, ... , A12
+        # ...
+        # H1, H2, ... , H12
+        coord_matrix = [
+            [char + str(num + 1) for num in range(num_coord)]
+            for char in list(rows)
+        ]
+
+        # Find diagonals, e.g., H1, G1, H2, ... , A1, B2, ... , A12
+        diags = defaultdict(list)
+        for i in range(len(rows)):
+            for j in range(num_coord):
+                diags[j - i].append(coord_matrix[i][j])
+
+        coords = itertools.chain(*[diags[i] for i in sorted(diags)])
+        order = {k: i for i, k in enumerate(coords)}
+
+        # Return index pairs sorted according to the custom order
+        return sorted(index_pairs, key=lambda x: order[x.coordinate])
 
     def get_indices(self, index_type_id, index_group):
         # Return empty list if index_type_id or index_group don't exist
