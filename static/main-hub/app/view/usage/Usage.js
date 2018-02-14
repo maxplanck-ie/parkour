@@ -52,5 +52,12 @@ Ext.define('MainHub.view.usage.Usage', {
       xtype: 'usagelibrarytypes',
       userCls: 'big-50 small-100'
     }
+    // {
+    //   xtype: 'container',
+    //   userCls: 'big-100',
+    //   html: '<hr style="border-top:1px solid #bdbdbd">',
+    //   style: { background: 'transparent' },
+    //   border: 0
+    // }
   ]
 });
