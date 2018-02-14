@@ -96,9 +96,8 @@ class IndexRegistry:
 
     def get_diagonal(self, index_pairs):
         letters = string.ascii_uppercase  # ABCD...
-        last_coord = max([x.coordinate for x in index_pairs])  # e.g., H12
-        char_coord = last_coord[0]
-        num_coord = int(last_coord[1:])
+        last_coord = max([(x.char_coord, x.num_coord) for x in index_pairs])
+        char_coord, num_coord = last_coord  # e.g., 'H' and 12
         rows = letters[:letters.index(char_coord) + 1]
 
         # Build coordinate matrix
@@ -165,7 +164,7 @@ class IndexGenerator:
     format = ''
     mode = ''
     MAX_ATTEMPTS = 30
-    MAX_RANDOM_SAMPLES = 10
+    MAX_RANDOM_SAMPLES = 5
 
     def __init__(self, library_ids, sample_ids, start_coord, direction):
         self._result = []
@@ -488,7 +487,7 @@ class IndexGenerator:
             if len(pairs) == len(init_pairs) + len(samples):
                 library_pairs = [x for x in pairs if x[0]['is_library']]
                 plate_pairs = [x for x in pairs if not x[0]['is_library']]
-                if True:
+                if len(plate_pairs) <= self.MAX_RANDOM_SAMPLES:
                     plate_pairs = self.sort_pairs(plate_pairs)
                 return library_pairs + plate_pairs
 

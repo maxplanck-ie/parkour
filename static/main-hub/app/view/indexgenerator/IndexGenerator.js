@@ -212,7 +212,8 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
               store: Ext.data.Store({
                 data: [
                   { id: 1, value: 'right' },
-                  { id: 2, value: 'down' }
+                  { id: 2, value: 'down' },
+                  { id: 3, value: 'diagonal' }
                 ]
               }),
               queryMode: 'local',
