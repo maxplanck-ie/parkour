@@ -40,6 +40,11 @@ Ext.define('MainHub.view.usage.ChartCartesianBase', {
     bottom: 30
   },
 
+  legend: {
+    type: 'sprite',
+    docked: 'right'
+  },
+
   axes: [
     {
       type: 'category',
@@ -60,9 +65,20 @@ Ext.define('MainHub.view.usage.ChartCartesianBase', {
       grid: true,
       fields: ['data'],
       minimum: 0,
-      hidden: true,
       style: {
         strokeStyle: '#ccc'
+      },
+      listeners: {
+        rangechange: function (axis, range) {
+          var store = axis.getChart().getStore();
+          axis.onAxisRangeChange(axis, store);
+        }
+      },
+      onAxisRangeChange: function (axis, store) {
+        var maxValue = store.max('data');
+        if (maxValue !== undefined) {
+          axis.setMaximum(maxValue);
+        }
       }
     }
   ],
@@ -79,5 +95,20 @@ Ext.define('MainHub.view.usage.ChartCartesianBase', {
         toolTip.setHtml(name + ': ' + record.get(ctx.field));
       }
     }
-  }]
+  }],
+
+  listeners: {
+    afterrender: function () {
+      var axis = this.getAxis(1);
+      var store = this.getStore();
+
+      function onAxisRangeChange () {
+        axis.onAxisRangeChange(axis, store);
+      }
+
+      store.on({
+        datachanged: onAxisRangeChange
+      });
+    }
+  }
 });
