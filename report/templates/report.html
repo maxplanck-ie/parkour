@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
+{% load filters %}
 
 {% block title %}Parkour LIMS | Report{% endblock %}
 
@@ -107,15 +108,15 @@
         <thead>
             <tr>
                 <th width="50%">Device</th>
-                <th width="25%">Number of Libraries</th>
-                <th width="25%">Number of Runs</th>
+                <th width="25%">Libraries and Samples</th>
+                <th width="25%">Runs</th>
             </tr>
         </thead>
         <tbody>
             {% for row in sequencer_counts %}
             <tr>
                 <td>{{ row.name }}</td>
-                <td>{{ row.libraries_count }}</td>
+                <td>{{ row.items_count }}</td>
                 <td>{{ row.runs_count }}</td>
             </tr>
             {% endfor %}
@@ -133,10 +134,11 @@
             </tr>
         </thead>
         <tbody>
-            {% for row in libraries_on_sequencers_count %}
+            {% for pi, counts in libraries_on_sequencers_count.items %}
             <tr>
-                {% for key, value in row.items %}
-                    <td>{{ value }}</td>
+                <td>{{ pi }}</td>
+                {% for sequencer in sequencers_list %}
+                    <td>{{ counts|get_count:sequencer }}</td>
                 {% endfor %}
             </tr>
             {% endfor %}
