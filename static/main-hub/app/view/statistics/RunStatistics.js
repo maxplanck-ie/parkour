@@ -69,17 +69,12 @@ Ext.define('MainHub.view.statistics.RunStatistics', {
           filter: { type: 'number' }
         },
         {
-          text: 'Density (K/mm2)',
-          dataIndex: 'density',
-          filter: { type: 'number' }
-        },
-        {
           text: 'Cluster PF (%)',
           dataIndex: 'cluster_pf',
           filter: { type: 'number' }
         },
         {
-          text: 'Reads PF (M)',
+          text: 'Reads PF',
           dataIndex: 'reads_pf',
           filter: { type: 'number' }
         },
@@ -95,11 +90,6 @@ Ext.define('MainHub.view.statistics.RunStatistics', {
           filter: { type: 'number' }
         },
         {
-          text: '% aligned Spike In',
-          dataIndex: 'aligned_spike_in',
-          filter: { type: 'number' }
-        },
-        {
           text: 'Read 1 % >=Q30',
           dataIndex: 'read_1',
           filter: { type: 'number' }
@@ -107,16 +97,6 @@ Ext.define('MainHub.view.statistics.RunStatistics', {
         {
           text: 'Read 2 (I) % >=Q30',
           dataIndex: 'read_2',
-          filter: { type: 'number' }
-        },
-        {
-          text: 'Read 3 (I) % >=Q30',
-          dataIndex: 'read_3',
-          filter: { type: 'number' }
-        },
-        {
-          text: 'Read 4 % >=Q30',
-          dataIndex: 'read_4',
           filter: { type: 'number' }
         }
       ]
