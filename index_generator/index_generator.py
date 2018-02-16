@@ -187,7 +187,7 @@ class IndexGenerator:
         ).prefetch_related(
             'index_type__indices_i7', 'index_type__indices_i5',
         ).order_by(
-            'index_type__format', 'index_type__id', 'sequencing_depth', 'name',
+            'index_type__format', 'index_type__id', 'sequencing_depth',
         ).only(
             'id', 'name', 'sequencing_depth', 'read_length__id', 'index_type',
         )
