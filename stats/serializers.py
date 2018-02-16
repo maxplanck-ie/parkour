@@ -52,4 +52,4 @@ class FlowcellSerializer(ModelSerializer):
                 lanes.get(lane_key, {}).get('request', None),
             }, **item})
 
-        return result
+        return sorted(result, key=lambda x: x['name'])
