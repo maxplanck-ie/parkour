@@ -166,10 +166,10 @@ class Report:
             pools = {x.pool for x in flowcell.fetched_lanes}
             for pool in pools:
                 records = pool.fetched_libraries + pool.fetched_samples
-                sequencer_mapping.update({
-                    record: sequencer_name for record in records
-                })
-
+                for record in records:
+                    if record not in sequencer_mapping:
+                        sequencer_mapping[record] = []
+                    sequencer_mapping[record].append(sequencer_name)
         items = sequencer_mapping.keys()
 
         pi_mapping = {}
@@ -181,7 +181,11 @@ class Report:
                 record: pi_name for record in records if record in items
             })
 
-        pairs = [(pi_mapping[k], v) for k, v in sequencer_mapping.items()]
+        pairs = [
+            (pi_mapping[k], sequencer_name)
+            for k, v in sequencer_mapping.items() for sequencer_name in v
+        ]
+
         counts = Counter(pairs)
 
         data = {}
