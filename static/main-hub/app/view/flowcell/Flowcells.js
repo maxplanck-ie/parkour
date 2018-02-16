@@ -133,8 +133,6 @@ Ext.define('MainHub.view.flowcell.Flowcells', {
       ]
     },
 
-    plugins: 'gridfilters',
-
     features: [{
       ftype: 'grouping',
       startCollapsed: true,

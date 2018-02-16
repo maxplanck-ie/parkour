@@ -42,6 +42,9 @@ Ext.define('MainHub.components.BaseGrid', {
     },
     {
       ptype: 'clipboard'
+    },
+    {
+      ptype: 'gridfilters'
     }
   ],
 
