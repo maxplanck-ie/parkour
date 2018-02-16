@@ -3,11 +3,9 @@ from collections import OrderedDict, Counter
 
 from django.apps import apps
 from django.shortcuts import render
-from django.db.models import Q, Prefetch
+from django.db.models import Prefetch
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-
-from common.utils import print_sql_queries
 
 Organization = apps.get_model('common', 'Organization')
 PrincipalInvestigator = apps.get_model('common', 'PrincipalInvestigator')
@@ -24,14 +22,14 @@ Lane = apps.get_model('flowcell', 'Lane')
 
 
 class Report:
-    def __init__(self):
-        # TODO: date range filter
+    def __init__(self, start, end):
         libraries_qs = Library.objects.select_related(
-            'library_protocol').only('id', 'library_protocol__name')
+            'library_protocol').only('id', 'library_protocol__name').filter(
+                create_time__gt=start, create_time__lt=end)
 
-        # TODO: date range filter
         samples_qs = Sample.objects.select_related(
-            'library_protocol').only('id', 'library_protocol__name')
+            'library_protocol').only('id', 'library_protocol__name').filter(
+                create_time__gt=start, create_time__lt=end)
 
         self.requests = Request.objects.select_related(
             'user__organization', 'user__pi',
@@ -62,6 +60,7 @@ class Report:
         ).only('id', 'sequencer__name', 'lanes')
 
     def get_total_counts(self):
+        data = []
         num_libraries = 0
         num_samples = 0
 
@@ -69,10 +68,13 @@ class Report:
             num_libraries += len(req.fetched_libraries)
             num_samples += len(req.fetched_samples)
 
-        return [
-            {'type': 'Samples', 'count': num_samples},
-            {'type': 'Libraries', 'count': num_libraries},
-        ]
+        if num_samples > 0:
+            data.append({'type': 'Samples', 'count': num_samples})
+
+        if num_libraries > 0:
+            data.append({'type': 'Libraries', 'count': num_libraries})
+
+        return data
 
     def get_organization_counts(self):
         counts = {}
@@ -148,11 +150,15 @@ class Report:
                 counts[sequencer_name]['samples'] += \
                     len(pool.fetched_samples)
 
-        data = [{
-            'name': name,
-            'items_count': count['libraries'] + count['samples'],
-            'runs_count': count['runs'],
-        } for name, count in counts.items()]
+        data = [
+            {
+                'name': name,
+                'items_count': count['libraries'] + count['samples'],
+                'runs_count': count['runs'],
+            }
+            for name, count in counts.items()
+            if count['libraries'] + count['samples'] > 0
+        ]
 
         return sorted(data, key=lambda x: x['name'])
 
@@ -198,36 +204,48 @@ class Report:
 
     @staticmethod
     def _get_data(counts):
-        data = [{
-            'name': name,
-            'libraries_count': count['libraries'],
-            'samples_count': count['samples'],
-        } for name, count in counts.items()]
+        data = [
+            {
+                'name': name,
+                'libraries_count': count['libraries'],
+                'samples_count': count['samples'],
+            }
+            for name, count in counts.items()
+            if count['libraries'] + count['samples'] > 0
+        ]
 
         return sorted(data, key=lambda x: x['name'])
 
 
-@print_sql_queries
 @login_required
 @staff_member_required
 def report(request):
     data = {}
-    # data['end_date'] = datetime.now().strftime('%d.%m.%y')
-    # request_ids = Request.objects.all().values_list('pk', flat=True)
-    # samples = Sample.objects.filter(request__pk__in=request_ids)
-    # libraries = Library.objects.filter(request__pk__in=request_ids)
 
-    report = Report()
+    now = datetime.now()
+    start = request.GET.get('start', now)
+    end = request.GET.get('end', now)
 
-    # Start date
-    # oldest_sample = samples.first()
-    # oldest_library = libraries.first()
-    # oldest_sample_date = oldest_sample.create_time \
-    #     if oldest_sample else datetime.now()
-    # oldest_library_date = oldest_library.create_time \
-    #     if oldest_library else datetime.now()
-    # start_date = min([oldest_sample_date, oldest_library_date])
-    # data['start_date'] = start_date.strftime('%d.%m.%y')
+    try:
+        start = datetime.strptime(start, '%d.%m.%Y') \
+            if type(start) is str else start
+    except ValueError:
+        start = now
+    finally:
+        start = start.replace(hour=0, minute=0)
+
+    try:
+        end = datetime.strptime(end, '%d.%m.%Y') \
+            if type(end) is str else end
+    except ValueError:
+        end = now
+    finally:
+        end = end.replace(hour=23, minute=59)
+
+    if start > end:
+        start = end.replace(hour=0, minute=0)
+
+    report = Report(start, end)
 
     # Total Sample Count
     data['total_counts'] = report.get_total_counts()
