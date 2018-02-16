@@ -39,7 +39,7 @@ Ext.define('MainHub.model.requests.Request', {
             name: 'deep_seq_request_path'
         },
         {
-            type: 'int',
+            type: 'float',
             name: 'total_sequencing_depth'
         },
         {

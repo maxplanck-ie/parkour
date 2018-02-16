@@ -46,12 +46,14 @@ Ext.define('MainHub.model.libraries.BatchAdd.Common', {
             defaultValue: null
         },
         {
-            type: 'int',
-            name: 'sequencing_depth'
+            type: 'float',
+            name: 'sequencing_depth',
+            defaultValue: null
         },
         {
             type: 'float',
-            name: 'concentration'
+            name: 'concentration',
+            defaultValue: null
         },
         {
             type: 'int',
@@ -61,7 +63,8 @@ Ext.define('MainHub.model.libraries.BatchAdd.Common', {
         },
         {
             type: 'int',
-            name: 'amplification_cycles'
+            name: 'amplification_cycles',
+            defaultValue: null
         },
         {
             type: 'bool',

@@ -104,7 +104,7 @@ Ext.define('MainHub.model.libraries.Library', {
         },
         {
             name: 'sequencing_depth',
-            type: 'int',
+            type: 'float',
             allowNull: true
         },
         {

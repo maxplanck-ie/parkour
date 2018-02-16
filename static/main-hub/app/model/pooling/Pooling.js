@@ -43,7 +43,7 @@ Ext.define('MainHub.model.pooling.Pooling', {
         },
         {
             name: 'sequencing_depth',
-            type: 'int'
+            type: 'float'
         },
         {
             name: 'percentage_library',

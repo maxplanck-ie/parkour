@@ -786,8 +786,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         width: 85,
         editor: {
           xtype: 'numberfield',
-          minValue: 0,
-          allowDecimals: false
+          minValue: 0
         },
         renderer: this.errorRenderer
       },
@@ -1025,7 +1024,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
     if (numRecords && numRecords > 0) {
       var data = [];
       for (var i = 0; i < numRecords; i++) {
-        data.push({ concentration: 0 });
+        data.push({});
       }
       store.add(data);
     }

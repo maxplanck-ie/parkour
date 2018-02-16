@@ -28,7 +28,7 @@ Ext.define('MainHub.model.indexgenerator.Record', {
     },
     {
       name: 'sequencing_depth',
-      type: 'int'
+      type: 'float'
     },
     {
       name: 'library_protocol_name',

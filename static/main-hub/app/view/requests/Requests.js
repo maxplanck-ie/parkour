@@ -65,7 +65,7 @@ Ext.define('MainHub.view.requests.Requests', {
           flex: 1
         },
         {
-          text: 'Total Sequencing Depth',
+          text: 'Total Sequencing Depth (M)',
           dataIndex: 'total_sequencing_depth',
           flex: 1
         },

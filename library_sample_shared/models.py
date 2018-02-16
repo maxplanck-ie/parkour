@@ -273,7 +273,7 @@ class GenericLibrarySample(DateTimeMixin):
         verbose_name='Read Length',
     )
 
-    sequencing_depth = models.PositiveIntegerField('Sequencing Depth')
+    sequencing_depth = models.FloatField('Sequencing Depth')
 
     comments = models.TextField('Comments', null=True, blank=True)
 
