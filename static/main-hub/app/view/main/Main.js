@@ -15,7 +15,8 @@ Ext.define('MainHub.view.main.Main', {
         'MainHub.view.flowcell.Flowcells',
         'MainHub.view.invoicing.Invoicing',
         'MainHub.view.usage.Usage',
-        'MainHub.view.statistics.RunStatistics'
+        'MainHub.view.statistics.RunStatistics',
+        'MainHub.view.statistics.Sequences'
     ],
 
     controller: 'main',

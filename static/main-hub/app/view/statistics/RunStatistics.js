@@ -102,7 +102,7 @@ Ext.define('MainHub.view.statistics.RunStatistics', {
       ]
     },
 
-    plugins: 'gridfilters',
+    // plugins: 'gridfilters',
 
     features: [{
       ftype: 'grouping',

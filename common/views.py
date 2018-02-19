@@ -84,11 +84,18 @@ def get_navigation_tree(request):
                 'text': 'Statistics',
                 'iconCls': 'x-fa fa-line-chart',
                 'expanded': True,
-                'children': [{
-                    'text': 'Runs',
-                    'viewType': 'run-statistics',
-                    'leaf': True,
-                }]
+                'children': [
+                    {
+                        'text': 'Runs',
+                        'viewType': 'run-statistics',
+                        'leaf': True,
+                    },
+                    {
+                        'text': 'Sequences',
+                        'viewType': 'sequences-statistics',
+                        'leaf': True,
+                    },
+                ]
             },
         ]
 
