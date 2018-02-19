@@ -14,12 +14,38 @@ Library = apps.get_model('library', 'Library')
 Sample = apps.get_model('sample', 'Sample')
 
 
+def get_date_range(request, format):
+    now = datetime.now()
+    start = request.query_params.get('start', now)
+    end = request.query_params.get('end', now)
+
+    try:
+        start = datetime.strptime(start, format) \
+            if type(start) is str else start
+    except ValueError:
+        start = now
+    finally:
+        start = start.replace(hour=0, minute=0)
+
+    try:
+        end = datetime.strptime(end, format) \
+            if type(end) is str else end
+    except ValueError:
+        end = now
+    finally:
+        end = end.replace(hour=23, minute=59)
+
+    if start > end:
+        start = end.replace(hour=0, minute=0)
+
+    return (start, end)
+
+
 class RecordsUsage(APIView):
     permission_classes = (IsAdminUser,)
 
     def get(self, request):
-        start = request.query_params.get('start', datetime.now())
-        end = request.query_params.get('end', datetime.now())
+        start, end = get_date_range(request, '%Y-%m-%dT%H:%M:%S')
 
         libraries = Library.objects.filter(
             request__isnull=False,
@@ -49,8 +75,7 @@ class OrganizationsUsage(APIView):
     permission_classes = (IsAdminUser,)
 
     def get(self, request):
-        start = request.query_params.get('start', datetime.now())
-        end = request.query_params.get('end', datetime.now())
+        start, end = get_date_range(request, '%Y-%m-%dT%H:%M:%S')
 
         libraries_qs = Library.objects.only('id')
         samples_qs = Sample.objects.only('id')
@@ -86,8 +111,7 @@ class PrincipalInvestigatorsUsage(APIView):
     permission_classes = (IsAdminUser,)
 
     def get(self, request):
-        start = request.query_params.get('start', datetime.now())
-        end = request.query_params.get('end', datetime.now())
+        start, end = get_date_range(request, '%Y-%m-%dT%H:%M:%S')
 
         libraries_qs = Library.objects.only('id')
         samples_qs = Sample.objects.only('id')
@@ -126,8 +150,7 @@ class LibraryTypesUsage(APIView):
     permission_classes = (IsAdminUser,)
 
     def get(self, request):
-        start = request.query_params.get('start', datetime.now())
-        end = request.query_params.get('end', datetime.now())
+        start, end = get_date_range(request, '%Y-%m-%dT%H:%M:%S')
 
         libraries_qs = Library.objects.select_related(
             'library_type').only('id', 'library_type__name')

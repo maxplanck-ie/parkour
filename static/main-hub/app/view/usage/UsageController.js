@@ -45,7 +45,10 @@ Ext.define('MainHub.view.usage.UsageController', {
         },
         callback: function (data) {
           panel.setLoading(false);
-          if (data.length > 0 && data[0].get('data') > 0) {
+          if (
+            data && data.length > 0 &&
+            Ext.Array.sum(Ext.Array.pluck(Ext.Array.pluck(data, 'data'), 'data')) > 0
+          ) {
             emptyText.hide();
             polar.show();
             if (cartesian) {
