@@ -16,8 +16,14 @@ Ext.define('MainHub.view.flowcell.FlowcellsController', {
       '#': {
         activate: 'activateView'
       },
-      '#years-combobox': {
-        select: 'selectYear'
+      '#month-picker': {
+        boxready: function (df) {
+          var dp = df.getPicker();
+          dp.on('show', function () {
+            dp.showMonthPicker(false);
+          });
+        },
+        select: 'selectMonth'
       },
       '#flowcells-grid': {
         resize: 'resize',
@@ -51,26 +57,17 @@ Ext.define('MainHub.view.flowcell.FlowcellsController', {
   },
 
   activateView: function (view) {
-    var flowcellYearsCb = view.down('#years-combobox');
-
-    flowcellYearsCb.getStore().reload({
-      callback: function (items) {
-        if (items && items.length > 0) {
-          var lastItem = items[items.length - 1];
-          flowcellYearsCb.select(lastItem);
-          flowcellYearsCb.fireEvent('select', flowcellYearsCb, lastItem);
-          flowcellYearsCb.cancelFocus();
-        }
-      }
-    });
+    var monthPicker = view.down('#month-picker');
+    monthPicker.fireEvent('select', monthPicker, monthPicker.getValue());
   },
 
-  selectYear: function (cb, record) {
-    var grid = cb.up('grid');
+  selectMonth: function (df, value) {
+    var grid = df.up('grid');
 
     grid.getStore().reload({
       params: {
-        year: record.get('year')
+        year: value.getFullYear(),
+        month: value.getMonth() + 1
       },
       callback: function () {
         grid.getView().features[0].collapseAll();

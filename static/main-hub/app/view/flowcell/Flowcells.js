@@ -155,16 +155,14 @@ Ext.define('MainHub.view.flowcell.Flowcells', {
         xtype: 'toolbar',
         dock: 'top',
         items: [{
-          xtype: 'combobox',
-          itemId: 'years-combobox',
-          fieldLabel: 'Select Year',
-          store: 'FlowcellYears',
-          queryMode: 'local',
-          valueField: 'year',
-          displayField: 'year',
-          forceSelection: true,
-          labelWidth: 80,
-          width: 170
+          xtype: 'datefield',
+          itemId: 'month-picker',
+          fieldLabel: 'Select Month',
+          format: 'F Y',
+          submitFormat: 'm/d/Y',
+          value: new Date(),
+          noDayPicker: true,
+          startDay: 1
         }]
       },
       {
