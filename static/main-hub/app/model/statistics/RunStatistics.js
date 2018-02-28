@@ -3,6 +3,10 @@ Ext.define('MainHub.model.statistics.RunStatistics', {
 
   fields: [
     {
+      name: 'id',
+      type: 'int'
+    },
+    {
       name: 'flowcell_id',
       type: 'string'
     },
