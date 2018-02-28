@@ -3,7 +3,7 @@ Ext.define('MainHub.model.statistics.RunStatistics', {
 
   fields: [
     {
-      name: 'id',
+      name: 'pk',
       type: 'int'
     },
     {

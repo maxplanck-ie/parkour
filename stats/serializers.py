@@ -10,7 +10,7 @@ class FlowcellSerializer(ModelSerializer):
 
     class Meta:
         model = Flowcell
-        fields = ('id', 'flowcell_id', 'create_time', 'sequencer', 'matrix',)
+        fields = ('pk', 'flowcell_id', 'create_time', 'sequencer', 'matrix',)
 
     def get_sequencer(self, obj):
         return obj.sequencer.name
@@ -36,7 +36,7 @@ class FlowcellSerializer(ModelSerializer):
         for item in data['matrix']:
             lane_key = 'Lane 1' if num_lanes == 1 else item['name']
             result.append({**{
-                'id': data['id'],
+                'pk': data['pk'],
                 'flowcell_id': data['flowcell_id'],
                 'create_time': data['create_time'],
                 'sequencer': data['sequencer'],

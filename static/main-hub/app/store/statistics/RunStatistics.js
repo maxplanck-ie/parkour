@@ -8,7 +8,7 @@ Ext.define('MainHub.store.statistics.RunStatistics', {
 
   model: 'MainHub.model.statistics.RunStatistics',
 
-  groupField: 'id',
+  groupField: 'pk',
   groupDir: 'DESC',
 
   proxy: {
