@@ -75,9 +75,15 @@ Ext.define('MainHub.view.statistics.RunStatistics', {
           filter: { type: 'number' }
         },
         {
-          text: 'Reads PF',
+          text: 'Reads PF (M)',
           dataIndex: 'reads_pf',
-          filter: { type: 'number' }
+          filter: { type: 'number' },
+          renderer: function (value) {
+            if (value) {
+              value = (value / 1000000).toFixed(1);
+            }
+            return value;
+          }
         },
         {
           text: 'Undet. Indices (%)',
