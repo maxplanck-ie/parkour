@@ -16,13 +16,7 @@ Ext.define('MainHub.view.flowcell.FlowcellsController', {
       '#': {
         activate: 'activateView'
       },
-      '#month-picker': {
-        boxready: function (df) {
-          var dp = df.getPicker();
-          dp.on('show', function () {
-            dp.showMonthPicker(false);
-          });
-        },
+      'parkourmonthpicker': {
         select: 'selectMonth'
       },
       '#flowcells-grid': {
@@ -57,7 +51,7 @@ Ext.define('MainHub.view.flowcell.FlowcellsController', {
   },
 
   activateView: function (view) {
-    var monthPicker = view.down('#month-picker');
+    var monthPicker = view.down('parkourmonthpicker');
     monthPicker.fireEvent('select', monthPicker, monthPicker.getValue());
   },
 

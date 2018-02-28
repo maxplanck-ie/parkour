@@ -4,6 +4,7 @@ Ext.define('MainHub.view.flowcell.Flowcells', {
 
   requires: [
     'MainHub.components.BaseGrid',
+    'MainHub.components.MonthPicker',
     'MainHub.view.flowcell.FlowcellsController'
   ],
 
@@ -155,14 +156,7 @@ Ext.define('MainHub.view.flowcell.Flowcells', {
         xtype: 'toolbar',
         dock: 'top',
         items: [{
-          xtype: 'datefield',
-          itemId: 'month-picker',
-          fieldLabel: 'Select Month',
-          format: 'F Y',
-          submitFormat: 'm/d/Y',
-          value: new Date(),
-          noDayPicker: true,
-          startDay: 1
+          xtype: 'parkourmonthpicker'
         }]
       },
       {
