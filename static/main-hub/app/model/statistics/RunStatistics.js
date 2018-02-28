@@ -7,6 +7,10 @@ Ext.define('MainHub.model.statistics.RunStatistics', {
       type: 'string'
     },
     {
+      name: 'create_time',
+      type: 'date'
+    },
+    {
       name: 'sequencer',
       type: 'string'
     },

@@ -4,6 +4,7 @@ Ext.define('MainHub.view.statistics.RunStatistics', {
 
   requires: [
     'MainHub.components.BaseGrid',
+    'MainHub.components.MonthPicker',
     'MainHub.components.SearchField',
     'MainHub.view.statistics.RunStatisticsController'
   ],
@@ -109,10 +110,15 @@ Ext.define('MainHub.view.statistics.RunStatistics', {
       startCollapsed: true,
       enableGroupingMenu: false,
       groupHeaderTpl: [
-        '<strong>{children:this.getFlowcellId} ({children:this.getSequencer}, {children:this.getReadLength})</strong>',
+        '<strong>{children:this.getFlowcellId} ' +
+        '({children:this.getDate}, {children:this.getSequencer}, ' +
+        '{children:this.getReadLength})</strong>',
         {
           getFlowcellId: function (children) {
             return children[0].get('flowcell_id');
+          },
+          getDate: function (children) {
+            return Ext.util.Format.date(children[0].get('create_time'));
           },
           getSequencer: function (children) {
             return children[0].get('sequencer');
@@ -124,6 +130,12 @@ Ext.define('MainHub.view.statistics.RunStatistics', {
       ]
     }],
 
-    dockedItems: []
+    dockedItems: [{
+      xtype: 'toolbar',
+      dock: 'top',
+      items: [{
+        xtype: 'parkourmonthpicker'
+      }]
+    }]
   }]
 });

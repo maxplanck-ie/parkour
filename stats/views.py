@@ -1,4 +1,5 @@
 import json
+import datetime
 import itertools
 
 from django.apps import apps
@@ -8,8 +9,6 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import list_route
 from rest_framework.permissions import IsAdminUser
-
-# from common.utils import print_sql_queries
 
 from .serializers import FlowcellSerializer
 
@@ -25,37 +24,63 @@ class RunStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = FlowcellSerializer
 
     def get_queryset(self):
+        today = datetime.date.today()
+        year = self.request.query_params.get('year', today.year)
+        month = self.request.query_params.get('month', today.month)
+
         request_qs = Request.objects.only('name')
 
         libraries_qs = Library.objects.filter(~Q(status=-1)).select_related(
-            'read_length', 'library_protocol', 'library_type',
+            'read_length',
+            'library_protocol',
+            'library_type',
         ).prefetch_related(
             Prefetch('request', queryset=request_qs, to_attr='fetched_request')
-        ).only('read_length__name', 'library_protocol__name',
-               'library_type__name',)
+        ).only(
+            'read_length__name',
+            'library_protocol__name',
+            'library_type__name',
+        )
 
         samples_qs = Sample.objects.filter(~Q(status=-1)).select_related(
-            'read_length', 'library_protocol', 'library_type',
+            'read_length',
+            'library_protocol',
+            'library_type',
         ).prefetch_related(
             Prefetch('request', queryset=request_qs, to_attr='fetched_request')
-        ).only('read_length__name', 'library_protocol__name',
-               'library_type__name',)
+        ).only(
+            'read_length__name',
+            'library_protocol__name',
+            'library_type__name',
+        )
 
         lanes_qs = Lane.objects.all().select_related('pool').prefetch_related(
             Prefetch('pool__libraries', queryset=libraries_qs,
                      to_attr='fetched_libraries'),
             Prefetch('pool__samples', queryset=samples_qs,
                      to_attr='fetched_samples'),
-        ).only('name', 'loading_concentration', 'phix', 'pool__name',
-               'pool__libraries', 'pool__samples',)
+        ).only(
+            'name',
+            'phix',
+            'loading_concentration',
+            'pool__name',
+            'pool__libraries',
+            'pool__samples',
+        )
 
-        queryset = Flowcell.objects.exclude(
-            matrix__isnull=True).select_related('sequencer').prefetch_related(
-                Prefetch('lanes', queryset=lanes_qs, to_attr='fetched_lanes'))
+        queryset = Flowcell.objects.filter(
+            create_time__year=year,
+            create_time__month=month,
+        ).exclude(
+            matrix__isnull=True,
+        ).select_related(
+            'sequencer',
+        ).prefetch_related(
+            Prefetch('lanes', queryset=lanes_qs, to_attr='fetched_lanes'),
+        ).order_by('-create_time')
 
         return queryset
 
-    # @print_sql_queries
     def list(self, request):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
