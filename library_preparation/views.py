@@ -58,7 +58,7 @@ class LibraryPreparationViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
             samples__pk__in=sample_ids).distinct().values('name', 'samples')
         pools_map = {x['samples']: x['name'] for x in pools}
 
-        # Get Index Pairs
+        # Get coordinates
         index_types = {x.sample.index_type.pk for x in queryset}
         index_pairs = IndexPair.objects.filter(
             index_type__pk__in=index_types,
