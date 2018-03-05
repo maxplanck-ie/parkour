@@ -143,8 +143,9 @@ class LibraryPreparationSerializer(ModelSerializer):
 
     def get_coordinate(self, obj):
         coordinates = self.context.get('coordinates', {})
+        index_type = obj.sample.index_type.pk if obj.sample.index_type else ''
         key = (
-            obj.sample.index_type.pk,
+            index_type,
             obj.sample.index_i7_id,
             obj.sample.index_i5_id,
         )

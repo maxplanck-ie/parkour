@@ -141,11 +141,13 @@ class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ViewSet):
             l.index_type.pk
             for pool in queryset
             for l in pool.libraries.all()
+            if l.index_type
         }
         index_types2 = {
             s.index_type.pk
             for pool in queryset
             for s in pool.samples.all()
+            if s.index_type
         }
         index_types = index_types1 | index_types2
         index_pairs = IndexPair.objects.filter(

@@ -89,8 +89,9 @@ class PoolingBaseSerializer(ModelSerializer):
 
     def get_coordinate(self, obj):
         coordinates = self.context.get('coordinates', {})
+        index_type = obj.index_type.pk if obj.index_type else ''
         key = (
-            obj.index_type.pk,
+            index_type,
             obj.index_i7_id,
             obj.index_i5_id,
         )
