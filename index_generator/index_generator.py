@@ -82,12 +82,16 @@ class IndexRegistry:
         for pair in index_pairs:
             index1 = self.create_index_dict(
                 index_type.format, index_type.pk,
-                pair.index1.prefix, pair.index1.number, pair.index1.index)
+                pair.index1.prefix, pair.index1.number,
+                pair.index1.index, pair.coordinate,
+                )
 
             if self.mode == 'dual':
                 index2 = self.create_index_dict(
                     index_type.format, index_type.pk,
-                    pair.index2.prefix, pair.index2.number, pair.index2.index)
+                    pair.index2.prefix, pair.index2.number,
+                    pair.index2.index, pair.coordinate,
+                )
             else:
                 index2 = self.create_index_dict()
 
@@ -135,13 +139,15 @@ class IndexRegistry:
 
     @staticmethod
     def create_index_dict(format='', index_type='', prefix='',
-                          number='', index='', is_library=False):
+                          number='', index='', coordinate='',
+                          is_library=False):
         return {
             'format': format,
             'index_type': index_type,
             'prefix': prefix,
             'number': number,
             'index': index,
+            'coordinate': coordinate,
             'is_library': is_library,
         }
 
@@ -353,10 +359,10 @@ class IndexGenerator:
             if idx:
                 idx = self.index_registry.create_index_dict(
                     index_type.format, index_type.pk, idx[0].prefix,
-                    idx[0].number, idx[0].index, True)
+                    idx[0].number, idx[0].index, is_library=True)
             else:
                 idx = self.index_registry.create_index_dict(
-                    '', '', '', '', index, True)
+                    index=index, is_library=True)
             return idx
 
         no_index = []
@@ -615,6 +621,7 @@ class IndexGenerator:
             index_i5 = record['index_i5']
             rec = dict(record)
 
+            rec['coordinate'] = index_i7['coordinate']
             rec['index_i7_id'] = index_i7['prefix'] + index_i7['number']
             rec['index_i5_id'] = index_i5['prefix'] + index_i5['number']
 
