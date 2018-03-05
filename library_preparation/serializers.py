@@ -52,6 +52,7 @@ class LibraryPreparationSerializer(ModelSerializer):
     concentration_sample = SerializerMethodField()
     dilution_factor = SerializerMethodField()
     comments_facility = SerializerMethodField()
+    coordinate = SerializerMethodField()
     index_i7_id = SerializerMethodField()
     index_i5_id = SerializerMethodField()
     quality_check = CharField(required=False)
@@ -59,13 +60,33 @@ class LibraryPreparationSerializer(ModelSerializer):
     class Meta:
         model = LibraryPreparation
         list_serializer_class = LibraryPreparationListSerializer
-        fields = ('pk', 'name', 'barcode', 'is_converted', 'request_name',
-                  'pool_name',  'library_protocol', 'library_protocol_name',
-                  'concentration_sample', 'starting_amount', 'pcr_cycles',
-                  'spike_in_description', 'spike_in_volume', 'dilution_factor',
-                  'comments', 'concentration_library', 'mean_fragment_size',
-                  'qpcr_result', 'nM', 'comments_facility', 'index_i7_id',
-                  'index_i5_id', 'create_time', 'quality_check',)
+        fields = (
+            'pk',
+            'name',
+            'barcode',
+            'is_converted',
+            'request_name',
+            'pool_name',
+            'library_protocol',
+            'library_protocol_name',
+            'concentration_sample',
+            'starting_amount',
+            'pcr_cycles',
+            'spike_in_description',
+            'spike_in_volume',
+            'dilution_factor',
+            'comments',
+            'concentration_library',
+            'mean_fragment_size',
+            'qpcr_result',
+            'nM',
+            'comments_facility',
+            'coordinate',
+            'index_i7_id',
+            'index_i5_id',
+            'create_time',
+            'quality_check',
+        )
 
     def to_internal_value(self, data):
         internal_value = super().to_internal_value(data)
@@ -119,6 +140,15 @@ class LibraryPreparationSerializer(ModelSerializer):
 
     def get_comments_facility(self, obj):
         return obj.sample.comments_facility
+
+    def get_coordinate(self, obj):
+        coordinates = self.context.get('coordinates', {})
+        key = (
+            obj.sample.index_type.pk,
+            obj.sample.index_i7_id,
+            obj.sample.index_i5_id,
+        )
+        return coordinates.get(key, '')
 
     def get_index_i7_id(self, obj):
         return obj.sample.index_i7_id

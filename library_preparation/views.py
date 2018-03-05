@@ -21,6 +21,7 @@ from .serializers import LibraryPreparationSerializer
 
 Request = apps.get_model('request', 'Request')
 IndexType = apps.get_model('library_sample_shared', 'IndexType')
+IndexPair = apps.get_model('library_sample_shared', 'IndexPair')
 IndexI7 = apps.get_model('library_sample_shared', 'IndexI7')
 IndexI5 = apps.get_model('library_sample_shared', 'IndexI5')
 Pool = apps.get_model('index_generator', 'Pool')
@@ -57,9 +58,21 @@ class LibraryPreparationViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
             samples__pk__in=sample_ids).distinct().values('name', 'samples')
         pools_map = {x['samples']: x['name'] for x in pools}
 
+        # Get Index Pairs
+        index_types = {x.sample.index_type.pk for x in queryset}
+        index_pairs = IndexPair.objects.filter(
+            index_type__pk__in=index_types,
+        ).select_related('index_type', 'index1', 'index2').distinct()
+        coordinates_map = {
+            (ip.index_type.pk, ip.index1.index_id, ip.index2.index_id):
+            ip.coordinate
+            for ip in index_pairs
+        }
+
         return {
             'requests': requests_map,
             'pools': pools_map,
+            'coordinates': coordinates_map,
         }
 
     def list(self, request):
@@ -107,6 +120,7 @@ class LibraryPreparationViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
             'Spike-in Volume (µl)',
             'µl Sample',
             'µl Buffer',
+            'Coordinate',
             'Index I7 ID',
             'Index I5 ID',
         ]
@@ -145,7 +159,11 @@ class LibraryPreparationViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
             formula = f'H{row_idx}-J{row_idx}-K{row_idx}'
             row.append(Formula(formula))
 
-            row.extend([item['index_i7_id'], item['index_i5_id']])
+            row.extend([
+                item['coordinate'],
+                item['index_i7_id'],
+                item['index_i5_id'],
+            ])
 
             for i in range(len(row)):
                 ws.write(row_num, i, row[i], font_style)
