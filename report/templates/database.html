@@ -23,7 +23,7 @@
             <thead>
                 <tr>
                     <th width="5%">#</th>
-                    {% for column in columns.values %}
+                    {% for column in columns %}
                         <th>{{ column }}</th>
                     {% endfor %}
                 </tr>
@@ -32,7 +32,7 @@
                 {% for row in data %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        {% for column in columns.keys %}
+                        {% for column in columns %}
                             <td>
                                 {{ row|get_value:column|none }}
                             </td>
