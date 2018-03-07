@@ -1,3 +1,4 @@
+from itertools import chain
 from datetime import datetime
 from collections import OrderedDict, Counter
 
@@ -6,6 +7,8 @@ from django.shortcuts import render
 from django.db.models import Prefetch
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+
+from common.utils import print_sql_queries
 
 Organization = apps.get_model('common', 'Organization')
 PrincipalInvestigator = apps.get_model('common', 'PrincipalInvestigator')
@@ -267,3 +270,117 @@ def report(request):
     data['libraries_on_sequencers_count'] = report.get_pi_sequencer_counts()
 
     return render(request, 'report.html', data)
+
+
+@print_sql_queries
+@login_required
+@staff_member_required
+def database(request):
+    # Get Requests
+    libraries_qs = Library.objects.all().only('id', 'barcode')
+    samples_qs = Sample.objects.all().only('id', 'barcode')
+    requests = Request.objects.select_related('user').prefetch_related(
+        Prefetch('libraries', queryset=libraries_qs, to_attr='fetched_libs'),
+        Prefetch('samples', queryset=samples_qs, to_attr='fetched_samples'),
+    ).only('name', 'user', 'libraries', 'samples')
+
+    requests_map = {}
+    for req in requests:
+        requests_map.update({
+            r.barcode: (req.name, req.user.full_name)
+            for r in list(chain(req.fetched_libs, req.fetched_samples))
+        })
+
+    columns = OrderedDict({
+        'name': 'Name',
+        'type': 'Type',
+        'barcode': 'Barcode',
+        'status': 'Status',
+        'request': 'Request',
+        'user': 'User',
+        'library_protocol': 'Library Protocol',
+        'library_type': 'Library Type',
+        'organism': 'Organism',
+        'read_length': 'Read Length',
+        'concentration': 'Concentration',
+        'concentration_method': 'Concentration Method',
+        'sequencing_depth': 'Sequencing Depth',
+        'index_type': 'Index Type',
+        'index_reads': 'Index Reads',
+        'index_i7_id': 'Index I7 ID',
+        'index_i7': 'Index I7',
+        'index_i5_id': 'Index I5 ID',
+        'index_i5': 'Index I5',
+        'amplification_cycles': 'Amplification Cycles',
+        'mean_fragment_size': 'Mean Fragment Size',
+        'qpcr_result': 'qPCR Result',
+        'nucleic_acid_type': 'Nucleic Acid Type',
+        'rna_quality': 'RNA Quality',
+    })
+
+    common_related_fields = [
+        'library_protocol',
+        'library_type',
+        'organism',
+        'concentration_method',
+        'read_length',
+        'index_type',
+    ]
+
+    libraries = Library.objects.select_related(
+        *common_related_fields,
+    ).prefetch_related(
+        'index_type__indices_i7',
+        'index_type__indices_i5',
+    )
+
+    samples = Sample.objects.select_related(
+        *common_related_fields,
+        'nucleic_acid_type',
+    ).prefetch_related(
+        'index_type__indices_i7',
+        'index_type__indices_i5',
+    )
+
+    data = [{
+        'name': r.name,
+        'type': r.__class__.__name__,
+        'barcode': r.barcode,
+        'status': r.status,
+        'request':
+        requests_map.get(r.barcode)[0] if r.barcode in requests_map else '',
+        'user':
+        requests_map.get(r.barcode)[1] if r.barcode in requests_map else '',
+        'concentration': r.concentration,
+        'sequencing_depth': r.sequencing_depth,
+        'index_reads': r.index_reads,
+        'index_i7_id': r.index_i7_id,
+        'index_i5_id': r.index_i5_id,
+        'index_i7': r.index_i7,
+        'index_i5': r.index_i5,
+
+        'mean_fragment_size': getattr(r, 'mean_fragment_size', ''),
+        'qpcr_result': getattr(r, 'qpcr_result', ''),
+        'rna_quality': getattr(r, 'rna_quality', ''),
+
+        'nucleic_acid_type':
+        getattr(r.nucleic_acid_type, 'name', '')
+        if hasattr(r, 'nucleic_acid_type') else '',
+
+        'concentration_method': getattr(r.concentration_method, 'name', ''),
+        'library_protocol': getattr(r.library_protocol, 'name', ''),
+        'library_type': getattr(r.library_type, 'name', ''),
+        'read_length': getattr(r.read_length, 'name', ''),
+        'index_type': getattr(r.index_type, 'name', ''),
+        'organism': getattr(r.organism, 'name', ''),
+    } for r in list(chain(libraries, samples))]
+
+    data = sorted(data, key=lambda x: (
+        int(x['barcode'][:2]),
+        int(x['barcode'][3:]),
+    ))
+
+    return render(request, 'database.html', {
+        'columns': columns,
+        'data': data,
+    })

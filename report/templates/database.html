@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load filters %}
+
+{% block title %}Parkour LIMS | Database{% endblock %}
+
+{% block css %}
+<style>
+    #database {
+        /* margin: 30px; */
+    }
+
+    th, td {
+        white-space: nowrap;
+    }
+</style>
+{% endblock css %}
+
+{% block content %}
+<div id="database">
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th width="5%">#</th>
+                    {% for column in columns.values %}
+                        <th>{{ column }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in data %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        {% for column in columns.keys %}
+                            <td>
+                                {{ row|get_value:column|none }}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock content %}

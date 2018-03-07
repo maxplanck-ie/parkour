@@ -37,8 +37,9 @@ urlpatterns = [
     url(r'library_preparation/', include('library_preparation.urls')),
     url(r'pooling/', include('pooling.urls')),
     url(r'flowcell/', include('flowcell.urls')),
-    url(r'report/', include('report.urls')),
     url(r'invoicing/', include('invoicing.urls')),
+
+    url(r'', include('report.urls')),
 ]
 
 if settings.DEBUG:

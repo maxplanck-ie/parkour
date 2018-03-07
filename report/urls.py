@@ -3,5 +3,6 @@ from report import views
 
 
 urlpatterns = [
-    url(r'^$', views.report, name='report'),
+    url(r'^report/$', views.report, name='report'),
+    url(r'^db/$', views.database, name='database'),
 ]
