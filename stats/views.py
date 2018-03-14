@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import list_route
 from rest_framework.permissions import IsAdminUser
 
+from common.utils import get_date_range
 from .serializers import FlowcellSerializer
 
 Request = apps.get_model('request', 'Request')
@@ -24,10 +25,6 @@ class RunStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = FlowcellSerializer
 
     def get_queryset(self):
-        today = datetime.date.today()
-        year = self.request.query_params.get('year', today.year)
-        month = self.request.query_params.get('month', today.month)
-
         request_qs = Request.objects.only('name')
 
         libraries_qs = Library.objects.filter(~Q(status=-1)).select_related(
@@ -68,10 +65,7 @@ class RunStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
             'pool__samples',
         )
 
-        queryset = Flowcell.objects.filter(
-            create_time__year=year,
-            create_time__month=month,
-        ).exclude(
+        queryset = Flowcell.objects.exclude(
             matrix__isnull=True,
         ).select_related(
             'sequencer',
@@ -82,7 +76,16 @@ class RunStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
         return queryset
 
     def list(self, request):
-        queryset = self.filter_queryset(self.get_queryset())
+        now = datetime.date.today()
+        start = request.query_params.get('start', now)
+        end = request.query_params.get('end', now)
+        start, end = get_date_range(start, end, '%Y-%m-%dT%H:%M:%S')
+
+        queryset = self.filter_queryset(self.get_queryset()).filter(
+            create_time__gte=start,
+            create_time__lte=end,
+        )
+
         serializer = self.get_serializer(queryset, many=True)
         data = list(itertools.chain(*serializer.data))
         return Response(data)

@@ -6,7 +6,8 @@ Ext.define('MainHub.view.statistics.RunStatistics', {
     'MainHub.components.BaseGrid',
     'MainHub.components.MonthPicker',
     'MainHub.components.SearchField',
-    'MainHub.view.statistics.RunStatisticsController'
+    'MainHub.view.statistics.RunStatisticsController',
+    'Ext.ux.DateRangePicker'
   ],
 
   controller: 'run-statistics',
@@ -140,7 +141,16 @@ Ext.define('MainHub.view.statistics.RunStatistics', {
       xtype: 'toolbar',
       dock: 'top',
       items: [{
-        xtype: 'parkourmonthpicker'
+        xtype: 'daterangepicker',
+        ui: 'header',
+        drpDefaults: {
+          showButtonTip: false,
+          dateFormat: 'd.m.Y',
+          mainBtnTextColor: '#999',
+          mainBtnIconCls: 'x-fa fa-calendar',
+          presetPeriodsBtnIconCls: 'x-fa fa-calendar-check-o',
+          confirmBtnIconCls: 'x-fa fa-check'
+        }
       }]
     }]
   }]

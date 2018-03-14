@@ -7,24 +7,24 @@ Ext.define('MainHub.view.statistics.RunStatisticsController', {
       '#': {
         activate: 'activateView'
       },
-      'parkourmonthpicker': {
-        select: 'selectMonth'
+      'daterangepicker': {
+        select: 'setRange'
       }
     }
   },
 
   activateView: function (view) {
-    var monthPicker = view.down('parkourmonthpicker');
-    monthPicker.fireEvent('select', monthPicker, monthPicker.getValue());
+    var dateRange = view.down('daterangepicker');
+    dateRange.fireEvent('select', dateRange, dateRange.getPickerValue());
   },
 
-  selectMonth: function (mp, value) {
-    var grid = mp.up('grid');
+  setRange: function (drp, value) {
+    var grid = drp.up('grid');
 
     grid.getStore().reload({
       params: {
-        year: value.getFullYear(),
-        month: value.getMonth() + 1
+        start: value.startDateObj,
+        end: value.endDateObj
       },
       callback: function () {
         grid.getView().features[0].collapseAll();
