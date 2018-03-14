@@ -2,6 +2,7 @@ from datetime import datetime
 from collections import OrderedDict, Counter
 
 from django.apps import apps
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.db import connection
 from django.db.models import Prefetch
@@ -274,10 +275,15 @@ def report(request):
     return render(request, 'report.html', data)
 
 
-@print_sql_queries
 @login_required
 @staff_member_required
 def database(request):
+    return render(request, 'database.html')
+
+# @print_sql_queries
+@login_required
+@staff_member_required
+def database_data(request):
     with connection.cursor() as c:
         query = QUERY.format(
             table_name='library',
@@ -349,7 +355,4 @@ def database(request):
         'Sequencer',
     ]
 
-    return render(request, 'database.html', {
-        'columns': columns,
-        'data': data,
-    })
+    return JsonResponse({'columns': columns, 'data': data})
