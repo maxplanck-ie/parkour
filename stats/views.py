@@ -1,6 +1,6 @@
 import json
-import datetime
 import itertools
+from datetime import datetime
 
 from django.apps import apps
 from django.db.models import Q, Prefetch
@@ -76,7 +76,7 @@ class RunStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
         return queryset
 
     def list(self, request):
-        now = datetime.date.today()
+        now = datetime.now()
         start = request.query_params.get('start', now)
         end = request.query_params.get('end', now)
         start, end = get_date_range(start, end, '%Y-%m-%dT%H:%M:%S')
