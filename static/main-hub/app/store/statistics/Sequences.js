@@ -8,8 +8,8 @@ Ext.define('MainHub.store.statistics.Sequences', {
 
   model: 'MainHub.model.statistics.Sequences',
 
-  // groupField: 'flowcell_id',
-  // groupDir: 'ASC',
+  // groupField: 'request',
+  // groupDir: 'DESC',
 
   // proxy: {
   //   type: 'ajax',
@@ -25,33 +25,33 @@ Ext.define('MainHub.store.statistics.Sequences', {
       request: 'Project_270_Gilsbach_B03_Hein',
       barcode: '18L004171',
       name: 'ATAC_EC_1_R1',
-      fast_qc_r1: 'link',
-      fast_qc_r2: 'link',
-      sequencer: 'NextSeq HIGH',
-      flowcell: '180115_NB501361_0232_AHF7KVBGX5',
       lane: '1, 2, 3, 4',
       pool: 'Pool 254',
       library_protocol: 'Other-DNA ',
       library_type: 'Other',
+      reads_pf_requested: null,
+      reads_pf_sequenced: null,
       confident_reads: 0.5,
-      contamination_report: 'link',
-      percentage_optical_duplicates: 0.57
+      optical_duplicates: 0.57,
+      dupped_reads: null,
+      mapped_reads: null,
+      insert_size: null
     },
     {
       request: 'Project_270_Gilsbach_B03_Hein',
       barcode: '18L004172',
       name: 'ATAC_EC_1_R2',
-      fast_qc_r1: 'link',
-      fast_qc_r2: 'link',
-      sequencer: 'NextSeq HIGH',
-      flowcell: '180115_NB501361_0232_AHF7KVBGX5',
       lane: '1, 2, 3, 4',
       pool: 'Pool 254',
       library_protocol: 'Other-DNA ',
       library_type: 'Other',
+      reads_pf_requested: null,
+      reads_pf_sequenced: null,
       confident_reads: 0.53,
-      contamination_report: 'link',
-      percentage_optical_duplicates: 0.56
+      optical_duplicates: 0.56,
+      dupped_reads: null,
+      mapped_reads: null,
+      insert_size: null
     }
   ],
 

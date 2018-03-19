@@ -5,7 +5,8 @@ Ext.define('MainHub.view.statistics.Sequences', {
   requires: [
     'MainHub.components.BaseGrid',
     'MainHub.components.SearchField',
-    'MainHub.view.statistics.SequencesController'
+    'MainHub.view.statistics.SequencesController',
+    'Ext.ux.DateRangePicker'
   ],
 
   controller: 'sequences-statistics',
@@ -56,27 +57,6 @@ Ext.define('MainHub.view.statistics.Sequences', {
             filter: { type: 'string' }
           },
           {
-            text: 'Fast QC R1',
-            dataIndex: 'fast_qc_r1',
-            renderer: me.linkRenderer
-          },
-          {
-            text: 'Fast QC R2',
-            dataIndex: 'fast_qc_r2',
-            renderer: me.linkRenderer
-          },
-          {
-            text: 'Sequencer',
-            dataIndex: 'sequencer',
-            filter: { type: 'string' }
-          },
-          {
-            text: 'Flowcell',
-            dataIndex: 'flowcell',
-            renderer: 'gridCellTooltipRenderer',
-            filter: { type: 'string' }
-          },
-          {
             text: 'Lane',
             dataIndex: 'lane',
             filter: { type: 'string' }
@@ -99,84 +79,74 @@ Ext.define('MainHub.view.statistics.Sequences', {
             filter: { type: 'string' }
           },
           {
-            text: 'Confident off-species Reads',
-            tooltip: 'Confident off-species Reads',
+            text: 'Reads PF (M), requested',
+            tooltip: 'Reads PF (M), requested',
+            dataIndex: 'reads_pf_requested',
+            filter: { type: 'number' }
+          },
+          {
+            text: 'Reads PF (M), sequenced',
+            tooltip: 'Reads PF (M), sequenced',
+            dataIndex: 'reads_pf_sequenced',
+            filter: { type: 'number' }
+          },
+          {
+            text: 'confident off-species reads',
+            tooltip: 'confident off-species reads',
             dataIndex: 'confident_reads',
-            filter: { type: 'number' }
-          },
-          {
-            text: 'Contamination Report',
-            tooltip: 'Contamination Report',
-            dataIndex: 'contamination_report',
-            renderer: me.linkRenderer
-          },
-          {
-            text: '% Read Pairs Unique',
-            tooltip: '% Read Pairs Unique',
-            dataIndex: 'percentage_read_pairs_unique',
-            // renderer: me.percentageRenderer,
-            filter: { type: 'number' }
-          },
-          {
-            text: '% Read Pairs Not Optical Duplicates',
-            tooltip: '% Read Pairs Not Optical Duplicates',
-            dataIndex: 'percentage_read_pairs_duplicates',
-            // renderer: me.percentageRenderer,
             filter: { type: 'number' }
           },
           {
             text: '% Optical Duplicates',
             tooltip: '% Optical Duplicates',
-            dataIndex: 'percentage_optical_duplicates',
+            dataIndex: 'optical_duplicates',
             // renderer: me.percentageRenderer,
             filter: { type: 'number' }
           },
           {
-            text: '% Uniquely Mapped',
-            tooltip: '% Uniquely Mapped',
-            dataIndex: 'percentage_uniquely_mapped',
+            text: '% dupped reads',
+            tooltip: '% dupped reads',
+            dataIndex: 'dupped_reads',
             // renderer: me.percentageRenderer,
             filter: { type: 'number' }
           },
           {
-            text: '% Mapped to Multiple',
-            tooltip: '% Mapped to Multiple',
-            dataIndex: 'percentage_multiple_mapped',
+            text: '% mapped reads',
+            tooltip: '% mapped reads',
+            dataIndex: 'mapped_reads',
             // renderer: me.percentageRenderer,
-            filter: { type: 'number' }
-          },
-          {
-            text: 'Unmapped',
-            dataIndex: 'unmapped',
             filter: { type: 'number' }
           },
           {
             text: 'Insert Size',
             dataIndex: 'insert_size',
             filter: { type: 'number' }
-          },
-          {
-            text: 'FRiP Score',
-            dataIndex: 'frip_score',
-            filter: { type: 'number' }
           }
         ]
       },
 
-      dockedItems: []
+      dockedItems: [{
+        xtype: 'toolbar',
+        dock: 'top',
+        items: [{
+          xtype: 'daterangepicker',
+          ui: 'header',
+          drpDefaults: {
+            showButtonTip: false,
+            dateFormat: 'd.m.Y',
+            mainBtnTextColor: '#999',
+            mainBtnIconCls: 'x-fa fa-calendar',
+            presetPeriodsBtnIconCls: 'x-fa fa-calendar-check-o',
+            confirmBtnIconCls: 'x-fa fa-check'
+          }
+        }]
+      }]
     }];
 
     this.callParent(arguments);
   },
 
-  linkRenderer: function (value) {
-    return Ext.String.format('<a href="{0}" target="_blank">link</a>', value);
-  },
-
   percentageRenderer: function (value) {
-    if (value) {
-      value += '%';
-    }
-    return value;
+    return value ? value + '%' : value;
   }
 });
