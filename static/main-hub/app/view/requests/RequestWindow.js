@@ -140,7 +140,13 @@ Ext.define('MainHub.view.requests.RequestWindow', {
       xtype: 'button',
       itemId: 'upload-signed-request-button',
       iconCls: 'fa fa-upload fa-lg',
-      text: 'Upload signed Request to complete Submission'
+      text: 'Upload Signed Request to Complete Submission'
+    },
+    {
+      xtype: 'button',
+      itemId: 'download-complete-report-button',
+      iconCls: 'fa fa-download fa-lg',
+      text: 'Download Complete Report'
     },
     '->',
     {

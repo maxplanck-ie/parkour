@@ -26,6 +26,7 @@ from .serializers import (
 )
 
 Request = apps.get_model('request', 'Request')
+IndexPair = apps.get_model('library_sample_shared', 'IndexPair')
 Library = apps.get_model('library', 'Library')
 Sample = apps.get_model('sample', 'Sample')
 Pool = apps.get_model('index_generator', 'Pool')
@@ -42,6 +43,51 @@ class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ViewSet):
     sample_model = Sample
     library_serializer = PoolingLibrarySerializer
     sample_serializer = PoolingSampleSerializer
+
+    def get_queryset(self):
+        libraries_qs = Library.objects.filter(
+            Q(status=2) | Q(status=-2)
+        ).select_related(
+            'index_type',
+        ).prefetch_related(
+            'index_type__indices_i7',
+            'index_type__indices_i5',
+        ).only(
+            'name',
+            'barcode',
+            'status',
+            'index_type',
+            'index_i7',
+            'index_i5',
+            'sequencing_depth',
+            'mean_fragment_size',
+            'concentration_facility'
+        )
+
+        samples_qs = Sample.objects.filter(
+            Q(status=3) | Q(status=2) | Q(status=-2)
+        ).select_related(
+            'index_type',
+        ).prefetch_related(
+            'index_type__indices_i7',
+            'index_type__indices_i5',
+        ).only(
+            'name',
+            'barcode',
+            'status',
+            'index_type',
+            'index_i7',
+            'index_i5',
+            'sequencing_depth',
+            'is_converted',
+        )
+
+        return Pool.objects.select_related(
+            'size'
+        ).prefetch_related(
+            Prefetch('libraries', queryset=libraries_qs),
+            Prefetch('samples', queryset=samples_qs),
+        )
 
     def get_context(self, queryset):
         library_ids = queryset.values_list('libraries', flat=True)
@@ -90,51 +136,43 @@ class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ViewSet):
             elif x.sample:
                 pooling_map[x.sample.pk, 'Sample'] = x
 
+        # Get coordinates
+        index_types1 = {
+            l.index_type.pk
+            for pool in queryset
+            for l in pool.libraries.all()
+            if l.index_type
+        }
+        index_types2 = {
+            s.index_type.pk
+            for pool in queryset
+            for s in pool.samples.all()
+            if s.index_type
+        }
+        index_types = index_types1 | index_types2
+        index_pairs = IndexPair.objects.filter(
+            index_type__pk__in=index_types,
+        ).select_related('index_type', 'index1', 'index2').distinct()
+        coordinates_map = {
+            (ip.index_type.pk, ip.index1.index_id, ip.index2.index_id):
+            ip.coordinate
+            for ip in index_pairs
+        }
+
         return {
             'requests': requests_map,
             'library_preparation': library_reparation_map,
             'pooling': pooling_map,
+            'coordinates': coordinates_map,
         }
 
     def list(self, request):
         """ Get the list of all pooling objects. """
-        libraries_qs = Library.objects.filter(
-            Q(status=2) | Q(status=-2)
-        ).only(
-            'name',
-            'barcode',
-            'status',
-            'index_i7',
-            'index_i5',
-            'sequencing_depth',
-            'mean_fragment_size',
-            'concentration_facility'
-        )
-
-        samples_qs = Sample.objects.filter(
-            Q(status=3) | Q(status=2) | Q(status=-2)
-        ).only(
-            'name',
-            'barcode',
-            'status',
-            'index_i7',
-            'index_i5',
-            'sequencing_depth',
-            'is_converted',
-        )
-
-        queryset = Pool.objects.select_related(
-            'size'
-        ).prefetch_related(
-            Prefetch('libraries', queryset=libraries_qs),
-            Prefetch('samples', queryset=samples_qs),
-        )
-
+        queryset = self.get_queryset()
         serializer = PoolSerializer(
             queryset, many=True, context=self.get_context(queryset))
         data = list(itertools.chain(*serializer.data))
         data = sorted(data, key=lambda x: x['barcode'][3:])
-
         return Response(data)
 
     @list_route(methods=['post'])

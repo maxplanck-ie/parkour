@@ -4,8 +4,10 @@ Ext.define('MainHub.view.statistics.RunStatistics', {
 
   requires: [
     'MainHub.components.BaseGrid',
+    'MainHub.components.MonthPicker',
     'MainHub.components.SearchField',
-    'MainHub.view.statistics.RunStatisticsController'
+    'MainHub.view.statistics.RunStatisticsController',
+    'Ext.ux.DateRangePicker'
   ],
 
   controller: 'run-statistics',
@@ -74,9 +76,15 @@ Ext.define('MainHub.view.statistics.RunStatistics', {
           filter: { type: 'number' }
         },
         {
-          text: 'Reads PF',
+          text: 'Reads PF (M)',
           dataIndex: 'reads_pf',
-          filter: { type: 'number' }
+          filter: { type: 'number' },
+          renderer: function (value) {
+            if (value) {
+              value = (value / 1000000).toFixed(1);
+            }
+            return value;
+          }
         },
         {
           text: 'Undet. Indices (%)',
@@ -109,10 +117,15 @@ Ext.define('MainHub.view.statistics.RunStatistics', {
       startCollapsed: true,
       enableGroupingMenu: false,
       groupHeaderTpl: [
-        '<strong>{children:this.getFlowcellId} ({children:this.getSequencer}, {children:this.getReadLength})</strong>',
+        '<strong>{children:this.getFlowcellId} ' +
+        '({children:this.getDate}, {children:this.getSequencer}, ' +
+        '{children:this.getReadLength})</strong>',
         {
           getFlowcellId: function (children) {
             return children[0].get('flowcell_id');
+          },
+          getDate: function (children) {
+            return Ext.util.Format.date(children[0].get('create_time'));
           },
           getSequencer: function (children) {
             return children[0].get('sequencer');
@@ -124,6 +137,21 @@ Ext.define('MainHub.view.statistics.RunStatistics', {
       ]
     }],
 
-    dockedItems: []
+    dockedItems: [{
+      xtype: 'toolbar',
+      dock: 'top',
+      items: [{
+        xtype: 'daterangepicker',
+        ui: 'header',
+        drpDefaults: {
+          showButtonTip: false,
+          dateFormat: 'd.m.Y',
+          mainBtnTextColor: '#999',
+          mainBtnIconCls: 'x-fa fa-calendar',
+          presetPeriodsBtnIconCls: 'x-fa fa-calendar-check-o',
+          confirmBtnIconCls: 'x-fa fa-check'
+        }
+      }]
+    }]
   }]
 });

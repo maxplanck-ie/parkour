@@ -42,18 +42,32 @@ class PoolingBaseSerializer(ModelSerializer):
     concentration_c1 = SerializerMethodField()
     concentration_library = SerializerMethodField()
     mean_fragment_size = SerializerMethodField()
-    index_i7_id = SerializerMethodField()
-    index_i5_id = SerializerMethodField()
+    coordinate = SerializerMethodField()
     create_time = SerializerMethodField()
     quality_check = CharField(required=False)
 
     class Meta:
         list_serializer_class = BaseListSerializer
-        fields = ('pk', 'record_type', 'name', 'status', 'barcode',
-                  'request', 'request_name', 'sequencing_depth',
-                  'concentration_c1', 'concentration_library',
-                  'mean_fragment_size', 'create_time', 'quality_check',
-                  'index_i7_id', 'index_i5_id', 'index_i7', 'index_i5',)
+        fields = (
+            'pk',
+            'record_type',
+            'name',
+            'status',
+            'barcode',
+            'request',
+            'request_name',
+            'sequencing_depth',
+            'concentration_c1',
+            'concentration_library',
+            'mean_fragment_size',
+            'create_time',
+            'quality_check',
+            'coordinate',
+            'index_i7_id',
+            'index_i5_id',
+            'index_i7',
+            'index_i5',
+        )
         extra_kwargs = {
             'name': {'required': False},
             'barcode': {'required': False},
@@ -64,32 +78,24 @@ class PoolingBaseSerializer(ModelSerializer):
         return obj.__class__.__name__
 
     def get_request(self, obj):
-        return self._get_request(obj)['pk']
+        return self._get_request(obj).get('pk', None)
 
     def get_request_name(self, obj):
-        return self._get_request(obj)['name']
+        return self._get_request(obj).get('name', '')
 
     def get_concentration_c1(self, obj):
         pooling_object = self._get_pooling_object(obj)
         return pooling_object.concentration_c1 if pooling_object else None
 
-    def get_index_i7_id(self, obj):
-        # try:
-        #     index_type = IndexType.objects.get(pk=obj.index_type.pk)
-        #     index_i7 = index_type.indices_i7.get(index=obj.index_i7)
-        #     return index_i7.index_id
-        # except Exception:
-        #     return ''
-        return None
-
-    def get_index_i5_id(self, obj):
-        # try:
-        #     index_type = IndexType.objects.get(pk=obj.index_type.pk)
-        #     index_i5 = index_type.indices_i5.get(index=obj.index_i5)
-        #     return index_i5.index_id
-        # except Exception:
-        #     return ''
-        return None
+    def get_coordinate(self, obj):
+        coordinates = self.context.get('coordinates', {})
+        index_type = obj.index_type.pk if obj.index_type else ''
+        key = (
+            index_type,
+            obj.index_i7_id,
+            obj.index_i5_id,
+        )
+        return coordinates.get(key, '')
 
     def get_create_time(self, obj):
         pooling_object = self._get_pooling_object(obj)
@@ -123,7 +129,7 @@ class PoolingBaseSerializer(ModelSerializer):
 
     def _get_request(self, obj):
         return self.context.get('requests').get(
-            (obj.pk, obj.__class__.__name__)
+            (obj.pk, obj.__class__.__name__), {}
         )
 
     def _get_pooling_object(self, obj):

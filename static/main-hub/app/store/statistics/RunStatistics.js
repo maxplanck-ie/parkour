@@ -8,8 +8,8 @@ Ext.define('MainHub.store.statistics.RunStatistics', {
 
   model: 'MainHub.model.statistics.RunStatistics',
 
-  groupField: 'flowcell_id',
-  groupDir: 'ASC',
+  groupField: 'pk',
+  groupDir: 'DESC',
 
   proxy: {
     type: 'ajax',

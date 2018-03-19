@@ -48,3 +48,28 @@ def print_sql_queries(func):
                 print('\n### {} ({} seconds)\n\n{};\n'.format(
                     i, query['time'], '\n'.join(sql)))
     return wrapper
+
+
+def get_date_range(start, end, format):
+    now = datetime.now()
+
+    try:
+        start = datetime.strptime(start, format) \
+            if type(start) is str else start
+    except ValueError:
+        start = now
+    finally:
+        start = start.replace(hour=0, minute=0)
+
+    try:
+        end = datetime.strptime(end, format) \
+            if type(end) is str else end
+    except ValueError:
+        end = now
+    finally:
+        end = end.replace(hour=23, minute=59)
+
+    if start > end:
+        start = end.replace(hour=0, minute=0)
+
+    return (start, end)

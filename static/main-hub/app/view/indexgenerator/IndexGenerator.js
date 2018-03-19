@@ -265,6 +265,11 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             }
           },
           {
+            text: 'Coord',
+            dataIndex: 'coordinate',
+            width: 65
+          },
+          {
             text: 'Index I7 ID',
             dataIndex: 'index_i7_id',
             width: 90,

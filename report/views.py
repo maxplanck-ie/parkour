@@ -2,10 +2,16 @@ from datetime import datetime
 from collections import OrderedDict, Counter
 
 from django.apps import apps
+from django.http import JsonResponse
 from django.shortcuts import render
+from django.db import connection
 from django.db.models import Prefetch
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+
+from .sql import QUERY, LIBRARY_SELECT, SAMPLE_SELECT, SAMPLE_JOINS
+
+from common.utils import print_sql_queries
 
 Organization = apps.get_model('common', 'Organization')
 PrincipalInvestigator = apps.get_model('common', 'PrincipalInvestigator')
@@ -267,3 +273,86 @@ def report(request):
     data['libraries_on_sequencers_count'] = report.get_pi_sequencer_counts()
 
     return render(request, 'report.html', data)
+
+
+@login_required
+@staff_member_required
+def database(request):
+    return render(request, 'database.html')
+
+# @print_sql_queries
+@login_required
+@staff_member_required
+def database_data(request):
+    with connection.cursor() as c:
+        query = QUERY.format(
+            table_name='library',
+            table_name_plural='libraries',
+            select=LIBRARY_SELECT,
+            joins='',
+        )
+        c.execute(query)
+        columns = [col[0] for col in c.description]
+        libraries = [dict(zip(columns, row)) for row in c.fetchall()]
+
+        query = QUERY.format(
+            table_name='sample',
+            table_name_plural='samples',
+            select=SAMPLE_SELECT,
+            joins=SAMPLE_JOINS,
+        )
+        c.execute(query)
+        columns = [col[0] for col in c.description]
+        samples = [dict(zip(columns, row)) for row in c.fetchall()]
+
+    data = sorted(libraries + samples, key=lambda x: (
+        int(x['Barcode'][:2]),
+        int(x['Barcode'][3:]),
+    ))
+
+    columns = [
+        'Name',
+        'Barcode',
+        'Status',
+        'Request',
+        'User',
+        'Library Type',
+        'Library Protocol',
+        'Concentration',
+        'Sequencing Depth',
+        'Read Length',
+        'Concentration Method',
+        'Equal Representation of Nucleotides',
+        'Index Type',
+        'Index Reads',
+        'Index I7 ID',
+        'Index I7',
+        'Index I5 ID',
+        'Index I5',
+        'Amplification Cycles',
+        'Dilution Factor',
+        'Concentration (Facility)',
+        'Sample Volume (Facility)',
+        'Amount (Facility)',
+        'Size Distribution (Facility)',
+        'Concentration Method (Facility)',
+        'RNA Quality (Facility)',
+        'Organism',
+        'Concentration C1',
+        'RNA Quality',
+        'Nucleic Acid Type',
+        'Starting Amount',
+        'Spike-in Volume',
+        'PCR Cycles',
+        'Concentration Library',
+        'Mean Fragment Size',
+        'nM',
+        'qPCR Result',
+        'qPCR Result (Facility)',
+        'Pool',
+        'Pool Size',
+        'Flowcell ID',
+        'Sequencer',
+    ]
+
+    return JsonResponse({'columns': columns, 'data': data})

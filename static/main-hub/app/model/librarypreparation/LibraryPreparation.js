@@ -53,7 +53,8 @@ Ext.define('MainHub.model.librarypreparation.LibraryPreparation', {
         },
         {
             name: 'concentration_sample',
-            type: 'float'
+            type: 'float',
+            allowNull: true
         },
         {
             name: 'starting_amount',
@@ -68,6 +69,10 @@ Ext.define('MainHub.model.librarypreparation.LibraryPreparation', {
             name: 'spike_in_volume',
             type: 'float',
             allowNull: true
+        },
+        {
+            name: 'coordinate',
+            type: 'string'
         },
         {
             name: 'index_i7_id',

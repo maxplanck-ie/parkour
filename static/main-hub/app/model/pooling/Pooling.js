@@ -50,6 +50,10 @@ Ext.define('MainHub.model.pooling.Pooling', {
             type: 'string'
         },
         {
+            name: 'coordinate',
+            type: 'string'
+        },
+        {
             name: 'index_i7_id',
             type: 'string'
         },

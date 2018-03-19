@@ -24,6 +24,9 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
       '#upload-signed-request-button': {
         click: 'uploadPDF'
       },
+      '#download-complete-report-button': {
+        click: 'downloadCompleteReport'
+      },
       '#save-button': {
         click: 'save'
       },
@@ -90,6 +93,11 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
           }
         });
       }
+    }
+
+    // Hide Download Complete Report button for non-staff
+    if (!USER_IS_STAFF) {
+      wnd.down('#download-complete-report-button').hide();
     }
 
     this.initializeTooltips();
@@ -376,6 +384,17 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
     });
   },
 
+  downloadCompleteReport: function (btn) {
+    var wnd = btn.up('window');
+    var form = Ext.create('Ext.form.Panel', { standardSubmit: true });
+    var url = Ext.String.format(
+        'api/requests/{0}/download_complete_report/',
+        wnd.record.get('pk')
+    );
+
+    form.submit({ url: url, method: 'GET' });
+  },
+
   save: function (btn) {
     var wnd = btn.up('window');
     var form = Ext.getCmp('request-form');
@@ -468,10 +487,8 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
   disableButtonsAndMenus: function () {
     if (!USER_IS_STAFF) {
       var grid = Ext.getCmp('libraries-in-request-grid');
-
-        // Don't add new records to a Request
+      // Don't add new records to a Request
       grid.down('#batch-add-button').disable();
-      grid.down('#add-library-button').disable();
       grid.suspendEvent('itemcontextmenu');
     }
   },

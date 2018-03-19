@@ -135,6 +135,11 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
           }
         },
         {
+          text: 'Coord',
+          dataIndex: 'coordinate',
+          width: 65
+        },
+        {
           text: 'I7 ID',
           tooltip: 'Index I7 ID',
           dataIndex: 'index_i7_id',

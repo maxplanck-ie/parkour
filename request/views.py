@@ -2,6 +2,7 @@ import json
 import logging
 import itertools
 from unicodedata import normalize
+from collections import OrderedDict
 
 from django.apps import apps
 from django.http import HttpResponse, JsonResponse
@@ -19,7 +20,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAdminUser
 
-from fpdf import FPDF
+from fpdf import FPDF, HTMLMixin
 
 from common.views import (
     CsrfExemptSessionAuthentication,
@@ -98,6 +99,72 @@ class PDF(FPDF):  # pragma: no cover
         self.cell(35, 10, type)
         self.cell(0, 10, str(depth))
         self.ln(6)
+
+
+class Report(FPDF, HTMLMixin):
+    def __init__(self, title='Report', font='Arial'):
+        self.title = title
+        self.font = font
+        super().__init__()
+
+    def header(self):
+        self.set_font(family=self.font, size=8)
+        self.set_text_color(r=189, g=189, b=189)
+        self.cell(0, 10, 'COMPLETE REPORT', align='L')
+        self.cell(
+            0, 10, 'Deep Sequencing Facility @ MPI-IE, Freiburg', align='R')
+        self.ln(10)
+
+    def footer(self):
+        self.set_y(-15)  # Position at 1.5 cm from bottom
+        self.set_font(self.font, size=8)  # Arial 8
+        # Page number
+        self.cell(0, 10, 'Page ' + str(self.page_no()) + ' of {nb}', 0, 0, 'C')
+
+    def page_header(self, text):
+        self.set_font(family=self.font, style='B', size=12)
+        self.cell(0, 10, text)
+        self.ln(14)
+
+    def text_block(self, text, style='', size=11, multi=False):
+        self.set_font(family=self.font, style=style, size=size)
+        if multi:
+            self.multi_cell(0, 6, text)
+        else:
+            self.cell(0, 10, text)
+        self.ln(6)
+
+    def generate_html(self, data):
+        if len(data) == 0:
+            return ''
+
+        columns = list(data[0].keys())
+        length = len(columns)
+
+        thead = ''.join(map(
+            lambda c: f'<th width="{100 // length}%" align="left">{c}</th>',
+            columns,
+        ))
+
+        tbody = []
+        for item in data:
+            row = ''.join(map(lambda x: f'<td>{x}</td>', item.values()))
+            tbody.append(f'<tr>{row}</tr>')
+        tbody = ''.join(tbody)
+
+        html = '''
+        <font face="Arial" size="10">
+             <table border="0" width="100%">
+                <thead>
+                    <tr>{}</tr>
+                </thead>
+                <tbody>{}</tbody>
+            </table>
+        </font>
+        '''.format(thead, tbody)
+        html = html.replace('\n', '')
+
+        return html
 
 
 @login_required
@@ -440,6 +507,149 @@ class RequestViewSet(viewsets.ModelViewSet):
             logger.exception(e)
 
         return JsonResponse({'success': not error, 'error': error})
+
+    @detail_route(methods=['get'])
+    @permission_classes((IsAdminUser))
+    def download_complete_report(self, request, pk=None):
+        instance = self.get_object()
+        pdf = Report('Deep Sequencing Request')
+        pdf.set_draw_color(217, 217, 217)
+        pdf.alias_nb_pages()
+
+        # Page 1
+        pdf.add_page()
+        pdf.text_block('Date, Request ID', 'B')
+        pdf.text_block('{}, {}'.format(
+            instance.create_time.strftime('%d.%m.%Y'), instance.name
+        ))
+        pdf.ln(8)
+        pdf.text_block('Content of Report', 'B')
+        pdf.text_block('Summary')
+        pdf.text_block('Quality Control of Received Samples')
+        pdf.text_block('Library Construction')
+        pdf.text_block('Cluster Generation and Sequencing')
+        pdf.text_block('Acknowledgements')
+        pdf.text_block('Appendix ')
+
+        # Page 2
+        pdf.add_page()
+        pdf.page_header('General Summary of Workflow')
+        pdf.text_block('Submitted samples or libraries undergo an incoming ' +
+                       'quality control using appropriate analytical ' +
+                       'instruments (Fluorometer, Capillary ' +
+                       'Electrophoresis, qPCR etc). All samples that pass ' +
+                       'international quality standards are subjected to ' +
+                       'appropriate library preparation methods. Qualified ' +
+                       'libraries are pooled for multiplex sequencing. An ' +
+                       'Index Generator Software assures suitable index ' +
+                       'design. Pooled libraries are sequenced to reach ' +
+                       'desired depth/coverage using installed sequencing ' +
+                       'instruments. Immediately after the sequencing run ' +
+                       'bcl to fastq conversion and demultiplexing is done ' +
+                       'and the user informed.', multi=True)
+
+        # Page 3
+        pdf.add_page()
+        pdf.page_header('Quality Control of Received Samples/Libraries')
+        pdf.text_block('All documented measurements were conducted by the ' +
+                       'deep sequencing facility, MPI-IE Freiburg. Raw data ' +
+                       'and reports of fluorometric quantification (Qubit) ' +
+                       'and size distribution measurements (Fragment ' +
+                       'Analyzer) can be found as attachment to each ' +
+                       'request in Parkour (parkour.ie-freiburg.mpg.de).',
+                       multi=True)
+        # Temporary
+        data = [OrderedDict({
+            'Date': '-',
+            'ID': '-',
+            'Name': '-',
+            'L/S': '-',
+            'Nuc.Type': '-',
+            'ng/µl': '-',
+            'bp': '-',
+            'Comments': '-',
+        })]
+        pdf.write_html(pdf.generate_html(data))
+
+        # Page 4
+        pdf.add_page()
+        pdf.page_header('Library Construction')
+        pdf.text_block('Documentation is only possible if libraries were ' +
+                       'constructed in the deep sequencing facility, MPI-IE ' +
+                       'Freiburg. Raw data and reports of fluorometric ' +
+                       'quantification (Qubit) and size distribution ' +
+                       'measurements (Fragment Analyzer) can be found as ' +
+                       'attachment to each request in Parkour ' +
+                       '(parkour.ie-freiburg.mpg.de). Given Library ' +
+                       'Preparation Methods are detailed in the appendix.',
+                       multi=True)
+        # Temporary
+        data = [OrderedDict({
+            'Date': '-',
+            'ID': '-',
+            'Name': '-',
+            'Protocol': '-',
+            'I7': '-',
+            'I5': '-',
+            'PCR': '-',
+            'ng/µl': '-',
+            'bp': '-',
+            'nM': '-',
+            'Comments': '-',
+        })]
+        pdf.write_html(pdf.generate_html(data))
+
+        # Page 5
+        pdf.add_page()
+        pdf.page_header('Cluster Generation and Sequencing')
+        # Temporary
+        data = [OrderedDict({
+            'Date': '-',
+            'ID': '-',
+            'Name': '-',
+            'Pool ID': '-',
+            'Flowcell ID': '-',
+            'Sequencer': '-',
+            'Depth (M)': '-',
+            '% Confident off species reads': '-',
+        })]
+        pdf.write_html(pdf.generate_html(data))
+
+        # Page 6
+        pdf.add_page()
+        pdf.page_header('Acknowledgements')
+        pdf.text_block('If data produced in the Deep Sequencing Facility @ ' +
+                       'MPI-IE Freiburg is published, include an ' +
+                       'acknowledgement in your paper. Also, review if ' +
+                       'contributions are substantial and should lead to an ' +
+                       'authorship of staff of the facility. Additionally ' +
+                       'let us know of any publications involving the ' +
+                       'facility to track citations and publications and ' +
+                       'demonstrate the usefulness of the facility as a ' +
+                       'research resource and to obtain further funding.',
+                       multi=True)
+        pdf.text_block('Example acknowledgement')
+        pdf.ln(6)
+        pdf.text_block('We thank the Deep Sequencing Facility @ MPI-IE ' +
+                       'Freiburg, for performance of quality controls, ' +
+                       'library construction and Illumina sequencing.',
+                       multi=True)
+
+        # Page 7
+        pdf.add_page()
+        pdf.page_header('Appendix')
+        pdf.text_block('Detailed list of different library preparation ' +
+                       'protocols, sequencing devices and installed software.',
+                       multi=True)
+
+        # Generate PDF file
+        pdf = pdf.output(dest='S').encode('latin-1')
+
+        # f_name = request_name + '_Deep_Sequencing_Request.pdf'
+        f_name = 'Complete Report.pdf'
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="%s"' % f_name
+        return response
 
     def _get_post_data(self, request):
         post_data = {}
