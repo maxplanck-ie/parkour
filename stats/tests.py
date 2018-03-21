@@ -125,3 +125,45 @@ class TestRunStatistics(BaseTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertFalse(data['success'])
         self.assertEqual(data['message'], 'Invalid matrix data.')
+
+
+class TestSequencesStatistics(BaseTestCase):
+    def setUp(self):
+        self.user = self.create_user()
+        self.login()
+
+    def test_flowcell_list(self):
+        library1 = create_library(get_random_name(), 4)
+        library2 = create_library(get_random_name(), 4)
+        sample1 = create_sample(get_random_name(), 4)
+        sample2 = create_sample(get_random_name(), 4)
+
+        request = create_request(self.user)
+        request.libraries.add(library1)
+        request.libraries.add(library2)
+        request.samples.add(sample1)
+        request.samples.add(sample2)
+
+        pool = create_pool(self.user)
+        pool.libraries.add(library1)
+        pool.libraries.add(library2)
+        pool.samples.add(sample1)
+        pool.samples.add(sample2)
+
+        sequencer = create_sequencer(get_random_name(), lanes=8)
+        flowcell = create_flowcell(get_random_name(), sequencer)
+
+        lanes = []
+        # matrix = []
+        for i in range(8):
+            name = 'Lane {}'.format(i + 1)
+            lane = Lane(name=name, pool=pool)
+            lane.save()
+            lanes.append(lane.pk)
+
+        flowcell.lanes.add(*lanes)
+        flowcell.save()
+
+        response = self.client.get('/api/sequences_statistics/')
+        # data = response.json()
+        self.assertEqual(response.status_code, 200)

@@ -11,7 +11,7 @@ from rest_framework.decorators import list_route
 from rest_framework.permissions import IsAdminUser
 
 from common.utils import get_date_range
-from .serializers import FlowcellSerializer
+from .serializers import RunsSerializer, SequencesSerializer
 
 Request = apps.get_model('request', 'Request')
 Library = apps.get_model('library', 'Library')
@@ -22,7 +22,7 @@ Lane = apps.get_model('flowcell', 'Lane')
 
 class RunStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAdminUser]
-    serializer_class = FlowcellSerializer
+    serializer_class = RunsSerializer
 
     def get_queryset(self):
         request_qs = Request.objects.only('name')
@@ -114,3 +114,13 @@ class RunStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
         flowcell.matrix = matrix
         flowcell.save(update_fields=['matrix'])
         return Response({'success': True})
+
+
+class SequencesStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [IsAdminUser]
+    serializer_class = SequencesSerializer
+
+    def get_queryset(self):
+        return Flowcell.objects.all().select_related(
+            'sequencer',
+        ).order_by('-create_time')

@@ -5,7 +5,7 @@ from rest_framework.serializers import ModelSerializer, SerializerMethodField
 Flowcell = apps.get_model('flowcell', 'Flowcell')
 
 
-class FlowcellSerializer(ModelSerializer):
+class RunsSerializer(ModelSerializer):
     sequencer = SerializerMethodField()
 
     class Meta:
@@ -55,3 +55,14 @@ class FlowcellSerializer(ModelSerializer):
             }, **item})
 
         return sorted(result, key=lambda x: x['name'])
+
+
+class SequencesSerializer(ModelSerializer):
+    sequencer = SerializerMethodField()
+
+    class Meta:
+        model = Flowcell
+        fields = ('pk', 'flowcell_id', 'create_time', 'sequencer',)
+
+    def get_sequencer(self, obj):
+        return obj.sequencer.name
