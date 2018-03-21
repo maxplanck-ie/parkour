@@ -160,6 +160,36 @@
         </tbody>
     </table>
 
+    <hr/>
+
+    <table class="table table-bordered table-hover">
+        <caption>Turnaround (all-time)</caption>
+        <thead>
+            <tr>
+                <th width="50%">Step</th>
+                <th width="50%">Average # of Days</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Library Preparation</td>
+                <td>{{ turnaround.library_preparation|to_int }}</td>
+            </tr>
+            <tr>
+                <td>Pooling</td>
+                <td>{{ turnaround.pooling|to_int }}</td>
+            </tr>
+            <tr>
+                <td>Sequencing</td>
+                <td>{{ turnaround.sequencing|to_int }}</td>
+            </tr>
+            <tr>
+                <td>Complete Workflow</td>
+                <td>{{ turnaround.complete_workflow|to_int }}</td>
+            </tr>
+        </tbody>
+    </table>
+
 </div>
 {% endblock %}
 
