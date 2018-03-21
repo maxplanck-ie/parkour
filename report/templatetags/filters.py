@@ -14,3 +14,8 @@ def get_value(dictionary, key):
 @register.filter
 def none(value):
     return value if value is not None else ''
+
+
+@register.filter
+def to_int(value):
+    return int(value)

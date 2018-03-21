@@ -208,6 +208,96 @@ class Report:
 
         return OrderedDict(sorted(data.items()))
 
+    def get_turnaround(self):
+        columns = [
+            'library_preparation',
+            'pooling',
+            'sequencing',
+            'complete_workflow',
+        ]
+
+        query = '''
+        CREATE TEMPORARY TABLE IF NOT EXISTS temp1 AS SELECT
+            L.id,
+            CAST('Library' AS CHAR) rtype,
+            L.create_time date1,
+            CAST(NULL AS TIMESTAMPTZ) date2,
+            P.create_time date3
+        FROM library_library L
+        LEFT JOIN pooling_pooling P
+            ON L.id = P.library_id;
+
+        CREATE TEMPORARY TABLE IF NOT EXISTS temp2 AS SELECT
+            L.id,
+            MIN(F.create_time) date4
+        FROM library_library L
+        LEFT JOIN index_generator_pool_libraries PR
+            ON L.id = PR.library_id
+        LEFT JOIN index_generator_pool P
+            ON PR.pool_id = P.id
+        LEFT JOIN flowcell_lane La
+            ON P.id = La.pool_id
+        LEFT JOIN flowcell_flowcell_lanes FL
+            ON La.id = FL.lane_id
+        LEFT JOIN flowcell_flowcell F
+            ON FL.flowcell_id = F.id
+        GROUP BY L.id;
+
+        CREATE TEMPORARY TABLE IF NOT EXISTS temp3 AS SELECT
+            S.id,
+            CAST('Sample' AS CHAR) rtype,
+            S.create_time date1,
+            LP.create_time date2,
+            P.create_time date3
+        FROM sample_sample S
+        LEFT JOIN library_preparation_librarypreparation LP
+            ON S.id = LP.sample_id
+        LEFT JOIN pooling_pooling P
+            ON S.id = P.sample_id;
+
+        CREATE TEMPORARY TABLE IF NOT EXISTS temp4 AS SELECT
+            S.id,
+            MIN(F.create_time) date4
+        FROM sample_sample S
+        LEFT JOIN index_generator_pool_samples PR
+            ON S.id = PR.sample_id
+        LEFT JOIN index_generator_pool P
+            ON PR.pool_id = P.id
+        LEFT JOIN flowcell_lane L
+            ON P.id = L.pool_id
+        LEFT JOIN flowcell_flowcell_lanes FL
+            ON L.id = FL.lane_id
+        LEFT JOIN flowcell_flowcell F
+            ON FL.flowcell_id = F.id
+        GROUP BY S.id;
+
+        SELECT
+            FLOOR(AVG(CASE
+                WHEN rtype = 'Library' THEN NULL
+                ELSE DATE_PART('day', date2 - date1)
+            END)) "Library Preparation",
+            FLOOR(AVG(CASE
+                WHEN rtype = 'Library' THEN DATE_PART('day', date3 - date1)
+                ELSE DATE_PART('day', date3 - date2)
+            END)) "Pooling",
+            FLOOR(AVG(DATE_PART('day', date4 - date3))) "Sequencing",
+            FLOOR(AVG(DATE_PART('day', date4 - date1))) "Complete Workflow"
+        FROM (
+            SELECT *
+            FROM temp1 t1
+            LEFT JOIN temp2 t2 ON t1.id = t2.id
+            UNION ALL
+            SELECT *
+            FROM temp3 t1
+            LEFT JOIN temp4 t2 ON t1.id = t2.id
+        ) t
+        '''
+
+        with connection.cursor() as c:
+            c.execute(query)
+            return dict(zip(columns, c.fetchone()))
+        return dict(zip(columns, (0, 0, 0, 0)))
+
     @staticmethod
     def _get_data(counts):
         data = [
@@ -271,6 +361,9 @@ def report(request):
     # Count by PI and Sequencer
     data['sequencers_list'] = report.get_sequencers_list()
     data['libraries_on_sequencers_count'] = report.get_pi_sequencer_counts()
+
+    # Count days
+    data['turnaround'] = report.get_turnaround()
 
     return render(request, 'report.html', data)
 
