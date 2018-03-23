@@ -61,3 +61,4 @@ router.register(r'library_preparation_costs', LibraryPreparationCostsViewSet, ba
 router.register(r'sequencing_costs', SequencingCostsViewSet, base_name='sequencing-costs')
 
 router.register(r'run_statistics', RunStatisticsViewSet, base_name='run-statistics')
+router.register(r'analysis_list', FlowcellViewSet, base_name='analysis_list')

@@ -352,3 +352,18 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
             writer.writerow(row)
 
         return response
+
+    @list_route(methods=['get'])
+    def analysis_list(self, request):
+        flowcell_id = request.query_params.get('flowcell_id', '')
+        flowcell = Flowcell.objects.get(flowcell_id=flowcell_id)
+
+        # Iterate over requests
+        requests = dict()
+        for request in flowcell.requests.all():
+            rname = request.name
+            requests[rname] = dict()
+            for l in request.libraries.all():
+                requests[rname][l.name] = [l.library_type.name, l.library_protocol.name, l.organism.name]
+
+        return Response(requests)
