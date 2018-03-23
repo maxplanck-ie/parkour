@@ -356,6 +356,15 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
     @list_route(methods=['get'])
     def analysis_list(self, request):
         flowcell_id = request.query_params.get('flowcell_id', '')
+
+        # Don't throw an error if the flow cell ID is missing
+        exists = False
+        for _ in FlowcellViewSet().get_queryset():
+            if flowcell_id == _.flowcell_id:
+                exists = True
+                break
+        if not exists:
+            return Response({})
         flowcell = Flowcell.objects.get(flowcell_id=flowcell_id)
 
         # Iterate over requests
