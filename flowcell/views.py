@@ -360,6 +360,14 @@ class FlowcellAnalysisViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
 
     @list_route(methods=['get'])
     def analysis_list(self, request):
+        """
+        This returns a dictionary of the information required to run an automated 
+        analysis on the flow cell's contents
+
+        The keys of the dictionary are projects. The values are then a dictionary 
+        dictionaries with library name keys and tuple values of (sample/library 
+        name, library type, library protocol type, organism).
+        """
         flowcell_id = request.query_params.get('flowcell_id', '')
         flowcell = get_object_or_404(Flowcell, flowcell_id=flowcell_id)
 
@@ -369,6 +377,6 @@ class FlowcellAnalysisViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
             rname = request.name
             requests[rname] = dict()
             for l in request.libraries.all():
-                requests[rname][l.name] = [l.library_type.name, l.library_protocol.name, l.organism.name]
+                requests[rname][l.barcode] = [l.name, l.library_type.name, l.library_protocol.name, l.organism.name]
 
         return Response(requests)
