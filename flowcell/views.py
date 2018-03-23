@@ -8,6 +8,7 @@ import datetime
 from django.apps import apps
 from django.db.models import Prefetch, Q, F
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -353,19 +354,14 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
 
         return response
 
+
+class FlowcellAnalysisViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
+    permission_classes = [IsAdminUser]
+
     @list_route(methods=['get'])
     def analysis_list(self, request):
         flowcell_id = request.query_params.get('flowcell_id', '')
-
-        # Don't throw an error if the flow cell ID is missing
-        exists = False
-        for _ in FlowcellViewSet().get_queryset():
-            if flowcell_id == _.flowcell_id:
-                exists = True
-                break
-        if not exists:
-            return Response({})
-        flowcell = Flowcell.objects.get(flowcell_id=flowcell_id)
+        flowcell = get_object_or_404(Flowcell, flowcell_id=flowcell_id)
 
         # Iterate over requests
         requests = dict()
