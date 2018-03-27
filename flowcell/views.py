@@ -378,5 +378,7 @@ class FlowcellAnalysisViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
             requests[rname] = dict()
             for l in request.libraries.all():
                 requests[rname][l.barcode] = [l.name, l.library_type.name, l.library_protocol.name, l.organism.name]
+            for l in request.samples.all():
+                requests[rname][l.barcode] = [l.name, l.library_type.name, l.library_protocol.name, l.organism.name]
 
         return Response(requests)
