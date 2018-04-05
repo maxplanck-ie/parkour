@@ -3,6 +3,22 @@ Ext.define('MainHub.model.statistics.Sequences', {
 
   fields: [
     {
+      name: 'pk',
+      type: 'int'
+    },
+    {
+      name: 'flowcell_id',
+      type: 'string'
+    },
+    {
+      name: 'create_time',
+      type: 'date'
+    },
+    {
+      name: 'sequencer',
+      type: 'string'
+    },
+    {
       name: 'request',
       type: 'string'
     },

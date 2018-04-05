@@ -110,7 +110,16 @@ Ext.define('MainHub.view.statistics.RunStatistics', {
       ]
     },
 
-    // plugins: 'gridfilters',
+    plugins: [
+      {
+        ptype: 'bufferedrenderer',
+        trailingBufferZone: 100,
+        leadingBufferZone: 100
+      },
+      {
+        ptype: 'gridfilters'
+      }
+    ],
 
     features: [{
       ftype: 'grouping',
