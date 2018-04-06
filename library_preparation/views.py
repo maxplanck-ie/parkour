@@ -32,7 +32,7 @@ logger = logging.getLogger('db')
 
 class LibraryPreparationViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAdminUser]
-    authentication_classes = [CsrfExemptSessionAuthentication]
+    # authentication_classes = [CsrfExemptSessionAuthentication]
     serializer_class = LibraryPreparationSerializer
 
     def get_queryset(self):
@@ -85,7 +85,8 @@ class LibraryPreparationViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
         data = sorted(serializer.data, key=lambda x: x['barcode'][3:])
         return Response(data)
 
-    @action(methods=['post'], detail=False)
+    @action(methods=['post'], detail=False,
+            authentication_classes=[CsrfExemptSessionAuthentication])
     # @authentication_classes((CsrfExemptSessionAuthentication))
     def download_benchtop_protocol(self, request):
         """ Generate Benchtop Protocol as XLS file for selected samples. """

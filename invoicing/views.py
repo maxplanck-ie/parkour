@@ -40,7 +40,6 @@ Flowcell = apps.get_model('flowcell', 'Flowcell')
 
 
 class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
-    authentication_classes = [CsrfExemptSessionAuthentication]
     permission_classes = [IsAdminUser]
     serializer_class = InvoicingSerializer
 
@@ -107,7 +106,8 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
 
         return Response(data)
 
-    @action(methods=['post'], detail=False)
+    @action(methods=['post'], detail=False,
+            authentication_classes=[CsrfExemptSessionAuthentication])
     def upload(self, request):
         """ Upload Invoicing Report. """
         month = request.data.get('month', None)

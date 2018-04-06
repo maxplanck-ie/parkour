@@ -38,7 +38,6 @@ logger = logging.getLogger('db')
 
 class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ViewSet):
     permission_classes = [IsAdminUser]
-    authentication_classes = [CsrfExemptSessionAuthentication]
     library_model = Library
     sample_model = Sample
     library_serializer = PoolingLibrarySerializer
@@ -175,7 +174,8 @@ class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ViewSet):
         data = sorted(data, key=lambda x: x['barcode'][3:])
         return Response(data)
 
-    @action(methods=['post'], detail=False)
+    @action(methods=['post'], detail=False,
+            authentication_classes=[CsrfExemptSessionAuthentication])
     def download_benchtop_protocol(self, request):
         """ Generate Benchtop Protocol as XLS file for selected records. """
         response = HttpResponse(content_type='application/ms-excel')
@@ -374,7 +374,8 @@ class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ViewSet):
         wb.save(response)
         return response
 
-    @action(methods=['post'], detail=False)
+    @action(methods=['post'], detail=False,
+            authentication_classes=[CsrfExemptSessionAuthentication])
     def download_pooling_template(self, request):
         """ Generate Pooling Template as XLS file for selected records. """
         response = HttpResponse(content_type='application/ms-excel')
