@@ -7,7 +7,7 @@ from django.http import HttpResponse
 
 from rest_framework import viewsets
 from rest_framework.response import Response
-from rest_framework.decorators import list_route
+from rest_framework.decorators import action
 # from rest_framework.decorators import authentication_classes
 from rest_framework.permissions import IsAdminUser
 
@@ -85,7 +85,7 @@ class LibraryPreparationViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
         data = sorted(serializer.data, key=lambda x: x['barcode'][3:])
         return Response(data)
 
-    @list_route(methods=['post'])
+    @action(methods=['post'], detail=False)
     # @authentication_classes((CsrfExemptSessionAuthentication))
     def download_benchtop_protocol(self, request):
         """ Generate Benchtop Protocol as XLS file for selected samples. """

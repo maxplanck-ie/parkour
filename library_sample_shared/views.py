@@ -4,7 +4,7 @@ import logging
 from django.apps import apps
 from rest_framework import viewsets
 from rest_framework.response import Response
-from rest_framework.decorators import list_route
+from rest_framework.decorators import action
 
 from common.views import StandardResultsSetPagination
 
@@ -99,13 +99,13 @@ class IndexViewSet(viewsets.ViewSet):
         data = sorted(indices, key=lambda x: x['index_id'])
         return Response(data)
 
-    @list_route(methods=['get'])
+    @action(methods=['get'], detail=False)
     def i7(self, request):
         """ Get the list of indices i7. """
         data = self._get_sorted_indices(IndexI7, IndexI7Serializer)
         return Response(data)
 
-    @list_route(methods=['get'])
+    @action(methods=['get'], detail=False)
     def i5(self, request):
         """ Get the list of indices i5. """
         data = self._get_sorted_indices(IndexI5, IndexI5Serializer)
@@ -246,7 +246,7 @@ class LibrarySampleBaseViewSet(viewsets.ModelViewSet):
                     'message': 'Invalid payload.',
                 }, 400)
 
-    @list_route(methods=['post'])
+    @action(methods=['post'], detail=False)
     def edit(self, request):
         """ Update multiple libraries/samples. """
         post_data = json.loads(request.POST.get('data', '[]'))

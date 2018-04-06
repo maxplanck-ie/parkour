@@ -10,7 +10,7 @@ from django.db.models import Q, Prefetch, Min
 
 from rest_framework import mixins, viewsets
 from rest_framework.response import Response
-from rest_framework.decorators import list_route
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser
 
 from month import Month
@@ -79,7 +79,7 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
 
         return queryset
 
-    @list_route(methods=['get'])
+    @action(methods=['get'], detail=False)
     def billing_periods(self, request):
         flowcells = Flowcell.objects.all()
         data = []
@@ -107,7 +107,7 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
 
         return Response(data)
 
-    @list_route(methods=['post'])
+    @action(methods=['post'], detail=False)
     def upload(self, request):
         """ Upload Invoicing Report. """
         month = request.data.get('month', None)
@@ -132,7 +132,7 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
 
         return JsonResponse({'success': True})
 
-    @list_route(methods=['get'])
+    @action(methods=['get'], detail=False)
     def download(self, request):
         """ Download Invoicing Report. """
         today = datetime.date.today()

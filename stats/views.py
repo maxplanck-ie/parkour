@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets
 from rest_framework.response import Response
-from rest_framework.decorators import list_route
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser
 
 from common.utils import get_date_range
@@ -97,7 +97,7 @@ class RunStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
         data = list(itertools.chain(*serializer.data))
         return Response(data)
 
-    @list_route(methods=['post'])
+    @action(methods=['post'], detail=False)
     def upload(self, request):
         flowcell_id = request.data.get('flowcell_id', '')
         matrix = request.data.get('matrix', '')
@@ -204,7 +204,7 @@ class SequencesStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
         data = list(itertools.chain(*serializer.data))
         return Response(data)
 
-    @list_route(methods=['post'])
+    @action(methods=['post'], detail=False)
     def upload(self, request):
         flowcell_id = request.data.get('flowcell_id', '')
         sequences = request.data.get('sequences', '')
