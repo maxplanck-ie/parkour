@@ -153,8 +153,11 @@ class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ViewSet):
             index_type__pk__in=index_types,
         ).select_related('index_type', 'index1', 'index2').distinct()
         coordinates_map = {
-            (ip.index_type.pk, ip.index1.index_id, ip.index2.index_id):
-            ip.coordinate
+            (
+                ip.index_type.pk,
+                ip.index1.index_id,
+                ip.index2.index_id if ip.index2 else '',
+            ): ip.coordinate
             for ip in index_pairs
         }
 
