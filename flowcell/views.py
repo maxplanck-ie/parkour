@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets
 from rest_framework.response import Response
-from rest_framework.decorators import list_route
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser
 
 from xlwt import Workbook, XFStyle
@@ -164,7 +164,7 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
                 'errors': serializer.errors,
             }, 400)
 
-    @list_route(methods=['get'])
+    @action(methods=['get'], detail=False)
     def pool_list(self, request):
         data = []
 
@@ -187,7 +187,7 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
 
         return Response(data)
 
-    @list_route(methods=['post'])
+    @action(methods=['post'], detail=False)
     def download_benchtop_protocol(self, request):
         """ Generate Benchtop Protocol as XLS file for selected lanes. """
         ids = json.loads(request.data.get('ids', '[]'))
@@ -252,7 +252,7 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
 
         return response
 
-    @list_route(methods=['post'])
+    @action(methods=['post'], detail=False)
     def download_sample_sheet(self, request):
         """ Generate Benchtop Protocol as XLS file for selected lanes. """
 

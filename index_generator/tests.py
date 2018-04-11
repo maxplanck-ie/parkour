@@ -1132,7 +1132,7 @@ class TestIndexGenerator(BaseTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertFalse(data['success'])
         self.assertEqual(
-            data['message'], 'No libraries nor samples have been provided.')
+            data['message'], 'No libraries nor samples have been provided')
 
     def test_save_pool_invalid_or_missing_pool_size(self):
         sample = create_sample(

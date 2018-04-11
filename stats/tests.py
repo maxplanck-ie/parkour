@@ -125,3 +125,95 @@ class TestRunStatistics(BaseTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertFalse(data['success'])
         self.assertEqual(data['message'], 'Invalid matrix data.')
+
+
+class TestSequencesStatistics(BaseTestCase):
+    def setUp(self):
+        self.user = self.create_user()
+        self.login()
+
+    def test_flowcell_list(self):
+        library1 = create_library(get_random_name(), 4)
+        library2 = create_library(get_random_name(), 4)
+        sample1 = create_sample(get_random_name(), 4)
+        sample2 = create_sample(get_random_name(), 4)
+
+        request = create_request(self.user)
+        request.libraries.add(library1)
+        request.libraries.add(library2)
+        request.samples.add(sample1)
+        request.samples.add(sample2)
+
+        pool = create_pool(self.user)
+        pool.libraries.add(library1)
+        pool.libraries.add(library2)
+        pool.samples.add(sample1)
+        pool.samples.add(sample2)
+
+        sequencer = create_sequencer(get_random_name(), lanes=8)
+        flowcell = create_flowcell(get_random_name(), sequencer)
+        sequences = [
+            {'barcode': library1.barcode},
+            {'barcode': library2.barcode},
+            {'barcode': sample1.barcode},
+            {'barcode': sample2.barcode},
+        ]
+
+        lanes = []
+        for i in range(8):
+            name = 'Lane {}'.format(i + 1)
+            lane = Lane(name=name, pool=pool)
+            lane.save()
+            lanes.append(lane.pk)
+
+        flowcell.lanes.add(*lanes)
+        flowcell.sequences = sequences
+        flowcell.save()
+
+        response = self.client.get('/api/sequences_statistics/')
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(data), 4)
+        self.assertEqual(data[0]['sequencer'], flowcell.sequencer.name)
+
+    def test_upload_flowcell_sequences(self):
+        sequencer = create_sequencer(get_random_name(), lanes=8)
+        flowcell = create_flowcell(get_random_name(), sequencer)
+
+        sequences = [
+            {'barcode': 'barcode'},
+            {'barcode': 'barcode'},
+        ]
+
+        response = self.client.post('/api/sequences_statistics/upload/', {
+            'flowcell_id': flowcell.flowcell_id,
+            'sequences': json.dumps(sequences),
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()['success'])
+
+        updated_flowcell = Flowcell.objects.get(pk=flowcell.pk)
+        self.assertEqual(updated_flowcell.sequences, sequences)
+
+    def test_upload_flowcell_sequences_invalid_flowcell_id(self):
+        flowcell_id = get_random_name()
+        response = self.client.post('/api/sequences_statistics/upload/', {
+            'flowcell_id': flowcell_id,
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['detail'], 'Not found.')
+
+    def test_upload_flowcell_sequences_invalid_data(self):
+        sequencer = create_sequencer(get_random_name(), lanes=8)
+        flowcell = create_flowcell(get_random_name(), sequencer)
+
+        response = self.client.post('/api/sequences_statistics/upload/', {
+            'flowcell_id': flowcell.flowcell_id,
+        })
+
+        data = response.json()
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(data['success'])
+        self.assertEqual(data['message'], 'Invalid sequences data.')

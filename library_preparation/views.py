@@ -7,7 +7,7 @@ from django.http import HttpResponse
 
 from rest_framework import viewsets
 from rest_framework.response import Response
-from rest_framework.decorators import list_route
+from rest_framework.decorators import action
 # from rest_framework.decorators import authentication_classes
 from rest_framework.permissions import IsAdminUser
 
@@ -32,7 +32,7 @@ logger = logging.getLogger('db')
 
 class LibraryPreparationViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAdminUser]
-    authentication_classes = [CsrfExemptSessionAuthentication]
+    # authentication_classes = [CsrfExemptSessionAuthentication]
     serializer_class = LibraryPreparationSerializer
 
     def get_queryset(self):
@@ -66,8 +66,11 @@ class LibraryPreparationViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
             index_type__pk__in=index_types,
         ).select_related('index_type', 'index1', 'index2').distinct()
         coordinates_map = {
-            (ip.index_type.pk, ip.index1.index_id, ip.index2.index_id):
-            ip.coordinate
+            (
+                ip.index_type.pk,
+                ip.index1.index_id,
+                ip.index2.index_id if ip.index2 else '',
+            ): ip.coordinate
             for ip in index_pairs
         }
 
@@ -85,7 +88,8 @@ class LibraryPreparationViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
         data = sorted(serializer.data, key=lambda x: x['barcode'][3:])
         return Response(data)
 
-    @list_route(methods=['post'])
+    @action(methods=['post'], detail=False,
+            authentication_classes=[CsrfExemptSessionAuthentication])
     # @authentication_classes((CsrfExemptSessionAuthentication))
     def download_benchtop_protocol(self, request):
         """ Generate Benchtop Protocol as XLS file for selected samples. """

@@ -9,7 +9,7 @@ from django.db.models import Q, Prefetch
 
 from rest_framework import viewsets
 from rest_framework.response import Response
-from rest_framework.decorators import list_route
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser
 
 from xlwt import Workbook, XFStyle, Formula
@@ -38,7 +38,6 @@ logger = logging.getLogger('db')
 
 class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ViewSet):
     permission_classes = [IsAdminUser]
-    authentication_classes = [CsrfExemptSessionAuthentication]
     library_model = Library
     sample_model = Sample
     library_serializer = PoolingLibrarySerializer
@@ -154,8 +153,11 @@ class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ViewSet):
             index_type__pk__in=index_types,
         ).select_related('index_type', 'index1', 'index2').distinct()
         coordinates_map = {
-            (ip.index_type.pk, ip.index1.index_id, ip.index2.index_id):
-            ip.coordinate
+            (
+                ip.index_type.pk,
+                ip.index1.index_id,
+                ip.index2.index_id if ip.index2 else '',
+            ): ip.coordinate
             for ip in index_pairs
         }
 
@@ -175,7 +177,8 @@ class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ViewSet):
         data = sorted(data, key=lambda x: x['barcode'][3:])
         return Response(data)
 
-    @list_route(methods=['post'])
+    @action(methods=['post'], detail=False,
+            authentication_classes=[CsrfExemptSessionAuthentication])
     def download_benchtop_protocol(self, request):
         """ Generate Benchtop Protocol as XLS file for selected records. """
         response = HttpResponse(content_type='application/ms-excel')
@@ -374,7 +377,8 @@ class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ViewSet):
         wb.save(response)
         return response
 
-    @list_route(methods=['post'])
+    @action(methods=['post'], detail=False,
+            authentication_classes=[CsrfExemptSessionAuthentication])
     def download_pooling_template(self, request):
         """ Generate Pooling Template as XLS file for selected records. """
         response = HttpResponse(content_type='application/ms-excel')

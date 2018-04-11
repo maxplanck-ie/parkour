@@ -5,7 +5,7 @@ from rest_framework.serializers import ModelSerializer, SerializerMethodField
 Flowcell = apps.get_model('flowcell', 'Flowcell')
 
 
-class FlowcellSerializer(ModelSerializer):
+class RunsSerializer(ModelSerializer):
     sequencer = SerializerMethodField()
 
     class Meta:
@@ -55,3 +55,65 @@ class FlowcellSerializer(ModelSerializer):
             }, **item})
 
         return sorted(result, key=lambda x: x['name'])
+
+
+class SequencesSerializer(ModelSerializer):
+    sequencer = SerializerMethodField()
+
+    class Meta:
+        model = Flowcell
+        fields = (
+            'pk',
+            'flowcell_id',
+            'create_time',
+            'sequencer',
+            'sequences',
+        )
+
+    def get_sequencer(self, obj):
+        return obj.sequencer.name
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        result = []
+
+        pools, lanes = set(), set()
+        for l in instance.fetched_lanes:
+            pools.add(l.pool.name)
+            lanes.add(l.name.split(' ')[1])
+        pools = ', '.join(sorted(list(pools)))
+        lanes = ', '.join(sorted(list(lanes)))
+
+        items, processed_requests = {}, {}
+        for request in instance.fetched_requests:
+            if request.name not in processed_requests:
+                records = request.fetched_libraries + request.fetched_samples
+                for record in records:
+                    items[record.barcode] = {
+                        'name': record.name,
+                        'barcode': record.barcode,
+                        'request': request.name,
+                        'library_protocol': record.library_protocol.name,
+                        'library_type': record.library_type.name,
+                        'pool': pools,
+                        'lane': lanes,
+                    }
+                processed_requests[request.name] = True
+
+        for item in data['sequences']:
+            obj = items.get(item['barcode'], {})
+            result.append({**{
+                'pk': data['pk'],
+                'flowcell_id': data['flowcell_id'],
+                'create_time': data['create_time'],
+                'sequencer': data['sequencer'],
+                'request': obj.get('request', ''),
+                'barcode': obj.get('barcode', ''),
+                'name': obj.get('name', ''),
+                'lane': obj.get('lane', ''),
+                'pool': obj.get('pool', ''),
+                'library_protocol': obj.get('library_protocol', ''),
+                'library_type': obj.get('library_type', ''),
+            }, **item})
+
+        return sorted(result, key=lambda x: x['barcode'][3:])

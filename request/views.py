@@ -15,7 +15,7 @@ from django.core.mail import send_mail
 from django.db.models import Prefetch
 
 from rest_framework import viewsets, filters
-from rest_framework.decorators import detail_route, permission_classes
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAdminUser
@@ -34,26 +34,6 @@ Library = apps.get_model('library', 'Library')
 Sample = apps.get_model('sample', 'Sample')
 
 logger = logging.getLogger('db')
-
-
-# def handle_request_id_exceptions(func):
-#     def wrapper(*args, **kwargs):
-#         try:
-#             return func(*args, **kwargs)
-
-#         except ValueError:
-#             return Response({
-#                 'success': False,
-#                 'message': 'Id is not provided.',
-#             }, 400)
-
-#         except Request.DoesNotExist:
-#             return Response({
-#                 'success': False,
-#                 'message': 'Request does not exist.',
-#             }, 404)
-
-#     return wrapper
 
 
 class PDF(FPDF):  # pragma: no cover
@@ -221,7 +201,6 @@ def upload_files(request):
 class RequestViewSet(viewsets.ModelViewSet):
     serializer_class = RequestSerializer
     pagination_class = StandardResultsSetPagination
-    authentication_classes = [CsrfExemptSessionAuthentication]
 
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name', 'description', 'user__first_name',
@@ -281,7 +260,7 @@ class RequestViewSet(viewsets.ModelViewSet):
                 'errors': serializer.errors,
             }, 400)
 
-    @detail_route(methods=['post'])
+    @action(methods=['post'], detail=True)
     def edit(self, request, pk=None):
         """ Update request with a given id. """
         instance = self.get_object()
@@ -301,7 +280,7 @@ class RequestViewSet(viewsets.ModelViewSet):
                 'errors': serializer.errors,
             }, 400)
 
-    @detail_route(methods=['post'])
+    @action(methods=['post'], detail=True)
     def samples_submitted(self, request, pk=None):
         instance = self.get_object()
         post_data = self._get_post_data(request)
@@ -309,7 +288,7 @@ class RequestViewSet(viewsets.ModelViewSet):
         instance.save(update_fields=['samples_submitted'])
         return Response({'success': True})
 
-    @detail_route(methods=['get'])
+    @action(methods=['get'], detail=True)
     def get_records(self, request, pk=None):
         """ Get the list of record's submitted libraries and samples. """
         libraries_qs = Library.objects.all().only(
@@ -339,7 +318,7 @@ class RequestViewSet(viewsets.ModelViewSet):
         data = sorted(data, key=lambda x: x['barcode'][3:])
         return Response(data)
 
-    @detail_route(methods=['get'])
+    @action(methods=['get'], detail=True)
     def get_files(self, request, pk=None):
         """ Get the list of attached files for a request with a given id. """
         instance = self.get_object()
@@ -347,7 +326,7 @@ class RequestViewSet(viewsets.ModelViewSet):
         serializer = RequestFileSerializer(files, many=True)
         return Response(serializer.data)
 
-    @detail_route(methods=['get'])
+    @action(methods=['get'], detail=True)
     def download_deep_sequencing_request(self, request, pk=None):  # pragma: no cover
         """ Generate a deep sequencing request form in PDF. """
         instance = self.get_object()
@@ -436,7 +415,8 @@ class RequestViewSet(viewsets.ModelViewSet):
 
         return response
 
-    @detail_route(methods=['post'])
+    @action(methods=['post'], detail=True,
+            authentication_classes=[CsrfExemptSessionAuthentication])
     def upload_deep_sequencing_request(self, request, pk=None):
         """
         Upload a deep sequencing request with the PI's signature and
@@ -465,8 +445,7 @@ class RequestViewSet(viewsets.ModelViewSet):
              'path': file_path
         })
 
-    @detail_route(methods=['post'])
-    @permission_classes((IsAdminUser))
+    @action(methods=['post'], detail=True, permission_classes=[IsAdminUser])
     def send_email(self, request, pk=None):  # pragma: no cover
         """ Send an email to the user. """
         error = ''
@@ -508,8 +487,7 @@ class RequestViewSet(viewsets.ModelViewSet):
 
         return JsonResponse({'success': not error, 'error': error})
 
-    @detail_route(methods=['get'])
-    @permission_classes((IsAdminUser))
+    @action(methods=['get'], detail=True)
     def download_complete_report(self, request, pk=None):
         instance = self.get_object()
         pdf = Report('Deep Sequencing Request')

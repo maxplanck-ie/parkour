@@ -1,7 +1,7 @@
 import json
 
 from rest_framework.response import Response
-from rest_framework.decorators import list_route
+from rest_framework.decorators import action
 
 
 class MultiEditMixin:
@@ -9,7 +9,7 @@ class MultiEditMixin:
     Provides the `edit()` action, which updates multiple objects.
     """
 
-    @list_route(methods=['post'])
+    @action(methods=['post'], detail=False)
     def edit(self, request):
         """ Update multiple objects. """
 
@@ -74,7 +74,7 @@ class LibrarySampleMultiEditMixin(object):
     both Library and Sample instances.
     """
 
-    @list_route(methods=['post'])
+    @action(methods=['post'], detail=False)
     def edit(self, request):
         """ Update multiple libraries or samples. """
         if request.is_ajax():

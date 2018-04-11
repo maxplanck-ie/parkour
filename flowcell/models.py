@@ -44,6 +44,7 @@ class Flowcell(DateTimeMixin):
     requests = models.ManyToManyField(
         Request, related_name='flowcell', blank=True)
     matrix = JSONField('Flowcell Matrix', blank=True, null=True)
+    sequences = JSONField('Sequences', blank=True, null=True)
 
     def __str__(self):
         return self.flowcell_id

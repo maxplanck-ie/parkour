@@ -1,34 +1,31 @@
-Ext.define('MainHub.view.statistics.RunStatistics', {
+Ext.define('MainHub.view.statistics.Sequences', {
   extend: 'Ext.container.Container',
-  xtype: 'run-statistics',
+  xtype: 'sequences-statistics',
 
   requires: [
     'MainHub.components.BaseGrid',
-    'MainHub.components.MonthPicker',
     'MainHub.components.SearchField',
-    'MainHub.view.statistics.RunStatisticsController',
+    'MainHub.view.statistics.SequencesController',
     'Ext.ux.DateRangePicker'
   ],
 
-  controller: 'run-statistics',
+  controller: 'sequences-statistics',
 
   anchor: '100% -1',
   layout: 'fit',
 
   items: [{
     xtype: 'basegrid',
-    id: 'run-statistics-grid',
-    itemId: 'run-statistics-grid',
-    store: 'RunStatistics',
+    store: 'SequencesStatistics',
     height: Ext.Element.getViewportHeight() - 64,
 
     header: {
-      title: 'Run Statistics',
+      title: 'Sequences',
       items: [{
         xtype: 'parkoursearchfield',
-        store: 'RunStatistics',
+        store: 'SequencesStatistics',
         emptyText: 'Search',
-        paramName: 'pool',
+        // paramName: 'pool',
         width: 200
       }]
     },
@@ -40,8 +37,26 @@ Ext.define('MainHub.view.statistics.RunStatistics', {
       },
       items: [
         {
+          text: 'Request',
+          dataIndex: 'request',
+          renderer: 'gridCellTooltipRenderer',
+          filter: { type: 'string' }
+        },
+        {
+          text: 'Barcode',
+          dataIndex: 'barcode',
+          filter: { type: 'string' }
+        },
+        {
+          text: 'Name',
+          dataIndex: 'name',
+          renderer: 'gridCellTooltipRenderer',
+          filter: { type: 'string' }
+        },
+        {
           text: 'Lane',
-          dataIndex: 'name'
+          dataIndex: 'lane',
+          filter: { type: 'string' }
         },
         {
           text: 'Pool',
@@ -49,62 +64,59 @@ Ext.define('MainHub.view.statistics.RunStatistics', {
           filter: { type: 'string' }
         },
         {
-          text: 'Request',
-          dataIndex: 'request',
+          text: 'Library Protocol',
+          dataIndex: 'library_protocol',
+          renderer: 'gridCellTooltipRenderer',
           filter: { type: 'string' }
-        },
-        {
-          text: 'Prep. Method',
-          dataIndex: 'library_preparation',
-          tooltip: 'Preparation Method',
-          filter: { type: 'list' }
         },
         {
           text: 'Library Type',
           dataIndex: 'library_type',
-          filter: { type: 'list' }
+          renderer: 'gridCellTooltipRenderer',
+          filter: { type: 'string' }
         },
         {
-          text: 'Loading Concentr.',
-          dataIndex: 'loading_concentration',
-          tooltip: 'Loading Concentration',
+          text: 'Reads PF (M), requested',
+          tooltip: 'Reads PF (M), requested',
+          dataIndex: 'reads_pf_requested',
           filter: { type: 'number' }
         },
         {
-          text: 'Cluster PF (%)',
-          dataIndex: 'cluster_pf',
+          text: 'Reads PF (M), sequenced',
+          tooltip: 'Reads PF (M), sequenced',
+          dataIndex: 'reads_pf_sequenced',
           filter: { type: 'number' }
         },
         {
-          text: 'Reads PF (M)',
-          dataIndex: 'reads_pf',
-          filter: { type: 'number' },
-          renderer: function (value) {
-            if (value) {
-              value = (value / 1000000).toFixed(1);
-            }
-            return value;
-          }
-        },
-        {
-          text: 'Undet. Indices (%)',
-          dataIndex: 'undetermined_indices',
-          tooltip: 'Undetermined Indices (%)',
+          text: 'confident off-species reads',
+          tooltip: 'confident off-species reads',
+          dataIndex: 'confident_reads',
           filter: { type: 'number' }
         },
         {
-          text: '% Spike In',
-          dataIndex: 'phix',
+          text: '% Optical Duplicates',
+          tooltip: '% Optical Duplicates',
+          dataIndex: 'optical_duplicates',
+          // renderer: me.percentageRenderer,
           filter: { type: 'number' }
         },
         {
-          text: 'Read 1 % >=Q30',
-          dataIndex: 'read_1',
+          text: '% dupped reads',
+          tooltip: '% dupped reads',
+          dataIndex: 'dupped_reads',
+          // renderer: me.percentageRenderer,
           filter: { type: 'number' }
         },
         {
-          text: 'Read 2 (I) % >=Q30',
-          dataIndex: 'read_2',
+          text: '% mapped reads',
+          tooltip: '% mapped reads',
+          dataIndex: 'mapped_reads',
+          // renderer: me.percentageRenderer,
+          filter: { type: 'number' }
+        },
+        {
+          text: 'Insert Size',
+          dataIndex: 'insert_size',
           filter: { type: 'number' }
         }
       ]
@@ -127,8 +139,7 @@ Ext.define('MainHub.view.statistics.RunStatistics', {
       enableGroupingMenu: false,
       groupHeaderTpl: [
         '<strong>{children:this.getFlowcellId} ' +
-        '({children:this.getDate}, {children:this.getSequencer}, ' +
-        '{children:this.getReadLength})</strong>',
+        '({children:this.getDate}, {children:this.getSequencer})</strong>',
         {
           getFlowcellId: function (children) {
             return children[0].get('flowcell_id');
@@ -138,9 +149,6 @@ Ext.define('MainHub.view.statistics.RunStatistics', {
           },
           getSequencer: function (children) {
             return children[0].get('sequencer');
-          },
-          getReadLength: function (children) {
-            return children[0].get('read_length');
           }
         }
       ]

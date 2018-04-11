@@ -23,7 +23,7 @@ from invoicing.views import (
     LibraryPreparationCostsViewSet,
     SequencingCostsViewSet,
 )
-from stats.views import RunStatisticsViewSet
+from stats.views import RunStatisticsViewSet, SequencesStatisticsViewSet
 
 
 router = routers.DefaultRouter()
@@ -62,3 +62,4 @@ router.register(r'sequencing_costs', SequencingCostsViewSet, base_name='sequenci
 
 router.register(r'run_statistics', RunStatisticsViewSet, base_name='run-statistics')
 router.register(r'analysis_list', FlowcellAnalysisViewSet, base_name='analysis_list')
+router.register(r'sequences_statistics', SequencesStatisticsViewSet, base_name='sequences-statistics')
