@@ -358,7 +358,7 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
 class FlowcellAnalysisViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAdminUser]
 
-    @list_route(methods=['get'])
+    @action(methods=['get'], detail=False)
     def analysis_list(self, request):
         """
         This returns a dictionary of the information required to run an automated 
