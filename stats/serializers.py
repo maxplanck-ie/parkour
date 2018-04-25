@@ -77,26 +77,31 @@ class SequencesSerializer(ModelSerializer):
         data = super().to_representation(instance)
         result = []
 
-        pools, lanes = set(), set()
-        for l in instance.fetched_lanes:
-            pools.add(l.pool.name)
-            lanes.add(l.name.split(' ')[1])
-        pools = ', '.join(sorted(list(pools)))
-        lanes = ', '.join(sorted(list(lanes)))
+        pools, lanes = {}, {}
+        for lane in instance.fetched_lanes:
+            pool = lane.pool
+            records = pool.fetched_libraries + pool.fetched_samples
+            for record in records:
+                barcode = record.barcode
+                pools[barcode] = pool.name
+                if barcode not in lanes:
+                    lanes[barcode] = []
+                lanes[barcode].append(lane.name.split(' ')[1])
 
         items, processed_requests = {}, {}
         for request in instance.fetched_requests:
             if request.name not in processed_requests:
                 records = request.fetched_libraries + request.fetched_samples
                 for record in records:
-                    items[record.barcode] = {
+                    barcode = record.barcode
+                    items[barcode] = {
                         'name': record.name,
                         'barcode': record.barcode,
                         'request': request.name,
                         'library_protocol': record.library_protocol.name,
                         'library_type': record.library_type.name,
-                        'pool': pools,
-                        'lane': lanes,
+                        'pool': pools.get(barcode, ''),
+                        'lane': lanes.get(barcode, ''),
                     }
                 processed_requests[request.name] = True
 

@@ -79,39 +79,42 @@ Ext.define('MainHub.view.statistics.Sequences', {
           text: 'Reads PF (M), requested',
           tooltip: 'Reads PF (M), requested',
           dataIndex: 'reads_pf_requested',
+          renderer: floatRenderer,
           filter: { type: 'number' }
         },
         {
           text: 'Reads PF (M), sequenced',
           tooltip: 'Reads PF (M), sequenced',
           dataIndex: 'reads_pf_sequenced',
+          renderer: floatRenderer,
           filter: { type: 'number' }
         },
         {
           text: 'confident off-species reads',
           tooltip: 'confident off-species reads',
           dataIndex: 'confident_reads',
+          renderer: floatRenderer,
           filter: { type: 'number' }
         },
         {
           text: '% Optical Duplicates',
           tooltip: '% Optical Duplicates',
           dataIndex: 'optical_duplicates',
-          // renderer: me.percentageRenderer,
+          renderer: floatRenderer,
           filter: { type: 'number' }
         },
         {
           text: '% dupped reads',
           tooltip: '% dupped reads',
           dataIndex: 'dupped_reads',
-          // renderer: me.percentageRenderer,
+          renderer: floatRenderer,
           filter: { type: 'number' }
         },
         {
           text: '% mapped reads',
           tooltip: '% mapped reads',
           dataIndex: 'mapped_reads',
-          // renderer: me.percentageRenderer,
+          renderer: floatRenderer,
           filter: { type: 'number' }
         },
         {
@@ -172,3 +175,10 @@ Ext.define('MainHub.view.statistics.Sequences', {
     }]
   }]
 });
+
+function floatRenderer (value) {
+  if (value) {
+    value = (value / 1000000).toFixed(2);
+  }
+  return value;
+}

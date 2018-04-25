@@ -165,10 +165,25 @@ class SequencesStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
             'samples',
         )
 
-        lanes_qs = Lane.objects.select_related('pool').only(
+        lanes_qs = Lane.objects.select_related(
+            'pool'
+        ).prefetch_related(
+            Prefetch(
+                'pool__libraries',
+                queryset=Library.objects.only('barcode'),
+                to_attr='fetched_libraries',
+            ),
+            Prefetch(
+                'pool__samples',
+                queryset=Sample.objects.only('barcode'),
+                to_attr='fetched_samples',
+            ),
+        ).only(
             'name',
             'pool__name',
-        )
+            'pool__libraries',
+            'pool__samples',
+        ).order_by('name')
 
         queryset = Flowcell.objects.exclude(
             sequences__isnull=True,
