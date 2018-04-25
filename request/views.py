@@ -32,6 +32,8 @@ from .serializers import RequestSerializer, RequestFileSerializer
 User = get_user_model()
 Library = apps.get_model('library', 'Library')
 Sample = apps.get_model('sample', 'Sample')
+LibraryPreparation = apps.get_model(
+    'library_preparation', 'LibraryPreparation')
 
 logger = logging.getLogger('db')
 
@@ -114,7 +116,7 @@ class Report(FPDF, HTMLMixin):
             self.cell(0, 10, text)
         self.ln(6)
 
-    def generate_html(self, data):
+    def generate_html_table(self, data):
         if len(data) == 0:
             return ''
 
@@ -490,6 +492,11 @@ class RequestViewSet(viewsets.ModelViewSet):
     @action(methods=['get'], detail=True)
     def download_complete_report(self, request, pk=None):
         instance = self.get_object()
+        records = sorted(list(itertools.chain(
+            instance.libraries.all(),
+            instance.samples.all(),
+        )), key=lambda x: x.barcode[3:])
+
         pdf = Report('Deep Sequencing Request')
         pdf.set_draw_color(217, 217, 217)
         pdf.alias_nb_pages()
@@ -536,18 +543,31 @@ class RequestViewSet(viewsets.ModelViewSet):
                        'Analyzer) can be found as attachment to each ' +
                        'request in Parkour (parkour.ie-freiburg.mpg.de).',
                        multi=True)
-        # Temporary
-        data = [OrderedDict({
-            'Date': '-',
-            'ID': '-',
-            'Name': '-',
-            'L/S': '-',
-            'Nuc.Type': '-',
-            'ng/µl': '-',
-            'bp': '-',
-            'Comments': '-',
-        })]
-        pdf.write_html(pdf.generate_html(data))
+        header = [
+            'Date',
+            'ID',
+            'Name',
+            'L/S',
+            'Nuc.Type',
+            'ng/µl',
+            'bp',
+            'Comments',
+        ]
+        data = []
+        for r in records:
+            rtype = r.__class__.__name__
+            row = [
+                r.create_time.strftime('%d.%m.%Y'),
+                r.barcode,
+                r.name,
+                rtype[0],
+                r.nucleic_acid_type.name if rtype == 'Sample' else '-',
+                r.concentration,
+                r.mean_fragment_size if rtype == 'Library' else '-',
+                r.comments
+            ]
+            data.append(OrderedDict(zip(header, row)))
+        pdf.write_html(pdf.generate_html_table(data))
 
         # Page 4
         pdf.add_page()
@@ -562,20 +582,38 @@ class RequestViewSet(viewsets.ModelViewSet):
                        'Preparation Methods are detailed in the appendix.',
                        multi=True)
         # Temporary
-        data = [OrderedDict({
-            'Date': '-',
-            'ID': '-',
-            'Name': '-',
-            'Protocol': '-',
-            'I7': '-',
-            'I5': '-',
-            'PCR': '-',
-            'ng/µl': '-',
-            'bp': '-',
-            'nM': '-',
-            'Comments': '-',
-        })]
-        pdf.write_html(pdf.generate_html(data))
+        lib_prep_objects = LibraryPreparation.objects.filter(
+            sample__in=instance.samples.all())
+        header = [
+            'Date',
+            'ID',
+            'Name',
+            'Protocol',
+            'I7',
+            'I5',
+            'PCR',
+            'ng/µl',
+            'bp',
+            'nM',
+            'Comments',
+        ]
+        data = []
+        for r in lib_prep_objects:
+            row = [
+                r.create_time.strftime('%d.%m.%Y'),
+                r.sample.barcode,
+                r.sample.name,
+                r.sample.library_protocol.name,
+                r.sample.index_i7,
+                r.sample.index_i5,
+                r.pcr_cycles,
+                r.concentration_library,
+                r.mean_fragment_size,
+                r.nM,
+                r.comments
+            ]
+            data.append(OrderedDict(zip(header, row)))
+        pdf.write_html(pdf.generate_html_table(data))
 
         # Page 5
         pdf.add_page()
@@ -591,7 +629,7 @@ class RequestViewSet(viewsets.ModelViewSet):
             'Depth (M)': '-',
             '% Confident off species reads': '-',
         })]
-        pdf.write_html(pdf.generate_html(data))
+        pdf.write_html(pdf.generate_html_table(data))
 
         # Page 6
         pdf.add_page()
