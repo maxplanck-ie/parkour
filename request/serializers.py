@@ -14,10 +14,20 @@ class RequestSerializer(ModelSerializer):
 
     class Meta:
         model = Request
-        fields = ('pk', 'name', 'user', 'user_full_name', 'create_time',
-                  'description', 'total_sequencing_depth',
-                  'restrict_permissions', 'deep_seq_request_name',
-                  'deep_seq_request_path', 'files',)
+        fields = (
+            'pk',
+            'name',
+            'user',
+            'user_full_name',
+            'create_time',
+            'cost_unit',
+            'description',
+            'total_sequencing_depth',
+            'restrict_permissions',
+            'deep_seq_request_name',
+            'deep_seq_request_path',
+            'files',
+        )
 
     def get_user_full_name(self, obj):
         return obj.user.full_name

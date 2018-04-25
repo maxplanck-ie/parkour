@@ -3,7 +3,7 @@ import itertools
 from django.db import models
 from django.conf import settings
 
-from common.models import DateTimeMixin
+from common.models import DateTimeMixin, CostUnit
 from library.models import Library
 from sample.models import Sample
 
@@ -23,6 +23,13 @@ class Request(DateTimeMixin):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name='User'
+    )
+
+    cost_unit = models.ForeignKey(
+        CostUnit,
+        verbose_name='Cost Unit',
+        blank=True,
+        null=True,
     )
 
     libraries = models.ManyToManyField(
