@@ -47,7 +47,7 @@ class SequencerAdmin(admin.ModelAdmin):
 @admin.register(Flowcell)
 class FlowcellAdmin(admin.ModelAdmin):
     list_display = ('flowcell_id', 'sequencer',)
-    search_fields = ('flowcell_id', 'sequencer',)
+    # search_fields = ('flowcell_id', 'sequencer',)
     list_filter = ('sequencer',)
     exclude = ('lanes', 'requests',)
     inlines = [LaneInline]
