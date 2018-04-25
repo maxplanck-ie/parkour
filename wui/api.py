@@ -16,7 +16,7 @@ from incoming_libraries.views import IncomingLibrariesViewSet
 from index_generator.views import PoolSizeViewSet, IndexGeneratorViewSet
 from library_preparation.views import LibraryPreparationViewSet
 from pooling.views import PoolingViewSet
-from flowcell.views import SequencerViewSet, PoolViewSet, FlowcellViewSet
+from flowcell.views import SequencerViewSet, PoolViewSet, FlowcellViewSet, FlowcellAnalysisViewSet
 from invoicing.views import (
     InvoicingViewSet,
     FixedCostsViewSet,
@@ -62,3 +62,4 @@ router.register(r'sequencing_costs', SequencingCostsViewSet, base_name='sequenci
 
 router.register(r'run_statistics', RunStatisticsViewSet, base_name='run-statistics')
 router.register(r'sequences_statistics', SequencesStatisticsViewSet, base_name='sequences-statistics')
+router.register(r'analysis_list', FlowcellAnalysisViewSet, base_name='analysis_list')

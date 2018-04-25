@@ -8,6 +8,7 @@ import datetime
 from django.apps import apps
 from django.db.models import Prefetch, Q, F
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -92,7 +93,6 @@ class PoolViewSet(viewsets.ReadOnlyModelViewSet):
 
 class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAdminUser]
-    authentication_classes = [CsrfExemptSessionAuthentication]
     serializer_class = LaneSerializer
 
     def get_queryset(self):
@@ -186,7 +186,8 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
 
         return Response(data)
 
-    @action(methods=['post'], detail=False)
+    @action(methods=['post'], detail=False,
+            authentication_classes=[CsrfExemptSessionAuthentication])
     def download_benchtop_protocol(self, request):
         """ Generate Benchtop Protocol as XLS file for selected lanes. """
         ids = json.loads(request.data.get('ids', '[]'))
@@ -251,7 +252,8 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
 
         return response
 
-    @action(methods=['post'], detail=False)
+    @action(methods=['post'], detail=False,
+            authentication_classes=[CsrfExemptSessionAuthentication])
     def download_sample_sheet(self, request):
         """ Generate Benchtop Protocol as XLS file for selected lanes. """
 
@@ -352,3 +354,37 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
             writer.writerow(row)
 
         return response
+
+
+class FlowcellAnalysisViewSet(viewsets.ViewSet):
+    permission_classes = [IsAdminUser]
+
+    @action(methods=['get'], detail=False)
+    def analysis_list(self, request):
+        """
+        This returns a dictionary of the information required to run an automated
+        analysis on the flow cell's contents
+        The keys of the dictionary are projects. The values are then a dictionary
+        dictionaries with library name keys and tuple values of (sample/library
+        name, library type, library protocol type, organism).
+        """
+        flowcell_id = request.query_params.get('flowcell_id', '')
+        flowcell = get_object_or_404(Flowcell, flowcell_id=flowcell_id)
+
+        # Iterate over requests
+        requests = dict()
+        for request in flowcell.requests.all():
+            rname = request.name
+            requests[rname] = dict()
+            records = list(itertools.chain(
+                request.libraries.all(), request.samples.all()
+            ))
+            for item in records:
+                requests[rname][item.barcode] = [
+                    item.name,
+                    item.library_type.name,
+                    item.library_protocol.name,
+                    item.organism.name,
+                ]
+
+        return Response(requests)
