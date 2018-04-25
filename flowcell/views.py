@@ -93,7 +93,6 @@ class PoolViewSet(viewsets.ReadOnlyModelViewSet):
 
 class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAdminUser]
-    authentication_classes = [CsrfExemptSessionAuthentication]
     serializer_class = LaneSerializer
 
     def get_queryset(self):
@@ -187,7 +186,8 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
 
         return Response(data)
 
-    @action(methods=['post'], detail=False)
+    @action(methods=['post'], detail=False,
+            authentication_classes=[CsrfExemptSessionAuthentication])
     def download_benchtop_protocol(self, request):
         """ Generate Benchtop Protocol as XLS file for selected lanes. """
         ids = json.loads(request.data.get('ids', '[]'))
@@ -252,7 +252,8 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
 
         return response
 
-    @action(methods=['post'], detail=False)
+    @action(methods=['post'], detail=False,
+            authentication_classes=[CsrfExemptSessionAuthentication])
     def download_sample_sheet(self, request):
         """ Generate Benchtop Protocol as XLS file for selected lanes. """
 
@@ -355,17 +356,16 @@ class FlowcellViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
         return response
 
 
-class FlowcellAnalysisViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
+class FlowcellAnalysisViewSet(viewsets.ViewSet):
     permission_classes = [IsAdminUser]
 
     @action(methods=['get'], detail=False)
     def analysis_list(self, request):
         """
-        This returns a dictionary of the information required to run an automated 
+        This returns a dictionary of the information required to run an automated
         analysis on the flow cell's contents
-
-        The keys of the dictionary are projects. The values are then a dictionary 
-        dictionaries with library name keys and tuple values of (sample/library 
+        The keys of the dictionary are projects. The values are then a dictionary
+        dictionaries with library name keys and tuple values of (sample/library
         name, library type, library protocol type, organism).
         """
         flowcell_id = request.query_params.get('flowcell_id', '')
@@ -376,9 +376,15 @@ class FlowcellAnalysisViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
         for request in flowcell.requests.all():
             rname = request.name
             requests[rname] = dict()
-            for l in request.libraries.all():
-                requests[rname][l.barcode] = [l.name, l.library_type.name, l.library_protocol.name, l.organism.name]
-            for l in request.samples.all():
-                requests[rname][l.barcode] = [l.name, l.library_type.name, l.library_protocol.name, l.organism.name]
+            records = list(itertools.chain(
+                request.libraries.all(), request.samples.all()
+            ))
+            for item in records:
+                requests[rname][item.barcode] = [
+                    item.name,
+                    item.library_type.name,
+                    item.library_protocol.name,
+                    item.organism.name,
+                ]
 
         return Response(requests)
