@@ -39,12 +39,28 @@ Ext.define('MainHub.view.requests.RequestWindow', {
             },
             items: [
               {
+                xtype: 'combobox',
+                itemId: 'cost-unit-cb',
+                name: 'cost_unit',
+                queryMode: 'local',
+                valueField: 'id',
+                displayField: 'name',
+                fieldLabel: 'Cost Unit',
+                emptyText: 'Cost Unit',
+                allowBlank: USER.is_staff,
+                forceSelection: true,
+                store: Ext.create('Ext.data.Store', {
+                  fields: ['id', 'name'],
+                  data: []
+                })
+              },
+              {
                 name: 'description',
                 xtype: 'textarea',
                 fieldLabel: 'Description',
                 emptyText: 'Description',
                 allowBlank: false,
-                height: 165
+                height: 125
               },
               {
                 xtype: 'filegridfield',

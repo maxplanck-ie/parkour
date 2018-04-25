@@ -47,8 +47,10 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
     var downloadRequestBlankBtn = wnd.down('#download-request-blank-button');
     var uploadSignedRequestBtn = wnd.down('#upload-signed-request-button');
     var librariesInRequestGrid = wnd.down('#libraries-in-request-grid');
+    var costUnitsCbStore = wnd.down('#cost-unit-cb').getStore();
 
     Ext.getStore('requestFilesStore').removeAll();
+    costUnitsCbStore.add(USER.cost_units);
 
     if (wnd.mode === 'add') {
       Ext.getStore('librariesInRequestStore').removeAll();
@@ -77,7 +79,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
       }
 
       // Disable Request editing
-      if (!USER_IS_STAFF && request.restrictPermissions) {
+      if (!USER.is_staff && request.restrictPermissions) {
         this.disableButtonsAndMenus();
       }
 
@@ -96,7 +98,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
     }
 
     // Hide Download Complete Report button for non-staff
-    if (!USER_IS_STAFF) {
+    if (!USER.is_staff) {
       wnd.down('#download-complete-report-button').hide();
     }
 
@@ -430,6 +432,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
 
       params: {
         data: Ext.JSON.encode({
+          cost_unit: data.cost_unit,
           description: data.description,
           records: Ext.Array.pluck(store.data.items, 'data'),
           files: form.down('filegridfield').getValue()
@@ -485,7 +488,7 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
   },
 
   disableButtonsAndMenus: function () {
-    if (!USER_IS_STAFF) {
+    if (!USER.is_staff) {
       var grid = Ext.getCmp('libraries-in-request-grid');
       // Don't add new records to a Request
       grid.down('#batch-add-button').disable();

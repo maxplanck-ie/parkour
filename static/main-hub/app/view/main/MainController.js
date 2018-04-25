@@ -25,7 +25,7 @@ Ext.define('MainHub.view.main.MainController', {
             }
         });
 
-        if (!USER_IS_STAFF) {
+        if (!USER.is_staff) {
             Ext.getCmp('adminSiteBtn').hide();
         }
     },

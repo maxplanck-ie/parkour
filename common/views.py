@@ -1,3 +1,5 @@
+import json
+
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
@@ -12,8 +14,12 @@ def index(request):
     user = request.user
     return render(request, 'index.html', {
         'DEBUG': settings.DEBUG,
-        'USERNAME': user.full_name,
-        'USER_IS_STAFF': user.is_staff
+        'USER': json.dumps({
+            'name': user.full_name,
+            'is_staff': user.is_staff,
+            'cost_units':
+            list(user.cost_unit.order_by('name').values('id', 'name'))
+        })
     })
 
 

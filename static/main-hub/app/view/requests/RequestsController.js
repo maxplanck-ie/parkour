@@ -28,7 +28,7 @@ Ext.define('MainHub.view.requests.RequestsController', {
 
   boxready: function () {
     // Hide the User column for non-administrators
-    if (!USER_IS_STAFF) {
+    if (!USER.is_staff) {
       Ext.getCmp('requests-grid').down('[dataIndex=user_full_name]').setVisible(false);
     }
   },
@@ -69,9 +69,9 @@ Ext.define('MainHub.view.requests.RequestsController', {
       }
     };
 
-    if (!USER_IS_STAFF && !record.restrict_permissions) {
+    if (!USER.is_staff && !record.restrict_permissions) {
       menuItems.push(deleteRequestOption);
-    } else if (USER_IS_STAFF) {
+    } else if (USER.is_staff) {
       menuItems.push(deleteRequestOption);
       menuItems.push('-');
       menuItems.push({
