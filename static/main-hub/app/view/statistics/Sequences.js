@@ -16,6 +16,7 @@ Ext.define('MainHub.view.statistics.Sequences', {
 
   items: [{
     xtype: 'basegrid',
+    itemId: 'sequences-grid',
     store: 'SequencesStatistics',
     height: Ext.Element.getViewportHeight() - 64,
 
@@ -25,61 +26,77 @@ Ext.define('MainHub.view.statistics.Sequences', {
         xtype: 'parkoursearchfield',
         store: 'SequencesStatistics',
         emptyText: 'Search',
-        // paramName: 'pool',
         width: 200
       }]
     },
 
     columns: {
       defaults: {
-        minWidth: 135,
         flex: 1
       },
       items: [
         {
+          xtype: 'checkcolumn',
+          itemId: 'check-column',
+          dataIndex: 'selected',
+          resizable: false,
+          menuDisabled: true,
+          hideable: false,
+          tdCls: 'no-dirty',
+          width: 35
+        },
+        {
           text: 'Request',
           dataIndex: 'request',
           renderer: 'gridCellTooltipRenderer',
-          filter: { type: 'string' }
+          filter: { type: 'string' },
+          minWidth: 135
         },
         {
           text: 'Barcode',
           dataIndex: 'barcode',
-          filter: { type: 'string' }
+          filter: { type: 'string' },
+          minWidth: 135
         },
         {
           text: 'Name',
           dataIndex: 'name',
           renderer: 'gridCellTooltipRenderer',
-          filter: { type: 'string' }
+          filter: { type: 'string' },
+          minWidth: 135
         },
         {
           text: 'Lane',
           dataIndex: 'lane',
-          filter: { type: 'string' }
+          filter: { type: 'string' },
+          minWidth: 135
         },
         {
           text: 'Pool',
           dataIndex: 'pool',
-          filter: { type: 'string' }
+          filter: { type: 'string' },
+          minWidth: 135
         },
         {
           text: 'Library Protocol',
           dataIndex: 'library_protocol',
           renderer: 'gridCellTooltipRenderer',
-          filter: { type: 'string' }
+          filter: { type: 'string' },
+          minWidth: 135
         },
         {
           text: 'Library Type',
           dataIndex: 'library_type',
           renderer: 'gridCellTooltipRenderer',
-          filter: { type: 'string' }
+          filter: { type: 'string' },
+          minWidth: 135
         },
         {
           text: 'Reads PF (M), requested',
           tooltip: 'Reads PF (M), requested',
           dataIndex: 'reads_pf_requested',
-          filter: { type: 'number' }
+          filter: { type: 'number' },
+          minWidth: 135
         },
         {
           text: 'Reads PF (M), sequenced',
@@ -91,40 +108,46 @@ Ext.define('MainHub.view.statistics.Sequences', {
             }
             return value;
           },
-          filter: { type: 'number' }
+          filter: { type: 'number' },
+          minWidth: 135
         },
         {
           text: 'confident off-species reads',
           tooltip: 'confident off-species reads',
           dataIndex: 'confident_reads',
           renderer: floatRenderer,
-          filter: { type: 'number' }
+          filter: { type: 'number' },
+          minWidth: 135
         },
         {
           text: '% Optical Duplicates',
           tooltip: '% Optical Duplicates',
           dataIndex: 'optical_duplicates',
           renderer: floatRenderer,
-          filter: { type: 'number' }
+          filter: { type: 'number' },
+          minWidth: 135
         },
         {
           text: '% dupped reads',
           tooltip: '% dupped reads',
           dataIndex: 'dupped_reads',
           renderer: floatRenderer,
-          filter: { type: 'number' }
+          filter: { type: 'number' },
+          minWidth: 135
         },
         {
           text: '% mapped reads',
           tooltip: '% mapped reads',
           dataIndex: 'mapped_reads',
           renderer: floatRenderer,
-          filter: { type: 'number' }
+          filter: { type: 'number' },
+          minWidth: 135
         },
         {
           text: 'Insert Size',
           dataIndex: 'insert_size',
-          filter: { type: 'number' }
+          filter: { type: 'number' },
+          minWidth: 135
         }
       ]
     },
@@ -161,22 +184,35 @@ Ext.define('MainHub.view.statistics.Sequences', {
       ]
     }],
 
-    dockedItems: [{
-      xtype: 'toolbar',
-      dock: 'top',
-      items: [{
-        xtype: 'daterangepicker',
-        ui: 'header',
-        drpDefaults: {
-          showButtonTip: false,
-          dateFormat: 'd.m.Y',
-          mainBtnTextColor: '#999',
-          mainBtnIconCls: 'x-fa fa-calendar',
-          presetPeriodsBtnIconCls: 'x-fa fa-calendar-check-o',
-          confirmBtnIconCls: 'x-fa fa-check'
-        }
-      }]
-    }]
+    dockedItems: [
+      {
+        xtype: 'toolbar',
+        dock: 'top',
+        items: [{
+          xtype: 'daterangepicker',
+          ui: 'header',
+          drpDefaults: {
+            showButtonTip: false,
+            dateFormat: 'd.m.Y',
+            mainBtnTextColor: '#999',
+            mainBtnIconCls: 'x-fa fa-calendar',
+            presetPeriodsBtnIconCls: 'x-fa fa-calendar-check-o',
+            confirmBtnIconCls: 'x-fa fa-check'
+          }
+        }]
+      },
+      {
+        xtype: 'toolbar',
+        dock: 'bottom',
+        items: [
+          {
+            text: 'Download Report',
+            itemId: 'download-report',
+            iconCls: 'fa fa-download fa-lg'
+          }
+        ]
+      }
+    ]
   }]
 });
 
