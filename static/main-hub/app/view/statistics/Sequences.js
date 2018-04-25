@@ -79,14 +79,18 @@ Ext.define('MainHub.view.statistics.Sequences', {
           text: 'Reads PF (M), requested',
           tooltip: 'Reads PF (M), requested',
           dataIndex: 'reads_pf_requested',
-          renderer: floatRenderer,
           filter: { type: 'number' }
         },
         {
           text: 'Reads PF (M), sequenced',
           tooltip: 'Reads PF (M), sequenced',
           dataIndex: 'reads_pf_sequenced',
-          renderer: floatRenderer,
+          renderer: function (value) {
+            if (value) {
+              value = (value / 1000000).toFixed(1);
+            }
+            return value;
+          },
           filter: { type: 'number' }
         },
         {
@@ -178,7 +182,7 @@ Ext.define('MainHub.view.statistics.Sequences', {
 
 function floatRenderer (value) {
   if (value) {
-    value = (value / 1000000).toFixed(2);
+    value = value.toFixed(2);
   }
   return value;
 }
