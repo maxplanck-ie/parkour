@@ -24,6 +24,7 @@ from invoicing.views import (
     SequencingCostsViewSet,
 )
 from stats.views import RunStatisticsViewSet, SequencesStatisticsViewSet
+from ena_uploader.views import ENAUploaderViewSet
 
 
 router = routers.DefaultRouter()
@@ -63,3 +64,5 @@ router.register(r'sequencing_costs', SequencingCostsViewSet, base_name='sequenci
 router.register(r'run_statistics', RunStatisticsViewSet, base_name='run-statistics')
 router.register(r'sequences_statistics', SequencesStatisticsViewSet, base_name='sequences-statistics')
 router.register(r'analysis_list', FlowcellAnalysisViewSet, base_name='analysis_list')
+
+router.register(r'ena_uploader', ENAUploaderViewSet, base_name='ena_uploader')

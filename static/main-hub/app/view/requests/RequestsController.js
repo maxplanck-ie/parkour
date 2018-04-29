@@ -69,10 +69,21 @@ Ext.define('MainHub.view.requests.RequestsController', {
       }
     };
 
+    var enaUploaderOption = {
+      text: 'ENA Uploader',
+      handler: function () {
+        Ext.create('MainHub.view.enauploader.ENAUploader', {
+          request: record
+        });
+      }
+    };
+
     if (!USER.is_staff && !record.restrict_permissions) {
       menuItems.push(deleteRequestOption);
+      menuItems.push(enaUploaderOption);
     } else if (USER.is_staff) {
       menuItems.push(deleteRequestOption);
+      menuItems.push(enaUploaderOption);
       menuItems.push('-');
       menuItems.push({
         text: 'Compose Email',
