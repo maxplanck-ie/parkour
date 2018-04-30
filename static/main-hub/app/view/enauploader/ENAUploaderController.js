@@ -11,10 +11,14 @@ Ext.define('MainHub.view.enauploader.ENAUploaderController', {
         tabchange: 'tabChange'
       },
       '#samples-grid': {
-        boxready: 'loadSamples'
+        boxready: 'loadSamples',
+        headercontextmenu: 'showHeaderMenu'
       },
       '#check-column': {
         checkchange: 'checkSample'
+      },
+      'enabasegrid': {
+        itemcontextmenu: 'showContextMenu'
       },
       '#download-files-button': {
         click: 'download'
@@ -34,6 +38,54 @@ Ext.define('MainHub.view.enauploader.ENAUploaderController', {
         return item.get('selected');
       });
     }
+  },
+
+  showHeaderMenu: function (ct, column, e) {
+    var me = this;
+
+    if (column.dataIndex !== 'selected') {
+      return false;
+    }
+
+    e.stopEvent();
+    Ext.create('Ext.menu.Menu', {
+      plain: true,
+      defaults: {
+        margin: 5
+      },
+      items: [
+        {
+          text: 'Select All',
+          handler: function () {
+            me.selectAll(true);
+          }
+        },
+        '-',
+        {
+          text: 'Unselect All',
+          handler: function () {
+            me.selectAll(false);
+          }
+        }
+      ]
+    }).showAt(e.getXY());
+  },
+
+  showContextMenu: function (gridView, record, itemEl, index, e) {
+    var me = this;
+
+    e.stopEvent();
+    Ext.create('Ext.menu.Menu', {
+      plain: true,
+      items: [{
+        text: 'Apply to All',
+        margin: 5,
+        handler: function () {
+          var dataIndex = MainHub.Utilities.getDataIndex(e, gridView);
+          me.applyToAll(gridView, record, dataIndex);
+        }
+      }]
+    }).showAt(e.getXY());
   },
 
   loadSamples: function (grid) {
@@ -76,6 +128,33 @@ Ext.define('MainHub.view.enauploader.ENAUploaderController', {
         data: Ext.JSON.encode(Ext.Array.pluck(selectedSamples, 'data'))
       }
     });
+  },
+
+  selectAll: function (result) {
+    var store = Ext.getStore('ENASamples');
+    result = result || false;
+
+    store.each(function (item) {
+      item.set('selected', result);
+    });
+
+    if (store.getCount() > 0) {
+      this.getView().getViewModel().setData({
+        tabsDisabled: !result
+      });
+    }
+  },
+
+  applyToAll: function (gridView, record, dataIndex) {
+    var store = Ext.getStore('ENASamples');
+
+    if (dataIndex) {
+      store.each(function (item) {
+        if (item !== record) {
+          item.set(dataIndex, record.get(dataIndex));
+        }
+      });
+    }
   },
 
   getSelectedSamples: function (store) {

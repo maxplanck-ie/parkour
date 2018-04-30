@@ -15,19 +15,19 @@ Ext.define('MainHub.view.enauploader.Experiments', {
     items: [
       {
         text: 'Name',
-        dataIndex: 'name'
+        dataIndex: 'library_name'
       },
       {
         text: 'Library Protocol',
-        dataIndex: 'library_protocol'
+        dataIndex: 'library_construction_protocol'
       },
       {
         text: 'Library Type',
-        dataIndex: 'library_type'
+        dataIndex: 'library_strategy'
       },
       {
         text: 'Design Description',
-        dataIndex: 'description'
+        dataIndex: 'design_description'
       },
       {
         text: 'Library Layout',
@@ -35,11 +35,14 @@ Ext.define('MainHub.view.enauploader.Experiments', {
       },
       {
         text: 'Insert Size',
-        dataIndex: 'mean_fragment_size'
+        dataIndex: 'insert_size',
+        editor: {
+          xtype: 'numberfield'
+        }
       },
       {
         text: 'Sequencer',
-        dataIndex: 'sequencer'
+        dataIndex: 'instrument_model'
       },
       {
         text: 'Alias',

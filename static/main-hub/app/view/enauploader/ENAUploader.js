@@ -87,7 +87,7 @@ Ext.define('MainHub.view.enauploader.ENAUploader', {
                     },
                     {
                       text: 'Name',
-                      dataIndex: 'name',
+                      dataIndex: 'library_name',
                       flex: 1
                     },
                     {

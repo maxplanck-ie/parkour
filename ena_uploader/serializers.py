@@ -9,25 +9,31 @@ Sample = apps.get_model('sample', 'Sample')
 
 
 class BaseSerializer(ModelSerializer):
-    library_protocol = SerializerMethodField()
+    insert_size = SerializerMethodField()
+    library_name = SerializerMethodField()
     library_type = SerializerMethodField()
+    library_strategy = SerializerMethodField()
+    library_construction_protocol = SerializerMethodField()
 
     class Meta:
         fields = (
             'pk',
-            'name',
             'barcode',
             'is_converted',
-            'library_protocol',
-            'library_type',
-            'mean_fragment_size',
+            'insert_size',
+            'library_name',
+            'library_strategy',
+            'library_construction_protocol',
         )
 
-    def get_library_protocol(self, obj):
-        return obj.library_protocol.name
+    def get_library_name(self, obj):
+        return obj.name
 
-    def get_library_type(self, obj):
+    def get_library_strategy(self, obj):
         return obj.library_type.name
+
+    def get_library_construction_protocol(self, obj):
+        return obj.library_protocol.name
 
 
 class LibrarySerializer(BaseSerializer):
@@ -37,18 +43,19 @@ class LibrarySerializer(BaseSerializer):
         model = Library
         fields = BaseSerializer.Meta.fields
 
-    def get_is_coverted(selg, obj):
+    def get_is_coverted(self, obj):
         return False
+
+    def get_insert_size(self, obj):
+        return obj.mean_fragment_size
 
 
 class SampleSerializer(BaseSerializer):
-    mean_fragment_size = SerializerMethodField()
-
     class Meta:
         model = Sample
         fields = BaseSerializer.Meta.fields
 
-    def get_mean_fragment_size(self, obj):
+    def get_insert_size(self, obj):
         try:
             return obj.librarypreparation.mean_fragment_size
         except Exception:
@@ -76,8 +83,8 @@ class ENASerializer(ModelSerializer):
         for type in ['libraries', 'samples']:
             result.extend(list(map(
                 lambda x: {**{
-                    'description': data['description'],
-                    'sequencer': sequencer_name,
+                    'design_description': data['description'],
+                    'instrument_model': sequencer_name,
                 }, **x},
                 data.pop(type),
             )))
