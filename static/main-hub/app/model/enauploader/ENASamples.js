@@ -4,36 +4,17 @@ Ext.define('MainHub.model.enauploader.ENASamples', {
   fields: [
     // Experiments
     {
-      name: 'library_protocol',
-      type: 'string'
-    },
-    {
-      name: 'library_type',
-      type: 'string'
-    },
-    {
-      name: 'description',
-      type: 'string'
-    },
-    {
-      name: 'library_layout',
-      type: 'string'
-    },
-    {
-      name: 'mean_fragment_size',
-      type: 'string'
-    },
-    {
-      name: 'sequencer',
-      type: 'string'
-    },
-    {
       name: 'alias',
       type: 'string'
     },
     {
       name: 'status',
       type: 'string'
+    },
+    {
+      name: 'accession',
+      type: 'string',
+      defaultValue: 'update_by_ENA'
     },
     {
       name: 'title',
@@ -48,6 +29,18 @@ Ext.define('MainHub.model.enauploader.ENASamples', {
       type: 'string'
     },
     {
+      name: 'design_description',
+      type: 'string'
+    },
+    {
+      name: 'library_name',
+      type: 'string'
+    },
+    {
+      name: 'library_strategy',
+      type: 'string'
+    },
+    {
       name: 'library_source',
       type: 'string'
     },
@@ -56,8 +49,30 @@ Ext.define('MainHub.model.enauploader.ENASamples', {
       type: 'string'
     },
     {
+      name: 'library_layout',
+      type: 'string'
+    },
+    {
+      name: 'insert_size',
+      type: 'number',
+      allowNull: true
+    },
+    {
+      name: 'library_construction_protocol',
+      type: 'string'
+    },
+    {
       name: 'platform',
       type: 'string'
+    },
+    {
+      name: 'instrument_model',
+      type: 'string'
+    },
+    {
+      name: 'submission_date',
+      type: 'string',
+      defaultValue: 'update_by_ENA'
     }
   ]
 });

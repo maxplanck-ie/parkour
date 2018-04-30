@@ -1,7 +1,10 @@
+import io
+import csv
 import json
+from zipfile import ZipFile
 
 from django.apps import apps
-# from django.http import HttpResponse
+from django.http import HttpResponse
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 
@@ -75,5 +78,54 @@ class ENAUploaderViewSet(viewsets.ViewSet):
     @action(methods=['post'], detail=True,
             authentication_classes=[CsrfExemptSessionAuthentication])
     def download(self, request, pk=None):
+        def getrow(header, item):
+            row = []
+            for h in header:
+                value = item.get(h, '')
+                row.append(value if value else 'NA')
+            return row
+
+        def getfile(header, data):
+            file = io.StringIO()
+            writer = csv.writer(file, dialect='excel-tab')
+            writer.writerow(header)
+            for item in data:
+                writer.writerow(getrow(header, item))
+            return file
+
         data = json.loads(request.data.get('data', '[]'))
-        return Response(data)
+
+        response = HttpResponse(content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename=ENA.zip'
+
+        # Create experiments.tsv
+        header = [
+            'alias',
+            'status',
+            'accession',
+            'title',
+            'study_alias',
+            'sample_alias',
+            'design_description',
+            'library_name',
+            'library_strategy',
+            'library_source',
+            'library_selection',
+            'library_layout',
+            'insert_size',
+            'library_construction_protocol',
+            'platform',
+            'instrument_model',
+            'submission_date',
+        ]
+        experiments_file = getfile(header, data)
+
+        # Archive the files
+        in_memory = io.BytesIO()
+        with ZipFile(in_memory, 'a') as z:
+            z.writestr('experiments.tsv', experiments_file.getvalue())
+
+        in_memory.seek(0)
+        response.write(in_memory.read())
+
+        return response
