@@ -100,6 +100,7 @@ class SequencesSerializer(ModelSerializer):
                         'request': request.name,
                         'library_protocol': record.library_protocol.name,
                         'library_type': record.library_type.name,
+                        'reads_pf_requested': record.sequencing_depth,
                         'pool': pools.get(barcode, ''),
                         'lane': lanes.get(barcode, ''),
                     }
@@ -119,6 +120,7 @@ class SequencesSerializer(ModelSerializer):
                 'pool': obj.get('pool', ''),
                 'library_protocol': obj.get('library_protocol', ''),
                 'library_type': obj.get('library_type', ''),
+                'reads_pf_requested': obj.get('reads_pf_requested', ''),
             }, **item})
 
         return sorted(result, key=lambda x: x['barcode'][3:])
