@@ -123,7 +123,21 @@ class RunStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
                 'message': 'Invalid matrix data.',
             }, 400)
 
-        flowcell.matrix = matrix
+        # Update pre-existing information
+        currentMatrix = list()
+        if flowcell.matrix:
+            currentMatrix = flowcell.matrix
+
+        found = dict()
+        for idx, entry in enumerate(currentMatrix):
+            found[entry['name']] = idx
+        for entry in matrix:
+            if entry['name'] in found:
+                currentMatrix[found[entry['name']]] = entry
+            else:
+                currentMatrix.append(entry)
+
+        flowcell.matrix = currentMatrix
         flowcell.save(update_fields=['matrix'])
         return Response({'success': True})
 
@@ -238,7 +252,21 @@ class SequencesStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
                 'message': 'Invalid sequences data.',
             }, 400)
 
-        flowcell.sequences = sequences
+        # Update pre-existing sequence information
+        currentSequences = list()
+        if flowcell.sequences:
+            currentSequences = flowcell.sequences
+
+        found = dict()
+        for idx, entry in enumerate(currentSequences):
+            found[entry['barcode']] = idx
+        for entry in sequences:
+            if entry['barcode'] in found:
+                currentSequences[found[entry['barcode']]] = entry
+            else:
+                currentSequences.append(entry)
+
+        flowcell.sequences = currentSequences
         flowcell.save(update_fields=['sequences'])
         return Response({'success': True})
 
