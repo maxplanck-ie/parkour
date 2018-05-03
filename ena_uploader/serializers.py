@@ -10,6 +10,7 @@ Sample = apps.get_model('sample', 'Sample')
 
 class BaseSerializer(ModelSerializer):
     insert_size = SerializerMethodField()
+    scientific_name = SerializerMethodField()
     library_name = SerializerMethodField()
     library_type = SerializerMethodField()
     library_strategy = SerializerMethodField()
@@ -21,10 +22,14 @@ class BaseSerializer(ModelSerializer):
             'barcode',
             'is_converted',
             'insert_size',
+            'scientific_name',
             'library_name',
             'library_strategy',
             'library_construction_protocol',
         )
+
+    def get_scientific_name(self, obj):
+        return obj.organism.name
 
     def get_library_name(self, obj):
         return obj.name
@@ -84,6 +89,7 @@ class ENASerializer(ModelSerializer):
             result.extend(list(map(
                 lambda x: {**{
                     'design_description': data['description'],
+                    'sample_description': data['description'],
                     'instrument_model': sequencer_name,
                 }, **x},
                 data.pop(type),

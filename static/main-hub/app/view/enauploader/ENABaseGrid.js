@@ -15,8 +15,6 @@ Ext.define('MainHub.view.enauploader.ENABaseGrid', {
     rowSelect: false
   },
 
-  store: 'ENASamples',
-
   plugins: [
     {
       ptype: 'cellediting',

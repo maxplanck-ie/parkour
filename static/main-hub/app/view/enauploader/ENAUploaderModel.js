@@ -3,6 +3,6 @@ Ext.define('MainHub.view.enauploader.ENAUploaderModel', {
   alias: 'viewmodel.enauploader-enauploader',
 
   data: {
-    tabsDisabled: true
+    createButtonHidden: true
   }
 });

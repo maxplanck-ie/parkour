@@ -1,8 +1,11 @@
-Ext.define('MainHub.model.enauploader.ENASamples', {
+Ext.define('MainHub.model.enauploader.Experiment', {
   extend: 'MainHub.model.Record',
 
   fields: [
-    // Experiments
+    {
+      name: 'barcode',
+      type: 'string'
+    },
     {
       name: 'alias',
       type: 'string'
