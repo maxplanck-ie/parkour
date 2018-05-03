@@ -34,16 +34,19 @@ class ENAUploaderViewSet(viewsets.ViewSet):
     @print_sql_queries
     def retrieve(self, request, pk=None):
         libraries_qs = Library.objects.select_related(
+            'organism',
             'library_protocol',
             'library_type',
         ).only(
             'name',
             'barcode',
+            'organism__name',
             'mean_fragment_size',
             'library_protocol__name',
             'library_type__name',
         )
         samples_qs = Sample.objects.select_related(
+            'organism',
             'library_protocol',
             'library_type',
             'librarypreparation'
@@ -51,6 +54,7 @@ class ENAUploaderViewSet(viewsets.ViewSet):
             'name',
             'barcode',
             'is_converted',
+            'organism__name',
             'library_protocol__name',
             'library_type__name',
             'librarypreparation__mean_fragment_size'
@@ -93,7 +97,10 @@ class ENAUploaderViewSet(viewsets.ViewSet):
                 writer.writerow(getrow(header, item))
             return file
 
-        data = json.loads(request.data.get('data', '[]'))
+        experiments = json.loads(request.data.get('experiments', '[]'))
+        samples = json.loads(request.data.get('samples', '[]'))
+        studies = json.loads(request.data.get('studies', '[]'))
+        runs = json.loads(request.data.get('runs', '[]'))
 
         response = HttpResponse(content_type='application/zip')
         response['Content-Disposition'] = 'attachment; filename=ENA.zip'
@@ -118,12 +125,54 @@ class ENAUploaderViewSet(viewsets.ViewSet):
             'instrument_model',
             'submission_date',
         ]
-        experiments_file = getfile(header, data)
+        experiments_file = getfile(header, experiments)
+
+        # Create samples.tsv
+        header = [
+            'alias',
+            'status',
+            'accession',
+            'title',
+            'scientific_name',
+            'taxon_id',
+            'sample_description',
+            'submission_date',
+        ]
+        samples_file = getfile(header, samples)
+
+        # Create studies.tsv
+        header = [
+            'alias',
+            'status',
+            'accession',
+            'title',
+            'study_type',
+            'study_abstract',
+            'pubmed_id',
+            'submission_date',
+        ]
+        studies_file = getfile(header, studies)
+
+        # Create runs.tsv
+        header = [
+            'alias',
+            'status',
+            'accession',
+            'experiment_alias',
+            'file_name',
+            'file_format',
+            'file_checksum',
+            'submission_date',
+        ]
+        runs_file = getfile(header, runs)
 
         # Archive the files
         in_memory = io.BytesIO()
         with ZipFile(in_memory, 'a') as z:
             z.writestr('experiments.tsv', experiments_file.getvalue())
+            z.writestr('samples.tsv', samples_file.getvalue())
+            z.writestr('studies.tsv', studies_file.getvalue())
+            z.writestr('runs.tsv', runs_file.getvalue())
 
         in_memory.seek(0)
         response.write(in_memory.read())

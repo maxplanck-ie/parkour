@@ -5,7 +5,10 @@ Ext.define('MainHub.view.enauploader.ENAUploader', {
     'MainHub.view.enauploader.ENAUploaderController',
     'MainHub.view.enauploader.ENAUploaderModel',
     'MainHub.view.enauploader.ENABaseGrid',
-    'MainHub.view.enauploader.Experiments'
+    'MainHub.view.enauploader.Experiments',
+    'MainHub.view.enauploader.Samples',
+    'MainHub.view.enauploader.Studies',
+    'MainHub.view.enauploader.Runs'
   ],
 
   controller: 'enauploader-enauploader',
@@ -15,8 +18,8 @@ Ext.define('MainHub.view.enauploader.ENAUploader', {
 
   title: 'ENA Uploader',
 
-  height: 500,
-  width: 650,
+  height: 550,
+  width: 700,
 
   modal: true,
   resizable: false,
@@ -30,7 +33,8 @@ Ext.define('MainHub.view.enauploader.ENAUploader', {
     xtype: 'tabpanel',
     itemId: 'tabs',
     defaults: {
-      styleHtmlContent: true
+      styleHtmlContent: true,
+      layout: 'fit'
     },
     items: [
       {
@@ -74,8 +78,8 @@ Ext.define('MainHub.view.enauploader.ENAUploader', {
                 viewConfig: {
                   stripeRows: false
                 },
-                height: 195,
-                store: 'ENASamples',
+                height: 245,
+                store: 'ENARecords',
                 columns: {
                   items: [
                     {
@@ -108,7 +112,15 @@ Ext.define('MainHub.view.enauploader.ENAUploader', {
                       }
                     }
                   ]
-                }
+                },
+                bbar: [
+                  '->',
+                  {
+                    itemId: 'add-selected-button',
+                    tooltip: 'Add selected items to Experiments/Samples',
+                    text: 'Add to'
+                  }
+                ]
               }],
               getValue: function () {
                 // return Ext.pluck(this.down('grid').getStore().data.items, 'id');
@@ -120,44 +132,50 @@ Ext.define('MainHub.view.enauploader.ENAUploader', {
       {
         title: 'Experiments',
         itemId: 'experiments-tab',
-        bind: {
-          disabled: '{tabsDisabled}'
-        },
         items: [{
-          xtype: 'ena-experiments'
+          xtype: 'ena-experiments',
+          store: 'ENAExperiments'
+        }]
+      },
+      {
+        title: 'Samples',
+        itemId: 'samples-tab',
+        items: [{
+          xtype: 'ena-samples',
+          store: 'ENASamples'
+        }]
+      },
+      {
+        title: 'Studies',
+        itemId: 'studies-tab',
+        items: [{
+          xtype: 'ena-studies',
+          store: 'ENAStudies'
         }]
       },
       {
         title: 'Runs',
         itemId: 'runs-tab',
-        html: 'Runs Tab',
-        bind: {
-          disabled: '{tabsDisabled}'
-        }
-      },
-      {
-        title: 'Studies',
-        itemId: 'studies-tab',
-        html: 'Studies Tab',
-        bind: {
-          disabled: '{tabsDisabled}'
-        }
-      },
-      {
-        title: 'Samples',
-        itemId: 'samples-tab',
-        html: 'Samples Tab',
-        bind: {
-          disabled: '{tabsDisabled}'
-        }
+        items: [{
+          xtype: 'ena-runs',
+          store: 'ENARuns'
+        }]
       }
     ]
   }],
 
   bbar: [
+    {
+      itemId: 'create-empty-record-button',
+      tooltip: 'Create empty record',
+      iconCls: 'fa fa-plus fa-lg',
+      text: 'Create',
+      bind: {
+        hidden: '{createButtonHidden}'
+      }
+    },
     '->',
     {
-      xtype: 'button',
       itemId: 'download-files-button',
       iconCls: 'fa fa-download fa-lg',
       text: 'Download Files'
