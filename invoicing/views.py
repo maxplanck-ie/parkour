@@ -68,13 +68,18 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
             flowcell__create_time__year=year,
             flowcell__create_time__month=month,
             sequenced=True,
-        ).select_related('user').prefetch_related(
+        ).select_related(
+            'cost_unit',
+        ).prefetch_related(
             Prefetch('flowcell', queryset=flowcell_qs),
             Prefetch('libraries', queryset=libraries_qs),
             Prefetch('samples', queryset=samples_qs),
         ).distinct().annotate(
             sequencing_date=Min('flowcell__create_time')
-        ).only('name', 'user__cost_unit').order_by('sequencing_date', 'pk')
+        ).only(
+            'name',
+            'cost_unit__name',
+        ).order_by('sequencing_date', 'pk')
 
         return queryset
 
@@ -186,7 +191,7 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
         for item in data:
             row_num += 1
 
-            cost_units = '; '.join(sorted(item['cost_unit']))
+            # cost_units = '; '.join(sorted(item['cost_unit']))
             sequencers = '; '.join(
                 sorted(list({x['sequencer_name'] for x in item['sequencer']})))
             flowcells = '; '.join(item['flowcell'])
@@ -207,7 +212,7 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
 
             row = [
                 item['request'],
-                cost_units,
+                item['cost_unit'],
                 sequencers,
                 flowcells,
                 pools,

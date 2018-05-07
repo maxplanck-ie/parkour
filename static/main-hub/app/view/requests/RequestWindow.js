@@ -49,10 +49,7 @@ Ext.define('MainHub.view.requests.RequestWindow', {
                 emptyText: 'Cost Unit',
                 allowBlank: USER.is_staff,
                 forceSelection: true,
-                store: Ext.create('Ext.data.Store', {
-                  fields: ['id', 'name'],
-                  data: []
-                })
+                store: 'CostUnits'
               },
               {
                 name: 'description',

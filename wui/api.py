@@ -1,5 +1,6 @@
 from rest_framework import routers
 
+from common.views import CostUnitsViewSet
 from request.views import RequestViewSet
 from library_sample_shared.views import (
     OrganismViewSet,
@@ -16,19 +17,26 @@ from incoming_libraries.views import IncomingLibrariesViewSet
 from index_generator.views import PoolSizeViewSet, IndexGeneratorViewSet
 from library_preparation.views import LibraryPreparationViewSet
 from pooling.views import PoolingViewSet
-from flowcell.views import SequencerViewSet, PoolViewSet, FlowcellViewSet, FlowcellAnalysisViewSet
+from flowcell.views import (
+    SequencerViewSet,
+    PoolViewSet,
+    FlowcellViewSet,
+    FlowcellAnalysisViewSet,
+)
 from invoicing.views import (
     InvoicingViewSet,
     FixedCostsViewSet,
     LibraryPreparationCostsViewSet,
     SequencingCostsViewSet,
 )
+
 from stats.views import RunStatisticsViewSet, SequencesStatisticsViewSet
 
 
 router = routers.DefaultRouter()
 
 router.register(r'requests', RequestViewSet, base_name='request')
+router.register(r'cost_units', CostUnitsViewSet, base_name='cost-units')
 router.register(r'organisms', OrganismViewSet, base_name='organism')
 router.register(r'read_lengths', ReadLengthViewSet, base_name='read-length')
 router.register(r'concentration_methods', ConcentrationMethodViewSet, base_name='concentration-method')

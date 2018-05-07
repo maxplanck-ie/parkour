@@ -8,7 +8,7 @@ Ext.define('MainHub.model.invoicing.Request', {
     },
     {
       name: 'cost_unit',
-      type: 'auto'
+      type: 'string'
     },
     {
       name: 'sequencer',

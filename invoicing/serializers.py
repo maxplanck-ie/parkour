@@ -98,7 +98,7 @@ class InvoicingSerializer(ModelSerializer):
         return obj.name
 
     def get_cost_unit(self, obj):
-        return obj.user.cost_unit.values_list('name', flat=True)
+        return obj.cost_unit.name if obj.cost_unit else None
 
     def get_sequencer(self, obj):
         return [{

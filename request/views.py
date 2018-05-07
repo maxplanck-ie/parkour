@@ -334,11 +334,10 @@ class RequestViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         user = instance.user
         organization = user.organization.name if user.organization else ''
-        cost_unit = ', '.join(sorted(
-            user.cost_unit.values_list('name', flat=True)
-        ))
+        cost_unit = instance.cost_unit.name if instance.cost_unit else ''
         objects = list(itertools.chain(
-            instance.samples.all(), instance.libraries.all()
+            instance.samples.all(),
+            instance.libraries.all(),
         ))
         records = [{
             'name': obj.name,
@@ -360,7 +359,7 @@ class RequestViewSet(viewsets.ModelViewSet):
         pdf.info_row('Phone', user.phone if user.phone else '')
         pdf.info_row('Email', user.email)
         pdf.info_row('Organization', organization)
-        pdf.info_row('Cost Unit(s)', cost_unit)
+        pdf.info_row('Cost Unit', cost_unit)
         pdf.multi_info_row('Description', instance.description)
 
         y = pdf.get_y()

@@ -28,6 +28,7 @@ Ext.define('MainHub.Application', {
     'NavigationTree',
     'requests.Requests',
     'requests.RequestFiles',
+    'requests.CostUnits',
     'libraries.Libraries',
     'libraries.LibraryProtocols',
     'libraries.LibraryTypes',

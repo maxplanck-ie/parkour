@@ -51,7 +51,6 @@ Ext.define('MainHub.view.invoicing.Invoicing', {
           {
             text: 'Cost Unit',
             dataIndex: 'cost_unit',
-            renderer: 'listRenderer',
             minWidth: 150
           },
           {

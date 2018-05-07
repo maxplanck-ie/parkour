@@ -47,10 +47,13 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
     var downloadRequestBlankBtn = wnd.down('#download-request-blank-button');
     var uploadSignedRequestBtn = wnd.down('#upload-signed-request-button');
     var librariesInRequestGrid = wnd.down('#libraries-in-request-grid');
-    var costUnitsCbStore = wnd.down('#cost-unit-cb').getStore();
+    var costUnitCb = wnd.down('#cost-unit-cb');
+    var form = Ext.getCmp('request-form').getForm();
+    var grid = Ext.getCmp('libraries-in-request-grid');
+    var userId = USER.id;
+    var request;
 
     Ext.getStore('requestFilesStore').removeAll();
-    costUnitsCbStore.add(USER.cost_units);
 
     if (wnd.mode === 'add') {
       Ext.getStore('librariesInRequestStore').removeAll();
@@ -58,9 +61,8 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
       uploadSignedRequestBtn.disable();
       librariesInRequestGrid.getColumns()[0].hide();
     } else {
-      var form = Ext.getCmp('request-form').getForm();
-      var grid = Ext.getCmp('libraries-in-request-grid');
-      var request = wnd.record.data;
+      request = wnd.record.data;
+      userId = request.user;
 
       form.setValues(request);
 
@@ -79,8 +81,9 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
       }
 
       // Disable Request editing
-      if (!USER.is_staff && request.restrictPermissions) {
+      if (!USER.is_staff && request.restrict_permissions) {
         this.disableButtonsAndMenus();
+        costUnitCb.setReadOnly(true);
       }
 
       // Load all Libraries/Samples for current Request
@@ -96,6 +99,18 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
         });
       }
     }
+
+    // Load Cost Units
+    Ext.getStore('CostUnits').reload({
+      params: {
+        user_id: userId
+      },
+      callback: function (records, operation, success) {
+        if (success && request) {
+          costUnitCb.setValue(request.cost_unit);
+        }
+      }
+    });
 
     // Hide Download Complete Report button for non-staff
     if (!USER.is_staff) {
