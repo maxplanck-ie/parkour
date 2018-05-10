@@ -12,7 +12,9 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
-from common.utils import print_sql_queries
+from bioblend.galaxy import GalaxyInstance
+
+# from common.utils import print_sql_queries
 from common.views import CsrfExemptSessionAuthentication
 from .serializers import ENASerializer
 
@@ -31,7 +33,7 @@ class ENAUploaderViewSet(viewsets.ViewSet):
         data = queryset.values('pk', 'name')
         return Response(data)
 
-    @print_sql_queries
+    # @print_sql_queries
     def retrieve(self, request, pk=None):
         libraries_qs = Library.objects.select_related(
             'organism',
@@ -78,6 +80,18 @@ class ENAUploaderViewSet(viewsets.ViewSet):
 
         data = sorted(data, key=lambda x: x['barcode'][3:])
         return Response(data)
+
+    @action(methods=['get'], detail=False)
+    def get_galaxy_status(self, request):
+        url = request.query_params.get('galaxy_url', '')
+        api_key = request.query_params.get('galaxy_api_key', '')
+        gi = GalaxyInstance(url=url, key=api_key)
+
+        try:
+            gi.histories.get_most_recently_used_history()
+            return Response({'success': True})
+        except Exception as e:
+            return Response({'success': False})
 
     @action(methods=['post'], detail=True,
             authentication_classes=[CsrfExemptSessionAuthentication])

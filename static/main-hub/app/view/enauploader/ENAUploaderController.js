@@ -17,6 +17,9 @@ Ext.define('MainHub.view.enauploader.ENAUploaderController', {
       '#add-selected-button': {
         click: 'showAddMenu'
       },
+      '#refresh-galaxy-status-button': {
+        click: 'refreshGalaxyStatus'
+      },
       'enabasegrid': {
         itemcontextmenu: 'showContextMenu'
       },
@@ -161,6 +164,50 @@ Ext.define('MainHub.view.enauploader.ENAUploaderController', {
         var clone = Ext.Object.merge({}, item.data);
         delete clone.id;
         store.add(new Model(clone));
+      }
+    });
+  },
+
+  refreshGalaxyStatus: function (btn) {
+    var wnd = btn.up('window');
+    var form = wnd.down('form').getForm();
+    var data = form.getValues();
+    var galaxyURL = data.galaxy_url;
+    var galaxyAPIKey = data.galaxy_api_key;
+
+    if (galaxyURL === '' || galaxyAPIKey === '') {
+      new Noty({
+        text: 'Galaxy URL or Galaxy API Key is missing.',
+        type: 'warning'
+      }).show();
+      return false;
+    }
+
+    $.ajax({
+      dataType: 'json',
+      url: 'api/ena_uploader/get_galaxy_status/',
+      timeout: 5000,  // 5 seconds
+      data: {
+        galaxy_url: galaxyURL,
+        galaxy_api_key: galaxyAPIKey
+      },
+      success: function (obj) {
+        var status = obj.success ? 'online' : 'offline';
+        var type = obj.success ? 'info' : 'warning';
+
+        new Noty({ text: 'Galaxy is ' + status, type: type }).show();
+        wnd.getViewModel().setData({ galaxyStatus: status });
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        var error;
+
+        if (textStatus === 'timeout') {
+          error = 'Timeout Exceeded.';
+        } else {
+          error = errorThrown || textStatus;
+        }
+
+        new Noty({ text: error, type: 'error' }).show();
       }
     });
   },

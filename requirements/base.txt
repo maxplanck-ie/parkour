@@ -20,4 +20,5 @@ xlwt
 fpdf
 numpy
 jupyter
+bioblend
 python-dateutil

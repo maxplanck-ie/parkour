@@ -3,6 +3,7 @@ Ext.define('MainHub.view.enauploader.ENAUploaderModel', {
   alias: 'viewmodel.enauploader-enauploader',
 
   data: {
-    createButtonHidden: true
+    createButtonHidden: true,
+    galaxyStatus: 'offline'
   }
 });

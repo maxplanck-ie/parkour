@@ -18,8 +18,8 @@ Ext.define('MainHub.view.enauploader.ENAUploader', {
 
   title: 'ENA Uploader',
 
-  height: 550,
-  width: 700,
+  height: 725,
+  width: 800,
 
   modal: true,
   resizable: false,
@@ -48,7 +48,7 @@ Ext.define('MainHub.view.enauploader.ENAUploader', {
           border: 0,
           defaultType: 'textfield',
           defaults: {
-            labelWidth: 80,
+            labelWidth: 100,
             readOnly: true,
             anchor: '100%'
           },
@@ -64,6 +64,58 @@ Ext.define('MainHub.view.enauploader.ENAUploader', {
               fieldLabel: 'Description',
               emptyText: 'Description',
               height: 75
+            },
+            {
+              xtype: 'container',
+              html: '<hr />',
+              margin: '5px 0 7px'
+            },
+            {
+              name: 'galaxy_url',
+              fieldLabel: 'Galaxy URL',
+              emptyText: 'Galaxy URL',
+              // vtype: 'url',
+              readOnly: false
+            },
+            {
+              name: 'galaxy_api_key',
+              fieldLabel: 'Galaxy API Key',
+              emptyText: 'Galaxy API Key',
+              readOnly: false
+            },
+            {
+              xtype: 'fieldcontainer',
+              fieldLabel: 'Galaxy Status',
+              layout: 'hbox',
+              defaults: {
+                xtype: 'container'
+              },
+              items: [
+                {
+                  margin: '5px 5px 0 0',
+                  bind: {
+                    html: '<div class="status galaxy-status-{galaxyStatus}"></div>'
+                  }
+                },
+                {
+                  margin: '5px 20px 0 0',
+                  bind: {
+                    html: '{galaxyStatus}'
+                  }
+                },
+                {
+                  xtype: 'button',
+                  itemId: 'refresh-galaxy-status-button',
+                  iconCls: 'fa fa-lg fa-refresh',
+                  ui: 'header',
+                  text: 'Refresh'
+                }
+              ]
+            },
+            {
+              xtype: 'container',
+              html: '<hr />',
+              margin: '5px 0 7px'
             },
             {
               xtype: 'fieldcontainer',

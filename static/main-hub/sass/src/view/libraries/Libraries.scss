@@ -28,10 +28,12 @@
     background-color: #8d6e63;
 }
 
+.status.galaxy-status-online,
 .status.quality-check-approved {
     background-color: #66BB6A;
 }
 
+.status.galaxy-status-offline,
 .status.quality-check-failed {
     background-color: #ef5350;
 }
