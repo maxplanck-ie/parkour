@@ -11,7 +11,7 @@ import request.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('request', '0001_initial_squashed_0002_request_cost_unit'),
+        ('request', '0001_initial'),
     ]
 
     operations = [
