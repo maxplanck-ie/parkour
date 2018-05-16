@@ -68,8 +68,7 @@ class LaneSerializer(ModelSerializer):
         return obj.pool.name
 
     def get_read_length_name(self, obj):
-        records = obj.pool.libraries.all() or obj.pool.samples.all()
-        return records[0].read_length.name
+        return str(obj.pool.size)
 
     def get_index_i7_show(self, obj):
         # records = obj.pool.libraries.all() or obj.pool.samples.all()
