@@ -104,11 +104,25 @@ Ext.define('MainHub.view.statistics.Sequences', {
           dataIndex: 'reads_pf_sequenced',
           renderer: function (value) {
             if (value) {
-              value = (value / 1000000).toFixed(1);
+              value = (value / 1000000).toFixed(2);
             }
             return value;
           },
           filter: { type: 'number' },
+          minWidth: 135
+        },
+        {
+          text: '% reads',
+          renderer: function (value, meta, record) {
+            var readsRequested = record.get('reads_pf_requested');
+            var readsSequenced = record.get('reads_pf_sequenced');
+
+            if (readsRequested && readsSequenced) {
+              value = (((readsSequenced / 1000000) / readsRequested) * 100).toFixed(2);
+            }
+
+            return value;
+          },
           minWidth: 135
         },
         {
