@@ -46,17 +46,17 @@ class User(AbstractEmailUser):
     organization = models.ForeignKey(
         Organization,
         verbose_name='Organization',
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        default=None,
     )
 
     pi = models.ForeignKey(
         PrincipalInvestigator,
         verbose_name='Principal Investigator',
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        default=None,
     )
 
     cost_unit = models.ManyToManyField(
