@@ -169,7 +169,8 @@ class InvoicingSerializer(ModelSerializer):
             return f'{num_samples} samples'
 
     def get_library_protocol(self, obj):
-        return set([x.library_protocol.pk for x in obj.records]).pop()
+        protocols = set([x.library_protocol.pk for x in obj.records])
+        return protocols.pop() if protocols else ''
 
     def get_fixed_costs(self, obj):
         return 0
@@ -201,14 +202,9 @@ class InvoicingSerializer(ModelSerializer):
         costs = 0
         for flowcell in percentage:
             for pool in flowcell['pools']:
-                try:
-                    costs += fixed_costs[flowcell['sequencer']] * \
-                        reduce(lambda x, y: Decimal(x) * Decimal(y),
-                               pool['percentage'].split('*'))
-                except KeyError as e:
-                    sequencer = Sequencer.objects.get(pk=flowcell['sequencer'])
-                    logger.exception(
-                        f'Fixed Cost for "{sequencer.name}" is not set.')
+                costs += fixed_costs.get(flowcell['sequencer'], 0) * \
+                    reduce(lambda x, y: Decimal(x) * Decimal(y),
+                           pool['percentage'].split('*'))
         ret['fixed_costs'] = costs
 
         # Calculate Sequencing Costs
@@ -216,32 +212,22 @@ class InvoicingSerializer(ModelSerializer):
         for flowcell in percentage:
             for pool in flowcell['pools']:
                 key = f"{flowcell['sequencer']}_{pool['read_length']}"
-                try:
-                    costs += sequencing_costs[key] * \
-                        reduce(lambda x, y: Decimal(x) * Decimal(y),
-                               pool['percentage'].split('*'))
-                except KeyError as e:
-                    seq = Sequencer.objects.get(pk=flowcell['sequencer'])
-                    r_length = ReadLength.objects.get(pk=pool['read_length'])
-                    logger.exception(f'Sequencing Cost for "{seq.name} ' +
-                                     f'{r_length.name}" is not set.')
+                costs += sequencing_costs.get(key, 0) * \
+                    reduce(lambda x, y: Decimal(x) * Decimal(y),
+                           pool['percentage'].split('*'))
         ret['sequencing_costs'] = costs
 
         # Calculate Preparation Costs
         costs = 0
-        splt = num_libraries_samples.split(' ')
-        if splt[1] == 'samples':
-            try:
-                costs = Decimal(splt[0]) * preparation_costs[library_protocol]
-            except KeyError as e:
-                protocol = LibraryProtocol.objects.get(pk=library_protocol)
-                logger.exception(
-                    f'Preparation Cost for "{protocol.name}" is not set.')
+        split = num_libraries_samples.split(' ')
+        if split[1] == 'samples':
+            costs = preparation_costs.get(library_protocol, 0) * \
+                Decimal(split[0])
         else:
             try:
                 price = LibraryPreparationCosts.objects.get(
                     library_protocol__name='Quality Control').price
-                costs = Decimal(splt[0]) * price
+                costs = Decimal(split[0]) * price
             except LibraryPreparationCosts.DoesNotExist:
                 logger.exception(
                     f'Preparation Cost for libraries is not set.')
