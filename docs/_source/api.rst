@@ -4,18 +4,18 @@ API Documentation
 .. toctree::
    :maxdepth: 3
 
-   Request <modules/request.api>
+   Request <api/request>
 
-   Library <modules/library.api>
+   Library <api/library>
 
-   Sample <modules/sample.api>
+   Sample <api/sample>
 
-   Incoming Libraries <modules/incoming_libraries.api>
+   Incoming Libraries <api/incoming_libraries>
 
-   Index Generator <modules/index_generator.api>
+   Index Generator <api/index_generator>
 
-   Library Preparation <modules/library_preparation.api>
+   Library Preparation <api/library_preparation>
 
-   Pooling <modules/pooling.api>
+   Pooling <api/pooling>
 
-   Flowcell <modules/flowcell.api>
+   Flowcell <api/flowcell>
