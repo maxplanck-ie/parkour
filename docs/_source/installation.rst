@@ -21,11 +21,15 @@ Migrate the database tables::
 
   docker-compose run parkour-web python manage.py migrate
 
+Collect static files::
+
+  docker-compose run parkour-web python collectstatic --no-input --verbosity 0
+
 Create a superuser (admin)::
 
   docker-compose run parkour-web python manage.py createsuperuser
 
-Open Parkour LIMS at ``http://localhost:8001/``
+Open Parkour LIMS at ``http://localhost/``
 
 
 Manual setup
@@ -53,11 +57,7 @@ Export environment variables
 
   export SECRET_KEY=<SECRET_KEY>
   export DJANGO_SETTINGS_MODULE=wui.settings.dev
-  export DATABASE_URL=postgres://<DB_USER>@localhost:5432/<DB_NAME>
-
-.. note::
-
-   Change the PostgreSQL's ``port`` if needed.
+  export DATABASE_URL=postgres://<DB_USER>@<DB_HOST>:<DB_PORT>/<DB_NAME>
 
 Installation steps
 ------------------

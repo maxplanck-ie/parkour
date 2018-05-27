@@ -2,10 +2,15 @@ import itertools
 
 from django.db import models
 from django.conf import settings
+from django.contrib.auth import get_user_model
 
 from common.models import DateTimeMixin, CostUnit
 from library.models import Library
 from sample.models import Sample
+
+
+def get_sentinel_user():
+    return get_user_model().objects.get_or_create(username='deleted')[0]
 
 
 class FileRequest(models.Model):
@@ -22,7 +27,8 @@ class Request(DateTimeMixin):
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        verbose_name='User'
+        verbose_name='User',
+        on_delete=models.SET(get_sentinel_user),
     )
 
     cost_unit = models.ForeignKey(
@@ -30,6 +36,7 @@ class Request(DateTimeMixin):
         verbose_name='Cost Unit',
         blank=True,
         null=True,
+        on_delete=models.SET_NULL,
     )
 
     libraries = models.ManyToManyField(
