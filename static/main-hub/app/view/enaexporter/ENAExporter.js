@@ -1,19 +1,19 @@
-Ext.define('MainHub.view.enauploader.ENAUploader', {
+Ext.define('MainHub.view.enaexporter.ENAExporter', {
   extend: 'Ext.window.Window',
 
   requires: [
-    'MainHub.view.enauploader.ENAUploaderController',
-    'MainHub.view.enauploader.ENAUploaderModel',
-    'MainHub.view.enauploader.ENABaseGrid',
-    'MainHub.view.enauploader.Experiments',
-    'MainHub.view.enauploader.Samples',
-    'MainHub.view.enauploader.Studies',
-    'MainHub.view.enauploader.Runs'
+    'MainHub.view.enaexporter.ENAExporterController',
+    'MainHub.view.enaexporter.ENAExporterModel',
+    'MainHub.view.enaexporter.ENABaseGrid',
+    'MainHub.view.enaexporter.Experiments',
+    'MainHub.view.enaexporter.Samples',
+    'MainHub.view.enaexporter.Studies',
+    'MainHub.view.enaexporter.Runs'
   ],
 
-  controller: 'enauploader-enauploader',
+  controller: 'enaexporter-enaexporter',
   viewModel: {
-    type: 'enauploader-enauploader'
+    type: 'enaexporter-enaexporter'
   },
 
   title: 'ENA Uploader',

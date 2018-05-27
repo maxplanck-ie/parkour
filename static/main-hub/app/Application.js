@@ -63,11 +63,11 @@ Ext.define('MainHub.Application', {
     'usage.LibraryTypes',
     'statistics.RunStatistics',
     'statistics.Sequences',
-    'enauploader.Records',
-    'enauploader.Experiments',
-    'enauploader.Samples',
-    'enauploader.Studies',
-    'enauploader.Runs'
+    'enaexporter.Records',
+    'enaexporter.Experiments',
+    'enaexporter.Samples',
+    'enaexporter.Studies',
+    'enaexporter.Runs'
   ],
 
   requires: [

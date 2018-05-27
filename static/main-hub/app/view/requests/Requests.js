@@ -8,7 +8,7 @@ Ext.define('MainHub.view.requests.Requests', {
     'MainHub.view.requests.RequestWindow',
     'MainHub.view.requests.EmailWindow',
     'MainHub.view.libraries.LibraryWindow',
-    'MainHub.view.enauploader.ENAUploader'
+    'MainHub.view.enaexporter.ENAExporter'
   ],
 
   controller: 'requests',

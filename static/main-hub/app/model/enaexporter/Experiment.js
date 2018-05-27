@@ -1,4 +1,4 @@
-Ext.define('MainHub.model.enauploader.Experiment', {
+Ext.define('MainHub.model.enaexporter.Experiment', {
   extend: 'MainHub.model.Record',
 
   fields: [

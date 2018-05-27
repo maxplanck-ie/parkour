@@ -1,12 +1,12 @@
-Ext.define('MainHub.store.enauploader.Runs', {
+Ext.define('MainHub.store.enaexporter.Runs', {
   extend: 'Ext.data.Store',
   storeId: 'ENARuns',
 
   requires: [
-    'MainHub.model.enauploader.Run'
+    'MainHub.model.enaexporter.Run'
   ],
 
-  model: 'MainHub.model.enauploader.Run',
+  model: 'MainHub.model.enaexporter.Run',
 
   getId: function () {
     return 'ENARuns';

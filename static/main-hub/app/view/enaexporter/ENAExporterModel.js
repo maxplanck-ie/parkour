@@ -1,6 +1,6 @@
-Ext.define('MainHub.view.enauploader.ENAUploaderModel', {
+Ext.define('MainHub.view.enaexporter.ENAExporterModel', {
   extend: 'Ext.app.ViewModel',
-  alias: 'viewmodel.enauploader-enauploader',
+  alias: 'viewmodel.enaexporter-enaexporter',
 
   data: {
     createButtonHidden: true,

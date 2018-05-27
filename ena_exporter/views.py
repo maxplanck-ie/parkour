@@ -25,7 +25,7 @@ Sample = apps.get_model('sample', 'Sample')
 Flowcell = apps.get_model('flowcell', 'Flowcell')
 
 
-class ENAUploaderViewSet(viewsets.ViewSet):
+class ENAExporterViewSet(viewsets.ViewSet):
     def list(self, request):
         queryset = Request.objects.all().order_by('-create_time')
         if not request.user.is_staff:

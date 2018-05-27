@@ -1,6 +1,6 @@
-Ext.define('MainHub.view.enauploader.ENAUploaderController', {
+Ext.define('MainHub.view.enaexporter.ENAExporterController', {
   extend: 'Ext.app.ViewController',
-  alias: 'controller.enauploader-enauploader',
+  alias: 'controller.enaexporter-enaexporter',
 
   config: {
     control: {
@@ -47,7 +47,7 @@ Ext.define('MainHub.view.enauploader.ENAUploaderController', {
 
     grid.setLoading();
     grid.getStore().reload({
-      url: Ext.String.format('api/ena_uploader/{0}/', requestId),
+      url: Ext.String.format('api/ena_exporter/{0}/', requestId),
       callback: function () {
         grid.setLoading(false);
       }
@@ -185,7 +185,7 @@ Ext.define('MainHub.view.enauploader.ENAUploaderController', {
 
     $.ajax({
       dataType: 'json',
-      url: 'api/ena_uploader/get_galaxy_status/',
+      url: 'api/ena_exporter/get_galaxy_status/',
       timeout: 5000,  // 5 seconds
       data: {
         galaxy_url: galaxyURL,
@@ -250,7 +250,7 @@ Ext.define('MainHub.view.enauploader.ENAUploaderController', {
 
     var form = Ext.create('Ext.form.Panel', { standardSubmit: true });
     form.submit({
-      url: Ext.String.format('api/ena_uploader/{0}/download/', requestId),
+      url: Ext.String.format('api/ena_exporter/{0}/download/', requestId),
       params: {
         experiments: Ext.JSON.encode(Ext.Array.pluck(experiments, 'data')),
         samples: Ext.JSON.encode(Ext.Array.pluck(samples, 'data')),

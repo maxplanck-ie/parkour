@@ -1,6 +1,6 @@
-Ext.define('MainHub.view.enauploader.Samples', {
-  extend: 'MainHub.view.enauploader.ENABaseGrid',
-  alias: 'widget.ena-samples',
+Ext.define('MainHub.view.enaexporter.Studies', {
+  extend: 'MainHub.view.enaexporter.ENABaseGrid',
+  alias: 'widget.ena-studies',
 
   border: 0,
 
@@ -26,16 +26,16 @@ Ext.define('MainHub.view.enauploader.Samples', {
         dataIndex: 'title'
       },
       {
-        text: 'Scientific Name',
-        dataIndex: 'scientific_name'
+        text: 'Study Type',
+        dataIndex: 'study_type'
       },
       {
-        text: 'Taxon ID',
-        dataIndex: 'taxon_id'
+        text: 'Study Abstract',
+        dataIndex: 'study_abstract'
       },
       {
-        text: 'Sample Description',
-        dataIndex: 'sample_description'
+        text: 'PubMed ID',
+        dataIndex: 'pubmed_id'
       }
     ]
   }

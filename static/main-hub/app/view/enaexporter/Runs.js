@@ -1,5 +1,5 @@
-Ext.define('MainHub.view.enauploader.Runs', {
-  extend: 'MainHub.view.enauploader.ENABaseGrid',
+Ext.define('MainHub.view.enaexporter.Runs', {
+  extend: 'MainHub.view.enaexporter.ENABaseGrid',
   alias: 'widget.ena-runs',
 
   border: 0,

@@ -1,4 +1,4 @@
-Ext.define('MainHub.store.enauploader.Records', {
+Ext.define('MainHub.store.enaexporter.Records', {
   extend: 'Ext.data.Store',
   storeId: 'ENARecords',
 

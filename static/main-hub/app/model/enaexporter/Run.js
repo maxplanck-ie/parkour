@@ -1,4 +1,4 @@
-Ext.define('MainHub.model.enauploader.Run', {
+Ext.define('MainHub.model.enaexporter.Run', {
   extend: 'MainHub.model.Base',
 
   fields: [

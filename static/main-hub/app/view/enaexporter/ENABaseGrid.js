@@ -1,4 +1,4 @@
-Ext.define('MainHub.view.enauploader.ENABaseGrid', {
+Ext.define('MainHub.view.enaexporter.ENABaseGrid', {
   extend: 'Ext.grid.Panel',
   alias: 'widget.enabasegrid',
 
