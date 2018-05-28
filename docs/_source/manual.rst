@@ -6,3 +6,5 @@ User Manual
    :maxdepth: 3
 
    Introduction <manual/introduction>
+
+   Getting Started <manual/getting_started>
