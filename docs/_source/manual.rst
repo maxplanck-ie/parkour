@@ -22,3 +22,5 @@ User Manual
    Load Flowcells <manual/load_flowcells>
 
    Reporting <manual/reporting>
+
+   Statistics <manual/statistics>
