@@ -16,3 +16,5 @@ User Manual
    Index Generator <manual/index_generator>
 
    Preparation <manual/preparation>
+
+   Pooling <manual/pooling>
