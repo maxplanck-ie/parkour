@@ -24,3 +24,5 @@ User Manual
    Reporting <manual/reporting>
 
    Statistics <manual/statistics>
+
+   Invoicing <manual/invoicing>
