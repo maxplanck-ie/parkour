@@ -14,3 +14,5 @@ User Manual
    Incoming Libraries and Samples <manual/incoming_libraries_and_samples>
 
    Index Generator <manual/index_generator>
+
+   Preparation <manual/preparation>
