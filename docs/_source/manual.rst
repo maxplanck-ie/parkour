@@ -10,3 +10,5 @@ User Manual
    Getting Started <manual/getting_started>
 
    Requests <manual/requests>
+
+   Incoming Libraries and Samples <manual/incoming_libraries_and_samples>
