@@ -18,3 +18,5 @@ User Manual
    Preparation <manual/preparation>
 
    Pooling <manual/pooling>
+
+   Load Flowcells <manual/load_flowcells>
