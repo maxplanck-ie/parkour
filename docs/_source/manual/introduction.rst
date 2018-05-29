@@ -35,7 +35,7 @@ The LIMS's general principles are a simple yet functional web interface, ease of
     | Statistics (Runs/Sequences) |        |   X   |
     +-----------------------------+--------+-------+
 
-.. _requests:
+.. _intro-requests:
 
 .. figure:: img/requests.png
     :figwidth: 100 %

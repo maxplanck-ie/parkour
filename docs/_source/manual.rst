@@ -8,3 +8,5 @@ User Manual
    Introduction <manual/introduction>
 
    Getting Started <manual/getting_started>
+
+   Requests <manual/requests>
