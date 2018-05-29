@@ -20,3 +20,5 @@ User Manual
    Pooling <manual/pooling>
 
    Load Flowcells <manual/load_flowcells>
+
+   Reporting <manual/reporting>
