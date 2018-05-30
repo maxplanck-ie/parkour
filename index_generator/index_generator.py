@@ -2,7 +2,7 @@ import re
 import random
 import string
 import itertools
-from collections import namedtuple, OrderedDict, defaultdict
+from collections import namedtuple, OrderedDict, defaultdict, Counter
 
 from django.apps import apps
 
@@ -210,12 +210,13 @@ class IndexGenerator:
         ).only(
             'id',
             'name',
+            'barcode',
             'sequencing_depth',
             'read_length__id',
             'index_type',
             'index_i7',
             'index_i5',
-        )
+        ).order_by('barcode')
 
         self.samples = Sample.objects.filter(
             pk__in=sample_ids
@@ -225,16 +226,17 @@ class IndexGenerator:
         ).prefetch_related(
             'index_type__indices_i7',
             'index_type__indices_i5',
-        ).order_by(
-            'index_type__format',
-            'index_type__id',
-            'sequencing_depth',
         ).only(
             'id',
             'name',
+            'barcode',
             'sequencing_depth',
             'read_length__id',
             'index_type',
+        ).order_by(
+            'index_type__format',
+            'index_type__id',
+            'barcode',
         )
 
         self.num_libraries = len(self.libraries)
@@ -278,11 +280,11 @@ class IndexGenerator:
         return index_types
 
     def generate(self):
-        """ """
+        """ Main method that generates indices. """
         if self.num_libraries > 0:
             self.add_libraries_to_result()
 
-        # If a single sample was selected, add it to the result
+        # If a single sample was selected, then add it directly to the result
         if not any(self._result) and self.num_samples == 1:
             index_i7, index_i5 = self.find_random(self.samples[0])
             self._result.append(
@@ -291,10 +293,7 @@ class IndexGenerator:
             return self.result
 
         depths = [x.sequencing_depth for x in self.samples]
-
-        init_index_pairs = []
-        init_indices_i7 = []
-        init_indices_i5 = []
+        init_index_pairs, init_indices_i7, init_indices_i5 = [], [], []
 
         if any(self._result):
             depths = [x['sequencing_depth'] for x in self._result] + depths
@@ -305,7 +304,9 @@ class IndexGenerator:
                 init_indices_i7.append(item['index_i7'])
                 init_indices_i5.append(item['index_i5'])
 
-        # Group samples by the index type's format
+        depths = self.sort_sequencing_depths(depths)
+
+        # Group samples by the index type format
         plate_samples, tube_samples = [], []
         for sample in self.samples:
             if sample.index_type.format == 'plate':
@@ -323,7 +324,7 @@ class IndexGenerator:
                 init_indices_i5.append(pair[1])
             plate_samples = []
 
-        # Ignore the first sample because it will be processed separately below
+        # Ignore the first sample because it will be processed separately
         if not any(init_index_pairs):
             if self.samples[0].index_type.format == 'plate':
                 plate_samples.pop(0)
@@ -428,7 +429,7 @@ class IndexGenerator:
         self._result.extend(no_index + with_index)
 
     def find_random(self, sample):
-        """ Find random indices I7/I5 for a given sample. """
+        """ Find a pair of random indices I7/I5 for a given sample. """
 
         if sample.index_type.format == 'single':
             index_i7 = random.choice(
@@ -446,42 +447,34 @@ class IndexGenerator:
             return (pair.index1, pair.index2)
 
     def find_indices(self, samples, depths, index_group, init_indices):
-        """ """
+        """ Generate indices for given samples and index group (I7/I5). """
         if not any(samples):
             return init_indices
 
-        attempt = 0
+        indices = list(init_indices)
 
-        while attempt < self.MAX_ATTEMPTS:
-            indices = list(init_indices)
+        for sample in samples:
+            index = self.find_index(
+                sample, index_group, indices, depths)
+            if 'index' not in index:
+                raise ValueError('Index not found.')
+            index = index['index']
+            indices.append(index)
 
-            try:
-                for sample in samples:
-                    index = self.find_index(
-                        sample, index_group, indices, depths)
-                    if 'index' not in index:
-                        raise ValueError('Index not found.')
-                    index = index['index']
-                    indices.append(index)
-            except ValueError:
-                pass
-
-            if len(indices) == len(init_indices) + len(samples):
-                library_indices = [x for x in indices if x['is_library']]
-                plate_indices = [x for x in indices if x['format'] ==
-                                 'plate' and not x['is_library']]
-                tube_indices = [x for x in indices if x['format'] ==
-                                'single' and not x['is_library']]
-                return library_indices + plate_indices + \
-                    self.sort_indices(tube_indices)
-
-            attempt += 1
+        if len(indices) == len(init_indices) + len(samples):
+            library_indices = [x for x in indices if x['is_library']]
+            plate_indices = [x for x in indices if x['format'] ==
+                             'plate' and not x['is_library']]
+            tube_indices = [x for x in indices if x['format'] ==
+                            'single' and not x['is_library']]
+            return library_indices + plate_indices + \
+                self.sort_indices(tube_indices)
 
         raise ValueError(f'Could not generate indices "{index_group}" ' +
                          'for the selected samples.')
 
     def find_index(self, sample, index_group, current_indices, depths):
-        """ Helper function for find_indices(). """
+        """ Helper function for `find_indices()`. """
         indices_in_result = [x['index'] for x in current_indices]
         result_index = {'avg_score': 100.0}
 
@@ -511,37 +504,31 @@ class IndexGenerator:
         return result_index
 
     def find_pairs(self, samples, depths, init_pairs):
-        """ """
+        """ Generate index pairs for given samples. """
         if not any(samples):
             return init_pairs
 
-        attempt = 0
-        while attempt < self.MAX_ATTEMPTS:
-            pairs = list(init_pairs)
+        pairs = list(init_pairs)
 
-            try:
-                for sample in samples:
-                    pair = self.find_pair(sample, depths, pairs)
-                    if 'pair' not in pair:
-                        raise ValueError('Pair not found.')
-                    pair = pair['pair']
-                    pairs.append(pair)
-            except ValueError:
-                pass
+        for sample in samples:
+            pair = self.find_pair(sample, depths, pairs)
+            if 'pair' not in pair:
+                raise ValueError('Pair not found.')
+            pair = pair['pair']
+            pairs.append(pair)
 
-            if len(pairs) == len(init_pairs) + len(samples):
-                library_pairs = [x for x in pairs if x[0]['is_library']]
-                plate_pairs = [x for x in pairs if not x[0]['is_library']]
-                if len(plate_pairs) <= self.MAX_RANDOM_SAMPLES:
-                    plate_pairs = self.sort_pairs(plate_pairs)
-                return library_pairs + plate_pairs
+        if len(pairs) == len(init_pairs) + len(samples):
+            library_pairs = [x for x in pairs if x[0]['is_library']]
+            plate_pairs = [x for x in pairs if not x[0]['is_library']]
+            if len(plate_pairs) <= self.MAX_RANDOM_SAMPLES:
+                plate_pairs = self.sort_pairs(plate_pairs)
+            return library_pairs + plate_pairs
 
-            attempt += 1
-
-        raise ValueError(f'Could not generate pairs for the selected samples.')
+        raise ValueError('Could not generate index pairs for the ' +
+                         'selected samples.')
 
     def find_pair(self, sample, depths, current_pairs):
-        """ """
+        """ Helper function for `find_pairs()`. """
         result_pair = {'avg_score': 100.0}
         pairs = list(self.index_registry.get_pairs(sample.index_type.pk))
         random.shuffle(pairs)
@@ -582,13 +569,16 @@ class IndexGenerator:
         return result_pair
 
     def find_pairs_fixed(self, plate_samples):
-        """ """
+        """
+        Return subsequent index pairs from the Index Registry
+        starting from the first one.
+        """
         result = []
 
         # Group by index type
         samples_dict = OrderedDict()
         for sample in plate_samples:
-            if sample.index_type.pk not in samples_dict.keys():
+            if sample.index_type.pk not in samples_dict:
                 samples_dict[sample.index_type.pk] = []
             samples_dict[sample.index_type.pk].append(sample)
 
@@ -601,7 +591,6 @@ class IndexGenerator:
         return result
 
     def calculate_color_distribution(self, indices, sequencing_depths, sample):
-        """ """
         total_depth = 0
         index_length = len(indices[0])
         color_distribution = [{'G': 0, 'R': 0} for _ in range(index_length)]
@@ -675,18 +664,33 @@ class IndexGenerator:
         return result
 
     @staticmethod
+    def sort_sequencing_depths(depths):
+        """ Sort sequencing depths to improve the result. """
+        counter = Counter(depths)
+        keys = counter.keys()
+        min_value, max_value = min(keys), max(keys)
+
+        if min_value == max_value:
+            return depths
+        elif counter[min_value] >= counter[max_value]:
+            return sorted(depths)
+        else:
+            return sorted(depths, reverse=True)
+
+    @staticmethod
     def convert_index(index):
         """ Convert A/C into R (red) and T into G (green). """
         return re.sub('T', 'G', re.sub('A|C', 'R', index))
 
     @staticmethod
     def sort_indices(indices):
+        """ Sort indices I7/I5 by ID. """
         return sorted(
             indices, key=lambda x: (x['index_type'], int(x['number'])))
 
     @staticmethod
     def sort_pairs(pairs):
-        # Sort pairs only by Index I7 ID
+        """ Sort index pairs (only by Index I7 ID). """
         return sorted(
             pairs, key=lambda x: (x[0]['index_type'], int(x[0]['number'])))
 
