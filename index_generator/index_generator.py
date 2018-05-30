@@ -153,7 +153,7 @@ class IndexRegistry:
 
     @staticmethod
     def split_coordinate(coordinate):
-        match = re.match(r'([A-Z]+)([1-9]+)', coordinate)
+        match = re.match(r'([A-Z]+)([0-9]+)', coordinate)
         if not match:
             raise ValueError('Invalid start coordinate.')
         return match[1], int(match[2])
