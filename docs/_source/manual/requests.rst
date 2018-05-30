@@ -37,6 +37,31 @@ To start adding samples to a request, click the Add button in the bottom right c
 
 Depending on the selection (library or sample) different parameters need to be filled into the webform.
 
+.. csv-table:: Request generation, editable parameters, marked fields are mandatory
+    :header: "Parameter", "Explanation", "Field type, Restrictions"
+    :delim: ;
+    :quote: ~
+
+    ~Name*~;~Meaningful label for your sample~;~String, only A-Za-z0-9 as well as _ and- are allowed; no duplicate entries~
+    ~Nucleic Acid Type*~;~Type of nucleic acid submitted for library preparation i.e. total RNA, genomic DNA.~;~Select from dropdown menu~
+    ~Protocol*~;~Library preparation protocol used to prepare the sequencing libraries~;~Select from dropdown menu~
+    ~Library Type*~;~Type of sequencing library generated i.e. RNA-Seq, ChIP-Seq.~;~Select from dropdown menu~
+    ~Concentration (ng/µl)*~;~Measured concentration ~;~Float~
+    ~RNA quality (RQN)*~;~RQN or RIN (RNA Quality Number or RNA integrity number), determined by software of capillary electrophoresis device~;~Float in the range 1-10~
+    ~Size (bp)*~;~Size distribution of submitted samples/libraries in bp (base pairs)~;~Integer~
+    ~Index Type*~;~Predefined compilations of indices, differ per library preparation protocol~;~Select from dropdown menu~
+    ~Index Reads*~;~Total number of index reads to be conducted by the sequencing instrument~;~0,1 or 2~
+    ~Index I7*~;~Sequence ID and sequence of index I7 used to construct library~;~Select from dropdown menu~
+    ~Index I5*~;~Sequence ID and sequence of index I5 used to construct library~;~Select from dropdown menu~
+    ~Read Length*~;~Number of bases to be sequenced by the sequencing instrument~;~Select from dropdown menu~
+    ~Sequencing Depth*~;~Number of reads that align to known reference bases~;~Integer~
+    ~Amplification cycles~;~Number of PCR amplification cycles~;~Integer~
+    ~Equal representation of nucleotides~;~Technical requirement for sequencing on Illumina sequencing instruments~;~Check = yes, no check = no~
+    ~qPCR result~;~qPCR quantification result~;~Integer~
+    ~Concentration determined by*~;~Specify concentration measurement concept i.e. fluorometry, spectrometry~;~Select from dropdown menu~
+    ~Organism*~;~Origin of samples or libraries~;~Select from dropdown menu~
+    ~Comment~;~Additional information on libraries or samples~;~String~
+
 The request creation table can be edited in multiple ways.
 
 * **Copy and Paste**. For convenient batch editing (per column editing) select a cell, press Esc (cell turns yellow) and paste your data (ctrl + v).

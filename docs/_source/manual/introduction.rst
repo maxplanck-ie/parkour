@@ -43,14 +43,6 @@ The LIMS's general principles are a simple yet functional web interface, ease of
 
     Screenshot of Parkour after login for users with the permission *staff*
 
-.. _modules-permissions:
-
-.. figure:: img/modules_permissions.png
-    :figwidth: 100 %
-    :align: center
-
-    Parkour's modules for **Active** and **Staff** users
-
 .. note::
 
     Users with the permission *active* will see only **Requests** and **Libraries & Samples**.

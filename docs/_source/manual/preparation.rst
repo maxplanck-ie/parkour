@@ -12,6 +12,21 @@ To edit the records in the Parkour preparation table, mark the respective cell a
 
 Once all mandatory fields are filled, evaluate the library result and choose “passed” to approve library quality or “fail” to stop further processing. To evaluate individual or all samples belonging to a sample preparation protocol, mark the individual samples or mouse over the protocol header, right click, choose “select all” and carry out the evaluation for all marked samples. Once evaluated, libraries will disappear from the Preparation tab and appear in the Pooling tab. All failed libraries will be rejected and are marked in the Libraries and Samples tab with the status “failed”.
 
+.. csv-table:: Editable Preparation parameters
+    :header: "Parameter", "Explanation", "Field type"
+    :delim: ;
+    :quote: ~
+
+    ~ng/µl samples~;~Concentration of sample. Filled with value from quality check. Can get overwritten if needed~;~Float~
+    ~Starting amount (ng)~;~Amount of nucleic acid used for library preparation~;~Float~
+    ~Spike-in~;~Description of Spike-In ~;~Float~
+    ~Spike-in µl~;~Volume of Spike-In (DF * ng/µl * µl)~;~Float~
+    ~Cycles~;~Number of PCR cycles used to enrich sequencing library~;~Integer~
+    ~ng/µl library~;~Concentration library~;~Float~
+    ~bp (mean fragment size)~;~Mean size distribution of library~;~Integer~
+    ~nM~;~Calculation of library yield. Conversion of ng/µl into nM~;~Automatically calculated field~
+    ~Comment~;~Additional information on library~;~String~
+
 .. _preparation:
 
 .. figure:: img/preparation.png

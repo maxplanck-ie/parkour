@@ -21,6 +21,21 @@ In the Incoming Libraries and Samples window quality information for each submit
 
     Incoming Quality Control module.
 
+.. csv-table:: Editable Quality Control parameters
+    :header: "Parameter", "Explanation", "Field type"
+    :delim: ;
+    :quote: ~
+
+    ~DF~;~Dilution factor, if values is >1 measurement value corresponds to a diluted and not the stock sample~;~Integer~
+    ~Concentration (ng/µl)~;~measured concentration ~;~Float~
+    ~µl~;~volume of submitted sample or library~;~FLoat~
+    ~ng~;~Amount of nucleic acid in stock sample (DF * ng/µl * µl)~;~Automatically calculated field, Float~
+    ~F/S~;~Measurement technology: Fluorometry or Spectrophotometry~;~Select from dropdown menu~
+    ~qPCR result~;~qPCR quantification result~;~Float~
+    ~bp~;~Mean size distribution of sample/library~;~Integer~
+    ~RNA quality (RQN)~;~RQN or RIN (RNA Quality Number or RNA integrity number), determined by software of capillary electrophoresis device~;~Float in the range 1-10~
+    ~Comment~;~Additional information on libraries or sample quality~;~String~
+
 To enter parameters from i.e. concentration measurements choose a request and select a respective cell. Paste or type individual values into cells and press enter or save to fix values into the database. To paste a series of values into multiple cells, mark a cell, press Esc, start pasting data (ctrl + v).
 
 To attach measurements reports to a request, choose from the request window your request, right click and choose view to start uploading files from the quality control step.
