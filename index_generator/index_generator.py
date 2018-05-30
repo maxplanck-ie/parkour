@@ -16,7 +16,10 @@ Pair = namedtuple('Pair', ['index1', 'index2', 'coordinate'])
 
 
 class IndexRegistry:
-    """ """
+    """
+    Class for storing fetched and sorted indices i7/i5 and index pairs.
+    """
+
     def __init__(self, mode, index_types, start_coord='A1', direction='right'):
         self.indices = {}
         self.pairs = {}
@@ -27,9 +30,6 @@ class IndexRegistry:
 
         self.mode = mode
         self.index_types = index_types
-        self.direction = direction
-        self.start_coord = start_coord
-
         char_coord, num_coord = self.split_coordinate(start_coord)
 
         # Fetch indices and index pairs
@@ -37,20 +37,31 @@ class IndexRegistry:
             if index_type.format == 'single':
                 self.fetch_indices(index_type)
             else:
-                self.fetch_pairs(index_type, char_coord, num_coord)
+                self.fetch_pairs(index_type, char_coord, num_coord, direction)
 
     def fetch_indices(self, index_type):
+        """ Fetch indices i7 and i5 for a given index type. """
         if index_type.pk not in self.indices.keys():
             self.indices[index_type.pk] = {'i7': [], 'i5': []}
 
         self.indices[index_type.pk]['i7'] = self.to_list(
-            index_type.format, index_type.pk, index_type.indices_i7.all())
+            index_type.format,
+            index_type.pk,
+            index_type.indices_i7.all(),
+        )
 
         if self.mode == 'dual':
             self.indices[index_type.pk]['i5'] = self.to_list(
-                index_type.format, index_type.pk, index_type.indices_i5.all())
+                index_type.format,
+                index_type.pk,
+                index_type.indices_i5.all(),
+            )
 
-    def fetch_pairs(self, index_type, char_coord, num_coord):
+    def fetch_pairs(self, index_type, char_coord, num_coord, direction):
+        """
+        Fetch index pairs (Index i7 + Index i5) for a given index type,
+        start coordinate, and direction.
+        """
         if index_type.pk not in self.pairs.keys():
             self.pairs[index_type.pk] = []
 
@@ -58,9 +69,9 @@ class IndexRegistry:
             index_type=index_type).select_related('index1', 'index2')
 
         # Sort index pairs according to the chosen direction
-        if self.direction == 'right':
+        if direction == 'right':
             index_pairs = index_pairs.order_by('char_coord', 'num_coord')
-        elif self.direction == 'down':
+        elif direction == 'down':
             index_pairs = index_pairs.order_by('num_coord', 'char_coord')
         else:  # diagonal
             index_pairs = self.get_diagonal(index_pairs)
@@ -74,9 +85,10 @@ class IndexRegistry:
         if start_idx is None:
             raise ValueError(
                 f'No index pairs for Index Type "{index_type.name}" ' +
-                f'and start coordinate "{self.start_coord}".'
+                f'and start coordinate "{char_coord + str(num_coord)}".'
             )
 
+        # Make the index pairs list begin with a provided start coordinate
         index_pairs = index_pairs[start_idx:] + index_pairs[:start_idx]
 
         for pair in index_pairs:
@@ -99,6 +111,7 @@ class IndexRegistry:
                 Pair(index1, index2, pair.coordinate))
 
     def get_diagonal(self, index_pairs):
+        """ Sort index pairs diagonally. """
         letters = string.ascii_uppercase  # ABCD...
         last_coord = max([(x.char_coord, x.num_coord) for x in index_pairs])
         char_coord, num_coord = last_coord  # e.g., 'H' and 12
@@ -126,14 +139,18 @@ class IndexRegistry:
         return sorted(index_pairs, key=lambda x: order[x.coordinate])
 
     def get_indices(self, index_type_id, index_group):
-        # Return empty list if index_type_id or index_group don't exist
+        """
+        Return a list of indices for a given index type id and index group.
+        """
         return self.indices.get(
             index_type_id, {'i7': [], 'i5': []}).get(index_group, [])
 
     def get_pairs(self, index_type_id):
+        """ Return a list of index pairs for a given index type id. """
         return self.pairs.get(index_type_id, [])
 
     def to_list(self, format, index_type, indices):
+        """ Return a list of index dicts. """
         return list(map(lambda x: self.create_index_dict(
             format, index_type, x.prefix, x.number, x.index), indices))
 
@@ -153,6 +170,9 @@ class IndexRegistry:
 
     @staticmethod
     def split_coordinate(coordinate):
+        """
+        Split a submitted coordinate into a character and a numeric parts.
+        """
         match = re.match(r'([A-Z]+)([0-9]+)', coordinate)
         if not match:
             raise ValueError('Invalid start coordinate.')
@@ -160,7 +180,11 @@ class IndexRegistry:
 
 
 class IndexGenerator:
-    """ """
+    """
+    Main class that fetches provided libraries and samples, checks the
+    compatibility of their index types, generates indices, and assigns
+    them to the libraries and samples.
+    """
     index_registry = None
     libraries = None
     samples = None
@@ -178,24 +202,39 @@ class IndexGenerator:
         self.libraries = Library.objects.filter(
             pk__in=library_ids
         ).select_related(
-            'read_length', 'index_type',
+            'read_length',
+            'index_type',
         ).prefetch_related(
-            'index_type__indices_i7', 'index_type__indices_i5',
+            'index_type__indices_i7',
+            'index_type__indices_i5',
         ).only(
-            'id', 'name', 'sequencing_depth', 'read_length__id', 'index_type',
-            'index_i7', 'index_i5',
+            'id',
+            'name',
+            'sequencing_depth',
+            'read_length__id',
+            'index_type',
+            'index_i7',
+            'index_i5',
         )
 
         self.samples = Sample.objects.filter(
             pk__in=sample_ids
         ).select_related(
-            'read_length', 'index_type',
+            'read_length',
+            'index_type',
         ).prefetch_related(
-            'index_type__indices_i7', 'index_type__indices_i5',
+            'index_type__indices_i7',
+            'index_type__indices_i5',
         ).order_by(
-            'index_type__format', 'index_type__id', 'sequencing_depth',
+            'index_type__format',
+            'index_type__id',
+            'sequencing_depth',
         ).only(
-            'id', 'name', 'sequencing_depth', 'read_length__id', 'index_type',
+            'id',
+            'name',
+            'sequencing_depth',
+            'read_length__id',
+            'index_type',
         )
 
         self.num_libraries = len(self.libraries)
@@ -216,7 +255,7 @@ class IndexGenerator:
             self.mode, index_types, start_coord, direction)
 
     def validate_index_types(self, records):
-        """ Check the compatibility of the provided samples. """
+        """ Check the compatibility of provided libraries and samples. """
         index_types = [x.index_type for x in records]
         index_types = list(filter(None, index_types))
 

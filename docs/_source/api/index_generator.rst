@@ -7,3 +7,8 @@ API operations on pools.
     :members:
     :undoc-members:
     :show-inheritance:
+
+.. automodule:: index_generator.index_generator
+    :members: IndexRegistry, IndexGenerator
+    :undoc-members:
+    :show-inheritance:
