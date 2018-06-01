@@ -17,7 +17,7 @@ Parkour has a central user management to register new users, edit or delete exis
 
 Only users with staff status can enter the administration site to add or edit new users and allocate permissions.
 
-To add a new user, open Parkour and go to site administration (/admin) and select “add” new user. Enter first name, last name and email address. A random password will be generated. Click “Save and continue editing”. Specify phone number, organization, principal investigator and cost unit. Multiple Cost units can be assigned to a single user. Depending on the role of the user, set permissions for the user; choose between: Active, Staff, and Superuser. Click “Save” to save the changes to the database.
+To add a new user, open *Parkour* and go to site administration (/admin) and select “add” new user. Enter first name, last name and email address. A random password will be generated. Click “Save and continue editing”. Specify phone number, organization, principal investigator and cost unit. Multiple Cost units can be assigned to a single user. Depending on the role of the user, set permissions for the user; choose between: Active, Staff, and Superuser. Click “Save” to save the changes to the database.
 
 .. _add-user:
 
