@@ -3,8 +3,28 @@
 
 ![Parkour LIMS](https://i.imgur.com/a6jgdio.png)
 
-Parkour LIMS aims to help laboratories, dealing with thousands of samples per year, with laboratory management, documentation, tracking, and evaluation. To do this, the LIMS has a web-based interface, which means anyone who has rights to access it can create new requests for Next Generation Sequencing (NGS) without asking the lab staff to do so and watch the request processing status in real time. The scalable and flexible structure of the LIMS can also allow the request of a primary analysis for sequences of a respective request in the future. The LIMS's general principles are a simple yet functional web interface, ease of use, user input validation, and fast data processing. Most importantly, Parkour LIMS also automates many repetitive tasks and simplifies critical work of staff in the lab.
+## Description
+
+Parkour LIMS (Laboratory Information Management System) is a software package for sample processing and quality management of next-generation sequencing (NGS) data and samples. Besides extensive functionality, most of existing LIMS are missing electronic laboratory notebook aspects to support, organize, and ultimately standardize initial laboratory-intensive sample preparation steps. The LIMS was designed to coordinate laboratory work by clearly structuring tasks and facilitate high-quality sample preparation. Deep sequencing users, laboratory personnel, and data managers will benefit from using Parkour LIMS as a central laboratory and quality management platform.
+
+## Main Features
+
+- Online sequencing request submission
+- Real-time status tracking
+- Coordinated sample preparation and instrument loading
+- In-depth support of NGS workflows
+- Quality control
+- Reporting
+- Interactive statistics on workflow usage
+- Automated invoicing
+- Standardized sample sheet generation
+- Metadata export capabilities
+- Highly customizable and extensible
+
+## Documentation
+
+Documentation and user manual can be viewed [here](https://parkour.readthedocs.io/).
 
 ## Installation
 
-Use the [Docker image](https://github.com/maxplanck-ie/docker-parkour) to install Parkour.
+All installation steps are described in the [documentation](https://parkour.readthedocs.io/installation.html).
