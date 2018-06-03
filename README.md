@@ -1,7 +1,7 @@
 # Parkour LIMS
 [![Build Status](https://travis-ci.org/maxplanck-ie/parkour.svg?branch=master)](https://travis-ci.org/maxplanck-ie/parkour) [![Documentation Status](https://readthedocs.org/projects/parkour/badge/?version=latest)](http://parkour.readthedocs.io/?badge=latest)
 
-![Parkour LIMS](https://i.imgur.com/a6jgdio.png)
+![Parkour LIMS](https://i.imgur.com/ie7NCxV.png)
 
 ## Description
 
