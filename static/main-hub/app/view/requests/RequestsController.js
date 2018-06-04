@@ -71,6 +71,7 @@ Ext.define('MainHub.view.requests.RequestsController', {
 
     var enaExporterOption = {
       text: 'ENA Exporter',
+      disabled: !record.get('completed'),
       handler: function () {
         Ext.create('MainHub.view.enaexporter.ENAExporter', {
           request: record

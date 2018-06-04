@@ -2,17 +2,11 @@ Ext.define('MainHub.model.enaexporter.Sample', {
   extend: 'MainHub.model.Base',
 
   fields: [
-    {
-      name: 'barcode',
-      type: 'string'
-    },
-    {
-      name: 'alias',
-      type: 'string'
-    },
+    // Common
     {
       name: 'status',
-      type: 'string'
+      type: 'string',
+      defaultValue: 'add'
     },
     {
       name: 'accession',
@@ -20,25 +14,86 @@ Ext.define('MainHub.model.enaexporter.Sample', {
       defaultValue: 'update_by_ENA'
     },
     {
-      name: 'title',
+      name: 'submission_date',
+      type: 'string',
+      defaultValue: 'update_by_ENA'
+    },
+
+    // Experiments
+    {
+      name: 'pk',
+      type: 'int'
+    },
+    {
+      name: 'barcode',
       type: 'string'
     },
+    {
+      name: 'library_name',
+      type: 'string'
+    },
+    {
+      name: 'library_strategy',
+      type: 'string'
+    },
+    {
+      name: 'design_description',
+      type: 'string'
+    },
+    {
+      name: 'library_source',
+      type: 'string'
+    },
+    {
+      name: 'library_selection',
+      type: 'string'
+    },
+    {
+      name: 'library_layout',
+      type: 'string'
+    },
+    {
+      name: 'insert_size',
+      type: 'int',
+      allowNull: true
+    },
+    {
+      name: 'library_construction_protocol',
+      type: 'string'
+    },
+    {
+      name: 'platform',
+      type: 'string',
+      defaultValue: 'Illumina'
+    },
+    {
+      name: 'instrument_model',
+      type: 'string'
+    },
+
+    // Samples
     {
       name: 'scientific_name',
       type: 'string'
     },
     {
       name: 'taxon_id',
-      type: 'string'
+      type: 'int',
+      allowNull: true
     },
     {
       name: 'sample_description',
       type: 'string'
     },
+
+    // Runs
     {
-      name: 'submission_date',
-      type: 'string',
-      defaultValue: 'update_by_ENA'
+      name: 'file_name',
+      type: 'string'
+    },
+    {
+      name: 'file_format',
+      type: 'string'
     }
   ]
 });

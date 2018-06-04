@@ -14,7 +14,6 @@ from rest_framework.decorators import action
 
 from bioblend.galaxy import GalaxyInstance
 
-# from common.utils import print_sql_queries
 from common.views import CsrfExemptSessionAuthentication
 from .serializers import ENASerializer
 
@@ -22,7 +21,6 @@ from .serializers import ENASerializer
 Request = apps.get_model('request', 'Request')
 Library = apps.get_model('library', 'Library')
 Sample = apps.get_model('sample', 'Sample')
-Flowcell = apps.get_model('flowcell', 'Flowcell')
 
 
 class ENAExporterViewSet(viewsets.ViewSet):
@@ -33,34 +31,43 @@ class ENAExporterViewSet(viewsets.ViewSet):
         data = queryset.values('pk', 'name')
         return Response(data)
 
-    # @print_sql_queries
     def retrieve(self, request, pk=None):
         libraries_qs = Library.objects.select_related(
             'organism',
+            'read_length',
             'library_protocol',
             'library_type',
         ).only(
             'name',
+            'status',
             'barcode',
-            'organism__name',
+            'comments',
+            'organism__taxon_id',
+            'organism__scientific_name',
+            'read_length__name',
             'mean_fragment_size',
             'library_protocol__name',
             'library_type__name',
-        )
+        ).filter(status__gte=5)
+
         samples_qs = Sample.objects.select_related(
             'organism',
+            'read_length',
             'library_protocol',
             'library_type',
             'librarypreparation'
         ).only(
             'name',
+            'status',
             'barcode',
-            'is_converted',
-            'organism__name',
+            'comments',
+            'organism__taxon_id',
+            'organism__scientific_name',
+            'read_length__name',
             'library_protocol__name',
             'library_type__name',
             'librarypreparation__mean_fragment_size'
-        )
+        ).filter(status__gte=5)
 
         queryset = Request.objects.prefetch_related(
             Prefetch('libraries', queryset=libraries_qs),
@@ -96,25 +103,31 @@ class ENAExporterViewSet(viewsets.ViewSet):
     @action(methods=['post'], detail=True,
             authentication_classes=[CsrfExemptSessionAuthentication])
     def download(self, request, pk=None):
-        def getrow(header, item):
+        def getrow(header, item, type, index):
             row = []
             for h in header:
                 value = item.get(h, '')
-                row.append(value if value else 'NA')
+                row.append(value if value else 'None')
             return row
 
-        def getfile(header, data):
+        def getfile(type, header, data, **kwargs):
             file = io.StringIO()
             writer = csv.writer(file, dialect='excel-tab')
             writer.writerow(header)
-            for item in data:
-                writer.writerow(getrow(header, item))
+
+            if type == 'study':
+                study_data = kwargs.get('study_data', {})
+                item = {**dict(data[0]), **study_data}
+                writer.writerow(getrow(header, item, type, 1))
+            else:
+                for i, item in enumerate(data):
+                    writer.writerow(getrow(header, item, type, i))
+
             return file
 
-        experiments = json.loads(request.data.get('experiments', '[]'))
         samples = json.loads(request.data.get('samples', '[]'))
-        studies = json.loads(request.data.get('studies', '[]'))
-        runs = json.loads(request.data.get('runs', '[]'))
+        study_abstract = request.data.get('study_abstract', '')
+        study_type = request.data.get('study_type', '')
 
         response = HttpResponse(content_type='application/zip')
         response['Content-Disposition'] = 'attachment; filename=ENA.zip'
@@ -139,7 +152,7 @@ class ENAExporterViewSet(viewsets.ViewSet):
             'instrument_model',
             'submission_date',
         ]
-        experiments_file = getfile(header, experiments)
+        experiments_file = getfile('experiment', header, samples)
 
         # Create samples.tsv
         header = [
@@ -152,7 +165,7 @@ class ENAExporterViewSet(viewsets.ViewSet):
             'sample_description',
             'submission_date',
         ]
-        samples_file = getfile(header, samples)
+        samples_file = getfile('sample', header, samples)
 
         # Create studies.tsv
         header = [
@@ -165,7 +178,9 @@ class ENAExporterViewSet(viewsets.ViewSet):
             'pubmed_id',
             'submission_date',
         ]
-        studies_file = getfile(header, studies)
+        studies_file = getfile('study', header, samples, study_data={
+            'study_type': study_type, 'study_abstract': study_abstract
+        })
 
         # Create runs.tsv
         header = [
@@ -178,7 +193,7 @@ class ENAExporterViewSet(viewsets.ViewSet):
             'file_checksum',
             'submission_date',
         ]
-        runs_file = getfile(header, runs)
+        runs_file = getfile('run', header, samples)
 
         # Archive the files
         in_memory = io.BytesIO()

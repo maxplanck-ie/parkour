@@ -11,6 +11,17 @@ AlphaValidator = RegexValidator(
 
 class Organism(models.Model):
     name = models.CharField('Name', max_length=100)
+    scientific_name = models.CharField(
+        'Scientific Name',
+        max_length=150,
+        blank=True,
+        null=True,
+    )
+    taxon_id = models.PositiveIntegerField(
+        'Taxon Identifier',
+        blank=True,
+        null=True,
+    )
 
     def __str__(self):
         return self.name

@@ -5,10 +5,7 @@ Ext.define('MainHub.view.enaexporter.ENAExporter', {
     'MainHub.view.enaexporter.ENAExporterController',
     'MainHub.view.enaexporter.ENAExporterModel',
     'MainHub.view.enaexporter.ENABaseGrid',
-    'MainHub.view.enaexporter.Experiments',
-    'MainHub.view.enaexporter.Samples',
-    'MainHub.view.enaexporter.Studies',
-    'MainHub.view.enaexporter.Runs'
+    'MainHub.view.enaexporter.Samples'
   ],
 
   controller: 'enaexporter-enaexporter',
@@ -18,8 +15,8 @@ Ext.define('MainHub.view.enaexporter.ENAExporter', {
 
   title: 'ENA Uploader',
 
-  height: 725,
-  width: 800,
+  height: 480,
+  width: 700,
 
   modal: true,
   resizable: false,
@@ -43,26 +40,32 @@ Ext.define('MainHub.view.enaexporter.ENAExporter', {
         padding: 15,
         items: [{
           xtype: 'form',
-          itemId: 'request-form',
           layout: 'anchor',
           border: 0,
           defaultType: 'textfield',
           defaults: {
             labelWidth: 100,
-            readOnly: true,
             anchor: '100%'
           },
           items: [
             {
               name: 'name',
               fieldLabel: 'Request',
-              emptyText: 'Request'
+              emptyText: 'Request',
+              readOnly: true
             },
             {
-              name: 'description',
+              name: 'study_type',
+              fieldLabel: 'Study Type',
+              emptyText: 'Study Type',
+              allowBlank: false
+            },
+            {
+              name: 'study_abstract',
               xtype: 'textarea',
-              fieldLabel: 'Description',
-              emptyText: 'Description',
+              fieldLabel: 'Study Abstract',
+              emptyText: 'Study Abstract',
+              allowBlank: false,
               height: 75
             },
             {
@@ -92,13 +95,13 @@ Ext.define('MainHub.view.enaexporter.ENAExporter', {
               },
               items: [
                 {
-                  margin: '5px 5px 0 0',
+                  margin: '8px 5px 0 0',
                   bind: {
                     html: '<div class="status galaxy-status-{galaxyStatus}"></div>'
                   }
                 },
                 {
-                  margin: '5px 20px 0 0',
+                  margin: '8px 20px 0 0',
                   bind: {
                     html: '{galaxyStatus}'
                   }
@@ -111,82 +114,8 @@ Ext.define('MainHub.view.enaexporter.ENAExporter', {
                   text: 'Refresh'
                 }
               ]
-            },
-            {
-              xtype: 'container',
-              html: '<hr />',
-              margin: '5px 0 7px'
-            },
-            {
-              xtype: 'fieldcontainer',
-              fieldLabel: 'Samples',
-              items: [{
-                xtype: 'grid',
-                itemId: 'samples-grid',
-                sortableColumns: false,
-                enableColumnMove: false,
-                enableColumnResize: false,
-                enableColumnHide: false,
-                viewConfig: {
-                  stripeRows: false
-                },
-                height: 245,
-                store: 'ENARecords',
-                columns: {
-                  items: [
-                    {
-                      xtype: 'checkcolumn',
-                      itemId: 'check-column',
-                      dataIndex: 'selected',
-                      tdCls: 'no-dirty',
-                      width: 40
-                    },
-                    {
-                      text: 'Name',
-                      dataIndex: 'library_name',
-                      flex: 1
-                    },
-                    {
-                      text: '',
-                      dataIndex: 'record_type',
-                      width: 35,
-                      renderer: function (value, meta, record) {
-                        return record.getRecordType().charAt(0);
-                      }
-                    },
-                    {
-                      text: 'Barcode',
-                      dataIndex: 'barcode',
-                      minWidth: 95,
-                      flex: 1,
-                      renderer: function (value, meta, record) {
-                        return record.getBarcode();
-                      }
-                    }
-                  ]
-                },
-                bbar: [
-                  '->',
-                  {
-                    itemId: 'add-selected-button',
-                    tooltip: 'Add selected items to Experiments/Samples',
-                    text: 'Add to'
-                  }
-                ]
-              }],
-              getValue: function () {
-                // return Ext.pluck(this.down('grid').getStore().data.items, 'id');
-              }
             }
           ]
-        }]
-      },
-      {
-        title: 'Experiments',
-        itemId: 'experiments-tab',
-        items: [{
-          xtype: 'ena-experiments',
-          store: 'ENAExperiments'
         }]
       },
       {
@@ -194,38 +123,14 @@ Ext.define('MainHub.view.enaexporter.ENAExporter', {
         itemId: 'samples-tab',
         items: [{
           xtype: 'ena-samples',
+          itemId: 'samples-grid',
           store: 'ENASamples'
-        }]
-      },
-      {
-        title: 'Studies',
-        itemId: 'studies-tab',
-        items: [{
-          xtype: 'ena-studies',
-          store: 'ENAStudies'
-        }]
-      },
-      {
-        title: 'Runs',
-        itemId: 'runs-tab',
-        items: [{
-          xtype: 'ena-runs',
-          store: 'ENARuns'
         }]
       }
     ]
   }],
 
   bbar: [
-    {
-      itemId: 'create-empty-record-button',
-      tooltip: 'Create empty record',
-      iconCls: 'fa fa-plus fa-lg',
-      text: 'Create',
-      bind: {
-        hidden: '{createButtonHidden}'
-      }
-    },
     '->',
     {
       itemId: 'download-files-button',

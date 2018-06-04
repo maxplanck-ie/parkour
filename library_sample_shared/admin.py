@@ -18,7 +18,11 @@ from .forms import IndexTypeForm
 
 @admin.register(Organism)
 class OrganismAdmin(admin.ModelAdmin):
-    pass
+    list_display = (
+        'name',
+        'scientific_name',
+        'taxon_id',
+    )
 
 
 @admin.register(ConcentrationMethod)

@@ -5,26 +5,20 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
   config: {
     control: {
       '#': {
+        boxready: 'loadSamples',
         beforeshow: 'setModelData'
       },
       '#tabs': {
-        tabchange: 'tabChange'
+        // tabchange: 'tabChange'
       },
       '#samples-grid': {
-        boxready: 'loadSamples',
         headercontextmenu: 'showHeaderMenu'
-      },
-      '#add-selected-button': {
-        click: 'showAddMenu'
       },
       '#refresh-galaxy-status-button': {
         click: 'refreshGalaxyStatus'
       },
       'enabasegrid': {
         itemcontextmenu: 'showContextMenu'
-      },
-      '#create-empty-record-button': {
-        click: 'createEmptyRecord'
       },
       '#download-files-button': {
         click: 'download'
@@ -33,32 +27,56 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
   },
 
   setModelData: function (wnd) {
-    wnd.down('#request-form').getForm().setValues(wnd.request.data);
+    wnd.down('form').getForm().setValues(wnd.request.data);
   },
 
-  tabChange: function (tp, newTab) {
-    tp.up('window').getViewModel().setData({
-      createButtonHidden: newTab.itemId === 'general-tab'
-    });
-  },
+  // tabChange: function (tp, newTab) {
+  //   tp.up('window').getViewModel().setData({
+  //     createButtonHidden: newTab.itemId === 'general-tab'
+  //   });
+  // },
 
-  loadSamples: function (grid) {
-    var requestId = grid.up('window').request.get('pk');
+  loadSamples: function (wnd) {
+    var requestId = wnd.request.get('pk');
 
-    grid.setLoading();
-    grid.getStore().reload({
-      url: Ext.String.format('api/ena_exporter/{0}/', requestId),
-      callback: function () {
-        grid.setLoading(false);
-      }
+    Ext.getStore('ENASamples').reload({
+      url: Ext.String.format('api/ena_exporter/{0}/', requestId)
     });
   },
 
   showHeaderMenu: function (ct, column, e) {
     var me = this;
+    var store = Ext.getStore('ENASamples');
+    var selectedSamples = this.getSelectedSamples(store);
 
     if (column.dataIndex !== 'selected') {
       return false;
+    }
+
+    var items = [
+      {
+        text: 'Select All',
+        handler: function () {
+          me.selectAll(true);
+        }
+      }, {
+        text: 'Unselect All',
+        handler: function () {
+          me.selectAll(false);
+        }
+      }
+    ];
+
+    if (selectedSamples.length > 0) {
+      items = items.concat([
+        '-',
+        {
+          text: Ext.String.format('Delete Selected ({0})', selectedSamples.length),
+          handler: function () {
+            store.remove(selectedSamples);
+          }
+        }
+      ]);
     }
 
     e.stopEvent();
@@ -67,26 +85,17 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
       defaults: {
         margin: 5
       },
-      items: [
-        {
-          text: 'Select All',
-          handler: function () {
-            me.selectAll(true);
-          }
-        },
-        '-',
-        {
-          text: 'Unselect All',
-          handler: function () {
-            me.selectAll(false);
-          }
-        }
-      ]
+      items: items
     }).showAt(e.getXY());
   },
 
   showContextMenu: function (gridView, record, itemEl, index, e) {
     var me = this;
+    var dataIndex = MainHub.Utilities.getDataIndex(e, gridView);
+
+    if (!dataIndex || dataIndex === 'selected') {
+      return false;
+    }
 
     e.stopEvent();
     Ext.create('Ext.menu.Menu', {
@@ -98,7 +107,6 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
         {
           text: 'Apply to All',
           handler: function () {
-            var dataIndex = MainHub.Utilities.getDataIndex(e, gridView);
             me.applyToAll(gridView, record, dataIndex);
           }
         },
@@ -110,62 +118,6 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
         }
       ]
     }).showAt(e.getXY());
-  },
-
-  showAddMenu: function (btn, e) {
-    var me = this;
-
-    e.stopEvent();
-    Ext.create('Ext.menu.Menu', {
-      plain: true,
-      defaults: {
-        margin: 5
-      },
-      items: [
-        {
-          text: 'Experiments',
-          handler: function () {
-            me.addTo('experiments');
-          }
-        },
-        {
-          text: 'Samples',
-          handler: function () {
-            me.addTo('samples');
-          }
-        }
-      ]
-    }).showAt(e.getXY());
-  },
-
-  addTo: function (type) {
-    var selectedSamples = this.getSelectedSamples(Ext.getStore('ENARecords'));
-    var store = type === 'experiments'
-      ? Ext.getStore('ENAExperiments')
-      : Ext.getStore('ENASamples');
-    var Model = store.getModel();
-
-    if (selectedSamples.length === 0) {
-      new Noty({
-        text: 'You did not select any samples.',
-        type: 'warning'
-      }).show();
-      return false;
-    }
-
-    var barcodes = store.data.items.reduce(function (filtered, item) {
-      var barcode = item.get('barcode');
-      if (barcode) filtered.push(barcode);
-      return filtered;
-    }, []);
-
-    selectedSamples.forEach(function (item) {
-      if (barcodes.indexOf(item.get('barcode')) === -1) {
-        var clone = Ext.Object.merge({}, item.data);
-        delete clone.id;
-        store.add(new Model(clone));
-      }
-    });
   },
 
   refreshGalaxyStatus: function (btn) {
@@ -213,7 +165,7 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
   },
 
   selectAll: function (result) {
-    var store = Ext.getStore('ENARecords');
+    var store = Ext.getStore('ENASamples');
     result = result || false;
 
     store.each(function (item) {
@@ -222,7 +174,7 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
   },
 
   applyToAll: function (gridView, record, dataIndex) {
-    var store = Ext.getStore('ENARecords');
+    var store = Ext.getStore('ENASamples');
 
     if (dataIndex) {
       store.each(function (item) {
@@ -233,29 +185,24 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
     }
   },
 
-  createEmptyRecord: function (btn) {
-    var tab = btn.up('window').down('#tabs').getActiveTab();
-    var store = tab.down('grid').getStore();
-    store.add({});
-  },
-
   download: function (btn) {
-    var requestId = btn.up('window').request.get('pk');
-    var experiments = Ext.getStore('ENAExperiments').data.items;
+    var wnd = btn.up('window');
+    var requestId = wnd.request.get('pk');
     var samples = Ext.getStore('ENASamples').data.items;
-    var studies = Ext.getStore('ENAStudies').data.items;
-    var runs = Ext.getStore('ENARuns').data.items;
+    var data = wnd.down('form').getForm().getValues();
 
-    // TODO: validate records in all grids
+    if (samples.length === 0) {
+      new Noty({ text: 'No samples selected.', type: 'warning' }).show();
+      return false;
+    }
 
     var form = Ext.create('Ext.form.Panel', { standardSubmit: true });
     form.submit({
       url: Ext.String.format('api/ena_exporter/{0}/download/', requestId),
       params: {
-        experiments: Ext.JSON.encode(Ext.Array.pluck(experiments, 'data')),
         samples: Ext.JSON.encode(Ext.Array.pluck(samples, 'data')),
-        studies: Ext.JSON.encode(Ext.Array.pluck(studies, 'data')),
-        runs: Ext.JSON.encode(Ext.Array.pluck(runs, 'data'))
+        study_abstract: data.study_abstract,
+        study_type: data.study_type
       }
     });
   },

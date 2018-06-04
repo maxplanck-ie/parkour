@@ -40,6 +40,10 @@ Ext.define('MainHub.model.requests.Request', {
       name: 'restrict_permissions'
     },
     {
+      type: 'bool',
+      name: 'completed'
+    },
+    {
       type: 'string',
       name: 'deep_seq_request_name'
     },
