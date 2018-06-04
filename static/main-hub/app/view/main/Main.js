@@ -73,6 +73,13 @@ Ext.define('MainHub.view.main.Main', {
                 {
                     xtype: 'button',
                     ui: 'header',
+                    iconCls: 'x-fa fa-book',
+                    href: 'https://parkour.readthedocs.io/',
+                    tooltip: 'Documentation'
+                },
+                {
+                    xtype: 'button',
+                    ui: 'header',
                     iconCls: 'x-fa fa-sign-out',
                     href: 'logout',
                     tooltip: 'Logout'

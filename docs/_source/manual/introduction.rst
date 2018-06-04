@@ -6,8 +6,6 @@ Parkour LIMS supports sample processing laboratories, dealing with thousands of 
 
 The LIMS's general principles are a simple yet functional web interface, ease of use, user input validation, and fast data processing. Interestingly for software developers, Parkour’s dynamic structure allows for any program adjustments or implementation of new features into the existing workflow. Furthermore the program can be extended to support other than NGS workflows. Basically any samples processing laboratory can profits from the usage of Parkour as central laboratory management platform.
 
-When you've logged into Parkour LIMS, you will see the window shown in Figure :ref:`requests`. Depending on the permissions set per user, different options are available in the navigation panel (see Table :ref:`parkour-sections`).
-
 .. _parkour-sections:
 
 .. table:: Sections of Parkour LIMS available for users with permissions “Active” and “Staff”
@@ -37,7 +35,7 @@ When you've logged into Parkour LIMS, you will see the window shown in Figure :r
     | Statistics (Runs/Sequences) |        |   X   |
     +-----------------------------+--------+-------+
 
-.. _requests:
+.. _intro-requests:
 
 .. figure:: img/requests.png
     :figwidth: 100 %

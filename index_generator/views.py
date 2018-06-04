@@ -14,7 +14,6 @@ from common.mixins import LibrarySampleMultiEditMixin
 
 from .models import Pool, PoolSize
 from .index_generator import IndexGenerator
-# from .forms import LibraryResetForm, SampleResetForm
 from .serializers import (
     PoolSizeSerializer,
     IndexGeneratorSerializer,
@@ -37,41 +36,6 @@ class PoolSizeViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = PoolSizeSerializer
 
 
-# @login_required
-# @staff_member_required
-# def reset(request):
-#     """ Reset all record's values. """
-#     error = ''
-#     record_type = request.POST.get('record_type', '')
-#     record_id = request.POST.get('record_id', '')
-
-#     try:
-#         if record_type == 'L':
-#             library = Library.objects.get(pk=record_id)
-#             form = LibraryResetForm(request.POST, instance=library)
-#             if form.is_valid():
-#                 form.save()
-#             else:
-#                 error = str(form.errors)
-
-#         elif record_type == 'S':
-#             sample = Sample.objects.get(pk=record_id)
-#             form = SampleResetForm(request.POST, instance=sample)
-#             if form.is_valid():
-#                 form.save()
-#             else:
-#                 error = str(form.errors)
-
-#         else:
-#             raise ValueError('No Record Type is provided.')
-
-#     except Exception as e:
-#         error = str(e)
-#         logger.exception(e)
-
-#     return JsonResponse({'success': not error, 'error': error})
-
-
 class IndexGeneratorViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
     permission_classes = [IsAdminUser]
     library_model = Library
@@ -83,27 +47,54 @@ class IndexGeneratorViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
         """ Get the list of libraries and samples ready for pooling. """
 
         libraries_qs = Library.objects.select_related(
-            'library_protocol', 'read_length', 'index_type',
+            'library_protocol',
+            'read_length',
+            'index_type',
         ).prefetch_related(
-            'index_type__indices_i7', 'index_type__indices_i5',
+            'index_type__indices_i7',
+            'index_type__indices_i5',
         ).filter(
-            Q(is_pooled=False) & Q(index_i7__isnull=False) &
+            Q(is_pooled=False) &
+            Q(index_i7__isnull=False) &
             (Q(status=2) | Q(status=-2))
-        ).only('id', 'name', 'barcode', 'index_i7', 'index_i5',
-               'sequencing_depth', 'library_protocol__name',
-               'read_length__id', 'index_type__id', 'index_type__format',
-               'index_type__indices_i7', 'index_type__indices_i5',)
+        ).only(
+            'id',
+            'name',
+            'barcode',
+            'index_i7',
+            'index_i5',
+            'sequencing_depth',
+            'library_protocol__name',
+            'read_length__id',
+            'index_type__id',
+            'index_type__format',
+            'index_type__indices_i7',
+            'index_type__indices_i5',
+        )
 
         samples_qs = Sample.objects.select_related(
-            'library_protocol', 'read_length', 'index_type',
+            'library_protocol',
+            'read_length',
+            'index_type',
         ).prefetch_related(
-            'index_type__indices_i7', 'index_type__indices_i5',
+            'index_type__indices_i7',
+            'index_type__indices_i5',
         ).filter(
             Q(is_pooled=False) & (Q(status=2) | Q(status=-2))
-        ).only('id', 'name', 'barcode', 'index_i7', 'index_i5',
-               'sequencing_depth', 'library_protocol__name',
-               'read_length__id', 'index_type__id', 'index_type__format',
-               'index_type__indices_i7', 'index_type__indices_i5',)
+        ).only(
+            'id',
+            'name',
+            'barcode',
+            'index_i7',
+            'index_i5',
+            'sequencing_depth',
+            'library_protocol__name',
+            'read_length__id',
+            'index_type__id',
+            'index_type__format',
+            'index_type__indices_i7',
+            'index_type__indices_i5',
+        )
 
         queryset = Request.objects.prefetch_related(
             Prefetch('libraries', queryset=libraries_qs),
@@ -125,7 +116,11 @@ class IndexGeneratorViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
 
         try:
             index_generator = IndexGenerator(
-                libraries, samples, start_coord, direction)
+                libraries,
+                samples,
+                start_coord,
+                direction,
+            )
             data = index_generator.generate()
         except Exception as e:
             return Response({'success': False, 'message': str(e)}, 400)
