@@ -133,9 +133,14 @@ Ext.define('MainHub.view.enaexporter.ENAExporter', {
   bbar: [
     '->',
     {
-      itemId: 'download-files-button',
+      itemId: 'download-button',
       iconCls: 'fa fa-download fa-lg',
-      text: 'Download Files'
+      text: 'Download'
+    },
+    {
+      itemId: 'upload-button',
+      iconCls: 'fa fa-upload fa-lg',
+      text: 'Upload to Galaxy'
     }
   ]
 });

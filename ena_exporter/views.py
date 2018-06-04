@@ -1,3 +1,4 @@
+import os
 import io
 import csv
 import json
@@ -88,10 +89,10 @@ class ENAExporterViewSet(viewsets.ViewSet):
         data = sorted(data, key=lambda x: x['barcode'][3:])
         return Response(data)
 
-    @action(methods=['get'], detail=False)
+    @action(methods=['post'], detail=False)
     def get_galaxy_status(self, request):
-        url = request.query_params.get('galaxy_url', '')
-        api_key = request.query_params.get('galaxy_api_key', '')
+        url = request.data.get('galaxy_url', '')
+        api_key = request.data.get('galaxy_api_key', '')
         gi = GalaxyInstance(url=url, key=api_key)
 
         try:
@@ -103,6 +104,63 @@ class ENAExporterViewSet(viewsets.ViewSet):
     @action(methods=['post'], detail=True,
             authentication_classes=[CsrfExemptSessionAuthentication])
     def download(self, request, pk=None):
+        samples = json.loads(request.data.get('samples', '[]'))
+        study_abstract = request.data.get('study_abstract', '')
+        study_type = request.data.get('study_type', '')
+
+        response = HttpResponse(content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename=ENA.zip'
+
+        experiments_file, samples_file, studies_file, runs_file = \
+            self._generate_files(samples, study_abstract, study_type)
+
+        # Archive the files
+        in_memory = io.BytesIO()
+        with ZipFile(in_memory, 'a') as z:
+            z.writestr('experiments.tsv', experiments_file.getvalue())
+            z.writestr('samples.tsv', samples_file.getvalue())
+            z.writestr('studies.tsv', studies_file.getvalue())
+            z.writestr('runs.tsv', runs_file.getvalue())
+
+        in_memory.seek(0)
+        response.write(in_memory.read())
+
+        return response
+
+    @action(methods=['post'], detail=True,
+            authentication_classes=[CsrfExemptSessionAuthentication])
+    def upload(self, request, pk=None):
+        url = request.query_params.get('galaxy_url', '')
+        api_key = request.query_params.get('galaxy_api_key', '')
+        samples = json.loads(request.data.get('samples', '[]'))
+        study_abstract = request.data.get('study_abstract', '')
+        study_type = request.data.get('study_type', '')
+        zip_file_path = 'ENA.zip'
+
+        gi = GalaxyInstance(url=url, key=api_key)
+        try:
+            gi.histories.get_most_recently_used_history()
+            pass
+        except Exception as e:
+            return Response({
+                'success': False,
+                'message': 'Couldn\'t connect to Galaxy.',
+            })
+
+        experiments_file, samples_file, studies_file, runs_file = \
+            self._generate_files(samples, study_abstract, study_type)
+
+        with ZipFile(zip_file_path, mode='w') as zf:
+            zf.writestr('experiments.tsv', experiments_file.getvalue())
+            zf.writestr('samples.tsv', samples_file.getvalue())
+            zf.writestr('studies.tsv', studies_file.getvalue())
+            zf.writestr('runs.tsv', runs_file.getvalue())
+
+        os.remove(zip_file_path)
+        return Response({'success': True})
+
+    @staticmethod
+    def _generate_files(data, study_abstract, study_type):
         def getrow(header, item, type, index):
             row = []
             for h in header:
@@ -125,13 +183,6 @@ class ENAExporterViewSet(viewsets.ViewSet):
 
             return file
 
-        samples = json.loads(request.data.get('samples', '[]'))
-        study_abstract = request.data.get('study_abstract', '')
-        study_type = request.data.get('study_type', '')
-
-        response = HttpResponse(content_type='application/zip')
-        response['Content-Disposition'] = 'attachment; filename=ENA.zip'
-
         # Create experiments.tsv
         header = [
             'alias',
@@ -152,7 +203,7 @@ class ENAExporterViewSet(viewsets.ViewSet):
             'instrument_model',
             'submission_date',
         ]
-        experiments_file = getfile('experiment', header, samples)
+        experiments_file = getfile('experiment', header, data)
 
         # Create samples.tsv
         header = [
@@ -165,7 +216,7 @@ class ENAExporterViewSet(viewsets.ViewSet):
             'sample_description',
             'submission_date',
         ]
-        samples_file = getfile('sample', header, samples)
+        samples_file = getfile('sample', header, data)
 
         # Create studies.tsv
         header = [
@@ -178,7 +229,7 @@ class ENAExporterViewSet(viewsets.ViewSet):
             'pubmed_id',
             'submission_date',
         ]
-        studies_file = getfile('study', header, samples, study_data={
+        studies_file = getfile('study', header, data, study_data={
             'study_type': study_type, 'study_abstract': study_abstract
         })
 
@@ -193,17 +244,6 @@ class ENAExporterViewSet(viewsets.ViewSet):
             'file_checksum',
             'submission_date',
         ]
-        runs_file = getfile('run', header, samples)
+        runs_file = getfile('run', header, data)
 
-        # Archive the files
-        in_memory = io.BytesIO()
-        with ZipFile(in_memory, 'a') as z:
-            z.writestr('experiments.tsv', experiments_file.getvalue())
-            z.writestr('samples.tsv', samples_file.getvalue())
-            z.writestr('studies.tsv', studies_file.getvalue())
-            z.writestr('runs.tsv', runs_file.getvalue())
-
-        in_memory.seek(0)
-        response.write(in_memory.read())
-
-        return response
+        return experiments_file, samples_file, studies_file, runs_file

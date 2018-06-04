@@ -20,8 +20,11 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
       'enabasegrid': {
         itemcontextmenu: 'showContextMenu'
       },
-      '#download-files-button': {
-        click: 'download'
+      '#download-button': {
+        click: 'handleButtonClick'
+      },
+      '#upload-button': {
+        click: 'handleButtonClick'
       }
     }
   },
@@ -135,29 +138,27 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
       return false;
     }
 
-    $.ajax({
-      dataType: 'json',
+    Ext.Ajax.request({
       url: 'api/ena_exporter/get_galaxy_status/',
-      timeout: 5000,  // 5 seconds
-      data: {
+      timeout: 5000, // 5 seconds
+      params: {
         galaxy_url: galaxyURL,
         galaxy_api_key: galaxyAPIKey
       },
-      success: function (obj) {
+
+      success: function (response) {
+        var obj = Ext.decode(response.responseText);
         var status = obj.success ? 'online' : 'offline';
-        var type = obj.success ? 'info' : 'warning';
+        var type = obj.success ? 'info' : 'error';
 
         new Noty({ text: 'Galaxy is ' + status, type: type }).show();
         wnd.getViewModel().setData({ galaxyStatus: status });
       },
-      error: function (jqXHR, textStatus, errorThrown) {
-        var error;
 
-        if (textStatus === 'timeout') {
-          error = 'Timeout Exceeded.';
-        } else {
-          error = errorThrown || textStatus;
-        }
+      failure: function (response) {
+        var error = response.statusText === 'communication failure'
+          ? 'Timeout Exceeded.'
+          : response.statusText;
 
         new Noty({ text: error, type: 'error' }).show();
       }
@@ -185,26 +186,71 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
     }
   },
 
-  download: function (btn) {
+  handleButtonClick: function (btn) {
     var wnd = btn.up('window');
     var requestId = wnd.request.get('pk');
     var samples = Ext.getStore('ENASamples').data.items;
     var data = wnd.down('form').getForm().getValues();
+    var galaxyURL = data.galaxy_url;
+    var galaxyAPIKey = data.galaxy_api_key;
+    var action = btn.itemId.split('-')[0];
+    var params = {
+      samples: Ext.JSON.encode(Ext.Array.pluck(samples, 'data')),
+      study_abstract: data.study_abstract,
+      study_type: data.study_type
+    };
 
     if (samples.length === 0) {
       new Noty({ text: 'No samples selected.', type: 'warning' }).show();
       return false;
     }
 
-    var form = Ext.create('Ext.form.Panel', { standardSubmit: true });
-    form.submit({
-      url: Ext.String.format('api/ena_exporter/{0}/download/', requestId),
-      params: {
-        samples: Ext.JSON.encode(Ext.Array.pluck(samples, 'data')),
-        study_abstract: data.study_abstract,
-        study_type: data.study_type
+    if (action === 'download') {
+      var form = Ext.create('Ext.form.Panel', { standardSubmit: true });
+      form.submit({
+        url: Ext.String.format('api/ena_exporter/{0}/download/', requestId),
+        params: params
+      });
+    } else {
+      if (galaxyURL === '' || galaxyAPIKey === '') {
+        new Noty({
+          text: 'Galaxy URL or Galaxy API Key is missing.',
+          type: 'warning'
+        }).show();
+        return false;
       }
-    });
+
+      params.galaxyURL = galaxyURL;
+      params.galaxyAPIKey = galaxyAPIKey;
+
+      Ext.Ajax.request({
+        url: Ext.String.format('api/ena_exporter/{0}/{1}/', requestId, action),
+        params: params,
+
+        success: function (response) {
+          var obj = Ext.decode(response.responseText);
+          var status = obj.success ? 'online' : 'offline';
+
+          if (obj.success) {
+            new Noty({
+              text: 'Files have been successfully uploaded!'
+            }).show();
+          } else {
+            new Noty({
+              type: 'error',
+              text: obj.message
+            }).show();
+          }
+          wnd.getViewModel().setData({
+            galaxyStatus: status
+          });
+        },
+
+        failure: function (response) {
+          console.log('server-side failure with status code ' + response.status);
+        }
+      });
+    }
   },
 
   getSelectedSamples: function (store) {
