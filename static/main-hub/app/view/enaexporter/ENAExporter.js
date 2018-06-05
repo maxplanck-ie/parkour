@@ -75,16 +75,19 @@ Ext.define('MainHub.view.enaexporter.ENAExporter', {
             },
             {
               name: 'galaxy_url',
+              itemId: 'galaxy-url-input',
               fieldLabel: 'Galaxy URL',
               emptyText: 'Galaxy URL',
-              // vtype: 'url',
-              readOnly: false
+              enableKeyEvents: true,
+              regex: new RegExp(/^(https?:\/\/.*):?(\d*)\/?(.*)$/),
+              regexText: 'Enter a valid Galaxy URL with a protocol.'
             },
             {
               name: 'galaxy_api_key',
+              itemId: 'galaxy-api-key-input',
               fieldLabel: 'Galaxy API Key',
               emptyText: 'Galaxy API Key',
-              readOnly: false
+              enableKeyEvents: true
             },
             {
               xtype: 'fieldcontainer',

@@ -5,8 +5,11 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
   config: {
     control: {
       '#': {
-        boxready: 'loadSamples',
+        boxready: 'boxready',
         beforeshow: 'setModelData'
+      },
+      '#galaxy-url-input, #galaxy-api-key-input': {
+        keyup: 'saveToLocalStorage'
       },
       '#tabs': {
         // tabchange: 'tabChange'
@@ -33,15 +36,36 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
     wnd.down('form').getForm().setValues(wnd.request.data);
   },
 
+  saveToLocalStorage: function (fld, e) {
+    localStorage.setItem(fld.name, e.target.value);
+  },
+
   // tabChange: function (tp, newTab) {
   //   tp.up('window').getViewModel().setData({
   //     createButtonHidden: newTab.itemId === 'general-tab'
   //   });
   // },
 
-  loadSamples: function (wnd) {
+  boxready: function (wnd) {
     var requestId = wnd.request.get('pk');
+    var galaxyURLField = wnd.down('form').down('#galaxy-url-input');
+    var galaxyAPIKeyField = wnd.down('form').down('#galaxy-api-key-input');
+    var refreshGalaxyStatusBtn = wnd.down('#refresh-galaxy-status-button');
+    var galaxyURL;
+    var galaxyAPIKey;
 
+    // Set Galaxy URL and API Key
+    galaxyURL = localStorage.getItem(galaxyURLField.name);
+    galaxyAPIKey = localStorage.getItem(galaxyAPIKeyField.name);
+    if (galaxyURL !== '') galaxyURLField.setValue(galaxyURL);
+    if (galaxyAPIKey !== '') galaxyAPIKeyField.setValue(galaxyAPIKey);
+
+    // Check Galaxy status
+    if (galaxyURL !== '' && galaxyAPIKey !== '') {
+      refreshGalaxyStatusBtn.click();
+    }
+
+    // Load samples
     Ext.getStore('ENASamples').reload({
       url: Ext.String.format('api/ena_exporter/{0}/', requestId)
     });
