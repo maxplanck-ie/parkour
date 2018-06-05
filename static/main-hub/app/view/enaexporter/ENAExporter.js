@@ -13,7 +13,7 @@ Ext.define('MainHub.view.enaexporter.ENAExporter', {
     type: 'enaexporter-enaexporter'
   },
 
-  title: 'ENA Uploader',
+  title: 'ENA Exporter',
 
   height: 480,
   width: 700,
