@@ -61,7 +61,7 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
     if (galaxyAPIKey !== '') galaxyAPIKeyField.setValue(galaxyAPIKey);
 
     // Check Galaxy status
-    if (galaxyURL !== '' && galaxyAPIKey !== '') {
+    if (galaxyURL && galaxyAPIKey) {
       refreshGalaxyStatusBtn.click();
     }
 
