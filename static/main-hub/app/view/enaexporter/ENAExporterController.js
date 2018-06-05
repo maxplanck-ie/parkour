@@ -220,9 +220,10 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
         return false;
       }
 
-      params.galaxyURL = galaxyURL;
-      params.galaxyAPIKey = galaxyAPIKey;
+      params.galaxy_url = galaxyURL;
+      params.galaxy_api_key = galaxyAPIKey;
 
+      wnd.setLoading('Uploading...');
       Ext.Ajax.request({
         url: Ext.String.format('api/ena_exporter/{0}/{1}/', requestId, action),
         params: params,
@@ -241,13 +242,13 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
               text: obj.message
             }).show();
           }
-          wnd.getViewModel().setData({
-            galaxyStatus: status
-          });
+          wnd.getViewModel().setData({ galaxyStatus: status });
+          wnd.setLoading(false);
         },
 
         failure: function (response) {
           console.log('server-side failure with status code ' + response.status);
+          wnd.setLoading(false);
         }
       });
     }

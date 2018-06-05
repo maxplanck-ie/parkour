@@ -93,8 +93,8 @@ class ENAExporterViewSet(viewsets.ViewSet):
     def get_galaxy_status(self, request):
         url = request.data.get('galaxy_url', '')
         api_key = request.data.get('galaxy_api_key', '')
-        gi = GalaxyInstance(url=url, key=api_key)
 
+        gi = GalaxyInstance(url=url, key=api_key)
         try:
             gi.histories.get_most_recently_used_history()
             return Response({'success': True})
@@ -130,17 +130,21 @@ class ENAExporterViewSet(viewsets.ViewSet):
     @action(methods=['post'], detail=True,
             authentication_classes=[CsrfExemptSessionAuthentication])
     def upload(self, request, pk=None):
-        url = request.query_params.get('galaxy_url', '')
-        api_key = request.query_params.get('galaxy_api_key', '')
+        url = request.data.get('galaxy_url', '')
+        api_key = request.data.get('galaxy_api_key', '')
         samples = json.loads(request.data.get('samples', '[]'))
         study_abstract = request.data.get('study_abstract', '')
         study_type = request.data.get('study_type', '')
-        zip_file_path = 'ENA.zip'
+
+        experiments_file_path = 'experiments.tsv'
+        samples_file_path = 'samples.tsv'
+        studies_file_path = 'studies.tsv'
+        runs_file_path = 'runs.tsv'
+        new_history_name = 'ENA'
 
         gi = GalaxyInstance(url=url, key=api_key)
         try:
             gi.histories.get_most_recently_used_history()
-            pass
         except Exception as e:
             return Response({
                 'success': False,
@@ -150,13 +154,29 @@ class ENAExporterViewSet(viewsets.ViewSet):
         experiments_file, samples_file, studies_file, runs_file = \
             self._generate_files(samples, study_abstract, study_type)
 
-        with ZipFile(zip_file_path, mode='w') as zf:
-            zf.writestr('experiments.tsv', experiments_file.getvalue())
-            zf.writestr('samples.tsv', samples_file.getvalue())
-            zf.writestr('studies.tsv', studies_file.getvalue())
-            zf.writestr('runs.tsv', runs_file.getvalue())
+        files = {
+            experiments_file_path: experiments_file,
+            samples_file_path: samples_file,
+            studies_file_path: studies_file,
+            runs_file_path: runs_file,
+        }
 
-        os.remove(zip_file_path)
+        # Save files locally
+        for file_path, file in files.items():
+            with open(file_path, 'w') as f:
+                f.write(file.getvalue())
+
+        new_history = gi.histories.create_history(new_history_name)
+        try:
+            for file_path in files.keys():
+                gi.tools.upload_file(os.path.abspath(
+                    file_path), new_history['id'])
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)})
+        finally:
+            for file_path in files.keys():
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
         return Response({'success': True})
 
     @staticmethod
