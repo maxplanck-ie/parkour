@@ -214,7 +214,8 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
     var wnd = btn.up('window');
     var requestId = wnd.request.get('pk');
     var samples = Ext.getStore('ENASamples').data.items;
-    var data = wnd.down('form').getForm().getValues();
+    var form = wnd.down('form').getForm()
+    var data = form.getValues();
     var galaxyURL = data.galaxy_url;
     var galaxyAPIKey = data.galaxy_api_key;
     var action = btn.itemId.split('-')[0];
@@ -229,9 +230,17 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
       return false;
     }
 
+    // Form validation
+    if (!form.isValid()) {
+      new Noty({ text: 'Check the form.', type: 'warning' }).show();
+      return false;
+    }
+
+    // TODO: Sample data validation
+
     if (action === 'download') {
-      var form = Ext.create('Ext.form.Panel', { standardSubmit: true });
-      form.submit({
+      var downloadForm = Ext.create('Ext.form.Panel', { standardSubmit: true });
+      downloadForm.submit({
         url: Ext.String.format('api/ena_exporter/{0}/download/', requestId),
         params: params
       });

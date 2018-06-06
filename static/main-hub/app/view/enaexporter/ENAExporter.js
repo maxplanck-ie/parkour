@@ -55,16 +55,27 @@ Ext.define('MainHub.view.enaexporter.ENAExporter', {
               readOnly: true
             },
             {
+              xtype: 'combobox',
               name: 'study_type',
               fieldLabel: 'Study Type',
-              emptyText: 'Study Type',
-              allowBlank: false
+              emptyText: 'Select Study Type',
+              queryMode: 'local',
+              displayField: 'name',
+              valueField: 'name',
+              store: 'ENAStudyTypes',
+              forceSelection: true,
+              allowBlank: false,
+              listConfig: {
+                getInnerTpl: function () {
+                  return '<span data-qtip="{description}">{name}</span>';
+                }
+              }
             },
             {
               name: 'study_abstract',
               xtype: 'textarea',
               fieldLabel: 'Study Abstract',
-              emptyText: 'Study Abstract',
+              emptyText: 'Briefly describe the goals, purpose, and scope of the Study',
               allowBlank: false,
               height: 75
             },

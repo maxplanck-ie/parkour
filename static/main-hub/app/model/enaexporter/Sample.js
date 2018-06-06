@@ -82,6 +82,10 @@ Ext.define('MainHub.model.enaexporter.Sample', {
       allowNull: true
     },
     {
+      name: 'title',
+      type: 'string'
+    },
+    {
       name: 'sample_description',
       type: 'string'
     },
@@ -94,6 +98,11 @@ Ext.define('MainHub.model.enaexporter.Sample', {
     {
       name: 'file_format',
       type: 'string'
+    },
+    {
+      name: 'file_checksum',
+      type: 'string',
+      defaultValue: 'update_by_ENA'
     }
   ]
 });

@@ -30,23 +30,44 @@ Ext.define('MainHub.view.enaexporter.Samples', {
       },
       {
         text: 'Library Strategy',
-        dataIndex: 'library_strategy'
+        dataIndex: 'library_strategy',
+        tooltip: 'Sequencing technique intended for this library'
       },
       {
         text: 'Design Description',
-        dataIndex: 'design_description'
+        dataIndex: 'design_description',
+        tooltip: 'Goal and setup of the individual library including library was constructed'
       },
       {
         text: 'Library Source',
-        dataIndex: 'library_source'
+        dataIndex: 'library_source',
+        tooltip: 'Library Source specifies the type of source material that is being sequenced',
+        editor: {
+          xtype: 'combobox',
+          queryMode: 'local',
+          displayField: 'name',
+          valueField: 'name',
+          store: 'ENALibrarySources',
+          forceSelection: true
+        }
       },
       {
         text: 'Library Selection',
-        dataIndex: 'library_selection'
+        dataIndex: 'library_selection',
+        tooltip: 'Method used to enrich the target in the sequence library preparation',
+        editor: {
+          xtype: 'combobox',
+          queryMode: 'local',
+          displayField: 'name',
+          valueField: 'name',
+          store: 'ENALibrarySelections',
+          forceSelection: true
+        }
       },
       {
         text: 'Library Layout',
-        dataIndex: 'library_layout'
+        dataIndex: 'library_layout',
+        toioltip: 'Library Layout specifies whether to expect single or paired configuration of reads'
       },
       {
         text: 'Insert Size',
@@ -58,34 +79,45 @@ Ext.define('MainHub.view.enaexporter.Samples', {
       },
       {
         text: 'Library Construction Protocol',
-        tooltip: 'Library Construction Protocol',
-        dataIndex: 'library_construction_protocol'
+        dataIndex: 'library_construction_protocol',
+        tooltip: 'Protocol by which the library was constructed'
       },
       {
         text: 'Platform',
-        dataIndex: 'platform'
+        dataIndex: 'platform',
+        tooltip: 'Sequencing platform used in the experiment'
       },
       {
         text: 'Instrument Model',
-        dataIndex: 'instrument_model'
+        dataIndex: 'instrument_model',
+        tooltip: 'Sequencing platform model'
       },
       // Samples
       {
         text: 'Scientific Name',
-        dataIndex: 'scientific_name'
+        dataIndex: 'scientific_name',
+        tooltip: 'Scientific name of sample that distinguishes its taxonomy. Please use a name or synonym that is tracked in the INSDC Taxonomy database.'
       },
       {
         text: 'Taxon ID',
         dataIndex: 'taxon_id',
+        tooltip: 'NCBI Taxonomy Identifier',
         editor: {
           xtype: 'numberfield',
           minValue: 0
         }
       },
       {
-        text: 'Sample Description',
-        dataIndex: 'sample_description'
+        text: 'Sample Title',
+        dataIndex: 'title',
+        tooltip: 'Short text that can be used to call out sample records in search results or in displays'
       },
+      {
+        text: 'Sample Description',
+        dataIndex: 'sample_description',
+        tooltip: 'Free-form text describing the sample, its origin, and its method of isolation'
+      },
+      // Runs
       {
         text: 'File Name',
         dataIndex: 'file_name'
