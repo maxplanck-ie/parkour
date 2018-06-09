@@ -699,7 +699,7 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
         flex: 1,
         editor: {
           xtype: 'textfield',
-          regex: new RegExp('^[A-Za-z0-9_\-]+$'),
+          regex: new RegExp(/^[A-Za-z0-9_-]+$/),
           regexText: 'Only A-Za-z0-9 as well as _ and - are allowed'
         },
         renderer: this.errorRenderer

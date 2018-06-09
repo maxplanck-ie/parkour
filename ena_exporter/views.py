@@ -105,14 +105,20 @@ class ENAExporterViewSet(viewsets.ViewSet):
             authentication_classes=[CsrfExemptSessionAuthentication])
     def download(self, request, pk=None):
         samples = json.loads(request.data.get('samples', '[]'))
-        study_abstract = request.data.get('study_abstract', '')
         study_type = request.data.get('study_type', '')
+        study_title = request.data.get('study_title', '')
+        study_abstract = request.data.get('study_abstract', '')
 
         response = HttpResponse(content_type='application/zip')
         response['Content-Disposition'] = 'attachment; filename=ENA.zip'
 
         experiments_file, samples_file, studies_file, runs_file = \
-            self._generate_files(samples, study_abstract, study_type)
+            self._generate_files(samples, study_data={
+                'title': study_title,
+                'study_type': study_type,
+                'study_abstract': study_abstract,
+                'alias': f'study_{study_title.replace(" ", "_")}',
+            })
 
         # Archive the files
         in_memory = io.BytesIO()
@@ -133,8 +139,9 @@ class ENAExporterViewSet(viewsets.ViewSet):
         url = request.data.get('galaxy_url', '')
         api_key = request.data.get('galaxy_api_key', '')
         samples = json.loads(request.data.get('samples', '[]'))
-        study_abstract = request.data.get('study_abstract', '')
         study_type = request.data.get('study_type', '')
+        study_title = request.data.get('study_title', '')
+        study_abstract = request.data.get('study_abstract', '')
 
         experiments_file_path = 'experiments.tsv'
         samples_file_path = 'samples.tsv'
@@ -152,7 +159,12 @@ class ENAExporterViewSet(viewsets.ViewSet):
             })
 
         experiments_file, samples_file, studies_file, runs_file = \
-            self._generate_files(samples, study_abstract, study_type)
+            self._generate_files(samples, study_data={
+                'title': study_title,
+                'study_type': study_type,
+                'study_abstract': study_abstract,
+                'alias': f'study_{study_title.replace(" ", "_")}',
+            })
 
         files = {
             experiments_file_path: experiments_file,
@@ -180,26 +192,40 @@ class ENAExporterViewSet(viewsets.ViewSet):
         return Response({'success': True})
 
     @staticmethod
-    def _generate_files(data, study_abstract, study_type):
+    def _generate_files(data, **kwargs):
         def getrow(header, item, type, index):
             row = []
+            name = item.get('library_name')
             for h in header:
-                value = item.get(h, '')
-                row.append(value if value else 'None')
+                if h == 'alias' and type != 'study':
+                    value = f'{type}_{name}'
+                elif h == 'experiment_alias':
+                    value = f'experiment_{name}'
+                elif h == 'sample_alias':
+                    value = f'sample_{name}'
+                elif h == 'run_alias':
+                    value = f'run_{name}'
+                else:
+                    value = item.get(h, 'None')
+                row.append(value)
             return row
 
         def getfile(type, header, data, **kwargs):
+            study_data = kwargs.get('study_data', {})
             file = io.StringIO()
             writer = csv.writer(file, dialect='excel-tab')
             writer.writerow(header)
 
             if type == 'study':
-                study_data = kwargs.get('study_data', {})
                 item = {**dict(data[0]), **study_data}
                 writer.writerow(getrow(header, item, type, 1))
             else:
                 for i, item in enumerate(data):
-                    writer.writerow(getrow(header, item, type, i))
+                    item_ = {
+                        **dict(item),
+                        **{'study_alias': study_data.get('alias', '')},
+                    }
+                    writer.writerow(getrow(header, item_, type, i))
 
             return file
 
@@ -223,7 +249,8 @@ class ENAExporterViewSet(viewsets.ViewSet):
             'instrument_model',
             'submission_date',
         ]
-        experiments_file = getfile('experiment', header, data)
+        experiments_file = getfile('experiment', header, data,
+                                   study_data=kwargs.get('study_data'))
 
         # Create samples.tsv
         header = [
@@ -249,9 +276,8 @@ class ENAExporterViewSet(viewsets.ViewSet):
             'pubmed_id',
             'submission_date',
         ]
-        studies_file = getfile('study', header, data, study_data={
-            'study_type': study_type, 'study_abstract': study_abstract
-        })
+        studies_file = getfile('study', header, data,
+                               study_data=kwargs.get('study_data'))
 
         # Create runs.tsv
         header = [

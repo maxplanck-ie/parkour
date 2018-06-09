@@ -36,7 +36,9 @@ Ext.define('MainHub.view.enaexporter.Samples', {
       // Experiments
       {
         text: 'Library Name',
-        dataIndex: 'library_name'
+        dataIndex: 'library_name',
+        regex: new RegExp(/^[A-Za-z0-9_-]+$/),
+        regexText: 'Only A-Za-z0-9 as well as _ and - are allowed'
       },
       {
         text: 'Library Strategy',

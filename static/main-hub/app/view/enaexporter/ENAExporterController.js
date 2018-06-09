@@ -225,6 +225,7 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
     var params = {
       samples: Ext.JSON.encode(Ext.Array.pluck(store.data.items, 'data')),
       study_abstract: data.study_abstract,
+      study_title: data.study_title,
       study_type: data.study_type
     };
 

@@ -15,7 +15,7 @@ Ext.define('MainHub.view.enaexporter.ENAExporter', {
 
   title: 'ENA Exporter',
 
-  height: 480,
+  height: 525,
   width: 700,
 
   modal: true,
@@ -44,8 +44,9 @@ Ext.define('MainHub.view.enaexporter.ENAExporter', {
           border: 0,
           defaultType: 'textfield',
           defaults: {
+            anchor: '100%',
             labelWidth: 100,
-            anchor: '100%'
+            allowBlank: false
           },
           items: [
             {
@@ -55,16 +56,20 @@ Ext.define('MainHub.view.enaexporter.ENAExporter', {
               readOnly: true
             },
             {
+              name: 'study_title',
+              fieldLabel: 'Title',
+              emptyText: 'Title of the study as would be used in a publication'
+            },
+            {
               xtype: 'combobox',
               name: 'study_type',
-              fieldLabel: 'Study Type',
+              fieldLabel: 'Type',
               emptyText: 'Select Study Type',
               queryMode: 'local',
               displayField: 'name',
               valueField: 'name',
               store: 'ENAStudyTypes',
               forceSelection: true,
-              allowBlank: false,
               listConfig: {
                 getInnerTpl: function () {
                   return '<span data-qtip="{description}">{name}</span>';
@@ -74,9 +79,8 @@ Ext.define('MainHub.view.enaexporter.ENAExporter', {
             {
               name: 'study_abstract',
               xtype: 'textarea',
-              fieldLabel: 'Study Abstract',
-              emptyText: 'Briefly describe the goals, purpose, and scope of the Study',
-              allowBlank: false,
+              fieldLabel: 'Abstract',
+              emptyText: 'Briefly describe the goals, purpose, and scope of the study',
               height: 75
             },
             {
