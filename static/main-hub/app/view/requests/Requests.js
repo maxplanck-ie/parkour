@@ -57,6 +57,7 @@ Ext.define('MainHub.view.requests.Requests', {
         {
           text: 'User',
           dataIndex: 'user_full_name',
+          hidden: !USER.is_staff,
           flex: 1
         },
         {

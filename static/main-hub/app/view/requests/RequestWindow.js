@@ -143,24 +143,6 @@ Ext.define('MainHub.view.requests.RequestWindow', {
     ]
   }],
   bbar: [
-    {
-      xtype: 'button',
-      itemId: 'download-request-blank-button',
-      iconCls: 'fa fa-download fa-lg',
-      text: 'Download Request'
-    },
-    {
-      xtype: 'button',
-      itemId: 'upload-signed-request-button',
-      iconCls: 'fa fa-upload fa-lg',
-      text: 'Upload Signed Request to Complete Submission'
-    },
-    {
-      xtype: 'button',
-      itemId: 'download-complete-report-button',
-      iconCls: 'fa fa-download fa-lg',
-      text: 'Download Complete Report'
-    },
     '->',
     {
       xtype: 'button',

@@ -9,7 +9,6 @@ Ext.define('MainHub.view.requests.RequestsController', {
       },
       '#requests-grid': {
         resize: 'resize',
-        boxready: 'boxready',
         itemcontextmenu: 'showMenu'
       },
       '#add-request-button': {
@@ -26,13 +25,6 @@ Ext.define('MainHub.view.requests.RequestsController', {
     el.setHeight(Ext.Element.getViewportHeight() - 64);
   },
 
-  boxready: function () {
-    // Hide the User column for non-administrators
-    if (!USER.is_staff) {
-      Ext.getCmp('requests-grid').down('[dataIndex=user_full_name]').setVisible(false);
-    }
-  },
-
   addRequest: function (btn) {
     Ext.create('MainHub.view.requests.RequestWindow', {
       title: 'New Request',
@@ -42,60 +34,8 @@ Ext.define('MainHub.view.requests.RequestsController', {
 
   showMenu: function (grid, record, itemEl, index, e) {
     var me = this;
-
-    var menuItems = [{
-      text: 'View',
-      handler: function () {
-        Ext.create('MainHub.view.requests.RequestWindow', {
-          title: record.get('name'),
-          mode: 'edit',
-          record: record
-        }).show();
-      }
-    }];
-
-    var deleteRequestOption = {
-      text: 'Delete',
-      handler: function () {
-        Ext.Msg.show({
-          title: 'Delete Request',
-          message: Ext.String.format('Are you sure you want to delete the request "{0}"?', record.get('name')),
-          buttons: Ext.Msg.YESNO,
-          icon: Ext.Msg.QUESTION,
-          fn: function (btn) {
-            if (btn === 'yes') { me.deleteRequest(record); }
-          }
-        });
-      }
-    };
-
-    var enaExporterOption = {
-      text: 'ENA Exporter',
-      disabled: !record.get('completed'),
-      handler: function () {
-        Ext.create('MainHub.view.enaexporter.ENAExporter', {
-          request: record
-        });
-      }
-    };
-
-    if (!USER.is_staff && !record.restrict_permissions) {
-      menuItems.push(deleteRequestOption);
-      menuItems.push(enaExporterOption);
-    } else if (USER.is_staff) {
-      menuItems.push(deleteRequestOption);
-      menuItems.push(enaExporterOption);
-      menuItems.push('-');
-      menuItems.push({
-        text: 'Compose Email',
-        handler: function () {
-          Ext.create('MainHub.view.requests.EmailWindow', {
-            title: 'New Email',
-            record: record
-          });
-        }
-      });
-    }
+    var requestId = record.get('pk');
+    var deepSeqReqPath = record.get('deep_seq_request_path');
 
     e.stopEvent();
     Ext.create('Ext.menu.Menu', {
@@ -103,7 +43,86 @@ Ext.define('MainHub.view.requests.RequestsController', {
       defaults: {
         margin: 5
       },
-      items: menuItems
+      items: [
+        {
+          text: 'View',
+          handler: function () {
+            Ext.create('MainHub.view.requests.RequestWindow', {
+              title: record.get('name'),
+              mode: 'edit',
+              record: record
+            }).show();
+          }
+        },
+        {
+          text: 'Delete',
+          hidden: record.restrict_permissions,
+          handler: function () {
+            Ext.Msg.show({
+              title: 'Delete Request',
+              message: Ext.String.format('Are you sure you want to delete the request "{0}"?', record.get('name')),
+              buttons: Ext.Msg.YESNO,
+              icon: Ext.Msg.QUESTION,
+              fn: function (btn) {
+                if (btn === 'yes') {
+                  me.deleteRequest(record);
+                }
+              }
+            });
+          }
+        },
+        '-',
+        {
+          text: 'Download Request Form',
+          tooltip: 'Download deep sequencing request form',
+          disabled: !(deepSeqReqPath === ''),
+          handler: function () {
+            var url = Ext.String.format(
+              'api/requests/{0}/download_deep_sequencing_request/', requestId
+            );
+            var downloadForm = Ext.create('Ext.form.Panel', { standardSubmit: true });
+            downloadForm.submit({ url: url, method: 'GET' });
+          }
+        },
+        {
+          text: 'Upload Signed Request',
+          tooltip: 'Upload signed request form to complete the submission',
+          disabled: !(deepSeqReqPath === ''),
+          handler: function () {
+            me.uploadSignedRequest(requestId);
+          }
+        },
+        {
+          text: 'Download Complete Report',
+          handler: function () {
+            var url = Ext.String.format(
+              'api/requests/{0}/download_complete_report/', requestId
+            );
+            var downloadForm = Ext.create('Ext.form.Panel', { standardSubmit: true });
+            downloadForm.submit({ url: url, method: 'GET' });
+          }
+        },
+        '-',
+        {
+          text: 'ENA Exporter',
+          disabled: !record.get('completed'),
+          handler: function () {
+            Ext.create('MainHub.view.enaexporter.ENAExporter', {
+              request: record
+            });
+          }
+        },
+        {
+          text: 'Compose Email',
+          hidden: !USER.is_staff,
+          handler: function () {
+            Ext.create('MainHub.view.requests.EmailWindow', {
+              title: 'New Email',
+              record: record
+            });
+          }
+        }
+      ]
     }).showAt(e.getXY());
   },
 
@@ -127,6 +146,52 @@ Ext.define('MainHub.view.requests.RequestsController', {
       failure: function (response) {
         new Noty({ text: response.statusText, type: 'error' }).show();
         console.error(response);
+      }
+    });
+  },
+
+  uploadSignedRequest: function (requestId) {
+    var url = Ext.String.format(
+        'api/requests/{0}/upload_deep_sequencing_request/', requestId
+    );
+
+    Ext.create('Ext.ux.FileUploadWindow', {
+      onFileUpload: function () {
+        var uploadWindow = this;
+        var form = this.down('form').getForm();
+
+        if (!form.isValid()) {
+          new Noty({ text: 'You did not select any file.', type: 'warning' }).show();
+          return false;
+        }
+
+        form.submit({
+          url: url,
+          method: 'POST',
+          waitMsg: 'Uploading...',
+
+          success: function (f, action) {
+            var obj = Ext.JSON.decode(action.response.responseText);
+            if (obj.success) {
+              new Noty({ text: 'Deep Sequencing Request has been successfully uploaded.' }).show();
+              Ext.getStore('requestsStore').reload();
+            } else {
+              new Noty({ text: obj.message, type: 'error' }).show();
+            }
+            uploadWindow.close();
+          },
+
+          failure: function (f, action) {
+            var errorMsg;
+            if (action.failureType === 'server') {
+              errorMsg = action.result.message ? action.result.message : 'Server error.';
+            } else {
+              errorMsg = 'Error.';
+            }
+            new Noty({ text: errorMsg, type: 'error' }).show();
+            console.error(action);
+          }
+        });
       }
     });
   }

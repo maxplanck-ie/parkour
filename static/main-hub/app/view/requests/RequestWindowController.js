@@ -18,15 +18,6 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
         beforecheckchange: 'selectItem',
         unselectall: 'unselectAll'
       },
-      '#download-request-blank-button': {
-        click: 'generatePDF'
-      },
-      '#upload-signed-request-button': {
-        click: 'uploadPDF'
-      },
-      '#download-complete-report-button': {
-        click: 'downloadCompleteReport'
-      },
       '#save-button': {
         click: 'save'
       },
@@ -44,8 +35,6 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
   },
 
   onRequestWindowBoxready: function (wnd) {
-    var downloadRequestBlankBtn = wnd.down('#download-request-blank-button');
-    var uploadSignedRequestBtn = wnd.down('#upload-signed-request-button');
     var librariesInRequestGrid = wnd.down('#libraries-in-request-grid');
     var costUnitCb = wnd.down('#cost-unit-cb');
     var form = Ext.getCmp('request-form').getForm();
@@ -57,8 +46,6 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
 
     if (wnd.mode === 'add') {
       Ext.getStore('librariesInRequestStore').removeAll();
-      downloadRequestBlankBtn.disable();
-      uploadSignedRequestBtn.disable();
       librariesInRequestGrid.getColumns()[0].hide();
     } else {
       request = wnd.record.data;
@@ -75,9 +62,6 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
           link.download = request.deep_seq_request_name;
           link.click();
         });
-
-        downloadRequestBlankBtn.disable();
-        uploadSignedRequestBtn.disable();
       }
 
       // Disable Request editing
@@ -111,11 +95,6 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
         }
       }
     });
-
-    // Hide Download Complete Report button for non-staff
-    if (!USER.is_staff) {
-      wnd.down('#download-complete-report-button').hide();
-    }
 
     this.initializeTooltips();
   },
@@ -315,101 +294,6 @@ Ext.define('MainHub.view.requests.RequestWindowController', {
         console.error(response);
       }
     });
-  },
-
-  generatePDF: function (btn) {
-    var wnd = btn.up('window');
-    var form = Ext.create('Ext.form.Panel', { standardSubmit: true });
-    var url = Ext.String.format(
-        'api/requests/{0}/download_deep_sequencing_request/',
-        wnd.record.get('pk')
-    );
-
-    form.submit({ url: url, method: 'GET' });
-  },
-
-  uploadPDF: function (btn) {
-    var me = this;
-    var wnd = btn.up('window');
-      // var url = 'request/upload_deep_sequencing_request/';
-    var downloadRequestBlankBtn = wnd.down('#download-request-blank-button');
-    var uploadSignedRequestBtn = wnd.down('#upload-signed-request-button');
-    var url = Ext.String.format(
-        'api/requests/{0}/upload_deep_sequencing_request/',
-        wnd.record.get('pk')
-    );
-
-    Ext.create('Ext.ux.FileUploadWindow', {
-      onFileUpload: function () {
-        var uploadWindow = this;
-        var form = this.down('form').getForm();
-
-        if (!form.isValid()) {
-          new Noty({
-            text: 'You did not select any file.',
-            type: 'warning'
-          }).show();
-          return;
-        }
-
-        form.submit({
-          url: url,
-          method: 'POST',
-          waitMsg: 'Uploading...',
-
-          success: function (f, action) {
-            var obj = Ext.JSON.decode(action.response.responseText);
-
-            if (obj.success) {
-              new Noty({
-                text: 'Deep Sequencing Request has been successfully uploaded.'
-              }).show();
-
-              $('#uploaded-request-file').html(
-                Ext.String.format('<a href="{0}" target="_blank">uploaded</a>', obj.path)
-              );
-
-              downloadRequestBlankBtn.disable();
-              uploadSignedRequestBtn.disable();
-
-              me.disableButtonsAndMenus();
-
-              Ext.getStore('requestsStore').reload();
-            } else {
-              new Noty({
-                // text: 'There was a problem with the provided file.',
-                text: obj.message,
-                type: 'error'
-              }).show();
-            }
-
-            uploadWindow.close();
-          },
-
-          failure: function (f, action) {
-            var errorMsg;
-            if (action.failureType === 'server') {
-              errorMsg = action.result.message ? action.result.message : 'Server error.';
-            } else {
-              errorMsg = 'Error.';
-            }
-            new Noty({ text: errorMsg, type: 'error' }).show();
-            console.error(action);
-          }
-        });
-      }
-    });
-  },
-
-  downloadCompleteReport: function (btn) {
-    var wnd = btn.up('window');
-    var form = Ext.create('Ext.form.Panel', { standardSubmit: true });
-    var url = Ext.String.format(
-        'api/requests/{0}/download_complete_report/',
-        wnd.record.get('pk')
-    );
-
-    form.submit({ url: url, method: 'GET' });
   },
 
   save: function (btn) {
