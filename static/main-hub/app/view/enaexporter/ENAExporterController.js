@@ -120,7 +120,7 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
     var me = this;
     var dataIndex = MainHub.Utilities.getDataIndex(e, gridView);
 
-    if (!dataIndex || dataIndex === 'selected') {
+    if (!dataIndex || dataIndex === 'selected' || dataIndex === 'library_name') {
       return false;
     }
 
@@ -208,35 +208,50 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
         }
       });
     }
+
+    this.validateAll();
   },
 
   handleButtonClick: function (btn) {
     var wnd = btn.up('window');
+    var tabs = wnd.down('#tabs');
     var requestId = wnd.request.get('pk');
-    var samples = Ext.getStore('ENASamples').data.items;
-    var form = wnd.down('form').getForm()
+    var store = Ext.getStore('ENASamples');
+    var form = wnd.down('form').getForm();
     var data = form.getValues();
     var galaxyURL = data.galaxy_url;
     var galaxyAPIKey = data.galaxy_api_key;
     var action = btn.itemId.split('-')[0];
     var params = {
-      samples: Ext.JSON.encode(Ext.Array.pluck(samples, 'data')),
+      samples: Ext.JSON.encode(Ext.Array.pluck(store.data.items, 'data')),
       study_abstract: data.study_abstract,
       study_type: data.study_type
     };
 
-    if (samples.length === 0) {
+    if (store.getCount() === 0) {
       new Noty({ text: 'No samples selected.', type: 'warning' }).show();
       return false;
     }
 
     // Form validation
     if (!form.isValid()) {
+      tabs.setActiveItem(0);
       new Noty({ text: 'Check the form.', type: 'warning' }).show();
       return false;
     }
 
-    // TODO: Sample data validation
+    // Sample data validation
+    this.validateAll();
+
+    var numInvalidRecords = store.data.items.reduce(function (n, item) {
+      return n + (item.get('invalid') === true);
+    }, 0);
+
+    if (numInvalidRecords !== 0) {
+      tabs.setActiveItem(1);
+      new Noty({ text: 'Check the data.', type: 'warning' }).show();
+      return;
+    }
 
     if (action === 'download') {
       var downloadForm = Ext.create('Ext.form.Panel', { standardSubmit: true });
@@ -285,6 +300,67 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
         }
       });
     }
+  },
+
+  validateAll: function () {
+    var me = this;
+    var grid = this.getView().down('#samples-grid');
+    var store = grid.getStore();
+
+    // Validate all records
+    store.each(function (record) {
+      me.validateRecord(record);
+    });
+
+    // Refresh the grid
+    grid.getView().refresh();
+  },
+
+  validateRecord: function (record) {
+    var grid = this.getView().down('#samples-grid');
+    var store = grid.getStore();
+    var validation = record.getValidation(true).data;
+    var invalid = false;
+    var errors = {};
+
+    for (var dataIndex in validation) {
+      if (validation.hasOwnProperty(dataIndex)) {
+        if (validation[dataIndex] !== true) {
+          invalid = true;
+          errors[dataIndex] = validation[dataIndex];
+        }
+      }
+    }
+
+    store.suspendEvents();
+    record.set({ invalid: invalid, errors: errors });
+    store.resumeEvents();
+
+    return errors;
+  },
+
+  errorRenderer: function (value, meta, record) {
+    var dataIndex = meta.column.dataIndex;
+    var errors = record.get('errors');
+
+    if (Object.keys(errors).indexOf(dataIndex) !== -1) {
+      meta.tdCls += ' invalid-record';
+      meta.tdAttr = Ext.String.format('data-qtip="{0}"', errors[dataIndex]);
+    }
+
+    return value;
+  },
+
+  comboboxErrorRenderer: function (value, meta, record) {
+    var dataIndex = meta.column.dataIndex;
+    // var store = meta.column.getEditor().getStore();
+
+    if (record && Object.keys(record.get('errors')).indexOf(dataIndex) !== -1) {
+      meta.tdCls += ' invalid-record';
+      meta.tdAttr = Ext.String.format('data-qtip="{0}"', record.get('errors')[dataIndex]);
+    }
+
+    return value;
   },
 
   getSelectedSamples: function (store) {

@@ -2,18 +2,18 @@ Ext.define('validator.Unique', {
     extend: 'Ext.data.validator.Validator',
     alias: 'data.validator.unique',
     validate: function(value, record) {
-        var store = Ext.getCmp('batch-add-grid').getStore();
-        var names = [];
-        // var isValid = true;
+        var dataIndex = this.dataIndex;
+        var store = record.store;
+        var values = [];
 
         store.each(function(item) {
-            var name = item.get('name');
-            if (item !== record && name !== '') {
-                names.push(name);
+            var currentValue = item.get(dataIndex);
+            if (item !== record && currentValue !== '') {
+                values.push(currentValue);
             }
         });
 
-        return names.indexOf(value) === -1 || 'Must be unique';
+        return values.indexOf(value) === -1 || 'Must be unique';
     }
 });
 
@@ -102,7 +102,8 @@ Ext.define('MainHub.model.libraries.BatchAdd.Common', {
         name: [{
             type: 'presence'
         },{
-            type: 'unique'
+            type: 'unique',
+            dataIndex: 'name'
         }],
         library_protocol: 'presence',
         library_type: 'presence',

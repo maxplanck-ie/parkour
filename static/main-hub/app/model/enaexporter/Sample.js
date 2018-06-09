@@ -18,6 +18,16 @@ Ext.define('MainHub.model.enaexporter.Sample', {
       type: 'string',
       defaultValue: 'update_by_ENA'
     },
+    {
+      type: 'bool',
+      name: 'invalid',
+      defaultValue: false
+    },
+    {
+      type: 'auto',
+      name: 'errors',
+      defaultValue: {}
+    },
 
     // Experiments
     {
@@ -104,5 +114,32 @@ Ext.define('MainHub.model.enaexporter.Sample', {
       type: 'string',
       defaultValue: 'update_by_ENA'
     }
-  ]
+  ],
+
+  validators: {
+    library_name: [
+      {
+        type: 'presence'
+      },
+      {
+        type: 'unique',  // Defined in `model/libraries/BatchAdd/Common.js`
+        dataIndex: 'library_name'
+      }
+    ],
+    library_strategy: 'presence',
+    design_description: 'presence',
+    library_source: 'presence',
+    library_selection: 'presence',
+    library_layout: 'presence',
+    insert_size: 'presence',
+    library_construction_protocol: 'presence',
+    platform: 'presence',
+    instrument_model: 'presence',
+    scientific_name: 'presence',
+    taxon_id: 'presence',
+    title: 'presence',
+    sample_description: 'presence',
+    file_name: 'presence',
+    file_format: 'presence'
+  }
 });

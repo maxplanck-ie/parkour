@@ -4,6 +4,14 @@ Ext.define('MainHub.view.enaexporter.Samples', {
 
   border: 0,
 
+  viewConfig: {
+    markDirty: false,
+    stripeRows: false,
+    getRowClass: function (record) {
+      return record.get('invalid') ? 'invalid' : '';
+    }
+  },
+
   columns: {
     defaults: {
       minWidth: 150,
@@ -11,13 +19,15 @@ Ext.define('MainHub.view.enaexporter.Samples', {
       editor: {
         xtype: 'textfield',
         allowBlank: false
-      }
+      },
+      renderer: 'errorRenderer'
     },
     items: [
       {
         xtype: 'checkcolumn',
         itemId: 'check-column',
         dataIndex: 'selected',
+        renderer: undefined,
         tdCls: 'no-dirty',
         editor: null,
         minWidth: 40,
@@ -42,6 +52,7 @@ Ext.define('MainHub.view.enaexporter.Samples', {
         text: 'Library Source',
         dataIndex: 'library_source',
         tooltip: 'Library Source specifies the type of source material that is being sequenced',
+        renderer: 'comboboxErrorRenderer',
         editor: {
           xtype: 'combobox',
           queryMode: 'local',
@@ -55,6 +66,7 @@ Ext.define('MainHub.view.enaexporter.Samples', {
         text: 'Library Selection',
         dataIndex: 'library_selection',
         tooltip: 'Method used to enrich the target in the sequence library preparation',
+        renderer: 'comboboxErrorRenderer',
         editor: {
           xtype: 'combobox',
           queryMode: 'local',
