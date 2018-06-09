@@ -149,57 +149,6 @@ class Report(FPDF, HTMLMixin):
         return html
 
 
-@login_required
-def get_files(request):
-    """ Get the list of files for the given request id. """
-    file_ids = json.loads(request.GET.get('file_ids', '[]'))
-    error = ''
-    data = []
-
-    try:
-        files = [f for f in FileRequest.objects.all() if f.id in file_ids]
-        data = [
-            {
-                'id': file.id,
-                'name': file.name,
-                'size': file.file.size,
-                'path': settings.MEDIA_URL + file.file.name,
-            }
-            for file in files
-        ]
-
-    except Exception as e:
-        error = 'Could not get the attached files.'
-        logger.exception(e)
-
-    return JsonResponse({'success': not error, 'error': error, 'data': data})
-
-
-@csrf_exempt
-@login_required
-def upload_files(request):
-    """ Upload request files. """
-    file_ids = []
-    error = ''
-
-    if request.method == 'POST' and any(request.FILES):
-        try:
-            for file in request.FILES.getlist('files'):
-                f = FileRequest(name=file.name, file=file)
-                f.save()
-                file_ids.append(f.id)
-
-        except Exception as e:
-            error = 'Could not upload the files.'
-            logger.exception(e)
-
-    return JsonResponse({
-        'success': not error,
-        'error': error,
-        'fileIds': file_ids
-    })
-
-
 class RequestViewSet(viewsets.ModelViewSet):
     serializer_class = RequestSerializer
     pagination_class = StandardResultsSetPagination
