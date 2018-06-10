@@ -21,4 +21,5 @@ fpdf
 numpy
 jupyter
 bioblend
+python-docx
 python-dateutil
