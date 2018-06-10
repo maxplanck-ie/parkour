@@ -26,3 +26,5 @@ User Manual
    Statistics <manual/statistics>
 
    Invoicing <manual/invoicing>
+
+   Metadata Export <manual/metadata_export>
