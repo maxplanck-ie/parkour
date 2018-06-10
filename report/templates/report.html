@@ -166,27 +166,19 @@
         <caption>Turnaround (all-time)</caption>
         <thead>
             <tr>
-                <th width="50%">Step</th>
-                <th width="50%">Average # of Days</th>
+                {% for column in turnaround.columns %}
+                <th>{{ column }}</th>
+                {% endfor %}
             </tr>
         </thead>
         <tbody>
+            {% for row in turnaround.rows %}
             <tr>
-                <td>Library Preparation</td>
-                <td>{{ turnaround.library_preparation|to_int }}</td>
+                {% for column in turnaround.columns %}
+                    <td>{{ row|get_value:column }}</td>
+                {% endfor %}
             </tr>
-            <tr>
-                <td>Pooling</td>
-                <td>{{ turnaround.pooling|to_int }}</td>
-            </tr>
-            <tr>
-                <td>Sequencing</td>
-                <td>{{ turnaround.sequencing|to_int }}</td>
-            </tr>
-            <tr>
-                <td>Complete Workflow</td>
-                <td>{{ turnaround.complete_workflow|to_int }}</td>
-            </tr>
+            {% endfor %}
         </tbody>
     </table>
 

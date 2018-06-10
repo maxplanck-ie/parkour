@@ -81,7 +81,7 @@ class PoolingBaseSerializer(ModelSerializer):
         return self._get_request(obj).get('pk', None)
 
     def get_request_name(self, obj):
-        return self._get_request(obj).get('name', '')
+        return self._get_request(obj).get('name', None)
 
     def get_concentration_c1(self, obj):
         pooling_object = self._get_pooling_object(obj)

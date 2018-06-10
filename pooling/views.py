@@ -95,8 +95,14 @@ class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ViewSet):
         # Get Requests in one query
         requests = Request.objects.filter(
             Q(libraries__in=library_ids) | Q(samples__in=sample_ids)
-        ).prefetch_related('samples').values(
-            'pk', 'name', 'libraries__id', 'samples__id'
+        ).prefetch_related(
+            'libraries',
+            'samples'
+        ).values(
+            'pk',
+            'name',
+            'libraries__id',
+            'samples__id',
         ).distinct()
 
         requests_map = {}
@@ -106,7 +112,7 @@ class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ViewSet):
                     'pk': item['pk'],
                     'name': item['name'],
                 }
-            else:
+            if item['samples__id']:
                 requests_map[item['samples__id'], 'Sample'] = {
                     'pk': item['pk'],
                     'name': item['name'],

@@ -19,6 +19,7 @@ sphinx-rtd-theme
 xlwt
 fpdf
 numpy
+pandas
 jupyter
 bioblend
 python-docx

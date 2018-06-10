@@ -9,9 +9,10 @@ from django.db.models import Prefetch
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 
-from .sql import QUERY, LIBRARY_SELECT, SAMPLE_SELECT, SAMPLE_JOINS
+import numpy as np
+from pandas import DataFrame
 
-from common.utils import print_sql_queries
+from .sql import QUERY, LIBRARY_SELECT, SAMPLE_SELECT, SAMPLE_JOINS
 
 Organization = apps.get_model('common', 'Organization')
 PrincipalInvestigator = apps.get_model('common', 'PrincipalInvestigator')
@@ -209,27 +210,17 @@ class Report:
         return OrderedDict(sorted(data.items()))
 
     def get_turnaround(self):
-        columns = [
-            'library_preparation',
-            'pooling',
-            'sequencing',
-            'complete_workflow',
-        ]
-
         query = '''
         CREATE TEMPORARY TABLE IF NOT EXISTS temp1 AS SELECT
             L.id,
-            CAST('Library' AS CHAR) rtype,
+            CAST('Library' AS CHAR(7)) rtype,
             L.create_time date1,
-            CAST(NULL AS TIMESTAMPTZ) date2,
-            P.create_time date3
-        FROM library_library L
-        LEFT JOIN pooling_pooling P
-            ON L.id = P.library_id;
+            CAST(NULL AS TIMESTAMPTZ) date2
+        FROM library_library L;
 
         CREATE TEMPORARY TABLE IF NOT EXISTS temp2 AS SELECT
             L.id,
-            MIN(F.create_time) date4
+            MIN(F.create_time) date3
         FROM library_library L
         LEFT JOIN index_generator_pool_libraries PR
             ON L.id = PR.library_id
@@ -245,19 +236,16 @@ class Report:
 
         CREATE TEMPORARY TABLE IF NOT EXISTS temp3 AS SELECT
             S.id,
-            CAST('Sample' AS CHAR) rtype,
+            CAST('Sample' AS CHAR(6)) rtype,
             S.create_time date1,
-            LP.create_time date2,
-            P.create_time date3
+            LP.create_time date2
         FROM sample_sample S
         LEFT JOIN library_preparation_librarypreparation LP
-            ON S.id = LP.sample_id
-        LEFT JOIN pooling_pooling P
-            ON S.id = P.sample_id;
+            ON S.id = LP.sample_id;
 
         CREATE TEMPORARY TABLE IF NOT EXISTS temp4 AS SELECT
             S.id,
-            MIN(F.create_time) date4
+            MIN(F.create_time) date3
         FROM sample_sample S
         LEFT JOIN index_generator_pool_samples PR
             ON S.id = PR.sample_id
@@ -272,16 +260,7 @@ class Report:
         GROUP BY S.id;
 
         SELECT
-            FLOOR(AVG(CASE
-                WHEN rtype = 'Library' THEN NULL
-                ELSE DATE_PART('day', date2 - date1)
-            END)) "Library Preparation",
-            FLOOR(AVG(CASE
-                WHEN rtype = 'Library' THEN DATE_PART('day', date3 - date1)
-                ELSE DATE_PART('day', date3 - date2)
-            END)) "Pooling",
-            FLOOR(AVG(DATE_PART('day', date4 - date3))) "Sequencing",
-            FLOOR(AVG(DATE_PART('day', date4 - date1))) "Complete Workflow"
+            rtype, date1, date2, date3
         FROM (
             SELECT *
             FROM temp1 t1
@@ -295,8 +274,41 @@ class Report:
 
         with connection.cursor() as c:
             c.execute(query)
-            return dict(zip(columns, c.fetchone()))
-        return dict(zip(columns, (0, 0, 0, 0)))
+            columns = [x[0] for x in c.description]
+            df = DataFrame(c.fetchall(), columns=columns)
+
+        df['Request -> Preparation'] = df.date2 - df.date1
+        df['Preparation -> Sequencing'] = df.date3 - df.date2
+        df['Complete Workflow'] = df.date3 - df.date1
+
+        agg_samples_df = \
+            df[df.rtype == 'Sample'].aggregate(['mean', 'std']).fillna(0)
+        agg_samples_df = (agg_samples_df / np.timedelta64(1, 'D')).astype(int)
+
+        agg_libraries_df = df[df.rtype == 'Library'].iloc[:, -1]\
+            .aggregate(['mean', 'std']).fillna(0)
+        agg_libraries_df = \
+            (agg_libraries_df / np.timedelta64(1, 'D')).astype(int)
+
+        columns = [
+            'Turnaround',
+            'Sample (days)',
+            'Sample Deviation (days)',
+            'Library (days)',
+            'Library Deviation (days)',
+        ]
+
+        result_df = DataFrame(columns=columns)
+        result_df[columns[0]] = df.columns[4:]
+        result_df[columns[1]] = agg_samples_df.loc['mean'].values
+        result_df[columns[2]] = agg_samples_df.loc['std'].values
+        result_df[columns[3]] = [0] * 2 + [agg_libraries_df.loc['mean']]
+        result_df[columns[4]] = [0] * 2 + [agg_libraries_df.loc['std']]
+
+        return {
+            'columns': columns,
+            'rows': result_df.T.to_dict().values(),
+        }
 
     @staticmethod
     def _get_data(counts):
