@@ -607,22 +607,30 @@ class RequestViewSet(viewsets.ModelViewSet):
             '% Confident off species reads',
         ]
         data = []
-        # TODO: optimize the queries below
-        flowcell = instance.flowcell.get()
-        pool_ids = ', '.join(
-            sorted(set(flowcell.lanes.values_list('pool__name', flat=True))))
-        for r in records:
-            row = [
-                flowcell.create_time.strftime('%d.%m.%Y'),
-                r.barcode,
-                r.name,
-                pool_ids,
-                flowcell.flowcell_id,
-                flowcell.sequencer.name,
-                r.sequencing_depth,
-                '',
-            ]
-            data.append(row)
+        try:
+            flowcell = instance.flowcell.get()
+        except Exception:
+            flowcell = None
+        if flowcell:
+            pool_ids = ', '.join(sorted(set(
+                flowcell.lanes.values_list('pool__name', flat=True))))
+            sequences = flowcell.sequences if flowcell.sequences else []
+            conf_reads = {
+                s['barcode']: s.get('confident_reads', '')
+                for s in sequences
+            }
+            for r in records:
+                row = [
+                    flowcell.create_time.strftime('%d.%m.%Y'),
+                    r.barcode,
+                    r.name,
+                    pool_ids,
+                    flowcell.flowcell_id,
+                    flowcell.sequencer.name,
+                    r.sequencing_depth,
+                    conf_reads.get(r.barcode, ''),
+                ]
+                data.append(row)
         add_table(doc, header, data)
         doc.add_page_break()
 
