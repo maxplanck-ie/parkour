@@ -223,7 +223,7 @@ Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
       startCollapsed: true,
       enableGroupingMenu: false,
       groupHeaderTpl: [
-        '<strong>Protocol: {children:this.getName}</strong>',
+        '<strong>Protocol: {children:this.getName} (# of libraries: {children.length})</strong>',
         {
           getName: function (children) {
             return children[0].get('library_protocol_name');
