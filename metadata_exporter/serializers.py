@@ -87,7 +87,7 @@ class SampleSerializer(BaseSerializer):
             return None
 
 
-class ENASerializer(ModelSerializer):
+class MetadataSerializer(ModelSerializer):
     libraries = SampleSerializer(many=True)
     samples = SampleSerializer(many=True)
 
@@ -102,7 +102,6 @@ class ENASerializer(ModelSerializer):
         if not any(data['libraries']) and not any(data['samples']):
             return []
 
-        # TODO: test this
         flowcell = instance.flowcell.only('sequencer__name').first()
         sequencer_name = flowcell.sequencer.name if flowcell else None
 

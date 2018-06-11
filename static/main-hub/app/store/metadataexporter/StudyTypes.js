@@ -1,4 +1,4 @@
-Ext.define('MainHub.store.enaexporter.StudyTypes', {
+Ext.define('MainHub.store.metadataexporter.StudyTypes', {
   extend: 'Ext.data.Store',
   storeId: 'ENAStudyTypes',
 

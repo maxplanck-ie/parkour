@@ -1,4 +1,4 @@
-Ext.define('MainHub.model.enaexporter.Sample', {
+Ext.define('MainHub.model.metadataexporter.Sample', {
   extend: 'MainHub.model.Base',
 
   fields: [

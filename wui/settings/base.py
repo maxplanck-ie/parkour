@@ -56,7 +56,7 @@ INSTALLED_APPS = [
     'invoicing',
     'usage',
     'stats',
-    'ena_exporter'
+    'metadata_exporter'
 ]
 
 MIDDLEWARE_CLASSES = [

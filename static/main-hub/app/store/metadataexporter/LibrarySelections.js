@@ -1,4 +1,4 @@
-Ext.define('MainHub.store.enaexporter.LibrarySelections', {
+Ext.define('MainHub.store.metadataexporter.LibrarySelections', {
   extend: 'Ext.data.Store',
   storeId: 'ENALibrarySelections',
 

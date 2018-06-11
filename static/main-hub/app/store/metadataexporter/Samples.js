@@ -1,12 +1,12 @@
-Ext.define('MainHub.store.enaexporter.Samples', {
+Ext.define('MainHub.store.metadataexporter.Samples', {
   extend: 'Ext.data.Store',
   storeId: 'ENASamples',
 
   requires: [
-    'MainHub.model.enaexporter.Sample'
+    'MainHub.model.metadataexporter.Sample'
   ],
 
-  model: 'MainHub.model.enaexporter.Sample',
+  model: 'MainHub.model.metadataexporter.Sample',
 
   proxy: {
     type: 'ajax',

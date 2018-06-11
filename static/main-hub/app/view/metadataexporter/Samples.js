@@ -1,6 +1,6 @@
-Ext.define('MainHub.view.enaexporter.Samples', {
-  extend: 'MainHub.view.enaexporter.ENABaseGrid',
-  alias: 'widget.ena-samples',
+Ext.define('MainHub.view.metadataexporter.Samples', {
+  extend: 'MainHub.view.metadataexporter.MetadataBaseGrid',
+  alias: 'widget.metadata-samples',
 
   border: 0,
 

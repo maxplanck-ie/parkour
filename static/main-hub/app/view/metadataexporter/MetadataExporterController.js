@@ -1,6 +1,6 @@
-Ext.define('MainHub.view.enaexporter.ENAExporterController', {
+Ext.define('MainHub.view.metadataexporter.MetadataExporterController', {
   extend: 'Ext.app.ViewController',
-  alias: 'controller.enaexporter-enaexporter',
+  alias: 'controller.metadataexporter-metadataexporter',
 
   config: {
     control: {
@@ -10,9 +10,6 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
       },
       '#galaxy-url-input, #galaxy-api-key-input': {
         keyup: 'saveToLocalStorage'
-      },
-      '#tabs': {
-        // tabchange: 'tabChange'
       },
       '#samples-grid': {
         headercontextmenu: 'showHeaderMenu'
@@ -40,12 +37,6 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
     localStorage.setItem(fld.name, e.target.value);
   },
 
-  // tabChange: function (tp, newTab) {
-  //   tp.up('window').getViewModel().setData({
-  //     createButtonHidden: newTab.itemId === 'general-tab'
-  //   });
-  // },
-
   boxready: function (wnd) {
     var requestId = wnd.request.get('pk');
     var galaxyURLField = wnd.down('form').down('#galaxy-url-input');
@@ -67,7 +58,7 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
 
     // Load samples
     Ext.getStore('ENASamples').reload({
-      url: Ext.String.format('api/ena_exporter/{0}/', requestId)
+      url: Ext.String.format('api/metadata_exporter/{0}/', requestId)
     });
   },
 
@@ -163,7 +154,7 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
     }
 
     Ext.Ajax.request({
-      url: 'api/ena_exporter/get_galaxy_status/',
+      url: 'api/metadata_exporter/get_galaxy_status/',
       timeout: 5000, // 5 seconds
       params: {
         galaxy_url: galaxyURL,
@@ -257,7 +248,7 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
     if (action === 'download') {
       var downloadForm = Ext.create('Ext.form.Panel', { standardSubmit: true });
       downloadForm.submit({
-        url: Ext.String.format('api/ena_exporter/{0}/download/', requestId),
+        url: Ext.String.format('api/metadata_exporter/{0}/download/', requestId),
         params: params
       });
     } else {
@@ -274,7 +265,7 @@ Ext.define('MainHub.view.enaexporter.ENAExporterController', {
 
       wnd.setLoading('Uploading...');
       Ext.Ajax.request({
-        url: Ext.String.format('api/ena_exporter/{0}/{1}/', requestId, action),
+        url: Ext.String.format('api/metadata_exporter/{0}/upload/', requestId),
         params: params,
 
         success: function (response) {

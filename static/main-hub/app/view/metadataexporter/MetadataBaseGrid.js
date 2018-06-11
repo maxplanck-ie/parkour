@@ -1,6 +1,6 @@
-Ext.define('MainHub.view.enaexporter.ENABaseGrid', {
+Ext.define('MainHub.view.metadataexporter.MetadataBaseGrid', {
   extend: 'Ext.grid.Panel',
-  alias: 'widget.enabasegrid',
+  alias: 'widget.metadatabasegrid',
 
   sortableColumns: false,
   enableColumnMove: false,

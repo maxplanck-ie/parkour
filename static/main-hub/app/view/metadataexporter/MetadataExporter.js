@@ -1,19 +1,19 @@
-Ext.define('MainHub.view.enaexporter.ENAExporter', {
+Ext.define('MainHub.view.metadataexporter.MetadataExporter', {
   extend: 'Ext.window.Window',
 
   requires: [
-    'MainHub.view.enaexporter.ENAExporterController',
-    'MainHub.view.enaexporter.ENAExporterModel',
-    'MainHub.view.enaexporter.ENABaseGrid',
-    'MainHub.view.enaexporter.Samples'
+    'MainHub.view.metadataexporter.MetadataExporterController',
+    'MainHub.view.metadataexporter.MetadataExporterModel',
+    'MainHub.view.metadataexporter.MetadataBaseGrid',
+    'MainHub.view.metadataexporter.Samples'
   ],
 
-  controller: 'enaexporter-enaexporter',
+  controller: 'metadataexporter-metadataexporter',
   viewModel: {
-    type: 'enaexporter-enaexporter'
+    type: 'metadataexporter-metadataexporter'
   },
 
-  title: 'ENA Exporter',
+  title: 'Metadata Exporter',
 
   height: 525,
   width: 700,
@@ -94,6 +94,7 @@ Ext.define('MainHub.view.enaexporter.ENAExporter', {
               fieldLabel: 'Galaxy URL',
               emptyText: 'Galaxy URL',
               enableKeyEvents: true,
+              allowBlank: true,
               regex: new RegExp(/^(https?:\/\/.*):?(\d*)\/?(.*)$/),
               regexText: 'Enter a valid Galaxy URL with a protocol.'
             },
@@ -102,6 +103,7 @@ Ext.define('MainHub.view.enaexporter.ENAExporter', {
               itemId: 'galaxy-api-key-input',
               fieldLabel: 'Galaxy API Key',
               emptyText: 'Galaxy API Key',
+              allowBlank: true,
               enableKeyEvents: true
             },
             {
@@ -140,7 +142,7 @@ Ext.define('MainHub.view.enaexporter.ENAExporter', {
         title: 'Samples',
         itemId: 'samples-tab',
         items: [{
-          xtype: 'ena-samples',
+          xtype: 'metadata-samples',
           itemId: 'samples-grid',
           store: 'ENASamples'
         }]

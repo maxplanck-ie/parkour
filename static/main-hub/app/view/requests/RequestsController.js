@@ -104,10 +104,10 @@ Ext.define('MainHub.view.requests.RequestsController', {
         },
         '-',
         {
-          text: 'ENA Exporter',
+          text: 'Metadata Exporter',
           disabled: !record.get('completed'),
           handler: function () {
-            Ext.create('MainHub.view.enaexporter.ENAExporter', {
+            Ext.create('MainHub.view.metadataexporter.MetadataExporter', {
               request: record
             });
           }

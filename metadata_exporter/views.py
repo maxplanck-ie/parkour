@@ -16,7 +16,7 @@ from rest_framework.decorators import action
 from bioblend.galaxy import GalaxyInstance
 
 from common.views import CsrfExemptSessionAuthentication
-from .serializers import ENASerializer
+from .serializers import MetadataSerializer
 
 
 Request = apps.get_model('request', 'Request')
@@ -24,7 +24,7 @@ Library = apps.get_model('library', 'Library')
 Sample = apps.get_model('sample', 'Sample')
 
 
-class ENAExporterViewSet(viewsets.ViewSet):
+class MetadataExporterViewSet(viewsets.ViewSet):
     def list(self, request):
         queryset = Request.objects.all().order_by('-create_time')
         if not request.user.is_staff:
@@ -83,7 +83,7 @@ class ENAExporterViewSet(viewsets.ViewSet):
             queryset = queryset.filter(user=request.user)
 
         req = get_object_or_404(queryset, pk=pk)
-        serializer = ENASerializer(req)
+        serializer = MetadataSerializer(req)
         data = serializer.data.get('result')
 
         data = sorted(data, key=lambda x: x['barcode'][3:])

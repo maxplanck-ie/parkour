@@ -31,7 +31,7 @@ from invoicing.views import (
 )
 
 from stats.views import RunStatisticsViewSet, SequencesStatisticsViewSet
-from ena_exporter.views import ENAExporterViewSet
+from metadata_exporter.views import MetadataExporterViewSet
 
 
 router = routers.DefaultRouter()
@@ -73,4 +73,4 @@ router.register(r'run_statistics', RunStatisticsViewSet, base_name='run-statisti
 router.register(r'sequences_statistics', SequencesStatisticsViewSet, base_name='sequences-statistics')
 router.register(r'analysis_list', FlowcellAnalysisViewSet, base_name='analysis_list')
 
-router.register(r'ena_exporter', ENAExporterViewSet, base_name='ena_exporter')
+router.register(r'metadata_exporter', MetadataExporterViewSet, base_name='metadata_exporter')
