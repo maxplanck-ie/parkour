@@ -25,7 +25,7 @@ from common.views import (
     CsrfExemptSessionAuthentication,
     StandardResultsSetPagination,
 )
-from .models import Request
+from .models import Request, FileRequest
 from .serializers import RequestSerializer, RequestFileSerializer
 
 User = get_user_model()
@@ -275,6 +275,52 @@ class RequestViewSet(viewsets.ModelViewSet):
         files = instance.files.all().order_by('name')
         serializer = RequestFileSerializer(files, many=True)
         return Response(serializer.data)
+
+    @action(methods=['post'], detail=False,
+            authentication_classes=[CsrfExemptSessionAuthentication])
+    def upload_files(self, request):
+        file_ids = []
+
+        if not any(request.FILES):
+            return JsonResponse({
+                'success': False,
+                'message': 'No files provided.'
+            }, status=400)
+
+        for file in request.FILES.getlist('files'):
+            f = FileRequest(name=file.name, file=file)
+            f.save()
+            file_ids.append(f.id)
+
+        return JsonResponse({'success': True, 'fileIds': file_ids})
+
+    @action(methods=['get'], detail=False)
+    def get_files_after_upload(self, request):
+        file_ids = json.loads(request.query_params.get('file_ids', '[]'))
+        error = ''
+        data = []
+
+        try:
+            files = [f for f in FileRequest.objects.all() if f.id in file_ids]
+            data = [
+                {
+                    'id': file.id,
+                    'name': file.name,
+                    'size': file.file.size,
+                    'path': settings.MEDIA_URL + file.file.name,
+                }
+                for file in files
+            ]
+
+        except Exception as e:
+            error = 'Could not get the attached files.'
+            logger.exception(e)
+
+        return JsonResponse({
+            'success': not error,
+            'error': error,
+            'data': data,
+        })
 
     @action(methods=['get'], detail=True)
     def download_deep_sequencing_request(self, request, pk=None):  # pragma: no cover
