@@ -11,4 +11,6 @@ Contents
 
    Installation <installation>
 
+   Web API <web_api>
+
    API Documentation <api>
