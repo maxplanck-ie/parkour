@@ -15,7 +15,7 @@ Contents
 
    API Documentation <api>
 
-A demonstration instance is available at `http://parkour-demo.ie-freiburg.mpg.de`__. The following accounts are available on that instance:
+A demonstration instance is available at http://parkour-demo.ie-freiburg.mpg.de. The following accounts are available on that instance:
 
  - A typical "staff" account with the username "parkour-staff@parkour-demo.ie-freiburg.mpg.de" and password "parkour-staff".
  - A typical "admin" account with the username "parkour-admin@parkour-demo.ie-freiburg.mpg.de" and password "parkour-admin".
