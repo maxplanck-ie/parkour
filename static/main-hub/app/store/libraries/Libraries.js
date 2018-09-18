@@ -12,7 +12,10 @@ Ext.define('MainHub.store.libraries.Libraries', {
         type: 'ajax',
         url: '/api/libraries_and_samples/',
         noCache: false,     //to remove param "_dc",
-        reader: 'json'
+        reader: 'json',
+        extraParams:{
+        showAll: 'False'
+    }
     },
 
     lazyFill: true
