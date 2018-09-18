@@ -14,6 +14,8 @@ class NucleicAcidType(models.Model):
         default='DNA',
     )
 
+    status = models.PositiveIntegerField("Status",default=1)
+
     class Meta:
         verbose_name = 'Nucleic Acid Type'
         verbose_name_plural = 'Nucleic Acid Types'

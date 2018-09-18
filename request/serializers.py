@@ -29,6 +29,7 @@ class RequestSerializer(ModelSerializer):
             'deep_seq_request_name',
             'deep_seq_request_path',
             'files',
+            'sequenced',
         )
 
     def get_user_full_name(self, obj):

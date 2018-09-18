@@ -121,9 +121,73 @@ Ext.define('MainHub.view.requests.RequestsController', {
               record: record
             });
           }
-        }
+        },
+        {
+          text: 'Mark as complete',
+          hidden: !USER.is_staff,
+          handler: function(){
+            Ext.Msg.show({
+              title: 'Mark request as complete',
+              message: Ext.String.format('Are you sure you want to mark request "{0} as complete?', record.get('name')),
+              buttons: Ext.Msg.YESNO,
+              icon: Ext.Msg.QUESTION,
+              fn: function(btn){
+               if(btn==='yes'){
+                me.markascomplete(record,'False');
+               }
+              }
+            });
+          }
+        },
       ]
     }).showAt(e.getXY());
+  },
+
+
+  markascomplete: function(record,admin_override){
+   var me = this;
+   Ext.Ajax.request({
+    url: Ext.String.format('api/requests/{0}/mark_as_complete/', record.get('pk')),
+      method: 'POST',
+      scope: me,
+
+
+      params:{
+       data:Ext.JSON.encode({
+         override:admin_override
+       })
+
+      },
+      success: function (response) {
+        var obj = Ext.JSON.decode(response.responseText);
+
+        if (obj.success) {
+          Ext.getStore('requestsStore').reload();
+          new Noty({ text: 'Request has been marked as complete!' }).show();
+        } else if(obj.noncomplete){
+          Ext.Msg.show({
+              title: 'Mark request as complete',
+              message: Ext.String.format('There are unsequenced libraries/samples related to this request. Do you want to mark it as complete anyway?'),
+              buttons: Ext.Msg.YESNO,
+              icon: Ext.Msg.QUESTION,
+              fn: function(btn){
+               if(btn==='yes'){
+                me.markascomplete(record,'True');
+               }
+              }
+            });
+        }
+
+         else {
+          new Noty({ text: obj.message, type: 'error' }).show();
+        }
+      },
+
+      failure: function (response) {
+        new Noty({ text: response.statusText, type: 'error' }).show();
+        console.error(response);
+        }
+   });
   },
 
   deleteRequest: function (record) {

@@ -22,6 +22,9 @@ Ext.define('MainHub.store.requests.Requests', {
       type: 'json',
       rootProperty: 'results',
       totalProperty: 'count'
+    },
+    extraParams:{
+        showAll: 'False'
     }
   },
 

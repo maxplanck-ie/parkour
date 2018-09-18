@@ -29,6 +29,7 @@ from .serializers import (
     ReadLengthSerializer,
     ConcentrationMethodSerializer,
 )
+from django.conf import settings
 
 Request = apps.get_model('request', 'Request')
 
@@ -137,6 +138,7 @@ class LibraryProtocolViewSet(MoveOtherMixin, viewsets.ReadOnlyModelViewSet):
         na_type = self.request.query_params.get('type', None)
         if na_type is not None:
             queryset = queryset.filter(type=na_type)
+        queryset = queryset.filter(status=settings.NON_OBSOLETE)
         return queryset
 
 

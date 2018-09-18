@@ -4,6 +4,7 @@ from django.db import models
 from django.core.validators import MinValueValidator, RegexValidator
 
 from common.models import DateTimeMixin
+from django.conf import settings
 
 AlphaValidator = RegexValidator(
     r'^[A-Z]$', 'Only capital alpha characters are allowed.')
@@ -201,6 +202,8 @@ class LibraryProtocol(models.Model):
         'Typical Application',
         max_length=200,
     )
+
+    status = models.PositiveIntegerField("Status", default=1)
     comments = models.TextField('Comments', null=True, blank=True)
 
     class Meta:

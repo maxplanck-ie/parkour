@@ -22,7 +22,7 @@ logger = logging.getLogger('db')
 
 
 class LibrarySampleTree(viewsets.ViewSet):
-    def get_queryset(self):
+    def get_queryset(self,showAll=False):
         libraries_qs = Library.objects.all().only('sequencing_depth')
         samples_qs = Sample.objects.all().only('sequencing_depth')
 
@@ -30,7 +30,9 @@ class LibrarySampleTree(viewsets.ViewSet):
             Prefetch('libraries', queryset=libraries_qs),
             Prefetch('samples', queryset=samples_qs),
         ).only('name').order_by('-create_time')
+        if not showAll:
 
+            queryset = queryset.filter(sequenced=False)
         if not self.request.user.is_staff:
             queryset = queryset.filter(user=self.request.user)
 
@@ -38,7 +40,11 @@ class LibrarySampleTree(viewsets.ViewSet):
 
     def list(self, request):
         """ Get the list of libraries and samples. """
-        queryset = self.get_queryset()
+        showAll = False
+        if request.query_params['showAll'] == 'True':
+            showAll = True
+        queryset = self.get_queryset(showAll)
+
         request_id = self.request.query_params.get('node', None)
 
         if request_id and request_id != 'root':

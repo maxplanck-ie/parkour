@@ -26,12 +26,44 @@ Ext.define('MainHub.view.requests.Requests', {
     header: {
       title: 'Requests',
       items: [{
+          xtype: 'fieldcontainer',
+          defaultType: 'checkboxfield',
+          layout: 'hbox',
+          margin: '0 20 0 0',
+          items: [
+            {
+
+       name : 'showAll',
+       boxLabel: 'Show all',
+       boxLabelAlign: 'before',
+       id : 'showAll',
+
+       margin: '0 15 0 0',
+       cls: 'grid-header-checkbox',
+       hidden: !USER.is_staff,
+       listeners:{
+        change: function(checkbox, newValue, oldValue, eOpts) {
+
+        if (newValue) {
+            Ext.getStore('requestsStore').getProxy().extraParams.showAll = 'True';
+            Ext.getStore('requestsStore').load()
+        } else {
+            Ext.getStore('requestsStore').getProxy().extraParams.showAll = 'False';
+            Ext.getStore('requestsStore').load()
+        }
+        }
+       }
+      }]
+        },
+
+      {
         xtype: 'searchfield',
         store: 'requestsStore',
         emptyText: 'Search',
         margin: '0 10px 0 0',
         width: 250
       },
+
       {
         xtype: 'button',
         itemId: 'add-request-button',

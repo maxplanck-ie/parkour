@@ -156,30 +156,44 @@ class RequestViewSet(viewsets.ModelViewSet):
     search_fields = ('name', 'description', 'user__first_name',
                      'user__last_name',)
 
-    def get_queryset(self):
-        libraries_qs = Library.objects.all().only('status', 'sequencing_depth')
-        samples_qs = Sample.objects.all().only('status', 'sequencing_depth')
+    def get_queryset(self,showAll=False):
+        libraries_qs = Library.objects.all().exclude(status=5).only('status', 'sequencing_depth')
+        samples_qs = Sample.objects.all().exclude(status=5).only('status', 'sequencing_depth')
+        #   print(libraries_qs.values())
+
 
         queryset = Request.objects.select_related('user').prefetch_related(
             Prefetch('libraries', queryset=libraries_qs),
             Prefetch('samples', queryset=samples_qs),
             'files',
         ).order_by('-create_time')
-
+        print(queryset.values())
+        if not showAll:
+            queryset = queryset.filter(sequenced=False)
         if self.request.user.is_staff:
             # Show only those Requests, whose libraries and samples
             # haven't reached status 6 yet
             # TODO: find a way to hide requests
             # queryset = [x for x in queryset if x.statuses.count(6) == 0]
-            pass
+            #queryset = [x for x in queryset if x.statuses.count(5)==0]
+            print('staff')
         else:
             queryset = queryset.filter(user=self.request.user)
+
+        #queryset = [x for x in queryset if x.statuses.count(5)==0]
+
+
 
         return queryset
 
     def list(self, request):
         """ Get the list of requests. """
-        queryset = self.filter_queryset(self.get_queryset())
+        print(request.query_params['showAll'])
+        showAll = False
+        if request.query_params['showAll'] == 'True':
+            showAll = True
+
+        queryset = self.filter_queryset(self.get_queryset(showAll))
 
         try:
             page = self.paginate_queryset(queryset)
@@ -191,6 +205,7 @@ class RequestViewSet(viewsets.ModelViewSet):
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
+
         return Response(serializer.data)
 
     def create(self, request):
@@ -215,6 +230,7 @@ class RequestViewSet(viewsets.ModelViewSet):
         """ Update request with a given id. """
         instance = self.get_object()
         post_data = self._get_post_data(request)
+
         post_data.update({'user': instance.user.pk})
 
         serializer = self.get_serializer(data=post_data, instance=instance)
@@ -229,6 +245,54 @@ class RequestViewSet(viewsets.ModelViewSet):
                 'message': 'Invalid payload.',
                 'errors': serializer.errors,
             }, 400)
+
+    @action(methods=['post'],detail=True)
+    def mark_as_complete(self,request,pk=None):
+        """Mark request as complete, set sequenced to true"""
+
+        instance = Request.objects.filter(pk=pk)
+
+
+        print(pk)
+        post_data = self._get_post_data(request)
+        override = post_data['override']
+        print(post_data['override'])
+        print(override)
+        if post_data['override'] == 'False':
+            override = False
+        else:
+            override = True
+
+        def checkifcomplete(element):
+            if element==5:
+                return True
+            else:
+                return False
+
+
+        if override:
+            print("Override is true")
+            instance.update(sequenced=True)
+            return Response({'success':True})
+
+        else:
+            print("Override is false")
+            #print(instance.statuses)
+            #check if all libraries/samples related to this requested have been sequenced
+            statuses = [status for x in instance for status  in x.statuses]
+            print(statuses)
+            complete = all([checkifcomplete(x) for x in statuses])
+
+            if complete:
+                print("all statuses are complete")
+                instance.update(sequenced=True)
+                return Response({'success':True})
+            elif not complete:
+                print("there are incomplete statuses")
+                return Response({'noncomplete':True})
+            else:
+                return Response({'error':'error'})
+
 
     @action(methods=['post'], detail=True)
     def samples_submitted(self, request, pk=None):

@@ -6,7 +6,7 @@ from library_sample_shared.views import LibrarySampleBaseViewSet
 
 from .models import NucleicAcidType
 from .serializers import NucleicAcidTypeSerializer, SampleSerializer
-
+from django.conf import settings
 logger = logging.getLogger('db')
 
 
@@ -15,7 +15,7 @@ class NucleicAcidTypeViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = NucleicAcidTypeSerializer
 
     def get_queryset(self):
-        return NucleicAcidType.objects.order_by('type', 'name')
+        return NucleicAcidType.objects.filter(status=settings.NON_OBSOLETE).order_by('type','name')
 
 
 class SampleViewSet(LibrarySampleBaseViewSet):
