@@ -156,6 +156,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
     var libraries = selectedRecords.filter(function (item) {
       return item.record_type === 'Library';
     });
+
     var samples = selectedRecords.filter(function (item) {
       return item.record_type === 'Sample';
     });
@@ -174,9 +175,11 @@ Ext.define('MainHub.view.pooling.PoolingController', {
       params: {
         pool_id: selectedRecords[0].pool,
         samples: Ext.JSON.encode(Ext.Array.pluck(samples, 'pk')),
-        libraries: Ext.JSON.encode(Ext.Array.pluck(libraries, 'pk'))
+        libraries: Ext.JSON.encode(Ext.Array.pluck(libraries, 'pk')),
+        bp: Ext.JSON.encode(Ext.Array.pluck(libraries,'bp'))
       }
     });
+
   },
 
   downloadPoolingTemplate: function (btn) {
@@ -220,7 +223,8 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         records.push({
           pk: item.get('pk'),
           record_type: item.get('record_type'),
-          pool: item.get('pool')
+          pool: item.get('pool'),
+          bp: item.get('mean_fragment_size')
         });
       }
     });

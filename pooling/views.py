@@ -190,6 +190,8 @@ class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ViewSet):
         response = HttpResponse(content_type='application/ms-excel')
         libraries = json.loads(request.data.get('libraries', '[]'))
         samples = json.loads(request.data.get('samples', '[]'))
+        bp = json.loads(request.data.get('bp','[]'))
+
         pool_id = request.POST.get('pool_id', '')
         pool = Pool.objects.get(pk=pool_id)
 
@@ -245,14 +247,15 @@ class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ViewSet):
             ws.write(row_num, i, column, font_style_bold)
             ws.col(i).width = 7000  # Set column width
 
-        for record in records:
+        for index,record in enumerate(records):
             row_num += 1
             row_idx = str(row_num + 1)
             req = record.request.get()
 
             if isinstance(record, Library):
                 concentration = record.concentration_facility
-                mean_fragment_size = record.mean_fragment_size
+                #mean_fragment_size = record.mean_fragment_size
+                mean_fragment_size = bp[index]
             else:
                 concentration = record.librarypreparation.concentration_library
                 mean_fragment_size = \
