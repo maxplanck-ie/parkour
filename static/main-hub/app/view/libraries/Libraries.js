@@ -51,13 +51,33 @@ Ext.define('MainHub.view.libraries.Libraries', {
           layout: 'hbox',
           margin: '0 20 0 0',
           items: [
+          {
+            name : 'showAll',
+            boxLabel: 'Show all',
+            boxLabelAlign: 'before',
+            id : 'showAlllr',
+            margin: '0 15 0 0',
+            cls: 'grid-header-checkbox',
+            hidden: !USER.is_staff,
+            listeners:{
+                change: function(checkbox, newValue, oldValue, eOpts) {
+                if (newValue) {
+                    Ext.getStore('librariesStore').getProxy().extraParams.showAll = 'True';
+                    Ext.getStore('librariesStore').load()
+                } else {
+                    Ext.getStore('librariesStore').getProxy().extraParams.showAll = 'False';
+                    Ext.getStore('librariesStore').load()
+                }
+               }
+              }
+            },
             {
               boxLabel: 'Show Libraries',
               itemId: 'showLibrariesCheckbox',
               margin: '0 15 0 0',
               cls: 'grid-header-checkbox',
               checked: true,
-              hidden: true
+              hidden: true,
             },
             {
               boxLabel: 'Show Samples',
