@@ -112,6 +112,11 @@ Ext.define('MainHub.view.requests.Requests', {
             meta.tdAttr = 'data-qtip="' + val + '" data-qwidth=300';
             return val;
           }
+        },
+        {
+          text: 'Number of samples and libraries',
+          dataIndex: 'number_of_samples',
+          flex: 1
         }
       ]
     },

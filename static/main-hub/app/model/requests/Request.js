@@ -58,6 +58,10 @@ Ext.define('MainHub.model.requests.Request', {
     {
       type: 'auto',
       name: 'files'
+    },
+    {
+      type: 'int',
+      name: 'number_of_samples'
     }
   ]
 });

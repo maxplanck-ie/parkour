@@ -12,6 +12,7 @@ class RequestSerializer(ModelSerializer):
     deep_seq_request_path = SerializerMethodField()
     completed = SerializerMethodField()
     files = SerializerMethodField()
+    number_of_samples = SerializerMethodField()
 
     class Meta:
         model = Request
@@ -30,10 +31,14 @@ class RequestSerializer(ModelSerializer):
             'deep_seq_request_path',
             'files',
             'sequenced',
+            'number_of_samples',
         )
 
     def get_user_full_name(self, obj):
         return obj.user.full_name
+
+    def get_number_of_samples(self,obj):
+        return len(obj.statuses)
 
     def get_restrict_permissions(self, obj):
         """

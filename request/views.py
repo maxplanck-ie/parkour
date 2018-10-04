@@ -157,8 +157,8 @@ class RequestViewSet(viewsets.ModelViewSet):
                      'user__last_name',)
 
     def get_queryset(self,showAll=False):
-        libraries_qs = Library.objects.all().exclude(status=5).only('status', 'sequencing_depth')
-        samples_qs = Sample.objects.all().exclude(status=5).only('status', 'sequencing_depth')
+        libraries_qs = Library.objects.all().only('status', 'sequencing_depth')
+        samples_qs = Sample.objects.all().only('status', 'sequencing_depth')
         #   print(libraries_qs.values())
 
 

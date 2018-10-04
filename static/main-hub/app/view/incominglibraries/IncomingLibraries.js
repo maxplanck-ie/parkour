@@ -142,14 +142,16 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
             var record = store.findRecord('id', value);
             meta.tdAttr = 'data-qtip="' + record.get('name') + '"';
             return (record) ? record.getShortName() : '';
-          }
+          },
+          hidden: true
         },
         {
           text: 'qPCR (nM)',
           tooltip: 'qPCR Result (user)',
           dataIndex: 'qpcr_result',
           tdCls: 'userEntry',
-          width: 85
+          width: 85,
+          hidden: true
         },
         {
           text: 'bp',
@@ -180,7 +182,8 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
             xtype: 'numberfield',
             minValue: 1,
             allowDecimals: false
-          }
+          },
+          hidden: true
         },
         {
           text: 'ng/µl',
@@ -240,7 +243,8 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
             }
 
             return (record) ? record.getShortName() : '';
-          }
+          },
+          hidden: true
         },
         {
           text: 'qPCR (nM)',
@@ -252,7 +256,8 @@ Ext.define('MainHub.view.incominglibraries.IncomingLibraries', {
             xtype: 'numberfield',
             id: 'qPCRResultEditor',
             minValue: 0
-          }
+          },
+          hidden: true
         },
         {
           text: 'bp',
