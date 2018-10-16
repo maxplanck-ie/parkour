@@ -188,9 +188,9 @@ class RequestViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         """ Get the list of requests. """
-        print(request.query_params['showAll'])
+        print(request.GET)
         showAll = False
-        if request.query_params['showAll'] == 'True':
+        if request.GET.get('showAll') == 'True':
             showAll = True
 
         queryset = self.filter_queryset(self.get_queryset(showAll))

@@ -129,6 +129,7 @@ USE_TZ = True
 
 ADMINS = [
     ('Devon P. Ryan', 'ryan@ie-freiburg.mpg.de'),
+    ('Ralvi Isufaj', 'isufaj@ie-freiburg.mpg.de'),
 ]
 
 
