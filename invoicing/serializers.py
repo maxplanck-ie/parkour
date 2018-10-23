@@ -11,7 +11,7 @@ from rest_framework.fields import empty
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 from .models import FixedCosts, LibraryPreparationCosts, SequencingCosts
-
+from pprint import pprint
 Request = apps.get_model('request', 'Request')
 ReadLength = apps.get_model('library_sample_shared', 'ReadLength')
 LibraryProtocol = apps.get_model('library_sample_shared', 'LibraryProtocol')
@@ -119,11 +119,15 @@ class InvoicingSerializer(ModelSerializer):
         pools = self._get_pools(obj)
         data = []
 
+
         for flowcell in obj.flowcell.all():
+            #pprint(vars(flowcell))
             flowcell_dict = {
                 'flowcell_id': flowcell.flowcell_id,
                 'sequencer': flowcell.sequencer.pk,
                 'pools': [],
+                'flowcell_create_month':int(flowcell.create_time.strftime('%m')),
+                'flowcell_create_year': int(flowcell.create_time.strftime('%Y')),
             }
 
             count = Counter(flowcell.lanes.values_list('pool', flat=True))
@@ -137,7 +141,15 @@ class InvoicingSerializer(ModelSerializer):
                 # libraries and samples
                 libraries = pool.libraries.filter(request=obj)
                 samples = pool.samples.filter(request=obj)
-
+                library_ids = []
+                sample_ids = []
+                for library in libraries:
+                    library_ids.append(library.pk)
+                for sample in samples:
+                    sample_ids.append(sample.pk)
+                for library in libraries:
+                    print("Library---------------")
+                    pprint(vars(library))
                 depth = sum(libraries.values_list(
                     'sequencing_depth', flat=True)) + \
                     sum(samples.values_list('sequencing_depth', flat=True))
@@ -152,6 +164,8 @@ class InvoicingSerializer(ModelSerializer):
                     'name': pool.name,
                     'read_length': item.read_length.pk,
                     'percentage': f'{percentage}*{count[pool.pk]}',
+                    'libraries':library_ids,
+                    'samples': sample_ids,
                 })
             data.append(flowcell_dict)
 
@@ -161,12 +175,35 @@ class InvoicingSerializer(ModelSerializer):
         return set([x.read_length.pk for x in obj.records])
 
     def get_num_libraries_samples(self, obj):
+
+
+
         num_libraries = obj.libraries.count()
+
         num_samples = obj.samples.count()
         if num_libraries > 0:
-            return f'{num_libraries} libraries'
+            print(num_libraries)
+
+            libcount = 0
+            flowcells = self.get_percentage(obj)
+            maxYear = max([d['flowcell_create_year'] for d in flowcells])
+            maxMonth = max([d['flowcell_create_month'] for d in flowcells])
+            for flowcell in flowcells:
+                if flowcell['flowcell_create_month'] == maxMonth and flowcell['flowcell_create_year'] == maxYear:
+                    for pool in flowcell['pools']:
+                        libcount = libcount + len(pool['libraries'])
+
+            return f'{libcount} libraries'
         else:
-            return f'{num_samples} samples'
+            sampcount = 0
+            flowcells = self.get_percentage(obj)
+            maxYear = max([d['flowcell_create_year'] for d in flowcells])
+            maxMonth = max([d['flowcell_create_month'] for d in flowcells])
+            for flowcell in flowcells:
+                if flowcell['flowcell_create_month'] == maxMonth and flowcell['flowcell_create_year'] == maxYear:
+                    for pool in flowcell['pools']:
+                        sampcount = sampcount + len(pool['samples'])
+            return f'{sampcount} samples'
 
     def get_library_protocol(self, obj):
         protocols = set([x.library_protocol.pk for x in obj.records])
@@ -198,29 +235,41 @@ class InvoicingSerializer(ModelSerializer):
         preparation_costs = self.context['preparation_costs']
         sequencing_costs = self.context['sequencing_costs']
 
+        '''
+        Fix so samples of a request that have been sequenced in different months are not billed twice
+        Only bill if it has been sequenced in the latest month that is in the flowcell list
+        '''
+        maxYear = max([d['flowcell_create_year'] for d in percentage])
+        maxMonth = max([d['flowcell_create_month'] for d in percentage])
+
+
         # Calculate Fixed Costs
         costs = 0
         for flowcell in percentage:
-            for pool in flowcell['pools']:
-                costs += fixed_costs.get(flowcell['sequencer'], 0) * \
-                    reduce(lambda x, y: Decimal(x) * Decimal(y),
-                           pool['percentage'].split('*'))
+            if flowcell['flowcell_create_month'] == maxMonth and flowcell['flowcell_create_year'] == maxYear:
+
+                for pool in flowcell['pools']:
+                    costs += fixed_costs.get(flowcell['sequencer'], 0) * \
+                        reduce(lambda x, y: Decimal(x) * Decimal(y),
+                               pool['percentage'].split('*'))
         ret['fixed_costs'] = costs
 
         # Calculate Sequencing Costs
         costs = 0
         for flowcell in percentage:
-            for pool in flowcell['pools']:
-                key = f"{flowcell['sequencer']}_{pool['read_length']}"
-                costs += sequencing_costs.get(key, 0) * \
-                    reduce(lambda x, y: Decimal(x) * Decimal(y),
-                           pool['percentage'].split('*'))
+            if flowcell['flowcell_create_month'] == maxMonth and flowcell['flowcell_create_year'] == maxYear:
+                for pool in flowcell['pools']:
+                    key = f"{flowcell['sequencer']}_{pool['read_length']}"
+                    costs += sequencing_costs.get(key, 0) * \
+                        reduce(lambda x, y: Decimal(x) * Decimal(y),
+                            pool['percentage'].split('*'))
         ret['sequencing_costs'] = costs
 
         # Calculate Preparation Costs
         costs = 0
         split = num_libraries_samples.split(' ')
         if split[1] == 'samples':
+
             costs = preparation_costs.get(library_protocol, 0) * \
                 Decimal(split[0])
         else:
