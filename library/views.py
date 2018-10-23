@@ -41,7 +41,7 @@ class LibrarySampleTree(viewsets.ViewSet):
     def list(self, request):
         """ Get the list of libraries and samples. """
         showAll = False
-        if request.query_params['showAll'] == 'True':
+        if request.GET.get('showAll') == 'True':
             showAll = True
         queryset = self.get_queryset(showAll)
 
