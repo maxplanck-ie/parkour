@@ -152,7 +152,20 @@ Ext.define('MainHub.view.pooling.Pooling', {
         tooltip: '% library in Pool',
         dataIndex: 'percentage_library',
         width: 55
-      }
+      },
+      {
+          text: 'Comments',
+          tooltip: 'Comments (facility)',
+          dataIndex: 'comment',
+          width: 150,
+          editor: {
+            xtype: 'textfield'
+          },
+          renderer: function (value, meta) {
+            meta.tdAttr = 'data-qtip="' + value + '"';
+            return value;
+          }
+        }
     ],
 
     features: [{
@@ -162,7 +175,7 @@ Ext.define('MainHub.view.pooling.Pooling', {
       groupHeaderTpl: [
         '<strong class="{children:this.getHeaderClass}">' +
           '{children:this.getName} | Pool Size: {children:this.getRealPoolSize} M reads ' +
-          '{children:this.getPoolSize}' +
+          '{children:this.getPoolSize}| Comment: {children:this.getComment} ' +
         '</strong>',
         {
           getHeaderClass: function (children) {
@@ -180,6 +193,10 @@ Ext.define('MainHub.view.pooling.Pooling', {
             }
 
             return cls;
+          },
+          getComment: function(children){
+            return children[0].get('comment')
+
           },
           getName: function (children) {
             return children[0].get('pool_name');

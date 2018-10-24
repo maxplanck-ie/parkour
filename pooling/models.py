@@ -26,6 +26,8 @@ class Pooling(DateTimeMixin):
         blank=True
     )
 
+    comment = models.TextField(verbose_name='Comment',blank=True)
+
     class Meta:
         verbose_name = 'Pooling'
         verbose_name_plural = 'Pooling'

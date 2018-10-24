@@ -73,6 +73,10 @@ Ext.define('MainHub.model.pooling.Pooling', {
             name: 'quality_check',
             type: 'string',
             allowNull: true
+        },
+        {
+            name: 'comment',
+            type: 'string'
         }
     ]
 });

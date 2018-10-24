@@ -28,6 +28,7 @@ class Pool(DateTimeMixin):
         Library, related_name='pool', blank=True)
     samples = models.ManyToManyField(
         Sample, related_name='pool', blank=True)
+    comment = models.TextField(verbose_name='Comment', blank=True)
 
     # def get_size(self):
     #     size = 0

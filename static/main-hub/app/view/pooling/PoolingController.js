@@ -15,7 +15,7 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         resize: 'resize',
         boxready: 'addToolbarButtons',
         itemcontextmenu: 'showMenu',
-        groupcontextmenu: 'showGroupMenu',
+        groupcontextmenu: 'showPoolingGroupMenu',
         beforeEdit: 'toggleEditors',
         edit: 'editRecord'
       },
@@ -39,6 +39,157 @@ Ext.define('MainHub.view.pooling.PoolingController', {
       }
     }
   },
+
+    showPoolingGroupMenu: function (gridView, node, groupId, e) {
+    var self = this;
+    var grid = gridView.grid;
+    var customConfig = gridView.grid.initialConfig.customConfig;
+    var qcMenuOptions = [];
+    var menuItems = [
+      {
+        text: 'Select All',
+        margin: '5px 5px 0 5px',
+        handler: function () {
+          self.selectUnselectAll(grid, parseInt(groupId), true);
+        }
+      },
+      {
+        text: 'Unselect All',
+        margin: 5,
+        handler: function () {
+          self.selectUnselectAll(grid, parseInt(groupId), false);
+        }
+      },
+      {
+        text: 'Edit comment',
+        margin: '5px 5px 0 5px',
+        handler: function (){
+            var self = this;
+            var store = grid.getStore();
+            var comment = '';
+            var i = 0;
+            store.each(function (item) {
+
+            if (item.get(store.groupField) === parseInt(groupId)) {
+
+                    comment = item.get('comment')
+                    console.log(comment)
+            }
+            });
+            var editcomment = {
+            xtype: 'container',
+            layout: 'hbox',
+            items: [{
+                xtype: 'textfield',
+                width: 100
+            },
+            {
+                xtype: 'button',
+                text: 'Click Me'
+            }]
+        };
+
+        menuItems.push(editcomment)
+      }
+      }
+    ];
+
+    if (customConfig && customConfig.qualityCheckMenuOptions) {
+      qcMenuOptions = customConfig.qualityCheckMenuOptions;
+    }
+
+    if (
+      qcMenuOptions.length > 0 &&
+      self._getSelectedRecords(grid.getStore(), parseInt(groupId)).length > 0
+    ) {
+      var qcMenu = {
+        xtype: 'container',
+        items: [
+          {
+            xtype: 'container',
+            html: 'Quality Check: Selected',
+            margin: '10px 5px 5px 5px',
+            style: {
+              color: '#000'
+            }
+          },
+          {
+            xtype: 'container',
+            margin: 5,
+            layout: {
+              type: 'hbox',
+              pack: 'center',
+              align: 'middle'
+            },
+            defaults: {
+              xtype: 'button',
+              scale: 'medium',
+              margin: '5px 10px 10px'
+            },
+            items: []
+          }
+        ]
+      };
+
+      if (qcMenuOptions.indexOf('passed') !== -1) {
+        qcMenu.items[1].items.push({
+          ui: 'menu-button-green',
+          tooltip: 'passed',
+          iconCls: 'fa fa-lg fa-check',
+          handler: function () {
+            self.qualityCheckSelected(grid, parseInt(groupId), 'passed');
+            this.up('menu').hide();
+          }
+        });
+      }
+
+      if (qcMenuOptions.indexOf('completed') !== -1) {
+        qcMenu.items[1].items.push({
+          ui: 'menu-button-green',
+          tooltip: 'completed',
+          iconCls: 'fa fa-lg fa-check',
+          handler: function () {
+            self.qualityCheckSelected(grid, parseInt(groupId), 'completed');
+            this.up('menu').hide();
+          }
+        });
+      }
+
+      if (qcMenuOptions.indexOf('compromised') !== -1) {
+        qcMenu.items[1].items.push({
+          ui: 'menu-button-yellow',
+          tooltip: 'compromised',
+          iconCls: 'fa fa-lg fa-exclamation-triangle',
+          handler: function () {
+            self.qualityCheckSelected(grid, parseInt(groupId), 'compromised');
+            this.up('menu').hide();
+          }
+        });
+      }
+
+      if (qcMenuOptions.indexOf('failed') !== -1) {
+        qcMenu.items[1].items.push({
+          ui: 'menu-button-red',
+          tooltip: 'failed',
+          iconCls: 'fa fa-lg fa-times',
+          handler: function () {
+            self.qualityCheckSelected(grid, parseInt(groupId), 'failed');
+            this.up('menu').hide();
+          }
+        });
+      }
+
+      menuItems.push('-');
+      menuItems.push(qcMenu);
+    }
+
+    e.stopEvent();
+    Ext.create('Ext.menu.Menu', {
+      plain: true,
+      items: menuItems
+    }).showAt(e.getXY());
+  },
+
 
   addToolbarButtons: function (grid) {
     var toolbar = grid.down('toolbar[dock="bottom"]');

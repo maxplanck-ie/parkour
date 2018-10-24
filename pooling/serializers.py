@@ -173,10 +173,11 @@ class PoolSerializer(ModelSerializer):
 
     libraries = SerializerMethodField()
     samples = SerializerMethodField()
+    comment = SerializerMethodField()
 
     class Meta:
         model = Pool
-        fields = ('pool', 'pool_name', 'pool_size', 'libraries', 'samples',)
+        fields = ('pool', 'pool_name', 'pool_size', 'libraries', 'samples','comment',)
 
     def get_pool(self, obj):
         return obj.pk
@@ -198,6 +199,10 @@ class PoolSerializer(ModelSerializer):
             obj.samples, many=True, context=self.context)
         return serializer.data
 
+    def get_comment(self,obj):
+        return obj.comment
+
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         result = []
@@ -215,6 +220,8 @@ class PoolSerializer(ModelSerializer):
                         x['sequencing_depth'] /
                         instance.total_sequencing_depth * 100
                     )),
+
+                    'comment': data['comment']
                 }, **x},
                 data.pop(type),
             )))
