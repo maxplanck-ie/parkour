@@ -205,6 +205,7 @@ class LibraryProtocol(models.Model):
 
     status = models.PositiveIntegerField("Status", default=1)
     comments = models.TextField('Comments', null=True, blank=True)
+    obsolete = models.PositiveIntegerField("Obsolete", default=1)
 
     class Meta:
         verbose_name = 'Library Protocol'

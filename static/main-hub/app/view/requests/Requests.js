@@ -40,7 +40,7 @@ Ext.define('MainHub.view.requests.Requests', {
 
        margin: '0 15 0 0',
        cls: 'grid-header-checkbox',
-       hidden: !USER.is_staff,
+       hidden: false,
        listeners:{
         change: function(checkbox, newValue, oldValue, eOpts) {
 

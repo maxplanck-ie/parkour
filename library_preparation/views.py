@@ -88,6 +88,8 @@ class LibraryPreparationViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
         data = sorted(serializer.data, key=lambda x: x['barcode'][3:])
         return Response(data)
 
+
+
     @action(methods=['post'], detail=False,
             authentication_classes=[CsrfExemptSessionAuthentication])
     # @authentication_classes((CsrfExemptSessionAuthentication))

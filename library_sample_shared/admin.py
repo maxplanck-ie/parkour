@@ -121,23 +121,23 @@ class IndexAdmin(admin.ModelAdmin):
 @admin.register(LibraryProtocol)
 class LibraryProtocolAdmin(admin.ModelAdmin):
     list_display = ('name', 'type', 'provider', 'catalog',
-                    'typical_application','status_name',)
+                    'typical_application','obsolete_name',)
     search_fields = ('name', 'provider', 'catalog', 'typical_application',)
     list_filter = ('type',)
     actions = ('mark_as_obsolete','mark_as_non_obsolete',)
 
     def mark_as_obsolete(self,request,queryset):
-        queryset.update(status=settings.OBSOLETE)
+        queryset.update(obsolete=settings.OBSOLETE)
     mark_as_obsolete.short_description = "Mark library protocol as obsolete"
 
     def mark_as_non_obsolete(self,request,queryset):
-        queryset.update(status=settings.NON_OBSOLETE)
+        queryset.update(obsolete=settings.NON_OBSOLETE)
     mark_as_non_obsolete.short_description = "Mark library protocol as non-obsolete"
 
-    def status_name(self,obj):
+    def obsolete_name(self,obj):
 
-        return "Non-obsolete" if obj.status==settings.NON_OBSOLETE else "Obsolete"
-    status_name.short_description = "STATUS"
+        return "Non-obsolete" if obj.obsolete==settings.NON_OBSOLETE else "Obsolete"
+    obsolete_name.short_description = "STATUS"
 
 
 

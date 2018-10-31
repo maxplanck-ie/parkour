@@ -30,13 +30,16 @@ from .serializers import (
     LibraryPreparationCostsSerializer,
     SequencingCostsSerializer,
 )
-
+from django.db import transaction
 Request = apps.get_model('request', 'Request')
 ReadLength = apps.get_model('library_sample_shared', 'ReadLength')
 LibraryProtocol = apps.get_model('library_sample_shared', 'LibraryProtocol')
 Library = apps.get_model('library', 'Library')
 Sample = apps.get_model('sample', 'Sample')
 Flowcell = apps.get_model('flowcell', 'Flowcell')
+
+
+
 
 
 class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
@@ -57,7 +60,6 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
         ).select_related(
             'read_length', 'library_protocol',
         ).only('read_length', 'library_protocol__name')
-
         samples_qs = Sample.objects.filter(
             ~Q(pool=None) & ~Q(status=-1)
         ).select_related(
@@ -81,7 +83,17 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
             'cost_unit__name',
         ).order_by('sequencing_date', 'pk')
 
+
+
         return queryset
+
+
+    def list(self,request):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+
+        return Response(serializer.data)
+
 
     @action(methods=['get'], detail=False)
     def billing_periods(self, request):
@@ -276,10 +288,20 @@ class FixedCostsViewSet(mixins.UpdateModelMixin,
 class LibraryPreparationCostsViewSet(mixins.UpdateModelMixin,
                                      viewsets.ReadOnlyModelViewSet):
     """ Get the list of Library Preparation Costs. """
+    obsolete_protocols = LibraryProtocol.objects.filter(obsolete=settings.OBSOLETE).values_list('id', flat=True)
+    lst = list(obsolete_protocols)
+    with transaction.atomic():
+        for id in obsolete_protocols:
+            LibraryProtocol.objects.filter(id=id).update(obsolete=settings.NON_OBSOLETE)
     permission_classes = [IsAdminUser]
     queryset = LibraryPreparationCosts.objects.all()
+    print(queryset.query)
+
     serializer_class = LibraryPreparationCostsSerializer
 
+    with transaction.atomic():
+        for id in obsolete_protocols:
+           LibraryProtocol.objects.filter(id=id).update(obsolete=settings.OBSOLETE)
 
 class SequencingCostsViewSet(mixins.UpdateModelMixin,
                              viewsets.ReadOnlyModelViewSet):

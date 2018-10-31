@@ -167,7 +167,7 @@ class RequestViewSet(viewsets.ModelViewSet):
             Prefetch('samples', queryset=samples_qs),
             'files',
         ).order_by('-create_time')
-        print(queryset.values())
+
         if not showAll:
             queryset = queryset.filter(sequenced=False)
         if self.request.user.is_staff:
@@ -188,7 +188,7 @@ class RequestViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         """ Get the list of requests. """
-        print(request.GET)
+
         showAll = False
         if request.GET.get('showAll') == 'True':
             showAll = True
@@ -253,11 +253,10 @@ class RequestViewSet(viewsets.ModelViewSet):
         instance = Request.objects.filter(pk=pk)
 
 
-        print(pk)
+
         post_data = self._get_post_data(request)
         override = post_data['override']
-        print(post_data['override'])
-        print(override)
+
         if post_data['override'] == 'False':
             override = False
         else:
@@ -280,7 +279,7 @@ class RequestViewSet(viewsets.ModelViewSet):
             #print(instance.statuses)
             #check if all libraries/samples related to this requested have been sequenced
             statuses = [status for x in instance for status  in x.statuses]
-            print(statuses)
+
             complete = all([checkifcomplete(x) for x in statuses])
 
             if complete:

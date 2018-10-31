@@ -138,9 +138,20 @@ class LibraryProtocolViewSet(MoveOtherMixin, viewsets.ReadOnlyModelViewSet):
         na_type = self.request.query_params.get('type', None)
         if na_type is not None:
             queryset = queryset.filter(type=na_type)
-        queryset = queryset.filter(status=settings.NON_OBSOLETE)
+        queryset = queryset.filter(obsolete=settings.NON_OBSOLETE)
         return queryset
 
+class LibraryProtocolInvoicingViewSet(MoveOtherMixin, viewsets.ReadOnlyModelViewSet):
+    """ Get the list of library protocols for invoicing. """
+    serializer_class = LibraryProtocolSerializer
+
+    def get_queryset(self):
+        queryset = LibraryProtocol.objects.order_by('name')
+        na_type = self.request.query_params.get('type', None)
+        if na_type is not None:
+            queryset = queryset.filter(type=na_type)
+
+        return queryset
 
 class LibraryTypeViewSet(MoveOtherMixin, viewsets.ReadOnlyModelViewSet):
     """ Get the list of library types. """

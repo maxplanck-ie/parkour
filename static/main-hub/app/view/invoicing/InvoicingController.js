@@ -189,7 +189,7 @@ Ext.define('MainHub.view.invoicing.InvoicingController', {
   },
 
   libraryProtocolRenderer: function (value, meta) {
-    var record = Ext.getStore('libraryProtocolsStore').findRecord(
+    var record = Ext.getStore('libraryprotocolinvoicingStore').findRecord(
       'id', value, 0, false, true, true);
     var name = record.get('name');
     meta.tdAttr = Ext.String.format('data-qtip="{0}"', name);

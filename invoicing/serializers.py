@@ -147,9 +147,7 @@ class InvoicingSerializer(ModelSerializer):
                     library_ids.append(library.pk)
                 for sample in samples:
                     sample_ids.append(sample.pk)
-                for library in libraries:
-                    print("Library---------------")
-                    pprint(vars(library))
+
                 depth = sum(libraries.values_list(
                     'sequencing_depth', flat=True)) + \
                     sum(samples.values_list('sequencing_depth', flat=True))
@@ -182,8 +180,9 @@ class InvoicingSerializer(ModelSerializer):
 
         num_samples = obj.samples.count()
         if num_libraries > 0:
-            print(num_libraries)
 
+
+            
             libcount = 0
             flowcells = self.get_percentage(obj)
             maxYear = max([d['flowcell_create_year'] for d in flowcells])
@@ -194,6 +193,8 @@ class InvoicingSerializer(ModelSerializer):
                         libcount = libcount + len(pool['libraries'])
 
             return f'{libcount} libraries'
+
+
         else:
             sampcount = 0
             flowcells = self.get_percentage(obj)
@@ -207,6 +208,7 @@ class InvoicingSerializer(ModelSerializer):
 
     def get_library_protocol(self, obj):
         protocols = set([x.library_protocol.pk for x in obj.records])
+
         return protocols.pop() if protocols else ''
 
     def get_fixed_costs(self, obj):

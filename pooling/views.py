@@ -36,7 +36,7 @@ LibraryPreparation = apps.get_model(
 logger = logging.getLogger('db')
 
 
-class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ViewSet):
+class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ModelViewSet):
     permission_classes = [IsAdminUser]
     library_model = Library
     sample_model = Sample
@@ -182,6 +182,17 @@ class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ViewSet):
         data = list(itertools.chain(*serializer.data))
         data = sorted(data, key=lambda x: x['barcode'][3:])
         return Response(data)
+
+    @action(methods=['post'], detail=True)
+    def edit_comment(self, request, pk=None):
+
+        instance = Pool.objects.filter(pk=pk)
+
+        post_data = self._get_post_data(request)
+        newComment = post_data['newComment']
+
+        instance.update(comment=newComment)
+        return Response({'success': True})
 
     @action(methods=['post'], detail=False,
             authentication_classes=[CsrfExemptSessionAuthentication])
@@ -467,3 +478,13 @@ class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ViewSet):
 
         wb.save(response)
         return response
+
+    def _get_post_data(self, request):
+        post_data = {}
+        if request.is_ajax():
+            post_data = request.data.get('data', {})
+            if isinstance(post_data, str):
+                post_data = json.loads(post_data)
+        else:
+            post_data = json.loads(request.data.get('data', '{}'))
+        return post_data

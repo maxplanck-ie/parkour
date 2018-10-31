@@ -50,7 +50,7 @@ class RequestSerializer(ModelSerializer):
 
     def get_completed(self, obj):
         """ Return True if request's libraries and samples are sequenced. """
-        return obj.statuses.count(5) > 0
+        return obj.statuses.count(6) > 0
 
     def get_deep_seq_request_name(self, obj):
         return obj.deep_seq_request.name.split('/')[-1] \
