@@ -45,6 +45,8 @@ Ext.define('MainHub.view.pooling.PoolingController', {
     var grid = gridView.grid;
     var customConfig = gridView.grid.initialConfig.customConfig;
     var qcMenuOptions = [];
+
+
     var menuItems = [
       {
         text: 'Select All',
@@ -64,7 +66,9 @@ Ext.define('MainHub.view.pooling.PoolingController', {
         text: 'Edit comment',
         margin: '5px 5px 0 5px',
         handler: function (){
-            var self = this;
+
+            console.log(self);
+            console.log(parseInt(groupId))
             var store = grid.getStore();
             var comment = '';
             var i = 0;
@@ -73,23 +77,28 @@ Ext.define('MainHub.view.pooling.PoolingController', {
             if (item.get(store.groupField) === parseInt(groupId)) {
 
                     comment = item.get('comment')
-                    console.log(comment)
+
             }
             });
-            var editcomment = {
-            xtype: 'container',
-            layout: 'hbox',
-            items: [{
-                xtype: 'textfield',
-                width: 100
-            },
-            {
-                xtype: 'button',
-                text: 'Click Me'
-            }]
-        };
+            Ext.MessageBox.show({
+           title: 'Edit comment',
+           width:300,
+           buttons: Ext.MessageBox.OKCANCEL,
+           buttonText:{
+                ok: "Save",
+                cancel: "Don't save"
+           },
+           multiline: true,
+           value: comment,
+           fn : function(btn,text){
+              if(btn=='ok'){
+                  self.editComment(self,store,parseInt(groupId),text)
+                  //self.syncStore(store.getId());
+              }
 
-        menuItems.push(editcomment)
+           }
+
+       });
       }
       }
     ];
@@ -207,6 +216,37 @@ Ext.define('MainHub.view.pooling.PoolingController', {
       text: 'Download Template QC Normalization and Pooling',
       iconCls: 'fa fa-file-excel-o fa-lg'
     });
+  },
+
+  editComment: function(self,store,groupId,text){
+            Ext.Ajax.request({
+                url: Ext.String.format('api/pooling/{0}/edit_comment/', groupId),
+                method: 'POST',
+                scope: self,
+                  params:{
+                   data:Ext.JSON.encode({
+                     newComment:text
+                   })
+
+                  },
+                  success: function (response) {
+                    var obj = Ext.JSON.decode(response.responseText);
+
+                    if (obj.success) {
+                      Ext.getStore('Pooling').reload();
+                      new Noty({ text: 'New comment has been saved!' }).show();
+                    }
+
+                     else {
+                      new Noty({ text: obj.message, type: 'error' }).show();
+                    }
+      },
+
+      failure: function (response) {
+        new Noty({ text: response.statusText, type: 'error' }).show();
+        console.error(response);
+        }
+   });
   },
 
   toggleEditors: function (editor, context) {

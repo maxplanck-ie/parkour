@@ -152,20 +152,8 @@ Ext.define('MainHub.view.pooling.Pooling', {
         tooltip: '% library in Pool',
         dataIndex: 'percentage_library',
         width: 55
-      },
-      {
-          text: 'Comments',
-          tooltip: 'Comments (facility)',
-          dataIndex: 'comment',
-          width: 150,
-          editor: {
-            xtype: 'textfield'
-          },
-          renderer: function (value, meta) {
-            meta.tdAttr = 'data-qtip="' + value + '"';
-            return value;
-          }
-        }
+      }
+
     ],
 
     features: [{
