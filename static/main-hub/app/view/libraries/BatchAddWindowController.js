@@ -41,9 +41,15 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
 
       '#save-button': {
         click: 'save'
+      },
+
+      '#download-sample-form':{
+        click: 'downloadSampleForm'
       }
     }
   },
+
+
 
   boxready: function (wnd) {
     if (wnd.mode === 'edit') {
@@ -78,10 +84,12 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
     if (btn.itemId === 'library-card-button') {
       wnd.recordType = 'Library';
       wnd.setTitle('Add Libraries');
+      wnd.getComponent('create-empty-records').getComponent('download-sample-form').setVisible(false);
       configuration = this.getLibraryGridConfiguration(wnd.mode);
     } else {
       wnd.recordType = 'Sample';
       wnd.setTitle('Add Samples');
+      wnd.getComponent('create-empty-records').getComponent('download-sample-form').setVisible(true);
       configuration = this.getSampleGridConfiguration(wnd.mode);
     }
 
@@ -136,6 +144,17 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
           }
         }]
     }).showAt(e.getXY());
+  },
+
+  downloadSampleForm: function (btn) {
+    console.log(btn.downloadUrl)
+    var form = Ext.create('Ext.form.Panel', { standardSubmit: true });
+
+    form.submit({
+      url: btn.downloadUrl,
+      method: 'GET',
+
+    });
   },
 
   applyToAll: function (record, dataIndex) {

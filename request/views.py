@@ -4,7 +4,7 @@ import itertools
 from unicodedata import normalize
 
 from django.apps import apps
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse,Http404
 from django.conf import settings
 from django.db.models import Prefetch
 from django.core.mail import send_mail
@@ -27,7 +27,7 @@ from common.views import (
 )
 from .models import Request, FileRequest
 from .serializers import RequestSerializer, RequestFileSerializer
-
+import os
 User = get_user_model()
 Library = apps.get_model('library', 'Library')
 Sample = apps.get_model('sample', 'Sample')
@@ -384,6 +384,21 @@ class RequestViewSet(viewsets.ModelViewSet):
             'error': error,
             'data': data,
         })
+
+
+    @action(methods=['get'],detail=False)
+    def download_RELACS_Pellets_Abs_form(self,request):
+        print(settings.FILES_PATH)
+        file_path = os.path.join(settings.FILES_PATH, 'RELACS_Pellets_Abs_form.xlsx')
+        print(file_path)
+
+        with open(file_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="application/vnd.ms-excel")
+            response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
+            return response
+
+
+
 
     @action(methods=['get'], detail=True)
     def download_deep_sequencing_request(self, request, pk=None):  # pragma: no cover
