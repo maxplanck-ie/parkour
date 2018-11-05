@@ -36,12 +36,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
     'authtools',
     'rest_framework',
     'django_admin_listfilter_dropdown',
     'django_extensions',
-
     'common',
     'library_sample_shared',
     'library',

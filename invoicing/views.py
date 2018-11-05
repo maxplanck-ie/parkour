@@ -288,20 +288,14 @@ class FixedCostsViewSet(mixins.UpdateModelMixin,
 class LibraryPreparationCostsViewSet(mixins.UpdateModelMixin,
                                      viewsets.ReadOnlyModelViewSet):
     """ Get the list of Library Preparation Costs. """
-    obsolete_protocols = LibraryProtocol.objects.filter(obsolete=settings.OBSOLETE).values_list('id', flat=True)
-    lst = list(obsolete_protocols)
-    with transaction.atomic():
-        for id in obsolete_protocols:
-            LibraryProtocol.objects.filter(id=id).update(obsolete=settings.NON_OBSOLETE)
+
     permission_classes = [IsAdminUser]
     queryset = LibraryPreparationCosts.objects.all()
     print(queryset.query)
 
     serializer_class = LibraryPreparationCostsSerializer
 
-    with transaction.atomic():
-        for id in obsolete_protocols:
-           LibraryProtocol.objects.filter(id=id).update(obsolete=settings.OBSOLETE)
+
 
 class SequencingCostsViewSet(mixins.UpdateModelMixin,
                              viewsets.ReadOnlyModelViewSet):
