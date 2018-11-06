@@ -58,7 +58,7 @@ Ext.define('MainHub.view.libraries.Libraries', {
             id : 'showAlllr',
             margin: '0 15 0 0',
             cls: 'grid-header-checkbox',
-            hidden: !USER.is_staff,
+            hidden: false,
             listeners:{
                 change: function(checkbox, newValue, oldValue, eOpts) {
                 if (newValue) {
