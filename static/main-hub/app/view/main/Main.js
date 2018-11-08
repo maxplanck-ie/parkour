@@ -82,6 +82,7 @@ Ext.define('MainHub.view.main.Main', {
                     ui: 'header',
                     iconCls: 'x-fa fa-sign-out',
                     href: 'logout',
+                    hrefTarget:'_self',
                     tooltip: 'Logout'
                 }
             ]
