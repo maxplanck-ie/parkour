@@ -1,6 +1,6 @@
 from django.contrib import admin
 from flowcell.models import Sequencer, Flowcell
-
+from django.conf import settings
 
 class LaneInline(admin.TabularInline):
     model = Flowcell.lanes.through
@@ -41,7 +41,23 @@ class LaneInline(admin.TabularInline):
 
 @admin.register(Sequencer)
 class SequencerAdmin(admin.ModelAdmin):
-    list_display = ('name', 'lanes', 'lane_capacity',)
+    list_display = ('name', 'lanes', 'lane_capacity','obsolete_name')
+    actions = ('mark_as_obsolete', 'mark_as_non_obsolete',)
+
+    def mark_as_obsolete(self, request, queryset):
+        queryset.update(obsolete=settings.OBSOLETE)
+
+    mark_as_obsolete.short_description = "Mark sequencer as obsolete"
+
+    def mark_as_non_obsolete(self, request, queryset):
+        queryset.update(obsolete=settings.NON_OBSOLETE)
+
+    mark_as_non_obsolete.short_description = "Mark sequencer as non-obsolete"
+
+    def obsolete_name(self, obj):
+        return "Non-obsolete" if obj.obsolete == settings.NON_OBSOLETE else "Obsolete"
+
+    obsolete_name.short_description = "STATUS"
 
 
 @admin.register(Flowcell)

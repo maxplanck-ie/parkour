@@ -2,6 +2,7 @@ from django.contrib import admin
 from django_admin_listfilter_dropdown.filters import RelatedDropdownFilter
 
 from .models import Pool, PoolSize
+from django.conf import settings
 
 
 class BaseInline(admin.TabularInline):
@@ -53,4 +54,20 @@ class PoolAdmin(admin.ModelAdmin):
 
 @admin.register(PoolSize)
 class PoolSizeAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('name', 'obsolete_name')
+    actions = ('mark_as_obsolete', 'mark_as_non_obsolete',)
+
+    def mark_as_obsolete(self, request, queryset):
+        queryset.update(obsolete=settings.OBSOLETE)
+
+    mark_as_obsolete.short_description = "Mark pool size as obsolete"
+
+    def mark_as_non_obsolete(self, request, queryset):
+        queryset.update(obsolete=settings.NON_OBSOLETE)
+
+    mark_as_non_obsolete.short_description = "Mark pool size as non-obsolete"
+
+    def obsolete_name(self, obj):
+        return "Non-obsolete" if obj.obsolete == settings.NON_OBSOLETE else "Obsolete"
+
+    obsolete_name.short_description = "STATUS"

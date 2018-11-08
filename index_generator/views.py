@@ -20,6 +20,7 @@ from .serializers import (
     IndexGeneratorLibrarySerializer,
     IndexGeneratorSampleSerializer,
 )
+from django.conf import settings
 
 Request = apps.get_model('request', 'Request')
 IndexI7 = apps.get_model('library_sample_shared', 'IndexI7')
@@ -32,7 +33,7 @@ logger = logging.getLogger('db')
 
 class PoolSizeViewSet(viewsets.ReadOnlyModelViewSet):
     """ Get the list of pool sizes. """
-    queryset = PoolSize.objects.all()
+    queryset = PoolSize.objects.all().filter(obsolete=settings.NON_OBSOLETE)
     serializer_class = PoolSizeSerializer
 
 

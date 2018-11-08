@@ -29,6 +29,7 @@ from .serializers import (
     PoolListSerializer,
     PoolInfoSerializer,
 )
+from django.conf import settings
 
 ReadLength = apps.get_model('library_sample_shared', 'ReadLength')
 IndexI7 = apps.get_model('library_sample_shared', 'IndexI7')
@@ -75,7 +76,7 @@ logger = logging.getLogger('db')
 
 class SequencerViewSet(viewsets.ReadOnlyModelViewSet):
     """ Get the list of sequencers. """
-    queryset = Sequencer.objects.all()
+    queryset = Sequencer.objects.all().filter(obsolete=settings.NON_OBSOLETE)
     serializer_class = SequencerSerializer
 
 

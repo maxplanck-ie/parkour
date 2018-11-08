@@ -7,15 +7,19 @@ from common.models import DateTimeMixin
 from library.models import Library
 from sample.models import Sample
 
-
 class PoolSize(models.Model):
     multiplier = models.PositiveSmallIntegerField('Multiplier', default=1)
     size = models.PositiveSmallIntegerField('Size')
+    obsolete = models.PositiveIntegerField("Obsolete", default=1)
 
     class Meta:
         ordering = ['multiplier', 'size']
 
     def __str__(self):
+        return f'{self.multiplier}x{self.size}'
+
+    @property
+    def name(self):
         return f'{self.multiplier}x{self.size}'
 
 
