@@ -281,7 +281,7 @@ class FixedCostsViewSet(mixins.UpdateModelMixin,
                         viewsets.ReadOnlyModelViewSet):
     """ Get the list of Fixed Costs. """
     permission_classes = [IsAdminUser]
-    queryset = FixedCosts.objects.all()
+    queryset = FixedCosts.objects.filter(sequencer__obsolete = settings.NON_OBSOLETE)
     serializer_class = FixedCostsSerializer
 
 
@@ -290,7 +290,7 @@ class LibraryPreparationCostsViewSet(mixins.UpdateModelMixin,
     """ Get the list of Library Preparation Costs. """
 
     permission_classes = [IsAdminUser]
-    queryset = LibraryPreparationCosts.objects.all()
+    queryset = LibraryPreparationCosts.objects.filter(library_protocol__obsolete=settings.NON_OBSOLETE)
     print(queryset.query)
 
     serializer_class = LibraryPreparationCostsSerializer
@@ -301,5 +301,5 @@ class SequencingCostsViewSet(mixins.UpdateModelMixin,
                              viewsets.ReadOnlyModelViewSet):
     """ Get the list of Sequencing Costs. """
     permission_classes = [IsAdminUser]
-    queryset = SequencingCosts.objects.all()
+    queryset = SequencingCosts.objects.filter(sequencer__obsolete=settings.NON_OBSOLETE)
     serializer_class = SequencingCostsSerializer
