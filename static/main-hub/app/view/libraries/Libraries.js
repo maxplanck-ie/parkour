@@ -55,6 +55,7 @@ Ext.define('MainHub.view.libraries.Libraries', {
             name : 'showAll',
             boxLabel: 'Show all',
             boxLabelAlign: 'before',
+            checked:true,
             id : 'showAlllr',
             margin: '0 15 0 0',
             cls: 'grid-header-checkbox',

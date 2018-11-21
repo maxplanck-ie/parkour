@@ -24,7 +24,7 @@ Ext.define('MainHub.store.requests.Requests', {
       totalProperty: 'count'
     },
     extraParams:{
-        showAll: 'False'
+        showAll: 'True'
     }
   },
 

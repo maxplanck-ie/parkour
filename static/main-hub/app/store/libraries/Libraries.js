@@ -14,7 +14,7 @@ Ext.define('MainHub.store.libraries.Libraries', {
         noCache: false,     //to remove param "_dc",
         reader: 'json',
         extraParams:{
-        showAll: 'False'
+        showAll: 'True'
     }
     },
 
