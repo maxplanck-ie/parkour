@@ -64,8 +64,9 @@ class IndexPairInline(admin.TabularInline):
 @admin.register(IndexType)
 class IndexTypeAdmin(admin.ModelAdmin):
     form = IndexTypeForm
-    list_display = ('name', 'index_length', 'is_dual', 'format',)
+    list_display = ('name', 'index_length', 'is_dual', 'format','obsolete_name')
     filter_horizontal = ('indices_i7', 'indices_i5',)
+    actions = ('mark_as_obsolete', 'mark_as_non_obsolete',)
 
     fieldsets = (
         (None, {
@@ -73,6 +74,19 @@ class IndexTypeAdmin(admin.ModelAdmin):
                        'indices_i7', 'indices_i5',),
         }),
     )
+
+    def mark_as_obsolete(self,request,queryset):
+        queryset.update(obsolete=settings.OBSOLETE)
+    mark_as_obsolete.short_description = "Mark index type as obsolete"
+
+    def mark_as_non_obsolete(self,request,queryset):
+        queryset.update(obsolete=settings.NON_OBSOLETE)
+    mark_as_non_obsolete.short_description = "Mark index type as non-obsolete"
+
+    def obsolete_name(self,obj):
+
+        return "Non-obsolete" if obj.obsolete==settings.NON_OBSOLETE else "Obsolete"
+    obsolete_name.short_description = "STATUS"
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
         # Display inline when the object has been saved and

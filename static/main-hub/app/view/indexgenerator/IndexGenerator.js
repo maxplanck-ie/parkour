@@ -122,12 +122,13 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
               queryMode: 'local',
               displayField: 'name',
               valueField: 'id',
-              store: 'IndexTypes',
+              //store: 'IndexTypes',
+              store: 'GeneratorIndexTypes',
               matchFieldWidth: false,
               forceSelection: true
             },
             renderer: function (value, meta) {
-              var record = Ext.getStore('IndexTypes').findRecord(
+              var record = Ext.getStore('GeneratorIndexTypes').findRecord(
                 'id', value, 0, false, true, true
               );
               var val = '';

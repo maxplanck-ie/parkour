@@ -85,7 +85,7 @@ class ConcentrationMethodViewSet(viewsets.ReadOnlyModelViewSet):
 
 class IndexTypeViewSet(MoveOtherMixin, viewsets.ReadOnlyModelViewSet):
     """ Get the list of index types. """
-    queryset = IndexType.objects.order_by('name')
+    queryset = IndexType.objects.filter(obsolete=settings.NON_OBSOLETE).order_by('name')
     serializer_class = IndexTypeSerializer
 
 

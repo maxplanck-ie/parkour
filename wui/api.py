@@ -15,7 +15,7 @@ from library_sample_shared.views import (
 from library.views import LibrarySampleTree, LibraryViewSet
 from sample.views import NucleicAcidTypeViewSet, SampleViewSet
 from incoming_libraries.views import IncomingLibrariesViewSet
-from index_generator.views import PoolSizeViewSet, IndexGeneratorViewSet
+from index_generator.views import PoolSizeViewSet, IndexGeneratorViewSet,GeneratorIndexTypeViewSet
 from library_preparation.views import LibraryPreparationViewSet
 from pooling.views import PoolingViewSet
 from flowcell.views import (
@@ -43,6 +43,7 @@ router.register(r'organisms', OrganismViewSet, base_name='organism')
 router.register(r'read_lengths', ReadLengthViewSet, base_name='read-length')
 router.register(r'concentration_methods', ConcentrationMethodViewSet, base_name='concentration-method')
 router.register(r'index_types', IndexTypeViewSet, base_name='index-type')
+router.register(r'generator_index_types', GeneratorIndexTypeViewSet, base_name='generator-index-type')
 router.register(r'indices', IndexViewSet, base_name='index')
 router.register(r'library_protocols', LibraryProtocolViewSet, base_name='library-protocol')
 router.register(r'library_protocols_invoicing', LibraryProtocolInvoicingViewSet, base_name='library-protocol-invoicing')

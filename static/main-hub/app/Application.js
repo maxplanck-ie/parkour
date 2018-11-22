@@ -43,6 +43,7 @@ Ext.define('MainHub.Application', {
     'incominglibraries.IncomingLibraries',
     'indexgenerator.PoolSizes',
     'indexgenerator.StartCoordinates',
+    'indexgenerator.GeneratorIndexTypes',
     'requests.LibrariesInRequest',
     'indexgenerator.IndexGenerator',
     'librarypreparation.LibraryPreparation',

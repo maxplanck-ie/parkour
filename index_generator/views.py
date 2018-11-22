@@ -20,6 +20,7 @@ from .serializers import (
     IndexGeneratorLibrarySerializer,
     IndexGeneratorSampleSerializer,
 )
+from library_sample_shared.serializers import IndexTypeSerializer
 from django.conf import settings
 
 Request = apps.get_model('request', 'Request')
@@ -27,8 +28,44 @@ IndexI7 = apps.get_model('library_sample_shared', 'IndexI7')
 IndexI5 = apps.get_model('library_sample_shared', 'IndexI5')
 Library = apps.get_model('library', 'Library')
 Sample = apps.get_model('sample', 'Sample')
+IndexType = apps.get_model('library_sample_shared','IndexType')
 
 logger = logging.getLogger('db')
+
+
+class MoveOtherMixin:
+    """ Move the `Other` option to the end of the returning list. """
+
+    def list(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(self._get_data(serializer))
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(self._get_data(serializer))
+
+    def _get_data(self, serializer):
+        data = serializer.data
+
+        # Move the 'Other' option to the end of the list
+        other_options = sorted([
+            x for x in data if 'Other' in x['name']
+        ], key=lambda x: x['name'])
+
+        for other in other_options:
+            index = data.index(other)
+            data.append(data.pop(index))
+
+        return data
+
+class GeneratorIndexTypeViewSet(MoveOtherMixin, viewsets.ReadOnlyModelViewSet):
+    """ Get the list of index types. """
+    queryset = IndexType.objects.order_by('name')
+    serializer_class = IndexTypeSerializer
+
 
 
 class PoolSizeViewSet(viewsets.ReadOnlyModelViewSet):

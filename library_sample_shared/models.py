@@ -125,6 +125,8 @@ class IndexType(models.Model):
         blank=True,
     )
 
+    obsolete = models.PositiveIntegerField("Obsolete", default=1)
+
     class Meta:
         verbose_name = 'Index Type'
         verbose_name_plural = 'Index Types'
