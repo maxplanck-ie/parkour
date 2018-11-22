@@ -258,6 +258,7 @@ class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ModelViewSet):
             ws.write(row_num, i, column, font_style_bold)
             ws.col(i).width = 7000  # Set column width
 
+        lib_index = 0
         for index,record in enumerate(records):
             row_num += 1
             row_idx = str(row_num + 1)
@@ -266,7 +267,9 @@ class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ModelViewSet):
             if isinstance(record, Library):
                 concentration = record.concentration_facility
                 #mean_fragment_size = record.mean_fragment_size
-                mean_fragment_size = bp[index]
+                #mean_fragment_size = bp[index]
+                mean_fragment_size = bp[lib_index]
+                lib_index += 1
             else:
                 concentration = record.librarypreparation.concentration_library
                 mean_fragment_size = \
@@ -327,7 +330,7 @@ class PoolingViewSet(LibrarySampleMultiEditMixin, viewsets.ModelViewSet):
             # Add rows to spreadsheet
             for i in range(len(row)):
                 ws.write(row_num, i, row[i], font_style)
-
+        lib_index = 0
         # Write Sum µl EB
         col_ul_eb = col_letters[11]
         formula = 'SUM({}{}:{}{})'.format(
