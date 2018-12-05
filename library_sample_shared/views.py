@@ -77,6 +77,11 @@ class ReadLengthViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ReadLength.objects.filter(obsolete=settings.NON_OBSOLETE)
     serializer_class = ReadLengthSerializer
 
+class ReadLengthInvoicingViewSet(viewsets.ReadOnlyModelViewSet):
+
+    queryset = ReadLength.objects.all()
+    serializer_class = ReadLengthSerializer
+
 
 class ConcentrationMethodViewSet(viewsets.ReadOnlyModelViewSet):
     """ Get the list of concentration methods. """

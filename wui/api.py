@@ -10,7 +10,8 @@ from library_sample_shared.views import (
     LibraryTypeViewSet,
     ReadLengthViewSet,
     ConcentrationMethodViewSet,
-    LibraryProtocolInvoicingViewSet
+    LibraryProtocolInvoicingViewSet,
+    ReadLengthInvoicingViewSet
 )
 from library.views import LibrarySampleTree, LibraryViewSet
 from sample.views import NucleicAcidTypeViewSet, SampleViewSet
@@ -47,6 +48,7 @@ router.register(r'generator_index_types', GeneratorIndexTypeViewSet, base_name='
 router.register(r'indices', IndexViewSet, base_name='index')
 router.register(r'library_protocols', LibraryProtocolViewSet, base_name='library-protocol')
 router.register(r'library_protocols_invoicing', LibraryProtocolInvoicingViewSet, base_name='library-protocol-invoicing')
+router.register(r'read_lengths_invoicing',ReadLengthInvoicingViewSet, base_name='read-lengths-invoicing')
 router.register(r'library_types', LibraryTypeViewSet, base_name='library-type')
 router.register(r'nucleic_acid_types', NucleicAcidTypeViewSet, base_name='nucleic-acid-type')
 router.register(r'pool_sizes', PoolSizeViewSet, base_name='pool-size')

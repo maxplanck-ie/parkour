@@ -180,7 +180,7 @@ Ext.define('MainHub.view.invoicing.InvoicingController', {
   },
 
   readLengthRenderer: function (value, meta) {
-    var store = Ext.getStore('readLengthsStore');
+    var store = Ext.getStore('readLengthsInvoicingStore');
     var items = value.map(function (id) {
       var record = store.findRecord('id', id, 0, false, true, true);
       return record.get('name');

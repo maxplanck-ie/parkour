@@ -59,6 +59,7 @@ Ext.define('MainHub.Application', {
     'invoicing.LibraryPreparationCosts',
     'invoicing.SequencingCosts',
     'invoicing.LibraryProtocolsInvoicing',
+    'invoicing.ReadLengthsInvoicing',
     'usage.Records',
     'usage.Organizations',
     'usage.PrincipalInvestigators',
