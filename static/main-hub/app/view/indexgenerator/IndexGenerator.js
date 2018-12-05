@@ -97,14 +97,33 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
               matchFieldWidth: false,
               forceSelection: true
             },
+
+            //tpl: Ext.create('Ext.XTemplate',
+             //                  '<tpl for=".">',
+              //                     '  <tpl if="obsolete==2">',
+               //                    '    <div class="x-boundlist-item x-item-disabled"><em>{name}</em></div>',
+                //                   '  <tpl else>',
+                 //                  '    <div class="x-boundlist-item x-item-disabled"><em>{name}</em></div>',
+                  //                 '  </tpl>',
+                   //            '</tpl>'),
             renderer: function (value) {
-              var store = Ext.getStore('readLengthsStore');
+             var store = Ext.getStore('readLengthsStore');
               var record = store.findRecord(
                     'id', value, 0, false, true, true
                 );
+
               return (record) ? record.get('name') : '';
-            }
+            },
+            //listeners:{
+              //beforeselect: function(combo, record, index) {
+                  //if(record.get('obsolete') == 2 ){
+                  //   return false;
+                //  }
+              //  }
+            //}
+
           },
+
           {
             text: 'Protocol',
             tooltip: 'Library Preparation Protocol',

@@ -25,7 +25,7 @@ class OrganismSerializer(ModelSerializer):
 class ReadLengthSerializer(ModelSerializer):
     class Meta:
         model = ReadLength
-        fields = ('id', 'name')
+        fields = ('id', 'name','obsolete')
 
 
 class ConcentrationMethodSerializer(ModelSerializer):
@@ -41,7 +41,7 @@ class IndexTypeSerializer(ModelSerializer):
     class Meta:
         model = IndexType
         fields = ('id', 'name', 'index_reads', 'is_dual', 'format',
-                  'index_length',)
+                  'index_length','obsolete')
 
     def get_index_reads(self, obj):
         return 2 if obj.is_dual else 1

@@ -25,3 +25,22 @@
     color: #f44336;
     font-weight: bold;
 }
+
+.x-item-disabled {
+  &.x-boundlist-item {
+    color: #8c8c8c;
+    cursor: default;
+  }
+  &.x-boundlist-item-over {
+    background: inherit;
+    border-color: white;
+  }
+}
+
+* grayed out combobox item */
+
+.obsolete2 {
+  color: lightgray;
+  background-color: whitesmoke;
+  font-style: italic;
+}

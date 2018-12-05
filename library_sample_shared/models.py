@@ -41,6 +41,7 @@ class ConcentrationMethod(models.Model):
 
 class ReadLength(models.Model):
     name = models.CharField('Name', max_length=50)
+    obsolete = models.PositiveIntegerField("Obsolete", default=1)
 
     class Meta:
         verbose_name = 'Read Length'

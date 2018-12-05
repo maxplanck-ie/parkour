@@ -3,10 +3,10 @@ Ext.define('MainHub.store.libraries.ReadLengths', {
     storeId: 'readLengthsStore',
 
     requires: [
-        'MainHub.model.libraries.LibraryField'
+        'MainHub.model.libraries.ReadLength'
     ],
 
-    model: 'MainHub.model.libraries.LibraryField',
+    model: 'MainHub.model.libraries.ReadLength',
 
     proxy: {
         type: 'ajax',

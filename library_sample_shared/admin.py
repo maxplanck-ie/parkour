@@ -32,7 +32,21 @@ class ConcentrationMethodAdmin(admin.ModelAdmin):
 
 @admin.register(ReadLength)
 class ReadLengthAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('name','obsolete_name')
+    actions = ('mark_as_obsolete','mark_as_non_obsolete')
+
+    def mark_as_obsolete(self,request,queryset):
+        queryset.update(obsolete=settings.OBSOLETE)
+    mark_as_obsolete.short_description = "Mark read length as obsolete"
+
+    def mark_as_non_obsolete(self,request,queryset):
+        queryset.update(obsolete=settings.NON_OBSOLETE)
+    mark_as_non_obsolete.short_description = "Mark read length as non-obsolete"
+
+    def obsolete_name(self,obj):
+
+        return "Non-obsolete" if obj.obsolete==settings.NON_OBSOLETE else "Obsolete"
+    obsolete_name.short_description = "STATUS"
 
 
 class IndexI7Inline(admin.TabularInline):

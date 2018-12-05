@@ -25,6 +25,10 @@ Ext.define('MainHub.model.libraries.IndexType', {
     {
       name: 'format',
       type: 'string'
+    },
+    {
+      name: 'obsolete',
+      type: 'int'
     }
   ]
 });

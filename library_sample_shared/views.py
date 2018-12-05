@@ -73,7 +73,8 @@ class OrganismViewSet(MoveOtherMixin, viewsets.ReadOnlyModelViewSet):
 
 class ReadLengthViewSet(viewsets.ReadOnlyModelViewSet):
     """ Get the list of read lengths. """
-    queryset = ReadLength.objects.all()
+    #queryset = ReadLength.objects.all()
+    queryset = ReadLength.objects.filter(obsolete=settings.NON_OBSOLETE)
     serializer_class = ReadLengthSerializer
 
 
