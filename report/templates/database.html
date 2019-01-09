@@ -6,6 +6,8 @@
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'js/DataTables/datatables.min.css' %}">
+<link rel="stylesheet" href="{% static 'js/DataTables/buttons.dataTables.min.css' %}">
+
 
 <style>
     #database {
@@ -27,6 +29,9 @@
 
 {% block js %}
 <script type="text/javascript" src="{% static 'js/DataTables/datatables.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/DataTables/dataTables.buttons.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/DataTables/buttons.colVis.min.js' %}"></script>
+
 
 <script type="text/javascript">
 $(document).ready(function() {
@@ -49,7 +54,9 @@ $(document).ready(function() {
             columns: columns,
             data: data.data,
             scrollX: true,
-            pageLength: 25
+            pageLength: 25,
+            dom: 'lBfrtip',
+            buttons: [ 'colvis' ]
             // fixedColumns: true
         });
         // new $.fn.dataTable.FixedHeader(table);
