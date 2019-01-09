@@ -44,12 +44,21 @@ Flowcell = apps.get_model('flowcell', 'Flowcell')
 
 class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAdminUser]
+
     serializer_class = InvoicingSerializer
+
+    def get_serializer_context(self):
+        today = datetime.date.today()
+        year = self.request.query_params.get('year', today.year)
+        month = self.request.query_params.get('month', today.month)
+        ctx = {'curr_month': month, 'curr_year': year, 'today': today}
+        return ctx
 
     def get_queryset(self):
         today = datetime.date.today()
         year = self.request.query_params.get('year', today.year)
         month = self.request.query_params.get('month', today.month)
+
 
         flowcell_qs = Flowcell.objects.select_related(
             'sequencer',
@@ -90,6 +99,11 @@ class InvoicingViewSet(viewsets.ReadOnlyModelViewSet):
 
     def list(self,request):
         queryset = self.filter_queryset(self.get_queryset())
+
+        today = datetime.date.today()
+        year = self.request.query_params.get('year', today.year)
+        month = self.request.query_params.get('month', today.month)
+        ctx = {'curr_month': month, 'curr_year': year, 'today': today}
         serializer = self.get_serializer(queryset, many=True)
 
         return Response(serializer.data)

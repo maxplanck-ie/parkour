@@ -31,7 +31,7 @@ Ext.define('MainHub.model.invoicing.Request', {
       type: 'auto'
     },
     {
-      name: 'num_libraries_samples',
+      name: 'num_libraries_samples_show',
       type: 'string'
     },
     {

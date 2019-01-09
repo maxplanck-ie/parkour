@@ -3,7 +3,7 @@ import itertools
 from decimal import Decimal
 from functools import reduce
 from collections import Counter
-
+import datetime
 from django.apps import apps
 from django.db.models import Prefetch
 
@@ -22,6 +22,9 @@ Sequencer = apps.get_model('flowcell', 'Sequencer')
 
 logger = logging.getLogger('db')
 
+def trunc_datetime(someDate):
+    return someDate.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
 
 class InvoicingSerializer(ModelSerializer):
     request = SerializerMethodField()
@@ -32,6 +35,7 @@ class InvoicingSerializer(ModelSerializer):
     percentage = SerializerMethodField()
     read_length = SerializerMethodField()
     num_libraries_samples = SerializerMethodField()
+    num_libraries_samples_show = SerializerMethodField()
     library_protocol = SerializerMethodField()
     fixed_costs = SerializerMethodField()
     sequencing_costs = SerializerMethodField()
@@ -42,7 +46,7 @@ class InvoicingSerializer(ModelSerializer):
     class Meta:
         model = Request
         fields = ('request', 'cost_unit', 'sequencer', 'flowcell', 'pool',
-                  'percentage', 'read_length', 'num_libraries_samples',
+                  'percentage', 'read_length', 'num_libraries_samples','num_libraries_samples_show',
                   'library_protocol', 'fixed_costs', 'sequencing_costs',
                   'preparation_costs', 'variable_costs', 'total_costs',)
 
@@ -62,6 +66,9 @@ class InvoicingSerializer(ModelSerializer):
             'read_length',
             'sequencing_depth',
         )
+
+        curr_month = int(self.context['curr_month'])
+        curr_year = int(self.context['curr_year'])
 
         pool_ids = instance.values_list('flowcell__lanes__pool')
         pools = Pool.objects.filter(pk__in=pool_ids).prefetch_related(
@@ -92,6 +99,8 @@ class InvoicingSerializer(ModelSerializer):
             'fixed_costs': fixed_costs,
             'preparation_costs': preparation_costs,
             'sequencing_costs': sequencing_costs,
+            'curr_month': curr_month,
+            'curr_year': curr_year,
         })
 
     def get_request(self, obj):
@@ -121,13 +130,14 @@ class InvoicingSerializer(ModelSerializer):
 
 
         for flowcell in obj.flowcell.all():
-            #pprint(vars(flowcell))
+
             flowcell_dict = {
                 'flowcell_id': flowcell.flowcell_id,
                 'sequencer': flowcell.sequencer.pk,
                 'pools': [],
                 'flowcell_create_month':int(flowcell.create_time.strftime('%m')),
                 'flowcell_create_year': int(flowcell.create_time.strftime('%Y')),
+                'flowcell_create_time': flowcell.create_time
             }
 
             count = Counter(flowcell.lanes.values_list('pool', flat=True))
@@ -172,38 +182,67 @@ class InvoicingSerializer(ModelSerializer):
     def get_read_length(self, obj):
         return set([x.read_length.pk for x in obj.records])
 
+    def get_num_libraries_samples_show(self,obj):
+
+        num_libraries = obj.libraries.count()
+        num_samples = obj.samples.count()
+
+        if num_libraries > 0:
+            return f'{num_libraries} libraries'
+        else:
+            return f'{num_samples} samples'
+
     def get_num_libraries_samples(self, obj):
 
+        flowcells = self.get_percentage(obj)
+
+        mindt = min([d['flowcell_create_time'] for d in flowcells])
+
+        #min_date = trunc_datetime(datetime.datetime(minYear, minMonth, 1))
+        min_date = trunc_datetime(datetime.datetime(mindt.year,mindt.month,1))
+
+
+        curr_date = trunc_datetime(datetime.datetime(self.context['curr_year'], self.context['curr_month'], 1))
 
 
         num_libraries = obj.libraries.count()
-
         num_samples = obj.samples.count()
+
         if num_libraries > 0:
 
 
-            
             libcount = 0
-            flowcells = self.get_percentage(obj)
-            maxYear = max([d['flowcell_create_year'] for d in flowcells])
-            maxMonth = max([d['flowcell_create_month'] for d in flowcells])
-            for flowcell in flowcells:
-                if flowcell['flowcell_create_month'] == maxMonth and flowcell['flowcell_create_year'] == maxYear:
-                    for pool in flowcell['pools']:
-                        libcount = libcount + len(pool['libraries'])
+
+            #for flowcell in flowcells:
+            #    flowcell_dt = trunc_datetime(datetime.datetime(flowcell['flowcell_create_year'],flowcell['flowcell_create_month'],1))
+            #    #if flowcell['flowcell_create_month'] == minMonth and flowcell['flowcell_create_year'] == minYear:
+            #    if flowcell_dt == minDt:
+            #        for pool in flowcell['pools']:
+            #            libcount = libcount + len(pool['libraries'])
+
+            '''de-coupling preparation costs from flowcell'''
+            if curr_date == min_date:
+                libcount = num_libraries
+
 
             return f'{libcount} libraries'
 
 
         else:
             sampcount = 0
-            flowcells = self.get_percentage(obj)
-            maxYear = max([d['flowcell_create_year'] for d in flowcells])
-            maxMonth = max([d['flowcell_create_month'] for d in flowcells])
-            for flowcell in flowcells:
-                if flowcell['flowcell_create_month'] == maxMonth and flowcell['flowcell_create_year'] == maxYear:
-                    for pool in flowcell['pools']:
-                        sampcount = sampcount + len(pool['samples'])
+
+            #for flowcell in flowcells:
+
+             #   if flowcell['flowcell_create_month'] == minMonth and flowcell['flowcell_create_year'] == minYear:
+
+              #      for pool in flowcell['pools']:
+               #         sampcount = sampcount + len(pool['samples'])
+
+
+            '''de-coupling preparation costs from flowcell'''
+            if curr_date == min_date:
+                sampcount = num_samples
+
             return f'{sampcount} samples'
 
     def get_library_protocol(self, obj):
@@ -241,14 +280,17 @@ class InvoicingSerializer(ModelSerializer):
         Fix so samples of a request that have been sequenced in different months are not billed twice
         Only bill if it has been sequenced in the latest month that is in the flowcell list
         '''
-        maxYear = max([d['flowcell_create_year'] for d in percentage])
-        maxMonth = max([d['flowcell_create_month'] for d in percentage])
+
+        curr_date = trunc_datetime(datetime.datetime(self.context['curr_year'], self.context['curr_month'], 1))
 
 
         # Calculate Fixed Costs
         costs = 0
         for flowcell in percentage:
-            if flowcell['flowcell_create_month'] == maxMonth and flowcell['flowcell_create_year'] == maxYear:
+            dt = flowcell['flowcell_create_time']
+            dt = trunc_datetime(datetime.datetime(dt.year,dt.month,1))
+            #if flowcell['flowcell_create_month'] == int(self.context['curr_month']) and flowcell['flowcell_create_year'] == int(self.context['curr_year']):
+            if dt == curr_date:
 
                 for pool in flowcell['pools']:
                     costs += fixed_costs.get(flowcell['sequencer'], 0) * \
@@ -259,7 +301,10 @@ class InvoicingSerializer(ModelSerializer):
         # Calculate Sequencing Costs
         costs = 0
         for flowcell in percentage:
-            if flowcell['flowcell_create_month'] == maxMonth and flowcell['flowcell_create_year'] == maxYear:
+            dt = flowcell['flowcell_create_time']
+            dt = trunc_datetime(datetime.datetime(dt.year, dt.month, 1))
+            #if flowcell['flowcell_create_month'] == self.context['curr_month'] and flowcell['flowcell_create_year'] == self.context['curr_year']:
+            if dt == curr_date:
                 for pool in flowcell['pools']:
                     key = f"{flowcell['sequencer']}_{pool['read_length']}"
                     costs += sequencing_costs.get(key, 0) * \

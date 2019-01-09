@@ -81,7 +81,7 @@ Ext.define('MainHub.view.invoicing.Invoicing', {
           },
           {
             text: '# of Libraries/Samples',
-            dataIndex: 'num_libraries_samples',
+            dataIndex: 'num_libraries_samples_show',
             minWidth: 150
           },
           {
