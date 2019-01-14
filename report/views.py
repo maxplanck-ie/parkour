@@ -457,6 +457,7 @@ def database_data(request):
         'Pool',
         'Pool Size',
         'Flowcell ID',
+        'Flowcell create time',
         'Sequencer',
     ]
 

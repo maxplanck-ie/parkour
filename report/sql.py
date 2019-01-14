@@ -79,6 +79,7 @@ FROM (
         pooling.concentration_c1 AS "Concentration C1",
         p.name AS "Pool",
         concat(psize.multiplier, 'x', psize.size) AS "Pool Size",
+        
 
         /* Sample-specific fields */
         {select}
@@ -126,6 +127,8 @@ FROM (
 
     LEFT JOIN pooling_pooling as pooling
         ON record.id = pooling.{table_name}_id
+    
+    
 
     /* Sample-specific joins */
     {joins}
@@ -133,8 +136,7 @@ FROM (
 
 
 LEFT JOIN (
-    SELECT record.id AS t2_id,
-        array_to_string(array_agg(DISTINCT f.flowcell_id), ', ') AS "Flowcell ID",
+    SELECT record.id AS t2_id, f.create_time::date AS "Flowcell create time",
         array_to_string(array_agg(DISTINCT s.name), ', ') AS "Sequencer"
     FROM {table_name}_{table_name} AS record
     LEFT JOIN index_generator_pool_{table_name_plural} as ps
@@ -149,6 +151,6 @@ LEFT JOIN (
         ON fl.flowcell_id = f.id
     LEFT JOIN flowcell_sequencer AS s
         ON f.sequencer_id = s.id
-    GROUP BY record.id
+    GROUP BY record.id, f.create_time::date
 ) t2 ON t1_id = t2_id
 '''
