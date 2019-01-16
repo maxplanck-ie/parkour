@@ -572,6 +572,7 @@ class RequestViewSet(viewsets.ModelViewSet):
                 row_cells = table.add_row().cells
                 for i, value in enumerate(row):
                     row_cells[i].text = str(value)
+                    document.add_page_break()
 
             # Change font size for all cells
             for row in table.rows:

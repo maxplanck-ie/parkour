@@ -75,7 +75,8 @@ a.dt-button {
   color: black;
   white-space: nowrap;
   overflow: hidden;
-  background-color: #e9e9e9;
+  /*background-color: #e9e9e9;*/
+  background-color: #8B0000;
   /* Fallback */
   background-image: -webkit-linear-gradient(top, white 0%, #e9e9e9 100%);
   /* Chrome 10+, Saf5.1+, iOS 5+ */
@@ -100,7 +101,8 @@ a.dt-button.disabled {
   color: #999;
   border: 1px solid #d0d0d0;
   cursor: default;
-  background-color: #f9f9f9;
+  /*background-color: #f9f9f9;*/
+  background-color: #8B0000;
   /* Fallback */
   background-image: -webkit-linear-gradient(top, #ffffff 0%, #f9f9f9 100%);
   /* Chrome 10+, Saf5.1+, iOS 5+ */
@@ -243,18 +245,14 @@ div.dt-button-collection div.dt-button.active:not(.disabled),
 div.dt-button-collection a.dt-button:active:not(.disabled),
 div.dt-button-collection a.dt-button.active:not(.disabled) {
   background-color: #dadada;
-  /* Fallback */
-  background-image: -webkit-linear-gradient(top, #f0f0f0 0%, #dadada 100%);
-  /* Chrome 10+, Saf5.1+, iOS 5+ */
-  background-image: -moz-linear-gradient(top, #f0f0f0 0%, #dadada 100%);
-  /* FF3.6 */
-  background-image: -ms-linear-gradient(top, #f0f0f0 0%, #dadada 100%);
-  /* IE10 */
-  background-image: -o-linear-gradient(top, #f0f0f0 0%, #dadada 100%);
-  /* Opera 11.10+ */
-  background-image: linear-gradient(to bottom, #f0f0f0 0%, #dadada 100%);
-  filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,StartColorStr='#f0f0f0', EndColorStr='#dadada');
-  box-shadow: inset 1px 1px 3px #666;
+            background-image: -webkit-linear-gradient(top, #76b900 0%, #dadada 100%);
+            background-image: -moz-linear-gradient(top, #76b900 0%, #dadada 100%);
+            background-image: -ms-linear-gradient(top, #76b900 0%, #dadada 100%);
+            background-image: -o-linear-gradient(top, #76b900 0%, #dadada 100%);
+            background-image: linear-gradient(to bottom, #76b900 0%, #dadada 100%);
+            filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,StartColorStr='#f0f0f0', EndColorStr='#dadada');
+            box-shadow: inset 1px 1px 3px #666;
+
 }
 div.dt-button-collection.fixed {
   position: fixed;
