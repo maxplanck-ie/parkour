@@ -20,6 +20,7 @@ from rest_framework.permissions import IsAdminUser
 from fpdf import FPDF, HTMLMixin
 from docx import Document
 from docx.shared import Pt,Cm
+from docx.enum.text import WD_BREAK
 
 from common.views import (
     CsrfExemptSessionAuthentication,
@@ -578,11 +579,22 @@ class RequestViewSet(viewsets.ModelViewSet):
             for row in table.rows:
                 row.height = Cm(0.7)
                 for cell in row.cells:
-                    paragraphs = cell.paragraphs
-                    for paragraph in paragraphs:
-                        for run in paragraph.runs:
-                            font = run.font
-                            font.size = Pt(9)
+                    if cell == row.cells[-1]:
+
+                        paragraphs = cell.paragraphs
+                        for paragraph in paragraphs:
+                            for run in paragraph.runs:
+                                if run == paragraph.runs[-1]:
+                                    run.add_break(WD_BREAK.PAGE)
+                                font = run.font
+                                font.size = Pt(9)
+                    else:
+                        paragraphs = cell.paragraphs
+                        for paragraph in paragraphs:
+                            for run in paragraph.runs:
+                                font = run.font
+                                font.size = Pt(9)
+
 
         f_name = 'QC Complete Report.docx'
         response = HttpResponse(content_type='application/vnd.openxmlformats' +
