@@ -19,7 +19,7 @@ from rest_framework.permissions import IsAdminUser
 
 from fpdf import FPDF, HTMLMixin
 from docx import Document
-from docx.shared import Pt
+from docx.shared import Pt,Cm
 
 from common.views import (
     CsrfExemptSessionAuthentication,
@@ -576,6 +576,7 @@ class RequestViewSet(viewsets.ModelViewSet):
 
             # Change font size for all cells
             for row in table.rows:
+                row.height = Cm(0.7)
                 for cell in row.cells:
                     paragraphs = cell.paragraphs
                     for paragraph in paragraphs:
