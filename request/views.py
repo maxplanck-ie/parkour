@@ -563,32 +563,55 @@ class RequestViewSet(viewsets.ModelViewSet):
 
     @action(methods=['get'], detail=True)
     def download_complete_report(self, request, pk=None):
-        def add_table(document, header, data):
-            # Create table
-            table = document.add_table(rows=1, cols=len(header))
-            hdr_cells = table.rows[0].cells
-            for i, h in enumerate(header):
-                hdr_cells[i].text = h
-            for row in data:
-                row_cells = table.add_row().cells
-                for i, value in enumerate(row):
-                    row_cells[i].text = str(value)
+        def add_table(document, header, data, contains_comments = True):
+
+            if contains_comments:
+
+                # Create table
+                #table = document.add_table(rows=1, cols=len(header))
+                table = document.add_table(rows=1, cols=len(header)-1)
+                hdr_cells = table.rows[0].cells
+                #for i, h in enumerate(header):
+                for i, h in enumerate(header[:-1]):
+                    hdr_cells[i].text = h
+                for row in data:
+                    row_cells = table.add_row().cells
+                    #for i, value in enumerate(row):
+                    for i, value in enumerate(row[:-1]):
+                        row_cells[i].text = str(value)
+                    #add comment row
+                    comment_cells = table.add_row().cells
+                    comment_cells[0].merge(comment_cells[-1])
+                    comment_cells[0].text = "Comments: " + str(row[-1])
 
 
-            # Change font size for all cells
-            for row in table.rows:
-                row.height = Cm(0.7)
-                for cell in row.cells:
-                    if cell == row.cells[-1]:
-
+                # Change font size for all cells
+                for row in table.rows:
+                    row.height = Cm(0.7)
+                    for cell in row.cells:
                         paragraphs = cell.paragraphs
                         for paragraph in paragraphs:
                             for run in paragraph.runs:
-                                if run == paragraph.runs[-1]:
-                                    run.add_break(WD_BREAK.PAGE)
                                 font = run.font
                                 font.size = Pt(9)
-                    else:
+            else:
+                # Create table
+                table = document.add_table(rows=1, cols=len(header))
+                hdr_cells = table.rows[0].cells
+                for i, h in enumerate(header):
+
+                    hdr_cells[i].text = h
+                for row in data:
+                    row_cells = table.add_row().cells
+                    # for i, value in enumerate(row):
+                    for i, value in enumerate(row[:-1]):
+                        row_cells[i].text = str(value)
+
+
+                # Change font size for all cells
+                for row in table.rows:
+                    row.height = Cm(0.7)
+                    for cell in row.cells:
                         paragraphs = cell.paragraphs
                         for paragraph in paragraphs:
                             for run in paragraph.runs:
@@ -769,7 +792,7 @@ class RequestViewSet(viewsets.ModelViewSet):
                     conf_reads.get(r.barcode, ''),
                 ]
                 data.append(row)
-        add_table(doc, header, data)
+        add_table(doc, header, data, contains_comments=False)
         doc.add_page_break()
 
         # Page 6
