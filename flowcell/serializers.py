@@ -1,5 +1,5 @@
 import itertools
-
+from pprint import pprint
 from django.apps import apps
 from django.db.models import Q
 
@@ -52,35 +52,108 @@ class LaneSerializer(ModelSerializer):
     index_i5_show = SerializerMethodField()
     equal_representation = SerializerMethodField()
     quality_check = CharField(required=False)
+    request = SerializerMethodField()
+    protocol = SerializerMethodField()
 
     class Meta:
         list_serializer_class = LaneListSerializer
         model = Lane
         fields = ('pk', 'name', 'pool', 'pool_name', 'read_length_name',
                   'index_i7_show', 'index_i5_show', 'equal_representation',
-                  'loading_concentration', 'phix', 'quality_check',)
+                  'loading_concentration', 'phix', 'quality_check','request','protocol')
         extra_kwargs = {
             'name': {'required': False},
             'pool': {'required': False},
         }
 
+    def get_request(self,obj):
+
+        requests = []
+        records = obj.pool.libraries.all() or obj.pool.samples.all()
+
+        for record in records:
+            for req in record.request.all():
+                requests.append(req.name)
+        if len(requests) == 1 or len(set(requests)) == 1:
+            return requests[0]
+        else:
+            return ";".join(requests)
+
+    def get_protocol(self,obj):
+
+        protocols = []
+
+        records = obj.pool.libraries.all() or obj.pool.samples.all()
+
+        for record in records:
+            protocols.append(record.library_protocol.name)
+
+        if len(protocols) == 1 or len(set(protocols)) == 1:
+            return protocols[0]
+        else:
+            return ";".join(protocols)
+
     def get_pool_name(self, obj):
+
         return obj.pool.name
 
     def get_read_length_name(self, obj):
-        return str(obj.pool.size)
+        read_lengths = []
+        i = 0
+        records = obj.pool.libraries.all() or obj.pool.samples.all()
+        for record in records:
+            print(record.library_protocol.name)
+            read_lengths.append(str(record.read_length.name))
+
+        if len(read_lengths) == 1 or len(set(read_lengths)) == 1:
+            return read_lengths[0]
+        else:
+            return ";".join(read_lengths)
+
+
 
     def get_index_i7_show(self, obj):
-        # records = obj.pool.libraries.all() or obj.pool.samples.all()
-        # return records[0].index_type.is_index_i7
-        # TODO: rethink this
-        return None
+        '''we show the actual index instead of a yes/no entry'''
+        records = obj.pool.libraries.all() or obj.pool.samples.all()
+        idx = []
+        contains_i7 = False
+        for record in records:
+            if str(record.index_i7) != "":
+                contains_i7 = True
+                break
+                #idx.append(str(record.index_i7))
+
+        #if len(idx) == 1 or len(set(idx)) == 1:
+        #    return idx[0]
+        #else:
+        #    return ";".join(idx)
+        if contains_i7:
+            return "Yes"
+        else:
+            return ""
+
 
     def get_index_i5_show(self, obj):
-        # records = obj.pool.libraries.all() or obj.pool.samples.all()
-        # return records[0].index_type.is_index_i5
-        # TODO: rethink this
-        return None
+        '''we show the actual index instead of a yes/no entry'''
+
+        records = obj.pool.libraries.all() or obj.pool.samples.all()
+        idx = []
+        contains_i5 = False
+        for record in records:
+            if str(record.index_i5) != "":
+                contains_i5 = True
+                break
+                #idx.append(str(record.index_i5))
+
+        #if len(idx) == 1 or len(set(idx)) == 1:
+        #    return idx[0]
+        #else:
+        #    return ";".join(idx)
+        if contains_i5:
+            return "Yes"
+        else:
+            return ""
+         #return None
 
     def get_equal_representation(self, obj):
         records = list(itertools.chain(
@@ -100,6 +173,7 @@ class FlowcellListSerializer(ModelSerializer):
                   'create_time', 'lanes',)
 
     def get_flowcell(self, obj):
+        pprint(vars(obj))
         return obj.pk
 
     def get_sequencer_name(self, obj):

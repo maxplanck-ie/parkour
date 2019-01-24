@@ -44,11 +44,11 @@ Ext.define('MainHub.model.flowcell.Flowcell', {
         },
         {
             name: 'index_i7_show',
-            type: 'bool'
+            type: 'string'
         },
         {
             name: 'index_i5_show',
-            type: 'bool'
+            type: 'string'
         },
         {
             name: 'equal_representation',
@@ -63,6 +63,14 @@ Ext.define('MainHub.model.flowcell.Flowcell', {
             name: 'phix',
             type: 'float',
             allowNull: true
+        },
+        {
+            name: 'request',
+            type: 'string'
+        },
+        {
+            name: 'protocol',
+            type: 'string'
         }
     ]
 });

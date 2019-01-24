@@ -38,13 +38,17 @@ Ext.define('MainHub.view.flowcell.Flowcells', {
     },
 
     customConfig: {
-      qualityCheckMenuOptions: ['completed']
+      qualityCheckMenuOptions: ['completed'],
+      listeners:{
+        refresh:function(d){Ext.each(d.panel.columns,function(col){col.autoSize()})}
+      }
     },
 
     columns: {
       defaults: {
         minWidth: 150,
         flex: 1
+
       },
       items: [
         {
@@ -81,6 +85,11 @@ Ext.define('MainHub.view.flowcell.Flowcells', {
           filter: { type: 'date' }
         },
         {
+          text: 'Request',
+          dataIndex: 'request',
+          filter: {type: 'string'}
+        },
+        {
           text: 'Length',
           tooltip: 'Read Length',
           dataIndex: 'read_length_name',
@@ -89,26 +98,31 @@ Ext.define('MainHub.view.flowcell.Flowcells', {
         {
           text: 'Index I7',
           dataIndex: 'index_i7_show',
-          renderer: 'yesNoRenderer',
-          filter: { type: 'boolean' }
+          //renderer: 'yesNoRenderer',
+          filter: { type: 'string' }
         },
         {
           text: 'Index I5',
           dataIndex: 'index_i5_show',
-          renderer: 'yesNoRenderer',
-          filter: { type: 'boolean' }
+          //renderer: 'yesNoRenderer',
+          filter: { type: 'string' }
         },
         {
           text: 'Sequencer',
           dataIndex: 'sequencer_name',
           filter: { type: 'list' }
         },
-        {
+      /*  {
           text: 'Equal nucl.',
           tooltip: 'Equal Representation of Nucleotides',
           dataIndex: 'equal_representation',
           renderer: 'yesNoRenderer',
           filter: { type: 'boolean' }
+        },*/
+        {
+            text: 'Library protocol',
+            dataIndex: 'protocol',
+            filter: {type: 'string'}
         },
         {
           text: 'Loading Conc.',
