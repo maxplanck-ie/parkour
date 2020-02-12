@@ -126,7 +126,7 @@ USE_TZ = True
 
 
 ADMINS = [
-    ('Bioinfo Core', 'bioinfo-core@ie-freiburg.mpg.de'),
+    ('goldbach', 'leander.goldbach@gmail.com'),
 ]
 
 
