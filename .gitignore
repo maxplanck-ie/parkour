@@ -67,3 +67,6 @@ docs/_build/
 /staticfiles/
 /media/
 /logs/
+
+# PyCharm
+.idea
