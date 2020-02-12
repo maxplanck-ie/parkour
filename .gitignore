@@ -1,3 +1,6 @@
+# Django (temporary)
+manage.py   # locally need to change manage.py but shouldnt change on git atm, unless explicitly requested
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
