@@ -174,7 +174,7 @@ class Report:
 
     def get_pi_sequencer_counts(self):
         sequencer_mapping = {}
-        for flowcell in self.flowcells:
+        for flowcell in self.flowcells:    # gets records from flowcell
             sequencer_name = flowcell.sequencer.name
             pools = {x.pool for x in flowcell.fetched_lanes}
             for pool in pools:
@@ -186,19 +186,22 @@ class Report:
         items = sequencer_mapping.keys()
 
         pi_mapping = {}
-        for req in self.requests:
+        for req in self.requests:    # gets records from requests
             pi = req.user.pi
             pi_name = pi.name if pi else 'None'
             records = req.fetched_libraries + req.fetched_samples
+
             pi_mapping.update({
                 record: pi_name for record in records if record in items
             })
 
-        pairs = [
-            (pi_mapping[k], sequencer_name)
-            for k, v in sequencer_mapping.items() for sequencer_name in v
-        ]
-
+        pairs = []
+        for k, v in sequencer_mapping.items():
+            for sequencer_name in v:
+                try:
+                    pairs.append((pi_mapping[k], sequencer_name))
+                except KeyError:    # KeyError if record exists under flowcell but the correspond. request was deleted.
+                    pass    # could add a warning pop-up here
         counts = Counter(pairs)
 
         data = {}

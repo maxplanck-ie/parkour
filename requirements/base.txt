@@ -19,7 +19,7 @@ sphinx-rtd-theme
 xlwt
 fpdf
 numpy
-pandas
+pandas==0.24
 jupyter
 bioblend
 python-docx
