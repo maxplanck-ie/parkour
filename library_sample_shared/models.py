@@ -54,7 +54,7 @@ class ReadLength(models.Model):
 class GenericIndex(models.Model):
     prefix = models.CharField('Prefix', max_length=10, default='')
     number = models.CharField('Number', max_length=10, default='')
-    index = models.CharField('Index', max_length=8)
+    index = models.CharField('Index', max_length=24)
 
     @property
     def index_id(self):
@@ -94,10 +94,11 @@ class IndexType(models.Model):
 
     index_length = models.CharField(
         'Index Length',
-        max_length=1,
+        max_length=2,
         choices=(
             ('6', '6'),
             ('8', '8'),
+            ('24', '24')
         ),
         default='8',
     )
@@ -124,6 +125,16 @@ class IndexType(models.Model):
         verbose_name='Indices I5',
         related_name='index_type',
         blank=True,
+    )
+
+    read_type = models.CharField(
+        'Read Type',
+        max_length=11,
+        choices=(
+            ('short', 'short read'),
+            ('long', 'long read'),
+        ),
+        default='short',
     )
 
     obsolete = models.PositiveIntegerField("Obsolete", default=1)

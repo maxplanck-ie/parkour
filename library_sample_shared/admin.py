@@ -84,7 +84,7 @@ class IndexTypeAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('name', 'index_length', 'format', 'is_dual',
+            'fields': ('name', 'read_type', 'index_length', 'format', 'is_dual',
                        'indices_i7', 'indices_i5',),
         }),
     )
