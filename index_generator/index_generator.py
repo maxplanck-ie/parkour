@@ -47,6 +47,7 @@ class IndexRegistry:
         self.indices[index_type.pk]['i7'] = self.to_list(
             index_type.format,
             index_type.pk,
+            index_type.read_type,
             index_type.indices_i7.all(),
         )
 
@@ -54,6 +55,7 @@ class IndexRegistry:
             self.indices[index_type.pk]['i5'] = self.to_list(
                 index_type.format,
                 index_type.pk,
+                index_type.read_type,
                 index_type.indices_i5.all(),
             )
 
@@ -149,18 +151,19 @@ class IndexRegistry:
         """ Return a list of index pairs for a given index type id. """
         return self.pairs.get(index_type_id, [])
 
-    def to_list(self, format, index_type, indices):
+    def to_list(self, format, index_type, read_type, indices):
         """ Return a list of index dicts. """
         return list(map(lambda x: self.create_index_dict(
-            format, index_type, x.prefix, x.number, x.index), indices))
+            format, index_type, read_type, x.prefix, x.number, x.index), indices))
 
     @staticmethod
-    def create_index_dict(format='', index_type='', prefix='',
+    def create_index_dict(format='', index_type='', read_type='', prefix='',
                           number='', index='', coordinate='',
                           is_library=False):
         return {
             'format': format,
             'index_type': index_type,
+            'read_type' : read_type,
             'prefix': prefix,
             'number': number,
             'index': index,
@@ -266,6 +269,13 @@ class IndexGenerator:
                 'Index Type must be set for all libraries and samples.')
         index_types = list(set(index_types))
 
+
+        ############################################################
+        ###
+        ### INSERT: CHECK THAT ONLY ONE INDEX READ_TYPE IS PRESENT
+        ###
+        ############################################################
+
         is_dual = [x.is_dual for x in index_types]
         if len(set(is_dual)) != 1:
             raise ValueError('Mixed single/dual indices are not allowed.')
@@ -333,6 +343,7 @@ class IndexGenerator:
 
         attempt = 0
         is_ok = False
+
 
         while not is_ok and attempt < self.MAX_ATTEMPTS:
             init_pairs = list(init_index_pairs)
@@ -494,12 +505,15 @@ class IndexGenerator:
             indices_in_result, depths, sample)
 
         for index in indices:
-            converted_index = self.convert_index(index['index'])
-            scores = self.calculate_scores(
-                sample, converted_index, color_distribution, total_depth)
-            avg_score = sum(scores) / self.index_length
-            if avg_score < result_index['avg_score']:
-                result_index = {'avg_score': avg_score, 'index': index}
+            if sample.index_type.read_type == 'short':
+                result_index = {'avg_score': 'Not applicable', 'index': index}  # don't need to check score
+            else:
+                converted_index = self.convert_index(index['index'])
+                scores = self.calculate_scores(
+                    sample, converted_index, color_distribution, total_depth)
+                avg_score = sum(scores) / self.index_length
+                if avg_score < result_index['avg_score']:
+                    result_index = {'avg_score': avg_score, 'index': index}
 
         return result_index
 
