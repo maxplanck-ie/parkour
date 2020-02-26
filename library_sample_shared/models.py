@@ -321,14 +321,14 @@ class GenericLibrarySample(DateTimeMixin):
 
     index_i7 = models.CharField(
         'Index I7',
-        max_length=8,
+        max_length=24,
         null=True,
         blank=True,
     )
 
     index_i5 = models.CharField(
         'Index I5',
-        max_length=8,
+        max_length=24,
         null=True,
         blank=True,
     )

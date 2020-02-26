@@ -269,17 +269,14 @@ class IndexGenerator:
                 'Index Type must be set for all libraries and samples.')
         index_types = list(set(index_types))
 
-
-        ############################################################
-        ###
-        ### INSERT: CHECK THAT ONLY ONE INDEX READ_TYPE IS PRESENT
-        ###
-        ############################################################
-
         is_dual = [x.is_dual for x in index_types]
         if len(set(is_dual)) != 1:
             raise ValueError('Mixed single/dual indices are not allowed.')
         self.mode = 'dual' if is_dual[0] else 'single'
+
+        index_read_type = [x.read_type for x in index_types]
+        if len(set(index_read_type)) != 1:
+            raise ValueError('Mixed long-read and short-read indices are not allowed')
 
         index_lengths = [x.index_length for x in index_types]
         if len(set(index_lengths)) != 1:
@@ -505,8 +502,8 @@ class IndexGenerator:
             indices_in_result, depths, sample)
 
         for index in indices:
-            if sample.index_type.read_type == 'short':
-                result_index = {'avg_score': 'Not applicable', 'index': index}  # don't need to check score
+            if sample.index_type.read_type == 'long':
+                result_index = {'avg_score': 999, 'index': index}  # don't need to check score
             else:
                 converted_index = self.convert_index(index['index'])
                 scores = self.calculate_scores(
@@ -569,16 +566,22 @@ class IndexGenerator:
             indices_in_result, depths, sample)
 
         for pair in pairs:
-            converted_index = self.convert_index(
-                self._concat_index_pair(pair))
-            scores = self.calculate_scores(
-                sample, converted_index, color_distribution, total_depth)
-            avg_score = sum(scores) / index_length
-            if avg_score < result_pair['avg_score']:
+            if sample.index_type.read_type == 'long':
                 result_pair = {
-                    'avg_score': avg_score,
+                    'avg_score': 999,
                     'pair': (pair.index1, pair.index2),
                 }
+            else:
+                converted_index = self.convert_index(
+                    self._concat_index_pair(pair))
+                scores = self.calculate_scores(
+                    sample, converted_index, color_distribution, total_depth)
+                avg_score = sum(scores) / index_length
+                if avg_score < result_pair['avg_score']:
+                    result_pair = {
+                        'avg_score': avg_score,
+                        'pair': (pair.index1, pair.index2),
+                    }
 
         return result_pair
 
