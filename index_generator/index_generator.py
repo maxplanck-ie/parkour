@@ -95,14 +95,14 @@ class IndexRegistry:
 
         for pair in index_pairs:
             index1 = self.create_index_dict(
-                index_type.format, index_type.pk,
+                index_type.format, index_type.pk, index_type.read_type,
                 pair.index1.prefix, pair.index1.number,
                 pair.index1.index, pair.coordinate,
                 )
 
             if self.mode == 'dual':
                 index2 = self.create_index_dict(
-                    index_type.format, index_type.pk,
+                    index_type.format, index_type.pk, index_type.read_type,
                     pair.index2.prefix, pair.index2.number,
                     pair.index2.index, pair.coordinate,
                 )
@@ -355,7 +355,6 @@ class IndexGenerator:
 
             # Find index pairs
             pairs = self.find_pairs(plate_samples, depths, init_pairs)
-
             # Extract indices from the pairs
             # for pair in pairs[1:]:
             for pair in pairs[len(init_pairs):]:
@@ -477,7 +476,6 @@ class IndexGenerator:
                             'single' and not x['is_library']]
             return library_indices + plate_indices + \
                 self.sort_indices(tube_indices)
-
         raise ValueError(f'Could not generate indices "{index_group}" ' +
                          'for the selected samples.')
 
@@ -518,7 +516,6 @@ class IndexGenerator:
         """ Generate index pairs for given samples. """
         if not any(samples):
             return init_pairs
-
         pairs = list(init_pairs)
 
         for sample in samples:
@@ -611,7 +608,6 @@ class IndexGenerator:
         total_depth = 0
         index_length = len(indices[0])
         color_distribution = [{'G': 0, 'R': 0} for _ in range(index_length)]
-
         for i, index in enumerate(indices):
             idx = self.convert_index(index)
             for cycle in range(index_length):
@@ -619,7 +615,6 @@ class IndexGenerator:
                 color_distribution[cycle][color] += sequencing_depths[i]
             total_depth += sequencing_depths[i]
         total_depth += sample.sequencing_depth
-
         return color_distribution, total_depth
 
     def calculate_scores(self, current_sample, current_converted_index,
