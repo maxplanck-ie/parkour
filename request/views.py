@@ -211,8 +211,11 @@ class RequestViewSet(viewsets.ModelViewSet):
 
     def create(self, request):
         """ Create a request. """
+        print('create')
         post_data = self._get_post_data(request)
+        print(post_data, '\n\n')
         post_data.update({'user': request.user.pk})
+        print(post_data)
         serializer = self.serializer_class(data=post_data)
 
         if serializer.is_valid():
@@ -229,6 +232,7 @@ class RequestViewSet(viewsets.ModelViewSet):
     @action(methods=['post'], detail=True)
     def edit(self, request, pk=None):
         """ Update request with a given id. """
+        print("edit")
         instance = self.get_object()
         post_data = self._get_post_data(request)
 
