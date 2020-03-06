@@ -282,6 +282,7 @@ class IndexGenerator:
         if len(set(index_lengths)) != 1:
             raise ValueError('Index Types with mixed index lengths ' +
                              'are not allowed.')
+
         self.index_length = int(index_lengths[0])
 
         return index_types
@@ -405,7 +406,7 @@ class IndexGenerator:
                 index=index, index_type=index_type)
             if idx:
                 idx = self.index_registry.create_index_dict(
-                    index_type.format, index_type.pk, idx[0].prefix,
+                    index_type.format, index_type.pk, index_type.read_type, idx[0].prefix,
                     idx[0].number, idx[0].index, is_library=True)
             else:
                 idx = self.index_registry.create_index_dict(
