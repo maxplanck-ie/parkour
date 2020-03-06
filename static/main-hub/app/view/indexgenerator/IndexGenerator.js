@@ -225,7 +225,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
               cls: 'panel-header-combobox',
               fieldLabel: 'Start Coordinate',
               labelWidth: 110,
-              width: 200,
+              width: 550,
               margin: '0 15px 0 0',
               hidden: true
             },
@@ -268,7 +268,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
           {
             text: 'Name',
             dataIndex: 'name',
-            width: 200
+            width: 550
           },
           {
             text: '',
@@ -376,6 +376,42 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             width: 55
           },
           {
+            text: '9',
+            dataIndex: 'index_i7_9',
+            cls: 'nucleotide-header',
+            renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
+            width: 55
+          },
+          {
+            text: '10',
+            dataIndex: 'index_i7_10',
+            cls: 'nucleotide-header',
+            renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
+            width: 55
+          },
+          {
+            text: '11',
+            dataIndex: 'index_i7_11',
+            cls: 'nucleotide-header',
+            renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
+            width: 55
+          },
+          {
+            text: '12',
+            dataIndex: 'index_i7_12',
+            cls: 'nucleotide-header',
+            renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
+            width: 55
+          },
+          {
             text: 'Index I5 ID',
             dataIndex: 'index_i5_id',
             summaryRenderer: function () {
@@ -452,6 +488,42 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
           {
             text: '8',
             dataIndex: 'index_i5_8',
+            cls: 'nucleotide-header',
+            renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
+            width: 55
+          },
+          {
+            text: '9',
+            dataIndex: 'index_i5_9',
+            cls: 'nucleotide-header',
+            renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
+            width: 55
+          },
+          {
+            text: '10',
+            dataIndex: 'index_i5_10',
+            cls: 'nucleotide-header',
+            renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
+            width: 55
+          },
+          {
+            text: '11',
+            dataIndex: 'index_i5_11',
+            cls: 'nucleotide-header',
+            renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
+            width: 55
+          },
+          {
+            text: '12',
+            dataIndex: 'index_i5_12',
             cls: 'nucleotide-header',
             renderer: me.renderNucleotide,
             summaryType: me.calculateColorDiversity,
