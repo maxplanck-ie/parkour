@@ -323,9 +323,10 @@ class IndexGenerator:
                 tube_samples.append(sample)
 
         # If the number of samples with index type 'plate' is large enough,
+        # or read_type is "long"
         # take pairs in the selected order (don't actually generate them)
-        if len(plate_samples) > self.MAX_RANDOM_SAMPLES:
-            pairs = self.find_pairs_fixed(plate_samples)
+        if len(plate_samples) > self.MAX_RANDOM_SAMPLES or self.samples[0].index_type.read_type == 'long':
+            pairs = self.find_pairs_fixed(plate_samples, init_index_pairs)
             for pair in pairs:
                 init_index_pairs.append(pair)
                 init_indices_i7.append(pair[0])
@@ -341,7 +342,6 @@ class IndexGenerator:
 
         attempt = 0
         is_ok = False
-
 
         while not is_ok and attempt < self.MAX_ATTEMPTS:
             init_pairs = list(init_index_pairs)
@@ -480,6 +480,7 @@ class IndexGenerator:
         raise ValueError(f'Could not generate indices "{index_group}" ' +
                          'for the selected samples.')
 
+
     def find_index(self, sample, index_group, current_indices, depths):
         """ Helper function for `find_indices()`. """
         indices_in_result = [x['index'] for x in current_indices]
@@ -583,13 +584,13 @@ class IndexGenerator:
 
         return result_pair
 
-    def find_pairs_fixed(self, plate_samples):
+    def find_pairs_fixed(self, plate_samples, init_index_pairs):
         """
         Return subsequent index pairs from the Index Registry
         starting from the first one.
         """
         result = []
-
+        indices_in_result = [(x[0]['index'], x[1]['index']) for x in init_index_pairs]
         # Group by index type
         samples_dict = OrderedDict()
         for sample in plate_samples:
@@ -599,6 +600,13 @@ class IndexGenerator:
 
         for index_type_id, samples in samples_dict.items():
             pairs = self.index_registry.get_pairs(index_type_id)
+            if self.mode == 'single':
+                pairs = [
+                    x for x in pairs
+                    if (x.index1['index'], x.index2['index']) not in indices_in_result
+                ]
+            if len(samples) > len(pairs):
+                raise IndexError(f'Not enough indices of type {sample.index_type} for given number of samples')
             for i, sample in enumerate(samples):
                 pair = pairs[i]
                 result.append((pair.index1, pair.index2))
