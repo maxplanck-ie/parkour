@@ -579,8 +579,8 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
           ),
           valueField: 'index',
           store: 'indexI7Store',
-          regex: new RegExp('^(?=(?:.{0,24})$)[ATCG]+$'),
-          regexText: 'Only A, T, C and G (uppercase) are allowed. Index length must be 6 or 8.',
+          regex: new RegExp('^(?=(?:.{6}|.{8}|.{10}|.{12}|.{24})$)[ATCG]+$'),
+          regexText: 'Only A, T, C and G (uppercase) are allowed. Index length must be 6, 8, 10, 12 or 24.',
           matchFieldWidth: false
         },
         renderer: this.errorRenderer
@@ -603,8 +603,8 @@ Ext.define('MainHub.view.libraries.BatchAddWindowController', {
           ),
           valueField: 'index',
           store: 'indexI5Store',
-          regex: new RegExp('^(?=(?:.{0,24})$)[ATCG]+$'),
-          regexText: 'Only A, T, C and G (uppercase) are allowed. Index length must be 6 or 8.',
+          regex: new RegExp('^(?=(?:.{6}|.{8}|.{10}|.{12}|.{24})$)[ATCG]+$'),
+          regexText: 'Only A, T, C and G (uppercase) are allowed. Index length must be 6, 8, 10, 12 or 24.',
           matchFieldWidth: false
         },
         renderer: this.errorRenderer

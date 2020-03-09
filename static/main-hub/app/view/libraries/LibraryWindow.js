@@ -196,8 +196,8 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                     itemId: 'indexI7Field',
                     fieldLabel: 'Index 1 (I7) <sup><strong><span class="field-tooltip" tooltip-text="Select from predefined list; make sure the displayed index is the sequence used for barcoding. Or enter sequence of index used for barcoding (typically 6 nucleotides)">[?]</span></strong></sup>',
                     emptyText: 'Index 1 (I7)',
-                    regex: new RegExp('^(?=(?:.{0,24})$)[ATCG]+$'),
-                    regexText: 'Only A, T, C and G (uppercase) are allowed. Index length must be 6 or 8.',
+                    regex: new RegExp('^(?=(?:.{6}|.{8}|.{10}|.{12}|.{24})$)[ATCG]+$'),
+                    regexText: 'Only A, T, C and G (uppercase) are allowed. Index length must be 6, 8, 10, 12 or 24.',
                     store: 'indexI7Store',
                     disabled: true
                 },
@@ -216,8 +216,8 @@ Ext.define('MainHub.view.libraries.LibraryWindow', {
                     itemId: 'indexI5Field',
                     fieldLabel: 'Index 2 (I5) <sup><strong><span class="field-tooltip" tooltip-text="Select from predefined list; make sure the displayed index is the sequence used for barcoding. Or enter sequence of index used for barcoding (typically 6 nucleotides)">[?]</span></strong></sup>',
                     emptyText: 'Index 2 (I5)',
-                    regex: new RegExp('^(?=(?:.{0,24})$)[ATCG]+$'),
-                    regexText: 'Only A, T, C and G (uppercase) are allowed. Index length must be 6 or 8.',
+                    regex: new RegExp('^(?=(?:.{6}|.{8}|.{10}|.{12}|.{24})$)[ATCG]+$'),
+                    regexText: 'Only A, T, C and G (uppercase) are allowed. Index length must be 6, 8, 10, 12 or 24.',
                     store: 'indexI5Store',
                     disabled: true
                 },

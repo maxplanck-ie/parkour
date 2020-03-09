@@ -98,6 +98,8 @@ class IndexType(models.Model):
         choices=(
             ('6', '6'),
             ('8', '8'),
+            ('10', '10'),
+            ('12', '12'),
             ('24', '24')
         ),
         default='8',
