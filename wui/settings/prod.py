@@ -1,7 +1,7 @@
 from .base import *
 
 
-DEBUG = True
+DEBUG = False
 
 LOGGING['loggers'] = {
     'django.request': {
