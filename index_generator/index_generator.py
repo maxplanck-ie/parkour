@@ -600,6 +600,7 @@ class IndexGenerator:
 
         for index_type_id, samples in samples_dict.items():
             pairs = self.index_registry.get_pairs(index_type_id)
+            # ensure uniqueness
             if self.mode == 'single':
                 pairs = [
                     x for x in pairs
