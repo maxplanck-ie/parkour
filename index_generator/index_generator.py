@@ -47,6 +47,7 @@ class IndexRegistry:
         self.indices[index_type.pk]['i7'] = self.to_list(
             index_type.format,
             index_type.pk,
+            index_type.read_type,
             index_type.indices_i7.all(),
         )
 
@@ -54,6 +55,7 @@ class IndexRegistry:
             self.indices[index_type.pk]['i5'] = self.to_list(
                 index_type.format,
                 index_type.pk,
+                index_type.read_type,
                 index_type.indices_i5.all(),
             )
 
@@ -93,14 +95,14 @@ class IndexRegistry:
 
         for pair in index_pairs:
             index1 = self.create_index_dict(
-                index_type.format, index_type.pk,
+                index_type.format, index_type.pk, index_type.read_type,
                 pair.index1.prefix, pair.index1.number,
                 pair.index1.index, pair.coordinate,
                 )
 
             if self.mode == 'dual':
                 index2 = self.create_index_dict(
-                    index_type.format, index_type.pk,
+                    index_type.format, index_type.pk, index_type.read_type,
                     pair.index2.prefix, pair.index2.number,
                     pair.index2.index, pair.coordinate,
                 )
@@ -149,18 +151,19 @@ class IndexRegistry:
         """ Return a list of index pairs for a given index type id. """
         return self.pairs.get(index_type_id, [])
 
-    def to_list(self, format, index_type, indices):
+    def to_list(self, format, index_type, read_type, indices):
         """ Return a list of index dicts. """
         return list(map(lambda x: self.create_index_dict(
-            format, index_type, x.prefix, x.number, x.index), indices))
+            format, index_type, read_type, x.prefix, x.number, x.index), indices))
 
     @staticmethod
-    def create_index_dict(format='', index_type='', prefix='',
+    def create_index_dict(format='', index_type='', read_type='', prefix='',
                           number='', index='', coordinate='',
                           is_library=False):
         return {
             'format': format,
             'index_type': index_type,
+            'read_type' : read_type,
             'prefix': prefix,
             'number': number,
             'index': index,
@@ -271,10 +274,15 @@ class IndexGenerator:
             raise ValueError('Mixed single/dual indices are not allowed.')
         self.mode = 'dual' if is_dual[0] else 'single'
 
+        index_read_type = [x.read_type for x in index_types]
+        if len(set(index_read_type)) != 1:
+            raise ValueError('Mixed long-read and short-read indices are not allowed')
+
         index_lengths = [x.index_length for x in index_types]
         if len(set(index_lengths)) != 1:
             raise ValueError('Index Types with mixed index lengths ' +
                              'are not allowed.')
+
         self.index_length = int(index_lengths[0])
 
         return index_types
@@ -315,9 +323,10 @@ class IndexGenerator:
                 tube_samples.append(sample)
 
         # If the number of samples with index type 'plate' is large enough,
+        # or read_type is "long"
         # take pairs in the selected order (don't actually generate them)
-        if len(plate_samples) > self.MAX_RANDOM_SAMPLES:
-            pairs = self.find_pairs_fixed(plate_samples)
+        if len(plate_samples) > self.MAX_RANDOM_SAMPLES or self.samples[0].index_type.read_type == 'long':
+            pairs = self.find_pairs_fixed(plate_samples, init_index_pairs)
             for pair in pairs:
                 init_index_pairs.append(pair)
                 init_indices_i7.append(pair[0])
@@ -347,7 +356,6 @@ class IndexGenerator:
 
             # Find index pairs
             pairs = self.find_pairs(plate_samples, depths, init_pairs)
-
             # Extract indices from the pairs
             # for pair in pairs[1:]:
             for pair in pairs[len(init_pairs):]:
@@ -398,7 +406,7 @@ class IndexGenerator:
                 index=index, index_type=index_type)
             if idx:
                 idx = self.index_registry.create_index_dict(
-                    index_type.format, index_type.pk, idx[0].prefix,
+                    index_type.format, index_type.pk, index_type.read_type, idx[0].prefix,
                     idx[0].number, idx[0].index, is_library=True)
             else:
                 idx = self.index_registry.create_index_dict(
@@ -469,9 +477,9 @@ class IndexGenerator:
                             'single' and not x['is_library']]
             return library_indices + plate_indices + \
                 self.sort_indices(tube_indices)
-
         raise ValueError(f'Could not generate indices "{index_group}" ' +
                          'for the selected samples.')
+
 
     def find_index(self, sample, index_group, current_indices, depths):
         """ Helper function for `find_indices()`. """
@@ -494,12 +502,15 @@ class IndexGenerator:
             indices_in_result, depths, sample)
 
         for index in indices:
-            converted_index = self.convert_index(index['index'])
-            scores = self.calculate_scores(
-                sample, converted_index, color_distribution, total_depth)
-            avg_score = sum(scores) / self.index_length
-            if avg_score < result_index['avg_score']:
-                result_index = {'avg_score': avg_score, 'index': index}
+            if sample.index_type.read_type == 'long':
+                result_index = {'avg_score': 999, 'index': index}  # don't need to check score
+            else:
+                converted_index = self.convert_index(index['index'])
+                scores = self.calculate_scores(
+                    sample, converted_index, color_distribution, total_depth)
+                avg_score = sum(scores) / self.index_length
+                if avg_score < result_index['avg_score']:
+                    result_index = {'avg_score': avg_score, 'index': index}
 
         return result_index
 
@@ -507,7 +518,6 @@ class IndexGenerator:
         """ Generate index pairs for given samples. """
         if not any(samples):
             return init_pairs
-
         pairs = list(init_pairs)
 
         for sample in samples:
@@ -555,26 +565,32 @@ class IndexGenerator:
             indices_in_result, depths, sample)
 
         for pair in pairs:
-            converted_index = self.convert_index(
-                self._concat_index_pair(pair))
-            scores = self.calculate_scores(
-                sample, converted_index, color_distribution, total_depth)
-            avg_score = sum(scores) / index_length
-            if avg_score < result_pair['avg_score']:
+            if sample.index_type.read_type == 'long':
                 result_pair = {
-                    'avg_score': avg_score,
+                    'avg_score': 999,
                     'pair': (pair.index1, pair.index2),
                 }
+            else:
+                converted_index = self.convert_index(
+                    self._concat_index_pair(pair))
+                scores = self.calculate_scores(
+                    sample, converted_index, color_distribution, total_depth)
+                avg_score = sum(scores) / index_length
+                if avg_score < result_pair['avg_score']:
+                    result_pair = {
+                        'avg_score': avg_score,
+                        'pair': (pair.index1, pair.index2),
+                    }
 
         return result_pair
 
-    def find_pairs_fixed(self, plate_samples):
+    def find_pairs_fixed(self, plate_samples, init_index_pairs):
         """
         Return subsequent index pairs from the Index Registry
         starting from the first one.
         """
         result = []
-
+        indices_in_result = [(x[0]['index'], x[1]['index']) for x in init_index_pairs]
         # Group by index type
         samples_dict = OrderedDict()
         for sample in plate_samples:
@@ -584,6 +600,14 @@ class IndexGenerator:
 
         for index_type_id, samples in samples_dict.items():
             pairs = self.index_registry.get_pairs(index_type_id)
+            # ensure uniqueness
+            if self.mode == 'single':
+                pairs = [
+                    x for x in pairs
+                    if (x.index1['index'], x.index2['index']) not in indices_in_result
+                ]
+            if len(samples) > len(pairs):
+                raise IndexError(f'Not enough indices of type {sample.index_type} for given number of samples')
             for i, sample in enumerate(samples):
                 pair = pairs[i]
                 result.append((pair.index1, pair.index2))
@@ -594,7 +618,6 @@ class IndexGenerator:
         total_depth = 0
         index_length = len(indices[0])
         color_distribution = [{'G': 0, 'R': 0} for _ in range(index_length)]
-
         for i, index in enumerate(indices):
             idx = self.convert_index(index)
             for cycle in range(index_length):
@@ -602,7 +625,6 @@ class IndexGenerator:
                 color_distribution[cycle][color] += sequencing_depths[i]
             total_depth += sequencing_depths[i]
         total_depth += sample.sequencing_depth
-
         return color_distribution, total_depth
 
     def calculate_scores(self, current_sample, current_converted_index,

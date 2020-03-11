@@ -225,7 +225,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
               cls: 'panel-header-combobox',
               fieldLabel: 'Start Coordinate',
               labelWidth: 110,
-              width: 550,
+              width: 500,
               margin: '0 15px 0 0',
               hidden: true
             },
@@ -268,7 +268,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
           {
             text: 'Name',
             dataIndex: 'name',
-            width: 550
+            width: 500
           },
           {
             text: '',
@@ -310,7 +310,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             renderer: me.renderNucleotide,
             summaryType: me.calculateColorDiversity,
             summaryRenderer: me.renderSummary,
-            width: 55
+            width: 50
           },
           {
             text: '2',
@@ -319,7 +319,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             renderer: me.renderNucleotide,
             summaryType: me.calculateColorDiversity,
             summaryRenderer: me.renderSummary,
-            width: 55
+            width: 50
           },
           {
             text: '3',
@@ -328,7 +328,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             renderer: me.renderNucleotide,
             summaryType: me.calculateColorDiversity,
             summaryRenderer: me.renderSummary,
-            width: 55
+            width: 50
           },
           {
             text: '4',
@@ -337,7 +337,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             renderer: me.renderNucleotide,
             summaryType: me.calculateColorDiversity,
             summaryRenderer: me.renderSummary,
-            width: 55
+            width: 50
           },
           {
             text: '5',
@@ -346,7 +346,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             renderer: me.renderNucleotide,
             summaryType: me.calculateColorDiversity,
             summaryRenderer: me.renderSummary,
-            width: 55
+            width: 50
           },
           {
             text: '6',
@@ -355,7 +355,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             renderer: me.renderNucleotide,
             summaryType: me.calculateColorDiversity,
             summaryRenderer: me.renderSummary,
-            width: 55
+            width: 50
           },
           {
             text: '7',
@@ -364,7 +364,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             renderer: me.renderNucleotide,
             summaryType: me.calculateColorDiversity,
             summaryRenderer: me.renderSummary,
-            width: 55
+            width: 50
           },
           {
             text: '8',
@@ -373,7 +373,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             renderer: me.renderNucleotide,
             summaryType: me.calculateColorDiversity,
             summaryRenderer: me.renderSummary,
-            width: 55
+            width: 50
           },
           {
             text: '9',
@@ -382,7 +382,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             renderer: me.renderNucleotide,
             summaryType: me.calculateColorDiversity,
             summaryRenderer: me.renderSummary,
-            width: 55
+            width: 50
           },
           {
             text: '10',
@@ -391,7 +391,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             renderer: me.renderNucleotide,
             summaryType: me.calculateColorDiversity,
             summaryRenderer: me.renderSummary,
-            width: 55
+            width: 50
           },
           {
             text: '11',
@@ -400,7 +400,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             renderer: me.renderNucleotide,
             summaryType: me.calculateColorDiversity,
             summaryRenderer: me.renderSummary,
-            width: 55
+            width: 50
           },
           {
             text: '12',
@@ -409,7 +409,115 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             renderer: me.renderNucleotide,
             summaryType: me.calculateColorDiversity,
             summaryRenderer: me.renderSummary,
-            width: 55
+            width: 50
+          },
+          {
+            text: '13',
+            dataIndex: 'index_i7_13',
+            cls: 'nucleotide-header',
+            renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
+            width: 50
+          },
+          {
+            text: '14',
+            dataIndex: 'index_i7_14',
+            cls: 'nucleotide-header',
+            renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
+            width: 50
+          },
+          {
+            text: '15',
+            dataIndex: 'index_i7_15',
+            cls: 'nucleotide-header',
+            renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
+            width: 50
+          },
+          {
+            text: '16',
+            dataIndex: 'index_i7_16',
+            cls: 'nucleotide-header',
+            renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
+            width: 50
+          },
+          {
+            text: '17',
+            dataIndex: 'index_i7_17',
+            cls: 'nucleotide-header',
+            renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
+            width: 50
+          },
+          {
+            text: '18',
+            dataIndex: 'index_i7_18',
+            cls: 'nucleotide-header',
+            renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
+            width: 50
+          },
+          {
+            text: '19',
+            dataIndex: 'index_i7_19',
+            cls: 'nucleotide-header',
+            renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
+            width: 50
+          },
+          {
+            text: '20',
+            dataIndex: 'index_i7_20',
+            cls: 'nucleotide-header',
+            renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
+            width: 50
+          },
+          {
+            text: '21',
+            dataIndex: 'index_i7_21',
+            cls: 'nucleotide-header',
+            renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
+            width: 50
+          },
+          {
+            text: '22',
+            dataIndex: 'index_i7_22',
+            cls: 'nucleotide-header',
+            renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
+            width: 50
+          },
+          {
+            text: '23',
+            dataIndex: 'index_i7_23',
+            cls: 'nucleotide-header',
+            renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
+            width: 50
+          },
+          {
+            text: '24',
+            dataIndex: 'index_i7_24',
+            cls: 'nucleotide-header',
+            renderer: me.renderNucleotide,
+            summaryType: me.calculateColorDiversity,
+            summaryRenderer: me.renderSummary,
+            width: 50
           },
           {
             text: 'Index I5 ID',
@@ -429,7 +537,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             renderer: me.renderNucleotide,
             summaryType: me.calculateColorDiversity,
             summaryRenderer: me.renderSummary,
-            width: 55
+            width: 50
           },
           {
             text: '2',
@@ -438,7 +546,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             renderer: me.renderNucleotide,
             summaryType: me.calculateColorDiversity,
             summaryRenderer: me.renderSummary,
-            width: 55
+            width: 50
           },
           {
             text: '3',
@@ -447,7 +555,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             renderer: me.renderNucleotide,
             summaryType: me.calculateColorDiversity,
             summaryRenderer: me.renderSummary,
-            width: 55
+            width: 50
           },
           {
             text: '4',
@@ -456,7 +564,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             renderer: me.renderNucleotide,
             summaryType: me.calculateColorDiversity,
             summaryRenderer: me.renderSummary,
-            width: 55
+            width: 50
           },
           {
             text: '5',
@@ -465,7 +573,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             renderer: me.renderNucleotide,
             summaryType: me.calculateColorDiversity,
             summaryRenderer: me.renderSummary,
-            width: 55
+            width: 50
           },
           {
             text: '6',
@@ -474,7 +582,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             renderer: me.renderNucleotide,
             summaryType: me.calculateColorDiversity,
             summaryRenderer: me.renderSummary,
-            width: 55
+            width: 50
           },
           {
             text: '7',
@@ -483,7 +591,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             renderer: me.renderNucleotide,
             summaryType: me.calculateColorDiversity,
             summaryRenderer: me.renderSummary,
-            width: 55
+            width: 50
           },
           {
             text: '8',
@@ -492,43 +600,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             renderer: me.renderNucleotide,
             summaryType: me.calculateColorDiversity,
             summaryRenderer: me.renderSummary,
-            width: 55
-          },
-          {
-            text: '9',
-            dataIndex: 'index_i5_9',
-            cls: 'nucleotide-header',
-            renderer: me.renderNucleotide,
-            summaryType: me.calculateColorDiversity,
-            summaryRenderer: me.renderSummary,
-            width: 55
-          },
-          {
-            text: '10',
-            dataIndex: 'index_i5_10',
-            cls: 'nucleotide-header',
-            renderer: me.renderNucleotide,
-            summaryType: me.calculateColorDiversity,
-            summaryRenderer: me.renderSummary,
-            width: 55
-          },
-          {
-            text: '11',
-            dataIndex: 'index_i5_11',
-            cls: 'nucleotide-header',
-            renderer: me.renderNucleotide,
-            summaryType: me.calculateColorDiversity,
-            summaryRenderer: me.renderSummary,
-            width: 55
-          },
-          {
-            text: '12',
-            dataIndex: 'index_i5_12',
-            cls: 'nucleotide-header',
-            renderer: me.renderNucleotide,
-            summaryType: me.calculateColorDiversity,
-            summaryRenderer: me.renderSummary,
-            width: 55
+            width: 50
           }
         ],
         store: [],
