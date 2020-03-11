@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('library_sample_shared', '0022_auto_20200311_1014'),
+        ('library_sample_shared', '0011_auto_20200309_1644'),
     ]
 
     operations = [
