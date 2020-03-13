@@ -23,7 +23,7 @@ Migrate the database tables::
 
 Collect static files::
 
-  docker-compose run parkour-web python collectstatic --no-input --verbosity 0
+  docker-compose run parkour-web python manage.py collectstatic --no-input --verbosity 0
 
 Create a superuser (admin)::
 
