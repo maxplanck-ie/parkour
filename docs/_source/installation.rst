@@ -13,6 +13,9 @@ Clone the repository::
   git clone https://github.com/maxplanck-ie/docker-parkour.git
   cd docker-parkour
 
+Customize your environment variables as given in this template::
+  parkour.env
+  
 Build the images and start the services::
 
   docker-compose up -d --build
