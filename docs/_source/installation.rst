@@ -14,6 +14,7 @@ Clone the repository::
   cd docker-parkour
 
 Customize your environment variables as given in this template::
+
   parkour.env
   
 Build the images and start the services::
