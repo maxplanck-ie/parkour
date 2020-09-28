@@ -1,26 +1,26 @@
 # Django
-Django<2.0
-django-authtools
-djangorestframework
-django-admin-list-filter-dropdown
-git+https://github.com/clearspark/django-monthfield
-django_extensions
+Django==1.11.8
+django-authtools==1.6.0
+djangorestframework==3.8.1
+django-admin-list-filter-dropdown==1.0.1
+django-monthfield==0.1.1
+django_extensions==1.9.7
 
 # Database
-psycopg2
-dj-database-url
+psycopg2==2.7.3.2
+dj-database-url==0.4.2
 
 # Documentation
-Sphinx
-sphinx-autobuild
-sphinx-rtd-theme
+Sphinx==1.6.5
+sphinx-autobuild==0.7.1
+sphinx-rtd-theme==0.2.4
 
 # Miscellaneous
-xlwt
-fpdf
-numpy
-pandas
-jupyter
-bioblend
-python-docx
-python-dateutil
+xlwt==1.3.0
+fpdf==1.7.2
+numpy==1.13.3
+pandas==0.23.0
+jupyter==1.0.0
+bioblend==0.11.0
+python-docx==0.8.6
+python-dateutil==2.6.1
