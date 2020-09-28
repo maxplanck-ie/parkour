@@ -126,7 +126,7 @@ USE_TZ = True
 
 
 ADMINS = [
-    ('Bioinfo Core', 'bioinfo-core@ie-freiburg.mpg.de'),
+    (os.environ['ADMIN_NAME'], os.environ['ADMIN_EMAIL']),
 ]
 
 
@@ -134,9 +134,9 @@ AUTH_USER_MODEL = 'common.User'
 
 
 # Email config
-EMAIL_HOST = 'mail.ie-freiburg.mpg.de'
+EMAIL_HOST = os.environ['EMAIL_HOST']
 EMAIL_SUBJECT_PREFIX = '[Parkour] '
-SERVER_EMAIL = 'parkour_support@ie-freiburg.mpg.de'
+SERVER_EMAIL = os.environ['SERVER_EMAIL']
 
 
 LOGGING = {
