@@ -135,7 +135,7 @@ AUTH_USER_MODEL = 'common.User'
 
 # Email config
 EMAIL_HOST = os.environ['EMAIL_HOST']
-EMAIL_SUBJECT_PREFIX = '[Parkour] '
+EMAIL_SUBJECT_PREFIX = os.environ['EMAIL_SUBJECT_PREFIX']
 SERVER_EMAIL = os.environ['SERVER_EMAIL']
 
 
