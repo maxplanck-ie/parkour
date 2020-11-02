@@ -8,6 +8,11 @@
     color: #388e3c;
 }
 
+.compromised .x-grid-cell {
+    background-color: #fff8e1;
+    color: #ff8f00;
+}
+
 .status {
     width: 12px;
     height: 12px;
@@ -16,19 +21,25 @@
 }
 
 .status.pending-submission {
-	background-color: #9E9E9E;
+    background-color: #9E9E9E;
 }
 
 .status.submission-completed {
-	background-color: #ffc107;
+    background-color: #8d6e63;
 }
 
+.status.galaxy-status-online,
 .status.quality-check-approved {
-	background-color: #66BB6A;
+    background-color: #66BB6A;
 }
 
+.status.galaxy-status-offline,
 .status.quality-check-failed {
-	background-color: #ef5350;
+    background-color: #ef5350;
+}
+
+.status.quality-check-compromised {
+    background-color: #ffc107;
 }
 
 .status.library-prepared {
@@ -41,4 +52,26 @@
 
 .status.sequencing {
     background-color: #ba68c8;
+}
+
+.status.completed {
+    background-color: #009688;
+}
+
+.no-leaf-icons .x-tree-icon-parent,
+.no-leaf-icons .x-tree-icon-parent-expanded,
+.no-leaf-icons .x-tree-icon-leaf {
+    display: none !important;
+}
+
+.x-tree-elbow-plus,
+.x-tree-elbow-end-plus,
+.x-grid-tree-node-expanded .x-tree-elbow-plus,
+.x-grid-tree-node-expanded .x-tree-elbow-end-plus {
+    color: #919191;
+}
+
+.parent-node-name.x-grid-td,
+.parent-node-name.x-grid-td .x-grid-cell-inner {
+    overflow: initial !important;
 }

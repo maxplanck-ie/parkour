@@ -3,14 +3,14 @@ Ext.define('MainHub.store.libraries.ConcentrationMethods', {
     storeId: 'concentrationMethodsStore',
 
     requires: [
-        'MainHub.model.libraries.LibraryField'
+        'MainHub.model.libraries.ConcentrationMethod'
     ],
 
-    model: 'MainHub.model.libraries.LibraryField',
+    model: 'MainHub.model.libraries.ConcentrationMethod',
 
     proxy: {
         type: 'ajax',
-        url: 'get_concentration_methods/',
+        url: 'api/concentration_methods/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"

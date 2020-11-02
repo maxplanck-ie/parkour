@@ -1,386 +1,629 @@
 Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
-    extend: 'Ext.app.ViewController',
-    alias: 'controller.index-generator',
+  extend: 'MainHub.components.BaseGridController',
+  alias: 'controller.index-generator',
 
-    requires: [],
-
-    config: {
-        control: {
-            '#': {
-                boxready: 'onIndexGeneratorBoxready'
-            },
-            '#poolingTreePanel': {
-                edit: 'onPoolingTreePanelEdit',
-                checkchange: 'onPoolingTreePanelCheckchange'
-            },
-            '#poolSize': {
-                boxready: 'onMaxPoolSizeBoxready'
-            },
-            '#poolGrid': {
-                edit: 'onSequenceDepthEdit'
-            },
-            '#savePool': {
-                click: 'savePool'
-            },
-            '#generateIndices': {
-                click: 'generateIndicesBtnClick'
-            }
-        }
-    },
-
-    onIndexGeneratorBoxready: function() {
-        // Clear Pool after reloading PoolingTree
-        Ext.getStore('PoolingTree').on('load', function() {
-            Ext.getCmp('poolGrid').getStore().removeAll();
-        });
-    },
-
-    onMaxPoolSizeBoxready: function(cb) {
-        cb.select(25, true);
-    },
-
-    onPoolingTreePanelEdit: function(editor, context) {
-        var record = context.record,
-            originalValue = context.originalValue,
-            values = context.newValues;
-
-        // Set Read Length
-        if (values.readLengthName !== null) {
-            var readLengthRecord = Ext.getStore('readLengthsStore')
-                .findRecord('id', values.readLengthName);
-            record.set('readLength', readLengthRecord.get('id'));
-            record.set('readLengthName', readLengthRecord.get('name'));
-
-            var recordId = null;
-            if (record.get('recordType') == 'L') {
-                recordId = record.get('libraryId');
-            } else {
-                recordId = record.get('sampleId');
-            }
-
-            // Update record in the database
-            Ext.Ajax.request({
-                url: 'index_generator/update_read_length/',
-                method: 'POST',
-                scope: this,
-                params: {
-                    record_type: record.get('recordType'),
-                    record_id: recordId,
-                    read_length_id: readLengthRecord.get('id')
-                }
-            });
-        }
-
-        // Set Index Type (for samples)
-        if (record.get('recordType') == 'S' && values.indexTypeName !== null) {
-            var indexTypeRecord = Ext.getStore('indexTypesStore').findRecord('id', values.indexTypeName);
-            record.set('indexType', indexTypeRecord.get('id'));
-            record.set('indexTypeName', indexTypeRecord.get('name'));
-
-            // Update record in the database
-            Ext.Ajax.request({
-                url: 'index_generator/update_index_type/',
-                method: 'POST',
-                scope: this,
-                params: {
-                    sample_id: record.get('sampleId'),
-                    index_type_id: indexTypeRecord.get('id')
-                }
-            });
-        }
-
-        // Reload stores
-        if (Ext.getStore('librariesStore').isLoaded()) Ext.getStore('librariesStore').reload();
-        if (Ext.getStore('incomingLibrariesStore').isLoaded()) Ext.getStore('incomingLibrariesStore').reload();
-    },
-
-    onPoolingTreePanelCheckchange: function(node, checked) {
-        var grid = Ext.getCmp('poolGrid'),
-            store = grid.getStore();
-
-        // Reset all samples' indices
-        store.each(function(record) {
-            if (record.get('recordType') == 'S') {
-                record.set('indexI7', '');
-                record.set('indexI7Id', '');
-                record.set('indexI5', '');
-                record.set('indexI5Id', '');
-
-                for (var i = 0; i < 8; i++) {
-                    record.set('indexI7_' + (i + 1), '');
-                    record.set('indexI5_' + (i + 1), '');
-                }
-            }
-        });
-
-        if (checked) {
-            if (this.isUnique(store, node) && this.isCompatible(store, node) &&
-                this.isIndexTypeSet(store, node) && this.isPoolSizeOk(store, node)) {
-
-                var indexI7Sequence = node.get('indexI7'),
-                    indexI7 = indexI7Sequence.split('');
-                if (indexI7Sequence.length == 6) {
-                    $.merge(indexI7, [' ', ' ']);
-                }
-
-                var indexI5Sequence = node.get('indexI5'),
-                    indexI5 = indexI5Sequence.split('');
-                if (indexI5Sequence.length === 0) {
-                    indexI5 = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '];
-                } else if (indexI5Sequence.length == 6) {
-                    $.merge(indexI5, [' ', ' ']);
-                }
-
-                store.add({
-                    name: node.get('text'),
-                    libraryId: node.get('libraryId'),
-                    sampleId: node.get('sampleId'),
-                    recordType: node.get('recordType'),
-                    sequencingDepth: node.get('sequencingDepth'),
-                    sequencingRunCondition: node.get('sequencingRunCondition'),
-                    indexType: node.get('indexType'),
-                    indexI7: indexI7Sequence,
-                    indexI5: indexI5Sequence,
-                    indexI7Id: node.get('indexI7Id'),
-                    indexI5Id: node.get('indexI5Id'),
-                    indexI7_1: indexI7[0],
-                    indexI7_2: indexI7[1],
-                    indexI7_3: indexI7[2],
-                    indexI7_4: indexI7[3],
-                    indexI7_5: indexI7[4],
-                    indexI7_6: indexI7[5],
-                    indexI7_7: indexI7[6],
-                    indexI7_8: indexI7[7],
-                    indexI5_1: indexI5[0],
-                    indexI5_2: indexI5[1],
-                    indexI5_3: indexI5[2],
-                    indexI5_4: indexI5[3],
-                    indexI5_5: indexI5[4],
-                    indexI5_6: indexI5[5],
-                    indexI5_7: indexI5[6],
-                    indexI5_8: indexI5[7]
-                });
-            } else {
-                node.set('checked', false);
-            }
-        } else {
-            var record = null;
-            if (node.get('recordType') == 'L') {
-                record = store.findRecord('libraryId', node.get('libraryId'));
-            } else {
-                record = store.findRecord('sampleId', node.get('sampleId'));
-            }
-            store.remove(record);
-        }
-
-        // Update Summary
-        grid.getView().refresh();
-
-        // Highlight cells which have low color diversity
-        $.each(grid.problematicCycles, function(idx, id) {
-            $('.x-grid-row-summary .x-grid-cell-' + id).addClass('problematic-cycle');
-        });
-        grid.problematicCycles = [];
-
-        // Update grid's header and enable/disable 'Pool' button
-        if (store.getCount() > 1) {
-            var totalPoolSize = grid.getStore().sum('sequencingDepth');
-            grid.setTitle('Pool (total size: ' + totalPoolSize + ' M)');
-            Ext.getCmp('savePool').setDisabled(false);
-
-            var recordTypes = Ext.pluck(Ext.Array.pluck(store.data.items, 'data'), 'recordType');
-            if (recordTypes.indexOf('S') > -1) {
-                Ext.getCmp('generateIndices').setDisabled(false);
-            }
-        } else {
-            grid.setTitle('Pool');
-            Ext.getCmp('savePool').setDisabled(true);
-            Ext.getCmp('generateIndices').setDisabled(true);
-        }
-    },
-
-    isUnique: function(store, node) {
-        if (store.getCount()) {
-            var record = store.findRecord('indexI7', node.get('indexI7'));
-            if (record) {
-                Ext.ux.ToastMessage('Selected index is already in the pool.', 'warning');
-                return false;
-            }
-        }
-        return true;
-    },
-
-    isCompatible: function(store, node) {
-        if (store.getCount()) {
-            // Same Read Length
-            var record = store.getAt(0);
-            if (record.get('sequencingRunCondition') != node.get('sequencingRunCondition')) {
-                Ext.ux.ToastMessage('Read lengths must be the same.', 'warning');
-                return false;
-            }
-        }
-        return true;
-    },
-
-    isIndexTypeSet: function(store, node) {
-        // Check if Index Type is set (only for samples)
-        if (node.get('recordType') == 'S') {
-            if (node.get('indexType') === '') {
-                Ext.ux.ToastMessage('Index Type must be set.', 'warning');
-                return false;
-            } else {
-                return true;
-            }
-        } else {
-            return true;
-        }
-    },
-
-    isPoolSizeOk: function(store, node) {
-        var maxPoolSize = Ext.getCmp('poolSize').getValue(),
-            poolSize = 0;
-
-        store.each(function(record) {
-            poolSize += record.get('sequencingDepth');
-        });
-        poolSize += node.get('sequencingDepth');
-
-        if (poolSize > maxPoolSize) {
-            Ext.ux.ToastMessage('You have exceeded Pool Size.<br>Please increase it.', 'warning');
-            // return false;
-        }
-
-        return true;
-    },
-
-    onSequenceDepthEdit: function(editor, context) {
-        var grid = this.getView().down('grid'),
-            record = context.record,
-            changes = record.getChanges(),
-            value = context.newValues.sequencingDepth;
-
-        record.set('sequencingDepth', value);
-
-        // TODO@me: update grid's title and summary
-    },
-
-    savePool: function(btn) {
-        var store = Ext.getCmp('poolGrid').getStore(),
-            url = 'index_generator/save_pool/';
-
-        if (this.isPoolValid(store)) {
-            // Get all libraries' and samples' ids
-            var libraries = [], samples = [];
-            store.each(function(record) {
-                if (record.get('recordType') == 'L') {
-                    libraries.push(record.get('libraryId'));
-                } else {
-                    samples.push({
-                        sample_id: record.get('sampleId'),
-                        index_i7: record.get('indexI7') ? record.get('indexI7') : '',
-                        index_i5: record.get('indexI5') ? record.get('indexI5') : ''
-                    });
-                }
-            });
-
-            Ext.getCmp('poolingContainer').setLoading('Saving...');
-            Ext.Ajax.request({
-                url: url,
-                method: 'POST',
-                timeout: 1000000,
-                scope: this,
-
-                params: {
-                    libraries: Ext.JSON.encode(libraries),
-                    samples: Ext.JSON.encode(samples)
-                },
-
-                success: function (response) {
-                    var obj = Ext.JSON.decode(response.responseText);
-
-                    if (obj.success) {
-                        Ext.getCmp('poolGrid').setTitle('Pool');
-                        Ext.getCmp('poolingContainer').setLoading(false);
-                        Ext.ux.ToastMessage('Pool has been saved!');
-
-                        // Reload stores
-                        if (Ext.getStore('PoolingTree').isLoaded()) Ext.getStore('PoolingTree').reload();
-                        if (Ext.getStore('libraryPreparationStore')) Ext.getStore('libraryPreparationStore').reload();
-                        if (Ext.getStore('poolingStore').isLoaded()) Ext.getStore('poolingStore').reload();
-
-                    } else {
-                        Ext.getCmp('poolingContainer').setLoading(false);
-                        Ext.ux.ToastMessage(obj.error, 'error');
-                        console.error('[ERROR]: ' + url);
-                    }
-                },
-
-                failure: function (response) {
-                    Ext.getCmp('poolingContainer').setLoading(false);
-                    Ext.ux.ToastMessage(response.statusText, 'error');
-                    console.error('[ERROR]: ' + url);
-                    console.error(response);
-                }
-            });
-        } else {
-            Ext.ux.ToastMessage('Some of the indices are empty. The pool cannot be saved.', 'warning');
-        }
-    },
-
-    isPoolValid: function(store) {
-        var result = true;
-
-        store.each(function(record) {
-            if (record.get('indexI7_1') === '') {
-                result = false;
-            }
-        });
-
-        return result;
-    },
-
-    generateIndicesBtnClick: function(btn) {
-        var poolingTreePanel = Ext.getCmp('poolingTreePanel'),
-            grid = Ext.getCmp('poolGrid'),
-            store = grid.getStore(),
-            url = 'index_generator/generate_indices/';
-
-        poolingTreePanel.disable();
-        grid.setLoading('Generating...');
-        Ext.Ajax.request({
-            url: url,
-            method: 'POST',
-            timeout: 1000000,
-            scope: this,
-
-            params: {
-                libraries: Ext.JSON.encode(Ext.Array.pluck(Ext.Array.pluck(store.data.items, 'data'), 'libraryId')),
-                samples: Ext.JSON.encode(Ext.Array.pluck(Ext.Array.pluck(store.data.items, 'data'), 'sampleId'))
-            },
-
-            success: function(response) {
-                var obj = Ext.JSON.decode(response.responseText);
-
-                if (obj.success) {
-                    store.removeAll();
-                    store.add(obj.data);
-                } else {
-                    Ext.ux.ToastMessage(obj.error, 'error');
-                    console.error('[ERROR]: ' + url);
-                }
-
-                poolingTreePanel.enable();
-                grid.setLoading(false);
-            },
-
-            failure: function(response) {
-                Ext.ux.ToastMessage(response.statusText, 'error');
-                console.error('[ERROR]: ' + url);
-                console.error(response);
-
-                poolingTreePanel.enable();
-                grid.setLoading(false);
-            }
-        });
+  config: {
+    control: {
+      '#': {
+        activate: 'activateView',
+        boxready: 'boxready'
+      },
+      '#index-generator-grid': {
+        beforeedit: 'toggleEditors',
+        edit: 'editRecord',
+        itemcontextmenu: 'showMenu',
+        groupcontextmenu: 'showGroupMenu'
+      },
+      '#check-column': {
+        beforecheckchange: 'beforeSelect',
+        checkchange: 'checkRecord'
+      },
+      '#save-pool-button': {
+        click: 'save'
+      },
+      '#generate-indices-button': {
+        click: 'generateIndices'
+      }
     }
+  },
+
+  activateView: function (view) {
+    var store = view.down('grid').getStore();
+    Ext.getStore(store.getId()).reload();
+    Ext.getCmp('poolSizeCb').clearValue();  // reset PoolSize
+  },
+
+  boxready: function () {
+    Ext.getStore('IndexGenerator').on('load', function () {
+      Ext.getCmp('pool-grid').getStore().removeAll();
+    });
+  },
+
+  toggleEditors: function (editor, context) {
+    var record = context.record;
+    var indexTypeEditor = Ext.getCmp('indexTypePoolingEditor');
+
+    // Don't show the editors when a selection checkbox was clicked
+    if (context.colIdx === 0) {
+      return false;
+    }
+
+    if (record.get('record_type') === 'Library') {
+      indexTypeEditor.disable();
+    } else {
+      indexTypeEditor.enable();
+    }
+  },
+
+  beforeSelect: function () {
+    if (!Ext.getCmp('poolSizeCb').getValue()) {
+      new Noty({
+        text: 'Pool Size must be set.',
+        type: 'warning'
+      }).show();
+      return false;
+    }
+  },
+
+  editRecord: function (editor, context) {
+    var store = editor.grid.getStore();
+    this.syncStore(store.getId());
+  },
+
+  applyToAll: function (gridView, record, dataIndex) {
+    var self = this;
+    var store = gridView.grid.getStore();
+    var allowedColumns = ['read_length', 'index_type'];
+
+    if (dataIndex && allowedColumns.indexOf(dataIndex) !== -1) {
+      store.each(function (item) {
+        if (
+          item.get(store.groupField) === record.get(store.groupField) &&
+          item !== record
+        ) {
+          if (
+            dataIndex === 'read_length' ||
+            (dataIndex === 'index_type' && item.get('record_type') === 'Sample')
+          ) {
+            item.set(dataIndex, record.get(dataIndex));
+          }
+        }
+      });
+
+      self.syncStore(store.getId());
+    } else {
+      self._showEditableColumnsMessage(gridView, allowedColumns);
+    }
+  },
+
+  // showContextMenu: function (gridView, record, item, index, e) {
+  //   var me = this;
+  //   e.stopEvent();
+  //   Ext.create('Ext.menu.Menu', {
+  //     items: [
+  //       {
+  //         text: 'Apply to All',
+  //         iconCls: 'x-fa fa-check-circle',
+  //         handler: function () {
+  //           var dataIndex = MainHub.Utilities.getDataIndex(e, gridView);
+  //           me.applyToAll(record, dataIndex);
+  //         }
+  //       }
+  //       // {
+  //       //   text: 'Reset',
+  //       //   iconCls: 'x-fa fa-eraser',
+  //       //   handler: function () {
+  //       //     Ext.Msg.show({
+  //       //       title: 'Reset',
+  //       //       message: 'Are you sure you want to reset the record\'s values?',
+  //       //       buttons: Ext.Msg.YESNO,
+  //       //       icon: Ext.Msg.QUESTION,
+  //       //       fn: function (btn) {
+  //       //         if (btn === 'yes') {
+  //       //           me.reset(record);
+  //       //         }
+  //       //       }
+  //       //     });
+  //       //   }
+  //       // }
+  //     ]
+  //   }).showAt(e.getXY());
+  // },
+
+  selectUnselectAll: function (grid, groupId, selected) {
+    var indexGeneratorStore = grid.getStore();
+    var poolGridStore = Ext.getCmp('pool-grid').getStore();
+    var checkColumn = grid.down('#check-column');
+    var selectedRecord;
+
+    // Unselect all
+    if (!selected) {
+      indexGeneratorStore.each(function (record) {
+        if (record.get(indexGeneratorStore.groupField) === groupId) {
+          var pooledRecordIdx = poolGridStore.findBy(function (item) {
+            return item.get('pk') === record.get('pk') &&
+              item.get('record_type') === record.get('record_type');
+          });
+          if (pooledRecordIdx !== -1) {
+            poolGridStore.removeAt(pooledRecordIdx);
+          }
+          record.set('selected', false);
+        }
+      });
+      return false;
+    }
+
+    if (!Ext.getCmp('poolSizeCb').getValue()) {
+      new Noty({
+        text: 'Pool Size must be set.',
+        type: 'warning'
+      }).show();
+      return false;
+    }
+
+    indexGeneratorStore.each(function (item) {
+      var itemInPoolIdx = poolGridStore.findBy(function (rec) {
+        return rec.get('record_type') === item.get('record_type') &&
+          rec.get('pk') === item.get('pk');
+      });
+
+      if (item.get(indexGeneratorStore.groupField) === groupId && itemInPoolIdx === -1) {
+        selectedRecord = item;
+        checkColumn.fireEvent('checkchange', checkColumn, null, true, item, null, {
+          multipleSelect: true
+        });
+      }
+    });
+
+    // Show notification
+    if (selectedRecord) {
+      this._isPoolSizeOk(poolGridStore, selectedRecord);
+    }
+  },
+
+  checkRecord: function (checkColumn, rowIndex, checked, record, e, eOpts) {
+    var grid = Ext.getCmp('pool-grid');
+    var store = grid.getStore();
+    var multipleSelect = false;
+    var startCoordinate = grid.down('#start-coordinate');
+    var direction = grid.down('#direction');
+
+    if (eOpts && eOpts.hasOwnProperty('multipleSelect')) {
+      multipleSelect = eOpts.multipleSelect;
+    }
+
+    // Reset all samples' indices
+    this._resetGeneratedIndices();
+
+    if (checked) {
+      if (
+        this._isIndexTypeSet(store, record) &&
+        // this._isUnique(store, record) &&
+        this._isCompatible(store, record) &&
+        this._isPoolSizeOk(store, record, multipleSelect)
+      ) {
+        record.set('selected', true);
+
+        var indexI7 = record.get('index_i7');
+        var indexI5 = record.get('index_i5');
+        var indexI7Sequence = indexI7.split('');
+        var indexI5Sequence = indexI5.split('');
+
+        if (indexI7.length === 6) {
+          indexI7Sequence = indexI7Sequence.concat([' ', ' ']);
+        }
+
+        if (indexI5.length === 0) {
+          indexI5Sequence = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '];
+        } else if (indexI5Sequence.length === 6) {
+          indexI5Sequence = indexI5Sequence.concat([' ', ' ']);
+        }
+
+        var data = {
+          pk: record.get('pk'),
+          name: record.get('name'),
+          record_type: record.get('record_type'),
+          sequencing_depth: record.get('sequencing_depth'),
+          read_length: record.get('read_length'),
+          index_type: record.get('index_type'),
+          index_i7_id: record.get('index_i7_id'),
+          index_i5_id: record.get('index_i5_id'),
+          index_i7: { index: indexI7 },
+          index_i5: { index: indexI5 }
+        };
+
+        for (var i = 0; i < 8; i++) {
+          data['index_i7_' + (i + 1)] = indexI7Sequence[i];
+          data['index_i5_' + (i + 1)] = indexI5Sequence[i];
+        }
+
+        store.add(data);
+      } else {
+        record.set('selected', false);
+      }
+    } else {
+      var itemIdx = store.findBy(function (rec) {
+        return rec.get('record_type') === record.get('record_type') &&
+          rec.get('pk') === record.get('pk');
+      });
+
+      if (itemIdx !== -1) {
+        store.removeAt(itemIdx);
+      }
+    }
+
+    // Update Summary
+    grid.getView().refresh();
+
+    // Update grid's header and enable/disable 'Pool' button
+    if (store.getCount() > 0) {
+      grid.setTitle(Ext.String.format(
+        'Pool (total size: {0} M)',
+        grid.getStore().sum('sequencing_depth')
+      ));
+      Ext.getCmp('save-pool-button').enable();
+
+      var recordTypes = Ext.pluck(Ext.Array.pluck(store.data.items, 'data'), 'record_type');
+      if (recordTypes.indexOf('Sample') > -1) {
+        Ext.getCmp('generate-indices-button').enable();
+      }
+
+      // Show plate params
+      var indexType = Ext.getStore('IndexTypes').findRecord(
+        'id', record.get('index_type'), 0, false, true, true);
+      if (indexType && indexType.get('format') === 'plate') {
+        startCoordinate.show();
+        direction.show();
+      }
+    } else {
+      grid.setTitle('Pool');
+      Ext.getCmp('save-pool-button').disable();
+      Ext.getCmp('generate-indices-button').disable();
+      startCoordinate.hide();
+      direction.hide();
+    }
+  },
+
+  generateIndices: function () {
+    var indexGeneratorGrid = Ext.getCmp('index-generator-grid');
+    var poolGrid = Ext.getCmp('pool-grid');
+    var startCoordinate = poolGrid.down('#start-coordinate');
+    var direction = poolGrid.down('#direction');
+    var store = poolGrid.getStore();
+    var libraries = [];
+    var samples = [];
+
+    // Reset all samples' indices
+    this._resetGeneratedIndices();
+
+    store.each(function (item) {
+      if (item.get('record_type') === 'Library') {
+        libraries.push(item.get('pk'));
+      } else {
+        samples.push(item.get('pk'));
+      }
+    });
+
+    indexGeneratorGrid.disable();
+    poolGrid.setLoading('Generating...');
+    Ext.Ajax.request({
+      url: 'api/index_generator/generate_indices/',
+      method: 'POST',
+      timeout: 60000,
+      scope: this,
+      params: {
+        libraries: Ext.JSON.encode(libraries),
+        samples: Ext.JSON.encode(samples),
+        start_coord: startCoordinate.getValue(),
+        direction: direction.getValue()
+      },
+      success: function (response) {
+        var obj = Ext.JSON.decode(response.responseText);
+        if (obj.success) {
+          store.removeAll();
+          store.add(obj.data);
+        } else {
+          new Noty({ text: obj.error, type: 'error' }).show();
+        }
+
+        indexGeneratorGrid.enable();
+        poolGrid.setLoading(false);
+      },
+      failure: function (response) {
+        var error = response.statusText;
+        try {
+          error = Ext.JSON.decode(response.responseText).message;
+        } catch (e) {}
+        new Noty({ text: error, type: 'error' }).show();
+        console.error(response);
+
+        indexGeneratorGrid.enable();
+        poolGrid.setLoading(false);
+      }
+    });
+  },
+
+  save: function () {
+    var me = this;
+    var store = Ext.getCmp('pool-grid').getStore();
+    var libraries = [];
+    var samples = [];
+
+    if (!this._isPoolValid(store)) {
+      new Noty({
+        text: 'Some of the indices are empty. The pool cannot be saved.',
+        type: 'warning'
+      }).show();
+      return;
+    }
+
+    // if (Ext.query('.problematic-cycle').length > 0) {
+    //   var n = new Noty({
+    //     text: 'Some of the cycles are non-optimal. Do you want to continue?',
+    //     type: 'warning',
+    //     timeout: false,
+    //     buttons: [
+    //       Noty.button('Yes', '', function () {
+    //         console.log('button 1 clicked');
+    //       }),
+
+    //       Noty.button('No', '', function () {
+    //         console.log('button 2 clicked');
+    //         n.close();
+    //       })
+    //     ]
+    //   }).show();
+    // }
+
+    // Get all libraries' and samples' ids
+    store.each(function (record) {
+      var item = {
+        pk: record.get('pk'),
+        index_i7: record.get('index_i7').index,
+        index_i5: record.get('index_i5').index
+      };
+      if (record.get('record_type') === 'Library') {
+        libraries.push(item);
+      } else {
+        samples.push(item);
+      }
+    });
+
+    Ext.getCmp('poolingContainer').setLoading('Saving...');
+    Ext.Ajax.request({
+      url: 'api/index_generator/save_pool/',
+      method: 'POST',
+      scope: this,
+      params: {
+        pool_size_id: Ext.getCmp('poolSizeCb').getValue(),
+        libraries: Ext.JSON.encode(libraries),
+        samples: Ext.JSON.encode(samples)
+      },
+      success: function (response) {
+        var obj = Ext.JSON.decode(response.responseText);
+
+        if (obj.success) {
+          Ext.getCmp('pool-grid').setTitle('Pool');
+          Ext.getCmp('poolingContainer').setLoading(false);
+          new Noty({ text: 'Pool has been saved!' }).show();
+
+          // Reload stores
+          Ext.getStore('IndexGenerator').reload();
+        } else {
+          Ext.getCmp('poolingContainer').setLoading(false);
+          new Noty({ text: obj.message, type: 'error' }).show();
+        }
+      },
+      failure: function (response) {
+        var errorMsg;
+        try {
+          var obj = Ext.JSON.decode(response.responseText);
+          errorMsg = obj.message;
+        } catch (error) {
+          errorMsg = response.statusText;
+        }
+        new Noty({ text: errorMsg, type: 'error' }).show();
+
+        if (errorMsg === 'Some of the indices are not unique.') {
+          me.highlightNonUnique();
+        }
+
+        Ext.getCmp('poolingContainer').setLoading(false);
+        console.error(response);
+      }
+    });
+  },
+
+  highlightNonUnique: function () {
+    var grid = Ext.getCmp('pool-grid');
+    var store = grid.getStore();
+    var duplicates = {};
+
+    var indexPairs = store.data.items.map(function (item) {
+      return item.get('index_i7').index + item.get('index_i5').index;
+    });
+
+    for (var i = 0; i < indexPairs.length; i++) {
+      if (duplicates.hasOwnProperty(indexPairs[i])) {
+        duplicates[indexPairs[i]].push(i);
+      } else if (indexPairs.lastIndexOf(indexPairs[i]) !== i) {
+        duplicates[indexPairs[i]] = [i];
+      }
+    }
+
+    var duplicateIndices = [].concat.apply([], Object.values(duplicates));
+
+    grid.getSelectionModel().deselectAll();
+    for (var j = 0; j < duplicateIndices.length; j++) {
+      grid.getSelectionModel().select(duplicateIndices[j], true);
+    }
+  },
+
+  // reset: function (record) {
+  //   Ext.Ajax.request({
+  //     url: 'index_generator/reset/',
+  //     method: 'POST',
+  //     timeout: 60000,
+  //     scope: this,
+  //     params: {
+  //       status: 1,
+  //       dilution_factor: 1,
+  //       record_type: record.get('recordType'),
+  //       record_id: record.get('recordType') === 'L' ? record.get('libraryId') : record.get('sampleId')
+  //     },
+  //     success: function (response) {
+  //       var obj = Ext.JSON.decode(response.responseText);
+
+  //       if (obj.success) {
+  //         Ext.getCmp('pool-grid').setTitle('Pool');
+  //         Ext.getStore('IndexGenerator').reload();
+  //         new Noty({ text: 'The changes have been saved!' }).show();
+  //       } else {
+  //         new Noty({ text: obj.error, type: 'error' }).show();
+  //       }
+  //     },
+  //     failure: function (response) {
+  //       new Noty({ text: response.statusText, type: 'error' }).show();
+  //       console.error(response);
+  //     }
+  //   });
+  // },
+
+  _isIndexTypeSet: function (store, record, showNotification) {
+    var notif = showNotification === undefined;
+
+    // Check if Index Type is set (only for samples)
+    if (record.get('record_type') === 'Sample' && record.get('index_type') === 0) {
+      if (notif) {
+        new Noty({
+          text: 'Index Type must be set.',
+          type: 'warning'
+        }).show();
+      }
+      return false;
+    }
+
+    return true;
+  },
+
+  // _isUnique: function (store, record, showNotification) {
+  //   var notif = showNotification === undefined;
+  //   if (store.getCount()) {
+  //     var recordI7 = store.findRecord('indexI7', record.get('indexI7'));
+  //     var recordI5 = store.findRecord('indexI5', record.get('indexI5'));
+
+  //     if (recordI7 || recordI5) {
+  //       if (notif) {
+  //         new Noty({
+  //           text: 'Selected index (I7/I5) is already in the pool.',
+  //           type: 'warning'
+  //         }).show();
+  //       }
+  //       return false;
+  //     }
+  //   }
+  //   return true;
+  // },
+
+  _isCompatible: function (store, record, showNotification) {
+    var notif = showNotification === undefined;
+
+    if (store.getCount()) {
+      var firstItem = store.getAt(0);
+      var indexTypesStore = Ext.getStore('IndexTypes');
+      var firstItemIndexType = indexTypesStore.findRecord(
+        'id', firstItem.get('index_type'), 0, false, true, true);
+      var recordIndexType = indexTypesStore.findRecord(
+        'id', record.get('index_type'), 0, false, true, true);
+
+      // Same Read Length
+      if (firstItem.get('read_length') !== record.get('read_length')) {
+        if (notif) {
+          new Noty({
+            text: 'Read lengths must be the same.',
+            type: 'warning'
+          }).show();
+        }
+        return false;
+      }
+
+      // No pooling of dual and single indices
+      if (
+        firstItemIndexType && recordIndexType &&
+        firstItemIndexType.get('is_dual') !== recordIndexType.get('is_dual')
+      ) {
+        if (notif) {
+          new Noty({
+            text: 'Pooling of dual and single indices is not allowed.',
+            type: 'warning'
+          }).show();
+        }
+        return false;
+      }
+
+      // No pooling of indices with the length of 6 and 8 nucleotides (no mixed length)
+      if (
+        firstItemIndexType && recordIndexType &&
+        firstItemIndexType.get('index_length') !== recordIndexType.get('index_length')
+      ) {
+        if (notif) {
+          new Noty({
+            text: 'Pooling of indices with 6 and 8 nucleotides (mixed) is not allowed.',
+            type: 'warning'
+          }).show();
+        }
+        return false;
+      }
+    }
+
+    return true;
+  },
+
+  _isPoolSizeOk: function (store, record, multipleSelect) {
+    var notif = !multipleSelect;
+    var poolSizeId = Ext.getCmp('poolSizeCb').getValue();
+    var poolSizeItem = Ext.getStore('PoolSizes').findRecord('id', poolSizeId, 0, false, true, true);
+    var poolSize = store.sum('sequencing_depth') + record.get('sequencing_depth');
+
+    if (poolSize > poolSizeItem.get('multiplier') * poolSizeItem.get('size')) {
+      if (notif) {
+        new Noty({
+          text: 'You have exceeded the Pool Size. Please increase it.',
+          type: 'warning'
+        }).show();
+      }
+    }
+
+    return true;
+  },
+
+  _resetGeneratedIndices: function () {
+    var store = Ext.getCmp('pool-grid').getStore();
+
+    store.each(function (record) {
+      if (record.get('record_type') === 'Sample') {
+        record.set({
+          index_i7: '',
+          index_i7_id: '',
+          index_i5: '',
+          index_i5_id: ''
+        });
+
+        for (var i = 0; i < 8; i++) {
+          record.set('index_i7_' + (i + 1), '');
+          record.set('index_i5_' + (i + 1), '');
+        }
+      }
+    });
+  },
+
+  _isPoolValid: function (store) {
+    var result = true;
+    store.each(function (record) {
+      if (record.get('index_i7_1') === '') {  // at least, indices I7 must be set
+        result = false;
+      }
+    });
+    return result;
+  }
 });

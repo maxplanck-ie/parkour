@@ -6,15 +6,17 @@ Ext.define('MainHub.view.main.Main', {
         'Ext.tab.Panel',
         'MainHub.view.main.MainController',
         'MainHub.view.main.MainContainerWrap',
-        'MainHub.view.reports.BlankReport',
-        'MainHub.view.startpage.Startpage',
-        // 'MainHub.view.researchers.Researchers',
+        'MainHub.view.requests.Requests',
         'MainHub.view.libraries.Libraries',
-        'MainHub.view.qualitycontrol.IncomingLibraries',
+        'MainHub.view.incominglibraries.IncomingLibraries',
         'MainHub.view.indexgenerator.IndexGenerator',
         'MainHub.view.librarypreparation.LibraryPreparation',
         'MainHub.view.pooling.Pooling',
-        'MainHub.view.flowcell.LoadFlowcells'
+        'MainHub.view.flowcell.Flowcells',
+        'MainHub.view.invoicing.Invoicing',
+        'MainHub.view.usage.Usage',
+        'MainHub.view.statistics.RunStatistics',
+        'MainHub.view.statistics.Sequences'
     ],
 
     controller: 'main',
@@ -34,6 +36,7 @@ Ext.define('MainHub.view.main.Main', {
     items: [
         {
             xtype: 'toolbar',
+            id: 'headerBar',
             itemId: 'headerBar',
             cls: 'sencha-dash-dash-headerbar shadow',
             height: 64,
@@ -43,13 +46,13 @@ Ext.define('MainHub.view.main.Main', {
                     xtype: 'component',
                     reference: 'logo',
                     cls: 'main-logo',
-                    html: '<div class="logo"><img src="static/main-hub/resources/images/logo.png">Parkour</div>',
-                    width: 320
+                    html: '<div class="logo"><img src="static/main-hub/resources/images/logo1.svg"><div class="title">Parkour LIMS</div></div>',
+                    width: 300
                 },
                 {
                     margin: '0 0 0 8',
                     // ui: 'header',
-                    iconCls:'x-fa fa-navicon',
+                    iconCls: 'x-fa fa-navicon',
                     id: 'main-navigation-btn',
                     handler: 'onToggleNavigationSize'
                 },
@@ -57,13 +60,29 @@ Ext.define('MainHub.view.main.Main', {
                 {
                     xtype: 'tbtext',
                     cls: 'top-user-name',
-                    text: USERNAME      // from 'globals.html'
+                    text: USER.name      // from 'globals.html'
+                },
+                {
+                    xtype: 'button',
+                    ui: 'header',
+                    id: 'adminSiteBtn',
+                    iconCls: 'x-fa fa-cog',
+                    href: 'admin',
+                    tooltip: 'Site administration'
+                },
+                {
+                    xtype: 'button',
+                    ui: 'header',
+                    iconCls: 'x-fa fa-book',
+                    href: 'https://parkour.readthedocs.io/',
+                    tooltip: 'Documentation'
                 },
                 {
                     xtype: 'button',
                     ui: 'header',
                     iconCls: 'x-fa fa-sign-out',
                     href: 'logout',
+                    hrefTarget:'_self',
                     tooltip: 'Logout'
                 }
             ]
@@ -80,7 +99,7 @@ Ext.define('MainHub.view.main.Main', {
                     itemId: 'navigationTreeList',
                     ui: 'navigation',
                     store: 'NavigationTree',
-                    width: 320,
+                    width: 300,
                     expanderFirst: false,
                     expanderOnly: false,
                     listeners: {

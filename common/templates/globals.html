@@ -16,7 +16,6 @@
         return cookieValue;
     }
 
-    var CSRF_TOKEN = getCookie('csrftoken'),
-        USERNAME = '{{ USERNAME }}',
-        USER_IS_STAFF = '{{ USER_IS_STAFF }}' == 'True';
+    var CSRF_TOKEN = getCookie('csrftoken');
+    var USER = JSON.parse(unescape('{{ USER | safe | escapejs }}'));
 </script>

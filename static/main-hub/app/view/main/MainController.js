@@ -2,9 +2,9 @@ Ext.define('MainHub.view.main.MainController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.main',
 
-    listen : {
-        controller : {
-            '#' : {
+    listen: {
+        controller: {
+            '#': {
                 unmatchedroute : 'onRouteChange'
             }
         }
@@ -21,12 +21,16 @@ Ext.define('MainHub.view.main.MainController', {
 
         Ext.getStore('NavigationTree').on('load', function() {
             if (!window.location.hash) {
-                me.redirectTo("startpage");
+                me.redirectTo('requests');
             }
         });
+
+        if (!USER.is_staff) {
+            Ext.getCmp('adminSiteBtn').hide();
+        }
     },
 
-    onNavigationTreeSelectionChange: function (tree, node) {
+    onNavigationTreeSelectionChange: function(tree, node) {
         var to = node && (node.get('routeId') || node.get('viewType'));
 
         if (to) {
@@ -34,13 +38,13 @@ Ext.define('MainHub.view.main.MainController', {
         }
     },
 
-    onToggleNavigationSize: function () {
+    onToggleNavigationSize: function() {
         var me = this,
             refs = me.getReferences(),
             navigationList = refs.navigationTreeList,
             wrapContainer = refs.mainContainerWrap,
             collapsing = !navigationList.getMicro(),
-            new_width = collapsing ? 64 : 320;
+            new_width = collapsing ? 64 : 300;
 
         if (Ext.isIE9m || !Ext.os.is.Desktop) {
             Ext.suspendLayouts();
@@ -55,8 +59,7 @@ Ext.define('MainHub.view.main.MainController', {
             // No animation for IE9 or lower...
             wrapContainer.layout.animatePolicy = wrapContainer.layout.animate = null;
             wrapContainer.updateLayout();  // ... since this will flush them
-        }
-        else {
+        } else {
             if (!collapsing) {
                 // If we are leaving micro mode (expanding), we do that first so that the
                 // text of the items in the navlist will be revealed by the animation.
@@ -65,6 +68,7 @@ Ext.define('MainHub.view.main.MainController', {
 
             // Start this layout first since it does not require a layout
             refs.logo.animate({dynamic: true, to: {width: new_width}});
+            refs.logo.el.removeCls('logo-collapsed');
 
             // Directly adjust the width config and then run the main wrap container layout
             // as the root layout (it and its chidren). This will cause the adjusted size to
@@ -78,7 +82,8 @@ Ext.define('MainHub.view.main.MainController', {
             // visible.
             if (collapsing) {
                 navigationList.on({
-                    afterlayoutanimation: function () {
+                    afterlayoutanimation: function() {
+                        refs.logo.el.addCls('logo-collapsed');
                         navigationList.setMicro(true);
                         navigationList.el.removeCls('nav-tree-animating');
                     },
@@ -102,7 +107,11 @@ Ext.define('MainHub.view.main.MainController', {
             view = (node && node.get('viewType')) || 'page404',
             lastView = me.lastView,
             existingItem = mainCard.child('component[routeId=' + hashTag + ']'),
+            baseTitle = 'Parkour LIMS',
             newView;
+
+        // Set Page Title
+        document.title = baseTitle + ' | ' + node.data.text;
 
         // Kill any previously routed window
         if (lastView && lastView.isWindow) {

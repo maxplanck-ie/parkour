@@ -3,15 +3,14 @@ Ext.define('MainHub.store.requests.LibrariesInRequest', {
     storeId: 'librariesInRequestStore',
 
     requires: [
-        'MainHub.model.requests.LibrariesInRequest'
+        'MainHub.model.Record'
     ],
 
-    model: 'MainHub.model.requests.LibrariesInRequest',
+    model: 'MainHub.model.Record',
 
     proxy: {
         type: 'ajax',
-        url: 'request/libraries_and_samples/',
-        timeout: 1000000,
+        // timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"
         limitParam: false,  //to remove param "limit"
@@ -20,17 +19,6 @@ Ext.define('MainHub.store.requests.LibrariesInRequest', {
             type: 'json',
             rootProperty: 'data',
             successProperty: 'success'
-        }
-    },
-
-    listeners: {
-        load: function(store, records, success, operation) {
-            if (!success) {
-                var response = operation._response,
-                    obj = Ext.JSON.decode(response.responseText);
-                console.error('[ERROR]: get_libraries_in_request/: ' + obj.error);
-                console.error(response);
-            }
         }
     }
 });

@@ -1,3 +1,12 @@
+a {
+    color: $color-soft-cyan;
+    text-decoration: none;
+}
+
+hr {
+    border-top: 1px solid #ccc;
+}
+
 .x-title-icon-navigation {
     font-family: FontAwesome;
     color: #fff;
@@ -23,14 +32,13 @@
     right: -24px;
 }
 
-// TODO-me: fix `ui: 'header'`
-@include extjs-button-small-ui(
-    $ui: 'header',
-    $color: #999,
-    $glyph-color: #919191,
-    $background-color: transparent,
-    $border-width: 0
-);
+.x-grid-dirty-cell.no-dirty > .x-grid-cell-inner:after {
+    content: '';
+}
+
+.fa-lg {
+    line-height: 0.9em;
+}
 
 @include treelist-ui(
     $ui: 'navigation',
@@ -54,6 +62,7 @@
 
     // Taller line height
     $item-line-height : $panel-navigation-item-line-height,
+    // $item-line-height: 50px,
 
     $row-over-background-color: mix(white, $panel-navigation-background-color, 5%),
     $row-selected-background-color: mix(white, $panel-navigation-background-color, 10%),
@@ -82,6 +91,45 @@
     $row-indicator-over-color: transparent
 );
 
+//--------------------------------------------------------
+// Create classes for full-size responsive items
+.big-100 {
+    @include responsivecolumn-item(100%);
+}
+
+.big-60 {
+    @include responsivecolumn-item(60%);
+}
+
+.big-50 {
+    @include responsivecolumn-item(50%);
+}
+
+.big-40 {
+    @include responsivecolumn-item(40%);
+}
+
+.big-33 {
+    @include responsivecolumn-item(33.33%);
+}
+
+.big-20 {
+    @include responsivecolumn-item(20%);
+}
+
+//--------------------------------------------------------
+// And classes for small-size responsive items
+.x-responsivecolumn-small {
+    >.small-100 {
+        @include responsivecolumn-item(100%);
+    }
+    >.small-50 {
+        @include responsivecolumn-item(50%);
+    }
+}
+
+//--------------------------------------------------------
+
 .shadow {
     @include box-shadow(0 1px 2px 0 rgba(0,0,0,0.2));
 }
@@ -96,12 +144,26 @@
 
     .logo {
         line-height: 65px;
+        position: relative;
 
         img {
-            margin-left: 22px;
-            margin-right: 22px;
-            //top: 8px;
-            //position: relative;
+            margin-left: 17px;
+            margin-right: 17px;
+            position: absolute;
+            top: 17px;
+        }
+
+        .title {
+            font-weight: bold;
+            margin-left: 60px;
+        }
+    }
+}
+
+.main-logo.logo-collapsed {
+    .logo {
+        .title {
+            margin-left: 65px;
         }
     }
 }
@@ -127,3 +189,5 @@
 .panel-header-combobox > .x-form-item-label > span.x-form-item-label-inner {
     color: #fff;
 }
+
+@import "../../ui/Buttons";

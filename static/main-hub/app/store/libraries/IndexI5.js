@@ -10,7 +10,7 @@ Ext.define('MainHub.store.libraries.IndexI5', {
 
     proxy: {
         type: 'ajax',
-        url: 'get_index_i5/',
+        url: 'api/indices/i5/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"
@@ -20,17 +20,6 @@ Ext.define('MainHub.store.libraries.IndexI5', {
             type: 'json',
             rootProperty: 'data',
             successProperty: 'success'
-        }
-    },
-
-    listeners: {
-        load: function(store, records, success, operation) {
-            if (!success) {
-                var response = operation._response,
-                    obj = Ext.JSON.decode(response.responseText);
-                console.log('[ERROR]: get_index_i5(): ' + obj.error);
-                console.log(response);
-            }
         }
     }
 });

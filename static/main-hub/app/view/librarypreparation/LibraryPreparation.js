@@ -1,218 +1,235 @@
 Ext.define('MainHub.view.librarypreparation.LibraryPreparation', {
-    extend: 'Ext.container.Container',
-    xtype: 'library-preparation',
+  extend: 'Ext.container.Container',
+  xtype: 'preparation',
 
-    requires: [
-        'MainHub.view.librarypreparation.LibraryPreparationController',
-        'MainHub.view.librarypreparation.BenchtopProtocolWindow',
-        'Ext.ux.FiddleCheckColumn'
-    ],
+  requires: [
+    'MainHub.components.BaseGrid',
+    'MainHub.view.librarypreparation.LibraryPreparationController'
+  ],
 
-    controller: 'library-preparation',
+  controller: 'library-preparation',
 
-    anchor: '100% -1',
-    layout: 'fit',
+  anchor: '100% -1',
+  layout: 'fit',
 
-    items: [{
-        xtype: 'grid',
-        id: 'libraryPreparationTable',
-        itemId: 'libraryPreparationTable',
-        height: Ext.Element.getViewportHeight() - 64,
-        header: {
-            title: 'Library Preparation'
+  items: [{
+    xtype: 'basegrid',
+    id: 'library-preparation-grid',
+    itemId: 'library-preparation-grid',
+    store: 'LibraryPreparation',
+
+    header: {
+      title: 'Preparation',
+      items: [{
+        xtype: 'textfield',
+        itemId: 'search-field',
+        emptyText: 'Search',
+        width: 200
+      }]
+    },
+
+    customConfig: {
+      qualityCheckMenuOptions: ['passed', 'failed']
+    },
+
+    columns: {
+      defaults: {
+        width: 80
+      },
+      items: [
+        {
+          xtype: 'checkcolumn',
+          itemId: 'check-column',
+          dataIndex: 'selected',
+          resizable: false,
+          menuDisabled: true,
+          hideable: false,
+          // locked: true,
+          tdCls: 'no-dirty',
+          width: 35
         },
-        padding: 15,
-        viewConfig: {
-            markDirty: false
+        {
+          text: 'Request',
+          tooltip: 'Request ID',
+          dataIndex: 'request_name',
+          // locked: true,
+          width: 250
         },
-        plugins: [{
-                ptype: 'rowediting',
-                clicksToEdit: 2
-            },
-            {
-                ptype: 'bufferedrenderer',
-                trailingBufferZone: 100,
-                leadingBufferZone: 100
-            }
-        ],
-        features: [{
-            ftype: 'grouping',
-            groupHeaderTpl: '<strong>Protocol: {name}</strong>'
-        }],
-        store: 'libraryPreparationStore',
+        {
+          text: 'Pool',
+          tooltip: 'Pool ID',
+          dataIndex: 'pool_name',
+          width: 120
+        },
+        {
+          text: 'Name',
+          tooltip: 'Sample Name',
+          dataIndex: 'name',
+          minWidth: 200,
+          flex: 1
+        },
+        {
+          text: 'Barcode',
+          dataIndex: 'barcode',
+          resizable: false,
+          renderer: 'barcodeRenderer',
+          width: 95
+        },
+        {
+          text: 'Date',
+          dataIndex: 'create_time',
+          renderer: Ext.util.Format.dateRenderer('d.m.Y'),
+          width: 90
+        },
+        {
+          text: 'Protocol',
+          tooltip: 'Library Preparation Protocol',
+          dataIndex: 'library_protocol_name',
+          renderer: 'gridCellTooltipRenderer',
+          minWidth: 150
+        },
+        {
+          text: 'DF',
+          tooltip: 'Dilution Factor',
+          dataIndex: 'dilution_factor',
+          width: 60
+        },
+        {
+          text: 'ng/µl Sample',
+          tooltip: 'Concentration Sample (ng/µl)',
+          dataIndex: 'concentration_sample',
+          width: 105,
+          editor: {
+            xtype: 'numberfield',
+            decimalPrecision: 2,
+            minValue: 0
+          }
+        },
+        {
+          text: 'ng Start',
+          tooltip: 'Starting Amount (ng)',
+          dataIndex: 'starting_amount',
+          width: 100,
+          editor: {
+            xtype: 'numberfield',
+            decimalPrecision: 1,
+            minValue: 0
+          }
+        },
+        {
+          text: 'Spike-in',
+          tooltip: 'Spike-in Description',
+          dataIndex: 'spike_in_description',
+          editor: { xtype: 'textfield' },
+          width: 150
+        },
+        {
+          text: 'µl Spike-in',
+          tooltip: 'Spike-in Volume (µl)',
+          dataIndex: 'spike_in_volume',
+          width: 100,
+          editor: {
+            xtype: 'numberfield',
+            decimalPrecision: 1,
+            minValue: 0
+          }
+        },
+        {
+          text: 'Coord',
+          dataIndex: 'coordinate',
+          width: 65
+        },
+        {
+          text: 'I7 ID',
+          tooltip: 'Index I7 ID',
+          dataIndex: 'index_i7_id',
+          width: 90
+        },
+        {
+          text: 'I5 ID',
+          tooltip: 'Index I5 ID',
+          dataIndex: 'index_i5_id',
+          width: 90
+        },
+        {
+          text: 'Cycles',
+          tooltip: 'PCR Cycles',
+          dataIndex: 'pcr_cycles',
+          editor: {
+            xtype: 'numberfield',
+            allowDecimals: false,
+            minValue: 0
+          }
+        },
+        {
+          text: 'ng/µl Library',
+          tooltip: 'Concentration Library (ng/µl)',
+          dataIndex: 'concentration_library',
+          width: 100,
+          editor: {
+            xtype: 'numberfield',
+            minValue: 0
+          }
+        },
+        {
+          text: 'qPCR (nM)',
+          tooltip: 'qPCR Result (nM)',
+          dataIndex: 'qpcr_result',
+          width: 100,
+          editor: {
+            xtype: 'numberfield',
+            minValue: 0
+          }
+        },
+        {
+          text: 'bp',
+          tooltip: 'Mean Fragment Size (bp)',
+          dataIndex: 'mean_fragment_size',
+          editor: {
+            xtype: 'numberfield',
+            allowDecimals: false,
+            minValue: 0
+          }
+        },
+        {
+          text: 'nM',
+          tooltip: '(Concentration Library (ng/µl) / (650 * Size (bp))) * 10^6',
+          dataIndex: 'nM',
+          editor: {
+            xtype: 'numberfield',
+            minValue: 0
+          }
+        },
+        {
+          text: 'QC Comments',
+          tooltip: 'Incoming Libraries/Samples QC Comments',
+          dataIndex: 'comments_facility',
+          renderer: 'gridCellTooltipRenderer',
+          editor: { xtype: 'textfield' },
+          width: 150
+        },
+        {
+          text: 'Comments',
+          dataIndex: 'comments',
+          renderer: 'gridCellTooltipRenderer',
+          editor: { xtype: 'textfield' },
+          width: 150
+        }
+      ]
+    },
 
-        columns: [{
-                xtype: 'fiddlecheckcolumn',
-                text: 'Active',
-                dataIndex: 'active',
-                width: 40
-            },
-            {
-                text: 'Sample',
-                dataIndex: 'name',
-                width: 200
-            },
-            {
-                text: 'Barcode',
-                dataIndex: 'barcode',
-                width: 90
-            },
-            {
-                text: 'Concentration Sample (ng/µl)',
-                dataIndex: 'concentrationSample'
-            },
-            {
-                text: 'Protocol',
-                dataIndex: 'libraryProtocolName'
-            },
-            {
-                text: 'Starting Amount (ng)',
-                dataIndex: 'startingAmount',
-                editor: {
-                    xtype: 'numberfield',
-                    decimalPrecision: 1,
-                    minValue: 1
-                }
-            },
-            {
-                text: 'Starting Volume (ng)',
-                dataIndex: 'startingVolume',
-                editor: {
-                    xtype: 'numberfield',
-                    decimalPrecision: 1,
-                    minValue: 1
-                }
-            },
-            {
-                text: 'Spike-in Description',
-                dataIndex: 'spikeInDescription',
-                editor: {
-                    xtype: 'textarea'
-                }
-            },
-            {
-                text: 'Spike-in Volume (µl)',
-                dataIndex: 'spikeInVolume',
-                editor: {
-                    xtype: 'numberfield',
-                    decimalPrecision: 1,
-                    minValue: 1
-                }
-            },
-            {
-                text: 'µl Sample',
-                dataIndex: 'ulSample',
-                editor: {
-                    xtype: 'numberfield',
-                    decimalPrecision: 1,
-                    minValue: 0.1
-                }
-            },
-            {
-                text: 'µl Buffer',
-                dataIndex: 'ulBuffer',
-                editor: {
-                    xtype: 'numberfield',
-                    decimalPrecision: 1,
-                    minValue: 0.1
-                }
-            },
-            {
-                text: 'Index I7 ID',
-                dataIndex: 'indexI7Id'
-            },
-            {
-                text: 'Index I5 ID',
-                dataIndex: 'indexI5Id'
-            },
-            {
-                text: 'PCR Cycles',
-                dataIndex: 'pcrCycles',
-                editor: {
-                    xtype: 'numberfield',
-                    allowDecimals: false,
-                    minValue: 1
-                }
-            },
-            {
-                text: 'Concentration Library (ng/µl)',
-                dataIndex: 'concentrationLibrary',
-                editor: {
-                    xtype: 'numberfield',
-                    minValue: 1
-                }
-            },
-            {
-                text: 'Mean Fragment Size (bp)',
-                dataIndex: 'meanFragmentSize',
-                editor: {
-                    xtype: 'numberfield',
-                    allowDecimals: false,
-                    minValue: 1
-                }
-            },
-            {
-                text: 'nM',
-                dataIndex: 'nM',
-                editor: {
-                    xtype: 'numberfield',
-                    minValue: 1
-                }
-            },
-            {
-                text: 'File',
-                dataIndex: 'file',
-                width: 45,
-                renderer: function(value) {
-                    return (value !== '') ? '<a class="library-preparation-download" href="' +
-                        value + '">' + '<i class="fa fa-download" aria-hidden="true"></i></a>' : '';
-                }
-            },
-            {
-                text: 'QC Result',
-                dataIndex: 'qcResult',
-                editor: {
-                    xtype: 'combobox',
-                    queryMode: 'local',
-                    displayField: 'name',
-                    valueField: 'id',
-                    store: Ext.create('Ext.data.Store', {
-                        fields: [{
-                                name: 'id',
-                                type: 'int'
-                            },
-                            {
-                                name: 'name',
-                                type: 'string'
-                            }
-                        ],
-                        data: [{
-                                id: 1,
-                                name: 'passed'
-                            },
-                            {
-                                id: 2,
-                                name: 'failed'
-                            }
-                        ]
-                    }),
-                    forceSelection: true
-                }
-            }
-        ],
-        dockedItems: [{
-            xtype: 'toolbar',
-            dock: 'bottom',
-            items: [
-                '->',
-                {
-                    xtype: 'button',
-                    id: 'downloadBenchtopProtocolLPBtn',
-                    itemId: 'downloadBenchtopProtocolLPBtn',
-                    text: 'Download Benchtop Protocol as XLS',
-                    disabled: true
-                }
-            ]
-        }]
+    features: [{
+      ftype: 'grouping',
+      startCollapsed: true,
+      enableGroupingMenu: false,
+      groupHeaderTpl: [
+        '<strong>Protocol: {children:this.getName} (# of libraries: {children.length})</strong>',
+        {
+          getName: function (children) {
+            return children[0].get('library_protocol_name');
+          }
+        }
+      ]
     }]
+  }]
 });

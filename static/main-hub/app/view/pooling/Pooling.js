@@ -1,211 +1,202 @@
 Ext.define('MainHub.view.pooling.Pooling', {
-    extend: 'Ext.container.Container',
-    xtype: 'pooling',
+  extend: 'Ext.container.Container',
+  xtype: 'pooling',
 
-    requires: [
-        'MainHub.view.pooling.PoolingController',
-        'Ext.ux.FiddleCheckColumn'
+  requires: [
+    'MainHub.components.BaseGrid',
+    'MainHub.view.pooling.PoolingController'
+  ],
+
+  controller: 'pooling',
+
+  anchor: '100% -1',
+  layout: 'fit',
+
+  items: [{
+    xtype: 'basegrid',
+    id: 'pooling-grid',
+    itemId: 'pooling-grid',
+    store: 'Pooling',
+    height: Ext.Element.getViewportHeight() - 64,
+
+    header: {
+      title: 'Pooling',
+      items: [{
+        xtype: 'textfield',
+        itemId: 'search-field',
+        emptyText: 'Search',
+        width: 200
+      }]
+    },
+
+    customConfig: {
+      qualityCheckMenuOptions: ['passed', 'failed']
+    },
+
+    viewConfig: {
+      stripeRows: false,
+      getRowClass: function (record) {
+        var rowClass = '';
+        if (
+          record.get('record_type') === 'Sample' &&
+          (record.get('status') === 2 || record.get('status') === -2)
+        ) {
+          rowClass = 'library-not-prepared';
+        }
+        return rowClass;
+      }
+    },
+
+    columns: [
+      {
+        xtype: 'checkcolumn',
+        itemId: 'check-column',
+        dataIndex: 'selected',
+        resizable: false,
+        menuDisabled: true,
+        hideable: false,
+        tdCls: 'no-dirty',
+        width: 35
+      },
+      {
+        text: 'Request',
+        tooltip: 'Request ID',
+        dataIndex: 'request_name',
+        menuDisabled: true,
+        hideable: false,
+        minWidth: 200,
+        flex: 1
+      },
+      {
+        text: 'Name',
+        tooltip: 'Library Name',
+        dataIndex: 'name',
+        menuDisabled: true,
+        hideable: false,
+        minWidth: 200,
+        flex: 1
+      },
+      {
+        text: 'Barcode',
+        dataIndex: 'barcode',
+        resizable: false,
+        menuDisabled: true,
+        hideable: false,
+        renderer: 'barcodeRenderer',
+        width: 95
+      },
+      {
+        text: 'Date',
+        dataIndex: 'create_time',
+        width: 90,
+        renderer: Ext.util.Format.dateRenderer('d.m.Y')
+      },
+      {
+        text: 'ng/µl',
+        tooltip: 'Concentration Library (ng/µl)',
+        dataIndex: 'concentration_library',
+        width: 100
+      },
+      {
+        text: 'bp',
+        tooltip: 'Mean Fragment Size (bp)',
+        dataIndex: 'mean_fragment_size',
+        width: 75
+      },
+      {
+        text: 'Coord',
+        dataIndex: 'coordinate',
+        width: 65
+      },
+      {
+        text: 'I7 ID',
+        tooltip: 'Index I7 ID',
+        dataIndex: 'index_i7_id',
+        width: 90
+      },
+      {
+        text: 'Index I7',
+        dataIndex: 'index_i7',
+        width: 90
+      },
+      {
+        text: 'I5 ID',
+        tooltip: 'Index I5 ID',
+        dataIndex: 'index_i5_id',
+        width: 90
+      },
+      {
+        text: 'Index I5',
+        dataIndex: 'index_i5',
+        width: 90
+      },
+      {
+        text: 'nM C1',
+        tooltip: 'Library Concentration C1 (nM)',
+        dataIndex: 'concentration_c1',
+        editor: {
+          xtype: 'numberfield',
+          decimalPrecision: 1,
+          minValue: 0
+        },
+        width: 100
+      },
+      {
+        text: 'Depth (M)',
+        tooltip: 'Sequencing Depth (M)',
+        dataIndex: 'sequencing_depth',
+        width: 90
+      },
+      {
+        text: '%',
+        tooltip: '% library in Pool',
+        dataIndex: 'percentage_library',
+        width: 55
+      }
+
     ],
 
-    controller: 'pooling',
+    features: [{
+      ftype: 'grouping',
+      startCollapsed: true,
+      enableGroupingMenu: false,
+      groupHeaderTpl: [
+        '<strong class="{children:this.getHeaderClass}">' +
+          '{children:this.getName} | Pool Size: {children:this.getRealPoolSize} M reads ' +
+          '{children:this.getPoolSize}| Comment: {children:this.getComment} ' +
+        '</strong>',
+        {
+          getHeaderClass: function (children) {
+            var cls = 'pool-header-green';
+            var numMissingSamples = 0;
 
-    anchor: '100% -1',
-    layout: 'fit',
+            Ext.each(children, function (item, index) {
+              if (item.get('record_type') === 'Sample' && item.get('status') < 3) {
+                numMissingSamples++;
+              }
+            });
 
-    items: [{
-        xtype: 'grid',
-        id: 'poolingTable',
-        itemId: 'poolingTable',
-        height: Ext.Element.getViewportHeight() - 64,
-        header: {
-            title: 'Pooling'
-        },
-        padding: 15,
-        viewConfig: {
-            markDirty: false
-        },
-        plugins: [{
-                ptype: 'rowediting',
-                clicksToEdit: 1,
-                autoUpdate: true
-            },
-            {
-                ptype: 'bufferedrenderer',
-                trailingBufferZone: 100,
-                leadingBufferZone: 100
+            if (numMissingSamples > 0) {
+              cls = 'pool-header-red';
             }
-        ],
-        features: [{
-            ftype: 'grouping',
-            collapsible: false,
-            groupHeaderTpl: [
-                '<strong>Pool: {name} | Pool size: {children:this.poolSize} M reads | Pool volume: {children:this.poolVolume} {children:this.renderDownloadBtn}</strong>',
-                {
-                    poolSize: function(children) {
-                        return Ext.sum(
-                            Ext.pluck(
-                                Ext.pluck(children, 'data'), 'sequencingDepth'
-                            )
-                        );
-                    },
-                    poolVolume: function(children) {
-                        return children.length * 10;
-                    },
-                    renderDownloadBtn: function(children) {
-                        var url = children[0].get('file');
 
-                        return (url !== '') ? '<span class="download-pooling-template"><a href="' + url +
-                            '">' + '<i class="fa fa-download" aria-hidden="true"></i></a></span>' : '';
-                    }
-                }
-            ]
-        }],
-        store: 'poolingStore',
-        columns: [{
-                xtype: 'fiddlecheckcolumn',
-                text: 'Active',
-                dataIndex: 'active',
-                width: 40
-            },
-            {
-                text: 'Request',
-                dataIndex: 'requestName',
-                flex: 1
-            },
-            {
-                text: 'Library',
-                dataIndex: 'name',
-                flex: 1
-            },
-            {
-                text: 'Barcode',
-                dataIndex: 'barcode',
-                width: 90
-            },
-            {
-                text: 'Library Concentration (ng/µl)',
-                dataIndex: 'concentration',
-                editor: {
-                    xtype: 'numberfield',
-                    hideTrigger: true,
-                    minValue: 1
-                },
-                flex: 1
-            },
-            {
-                text: 'Mean Fragment Size (bp)',
-                dataIndex: 'meanFragmentSize',
-                flex: 1
-            },
-            {
-                text: 'Library Concentration C1 (nM)',
-                dataIndex: 'concentrationC1',
-                editor: {
-                    xtype: 'numberfield',
-                    minValue: 1
-                },
-                flex: 1
-            },
-            {
-                text: 'Sequencing Depth (M)',
-                dataIndex: 'sequencingDepth',
-                flex: 1
-            },
-            {
-                text: 'Normalized Library Concentration C2 (nM)',
-                dataIndex: 'concentrationC2',
-                editor: {
-                    xtype: 'numberfield',
-                    decimalPrecision: 1,
-                    minValue: 1
-                },
-                flex: 1
-            },
-            {
-                text: 'Sample Volume V1 (µl)',
-                dataIndex: 'sampleVolume',
-                editor: {
-                    xtype: 'numberfield',
-                    decimalPrecision: 1,
-                    minValue: 0.1
-                },
-                flex: 1
-            },
-            {
-                text: 'Buffer Volume V2 (µl)',
-                dataIndex: 'bufferVolume',
-                editor: {
-                    xtype: 'numberfield',
-                    decimalPrecision: 1,
-                    minValue: 0.1
-                },
-                flex: 1
-            },
-            {
-                text: '% library in Pool',
-                dataIndex: 'percentageLibrary',
-                renderer: function(val) {
-                    return val + '%';
-                },
-                flex: 1
-            },
-            {
-                text: 'Volume to Pool',
-                dataIndex: 'volumeToPool',
-                flex: 1
-            },
-            {
-                text: 'QC Result',
-                dataIndex: 'qcResult',
-                editor: {
-                    xtype: 'combobox',
-                    queryMode: 'local',
-                    displayField: 'name',
-                    valueField: 'id',
-                    store: Ext.create('Ext.data.Store', {
-                        fields: [{
-                                name: 'id',
-                                type: 'int'
-                            },
-                            {
-                                name: 'name',
-                                type: 'string'
-                            }
-                        ],
-                        data: [{
-                                id: 1,
-                                name: 'passed'
-                            },
-                            {
-                                id: 2,
-                                name: 'failed'
-                            }
-                        ]
-                    }),
-                    forceSelection: true
-                }
-            }
-        ],
-        dockedItems: [{
-            xtype: 'toolbar',
-            dock: 'bottom',
-            items: [
-                '->',
-                {
-                    xtype: 'button',
-                    id: 'downloadBenchtopProtocolPBtn',
-                    itemId: 'downloadBenchtopProtocolPBtn',
-                    text: 'Download Benchtop Protocol',
-                    disabled: true
-                },
-                {
-                    xtype: 'button',
-                    id: 'downloadPoolingTemplateBtn',
-                    itemId: 'downloadPoolingTemplateBtn',
-                    text: 'Download Template QC Normalization and Pooling',
-                    disabled: true
-                }
-            ]
-        }]
+            return cls;
+          },
+          getComment: function(children){
+            return children[0].get('comment')
+
+          },
+          getName: function (children) {
+            return children[0].get('pool_name');
+          },
+          getRealPoolSize: function (children) {
+            return Ext.sum(Ext.pluck(Ext.pluck(children, 'data'), 'sequencing_depth'));
+          },
+          getPoolSize: function (children) {
+            return Ext.String.format('({0})', children[0].get('pool_size'));
+          }
+        }
+      ]
     }]
+  }]
 });

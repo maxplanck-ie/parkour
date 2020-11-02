@@ -1,42 +1,111 @@
+import json
+from datetime import datetime
+
 from django.test import TestCase
-from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 
-from .models import SampleProtocol, NucleicAcidType, FileSample, Sample
-from library_sample_shared.models import (Organism, ConcentrationMethod,
-                                          ReadLength)
-import tempfile
+from common.tests import BaseTestCase
+from common.utils import get_random_name
+
+from request.models import Request
+from library_sample_shared.models import (
+    Organism,
+    ConcentrationMethod,
+    ReadLength,
+    LibraryProtocol,
+    LibraryType,
+    BarcodeCounter,
+)
+
+from .models import NucleicAcidType, Sample
 
 User = get_user_model()
 
 
+def create_sample(name, status=0, save=True, read_length=None,
+                  index_type=None):
+    organism = Organism(name='Organism')
+    organism.save()
+
+    concentration_method = ConcentrationMethod(name='Concentration Method')
+    concentration_method.save()
+
+    if read_length is None:
+        read_length = ReadLength(name='Read Length')
+        read_length.save()
+
+    library_protocol = LibraryProtocol(
+        name='Protocol',
+        type='DNA',
+        provider='-',
+        catalog='-',
+        explanation='-',
+        input_requirements='-',
+        typical_application='-',
+    )
+    library_protocol.save()
+
+    library_type = LibraryType(name='Library Type')
+    library_type.save()
+    library_type.library_protocol.add(library_protocol)
+
+    nat = NucleicAcidType(name='Nucleic Acid Type')
+    nat.save()
+
+    sample = Sample(
+        name=name,
+        status=status,
+        organism_id=organism.pk,
+        concentration=1.0,
+        concentration_method_id=concentration_method.pk,
+        read_length_id=read_length.pk,
+        sequencing_depth=1,
+        library_protocol_id=library_protocol.pk,
+        library_type_id=library_type.pk,
+        nucleic_acid_type_id=nat.pk,
+    )
+
+    if index_type:
+        sample.index_type = index_type
+
+    if save:
+        sample.save()
+
+    return sample
+
+
 # Models
 
-class SampleProtocolTest(TestCase):
-    def setUp(self):
-        self.sample_protocol = SampleProtocol(
-            name='Protocol',
-            provider='',
-            catalog='',
-            explanation='',
-            input_requirements='',
-            typical_application='',
-        )
+class TestSampleModel(TestCase):
 
-    def test_sample_protocol_name(self):
-        self.assertTrue(isinstance(self.sample_protocol, SampleProtocol))
-        self.assertEqual(
-            self.sample_protocol.__str__(),
-            self.sample_protocol.name,
-        )
+    def setUp(self):
+        self.sample = create_sample(get_random_name(), save=False)
+
+    def test_barcode_generation(self):
+        """
+        Ensure the barcode counter is incremented and is assigned to a
+        new sample.
+        """
+        prev_counter = BarcodeCounter.load().last_id
+        self.assertEqual(self.sample.barcode, '')
+        self.sample.save()
+
+        new_counter = BarcodeCounter.load().last_id
+        self.assertEqual(new_counter, prev_counter + 1)
+
+        barcode = datetime.now().strftime('%y') + 'S'
+        barcode += '0' * (6 - len(str(new_counter))) + str(new_counter)
+
+        updated_sample = Sample.objects.get(pk=self.sample.pk)
+        self.assertEqual(updated_sample.barcode, barcode)
 
 
 class NucleicAcidTypeTest(TestCase):
     def setUp(self):
         self.nucleic_acid_type = NucleicAcidType(name='NAT')
 
-    def test_sample_protocol_name(self):
+    def test_nucleic_acid_type_name(self):
         self.assertTrue(isinstance(self.nucleic_acid_type, NucleicAcidType))
         self.assertEqual(
             self.nucleic_acid_type.__str__(),
@@ -44,263 +113,237 @@ class NucleicAcidTypeTest(TestCase):
         )
 
 
-class FileSampleTest(TestCase):
-    def setUp(self):
-        tmp_file = tempfile.NamedTemporaryFile()
-        self.file = FileSample(name='File', file=tmp_file)
-        tmp_file.close()
-
-    def test_file_sample(self):
-        self.assertTrue(isinstance(self.file, FileSample))
-        self.assertEqual(self.file.__str__(), self.file.name)
-
-
 # Views
 
-class GetNucleicAcidTypesTest(TestCase):
+class TestNucleicAcidTypes(BaseTestCase):
     def setUp(self):
-        User.objects.create_user(email='foo@bar.io', password='foo-foo')
-
-    def test_nucleic_acid_types(self):
+        self.create_user('foo@bar.io', 'foo-foo')
         self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.get(reverse('get_nucleic_acid_types'))
+        self.na_type = NucleicAcidType(name=self._get_random_name())
+        self.na_type.save()
+
+    def test_nucleic_acid_type_list(self):
+        """ Ensure get nucleic acid types behaves correctly. """
+        response = self.client.get(reverse('nucleic-acid-type-list'))
+        data = response.json()
+        na_types = [x['name'] for x in data]
         self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(len(response.content), b'[]')
+        self.assertIn(self.na_type.name, na_types)
 
 
-class GetSampleProtocolsTest(TestCase):
+class TestSamples(BaseTestCase):
+    """ Tests for samples. """
+
     def setUp(self):
-        User.objects.create_user(email='foo@bar.io', password='foo-foo')
-
-    def test_nucleic_acid_types(self):
+        self.user = self.create_user('foo@bar.io', 'foo-foo')
         self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.get(reverse('get_sample_protocols'), {
-            'type': 'DNA'
+
+        self.sample = create_sample(self._get_random_name())
+        self.request = Request(user=self.user)
+        self.request.save()
+        self.request.samples.add(self.sample)
+
+    def test_single_sample(self):
+        """ Ensure get single sample behaves correctly. """
+        response = self.client.get(reverse(
+            'samples-detail',
+            kwargs={'pk': self.sample.pk},
+        ))
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.sample.name, data['name'])
+
+    def test_single_sample_invalid_id(self):
+        """ Ensure error is thrown if the id does not exist. """
+        response = self.client.get(reverse(
+            'samples-detail',
+            kwargs={'pk': -1},
+        ))
+        self.assertEqual(response.status_code, 404)
+
+    def test_multiple_samples(self):
+        """ Ensure get multiple samples behaves correctly. """
+        sample1 = create_sample(get_random_name())
+        sample2 = create_sample(get_random_name())
+        sample3 = create_sample(get_random_name())
+
+        request = Request(user=self.user)
+        request.save()
+        request.samples.add(*[sample1.pk, sample2.pk, sample3.pk])
+
+        response = self.client.get(reverse('samples-list'), {
+            'request_id': request.pk,
+            'ids': json.dumps([sample1.pk, sample2.pk])
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['success'])
+        samples = [x['name'] for x in data['data']]
+        self.assertIn(sample1.name, samples)
+        self.assertIn(sample2.name, samples)
+        self.assertNotIn(sample3.name, samples)
+
+    def test_multiple_sample_contains_invalid(self):
+        """
+        Ensure get multiple samples containing invalid ids behaves correctly.
+        """
+        sample = create_sample(get_random_name())
+
+        request = Request(user=self.user)
+        request.save()
+        request.samples.add(sample)
+
+        response = self.client.get(reverse('samples-list'), {
+            'request_id': request.pk,
+            'ids': json.dumps([sample.pk, 'blah'])
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(data['success'])
+        self.assertEqual(data['message'], 'Invalid payload.')
+
+    def test_add_sample(self):
+        """ Ensure add sample behaves correctly. """
+        name = self._get_random_name()
+        response = self.client.post(reverse('samples-list'), {
+            'data': json.dumps([{
+                'name': name,
+                'organism': self.sample.organism.pk,
+                'concentration': 1.0,
+                'concentration_method': self.sample.concentration_method.pk,
+                'read_length': self.sample.read_length.pk,
+                'sequencing_depth': 1,
+                'library_protocol': self.sample.library_protocol.pk,
+                'library_type': self.sample.library_type.pk,
+                'nucleic_acid_type': self.sample.nucleic_acid_type.pk,
+            }])
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(data['success'])
+        self.assertEqual(name, data['data'][0]['name'])
+        self.assertEqual('Sample', data['data'][0]['record_type'])
+
+    def test_add_sample_contains_invalid(self):
+        """ Ensure add sample containing invalid data behaves correctly. """
+        name = self._get_random_name()
+        response = self.client.post(reverse('samples-list'), {
+            'data': json.dumps([{
+                'name': name,
+                'organism': self.sample.organism.pk,
+                'concentration': 1.0,
+                'concentration_method': self.sample.concentration_method.pk,
+                'read_length': self.sample.read_length.pk,
+                'sequencing_depth': 1,
+                'library_protocol': self.sample.library_protocol.pk,
+                'library_type': self.sample.library_type.pk,
+                'nucleic_acid_type': self.sample.nucleic_acid_type.pk,
+            }, {
+                'name': self._get_random_name(),
+                'concentration': 1.0,
+                'sequencing_depth': 1,
+            }])
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(data['success'])
+        self.assertIn('Invalid payload. Some records cannot be added.',
+                      data['message'])
+        self.assertEqual(len(data['data']), 1)
+        self.assertEqual(name, data['data'][0]['name'])
+
+    def test_add_sample_invalid_json(self):
+        """ Ensure error is thrown if the JSON object is empty. """
+        response = self.client.post(reverse('samples-list'), {})
+        data = response.json()
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(data['success'])
+        self.assertIn('Invalid payload.', data['message'])
+
+    def test_add_sample_invalid_data(self):
+        """ Ensure error is thrown if the JSON object contains invalid data."""
+        response = self.client.post(reverse('samples-list'), {
+            'data': json.dumps([{
+                'name': self._get_random_name(),
+            }])
+        })
+        data = response.json()
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(data['success'])
+        self.assertIn('Invalid payload.', data['message'])
+
+    def test_update_sample(self):
+        """ Ensure update sample behaves correctly. """
+        sample = create_sample(self._get_random_name())
+        new_name = self._get_random_name()
+
+        response = self.client.post(reverse('samples-edit'), {
+            'data': json.dumps([{
+                'pk': sample.pk,
+                'name': new_name,
+                'organism': sample.organism.pk,
+                'concentration': 1.0,
+                'concentration_method': sample.concentration_method.pk,
+                'read_length': sample.read_length.pk,
+                'sequencing_depth': 1,
+                'library_protocol': sample.library_protocol.pk,
+                'library_type': sample.library_type.pk,
+                'nucleic_acid_type': sample.nucleic_acid_type.pk,
+            }])
         })
         self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(response.content, b'[]')
+        self.assertTrue(response.json()['success'])
+        self.assertEqual(Sample.objects.get(pk=sample.pk).name, new_name)
 
-    def test_wrong_http_method(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('get_sample_protocols'))
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, b'[]')
+    def test_update_sample_contains_invalid(self):
+        """ Ensure update sample containing invalid data behaves correctly. """
+        sample1 = create_sample(self._get_random_name())
+        sample2 = create_sample(self._get_random_name())
+        new_name1 = self._get_random_name()
+        new_name2 = self._get_random_name()
 
-    def test_missing_sample_type(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.get(reverse('get_sample_protocols'))
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, b'[]')
-
-
-class SaveSampleTest(TestCase):
-    def setUp(self):
-        User.objects.create_user(email='foo@bar.io', password='foo-foo')
-
-        self.sample_protocol = SampleProtocol(
-            name='Protocol',
-            provider='',
-            catalog='',
-            explanation='',
-            input_requirements='',
-            typical_application='',
-        )
-        self.sample_protocol.save()
-
-        self.nucleic_acid_type = NucleicAcidType(name='NAT')
-        self.nucleic_acid_type.save()
-
-        self.organism = Organism(name='Human')
-        self.organism.save()
-
-        self.method = ConcentrationMethod(name='fluorography')
-        self.method.save()
-
-        self.read_length = ReadLength(name='1x50')
-        self.read_length.save()
-
-        self.f_1 = FileSample(name='File1', file=ContentFile(b'file1'))
-        self.f_2 = FileSample(name='File2', file=ContentFile(b'file2'))
-        self.f_1.save()
-        self.f_2.save()
-
-        self.test_sample = Sample(
-            name='Sample_edit',
-            organism_id=self.organism.pk,
-            dna_dissolved_in='dna',
-            concentration=1.0,
-            concentration_method_id=self.method.pk,
-            sample_volume=1,
-            read_length_id=self.read_length.pk,
-            sequencing_depth=1,
-            nucleic_acid_type_id=self.nucleic_acid_type.pk,
-            sample_protocol_id=self.sample_protocol.pk,
-        )
-        self.test_sample.save()
-        self.test_sample.files.add(*[self.f_1.pk, self.f_2.pk])
-
-    def test_save_ok(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('save_sample'), {
-            'mode': 'add',
-            'name': 'Sample_add',
-            'organism': self.organism.pk,
-            'dna_dissolved_in': 'dna',
-            'concentration': 1.0,
-            'concentration_method': self.method.pk,
-            'sample_volume': 1,
-            'read_length': self.read_length.pk,
-            'sequencing_depth': 1,
-            'nucleic_acid_type': self.nucleic_acid_type.pk,
-            'sample_protocol': self.sample_protocol.pk,
-            'files': '[%s]' % self.f_1.pk
+        response = self.client.post(reverse('samples-edit'), {
+            'data': json.dumps([{
+                'pk': sample1.pk,
+                'name': new_name1,
+                'organism': sample1.organism.pk,
+                'concentration': 1.0,
+                'concentration_method': sample1.concentration_method.pk,
+                'read_length': sample1.read_length.pk,
+                'sequencing_depth': 1,
+                'library_protocol': sample1.library_protocol.pk,
+                'library_type': sample1.library_type.pk,
+                'nucleic_acid_type': sample1.nucleic_acid_type.pk,
+            }, {
+                'pk': sample2.pk,
+                'name': new_name2,
+                'sample_id': sample2.pk,
+                'concentration': 1.0,
+                'sequencing_depth': 1,
+            }])
         })
+        data = response.json()
         self.assertEqual(response.status_code, 200)
-        sample = Sample.objects.get(name='Sample_add')
-        self.assertJSONEqual(str(response.content, 'utf-8'), {
-            'success': True,
-            'error': '',
-            'data': {
-                'name': sample.name,
-                'sampleId': sample.pk,
-                'barcode': sample.barcode,
-                'recordType': 'S',
-            },
-        })
-
-    def test_missing_or_invalid_fields(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('save_sample'), {
-            'mode': 'add',  # works for 'edit' too
-            'name': 'Sample',
-        })
-        self.assertEqual(response.status_code, 200)
-
-    def test_edit_ok(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('save_sample'), {
-            'mode': 'edit',
-            'sample_id': self.test_sample.pk,
-            'name': 'Sample_edit_new',
-            'organism': self.organism.pk,
-            'equal_representation_nucleotides': 'false',
-            'dna_dissolved_in': '1',
-            'concentration': '1.0',
-            'concentration_method': self.method.pk,
-            'sample_volume': '1',
-            'read_length': self.read_length.pk,
-            'sequencing_depth': '1',
-            'nucleic_acid_type': self.nucleic_acid_type.pk,
-            'sample_protocol': self.sample_protocol.pk,
-            'comments': '',
-            'files': '[%s]' % self.f_1.pk,
-        })
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(str(response.content, 'utf-8'), {
-            'success': True,
-            'error': '',
-            'data': [],
-        })
-
-    def test_wrong_http_method(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.get(reverse('save_sample'))
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(str(response.content, 'utf-8'), {
-            'success': False,
-            'error': 'Wrong HTTP method.',
-            'data': [],
-        })
-
-    def test_wrong_or_missing_mode(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('save_sample'))
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(str(response.content, 'utf-8'), {
-            'success': False,
-            'error': 'Wrong or missing mode.',
-            'data': [],
-        })
-
-    def test_missing_or_empty_sample_id(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('save_sample'), {'mode': 'edit'})
-        self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(response.content, b'[]')
-
-    def test_non_existing_library_id(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('save_sample'), {
-            'mode': 'edit',
-            'sample_id': '-1',
-        })
-        self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(response.content, b'[]')
-
-
-class UploadFilesTest(TestCase):
-    def setUp(self):
-        User.objects.create_user(email='foo@bar.io', password='foo-foo')
-
-    def test_upload_files(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        tmp_file = tempfile.NamedTemporaryFile()
-        with open(tmp_file.name, 'rb') as fp:
-            response = self.client.post(reverse('sample.upload_files'), {
-                'files': [fp]
-            }, format='miltipart')
-        tmp_file.close()
-        self.assertEqual(response.status_code, 200)
-
-
-class GetFilesTest(TestCase):
-    def setUp(self):
-        User.objects.create_user(email='foo@bar.io', password='foo-foo')
-
-        # TODO@me: fix creating a file, which must be physically located on a disk
-        self.f = FileSample(name='File', file=ContentFile(b'file'))
-        self.f.save()
-
-    def test_get_files(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.get(reverse('sample.get_files'), {
-            # 'file_ids': '[%s]' % self.f.pk
-        })
-        self.assertEqual(response.status_code, 200)
-
-
-class DeleteSampleTest(TestCase):
-    def setUp(self):
-        User.objects.create_user(email='foo@bar.io', password='foo-foo')
-        self.sample = Sample.get_test_sample('Sample')
-        self.sample.save()
+        self.assertTrue(data['success'])
+        self.assertIn('Invalid payload. Some records cannot be updated.',
+                      data['message'])
+        self.assertEqual(Sample.objects.get(pk=sample1.pk).name, new_name1)
+        self.assertEqual(Sample.objects.get(
+            pk=sample2.pk).name, sample2.name)
 
     def test_delete_sample(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('delete_sample'), {
-            'record_id': self.sample.pk
-        })
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(str(response.content, 'utf-8'), {
-            'success': True, 'error': '',
-        })
+        """ Ensure delete sample behaves correctly. """
+        sample = create_sample(self._get_random_name())
+        response = self.client.delete(reverse(
+            'samples-detail',
+            kwargs={'pk': sample.pk},
+        ))
+        self.assertEqual(response.status_code, 204)
 
-    def test_wrong_http_method(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.get(reverse('delete_sample'))
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(str(response.content, 'utf-8'), {
-            'success': False, 'error': 'Wrong HTTP method.',
-        })
-
-    def test_missing_or_empty_record_id(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('delete_sample'))
-        self.assertEqual(response.status_code, 200)
-
-    def test_non_existing_record_id(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
-        response = self.client.post(reverse('delete_sample'), {
-            'record_id': '-1'
-        })
-        self.assertEqual(response.status_code, 200)
+    def test_delete_sample_incorrect_id(self):
+        """ Ensure error is thrown if the id does not exist. """
+        response = self.client.delete(reverse(
+            'samples-detail',
+            kwargs={'pk': -1},
+        ))
+        self.assertEqual(response.status_code, 404)

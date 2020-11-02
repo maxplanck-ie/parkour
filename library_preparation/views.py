@@ -1,203 +1,180 @@
-from django.conf import settings
-from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
-
-from library_sample_shared.models import IndexI7, IndexI5
-from sample.models import Sample
-from pooling.models import Pooling
-from .models import LibraryPreparation
-from .forms import LibraryPreparationForm
-
 import logging
 import json
-import xlwt
+
+from django.apps import apps
+from django.db.models import Q
+from django.http import HttpResponse
+
+from rest_framework import viewsets
+from rest_framework.response import Response
+from rest_framework.decorators import action
+# from rest_framework.decorators import authentication_classes
+from rest_framework.permissions import IsAdminUser
+
+from xlwt import Workbook, XFStyle, Formula
+
+from common.views import CsrfExemptSessionAuthentication
+from common.mixins import MultiEditMixin
+
+from .models import LibraryPreparation
+from .serializers import LibraryPreparationSerializer
+
+Request = apps.get_model('request', 'Request')
+IndexType = apps.get_model('library_sample_shared', 'IndexType')
+IndexPair = apps.get_model('library_sample_shared', 'IndexPair')
+IndexI7 = apps.get_model('library_sample_shared', 'IndexI7')
+IndexI5 = apps.get_model('library_sample_shared', 'IndexI5')
+Pool = apps.get_model('index_generator', 'Pool')
+Sample = apps.get_model('sample', 'Sample')
 
 logger = logging.getLogger('db')
 
 
-@login_required
-def get_all(request):
-    """ Get the list of all samples for Library Preparation. """
-    error = ''
-    data = []
+class LibraryPreparationViewSet(MultiEditMixin, viewsets.ReadOnlyModelViewSet):
+    permission_classes = [IsAdminUser]
+    # authentication_classes = [CsrfExemptSessionAuthentication]
+    serializer_class = LibraryPreparationSerializer
 
-    objects = LibraryPreparation.objects.select_related('sample')
+    def get_queryset(self):
+        return LibraryPreparation.objects.select_related(
+            'sample',
+            'sample__index_type',
+            'sample__library_protocol',
+        ).prefetch_related(
+            'sample__index_type__indices_i7',
+            'sample__index_type__indices_i5',
+        ).filter(Q(sample__status=2) | Q(sample__status=-2))
 
-    for obj in objects:
-        if not request.user.is_staff:
-            user_id = obj.sample.request.get().user_id
-            if user_id != request.user.id:
-                obj = None
+    def get_context(self, queryset):
+        sample_ids = queryset.values_list('sample', flat=True)
 
-        if obj and obj.sample.status == 2:
-            index_i7 = IndexI7.objects.get(
-                index=obj.sample.index_i7,
-                index_type_id=obj.sample.index_type_id
-            )
-            index_i7_id = index_i7.index_id
+        # Get Requests
+        requests = Request.objects.filter(
+            samples__pk__in=sample_ids).distinct().values('name', 'samples')
+        requests_map = {x['samples']: x['name'] for x in requests}
 
-            try:
-                index_i5 = IndexI5.objects.get(
-                    index=obj.sample.index_i5,
-                    index_type_id=obj.sample.index_type_id
-                )
-                index_i5_id = index_i5.index_id
-            except IndexI5.DoesNotExist:
-                index_i5_id = ''
+        # Get Pools
+        pools = Pool.objects.filter(
+            samples__pk__in=sample_ids).distinct().values('name', 'samples')
+        pools_map = {x['samples']: x['name'] for x in pools}
 
-            data.append({
-                'active': False,
-                'name': obj.sample.name,
-                'sampleId': obj.sample.id,
-                'barcode': obj.sample.barcode,
-                'libraryProtocol': obj.sample.sample_protocol.id,
-                'libraryProtocolName': obj.sample.sample_protocol.name,
-                'concentrationSample': obj.sample.concentration,
-                'startingAmount': obj.starting_amount,
-                'startingVolume': obj.starting_volume,
-                'spikeInDescription': obj.spike_in_description,
-                'spikeInVolume': obj.spike_in_volume,
-                'ulSample': obj.ul_sample,
-                'ulBuffer': obj.ul_buffer,
-                'indexI7Id': index_i7_id,
-                'indexI5Id': index_i5_id,
-                'pcrCycles': obj.pcr_cycles,
-                'concentrationLibrary': obj.concentration_library,
-                'meanFragmentSize': obj.mean_fragment_size,
-                'nM': obj.nM,
-                'file':
-                    settings.MEDIA_URL + obj.file.name
-                    if obj.file
-                    else ''
-            })
+        # Get coordinates
+        index_types = {
+            x.sample.index_type.pk for x in queryset if x.sample.index_type
+        }
+        index_pairs = IndexPair.objects.filter(
+            index_type__pk__in=index_types,
+        ).select_related('index_type', 'index1', 'index2').distinct()
+        coordinates_map = {
+            (
+                ip.index_type.pk,
+                ip.index1.index_id,
+                ip.index2.index_id if ip.index2 else '',
+            ): ip.coordinate
+            for ip in index_pairs
+        }
 
-    return JsonResponse({'success': not error, 'error': error, 'data': data})
+        return {
+            'requests': requests_map,
+            'pools': pools_map,
+            'coordinates': coordinates_map,
+        }
 
-
-@login_required
-def edit(request):
-    """ Edit Library Preparation object. """
-    error = ''
-
-    try:
-        sample_id = request.POST.get('sample_id')
-        qc_result = request.POST.get('qc_result')
-        obj = LibraryPreparation.objects.get(sample_id=sample_id)
-        form = LibraryPreparationForm(request.POST, instance=obj)
-    except (ValueError, LibraryPreparation.DoesNotExist) as e:
-         error = str(e)
-         logger.exception(e)
-
-    if form:
-        if form.is_valid():
-            form.save()
-
-            if qc_result:
-                record = Sample.objects.get(pk=sample_id)
-                if qc_result == '1':
-                    record.status = 3
-                    record.save(update_fields=['status'])
-
-                    # Create Pooling object
-                    pooling_obj = Pooling(sample=record)
-                    # TODO: update field Concentration C1
-                    pooling_obj.save()
-                else:
-                    record.status = -1
-                    record.save(update_fields=['status'])
-
-                    # TODO@me: send email
-        else:
-            error = str(form.errors)
-            logger.debug(form.errors)
-
-    return JsonResponse({'success': not error, 'error': error})
+    def list(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = LibraryPreparationSerializer(
+            queryset, many=True, context=self.get_context(queryset)
+        )
+        data = sorted(serializer.data, key=lambda x: x['barcode'][3:])
+        return Response(data)
 
 
-@csrf_exempt
-@login_required
-def download_benchtop_protocol(request):
-    """ Generate Benchtop Protocol as XLS file for selected samples. """
-    # response = HttpResponse(content_type='application/vnd.ms-excel')
-    response = HttpResponse(content_type='application/ms-excel')
-    params = request.POST.getlist('params')
-    samples = json.loads(request.POST.get('samples'))
 
-    filename = 'Benchtop_Protocol.xls'
-    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+    @action(methods=['post'], detail=False,
+            authentication_classes=[CsrfExemptSessionAuthentication])
+    # @authentication_classes((CsrfExemptSessionAuthentication))
+    def download_benchtop_protocol(self, request):
+        """ Generate Benchtop Protocol as XLS file for selected samples. """
+        ids = json.loads(request.data.get('ids', '[]'))
 
-    wb = xlwt.Workbook(encoding='utf-8')
-    ws = wb.add_sheet('Benchtop Protocol')
+        filename = 'Library_Preparation_Benchtop_Protocol.xls'
+        response = HttpResponse(content_type='application/ms-excel')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
-    try:
-        params = ['Sample'] + params
+        queryset = self.filter_queryset(self.get_queryset()).filter(pk__in=ids)
+        serializer = LibraryPreparationSerializer(
+            queryset, many=True, context=self.get_context(queryset)
+        )
+        data = sorted(serializer.data, key=lambda x: x['barcode'][3:])
+
+        font_style = XFStyle()
+        font_style.alignment.wrap = 1
+        font_style_bold = XFStyle()
+        font_style_bold.font.bold = True
+
+        wb = Workbook(encoding='utf-8')
+        ws = wb.add_sheet('Benchtop Protocol')
+
+        header = [
+            'Request ID',
+            'Pool ID',
+            'Sample',
+            'Barcode',
+            'Protocol',
+            'Concentration Sample (ng/µl)',
+            'Starting Amount (ng)',
+            'Starting Volume (µl)',
+            'Spike-in Description',
+            'Spike-in Volume (µl)',
+            'µl Sample',
+            'µl Buffer',
+            'Coordinate',
+            'Index I7 ID',
+            'Index I5 ID',
+        ]
+
         row_num = 0
 
-        font_style = xlwt.XFStyle()
-        font_style.font.bold = True
+        for i, column in enumerate(header):
+            ws.write(row_num, i, column, font_style_bold)
+            ws.col(i).width = 8000
 
-        for i, column in enumerate(params):
-            ws.write(row_num, i, column, font_style)
-            ws.col(i).width = 6500  # Set column width
-
-        font_style = xlwt.XFStyle()
-        font_style.alignment.wrap = 1
-
-        for sample_id in samples:
-            obj = LibraryPreparation.objects.get(sample_id=sample_id)
+        for item in data:
             row_num += 1
-            row = [obj.sample.name]
+            row_idx = str(row_num + 1)
+            library_preparation_object = LibraryPreparation.objects.filter(
+                id=item['pk']
+            ).only('starting_amount', 'spike_in_description').first()
 
-            for param in params:
-                if param == 'Concentration Sample (ng/µl)':
-                    row.append(obj.sample.concentration)
-                elif param == 'Starting Amount (ng)':
-                    row.append(obj.starting_amount)
-                elif param == 'Starting Volume (ng)':
-                    row.append(obj.starting_volume)
-                elif param == 'Spike-in Volume (µl)':
-                    row.append(obj.spike_in_volume)
-                elif param == 'µl Sample':
-                    row.append(obj.ul_sample)
-                elif param == 'µl Buffer':
-                    row.append(obj.ul_buffer)
+            row = [
+                item['request_name'],
+                item['pool_name'],
+                item['name'],
+                item['barcode'],
+                item['library_protocol_name'],
+                item['concentration_sample'],
+                library_preparation_object.starting_amount,
+                '',
+                library_preparation_object.spike_in_description,
+                '',
+            ]
 
-            for i, column in enumerate(params):
+            # µl Sample = Starting Amount / Concentration Sample
+            formula = f'G{row_idx}/F{row_idx}'
+            row.append(Formula(formula))
+
+            # µl Buffer = Starting Volume - Spike-in Volume - µl Sample
+            formula = f'H{row_idx}-J{row_idx}-K{row_idx}'
+            row.append(Formula(formula))
+
+            row.extend([
+                item['coordinate'],
+                item['index_i7_id'],
+                item['index_i5_id'],
+            ])
+
+            for i in range(len(row)):
                 ws.write(row_num, i, row[i], font_style)
 
-    except Exception as e:
-        logger.exception(e)
-
-    wb.save(response)
-
-    return response
-
-
-@csrf_exempt
-@login_required
-def upload_benchtop_protocol(request):
-    """
-    Upload a file and add it to all samples with a givel Library Protocol.
-    """
-    error = ''
-
-    library_protocol = request.POST.get('library_protocol')
-
-    if request.method == 'POST' and any(request.FILES):
-        try:
-            # Get all Library Preparation objects with a given Library Protocol
-            objects = LibraryPreparation.objects.filter(
-                sample__sample_protocol_id=library_protocol
-            )
-
-            # Attach the file to the objects
-            for obj in objects:
-                obj.file = request.FILES.get('file')
-                obj.save()
-
-        except Exception as e:
-            error = str(e)
-            logger.debug(error)
-
-    return JsonResponse({'success': not error, 'error': error})
+        wb.save(response)
+        return response

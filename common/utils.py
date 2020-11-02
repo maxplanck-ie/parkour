@@ -1,22 +1,10 @@
-from django.http import JsonResponse
-
-from datetime import datetime
+import re
+import string
+import random
 from time import time
+from datetime import datetime
 
-
-class JSONResponseMixin:
-    """
-    A mixin that can be used to render a JSON response.
-    """
-
-    def render_to_json_response(self, context, **response_kwargs):
-        return JsonResponse(
-            self.get_data(context),
-            **response_kwargs
-        )
-
-    def get_data(self, context):
-        return context
+from django.db import connection
 
 
 def timeit(func):
@@ -31,14 +19,57 @@ def timeit(func):
     return wrapper
 
 
-def get_form_errors(errors):
-    result = 'Form is invalid:<br/><br/>'
-    for error_field, error_message in errors.items():
-        result += 'Field "%s":<br/>%s' % (error_field, error_message)
-    return result
-
-
 def generate_barcode(record_type, counter):
     barcode = datetime.now().strftime('%y') + record_type
     barcode += '0' * (6 - len(counter)) + counter
     return barcode
+
+
+def get_random_name(len=10):
+    """ Generate a random string of a given length. """
+    return ''.join(random.SystemRandom().choice(
+        string.ascii_lowercase + string.digits
+    ) for _ in range(len))
+
+
+def print_sql_queries(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        finally:
+            for i, query in enumerate(connection.queries):
+                sql = re.split(
+                    r'(SELECT|FROM|WHERE|GROUP BY|ORDER BY|INNER JOIN|LIMIT)',
+                    query['sql']
+                )
+                if not sql[0]:
+                    sql = sql[1:]
+                sql = [(' ' if i % 2 else '') + x for i, x in enumerate(sql)]
+                print('\n### {} ({} seconds)\n\n{};\n'.format(
+                    i, query['time'], '\n'.join(sql)))
+    return wrapper
+
+
+def get_date_range(start, end, format):
+    now = datetime.now()
+
+    try:
+        start = datetime.strptime(start, format) \
+            if type(start) is str else start
+    except ValueError:
+        start = now
+    finally:
+        start = start.replace(hour=0, minute=0)
+
+    try:
+        end = datetime.strptime(end, format) \
+            if type(end) is str else end
+    except ValueError:
+        end = now
+    finally:
+        end = end.replace(hour=23, minute=59)
+
+    if start > end:
+        start = end.replace(hour=0, minute=0)
+
+    return (start, end)

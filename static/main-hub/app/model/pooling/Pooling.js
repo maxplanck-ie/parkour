@@ -1,80 +1,81 @@
 Ext.define('MainHub.model.pooling.Pooling', {
-    extend: 'MainHub.model.Base',
+    extend: 'MainHub.model.Record',
 
-    fields: [{
-            name: 'name',
-            type: 'string'
-        },
+    fields: [
         {
-            name: 'active',
-            type: 'bool'
-        },
-        {
-            name: 'libraryId',
+            name: 'request',
             type: 'int'
         },
         {
-            name: 'sampleId',
+            name: 'request_name',
+            type: 'string'
+        },
+        {
+            name: 'pool',
             type: 'int'
         },
         {
-            name: 'requestId',
-            type: 'int'
-        },
-        {
-            name: 'requestName',
+            name: 'pool_name',
             type: 'string'
         },
         {
-            name: 'poolId',
-            type: 'int'
+            name: 'create_time',
+            type: 'date'
         },
         {
-            name: 'poolName',
+            name: 'pool_size',
             type: 'string'
         },
         {
-            name: 'barcode',
+            name: 'concentration_library',
+            type: 'float',
+            allowNull: true
+        },
+        {
+            name: 'mean_fragment_size',
+            type: 'int',
+            allowNull: true
+        },
+        {
+            name: 'concentration_c1',
+            type: 'float',
+            allowNull: true
+        },
+        {
+            name: 'sequencing_depth',
+            type: 'float'
+        },
+        {
+            name: 'percentage_library',
             type: 'string'
         },
         {
-            name: 'concentration',
-            type: 'int'
-        },
-        {
-            name: 'meanFragmentSize',
-            type: 'int'
-        },
-        {
-            name: 'concentrationC1',
+            name: 'coordinate',
             type: 'string'
         },
         {
-            name: 'concentrationC2',
+            name: 'index_i7_id',
             type: 'string'
         },
         {
-            name: 'sequencingDepth',
-            type: 'int'
-        },
-        {
-            name: 'sampleVolume',
+            name: 'index_i5_id',
             type: 'string'
         },
         {
-            name: 'bufferVolume',
+            name: 'index_i7',
             type: 'string'
         },
         {
-            name: 'percentageLibrary',
+            name: 'index_i5',
             type: 'string'
         },
         {
-            name: 'volumeToPool',
-            type: 'string'
+            name: 'quality_check',
+            type: 'string',
+            allowNull: true
         },
         {
-            name: 'file',
+            name: 'comment',
             type: 'string'
         }
     ]

@@ -10,7 +10,7 @@ Ext.define('MainHub.store.libraries.NucleicAcidTypes', {
 
     proxy: {
         type: 'ajax',
-        url: 'sample/nucleic_acid_types/',
+        url: 'api/nucleic_acid_types/',
         timeout: 1000000,
         pageParam: false,   //to remove param "page"
         startParam: false,  //to remove param "start"

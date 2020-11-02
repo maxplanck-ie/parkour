@@ -67,6 +67,7 @@
      */
     "requires": [
         "font-awesome",
+        "charts",
         "ux"
     ],
 
@@ -216,15 +217,10 @@
      *      }
      *
      */
-    "js": [
-        {
-            "path": "${framework.dir}/build/ext-all-rtl-debug.js"
-        },
-        {
-            "path": "app.js",
-            "bundle": true
-        }
-    ],
+    "js": [{
+        "path": "app.js",
+        "bundle": true
+    }],
 
 
 
@@ -291,7 +287,7 @@
     "production": {
         "output": {
             "appCache": {
-                "enable": true,
+                "enable": false,
                 "path": "cache.appcache"
             }
         },
@@ -299,7 +295,7 @@
             "cache": "${build.timestamp}"
         },
         "cache": {
-            "enable": true
+            "enable": false
         },
         "compressor": {
             "type": "yui"
@@ -426,7 +422,7 @@
 
     "cache": {
         "enable": false,
-        "deltas": true
+        "deltas": false
     },
 
 

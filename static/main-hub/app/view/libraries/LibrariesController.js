@@ -4,10 +4,13 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
 
     config: {
         control: {
+            '#': {
+                activate: 'activateView'
+            },
             '#librariesTable': {
-                boxready: 'refresh',
-                refresh: 'refresh',
-                itemcontextmenu: 'showContextMenu'
+                // boxready: 'refresh',
+                // refresh: 'refresh',
+                // itemcontextmenu: 'showContextMenu'
             },
             '#showLibrariesCheckbox': {
                 change: 'changeFilter'
@@ -21,12 +24,19 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
         }
     },
 
+    activateView: function() {
+        Ext.getStore('librariesStore').reload();
+    },
+
     refresh: function(grid) {
         Ext.getStore('librariesStore').reload();
     },
 
     showContextMenu: function(grid, record, item, index, e) {
         var me = this;
+
+        // Don't edit records which have reached status 1 and higher
+        if (!USER_IS_STAFF && record.get('status') !== 0) return false;
 
         e.stopEvent();
         Ext.create('Ext.menu.Menu', {
@@ -35,21 +45,6 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
                     iconCls: 'x-fa fa-pencil',
                     handler: function() {
                         me.editRecord(record);
-                    }
-                },
-                {
-                    text: 'Delete',
-                    iconCls: 'x-fa fa-trash',
-                    handler: function() {
-                        Ext.Msg.show({
-                            title: 'Delete record',
-                            message: 'Are you sure you want to delete this record?',
-                            buttons: Ext.Msg.YESNO,
-                            icon: Ext.Msg.QUESTION,
-                            fn: function(btn) {
-                                if (btn == 'yes') me.deleteRecord(record);
-                            }
-                        });
                     }
                 }
             ]
@@ -62,38 +57,6 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
             mode: 'edit',
             record: record
         }).show();
-    },
-
-    deleteRecord: function(record) {
-        var url = record.data.recordType == 'L' ? 'delete_library/' : 'delete_sample/';
-
-        Ext.Ajax.request({
-            url: url,
-            method: 'POST',
-            scope: this,
-            params: {
-                'record_id': record.data.recordType == 'L' ? record.data.libraryId : record.data.sampleId
-            },
-
-            success: function(response) {
-                var obj = Ext.JSON.decode(response.responseText);
-                if (obj.success) {
-                    var grid = Ext.getCmp('librariesTable');
-                    grid.fireEvent('refresh', grid);
-                    Ext.ux.ToastMessage('Record has been deleted!');
-                } else {
-                    Ext.ux.ToastMessage(obj.error, 'error');
-                    console.error('[ERROR]: ' + url);
-                    console.error(response);
-                }
-            },
-
-            failure: function(response) {
-                Ext.ux.ToastMessage(response.statusText, 'error');
-                console.error('[ERROR]: ' + url);
-                console.error(response);
-            }
-        });
     },
 
     changeFilter: function(el, value) {
@@ -135,7 +98,8 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
                 var res = false;
                 if (searchQuery) {
                     Ext.each(columns, function(column) {
-                        if (record.data[column].toLowerCase().indexOf(searchQuery.toLowerCase()) > -1) {
+                        var value = record.get(column);
+                        if (value && value.toString().toLowerCase().indexOf(searchQuery.toLowerCase()) > -1) {
                             res = res || true;
                         }
                     });
@@ -148,5 +112,10 @@ Ext.define('MainHub.view.libraries.LibrariesController', {
 
         store.clearFilter();
         store.filter([showFilter, searchFilter]);
+    },
+
+    gridCellTooltipRenderer: function (value, meta) {
+        meta.tdAttr = 'data-qtip="' + value + '"';
+        return value;
     }
 });

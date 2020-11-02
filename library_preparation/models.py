@@ -1,17 +1,13 @@
 from django.db import models
+
+from common.models import DateTimeMixin
 from sample.models import Sample
 
 
-class LibraryPreparation(models.Model):
+class LibraryPreparation(DateTimeMixin):
     sample = models.OneToOneField(Sample, verbose_name='Sample')
 
     starting_amount = models.FloatField(
-        'Starting Amount',
-        null=True,
-        blank=True,
-    )
-
-    starting_volume = models.FloatField(
         'Starting Amount',
         null=True,
         blank=True,
@@ -25,18 +21,6 @@ class LibraryPreparation(models.Model):
 
     spike_in_volume = models.FloatField(
         'Spike-in Volume',
-        null=True,
-        blank=True,
-    )
-
-    ul_sample = models.FloatField(
-        'µl Sample',
-        null=True,
-        blank=True,
-    )
-
-    ul_buffer = models.FloatField(
-        'µl Buffer',
         null=True,
         blank=True,
     )
@@ -65,8 +49,14 @@ class LibraryPreparation(models.Model):
         blank=True,
     )
 
-    file = models.FileField(
-        upload_to='benchtop_protocols/%Y/%m/%d/',
+    qpcr_result = models.FloatField(
+        'qPCR Result',
+        null=True,
+        blank=True,
+    )
+
+    comments = models.TextField(
+        'Comments',
         null=True,
         blank=True,
     )
@@ -76,4 +66,6 @@ class LibraryPreparation(models.Model):
         verbose_name_plural = 'Library Preparation'
 
     def __str__(self):
-        return self.sample.name
+        # return '%s (Request: %s)' % (self.sample.name,
+        #                              self.sample.request.get())
+        return '{} ({})'.format(self.sample.name, self.sample.barcode)

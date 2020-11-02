@@ -6,10 +6,16 @@ from django.contrib.auth.forms import PasswordResetForm
 from django.utils.crypto import get_random_string
 from authtools.admin import NamedUserAdmin
 from authtools.forms import UserCreationForm
+from django_admin_listfilter_dropdown.filters import RelatedDropdownFilter
 
 from common.models import PrincipalInvestigator, Organization, CostUnit
 
 User = get_user_model()
+
+
+class CostUnitInline(admin.TabularInline):
+    model = CostUnit
+    extra = 1
 
 
 @admin.register(PrincipalInvestigator)
@@ -17,6 +23,7 @@ class PrincipalInvestigatorAdmin(admin.ModelAdmin):
     list_display = ('name', 'organization',)
     search_fields = ('name', 'organization__name',)
     list_filter = ('organization',)
+    inlines = [CostUnitInline]
 
 
 @admin.register(Organization)
@@ -28,7 +35,8 @@ class OrganizationAdmin(admin.ModelAdmin):
 class CostUnitAdmin(admin.ModelAdmin):
     list_display = ('name', 'pi',)
     search_fields = ('name', 'pi__name', 'pi__organization__name',)
-    list_filter = ('pi__organization__name', 'pi__name',)
+    list_filter = (('pi', RelatedDropdownFilter),
+                   ('pi__organization', RelatedDropdownFilter),)
 
 
 class UserCreationForm(UserCreationForm):
@@ -62,7 +70,7 @@ class UserAdmin(NamedUserAdmin):
                 " The user will be emailed a link allowing him/her to login to"
                 " the site and set his/her password."
             ),
-            'fields': ('name', 'email',),
+            'fields': ('first_name', 'last_name', 'email',),
         }),
         ('Password', {
             'description': "Optionally, you may set the user's password here.",
@@ -71,47 +79,35 @@ class UserAdmin(NamedUserAdmin):
         }),
     )
 
-    list_display = (
-        'name',
-        'email',
-        'phone',
-        'organization',
-        'pi',
-        'is_staff',
-    )
+    list_display = ('first_name', 'last_name', 'email', 'phone',
+                    'organization', 'pi', 'cost_units', 'is_staff',)
 
-    search_fields = (
-        'name',
-        'email',
-        'phone',
-        'organization__name',
-        'pi__name',
-    )
+    search_fields = ('first_name', 'last_name', 'email', 'phone',
+                     'organization__name', 'pi__name', 'cost_unit__name',)
 
-    list_filter = ('is_staff', 'organization',)
-    list_display_links = ('name', 'email',)
+    list_filter = ('is_staff', 'organization', ('pi', RelatedDropdownFilter),)
+    list_display_links = ('first_name', 'last_name', 'email',)
     filter_horizontal = ('cost_unit', 'groups', 'user_permissions',)
 
     fieldsets = (
         (None, {
-            'fields': ('name', 'email', 'password',),
+            'fields': ('first_name', 'last_name', 'email', 'password',),
         }),
         ('Personal info', {
             'fields': ('phone', 'organization', 'pi', 'cost_unit',),
         }),
         ('Permissions', {
-            'fields': (
-                'is_active',
-                'is_staff',
-                'is_superuser',
-                'groups',
-                'user_permissions',
-            ),
+            'fields': ('is_active', 'is_staff', 'is_superuser', 'groups',
+                       'user_permissions',),
         }),
         ('Other', {
             'fields': ('last_login',),
         }),
     )
+
+    def cost_units(self, obj):
+        cost_units = obj.cost_unit.all().values_list('name', flat=True)
+        return ', '.join(sorted(cost_units))
 
     def save_model(self, request, obj, form, change):
         if not change and (not form.cleaned_data['password1'] or not
@@ -133,8 +129,11 @@ class UserAdmin(NamedUserAdmin):
                     request=request,
                     from_email=settings.SERVER_EMAIL,
                     use_https=request.is_secure(),
-                    subject_template_name='registration/user_creation_subj.txt',
-                    email_template_name='registration/user_creation_email.html',
+                    subject_template_name='registration/' +
+                    'user_creation_subject.txt',
+                    email_template_name='registration/' +
+                    'user_creation_email.html',
                 )
+
 
 admin.site.register(User, UserAdmin)

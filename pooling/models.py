@@ -1,9 +1,11 @@
 from django.db import models
+
+from common.models import DateTimeMixin
 from library.models import Library
 from sample.models import Sample
 
 
-class Pooling(models.Model):
+class Pooling(DateTimeMixin):
     library = models.OneToOneField(
         Library,
         verbose_name='Library',
@@ -24,39 +26,13 @@ class Pooling(models.Model):
         blank=True
     )
 
-    concentration_c2 = models.FloatField(
-        'Concentration C2',
-        null=True,
-        blank=True
-    )
-
-    sample_volume = models.FloatField(
-        'Sample Volume V1',
-        null=True,
-        blank=True
-    )
-
-    buffer_volume = models.FloatField(
-        'Buffer Volume V2',
-        null=True,
-        blank=True
-    )
-
-    percentage_library = models.PositiveSmallIntegerField(
-        '% library in Pool',
-        null=True,
-        blank=True,
-    )
-
-    volume_to_pool = models.FloatField(
-        'Volume to Pool',
-        null=True,
-        blank=True
-    )
+    comment = models.TextField(verbose_name='Comment',blank=True)
 
     class Meta:
         verbose_name = 'Pooling'
         verbose_name_plural = 'Pooling'
 
     def __str__(self):
-        return self.library.name if self.library else self.sample.name
+        obj = self.library if self.library else self.sample
+        # return '%s (%s)' % (obj.name, obj.pool.get())
+        return f'{obj.name} ({obj.barcode})'

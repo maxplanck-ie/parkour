@@ -1,9 +1,45 @@
+import json
+import string
+import random
+
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
+from rest_framework.test import APITestCase
+
 from .models import Organization, PrincipalInvestigator, CostUnit
 
+
 User = get_user_model()
+
+
+class BaseTestCase(TestCase):
+    def create_user(self, email='test@test.io', password='foo-bar',
+                    is_staff=True):
+        user = User.objects.create_user(email=email, password=password,
+                                        is_staff=is_staff)
+        user.save()
+        return user
+
+    def login(self, email='test@test.io', password='foo-bar'):
+        self.client.login(email=email, password=password)
+
+    def _get_random_name(self, len=10):
+        return ''.join(random.SystemRandom().choice(
+            string.ascii_lowercase + string.digits
+        ) for _ in range(len))
+
+
+class BaseAPITestCase(APITestCase):
+    def create_user(self, email='test@test.io', password='foo-bar',
+                    is_staff=True):
+        user = User.objects.create_user(email=email, password=password,
+                                        is_staff=is_staff)
+        user.save()
+        return user
+
+    def login(self, email='test@test.io', password='foo-bar'):
+        self.client.login(email=email, password=password)
 
 
 # Models
@@ -59,15 +95,33 @@ class IndexViewTest(TestCase):
         self.client.login(email='foo@bar.io', password='foo-foo')
         response = self.client.get(reverse('index'), follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'index.html')
 
 
 class NavigationTreeTest(TestCase):
     def setUp(self):
-        User.objects.create_user(email='foo@bar.io', password='foo-foo')
+        User.objects.create_user(
+            email='admin@bar.io', password='foo-foo', is_staff=True,
+        )
 
-    def test_navigation_tree(self):
-        self.client.login(email='foo@bar.io', password='foo-foo')
+        User.objects.create_user(
+            email='user@bar.io', password='foo-foo', is_staff=False,
+        )
+
+    def test_navigation_tree_admin(self):
+        self.client.login(email='admin@bar.io', password='foo-foo')
         response = self.client.get(reverse('get_navigation_tree'))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response['content-type'], 'application/json')
+        self.assertGreater(
+            len(json.loads(str(response.content, 'utf-8'))['children']), 2,
+        )
+
+    def test_navigation_tree_user(self):
+        self.client.login(email='user@bar.io', password='foo-foo')
+        response = self.client.get(reverse('get_navigation_tree'))
+        tabs = [
+            t['text']
+            for t in json.loads(str(response.content, 'utf-8'))['children']
+        ]
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(tabs, ['Requests', 'Libraries & Samples'])

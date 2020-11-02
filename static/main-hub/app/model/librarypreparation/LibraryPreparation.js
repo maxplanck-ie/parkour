@@ -1,85 +1,121 @@
 Ext.define('MainHub.model.librarypreparation.LibraryPreparation', {
-    extend: 'MainHub.model.Base',
+    extend: 'MainHub.model.Record',
 
-    fields: [{
+    fields: [
+        {
+            name: 'pk',
+            type: 'int'
+        },
+        {
             name: 'name',
             type: 'string'
         },
         {
-            name: 'active',
+            name: 'is_converted',
             type: 'bool'
-        },
-        {
-            name: 'sampleId',
-            type: 'int'
         },
         {
             name: 'barcode',
             type: 'string'
         },
         {
-            name: 'libraryProtocolName',
+            name: 'create_time',
+            type: 'date'
+        },
+        {
+            name: 'request_name',
             type: 'string'
         },
         {
-            name: 'libraryProtocol',
+            name: 'pool_name',
+            type: 'string'
+        },
+        {
+            name: 'selected',
+            type: 'bool',
+            defaultValue: false
+        },
+        {
+            name: 'comments_facility',
+            type: 'string'
+        },
+        {
+            name: 'comments',
+            type: 'string'
+        },
+        {
+            name: 'library_protocol',
             type: 'int'
         },
         {
-            name: 'concentrationSample',
-            type: 'float'
-        },
-        {
-            name: 'startingAmount',
+            name: 'library_protocol_name',
             type: 'string'
         },
         {
-            name: 'startingVolume',
+            name: 'concentration_sample',
+            type: 'float',
+            allowNull: true
+        },
+        {
+            name: 'starting_amount',
+            type: 'float',
+            allowNull: true
+        },
+        {
+            name: 'spike_in_description',
             type: 'string'
         },
         {
-            name: 'spikeInDescription',
+            name: 'spike_in_volume',
+            type: 'float',
+            allowNull: true
+        },
+        {
+            name: 'coordinate',
             type: 'string'
         },
         {
-            name: 'spikeInVolume',
+            name: 'index_i7_id',
             type: 'string'
         },
         {
-            name: 'ulSample',
+            name: 'index_i5_id',
             type: 'string'
         },
         {
-            name: 'ulBuffer',
-            type: 'string'
+            name: 'pcr_cycles',
+            type: 'int',
+            allowNull: true
         },
         {
-            name: 'indexI7Id',
-            type: 'string'
+            name: 'concentration_library',
+            type: 'float',
+            allowNull: true
         },
         {
-            name: 'indexI5Id',
-            type: 'string'
-        },
-        {
-            name: 'pcrCycles',
-            type: 'string'
-        },
-        {
-            name: 'concentrationLibrary',
-            type: 'string'
-        },
-        {
-            name: 'meanFragmentSize',
-            type: 'string'
+            name: 'mean_fragment_size',
+            type: 'int',
+            allowNull: true
         },
         {
             name: 'nM',
-            type: 'string'
+            type: 'float',
+            allowNull: true
         },
         {
-            name: 'file',
-            type: 'string'
+            name: 'qpcr_result',
+            type: 'float',
+            allowNull: true
+        },
+        {
+            name: 'dilution_factor',
+            type: 'int',
+            allowNull: true
+        },
+        {
+            name: 'quality_check',
+            type: 'string',
+            allowNull: true
         }
     ]
 });

@@ -1,170 +1,129 @@
 Ext.define('MainHub.model.libraries.Library', {
-    extend: 'MainHub.model.Base',
+    extend: 'MainHub.model.Record',
 
-    fields: [{
-            name: 'status',
+    idProperty: 'id',
+
+    fields: [
+        {
+            name: 'request_id',
             type: 'int'
         },
         {
-            name: 'requestName',
+            name: 'request_name',
             type: 'string'
         },
         {
-            name: 'requestId',
+            name: 'create_time',
+            type: 'date'
+        },
+        {
+            name: 'library_protocol',
             type: 'int'
         },
         {
-            name: 'libraryId',
+            name: 'library_protocol_name',
+            type: 'string'
+        },
+        {
+            name: 'library_type',
             type: 'int'
         },
         {
-            name: 'sampleId',
-            type: 'int'
-        },
-        {
-            name: 'name',
+            name: 'library_type_name',
             type: 'string'
         },
         {
-            name: 'recordType',
-            type: 'string'
-        },
-        {
-            name: 'date',
-            type: 'string'
-        },
-        {
-            name: 'libraryProtocol',
-            type: 'string'
-        },
-        {
-            name: 'libraryProtocolId',
-            type: 'int'
-        },
-        {
-            name: 'libraryType',
-            type: 'string'
-        },
-        {
-            name: 'libraryTypeId',
-            type: 'int'
-        },
-        {
-            name: 'enrichmentCycles',
-            type: 'string'
-        },
-        {
-            name: 'amplifiedCycles',
-            type: 'string'
+            name: 'amplification_cycles',
+            type: 'int',
+            allowNull: true
         },
         {
             name: 'organism',
-            type: 'string'
-        },
-        {
-            name: 'organismId',
             type: 'int'
         },
         {
-            name: 'indexType',
+            name: 'organism_name',
             type: 'string'
         },
         {
-            name: 'indexTypeId',
+            name: 'index_type',
             type: 'int'
         },
         {
-            name: 'indexReads',
+            name: 'index_type_name',
             type: 'string'
         },
         {
-            name: 'indexI7',
+            name: 'index_reads',
+            type: 'int',
+            allowNull: true
+        },
+        {
+            name: 'index_i7',
             type: 'string'
         },
         {
-            name: 'indexI5',
+            name: 'index_i5',
             type: 'string'
         },
         {
-            name: 'equalRepresentation',
-            type: 'string'
-        },
-        {
-            name: 'DNADissolvedIn',
-            type: 'string'
+            name: 'equal_representation_nucleotides',
+            type: 'bool',
+            allowNull: true
         },
         {
             name: 'concentration',
-            type: 'string'
+            type: 'float',
+            allowNull: true
         },
         {
-            name: 'concentrationMethod',
-            type: 'string'
-        },
-        {
-            name: 'concentrationMethodId',
+            name: 'concentration_method',
             type: 'int'
         },
         {
-            name: 'sampleVolume',
+            name: 'concentration_method_name',
             type: 'string'
         },
         {
-            name: 'meanFragmentSize',
-            type: 'string'
+            name: 'mean_fragment_size',
+            type: 'int',
+            allowNull: true
         },
         {
-            name: 'qPCRResult',
-            type: 'string'
+            name: 'qpcr_result',
+            type: 'float',
+            allowNull: true
         },
         {
-            name: 'readLength',
-            type: 'string'
-        },
-        {
-            name: 'readLengthId',
+            name: 'read_length',
             type: 'int'
         },
         {
-            name: 'sequencingDepth',
+            name: 'read_length_name',
             type: 'string'
+        },
+        {
+            name: 'sequencing_depth',
+            type: 'float',
+            allowNull: true
         },
         {
             name: 'comments',
             type: 'string'
         },
         {
-            name: 'barcode',
-            type: 'string'
-        },
-
-        {
-            name: 'nucleicAcidType',
+            name: 'nucleic_acid_type_name',
             type: 'string'
         },
         {
-            name: 'nucleicAcidTypeId',
+            name: 'nucleic_acid_type',
             type: 'int'
         },
         {
-            name: 'DNaseTreatment',
-            type: 'string'
-        },
-        {
-            name: 'rnaQuality',
-            type: 'string'
-        },
-        {
-            name: 'rnaSpikeIn',
-            type: 'string'
-        },
-        {
-            name: 'samplePreparationProtocol',
-            type: 'string'
-        },
-        {
-            name: 'requestedSampleTreatment',
-            type: 'string'
+            name: 'rna_quality',
+            type: 'float',
+            allowNull: true,
+            defaultValue: null
         }
     ]
 });

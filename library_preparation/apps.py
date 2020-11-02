@@ -6,4 +6,4 @@ class LibraryPreparationConfig(AppConfig):
     verbose_name = 'Library Preparation'
 
     def ready(self):
-        from .signals import delete_file
+        import library_preparation.signals

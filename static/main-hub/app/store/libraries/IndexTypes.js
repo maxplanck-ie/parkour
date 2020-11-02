@@ -1,38 +1,27 @@
 Ext.define('MainHub.store.libraries.IndexTypes', {
-    extend: 'Ext.data.Store',
-    storeId: 'indexTypesStore',
+  extend: 'Ext.data.Store',
+  storeId: 'IndexTypes',
 
-    requires: [
-        'MainHub.model.libraries.LibraryField'
-    ],
+  requires: [
+    'MainHub.model.libraries.IndexType'
+  ],
 
-    model: 'MainHub.model.libraries.LibraryField',
+  model: 'MainHub.model.libraries.IndexType',
 
-    proxy: {
-        type: 'ajax',
-        url: 'get_index_types/',
-        timeout: 1000000,
-        pageParam: false,   //to remove param "page"
-        startParam: false,  //to remove param "start"
-        limitParam: false,  //to remove param "limit"
-        noCache: false,     //to remove param "_dc",
-        reader: {
-            type: 'json',
-            rootProperty: 'data',
-            successProperty: 'success'
-        }
-    },
-
-    autoLoad: true,
-
-    listeners: {
-        load: function(store, records, success, operation) {
-            if (!success) {
-                var response = operation._response,
-                    obj = Ext.JSON.decode(response.responseText);
-                console.error('[ERROR]: get_index_types/: ' + obj.error);
-                console.error(response);
-            }
-        }
+  proxy: {
+    type: 'ajax',
+    url: 'api/index_types/',
+    timeout: 1000000,
+    pageParam: false,   // to remove param "page"
+    startParam: false,  // to remove param "start"
+    limitParam: false,  // to remove param "limit"
+    noCache: false,     // to remove param "_dc",
+    reader: {
+      type: 'json',
+      rootProperty: 'data',
+      successProperty: 'success'
     }
+  },
+
+  autoLoad: true
 });
