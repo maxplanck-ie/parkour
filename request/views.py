@@ -550,8 +550,7 @@ class RequestViewSet(viewsets.ModelViewSet):
                     'message': message,
                     'records': records,
                 }),
-                # from_email=settings.SERVER_EMAIL,
-                from_email='deepseq@ie-freiburg.mpg.de',
+                from_email=settings.SERVER_EMAIL,
                 recipient_list=[instance.user.email],
             )
 
