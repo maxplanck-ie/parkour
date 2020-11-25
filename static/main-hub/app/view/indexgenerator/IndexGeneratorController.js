@@ -214,9 +214,9 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
         }
 
         if (indexI5.length === 0) {
-          indexI5Sequence = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '];
+          indexI5Sequence = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',' ', ' ', ' ', ' '];
         } else if (indexI5Sequence.length === 6) {
-          indexI5Sequence = indexI5Sequence.concat([' ', ' ']);
+          indexI5Sequence = indexI5Sequence.concat([' ', ' ',' ',' ', ' ',' ']);
         }
 
         var data = {
@@ -232,7 +232,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
           index_i5: { index: indexI5 }
         };
 
-        for (var i = 0; i < 8; i++) {
+        for (var i = 0; i < 12; i++) {
           data['index_i7_' + (i + 1)] = indexI7Sequence[i];
           data['index_i5_' + (i + 1)] = indexI5Sequence[i];
         }
@@ -609,7 +609,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
           index_i5_id: ''
         });
 
-        for (var i = 0; i < 8; i++) {
+        for (var i = 0; i < 12; i++) {
           record.set('index_i7_' + (i + 1), '');
           record.set('index_i5_' + (i + 1), '');
         }
