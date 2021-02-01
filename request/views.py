@@ -420,6 +420,11 @@ class RequestViewSet(viewsets.ModelViewSet):
         } for obj in objects]
         records = sorted(records, key=lambda x: x['barcode'][3:])
 
+        declaration='None of the samples listed below contain any disease carrying agents or GMO of' \
+        ' risk group 2 or higher. They can be handled in an S1 laboratory without any safety concerns.'
+
+
+
         pdf = PDF('Deep Sequencing Request')
         pdf.set_draw_color(217, 217, 217)
         pdf.alias_nb_pages()
@@ -433,8 +438,9 @@ class RequestViewSet(viewsets.ModelViewSet):
         pdf.info_row('Email', user.email)
         pdf.info_row('Organization', organization)
         pdf.info_row('Cost Unit', cost_unit)
+        pdf.multi_info_row('Declaration', declaration)
         pdf.multi_info_row('Description', instance.description)
-
+  
         y = pdf.get_y()
         pdf.line(pdf.l_margin + 1, y, pdf.fw - pdf.r_margin - 1, y)
 
