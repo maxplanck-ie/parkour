@@ -268,7 +268,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
           {
             text: 'Name',
             dataIndex: 'name',
-            width: 550
+            width: 200
           },
           {
             text: '',
@@ -541,6 +541,14 @@ Ext.define('MainHub.view.indexgenerator.IndexGenerator', {
             text: 'Generate Indices',
             disabled: true
           },
+          /* for future:
+          {
+            xtype: 'button',
+            itemId: 'download-index-list-button',
+            text: 'Download Index List (csv)',
+            iconCls: 'fa fa-file-excel-o fa-lg'
+          },
+          */
           '->',
           {
             xtype: 'button',
