@@ -1,7 +1,7 @@
 # Django
 Django==1.11.29
 django-authtools==1.6.0
-djangorestframework==3.11
+djangorestframework==3.11.2
 django-admin-list-filter-dropdown==1.0.1
 django-monthfield==0.1.1
 django_extensions==1.9.7
