@@ -1,5 +1,5 @@
 # Django
-Django==1.11.29
+Django==2.2.24
 django-authtools==1.6.0
 djangorestframework==3.11.2
 django-admin-list-filter-dropdown==1.0.1
