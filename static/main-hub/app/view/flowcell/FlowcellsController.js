@@ -156,6 +156,9 @@ Ext.define('MainHub.view.flowcell.FlowcellsController', {
   downloadSampleSheet: function (btn) {
     var store = btn.up('grid').getStore();
     var selectedLanes = this._getSelectedRecords(store);
+    store.each(function(value, key) {
+       console.log(key, '==', value)
+    });
 
     if (selectedLanes.length === 0) {
       new Noty({

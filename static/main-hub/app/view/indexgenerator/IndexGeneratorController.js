@@ -23,8 +23,49 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
       },
       '#generate-indices-button': {
         click: 'generateIndices'
+      },
+      '#download-index-list-button': {
+        click: 'downloadIndexList'
       }
     }
+  },
+
+  downloadIndexList: function (btn,record) {
+    var store = btn.up('grid').getStore();
+//    console.log(store) 
+//    var grid = Ext.getCmp('grid');
+//    var store = grid.getStore();
+//    var sC = grid.down('#start-coordinate');
+//    item.get('index_i7').index
+    var indexI7 = record.get('index_i7').index;
+    var indexI5 = record.get('index_i5');
+    //var selectedLanes = this._getSelectedRecords(store);
+    //var ids=Ext.Array.pluck(selectedLanes, 'pk');
+   /*
+    store.each(function (record) {
+      if (record.get('record_type') === 'Sample') {
+        record.set({
+          index_i7: '',
+          index_i7_id: '',
+          index_i5: '',
+          index_i5_id: ''
+        }
+
+        for (var i = 0; i < 12; i++) {
+          record.set('index_i7_' + (i + 1), '');
+          record.set('index_i5_' + (i + 1), '');
+        }
+      }
+    });
+  },
+*/
+    var ids = [indexI7, indexI5];
+//    ids.push(sC)
+    var form = Ext.create('Ext.form.Panel', { standardSubmit: true });
+    form.submit({
+      url: 'api/index_generator/download_index_list/',
+      params: { 'ids': Ext.JSON.encode(ids) }
+    });
   },
 
   activateView: function (view) {
@@ -200,6 +241,7 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
         this._isIndexTypeSet(store, record) &&
         // this._isUnique(store, record) &&
         this._isCompatible(store, record) &&
+        this._isDistinct(store, record) &&
         this._isPoolSizeOk(store, record, multipleSelect)
       ) {
         record.set('selected', true);
@@ -505,6 +547,25 @@ Ext.define('MainHub.view.indexgenerator.IndexGeneratorController', {
 
     return true;
   },
+
+  _isDistinct: function (store, record, showNotification) {
+    var notif = showNotification === undefined;
+    if (store.getCount()) {
+      var recordI7 = store.findRecord('indexI7', record.get('indexI7'));
+      var recordI5 = store.findRecord('indexI5', record.get('indexI5'));
+      console.log("recordI7", recordI7)
+      if (recordI7 || recordI5) {
+        if (notif) {
+         new Noty({
+           text: 'Selected index (I7/I5) is already in the pool.',
+           type: 'warning'
+         }).show();
+        }
+        return false;
+      }
+     }
+     return true;
+   },
 
   // _isUnique: function (store, record, showNotification) {
   //   var notif = showNotification === undefined;

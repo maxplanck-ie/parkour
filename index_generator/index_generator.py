@@ -278,12 +278,15 @@ class IndexGenerator:
         if len(set(index_read_type)) != 1:
             raise ValueError('Mixed long-read and short-read indices are not allowed')
 
+# The following might be relaxed
         index_lengths = [x.index_length for x in index_types]
         if len(set(index_lengths)) != 1:
             raise ValueError('Index Types with mixed index lengths ' +
                              'are not allowed.')
 
         self.index_length = int(index_lengths[0])
+#        self.index_length = max(index_lengths)
+#        print("index_len=",self.index_length)
 
         return index_types
 

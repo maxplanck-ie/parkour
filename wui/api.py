@@ -79,3 +79,5 @@ router.register(r'sequences_statistics', SequencesStatisticsViewSet, basename='s
 router.register(r'analysis_list', FlowcellAnalysisViewSet, basename='analysis_list')
 
 router.register(r'metadata_exporter', MetadataExporterViewSet, basename='metadata_exporter')
+
+router.register(r'my_list', SeqeunceStatisticsViewSet, basename='my_list')

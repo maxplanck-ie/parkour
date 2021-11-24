@@ -102,6 +102,7 @@ class RunStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
         data = list(itertools.chain(*serializer.data))
         return Response(data)
 
+
     @action(methods=['post'], detail=False)
     def upload(self, request):
         flowcell_id = request.data.get('flowcell_id', '')
@@ -269,6 +270,13 @@ class SequencesStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
         flowcell.sequences = currentSequences
         flowcell.save(update_fields=['sequences'])
         return Response({'success': True})
+
+    @action(methods=['get'], detail=False)
+    def my_list(self, request):
+        serializer = self.get_serializer(queryset, many=True)
+        data = list(itertools.chain(*serializer.data))
+        return Response(data)
+        
 
     @action(methods=['post'], detail=False,
             authentication_classes=[CsrfExemptSessionAuthentication])

@@ -1,9 +1,11 @@
+import csv
 import json
 import logging
 import itertools
 
 from django.apps import apps
 from django.db.models import Prefetch, Q
+from django.http import HttpResponse
 
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -11,6 +13,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser
 
 from common.mixins import LibrarySampleMultiEditMixin
+from common.views import CsrfExemptSessionAuthentication
 
 from .models import Pool, PoolSize
 from .index_generator import IndexGenerator
@@ -80,6 +83,23 @@ class IndexGeneratorViewSet(viewsets.ViewSet, LibrarySampleMultiEditMixin):
     sample_model = Sample
     library_serializer = IndexGeneratorLibrarySerializer
     sample_serializer = IndexGeneratorSampleSerializer
+
+    @action(methods=['post'], detail=False,
+            authentication_classes=[CsrfExemptSessionAuthentication])
+
+    def download_index_list(self, request):
+        """ Download generated list of indexes as CSV file """
+        ids = json.loads(request.data.get('ids', '[]'))
+#        print("Hello IDs: ", ids)
+
+        response = HttpResponse(content_type='text/csv')
+        writer = csv.writer(response)
+        writer.writerow(['[Header]'] + ['IndexI7_id'] + ['IndexI5_id'] + ['IndexI7_seq'] + ['IndexI5_seq'])
+        writer.writerow(ids)
+#        response = HttpResponse('Thomas works here')
+        f_name="IndexList.csv"
+        response['Content-Disposition'] = 'attachment; filename="%s"' % f_name
+        return response
 
     def list(self, request):
         """ Get the list of libraries and samples ready for pooling. """
