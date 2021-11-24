@@ -391,6 +391,7 @@ class FlowcellAnalysisViewSet(viewsets.ViewSet):
                     item.library_protocol.name,
                     item.organism.name,
                     item.index_type.name,
+                    item.sequencing_depth,
                 ]
 
         return Response(requests)
