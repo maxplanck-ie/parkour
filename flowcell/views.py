@@ -385,12 +385,21 @@ class FlowcellAnalysisViewSet(viewsets.ViewSet):
                 request.libraries.all(), request.samples.all()
             ))
             for item in records:
+
+#               quick fix to deal with undefined index_type 
+#               this can happen for failed samples
+                try:
+                    item.index_type
+                    ind_type = index.index_type.name
+                except NameError:
+                    ind_type = "NA"
+
                 requests[rname][item.barcode] = [
                     item.name,
                     item.library_type.name,
                     item.library_protocol.name,
                     item.organism.name,
-                    item.index_type.name,
+                    ind_type,
                     item.sequencing_depth,
                 ]
 
