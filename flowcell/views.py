@@ -388,10 +388,9 @@ class FlowcellAnalysisViewSet(viewsets.ViewSet):
 
 #               quick fix to deal with undefined index_type 
 #               this can happen for failed samples
-                try:
-                    item.index_type
-                    ind_type = index.index_type.name
-                except NameError:
+                if (item.index_type is not None):
+                    ind_type = item.index_type.name
+                else:
                     ind_type = "NA"
 
                 requests[rname][item.barcode] = [
