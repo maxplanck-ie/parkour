@@ -18,7 +18,7 @@ sphinx-rtd-theme==0.2.4
 # Miscellaneous
 xlwt==1.3.0
 fpdf==1.7.2
-numpy==1.13.3
+numpy==1.22.0
 pandas==0.23.0
 jupyter==1.0.0
 bioblend==0.11.0
