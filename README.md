@@ -1,3 +1,6 @@
+Moved to: https://github.com/maxplanck-ie/parkour2
+
+<!--
 # Parkour LIMS
 [![Build Status](https://travis-ci.org/maxplanck-ie/parkour.svg?branch=master)](https://travis-ci.org/maxplanck-ie/parkour) [![Documentation Status](https://readthedocs.org/projects/parkour/badge/?version=latest)](http://parkour.readthedocs.io/?badge=latest)
 
@@ -37,3 +40,4 @@ A demonstration instance is available at [http://parkour-demo.ie-freiburg.mpg.de
  - A typical "admin" account with the username "parkour-admin@parkour-demo.ie-freiburg.mpg.de" and password "parkour-admin".
 
 Please note that the instance is reset every 12 hours!
+-->
