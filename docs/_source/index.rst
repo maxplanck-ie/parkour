@@ -1,6 +1,13 @@
 Parkour LIMS
 ============
 
+
+Update
+------
+
+The latest version is available [here](https://github.com/maxplanck-ie/parkour2#documentation) (WIP).
+
+
 Contents
 --------
 
