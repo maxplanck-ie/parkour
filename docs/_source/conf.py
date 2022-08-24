@@ -28,7 +28,11 @@ sys.path.insert(0, BASE_DIR)
 os.environ['DJANGO_SETTINGS_MODULE'] = 'wui.settings.dev'
 os.environ['SECRET_KEY'] = '$wcer0_jn8++b8h6_6o+%9t2%y%n8t-!23jn63-v$)@4cb)t33'
 os.environ['ADMIN_NAME'] = 'MPI-IE'
-os.environ['ADMIN_EMAIL'] = 'lims@omics.dev'
+os.environ['ADMIN_EMAIL'] = 'hola@mun.do'
+os.environ['EMAIL_HOST'] = 'mail.domain.tld'
+os.environ['EMAIL_SUBJECT_PREFIX'] = '[ParkourDocs]'
+os.environ['SERVER_EMAIL'] = 'hello@domain.tld'
+os.environ['TIME_ZONE'] = 'Europe/Berlin'
 django.setup()
 
 
